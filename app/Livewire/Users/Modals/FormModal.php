@@ -7,6 +7,7 @@ namespace App\Livewire\Users\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * @extends BaseFormModal<CreateEditForm, User>
@@ -39,6 +40,20 @@ class FormModal extends BaseFormModal
             'password_confirmation' => fn() => 'password123',
             'role' => fn() => 'basic',
         ];
+    }
+
+    public function openModal(mixed $modelId = null): void
+    {
+        // Check authorization before opening modal
+        if ($modelId !== null) {
+            // Editing existing user - check update permission
+            Gate::authorize('update', User::class);
+        } else {
+            // Creating new user - check create permission
+            Gate::authorize('create', User::class);
+        }
+
+        parent::openModal($modelId);
     }
 
     public function getModalTitle(): string
