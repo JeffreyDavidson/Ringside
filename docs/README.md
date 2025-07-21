@@ -93,6 +93,15 @@ composer rector
 
 ## Development Workflow
 
+### ⚠️ CRITICAL SAFETY RULE
+**ALWAYS verify you are NOT on `master` or `development` branch before committing!**
+
+```bash
+git branch --show-current  # Must NOT show 'master' or 'development'
+```
+
+**See [Git Workflow](development/git-workflow.md) for complete branch safety guidelines.**
+
 ### Code Standards
 1. **Follow PSR-12** - PHP coding standards compliance
 2. **Use Strict Types** - `declare(strict_types=1);` in all files
@@ -109,11 +118,23 @@ composer rector
 ## Contributing
 
 ### Development Process
-1. **Create Feature Branch** - Branch from main for new features
-2. **Follow Standards** - Adhere to all coding and documentation standards
-3. **Write Tests** - Include comprehensive test coverage
-4. **Update Documentation** - Keep documentation current with changes
-5. **Submit Pull Request** - Include detailed description and testing notes
+1. **⚠️ VERIFY BRANCH SAFETY** - Always check you're NOT on `master`/`development` before committing
+2. **Create Feature Branch** - Branch from development for new features
+3. **Follow Standards** - Adhere to all coding and documentation standards
+4. **Write Tests** - Include comprehensive test coverage
+5. **Update Documentation** - Keep documentation current with changes
+6. **Submit Pull Request** - Include detailed description and testing notes
+
+### Branch Safety Workflow
+```bash
+# ALWAYS start with this check
+git branch --show-current
+
+# If on protected branch, create feature branch
+git checkout -b feature/descriptive-name
+
+# Only then proceed with changes
+```
 
 ### Code Review Process
 - **Automated Checks** - CI/CD pipeline runs quality checks
