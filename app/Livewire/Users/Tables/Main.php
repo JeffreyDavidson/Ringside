@@ -25,7 +25,7 @@ class Main extends BaseTable
     public function builder(): UserBuilder
     {
         return User::query()
-            ->select('id', 'first_name', 'last_name', 'full_name', 'phone_number', 'email', 'role', 'status', 'avatar_path')
+            ->select('*')
             ->oldest('last_name');
     }
 
@@ -36,23 +36,16 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('users.name'), 'full_name')
-                ->label(
-                    fn (Model $row, Column $column) => view('components.tables.columns.full-name')->with([
-                        'model' => $row,
-                    ])
-                )->html()
                 ->searchable(function ($builder, $searchTerm) {
-                    $builder->where(function($query) use ($searchTerm) {
-                        $query->where('first_name', 'like', $searchTerm . '%')
-                              ->orWhere('last_name', 'like', $searchTerm . '%');
-                    });
+                    $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('users.role'), 'role')
                 ->format(fn (Role $value) => $value->name),
             Column::make(__('core.status'), 'status')
                 ->label(fn (User $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),
-            Column::make(__('users.email'), 'email'),
+            Column::make(__('users.email'), 'email')
+                ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
                 ->label(fn (User $row, Column $column): string => $row->formattedPhoneNumber),
         ];

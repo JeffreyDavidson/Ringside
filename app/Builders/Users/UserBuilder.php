@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Users;
 
+use App\Builders\Concerns\HasNameSearch;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -28,5 +29,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class UserBuilder extends Builder
 {
-    // Future query scopes will be added here as the User model evolves
+    use HasNameSearch;
+
+    // Users don't extend SingleRosterMemberBuilder, so we include HasNameSearch directly
 }

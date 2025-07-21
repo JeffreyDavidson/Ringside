@@ -69,8 +69,7 @@ class Main extends BaseTable
         return [
             Column::make(__('managers.name'), 'full_name')
                 ->searchable(function ($builder, $searchTerm) {
-                    $builder->orWhere('first_name', 'like', '%' . $searchTerm . '%')
-                           ->orWhere('last_name', 'like', '%' . $searchTerm . '%');
+                    $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')
                 ->label(fn (Manager $row) => $row->status?->label() ?? 'Unknown')
