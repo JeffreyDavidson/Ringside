@@ -8,6 +8,12 @@ use App\Models\Matches\EventMatch;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+/**
+ * @group matches
+ * @group integration
+ * @group livewire
+ * @group tables
+ */
 describe('Matches Main Table Component Integration', function () {
     beforeEach(function () {
         $this->admin = User::factory()->administrator()->create();

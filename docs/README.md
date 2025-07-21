@@ -29,6 +29,29 @@ php artisan migrate --seed
 php artisan serve
 ```
 
+### Testing
+```bash
+# Run all tests
+php artisan test
+vendor/bin/pest
+
+# Run tests by domain (recommended for focused development)
+vendor/bin/pest --group=managers
+vendor/bin/pest --group=wrestlers
+vendor/bin/pest --group=matches
+
+# Run tests by type
+vendor/bin/pest --group=integration
+vendor/bin/pest --group=tables
+vendor/bin/pest --group=rendering
+
+# Run multiple groups (most efficient for development)
+vendor/bin/pest --group=managers,tables
+```
+
+**⚠️ New Test Requirements:** All new tests MUST include proper Pest groups.  
+📚 **Quick Help:** [Test Group Quick Reference](guidelines/quick-reference-test-groups.md) | [Complete Guide](guidelines/pest-groups.md)
+
 ### Code Quality Tools
 ```bash
 # Code formatting
@@ -51,6 +74,7 @@ composer rector
 - **[PHP Standards](guidelines/php.md)** - PHP-specific conventions
 - **[Laravel Conventions](guidelines/laravel.md)** - Laravel framework patterns
 - **[Testing Standards](guidelines/testing.md)** - Testing conventions and practices
+- **[Pest Group System](guidelines/pest-groups.md)** - Test organization and targeted execution
 - **[Quality Tools](guidelines/quality-tools.md)** - Automated quality assurance
 
 ### Architecture Documentation

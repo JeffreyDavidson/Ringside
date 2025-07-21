@@ -13,6 +13,11 @@ use Livewire\Livewire;
 /**
  * Integration tests for TitlesTable Livewire component.
  *
+ * @group titles
+ * @group integration
+ * @group livewire
+ * @group tables
+ *
  * INTEGRATION TEST SCOPE:
  * - Component rendering with complex data relationships
  * - Filtering and search functionality integration

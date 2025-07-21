@@ -24,7 +24,27 @@ git checkout -b feature/your-feature-name
 1. ✅ **Check current branch**: `git branch --show-current`
 2. ✅ **Verify you are NOT on**: `master`, `main`, or `development`
 3. ✅ **If on protected branch**: Create new branch immediately
-4. ✅ **Only then proceed**: Stage and commit changes
+4. ✅ **Run targeted tests**: Use Pest groups to test relevant changes
+5. ✅ **Verify test groups**: Ensure new/modified tests have proper groups
+6. ✅ **Only then proceed**: Stage and commit changes
+
+### Pre-Commit Testing
+
+Before committing, run tests for areas you've modified:
+
+```bash
+# If working on managers domain
+vendor/bin/pest --group=managers
+
+# If working on table components  
+vendor/bin/pest --group=tables
+
+# If working on employment features
+vendor/bin/pest --group=employment
+
+# For new tests, verify groups work
+vendor/bin/pest --group=managers,integration
+```
 
 ### Branch Creation Pattern
 
