@@ -75,9 +75,11 @@ describe('FormModal Rendering', function () {
 
     it('presents wrestlers list for selection', function () {
         $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Test Wrestler']);
+        $matchType = MatchType::factory()->create(['name' => 'Singles']);
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal');
+            ->call('openModal')
+            ->set('form.matchTypeId', $matchType->id);
 
         $component->assertSee('Test Wrestler');
     });
@@ -321,9 +323,11 @@ describe('FormModal Tag Team Integration', function () {
 
     it('presents available tag teams for selection', function () {
         $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'The Hardy Boyz']);
+        $matchType = MatchType::factory()->create(['name' => 'Tag Team']);
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal');
+            ->call('openModal')
+            ->set('form.matchTypeId', $matchType->id);
 
         $component->assertSee('The Hardy Boyz');
     });

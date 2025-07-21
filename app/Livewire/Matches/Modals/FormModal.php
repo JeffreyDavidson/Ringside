@@ -312,6 +312,111 @@ class FormModal extends BaseFormModal
         return $result;
     }
 
+    /**
+     * Handle match type selection changes for dynamic UI updates.
+     *
+     * When the match type changes, we need to:
+     * 1. Clear incompatible competitor data
+     * 2. Initialize the correct competitor structure
+     * 3. Reset validation state
+     */
+    public function updatedFormMatchTypeId($value): void
+    {
+        if (!$value) {
+            return;
+        }
+
+        // Clear existing competitor data when match type changes
+        $this->form->competitors = [];
+        
+        // Initialize competitor structure based on match type
+        $this->initializeCompetitorStructure($value);
+    }
+
+    /**
+     * Get the currently selected match type model.
+     */
+    public function getSelectedMatchType(): ?MatchType
+    {
+        if (!$this->form->matchTypeId) {
+            return null;
+        }
+
+        return MatchType::find($this->form->matchTypeId);
+    }
+
+    /**
+     * Check if the current match type allows wrestlers.
+     */
+    public function getMatchTypeAllowsWrestlersProperty(): bool
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? $matchType->allowsWrestlers() : true;
+    }
+
+    /**
+     * Check if the current match type allows tag teams.
+     */
+    public function getMatchTypeAllowsTagTeamsProperty(): bool
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? $matchType->allowsTagTeams() : false;
+    }
+
+    /**
+     * Get the number of sides required for the current match type.
+     */
+    public function getNumberOfSidesProperty(): int
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? $matchType->getMinimumCompetitors() : 2;
+    }
+
+    /**
+     * Get the match type name for template logic.
+     */
+    public function getMatchTypeNameProperty(): string
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? strtolower($matchType->name) : '';
+    }
+
+    /**
+     * Initialize the competitor structure based on match type.
+     */
+    private function initializeCompetitorStructure(int $matchTypeId): void
+    {
+        $matchType = MatchType::find($matchTypeId);
+        
+        if (!$matchType) {
+            return;
+        }
+
+        $numberOfSides = $matchType->getMinimumCompetitors();
+        $competitors = [];
+
+        $matchTypeName = strtolower($matchType->name);
+
+        // Initialize competitor structure based on match type specifics
+        if (str_contains($matchTypeName, 'battle') || str_contains($matchTypeName, 'rumble') || str_contains($matchTypeName, 'royal')) {
+            // Battle Royal: Single array for multiple wrestlers
+            $competitors[0] = [
+                'wrestlers' => [],
+                'tag_teams' => [],
+            ];
+        } else {
+            // Other matches: Initialize empty competitor structure for each side
+            for ($i = 0; $i < $numberOfSides; $i++) {
+                $competitors[$i] = [
+                    'wrestlers' => [],
+                    'tag_teams' => [],
+                ];
+            }
+        }
+
+        $this->form->competitors = $competitors;
+    }
+
     public function render(): \Illuminate\View\View
     {
         return view($this->modalFormPath ?? 'livewire.matches.modals.form-modal');
