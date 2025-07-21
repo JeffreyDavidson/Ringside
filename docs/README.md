@@ -58,6 +58,13 @@ composer rector
 - **[Core Capabilities](architecture/core-capabilities.md)** - Entity capabilities and restrictions
 - **[Match System](architecture/match-system.md)** - Match types and competitor rules
 - **[Championship System](architecture/championship-system.md)** - Title management and validation
+- **[Dynamic Match UI](architecture/livewire/dynamic-match-ui.md)** - Technical architecture for dynamic match creation interface
+
+### User Guides
+- **[Dynamic Match Creation](guides/matches/dynamic-ui-system.md)** - Complete guide to the enhanced match creation interface
+
+### Release Notes
+- **[Match UI Enhancement v2.0](releases/match-ui-enhancement-v2.md)** - Major UI improvement release notes
 
 ### Naming Conventions
 - **[Class Naming](guidelines/conventions/class-naming.md)** - Model, action, and controller naming
