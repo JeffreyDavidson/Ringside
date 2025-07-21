@@ -263,7 +263,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             // NOTE: SQLite date calculations differ from MySQL, needs separate investigation
             expect($currentWithLength->reign_length)->toBeNumeric();
             expect($currentWithLength->reign_length)->toBeGreaterThan(0);
-        })->skip('SQLite date calculation differs from MySQL - needs database compatibility fix');
+        });
 
         test('withReignLength calculates correct values for ended championships', function () {
             $endedWithLength = TitleChampionship::query()
@@ -275,7 +275,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             // Assert - Just verify the calculation returns a numeric value
             expect($endedWithLength->reign_length)->toBeNumeric();
             expect($endedWithLength->reign_length)->toBeGreaterThan(0);
-        })->skip('SQLite date calculation differs from MySQL - needs database compatibility fix');
+        });
 
         test('withReignLength SQL uses COALESCE for current date fallback', function () {
             // Arrange

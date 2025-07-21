@@ -18,6 +18,11 @@ use Livewire\Livewire;
 /**
  * Integration tests for Main Livewire component.
  *
+ * @group wrestlers
+ * @group integration
+ * @group livewire
+ * @group tables
+ *
  * INTEGRATION TEST SCOPE:
  * - Component rendering with complex data relationships
  * - Filtering and search functionality integration
@@ -33,6 +38,7 @@ describe('Main Component Integration', function () {
     });
 
     describe('component rendering integration', function () {
+        /** @group wrestlers @group tables @group rendering */
         test('renders wrestlers table with complete data relationships', function () {
             // Create wrestlers with different statuses and relationships
             $employedWrestler = Wrestler::factory()->employed()->create(['name' => 'Active Wrestler']);
@@ -53,6 +59,7 @@ describe('Main Component Integration', function () {
                 ->assertSee($suspendedWrestler->name);
         });
 
+        /** @group wrestlers @group tables @group status @group badges */
         test('displays correct status badges for different wrestler states', function () {
             $employedWrestler = Wrestler::factory()->employed()->create(['name' => 'Employed Wrestler']);
             $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
@@ -74,6 +81,7 @@ describe('Main Component Integration', function () {
     });
 
     describe('filtering and search integration', function () {
+        /** @group wrestlers @group tables @group search @group filters */
         test('search functionality filters wrestlers correctly', function () {
             Wrestler::factory()->create(['name' => 'John Cena']);
             Wrestler::factory()->create(['name' => 'The Rock']);
