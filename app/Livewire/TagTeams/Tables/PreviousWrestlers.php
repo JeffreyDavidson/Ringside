@@ -57,7 +57,11 @@ class PreviousWrestlers extends DataTableComponent
 
     public function configure(): void
     {
-        // Removed additional selects that were causing SQL conflicts
-        // The relationship handles member selection automatically
+        $this->addAdditionalSelects([
+            'tag_teams_wrestlers.wrestler_id',
+            'tag_teams_wrestlers.tag_team_id',
+            'tag_teams_wrestlers.joined_at',
+            'tag_teams_wrestlers.left_at',
+        ]);
     }
 }
