@@ -13,6 +13,10 @@ use App\Models\Referees\Referee;
  */
 class FormModal extends BaseFormModal
 {
+    /**
+     * Store original model data for resetting purposes
+     */
+    public ?array $originalModelData = null;
 
     protected function getFormClass(): string
     {
@@ -47,6 +51,41 @@ class FormModal extends BaseFormModal
         $this->titleField = 'full_name';
     }
 
+    public function openModal(mixed $modelId = null): void
+    {
+        parent::openModal($modelId);
+        
+        // Store original model data if editing
+        if (isset($this->model) && !is_null($this->model)) {
+            $this->originalModelData = [
+                'first_name' => $this->model->first_name,
+                'last_name' => $this->model->last_name,
+                'employment_date' => $this->model->firstEmployment?->started_at?->toDateString() ?? '',
+            ];
+        } else {
+            $this->originalModelData = null;
+        }
+    }
+
+
+    public function clear(): void
+    {
+        if ($this->originalModelData) {
+            // Reset to original model data when editing
+            $this->form->first_name = $this->originalModelData['first_name'];
+            $this->form->last_name = $this->originalModelData['last_name'];
+            $this->form->employment_date = $this->originalModelData['employment_date'];
+            $this->form->resetErrorBag();
+            $this->form->resetValidation();
+        } else {
+            // Reset to empty state when creating - explicitly set defaults
+            $this->form->first_name = '';
+            $this->form->last_name = '';
+            $this->form->employment_date = '';
+            $this->form->resetErrorBag();
+            $this->form->resetValidation();
+        }
+    }
 
     public function render(): \Illuminate\View\View
     {
