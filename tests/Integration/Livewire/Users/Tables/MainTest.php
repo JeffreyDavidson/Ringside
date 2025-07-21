@@ -119,21 +119,26 @@ describe('UsersTable Component', function () {
 
     describe('filtering and search integration', function () {
         test('search functionality filters users by name correctly', function () {
-            User::factory()->create([
+            $john = User::factory()->create([
                 'first_name' => 'John',
                 'last_name' => 'Smith',
                 'email' => 'john@example.com',
             ]);
-            User::factory()->create([
+            $jane = User::factory()->create([
                 'first_name' => 'Jane',
                 'last_name' => 'Doe',
                 'email' => 'jane@example.com',
             ]);
-            User::factory()->create([
+            $bob = User::factory()->create([
                 'first_name' => 'Bob',
                 'last_name' => 'Johnson',
                 'email' => 'bob@example.com',
             ]);
+
+            // Ensure virtual columns are computed
+            $john->fresh();
+            $jane->fresh();
+            $bob->fresh();
 
             $component = Livewire::test(Main::class);
 
@@ -226,7 +231,7 @@ describe('UsersTable Component', function () {
             $component = Livewire::test(Main::class);
 
             // Get the rendered content to check ordering
-            $html = $component->get('users')->toHtml();
+            $html = $component->html();
 
             // Anderson should appear before Baker, Baker before Cooper
             $andersonPos = mb_strpos($html, 'Anderson');
@@ -256,8 +261,12 @@ describe('UsersTable Component', function () {
 
     describe('component state management', function () {
         test('component maintains state between interactions', function () {
-            User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
-            User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+            $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+            $jane = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+            
+            // Ensure virtual columns are computed
+            $john->fresh();
+            $jane->fresh();
 
             $component = Livewire::test(Main::class);
 
@@ -327,7 +336,8 @@ describe('UsersTable Component', function () {
             $component->assertOk();
 
             // Should not have N+1 query issues (query counting would require additional setup)
-            expect($component->get('users'))->not->toBeEmpty();
+            $users = $component->instance()->builder()->get();
+            expect($users)->not->toBeEmpty();
         });
 
         test('component eager loads necessary relationships', function () {

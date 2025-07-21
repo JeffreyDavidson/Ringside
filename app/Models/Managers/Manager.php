@@ -137,6 +137,15 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        // full_name is a virtual column, no need to append
+    ];
+
+    /**
      * The model's default values for attributes.
      *
      * @var array<string, string>
@@ -145,15 +154,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
         // Status is now computed from employment relationships
     ];
 
-    /**
-     * Get the manager's full name.
-     *
-     * @return Attribute<string, never>
-     */
-    protected function fullName(): Attribute
-    {
-        return Attribute::get(fn () => trim("{$this->first_name} {$this->last_name}"));
-    }
+    // full_name is handled by virtual column in database
 
     /**
      * Get the computed status attribute.

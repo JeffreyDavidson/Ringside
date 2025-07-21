@@ -68,7 +68,9 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('managers.name'), 'full_name')
-                ->searchable(),
+                ->searchable(function ($builder, $searchTerm) {
+                    $builder->whereNameMatches($searchTerm);
+                }),
             Column::make(__('core.status'), 'status')
                 ->label(fn (Manager $row) => $row->status?->label() ?? 'Unknown')
                 ->excludeFromColumnSelect(),

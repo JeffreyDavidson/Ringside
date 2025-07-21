@@ -12,6 +12,11 @@ use function Spatie\PestPluginTestTime\testTime;
 /**
  * Manager Actions Component Integration Tests
  *
+ * @group managers
+ * @group integration
+ * @group livewire
+ * @group actions
+ *
  * Tests the complete business action workflow for managers including:
  * - Employment lifecycle (employ, release)
  * - Injury management (injure, heal)
@@ -256,7 +261,7 @@ describe('ManagersActions Integration Tests', function () {
     describe('restore action', function () {
         test('restore action works for soft deleted manager', function () {
             $this->manager->delete();
-            expect($this->manager->fresh())->toBeNull();
+            expect($this->manager->trashed())->toBeTrue();
 
             $trashedManager = Manager::onlyTrashed()->find($this->manager->id);
 
@@ -269,7 +274,7 @@ describe('ManagersActions Integration Tests', function () {
 
             expect(Manager::find($this->manager->id))->not()->toBeNull();
             // expect(session('status'))->toBe('Manager successfully restored.');
-        });
+        })->group('managers', 'integration', 'livewire', 'actions', 'restore');
     });
 
     describe('manager-specific business scenarios', function () {
