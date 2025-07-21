@@ -12,9 +12,12 @@ trait PresentsRefereesList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: true, key: 'referees-list', seconds: 180)]
+    #[Computed(cache: false)]
     public function getReferees(): array
     {
-        return Referee::select('id', 'full_name')->pluck('full_name', 'id')->toArray();
+        return Referee::select('id', 'first_name', 'last_name')
+            ->get()
+            ->pluck('full_name', 'id')
+            ->toArray();
     }
 }

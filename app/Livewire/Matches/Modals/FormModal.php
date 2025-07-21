@@ -16,6 +16,7 @@ use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Livewire modal component for wrestling match management within events.
@@ -47,6 +48,16 @@ class FormModal extends BaseFormModal
     use PresentsTagTeamsList;
     use PresentsTitlesList;
     use PresentsWrestlersList;
+
+    /**
+     * Event identifier for match association.
+     *
+     * Required context for all matches since they cannot exist without an event.
+     * Comes from route model binding in the parent component.
+     *
+     * @var int Event database ID
+     */
+    public int $eventId;
 
     /**
      * String name to render view for each match type.
@@ -236,12 +247,69 @@ class FormModal extends BaseFormModal
                fake()->randomElement($callsToAction);
     }
 
+    /**
+     * Component mount lifecycle - properly initialize eventId before form creation.
+     *
+     * @param mixed $modelId Optional model ID for editing (Livewire standard)
+     */
+    public function mount(mixed $modelId = null): void
+    {
+        parent::mount($modelId);
+        
+        // Set eventId on form - this should always happen since eventId is required context
+        if ($this->eventId > 0 && $this->form) {
+            $this->form->eventId = $this->eventId;
+        } elseif ($this->form) {
+            // Log warning if eventId is not properly set (development aid)
+            \Log::warning('Matches FormModal: eventId not properly initialized', [
+                'eventId' => $this->eventId,
+                'component' => static::class
+            ]);
+        }
+    }
+
+    public function openModal(mixed $modelId = null): void
+    {
+        // Check authorization before opening modal
+        if ($modelId !== null) {
+            // Editing existing match - check update permission
+            Gate::authorize('update', EventMatch::class);
+        } else {
+            // Creating new match - check create permission
+            Gate::authorize('create', EventMatch::class);
+        }
+
+        parent::openModal($modelId);
+    }
+
     public function getModalTitle(): string
     {
         if (isset($this->model)) {
             return 'Edit Match';
         }
         return 'Create Match';
+    }
+
+    public function submitForm(): bool
+    {
+        // Store whether we're creating or updating before the form submission
+        $isCreating = $this->form->isCreating();
+        
+        $result = parent::submitForm();
+        
+        if ($result) {
+            // Dispatch the appropriate event based on whether we created or updated
+            if ($isCreating) {
+                $this->dispatch('matchCreated');
+            } else {
+                $this->dispatch('matchUpdated');
+            }
+            
+            // Reset the form after successful submission
+            $this->form->reset();
+        }
+        
+        return $result;
     }
 
     public function render(): \Illuminate\View\View

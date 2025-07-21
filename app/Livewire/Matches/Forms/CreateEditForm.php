@@ -8,6 +8,7 @@ use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Matches\EventMatch;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -51,6 +52,20 @@ class CreateEditForm extends BaseForm
     protected ?Model $formModel = null;
 
     /**
+     * Event identifier for match association.
+     *
+     * Links the match to a specific wrestling event where it will take place.
+     * This is always required since matches cannot exist without an event.
+     * Provided by route model binding, not user input.
+     * 
+     * Default value of 0 indicates uninitialized - will be set during component mount.
+     *
+     * @var int Event database ID
+     */
+    public int $eventId = 0;
+
+
+    /**
      * Match promotional preview content for marketing purposes.
      *
      * Used in promotional materials, match cards, and event advertising
@@ -66,17 +81,17 @@ class CreateEditForm extends BaseForm
      * Determines the rules, structure, and requirements for the wrestling
      * match (singles, tag team, ladder match, cage match, etc.).
      *
-     * @var int Match type database ID
+     * @var int|null Match type database ID
      */
-    public int $matchTypeId = 0;
+    public ?int $matchTypeId = null;
 
     /**
-     * Array of competitor IDs participating in the match.
+     * Array of competitors organized by sides in the match.
      *
-     * Contains wrestler or tag team IDs depending on match type requirements.
-     * Used for match participant assignment and validation.
+     * Each side contains wrestlers and potentially tag teams for that side.
+     * Structure: [0 => ['wrestlers' => [1, 2]], 1 => ['wrestlers' => [3, 4]]]
      *
-     * @var array<int> Competitor database IDs
+     * @var array<int, array{wrestlers: array<int>}> Competitors grouped by side
      */
     public array $competitors = [];
 
@@ -165,12 +180,29 @@ class CreateEditForm extends BaseForm
         // Delete existing competitors
         $this->formModel->competitors()->delete();
 
-        // Create new competitor records
-        foreach ($this->competitors as $wrestlerId) {
-            $this->formModel->competitors()->create([
-                'wrestler_id' => $wrestlerId,
-                // Add any other required fields for the EventMatchCompetitor model
-            ]);
+        // Create new competitor records using the side-based structure
+        foreach ($this->competitors as $sideNumber => $sideCompetitors) {
+            // Handle wrestlers for this side
+            if (isset($sideCompetitors['wrestlers'])) {
+                foreach ($sideCompetitors['wrestlers'] as $wrestlerId) {
+                    $this->formModel->competitors()->create([
+                        'competitor_type' => Wrestler::class,
+                        'competitor_id' => $wrestlerId,
+                        'side_number' => $sideNumber,
+                    ]);
+                }
+            }
+
+            // Handle tag teams for this side (when implemented)
+            if (isset($sideCompetitors['tag_teams'])) {
+                foreach ($sideCompetitors['tag_teams'] as $tagTeamId) {
+                    $this->formModel->competitors()->create([
+                        'competitor_type' => \App\Models\TagTeams\TagTeam::class,
+                        'competitor_id' => $tagTeamId,
+                        'side_number' => $sideNumber,
+                    ]);
+                }
+            }
         }
     }
 
@@ -186,11 +218,28 @@ class CreateEditForm extends BaseForm
     protected function getModelData(): array
     {
         return [
+            'event_id' => $this->eventId,
+            'match_number' => $this->getNextMatchNumber(),
             'preview' => $this->preview,
             'match_type_id' => $this->matchTypeId,
         ];
         // Note: relationships (competitors, referees, titles) are handled
         // separately through the relationship synchronization system
+    }
+
+    /**
+     * Get the next match number for the event.
+     *
+     * Calculates the next sequential match number based on existing matches
+     * for the specified event. Match numbers start from 1.
+     *
+     * @return int Next match number (1-based)
+     */
+    private function getNextMatchNumber(): int
+    {
+        $maxMatchNumber = EventMatch::where('event_id', $this->eventId)->max('match_number');
+        
+        return ($maxMatchNumber ?? 0) + 1;
     }
 
     /**
@@ -224,15 +273,134 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
-        return [
-            'matchTypeId' => ['required', 'integer', 'exists:match_types,id'],
-            'preview' => ['required', 'string'],
-            'competitors' => ['required', 'array', 'min:2'],
-            'competitors.*' => ['integer', 'exists:wrestlers,id'],
-            'referees' => ['required', 'array', 'min:1'],
+        $baseRules = [
+            // eventId removed - it's context from route model binding, not user input
+            'matchTypeId' => ['required', 'integer', 'min:1', 'exists:match_types,id'],
+            'preview' => ['sometimes', 'string'],
+            'referees' => ['sometimes', 'array'],
             'referees.*' => ['integer', 'exists:referees,id'],
             'titles' => ['sometimes', 'array'],
             'titles.*' => ['integer', 'exists:titles,id'],
+        ];
+
+        // Add dynamic competitor validation based on match type
+        $competitorRules = $this->getCompetitorValidationRules();
+        
+        return array_merge($baseRules, $competitorRules);
+    }
+
+    /**
+     * Get validation rules for competitors based on the match type.
+     *
+     * @return array<string, array<string>>
+     */
+    private function getCompetitorValidationRules(): array
+    {
+        // If no match type is selected yet, use basic validation
+        if (!$this->matchTypeId) {
+            return [
+                'competitors' => ['sometimes', 'array'],
+                'competitors.*.wrestlers' => ['sometimes', 'array'],
+                'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.*.tag_teams' => ['sometimes', 'array'],
+                'competitors.*.tag_teams.*' => ['integer', 'exists:tag_teams,id'],
+            ];
+        }
+
+        // Get the match type from database to determine validation rules
+        $matchType = \App\Models\Matches\MatchType::find($this->matchTypeId);
+        
+        if (!$matchType) {
+            return [
+                'competitors' => ['sometimes', 'array'],
+            ];
+        }
+
+        return $this->getValidationForMatchType($matchType);
+    }
+
+    /**
+     * Get specific validation rules for a match type.
+     *
+     * @param \App\Models\Matches\MatchType $matchType
+     * @return array<string, array<string>>
+     */
+    private function getValidationForMatchType($matchType): array
+    {
+        $matchTypeName = strtolower($matchType->name);
+        
+        // Singles Match: 2 sides, 1 wrestler each
+        if (str_contains($matchTypeName, 'singles')) {
+            return [
+                'competitors' => ['required', 'array', 'size:2'],
+                'competitors.0.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.0.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.1.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.1.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            ];
+        }
+        
+        // Tag Team Match: 2 sides, 2+ wrestlers or tag teams
+        if (str_contains($matchTypeName, 'tag') || str_contains($matchTypeName, 'team')) {
+            return [
+                'competitors' => ['required', 'array', 'size:2'],
+                'competitors.0' => ['required', 'array'],
+                'competitors.0.wrestlers' => ['sometimes', 'array', 'min:2'],
+                'competitors.0.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.0.tag_teams' => ['sometimes', 'array', 'min:1'],
+                'competitors.0.tag_teams.*' => ['integer', 'exists:tag_teams,id'],
+                'competitors.1' => ['required', 'array'],
+                'competitors.1.wrestlers' => ['sometimes', 'array', 'min:2'],
+                'competitors.1.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.1.tag_teams' => ['sometimes', 'array', 'min:1'],
+                'competitors.1.tag_teams.*' => ['integer', 'exists:tag_teams,id'],
+            ];
+        }
+        
+        // Triple Threat: 3 sides, 1 wrestler each
+        if (str_contains($matchTypeName, 'triple') || str_contains($matchTypeName, 'three')) {
+            return [
+                'competitors' => ['required', 'array', 'size:3'],
+                'competitors.0.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.0.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.1.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.1.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.2.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.2.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            ];
+        }
+
+        // Fatal Four Way: 4 sides, 1 wrestler each
+        if (str_contains($matchTypeName, 'fatal') || str_contains($matchTypeName, 'four')) {
+            return [
+                'competitors' => ['required', 'array', 'size:4'],
+                'competitors.0.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.0.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.1.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.1.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.2.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.2.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors.3.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.3.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            ];
+        }
+
+        // Battle Royal / Rumble: Multiple sides, 1 wrestler each
+        if (str_contains($matchTypeName, 'battle') || str_contains($matchTypeName, 'rumble') || str_contains($matchTypeName, 'royal')) {
+            return [
+                'competitors' => ['required', 'array', 'min:6'], // Minimum 6 for battle royal
+                'competitors.*.wrestlers' => ['required', 'array', 'size:1'],
+                'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            ];
+        }
+
+        // Default: Basic validation for unknown match types
+        return [
+            'competitors' => ['required', 'array', 'min:2'],
+            'competitors.*.wrestlers' => ['sometimes', 'array'],
+            'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            'competitors.*.tag_teams' => ['sometimes', 'array'],
+            'competitors.*.tag_teams.*' => ['integer', 'exists:tag_teams,id'],
         ];
     }
 
