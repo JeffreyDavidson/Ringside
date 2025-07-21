@@ -193,6 +193,22 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
     }
 
     /**
+     * Check if the stable is currently active.
+     */
+    public function isActive(): bool
+    {
+        return $this->status === StableStatus::Active;
+    }
+
+    /**
+     * Check if the stable is disbanded (inactive status).
+     */
+    public function isDisbanded(): bool
+    {
+        return $this->status === StableStatus::Inactive;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

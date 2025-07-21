@@ -11,21 +11,39 @@ use Livewire\Livewire;
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
-    
-    $this->state = State::where('name', 'California')->first();
+
+    // Create states table for testing - Sushi models need manual table creation in tests
+    // to work with Laravel's validation rules like Rule::exists()
+    \Schema::dropIfExists('states');
+    \Schema::create('states', function ($table) {
+        $table->id();
+        $table->string('name');
+        $table->string('code');
+        $table->timestamps();
+    });
+
+    // Populate with all states from the Sushi model data
+    collect((new State())->rows)->each(function ($stateData) {
+        \DB::table('states')->insert(array_merge($stateData, [
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]));
+    });
+
+    $this->state = \DB::table('states')->where('name', 'California')->first();
 });
 
 describe('Form Modal Initialization', function () {
     it('can mount modal component', function () {
         $modal = Livewire::test(FormModal::class);
-        
+
         $modal->assertOk();
         $modal->assertViewIs('livewire.venues.modals.form-modal');
     });
 
     it('initializes with empty form for creation', function () {
         $modal = Livewire::test(FormModal::class);
-        
+
         $modal->assertSet('form.name', '');
         $modal->assertSet('form.street_address', '');
         $modal->assertSet('form.city', '');
@@ -36,7 +54,7 @@ describe('Form Modal Initialization', function () {
     it('can open modal for creating new venue', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal');
-        
+
         $modal->assertSet('isModalOpen', true);
         $modal->assertSet('form.name', '');
     });
@@ -45,7 +63,7 @@ describe('Form Modal Initialization', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal')
             ->call('closeModal');
-        
+
         $modal->assertSet('isOpen', false);
     });
 });
@@ -324,7 +342,7 @@ describe('Form Modal Dummy Data', function () {
     it('can fill form with dummy data', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal')
-            ->call('fillWithDummyData');
+            ->call('fillDummyFields');
 
         $modal->assertSet('form.name', fn($value) => str_contains($value, 'Arena'));
         $modal->assertSet('form.street_address', fn($value) => !empty($value));
@@ -336,7 +354,7 @@ describe('Form Modal Dummy Data', function () {
     it('can submit form with dummy data', function () {
         $modal = Livewire::test(FormModal::class)
             ->call('openModal')
-            ->call('fillWithDummyData')
+            ->call('fillDummyFields')
             ->call('save');
 
         $modal->assertHasNoErrors();

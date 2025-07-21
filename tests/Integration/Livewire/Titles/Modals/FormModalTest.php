@@ -267,7 +267,7 @@ describe('FormModal Authorization', function () {
         $component = Livewire::test(FormModal::class)
             ->call('openModal');
 
-        $component->assertUnauthorized();
+        $component->assertForbidden();
     });
 
     it('requires administrator privileges', function () {
@@ -277,6 +277,6 @@ describe('FormModal Authorization', function () {
         $component = Livewire::test(FormModal::class)
             ->call('openModal');
 
-        $component->assertUnauthorized();
+        $component->assertForbidden();
     });
 });

@@ -337,7 +337,7 @@ describe('StablesTable Component', function () {
             $component->assertOk();
 
             // Verify component loads without performance issues
-            expect($component->payload['serverMemo']['data'])->toBeDefined();
+            expect($component->instance())->toBeInstanceOf(Main::class);
         });
     });
 
@@ -349,13 +349,11 @@ describe('StablesTable Component', function () {
             $wrestler1 = Wrestler::factory()->bookable()->create(['name' => 'Wrestler One']);
             $wrestler2 = Wrestler::factory()->bookable()->create(['name' => 'Wrestler Two']);
             $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'Tag Team']);
-            $manager = Manager::factory()->bookable()->create(['name' => 'Manager']);
 
-            // Attach members
+            // Attach members (wrestlers and tag teams can be stable members)
             $wrestler1->stables()->attach($stable->id, ['joined_at' => now()->subMonths(6), 'created_at' => now(), 'updated_at' => now()]);
             $wrestler2->stables()->attach($stable->id, ['joined_at' => now()->subMonths(5), 'created_at' => now(), 'updated_at' => now()]);
             $tagTeam->stables()->attach($stable->id, ['joined_at' => now()->subMonths(4), 'created_at' => now(), 'updated_at' => now()]);
-            $manager->stables()->attach($stable->id, ['joined_at' => now()->subMonths(3), 'created_at' => now(), 'updated_at' => now()]);
 
             $component = Livewire::actingAs($this->admin)
                 ->test(Main::class);
