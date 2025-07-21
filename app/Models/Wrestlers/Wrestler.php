@@ -253,7 +253,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     {
         return [
             'height' => HeightCast::class,
-            'status' => EmploymentStatus::class,
         ];
     }
 

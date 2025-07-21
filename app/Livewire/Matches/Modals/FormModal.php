@@ -16,6 +16,7 @@ use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Livewire modal component for wrestling match management within events.
@@ -47,6 +48,16 @@ class FormModal extends BaseFormModal
     use PresentsTagTeamsList;
     use PresentsTitlesList;
     use PresentsWrestlersList;
+
+    /**
+     * Event identifier for match association.
+     *
+     * Required context for all matches since they cannot exist without an event.
+     * Comes from route model binding in the parent component.
+     *
+     * @var int Event database ID
+     */
+    public int $eventId;
 
     /**
      * String name to render view for each match type.
@@ -236,12 +247,174 @@ class FormModal extends BaseFormModal
                fake()->randomElement($callsToAction);
     }
 
+    /**
+     * Component mount lifecycle - properly initialize eventId before form creation.
+     *
+     * @param mixed $modelId Optional model ID for editing (Livewire standard)
+     */
+    public function mount(mixed $modelId = null): void
+    {
+        parent::mount($modelId);
+        
+        // Set eventId on form - this should always happen since eventId is required context
+        if ($this->eventId > 0 && $this->form) {
+            $this->form->eventId = $this->eventId;
+        } elseif ($this->form) {
+            // Log warning if eventId is not properly set (development aid)
+            \Log::warning('Matches FormModal: eventId not properly initialized', [
+                'eventId' => $this->eventId,
+                'component' => static::class
+            ]);
+        }
+    }
+
+    public function openModal(mixed $modelId = null): void
+    {
+        // Check authorization before opening modal
+        if ($modelId !== null) {
+            // Editing existing match - check update permission
+            Gate::authorize('update', EventMatch::class);
+        } else {
+            // Creating new match - check create permission
+            Gate::authorize('create', EventMatch::class);
+        }
+
+        parent::openModal($modelId);
+    }
+
     public function getModalTitle(): string
     {
         if (isset($this->model)) {
             return 'Edit Match';
         }
         return 'Create Match';
+    }
+
+    public function submitForm(): bool
+    {
+        // Store whether we're creating or updating before the form submission
+        $isCreating = $this->form->isCreating();
+        
+        $result = parent::submitForm();
+        
+        if ($result) {
+            // Dispatch the appropriate event based on whether we created or updated
+            if ($isCreating) {
+                $this->dispatch('matchCreated');
+            } else {
+                $this->dispatch('matchUpdated');
+            }
+            
+            // Reset the form after successful submission
+            $this->form->reset();
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Handle match type selection changes for dynamic UI updates.
+     *
+     * When the match type changes, we need to:
+     * 1. Clear incompatible competitor data
+     * 2. Initialize the correct competitor structure
+     * 3. Reset validation state
+     */
+    public function updatedFormMatchTypeId($value): void
+    {
+        if (!$value) {
+            return;
+        }
+
+        // Clear existing competitor data when match type changes
+        $this->form->competitors = [];
+        
+        // Initialize competitor structure based on match type
+        $this->initializeCompetitorStructure($value);
+    }
+
+    /**
+     * Get the currently selected match type model.
+     */
+    public function getSelectedMatchType(): ?MatchType
+    {
+        if (!$this->form->matchTypeId) {
+            return null;
+        }
+
+        return MatchType::find($this->form->matchTypeId);
+    }
+
+    /**
+     * Check if the current match type allows wrestlers.
+     */
+    public function getMatchTypeAllowsWrestlersProperty(): bool
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? $matchType->allowsWrestlers() : true;
+    }
+
+    /**
+     * Check if the current match type allows tag teams.
+     */
+    public function getMatchTypeAllowsTagTeamsProperty(): bool
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? $matchType->allowsTagTeams() : false;
+    }
+
+    /**
+     * Get the number of sides required for the current match type.
+     */
+    public function getNumberOfSidesProperty(): int
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? $matchType->getMinimumCompetitors() : 2;
+    }
+
+    /**
+     * Get the match type name for template logic.
+     */
+    public function getMatchTypeNameProperty(): string
+    {
+        $matchType = $this->getSelectedMatchType();
+        return $matchType ? strtolower($matchType->name) : '';
+    }
+
+    /**
+     * Initialize the competitor structure based on match type.
+     */
+    private function initializeCompetitorStructure(int $matchTypeId): void
+    {
+        $matchType = MatchType::find($matchTypeId);
+        
+        if (!$matchType) {
+            return;
+        }
+
+        $numberOfSides = $matchType->getMinimumCompetitors();
+        $competitors = [];
+
+        $matchTypeName = strtolower($matchType->name);
+
+        // Initialize competitor structure based on match type specifics
+        if (str_contains($matchTypeName, 'battle') || str_contains($matchTypeName, 'rumble') || str_contains($matchTypeName, 'royal')) {
+            // Battle Royal: Single array for multiple wrestlers
+            $competitors[0] = [
+                'wrestlers' => [],
+                'tag_teams' => [],
+            ];
+        } else {
+            // Other matches: Initialize empty competitor structure for each side
+            for ($i = 0; $i < $numberOfSides; $i++) {
+                $competitors[$i] = [
+                    'wrestlers' => [],
+                    'tag_teams' => [],
+                ];
+            }
+        }
+
+        $this->form->competitors = $competitors;
     }
 
     public function render(): \Illuminate\View\View

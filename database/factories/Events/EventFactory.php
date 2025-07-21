@@ -60,6 +60,16 @@ class EventFactory extends Factory
     }
 
     /**
+     * Define the model's future state.
+     */
+    public function future(): static
+    {
+        return $this->state([
+            'date' => Carbon::tomorrow()->addDays(fake()->numberBetween(1, 30)),
+        ]);
+    }
+
+    /**
      * Define the venue the event takes place at.
      */
     public function atVenue(Venue $venue): static
