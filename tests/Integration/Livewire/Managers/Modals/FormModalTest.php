@@ -396,6 +396,9 @@ describe('Managers FormModal Tests', function () {
             // Employment date might be null or a valid date string
             if ($employmentDate !== null && $employmentDate !== '') {
                 expect($employmentDate)->toMatch('/^\d{4}-\d{2}-\d{2}/'); // YYYY-MM-DD format
+            } else {
+                // If no employment date, that's also valid
+                expect($employmentDate)->toBeIn([null, '']);
             }
         });
     });
@@ -474,14 +477,15 @@ describe('Managers FormModal Tests', function () {
 
         test('handles single name managers', function () {
             // Some managers might go by a single name
-            Livewire::test(FormModal::class)
+            $component = Livewire::test(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Fuji')
                 ->set('form.last_name', '') // Empty last name
                 ->call('submitForm');
 
-            // This might be invalid due to required validation - test documents current behavior
-            // If validation requires both names, this should fail
+            // Verify that validation properly handles single names
+            // Based on Laravel validation, last_name is required, so this should have errors
+            $component->assertHasErrors(['form.last_name']);
         });
     });
 });

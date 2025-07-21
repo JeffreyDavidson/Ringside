@@ -58,8 +58,8 @@ describe('Previous Managers Table Component', function () {
 
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
         
-        $table->assertSee($this->manager->name); // Should see the fired manager
-        $table->assertDontSee($currentManager->name); // Should not see the current manager
+        $table->assertSee($this->manager->full_name); // Should see the fired manager
+        $table->assertDontSee($currentManager->full_name); // Should not see the current manager
     });
 
     it('orders previous managers by hired date descending', function () {
@@ -92,9 +92,9 @@ describe('Previous Managers Table Component', function () {
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
         
         // Should be ordered by hired_at descending (most recent first)
-        $table->assertSee($manager1->name) // hired 10 days ago
-            ->assertSee($manager2->name) // hired 20 days ago  
-            ->assertSee($manager3->name); // hired 30 days ago
+        $table->assertSee($manager1->full_name) // hired 10 days ago
+            ->assertSee($manager2->full_name) // hired 20 days ago  
+            ->assertSee($manager3->full_name); // hired 30 days ago
     });
 
     it('shows only managers for specified wrestler', function () {
@@ -119,8 +119,8 @@ describe('Previous Managers Table Component', function () {
 
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
         
-        $table->assertSee($this->manager->name);
-        $table->assertDontSee($otherManager->name);
+        $table->assertSee($this->manager->full_name);
+        $table->assertDontSee($otherManager->full_name);
     });
 
     it('handles empty previous managers list', function () {
@@ -170,8 +170,8 @@ describe('Previous Managers Table Filtering', function () {
 
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
         
-        $table->assertSee($recentManager->name)
-            ->assertSee($oldManager->name);
+        $table->assertSee($recentManager->full_name)
+            ->assertSee($oldManager->full_name);
     });
 
     it('shows manager hire and fire dates', function () {
@@ -187,7 +187,7 @@ describe('Previous Managers Table Filtering', function () {
 
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
         
-        $table->assertSee($this->manager->name);
+        $table->assertSee($this->manager->full_name);
         // The table should show the employment period dates
         $table->assertSee($hiredDate->format('Y-m-d'));
         $table->assertSee($firedDate->format('Y-m-d'));
@@ -215,7 +215,7 @@ describe('Previous Managers Table Business Logic', function () {
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
         
         // Should show both employment periods
-        $table->assertSee($this->manager->name);
+        $table->assertSee($this->manager->full_name);
     });
 
     it('validates wrestler manager relationship integrity', function () {
@@ -228,7 +228,7 @@ describe('Previous Managers Table Business Logic', function () {
 
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
         
-        $table->assertSee($this->manager->name);
+        $table->assertSee($this->manager->full_name);
         
         // Just verify the component loads and displays data correctly
         $table->assertOk();
