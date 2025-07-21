@@ -12,6 +12,11 @@ use function Spatie\PestPluginTestTime\testTime;
 /**
  * Referee Actions Component Integration Tests
  *
+ * @group referees
+ * @group integration
+ * @group livewire
+ * @group actions
+ *
  * Tests the complete business action workflow for referees including:
  * - Employment lifecycle (employ, release)
  * - Injury management (injure, heal)
@@ -256,7 +261,7 @@ describe('RefereesActions Integration Tests', function () {
     describe('restore action', function () {
         test('restore action works for soft deleted referee', function () {
             $this->referee->delete();
-            expect($this->referee->fresh())->toBeNull();
+            expect($this->referee->trashed())->toBeTrue();
 
             $trashedReferee = Referee::onlyTrashed()->find($this->referee->id);
 
@@ -269,7 +274,7 @@ describe('RefereesActions Integration Tests', function () {
 
             expect(Referee::find($this->referee->id))->not()->toBeNull();
             // expect(session('status'))->toBe('Referee successfully restored.');
-        });
+        })->group('referees', 'integration', 'livewire', 'actions', 'restore');
     });
 
     describe('referee-specific business scenarios', function () {

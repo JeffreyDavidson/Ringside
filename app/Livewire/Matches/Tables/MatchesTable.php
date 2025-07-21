@@ -11,6 +11,7 @@ use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
@@ -44,6 +45,8 @@ class MatchesTable extends DataTableComponent
 
     public function configure(): void
     {
+        Gate::authorize('viewList', EventMatch::class);
+        
         $this->addAdditionalSelects([
             'events_matches.event_id',
         ]);

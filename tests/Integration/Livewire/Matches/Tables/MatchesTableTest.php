@@ -13,6 +13,13 @@ use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
+/**
+ * @group matches
+ * @group integration
+ * @group livewire
+ * @group tables
+ */
+
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
@@ -24,7 +31,7 @@ describe('MatchesTable Rendering', function () {
         
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
-    });
+    })->group('matches', 'integration', 'livewire', 'tables', 'rendering');
 
     it('displays matches in table', function () {
         $event = Event::factory()->create();
@@ -359,7 +366,7 @@ describe('MatchesTable Authorization', function () {
         auth()->logout();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertUnauthorized();
+            ->assertForbidden();
     });
 
     it('requires administrator privileges', function () {
@@ -368,6 +375,6 @@ describe('MatchesTable Authorization', function () {
         $this->actingAs($user);
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertUnauthorized();
+            ->assertForbidden();
     });
 });
