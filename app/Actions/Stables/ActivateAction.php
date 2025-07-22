@@ -50,7 +50,7 @@ class ActivateAction extends BaseStableAction
      */
     private function ensureCanBeActivated(Stable $stable): void
     {
-        if ($stable->isCurrentlyActivated()) {
+        if ($stable->isCurrentlyActive()) {
             throw CannotBeActivatedException::activated();
         }
     }

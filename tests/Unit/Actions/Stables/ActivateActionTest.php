@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\ActivateAction;
-use App\Exceptions\Status\CannotBeActivatedException;
+use App\Exceptions\CannotBeActivatedException;
 use App\Models\Stables\Stable;
 use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;

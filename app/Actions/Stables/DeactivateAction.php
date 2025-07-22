@@ -39,7 +39,7 @@ class DeactivateAction extends BaseStableAction
             throw CannotBeDeactivatedException::unactivated();
         }
 
-        if ($stable->isDeactivated()) {
+        if (! $stable->isCurrentlyActive()) {
             throw CannotBeDeactivatedException::deactivated();
         }
 
