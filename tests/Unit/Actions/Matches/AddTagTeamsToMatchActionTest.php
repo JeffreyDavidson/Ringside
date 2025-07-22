@@ -15,8 +15,8 @@ beforeEach(function () {
 
 test('it adds tag teams to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    $tagTeams = TagTeam::factory()->count(1)->create();
-    $sideNumber = 0;
+    $tagTeams = TagTeam::factory()->bookable()->count(1)->create();
+    $sideNumber = 1;
 
     $this->eventMatchRepository
         ->shouldReceive('addTagTeamToMatch')
