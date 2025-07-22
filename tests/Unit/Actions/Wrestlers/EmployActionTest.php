@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
-use App\Exceptions\CannotBeEmployedException;
+use App\Exceptions\Status\CannotBeEmployedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
@@ -24,7 +24,7 @@ test('it employs an employable wrestler at the current datetime by default', fun
         ->shouldNotReceive('unretire');
 
     $this->wrestlerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Wrestler $employableWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
             expect($employableWrestler->is($wrestler))->toBeTrue()
@@ -49,7 +49,7 @@ test('it employs an employable wrestler at a specific datetime', function ($fact
         ->shouldNotReceive('unretire');
 
     $this->wrestlerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);
@@ -66,7 +66,7 @@ test('it employs a retired wrestler at the current datetime by default', functio
     $datetime = now();
 
     $this->wrestlerRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->withArgs(function (Wrestler $unretirableWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
             expect($unretirableWrestler->is($wrestler))->toBeTrue()
                 ->and($unretireDate->eq($datetime))->toBeTrue();
@@ -77,7 +77,7 @@ test('it employs a retired wrestler at the current datetime by default', functio
         ->andReturn($wrestler);
 
     $this->wrestlerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Wrestler $employedWrestler, Carbon $employmentDate) use ($wrestler, $datetime) {
             expect($employedWrestler->is($wrestler))->toBeTrue()
@@ -95,13 +95,13 @@ test('it employs a retired wrestler at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->wrestlerRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->with($wrestler, $datetime)
         ->once()
         ->andReturn($wrestler);
 
     $this->wrestlerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturns($wrestler);

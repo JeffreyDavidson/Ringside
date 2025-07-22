@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\UnretireAction;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
@@ -24,7 +24,7 @@ test('it unretires a retired referee at the current datetime by default', functi
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->withArgs(function (Referee $unretireReferee, Carbon $unretireDate) use ($referee, $datetime) {
             expect($unretireReferee->is($referee))->toBeTrue()
@@ -35,7 +35,7 @@ test('it unretires a retired referee at the current datetime by default', functi
         ->andReturn($referee);
 
     $this->refereeRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Referee $employableReferee, Carbon $unretireDate) use ($referee, $datetime) {
             expect($employableReferee->is($referee))->toBeTrue()
@@ -53,13 +53,13 @@ test('it unretires a retired referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->with($referee, $datetime)
         ->andReturn($referee);
 
     $this->refereeRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($referee, $datetime)
         ->andReturn($referee);

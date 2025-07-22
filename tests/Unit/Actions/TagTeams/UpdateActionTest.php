@@ -29,7 +29,7 @@ test('it updates a tag team', function () {
         ->andReturns($tagTeam);
 
     $this->tagTeamRepository
-        ->shouldNotReceive('employ');
+        ->shouldNotReceive('createEmployment');
 
     resolve(UpdateAction::class)->handle($tagTeam, $data);
 });
@@ -51,7 +51,7 @@ test('it employs an unemployed tag team', function () {
         ->andReturns($tagTeam);
 
     $this->tagTeamRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($tagTeam, $data->employment_date)
         ->andReturns($tagTeam);
@@ -79,7 +79,7 @@ test('it employs a tag team with a future employment date', function () {
         ->andReturns($tagTeam);
 
     $this->tagTeamRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($tagTeam, $data->employment_date)
         ->andReturns($tagTeam);

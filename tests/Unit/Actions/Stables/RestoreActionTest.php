@@ -18,6 +18,5 @@ test('it restores a deleted stable', function () {
         ->once()
         ->with($stable);
 
-    RestoreAction::run($stable);
     resolve(RestoreAction::class)->handle($stable);
 });

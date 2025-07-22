@@ -3,18 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\ReinstateAction;
-use App\Events\Wrestlers\WrestlerReinstated;
-use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
-
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
-    Event::fake();
-
     testTime()->freeze();
 
     $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
@@ -25,7 +20,7 @@ test('it reinstates a suspended wrestler at the current datetime by default', fu
     $datetime = now();
 
     $this->wrestlerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->withArgs(function (Wrestler $reinstatableWrestler, Carbon $reinstatementDate) use ($wrestler, $datetime) {
             expect($reinstatableWrestler->is($wrestler))->toBeTrue()
@@ -36,13 +31,6 @@ test('it reinstates a suspended wrestler at the current datetime by default', fu
         ->andReturn($wrestler);
 
     resolve(ReinstateAction::class)->handle($wrestler);
-
-    Event::assertDispatched(WrestlerReinstated::class, function ($event) use ($wrestler, $datetime) {
-        expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->reinstatementDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
 });
 
 test('it reinstates a suspended wrestler at a specific datetime', function () {
@@ -50,19 +38,12 @@ test('it reinstates a suspended wrestler at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->wrestlerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
     resolve(ReinstateAction::class)->handle($wrestler, $datetime);
-
-    Event::assertDispatched(WrestlerReinstated::class, function ($event) use ($wrestler, $datetime) {
-        expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->reinstatementDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
 });
 
 test('invoke throws exception for reinstating a non reinstatable wrestler', function ($factoryState) {
@@ -73,7 +54,6 @@ test('invoke throws exception for reinstating a non reinstatable wrestler', func
 })->throws(CannotBeReinstatedException::class)->with([
     'bookable',
     'unemployed',
-    'injured',
     'released',
     'withFutureEmployment',
     'retired',

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\UpdateAction;
-use App\Actions\Stables\UpdateMembersAction;
 use App\Data\Stables\StableData;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
@@ -38,10 +37,12 @@ test('wrestlers of stable are synced when stable is updated', function () {
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldNotReceive('activate');
+        ->shouldReceive('updateStableMembers')
+        ->once();
 
-    UpdateMembersAction::shouldRun()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+    $this->stableRepository
+        ->shouldNotReceive('createActivation');
+
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });
@@ -68,11 +69,12 @@ test('tag teams of stable are synced when stable is updated', function () {
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldNotReceive('activate');
+        ->shouldReceive('updateStableMembers')
+        ->once();
 
-    UpdateMembersAction::shouldRun()
-        ->once()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+    $this->stableRepository
+        ->shouldNotReceive('createActivation');
+
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });
@@ -99,10 +101,12 @@ test('managers of stable are synced when stable is updated', function () {
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldNotReceive('activate');
+        ->shouldReceive('updateStableMembers')
+        ->once();
 
-    UpdateMembersAction::shouldRun()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+    $this->stableRepository
+        ->shouldNotReceive('createActivation');
+
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });

@@ -22,7 +22,7 @@ test('it can update a referee', function () {
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldNotReceive('employ');
+        ->shouldNotReceive('createEmployment');
 
     resolve(UpdateAction::class)->handle($referee, $data);
 });
@@ -39,8 +39,8 @@ test('it employs an employable referee if start date is filled in request', func
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('employ')
-        ->with($referee, $data->start_date)
+        ->shouldReceive('createEmployment')
+        ->with($referee, $data->employment_date)
         ->once()
         ->andReturn($referee);
 
@@ -59,8 +59,8 @@ test('it updates a future employed referee employment date if start date is fill
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('employ')
-        ->with($referee, $data->start_date)
+        ->shouldReceive('createEmployment')
+        ->with($referee, $data->employment_date)
         ->once()
         ->andReturn($referee);
 

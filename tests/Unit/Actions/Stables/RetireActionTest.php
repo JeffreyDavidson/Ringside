@@ -6,7 +6,7 @@ use App\Actions\Managers\RetireAction as ManagerRetireAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
-use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -27,7 +27,7 @@ test('it retires an active stable at the current datetime by default', function 
     $datetime = now();
 
     $this->stableRepository
-        ->shouldReceive('deactivate')
+        ->shouldReceive('endActivity')
         ->once()
         ->withArgs(function (Stable $retirableStable, Carbon $retirementDate) use ($stable, $datetime) {
             expect($retirableStable->is($stable))->toBeTrue()
@@ -38,7 +38,7 @@ test('it retires an active stable at the current datetime by default', function 
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->withArgs(function (Stable $retirableStable, Carbon $retirementDate) use ($stable, $datetime) {
             expect($retirableStable->is($stable))->toBeTrue()
@@ -47,6 +47,14 @@ test('it retires an active stable at the current datetime by default', function 
             return true;
         })
         ->andReturns($stable);
+
+    $this->stableRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->stableRepository
+        ->shouldReceive('removeTagTeams')
+        ->once();
 
     resolve(RetireAction::class)->handle($stable);
 });
@@ -56,16 +64,24 @@ test('it retires an active stable at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->stableRepository
-        ->shouldReceive('deactivate')
+        ->shouldReceive('endActivity')
         ->once()
         ->with($stable, $datetime)
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->with($stable, $datetime)
         ->andReturns($stable);
+
+    $this->stableRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->stableRepository
+        ->shouldReceive('removeTagTeams')
+        ->once();
 
     resolve(RetireAction::class)->handle($stable, $datetime);
 });
@@ -75,10 +91,10 @@ test('it retires an inactive stable at the current datetime by default', functio
     $datetime = now();
 
     $this->stableRepository
-        ->shouldNotReceive('deactivate');
+        ->shouldNotReceive('endActivity');
 
     $this->stableRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->withArgs(function (Stable $retirableStable, Carbon $retirementDate) use ($stable, $datetime) {
             expect($retirableStable->is($stable))->toBeTrue()
@@ -88,6 +104,14 @@ test('it retires an inactive stable at the current datetime by default', functio
         })
         ->andReturns($stable);
 
+    $this->stableRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->stableRepository
+        ->shouldReceive('removeTagTeams')
+        ->once();
+
     resolve(RetireAction::class)->handle($stable);
 });
 
@@ -96,13 +120,21 @@ test('it retires an inactive stable at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->stableRepository
-        ->shouldNotReceive('deactivate');
+        ->shouldNotReceive('endActivity');
 
     $this->stableRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->with($stable, $datetime)
         ->andReturns($stable);
+
+    $this->stableRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->stableRepository
+        ->shouldReceive('removeTagTeams')
+        ->once();
 
     resolve(RetireAction::class)->handle($stable, $datetime);
 });
@@ -121,13 +153,13 @@ test('it retires the current tag teams and current wrestlers and current manager
         ->create();
 
     $this->stableRepository
-        ->shouldReceive('deactivate')
+        ->shouldReceive('endActivity')
         ->once()
         ->with($stable, $datetime)
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->with($stable, $datetime)
         ->andReturns($stable);

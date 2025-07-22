@@ -3,17 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\UnretireAction;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
-
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
-    Event::fake();
-
     testTime()->freeze();
 
     $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
@@ -24,7 +20,7 @@ test('it unretires a retired wrestler at the current datetime by default', funct
     $datetime = now();
 
     $this->wrestlerRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->withArgs(function (Wrestler $unretireWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
             expect($unretireWrestler->is($wrestler))->toBeTrue()
@@ -34,16 +30,6 @@ test('it unretires a retired wrestler at the current datetime by default', funct
         })
         ->andReturn($wrestler);
 
-    $this->wrestlerRepository
-        ->shouldReceive('employ')
-        ->once()
-        ->withArgs(function (Wrestler $employableWrestler, Carbon $unretireDate) use ($wrestler, $datetime) {
-            expect($employableWrestler->is($wrestler))->toBeTrue()
-                ->and($unretireDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturn($wrestler);
 
     resolve(UnretireAction::class)->handle($wrestler);
 });
@@ -53,16 +39,11 @@ test('it unretires a retired wrestler at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->wrestlerRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
-    $this->wrestlerRepository
-        ->shouldReceive('employ')
-        ->once()
-        ->with($wrestler, $datetime)
-        ->andReturn($wrestler);
 
     resolve(UnretireAction::class)->handle($wrestler, $datetime);
 });

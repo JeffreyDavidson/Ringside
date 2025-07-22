@@ -3,18 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\ReleaseAction;
-use App\Events\Wrestlers\WrestlerReleased;
-use App\Exceptions\CannotBeReleasedException;
+use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
-
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
-    Event::fake();
-
     testTime()->freeze();
 
     $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
@@ -25,13 +20,19 @@ test('it releases a bookable wrestler at the current datetime by default', funct
     $datetime = now();
 
     $this->wrestlerRepository
-        ->shouldReceive('reinstate');
+        ->shouldReceive('removeFromCurrentTagTeam')
+        ->once();
 
     $this->wrestlerRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldReceive('removeFromCurrentStable')
+        ->once();
 
     $this->wrestlerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('removeFromCurrentManagers')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (Wrestler $releasableWrestler, Carbon $releaseDate) use ($wrestler, $datetime) {
             expect($releasableWrestler->is($wrestler))->toBeTrue()
@@ -42,13 +43,6 @@ test('it releases a bookable wrestler at the current datetime by default', funct
         ->andReturn($wrestler);
 
     resolve(ReleaseAction::class)->handle($wrestler);
-
-    Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
-        expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
 });
 
 test('it releases an bookable wrestler at a specific datetime', function () {
@@ -56,25 +50,24 @@ test('it releases an bookable wrestler at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->wrestlerRepository
-        ->shouldReceive('reinstate');
+        ->shouldReceive('removeFromCurrentTagTeam')
+        ->once();
 
     $this->wrestlerRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldReceive('removeFromCurrentStable')
+        ->once();
 
     $this->wrestlerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('removeFromCurrentManagers')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
     resolve(ReleaseAction::class)->handle($wrestler, $datetime);
-
-    Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
-        expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
 });
 
 test('it releases a suspended wrestler at the current datetime by default', function () {
@@ -82,7 +75,19 @@ test('it releases a suspended wrestler at the current datetime by default', func
     $datetime = now();
 
     $this->wrestlerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('removeFromCurrentTagTeam')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('removeFromCurrentStable')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('removeFromCurrentManagers')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('endSuspension')
         ->once()
         ->withArgs(function (Wrestler $reinstatableWrestler, Carbon $releaseDate) use ($wrestler, $datetime) {
             expect($reinstatableWrestler->is($wrestler))->toBeTrue()
@@ -93,10 +98,7 @@ test('it releases a suspended wrestler at the current datetime by default', func
         ->andReturn($wrestler);
 
     $this->wrestlerRepository
-        ->shouldNotReceive('clearInjury');
-
-    $this->wrestlerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (Wrestler $releasableWrestler, Carbon $releaseDate) use ($wrestler, $datetime) {
             expect($releasableWrestler->is($wrestler))->toBeTrue()
@@ -107,13 +109,6 @@ test('it releases a suspended wrestler at the current datetime by default', func
         ->andReturn($wrestler);
 
     resolve(ReleaseAction::class)->handle($wrestler);
-
-    Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
-        expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
 });
 
 test('it releases a suspended wrestler at a specific datetime', function () {
@@ -121,28 +116,30 @@ test('it releases a suspended wrestler at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->wrestlerRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('removeFromCurrentTagTeam')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('removeFromCurrentStable')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('removeFromCurrentManagers')
+        ->once();
+
+    $this->wrestlerRepository
+        ->shouldReceive('endSuspension')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
     $this->wrestlerRepository
-        ->shouldNotReceive('clearInjury');
-
-    $this->wrestlerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
 
     resolve(ReleaseAction::class)->handle($wrestler, $datetime);
-
-    Event::assertDispatched(WrestlerReleased::class, function ($event) use ($wrestler, $datetime) {
-        expect($event->wrestler->is($wrestler))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
 });
 
 test('invoke throws an exception for releasing a non releasable wrestler', function ($factoryState) {

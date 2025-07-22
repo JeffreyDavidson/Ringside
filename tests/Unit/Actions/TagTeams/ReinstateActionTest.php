@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\ReinstateAction;
-use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Models\TagTeams\TagTeam;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ test('it reinstates a suspended tag team at the current datetime by default', fu
     $datetime = now();
 
     $this->tagTeamRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->withArgs(function (TagTeam $reinstatableTagTeam, Carbon $reinstatementDate) use ($tagTeam, $datetime) {
             expect($reinstatableTagTeam->is($tagTeam))->toBeTrue()
@@ -39,7 +39,7 @@ test('it reinstates a suspended tag team at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->tagTeamRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
