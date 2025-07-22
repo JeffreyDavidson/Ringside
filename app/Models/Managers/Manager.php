@@ -134,6 +134,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     protected $fillable = [
         'first_name',
         'last_name',
+        'status',
     ];
 
     /**
@@ -202,7 +203,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     protected function casts(): array
     {
         return [
-            // Status is now computed from employment relationships
+            'status' => EmploymentStatus::class,
         ];
     }
 }

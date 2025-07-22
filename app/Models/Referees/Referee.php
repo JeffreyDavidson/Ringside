@@ -6,6 +6,7 @@ namespace App\Models\Referees;
 
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Concerns\HasMatches;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
@@ -96,6 +97,10 @@ use Illuminate\Support\Carbon;
 class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
 {
     use HasFactory;
+    use HasMatches, OfficiatesMatches {
+        OfficiatesMatches::matches insteadof HasMatches;
+        OfficiatesMatches::previousMatches insteadof HasMatches;
+    }
     /** @use IsEmployable<RefereeEmployment, static> */
     use IsEmployable;
 
@@ -107,8 +112,6 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
 
     /** @use IsSuspendable<RefereeSuspension, static> */
     use IsSuspendable;
-
-    use OfficiatesMatches;
 
     use ProvidesDisplayName;
     use SoftDeletes;
@@ -125,6 +128,7 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     protected $fillable = [
         'first_name',
         'last_name',
+        'status',
     ];
 
     /**

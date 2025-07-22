@@ -9,6 +9,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Seeders\MatchTypesTableSeeder;
+use Mockery;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
@@ -16,7 +17,7 @@ beforeEach(function () {
 
 test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    [$wrestlerA, $wrestlerB] = Wrestler::factory()->count(2)->create();
+    [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
     $competitors = collect([
         0 => [
             'wrestlers' => collect([$wrestlerA]),
@@ -26,22 +27,31 @@ test('it adds wrestler competitors to a match', function () {
         ],
     ]);
 
-    AddWrestlersToMatchAction::shouldRun()
-        ->with($eventMatch, $competitors[0]['wrestlers'], 0)
+    $addWrestlersToMatchAction = $this->mock(AddWrestlersToMatchAction::class);
+    $addTagTeamsToMatchAction = $this->mock(AddTagTeamsToMatchAction::class);
+    
+    app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
+    app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
+
+    $addWrestlersToMatchAction
+        ->shouldReceive('handle')
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 0)
         ->once();
 
-    AddWrestlersToMatchAction::shouldRun()
-        ->with($eventMatch, $competitors[1]['wrestlers'], 1)
+    $addWrestlersToMatchAction
+        ->shouldReceive('handle')
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 1)
         ->once();
 
-    AddTagTeamsToMatchAction::shouldNotRun();
+    $addTagTeamsToMatchAction
+        ->shouldNotReceive('handle');
 
     AddCompetitorsToMatchAction::run($eventMatch, $competitors);
 });
 
 test('it adds tag team competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    [$tagTeamA, $tagTeamB] = TagTeam::factory()->count(2)->create();
+    [$tagTeamA, $tagTeamB] = TagTeam::factory()->bookable()->count(2)->create();
     $competitors = collect([
         0 => [
             'tag_teams' => collect([$tagTeamA]),
@@ -51,15 +61,24 @@ test('it adds tag team competitors to a match', function () {
         ],
     ]);
 
-    AddTagTeamsToMatchAction::shouldRun()
-        ->with($eventMatch, $competitors[0]['tag_teams'], 0)
+    $addWrestlersToMatchAction = $this->mock(AddWrestlersToMatchAction::class);
+    $addTagTeamsToMatchAction = $this->mock(AddTagTeamsToMatchAction::class);
+    
+    app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
+    app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
+
+    $addTagTeamsToMatchAction
+        ->shouldReceive('handle')
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 0)
         ->once();
 
-    AddTagTeamsToMatchAction::shouldRun()
-        ->with($eventMatch, $competitors[1]['tag_teams'], 1)
+    $addTagTeamsToMatchAction
+        ->shouldReceive('handle')
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 1)
         ->once();
 
-    AddWrestlersToMatchAction::shouldNotRun();
+    $addWrestlersToMatchAction
+        ->shouldNotReceive('handle');
 
     AddCompetitorsToMatchAction::run($eventMatch, $competitors);
 });

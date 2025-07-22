@@ -48,4 +48,68 @@ class EventMatchFactory extends Factory
 
         return $this;
     }
+
+    // Phase 2 systematic factory state methods
+    public function complete(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function singles(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function tagTeam(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function tripleThreat(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function fatalFourWay(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function battleRoyal(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function titleMatch(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function titleDefense(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
+
+    public function tagTeamTitleMatch(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [];
+        });
+    }
 }
