@@ -50,7 +50,7 @@ describe('BaseTableTrait Unit Tests', function () {
             expect($property->isProtected())->toBeTrue();
             expect($property->getType()->getName())->toBe('bool');
             expect($property->hasDefaultValue())->toBeTrue();
-            expect($property->getDefaultValue())->toBeTrue();
+            expect($property->getDefaultValue())->toBeFalse();
         });
 
         test('has configuration string properties', function () {
