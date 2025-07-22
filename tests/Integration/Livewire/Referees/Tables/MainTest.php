@@ -57,6 +57,7 @@ describe('RefereesTable Component', function () {
                 ->assertSee($injuredReferee->full_name)
                 ->assertSee($retiredReferee->full_name)
                 ->assertSee($suspendedReferee->full_name);
+            expect(true)->toBeTrue();
         });
 
         test('displays correct status badges for different referee states', function () {

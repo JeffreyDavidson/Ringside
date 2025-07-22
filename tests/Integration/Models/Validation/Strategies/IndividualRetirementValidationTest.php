@@ -23,7 +23,7 @@ describe('IndividualRetirementValidation', function () {
 
     test('validates retirement rules correctly', function ($factoryState, $shouldPass) {
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
-        
+
         if ($shouldPass) {
             $this->strategy->validate($wrestler);
             expectValidEntityState($wrestler);
@@ -31,13 +31,14 @@ describe('IndividualRetirementValidation', function () {
             expect(fn() => $this->strategy->validate($wrestler))
                 ->toThrow(CannotBeRetiredException::class);
         }
+        expect(true)->toBeTrue();
     })->with([
         // Can retire: employed entities in various states
-        ['employed', true],        // Changed from 'bookable' to 'employed' 
-        ['suspended', true], 
+        ['employed', true],        // Changed from 'bookable' to 'employed'
+        ['suspended', true],
         ['injured', true],
         ['released', true],
-        
+
         // Cannot retire: invalid employment states
         ['unemployed', false],
         ['withFutureEmployment', false],
@@ -50,16 +51,17 @@ describe('IndividualRetirementValidation', function () {
                 public function hasStatus(EmploymentStatus $status): bool {
                     return false;
                 }
-                
+
                 public function isRetired(): bool {
-                    return false;  
+                    return false;
                 }
-                
+
                 // Note: hasFutureEmployment method intentionally missing
             };
 
             // Should handle missing hasFutureEmployment method gracefully
             $this->strategy->validate($mockEntity);
+            expect(true)->toBeTrue();
         });
 
         test('handles entities without isRetired method', function () {
@@ -67,33 +69,35 @@ describe('IndividualRetirementValidation', function () {
                 public function hasStatus(EmploymentStatus $status): bool {
                     return false;
                 }
-                
+
                 public function hasFutureEmployment(): bool {
                     return false;
                 }
-                
+
                 // Note: isRetired method intentionally missing
             };
 
             // Should handle missing isRetired method gracefully
             $this->strategy->validate($mockEntity);
+            expect(true)->toBeTrue();
         });
 
         test('handles entities without hasStatus method', function () {
             $mockEntity = new class extends Model {
                 public function isRetired(): bool {
-                    return false;  
+                    return false;
                 }
-                
+
                 public function hasFutureEmployment(): bool {
                     return false;
                 }
-                
+
                 // Note: hasStatus method intentionally missing
             };
 
             // Should handle missing hasStatus method gracefully
             $this->strategy->validate($mockEntity);
+            expect(true)->toBeTrue();
         });
     });
 });

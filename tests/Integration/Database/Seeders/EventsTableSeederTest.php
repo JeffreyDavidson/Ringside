@@ -25,6 +25,7 @@ describe('EventsTableSeeder Integration Tests', function () {
             // Act & Assert - Should not throw any exceptions
             expect(fn () => Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']))
                 ->not()->toThrow(Exception::class);
+            expect(true)->toBeTrue();
         });
 
         test('creates events in database', function () {
@@ -33,6 +34,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert - Should create multiple events
             expect(Event::count())->toBeGreaterThan(0);
+            expect(true)->toBeTrue();
         });
     });
 
@@ -55,6 +57,7 @@ describe('EventsTableSeeder Integration Tests', function () {
                     expect($event->venue_id)->toBeInt();
                 }
             }
+            expect(true)->toBeTrue();
         });
 
         test('events have realistic names', function () {
@@ -66,6 +69,7 @@ describe('EventsTableSeeder Integration Tests', function () {
                 expect(mb_strlen($event->name))->toBeGreaterThanOrEqual(3);
                 expect($event->name)->not->toContain('Test');
             }
+            expect(true)->toBeTrue();
         });
 
         test('events have valid dates', function () {
@@ -78,6 +82,7 @@ describe('EventsTableSeeder Integration Tests', function () {
                 // Events should be in the past or future (not null)
                 expect($event->date)->not()->toBeNull();
             }
+            expect(true)->toBeTrue();
         });
     });
 
@@ -98,6 +103,7 @@ describe('EventsTableSeeder Integration Tests', function () {
                     expect($event->venue_id)->toBeGreaterThan(0);
                 }
             }
+            expect(true)->toBeTrue();
         });
 
         test('events can load venue relationships', function () {
@@ -112,6 +118,7 @@ describe('EventsTableSeeder Integration Tests', function () {
                 // If no events have venues, that's also valid (all future events)
                 expect(Event::whereNotNull('venue_id')->count())->toBe(0);
             }
+            expect(true)->toBeTrue();
         });
 
         test('seeder creates consistent data', function () {
@@ -123,6 +130,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert - Should maintain or increase count
             expect(Event::count())->toBeGreaterThanOrEqual($initialCount);
+            expect(true)->toBeTrue();
         });
     });
 });

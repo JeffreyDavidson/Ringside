@@ -55,6 +55,7 @@ Groups allow developers to:
 | `badges` | Tests for badge/indicator display | `vendor/bin/pest --group=badges` |
 | `actions` | Tests for action buttons/dropdowns | `vendor/bin/pest --group=actions` |
 | `relationships` | Tests for model relationships | `vendor/bin/pest --group=relationships` |
+| `builders` | Tests for query builders | `vendor/bin/pest --group=builders` |
 | `employment` | Tests for employment status | `vendor/bin/pest --group=employment` |
 | `injuries` | Tests for injury management | `vendor/bin/pest --group=injuries` |
 | `suspensions` | Tests for suspension management | `vendor/bin/pest --group=suspensions` |

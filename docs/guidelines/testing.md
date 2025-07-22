@@ -14,6 +14,7 @@ Comprehensive testing standards ensure reliable, maintainable test suites.
 - **Descriptive Names**: Test names should explain expected behavior
 - **Consistent Formatting**: Follow same formatting rules as application code
 - **Group Assignment**: **MANDATORY** - Every test MUST include appropriate Pest groups
+- **Assertions Required**: Every test MUST include proper assertions to avoid "risky" test warnings
 
 ```php
 // ✅ CORRECT - Proper test structure with required groups
@@ -74,6 +75,70 @@ test('some test', function () {
 ```
 
 **See [Pest Group System](pest-groups.md) for complete group reference and usage examples.**
+
+## Test Quality Standards
+
+### Avoiding Risky Tests
+
+**Risky Test Warning**: Tests that execute code but don't verify results with assertions.
+
+**Common Causes:**
+- Tests that only setup data without assertions
+- Component tests that mount but don't verify behavior
+- Tests with conditional assertions that may not execute
+
+```php
+// ❌ RISKY - No assertions, just setup
+test('creates manager relationship', function () {
+    $wrestler = Wrestler::factory()->create();
+    $manager = Manager::factory()->create();
+    
+    WrestlerManager::create([
+        'wrestler_id' => $wrestler->id,
+        'manager_id' => $manager->id,
+    ]);
+    
+    // Missing: Assertions to verify the relationship was created correctly
+});
+
+// ✅ CORRECT - Proper verification
+test('creates manager relationship', function () {
+    $wrestler = Wrestler::factory()->create();
+    $manager = Manager::factory()->create();
+    
+    $relationship = WrestlerManager::create([
+        'wrestler_id' => $wrestler->id,
+        'manager_id' => $manager->id,
+    ]);
+    
+    expect($relationship)->toBeInstanceOf(WrestlerManager::class);
+    expect($wrestler->fresh()->managers)->toContain($manager);
+    expect($manager->fresh()->wrestlers)->toContain($wrestler);
+})->group('wrestlers', 'managers', 'integration', 'relationships');
+```
+
+### Database Compatibility
+
+**SQLite vs MySQL**: Ensure date calculations and SQL functions work across both databases.
+
+**Date Calculations:**
+```php
+// ❌ MySQL-only syntax
+'DATEDIFF(NOW(), created_at) as days_ago'
+
+// ✅ Database-agnostic approach
+$driverName = DB::connection()->getDriverName();
+$sql = match ($driverName) {
+    'mysql' => 'DATEDIFF(NOW(), created_at) as days_ago',
+    'sqlite' => 'CAST((julianday("now") - julianday(created_at)) AS INTEGER) as days_ago',
+    default => 'DATEDIFF(NOW(), created_at) as days_ago'
+};
+```
+
+**Testing Date Calculations:**
+- Always test both current and historical date scenarios
+- Use `Carbon::setTestNow()` for consistent test dates
+- Verify calculations produce expected numeric results
 
 ## Related Documentation
 - [Pest Group System](pest-groups.md) - Complete group reference and guidelines
