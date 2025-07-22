@@ -162,6 +162,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     protected $fillable = [
         'name',
         'signature_move',
+        'status',
     ];
 
     /**

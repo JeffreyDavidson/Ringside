@@ -195,6 +195,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
         'weight',
         'hometown',
         'signature_move',
+        'status',
     ];
 
     /**
@@ -253,6 +254,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     {
         return [
             'height' => HeightCast::class,
+            'status' => EmploymentStatus::class,
         ];
     }
 

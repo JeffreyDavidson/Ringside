@@ -7,7 +7,7 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanWinTitles;
-use App\Models\Concerns\HasMatches;
+use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
@@ -81,7 +81,7 @@ describe('TagTeam Model Unit Tests', function () {
             expect(TagTeam::class)->usesTrait(CanJoinStables::class);
             expect(TagTeam::class)->usesTrait(CanWinTitles::class);
             expect(TagTeam::class)->usesTrait(HasFactory::class);
-            expect(TagTeam::class)->usesTrait(HasMatches::class);
+            expect(TagTeam::class)->usesTrait(IsBookableCompetitor::class);
             expect(TagTeam::class)->usesTrait(IsEmployable::class);
             expect(TagTeam::class)->usesTrait(IsRetirable::class);
             expect(TagTeam::class)->usesTrait(IsSuspendable::class);
