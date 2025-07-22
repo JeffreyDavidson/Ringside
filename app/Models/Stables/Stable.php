@@ -139,6 +139,7 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
      */
     protected $fillable = [
         'name',
+        'status',
     ];
 
     /**

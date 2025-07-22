@@ -127,6 +127,7 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
      */
     protected $fillable = [
         'name',
+        'status',
         'type',
     ];
 

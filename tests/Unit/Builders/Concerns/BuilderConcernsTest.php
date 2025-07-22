@@ -33,7 +33,7 @@ describe('Builder Concerns Unit Tests', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
             // SingleRosterMemberBuilder uses the trait, and other builders inherit from it
             expect(App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasAvailabilityScopes::class);
-            expect(App\Builders\TagTeamBuilder::class)->usesTrait(HasAvailabilityScopes::class);
+            expect(App\Builders\Roster\TagTeamBuilder::class)->usesTrait(HasAvailabilityScopes::class);
 
             // Verify that methods are available on concrete builders
             $builder = Wrestler::query();
@@ -182,7 +182,7 @@ describe('Builder Concerns Unit Tests', function () {
         test('trait is used by builders or base classes', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
             expect(App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasRetirementScopes::class);
-            expect(App\Builders\TagTeamBuilder::class)->usesTrait(HasRetirementScopes::class);
+            expect(App\Builders\Roster\TagTeamBuilder::class)->usesTrait(HasRetirementScopes::class);
             expect(App\Builders\Titles\TitleBuilder::class)->usesTrait(HasRetirementScopes::class);
 
             // Verify that methods are available on concrete builders
