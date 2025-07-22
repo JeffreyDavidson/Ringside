@@ -3,8 +3,14 @@
 declare(strict_types=1);
 
 use App\Models\Events\Event;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('scheduled events can be retrieved', function () {
+    // Clear any existing events to ensure test isolation
+    Event::query()->forceDelete();
+    
     $scheduledEvent = Event::factory()->scheduled()->create();
     $unscheduledEvent = Event::factory()->unscheduled()->create();
     $pastEvent = Event::factory()->past()->create();

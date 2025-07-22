@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Stables\UpdateAction;
 use App\Data\Stables\StableData;
-use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -27,7 +26,6 @@ test('wrestlers of stable are synced when stable is updated', function () {
         null,
         new Collection(),
         $newStableWrestlers,
-        new Collection()
     );
 
     $this->stableRepository
@@ -42,7 +40,6 @@ test('wrestlers of stable are synced when stable is updated', function () {
 
     $this->stableRepository
         ->shouldNotReceive('createActivation');
-
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });
@@ -59,7 +56,6 @@ test('tag teams of stable are synced when stable is updated', function () {
         null,
         $newStableTagTeams,
         new Collection(),
-        new Collection()
     );
 
     $this->stableRepository
@@ -74,39 +70,6 @@ test('tag teams of stable are synced when stable is updated', function () {
 
     $this->stableRepository
         ->shouldNotReceive('createActivation');
-
-
-    resolve(UpdateAction::class)->handle($stable, $data);
-});
-
-test('managers of stable are synced when stable is updated', function () {
-    $formerStableManagers = Manager::factory()->count(2)->create();
-    $stable = Stable::factory()
-        ->hasAttached($formerStableManagers, ['hired_at' => now()->toDateTimeString()])
-        ->create();
-    $newStableManagers = Manager::factory()->count(2)->create();
-
-    $data = new StableData(
-        'New Stable Name',
-        null,
-        new Collection(),
-        new Collection(),
-        $newStableManagers
-    );
-
-    $this->stableRepository
-        ->shouldReceive('update')
-        ->once()
-        ->with($stable, $data)
-        ->andReturns($stable);
-
-    $this->stableRepository
-        ->shouldReceive('updateStableMembers')
-        ->once();
-
-    $this->stableRepository
-        ->shouldNotReceive('createActivation');
-
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });

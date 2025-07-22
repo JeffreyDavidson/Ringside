@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Titles\Title;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('active titles can be retrieved', function () {
     $activeTitle = Title::factory()->active()->create();
