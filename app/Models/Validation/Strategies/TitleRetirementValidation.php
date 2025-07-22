@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Validation\Strategies;
 
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\CannotBeRetiredException;
 use App\Models\Contracts\RetirementValidationStrategy;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Model;

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\RetireAction;
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\CannotBeRetiredException;
 use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ test('it retires an active title at the current datetime by default', function (
     $datetime = now();
 
     $this->titleRepository
-        ->shouldReceive('endActivation')
+        ->shouldReceive('pull')
         ->once()
         ->withArgs(function (Title $deactivatableTitle, Carbon $deactivationDate) use ($title, $datetime) {
             expect($deactivatableTitle->is($title))->toBeTrue()
@@ -50,7 +50,7 @@ test('it retires an active title at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->titleRepository
-        ->shouldReceive('endActivation')
+        ->shouldReceive('pull')
         ->once()
         ->with($title, $datetime)
         ->andReturns($title);
@@ -69,7 +69,7 @@ test('it retires an inactive title at the current datetime by default', function
     $datetime = now();
 
     $this->titleRepository
-        ->shouldNotReceive('deactivate');
+        ->shouldNotReceive('pull');
 
     $this->titleRepository
         ->shouldReceive('createRetirement')
@@ -90,7 +90,7 @@ test('it retires an inactive title at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->titleRepository
-        ->shouldNotReceive('deactivate');
+        ->shouldNotReceive('pull');
 
     $this->titleRepository
         ->shouldReceive('createRetirement')

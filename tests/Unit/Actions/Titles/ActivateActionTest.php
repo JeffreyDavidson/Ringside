@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\ActivateAction;
-use App\Exceptions\Status\CannotBeActivatedException;
+use App\Exceptions\CannotBeActivatedException;
 use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
@@ -77,11 +77,12 @@ test('it activates a retired title at the current datetime by default', function
         ->andReturn($title);
 
     $this->titleRepository
-        ->shouldReceive('createActivation')
+        ->shouldReceive('createReinstatement')
         ->once()
-        ->withArgs(function (Title $activatedTitle, Carbon $activationDate) use ($title, $datetime) {
-            expect($activatedTitle->is($title))->toBeTrue()
-                ->and($activationDate->eq($datetime))->toBeTrue();
+        ->withArgs(function (Title $reinstatedTitle, Carbon $reinstateDate, $notes) use ($title, $datetime) {
+            expect($reinstatedTitle->is($title))->toBeTrue()
+                ->and($reinstateDate->eq($datetime))->toBeTrue()
+                ->and($notes)->toBeNull();
 
             return true;
         })
@@ -101,9 +102,9 @@ test('it activates a retired title at a specific datetime', function () {
         ->andReturn($title);
 
     $this->titleRepository
-        ->shouldReceive('createActivation')
+        ->shouldReceive('createReinstatement')
         ->once()
-        ->with($title, $datetime)
+        ->with($title, $datetime, null)
         ->andReturns($title);
 
     resolve(ActivateAction::class)->handle($title, $datetime);

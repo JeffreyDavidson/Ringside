@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\RetireAction;
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\CannotBeRetiredException;
 use App\Models\Wrestlers\Wrestler;
+use App\Repositories\StableRepository;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
 use function Spatie\PestPluginTestTime\testTime;
@@ -13,10 +14,16 @@ beforeEach(function () {
     testTime()->freeze();
 
     $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
+    $this->stableRepository = $this->mock(StableRepository::class);
     
     // Add default expectations for complex methods that are always called
     $this->wrestlerRepository
         ->shouldReceive('removeFromCurrentTagTeam')
+        ->byDefault();
+    
+    // Add default expectation for stable removal calls
+    $this->stableRepository
+        ->shouldReceive('removeWrestler')
         ->byDefault();
     
     $this->wrestlerRepository
