@@ -74,6 +74,11 @@ class TagTeamFactory extends Factory
             ->withCurrentWrestlers($wrestlers, Carbon::now());
     }
 
+    public function futureEmployment(): static
+    {
+        return $this->withFutureEmployment();
+    }
+
     public function suspended(): static
     {
         $now = now();
