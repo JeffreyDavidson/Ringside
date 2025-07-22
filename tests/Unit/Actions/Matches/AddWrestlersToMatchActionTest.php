@@ -15,8 +15,8 @@ beforeEach(function () {
 
 test('it adds wrestlers to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    $wrestlers = Wrestler::factory()->count(1)->create();
-    $sideNumber = 0;
+    $wrestlers = Wrestler::factory()->bookable()->count(1)->create();
+    $sideNumber = 1;
 
     $this->eventMatchRepository
         ->shouldReceive('addWrestlerToMatch')
