@@ -7,7 +7,6 @@ use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\TagTeamRepository;
-use Illuminate\Support\Carbon;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -33,7 +32,6 @@ test('it creates a tag team without tag team partners and employment', function 
         ->once()
         ->with($data)
         ->andReturns(new TagTeam());
-
 
     $this->tagTeamRepository
         ->shouldNotReceive('addWrestlers');
@@ -67,14 +65,13 @@ test('it employs a tag team and tag team partners and employment when start date
         ->with($data)
         ->andReturns($tagTeam = new TagTeam());
 
-
     $this->tagTeamRepository
         ->shouldReceive('addWrestlers')
         ->once()
-        ->withArgs(function ($tagTeamArg, $wrestlersCollection, $dateArg) use ($tagTeam, $wrestlerA, $wrestlerB, $datetime) {
+        ->withArgs(function ($tagTeamArg, $wrestlersCollection, $dateArg) use ($tagTeam, $datetime) {
             expect($tagTeamArg->is($tagTeam))->toBeTrue()
                 ->and($dateArg->eq($datetime))->toBeTrue();
-            
+
             return true;
         });
 

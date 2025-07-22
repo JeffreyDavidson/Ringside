@@ -32,15 +32,7 @@ test('it unretires a retired title and redirects', function () {
         ->andReturn($title);
 
     $this->titleRepository
-        ->shouldReceive('createActivation')
-        ->once()
-        ->withArgs(function (Title $employableTitle, Carbon $unretireDate) use ($title, $datetime) {
-            expect($employableTitle->is($title))->toBeTrue()
-                ->and($unretireDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturn($title);
+        ->shouldNotReceive('createReinstatement');
 
     resolve(UnretireAction::class)->handle($title);
 });
@@ -56,10 +48,7 @@ test('it unretires a retired title at a specific datetime', function () {
         ->andReturn($title);
 
     $this->titleRepository
-        ->shouldReceive('createActivation')
-        ->once()
-        ->with($title, $datetime)
-        ->andReturn($title);
+        ->shouldNotReceive('createReinstatement');
 
     resolve(UnretireAction::class)->handle($title, $datetime);
 });

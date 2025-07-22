@@ -3,17 +3,15 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Enums\Shared\TitleStatus;
-use App\Enums\Shared\StableStatus;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Injurable;
+use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use Illuminate\Support\Carbon;
 
 /**
  * Custom expectation functions for status and lifecycle testing.
- * 
+ *
  * These functions provide reusable assertions for common status
  * and state verification patterns in integration tests.
  */
@@ -63,16 +61,16 @@ function expectToBeUnavailable($entity): void
 function expectValidEmploymentLifecycle(Employable $entity): void
 {
     $entity = $entity->fresh();
-    
+
     // Verify employment record exists if employed
     if ($entity->isEmployed()) {
         expect($entity->currentEmployment)->not->toBeNull();
         expect($entity->currentEmployment->started_at)->not->toBeNull();
         expect($entity->currentEmployment->ended_at)->toBeNull();
     }
-    
+
     // Verify no current employment if not employed
-    if (!$entity->isEmployed() && !$entity->hasFutureEmployment()) {
+    if (! $entity->isEmployed() && ! $entity->hasFutureEmployment()) {
         expect($entity->currentEmployment)->toBeNull();
     }
 }
@@ -83,7 +81,7 @@ function expectValidEmploymentLifecycle(Employable $entity): void
 function expectValidRetirementState(Retirable $entity): void
 {
     $entity = $entity->fresh();
-    
+
     if ($entity->isRetired()) {
         expect($entity->currentRetirement)->not->toBeNull();
         expect($entity->currentRetirement->started_at)->not->toBeNull();
@@ -99,7 +97,7 @@ function expectValidRetirementState(Retirable $entity): void
 function expectValidInjuryState(Injurable $entity): void
 {
     $entity = $entity->fresh();
-    
+
     if ($entity->isInjured()) {
         expect($entity->currentInjury)->not->toBeNull();
         expect($entity->currentInjury->started_at)->not->toBeNull();
@@ -115,7 +113,7 @@ function expectValidInjuryState(Injurable $entity): void
 function expectValidSuspensionState(Suspendable $entity): void
 {
     $entity = $entity->fresh();
-    
+
     if ($entity->isSuspended()) {
         expect($entity->currentSuspension)->not->toBeNull();
         expect($entity->currentSuspension->started_at)->not->toBeNull();
@@ -131,15 +129,15 @@ function expectValidSuspensionState(Suspendable $entity): void
 function expectValidEntityState($entity): void
 {
     expectValidEmploymentLifecycle($entity);
-    
+
     if ($entity instanceof Retirable) {
         expectValidRetirementState($entity);
     }
-    
+
     if ($entity instanceof Injurable) {
         expectValidInjuryState($entity);
     }
-    
+
     if ($entity instanceof Suspendable) {
         expectValidSuspensionState($entity);
     }
@@ -152,7 +150,7 @@ function expectValidChampionshipState($champion, $title): void
 {
     $champion = $champion->fresh();
     $title = $title->fresh();
-    
+
     if ($champion->currentChampionships()->where('title_id', $title->id)->exists()) {
         expect($title->currentChampionship)->not->toBeNull();
         expect($title->currentChampionship->champion->id)->toBe($champion->id);
@@ -171,16 +169,16 @@ function expectTransactionIntegrity(callable $action, $entity): void
         'injury_count' => $entity instanceof Injurable ? $entity->injuries()->count() : 0,
         'suspension_count' => $entity instanceof Suspendable ? $entity->suspensions()->count() : 0,
     ];
-    
+
     $action();
-    
+
     $finalState = [
         'employment_count' => $entity->fresh()->employments()->count(),
         'retirement_count' => $entity instanceof Retirable ? $entity->fresh()->retirements()->count() : 0,
         'injury_count' => $entity instanceof Injurable ? $entity->fresh()->injuries()->count() : 0,
         'suspension_count' => $entity instanceof Suspendable ? $entity->fresh()->suspensions()->count() : 0,
     ];
-    
+
     // Verify no orphaned records (counts only increase, never decrease unexpectedly)
     expect($finalState['employment_count'])->toBeGreaterThanOrEqual($initialState['employment_count']);
     expect($finalState['retirement_count'])->toBeGreaterThanOrEqual($initialState['retirement_count']);
@@ -194,7 +192,7 @@ function expectTransactionIntegrity(callable $action, $entity): void
 function expectValidFutureEmployment(Employable $entity): void
 {
     $entity = $entity->fresh();
-    
+
     if ($entity->hasFutureEmployment()) {
         expect($entity->futureEmployment)->not->toBeNull();
         expect($entity->futureEmployment->started_at)->toBeAfter(now());
@@ -209,7 +207,7 @@ function expectValidFutureEmployment(Employable $entity): void
 function expectStatusPriorityRules(Employable $entity): void
 {
     $entity = $entity->fresh();
-    
+
     // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
     if ($entity instanceof Retirable && $entity->isRetired()) {
         expect($entity->status)->toBe(EmploymentStatus::Retired);
@@ -254,12 +252,12 @@ function expectRelationshipCounts($entity, array $expectedCounts): void
 function expectManagerRelationship($wrestler, $manager, array $expectedPivotData = []): void
 {
     expect($wrestler->managers()->count())->toBeGreaterThan(0);
-    
+
     $relationship = $wrestler->managers()->where('manager_id', $manager->id)->first();
     expect($relationship)->not->toBeNull();
     expect($relationship->pivot->wrestler_id)->toBe($wrestler->id);
     expect($relationship->pivot->manager_id)->toBe($manager->id);
-    
+
     foreach ($expectedPivotData as $field => $expectedValue) {
         if ($expectedValue instanceof Carbon) {
             expect($relationship->pivot->{$field}->timestamp)->toBe($expectedValue->timestamp);
@@ -282,15 +280,15 @@ function expectManagerRelationship($wrestler, $manager, array $expectedPivotData
 function expectTagTeamMembership($wrestler, $tagTeam, array $expectedPivotData = []): void
 {
     expect($wrestler->tagTeams()->count())->toBeGreaterThan(0);
-    
+
     $relationship = $wrestler->tagTeams()->where('tag_team_id', $tagTeam->id)->first();
     expect($relationship)->not->toBeNull();
     expect($relationship->pivot->wrestler_id)->toBe($wrestler->id);
     expect($relationship->pivot->tag_team_id)->toBe($tagTeam->id);
-    
+
     foreach ($expectedPivotData as $field => $expectedValue) {
         $actualValue = $relationship->pivot->{$field};
-        
+
         if ($expectedValue === null) {
             expect($actualValue)->toBeNull();
         } elseif ($expectedValue instanceof Carbon) {
@@ -316,7 +314,7 @@ function expectCurrentRelationshipsActive($wrestler): void
     foreach ($currentManagers as $manager) {
         expect($manager->pivot->fired_at)->toBeNull();
     }
-    
+
     if (method_exists($wrestler, 'currentTagTeam')) {
         $currentTagTeam = $wrestler->currentTagTeam;
         if ($currentTagTeam) {
@@ -334,7 +332,7 @@ function expectPreviousRelationshipsEnded($wrestler): void
     foreach ($previousManagers as $manager) {
         expect($manager->pivot->fired_at)->not->toBeNull();
     }
-    
+
     if (method_exists($wrestler, 'previousTagTeams')) {
         $previousTagTeams = $wrestler->previousTagTeams()->get();
         foreach ($previousTagTeams as $tagTeam) {
@@ -356,7 +354,7 @@ function expectValidRelationshipDates($wrestler): void
             expect($pivot->hired_at->lessThan($pivot->fired_at))->toBeTrue();
         }
     }
-    
+
     // Check tag team relationships
     if (method_exists($wrestler, 'tagTeams')) {
         $tagTeams = $wrestler->tagTeams()->get();
@@ -376,7 +374,7 @@ function expectNoOverlappingRelationships($wrestler): void
 {
     // Multiple current managers are allowed in this system
     expect($wrestler->currentManagers()->count())->toBeGreaterThanOrEqual(0);
-    
+
     // Check for multiple current tag teams (should not exist per business rules)
     if (method_exists($wrestler, 'isAMemberOfCurrentTagTeam')) {
         $currentMemberships = $wrestler->tagTeams()->wherePivotNull('left_at')->count();
@@ -392,19 +390,19 @@ function expectProperRelationshipOrdering($wrestler): void
     // Managers should be ordered by hired_at
     $managers = $wrestler->managers()->orderBy('hired_at', 'asc')->get();
     $previousHiredDate = null;
-    
+
     foreach ($managers as $manager) {
         if ($previousHiredDate) {
             expect($manager->pivot->hired_at->greaterThanOrEqualTo($previousHiredDate))->toBeTrue();
         }
         $previousHiredDate = $manager->pivot->hired_at;
     }
-    
+
     // Tag teams should be ordered by joined_at
     if (method_exists($wrestler, 'tagTeams')) {
         $tagTeams = $wrestler->tagTeams()->orderBy('joined_at', 'asc')->get();
         $previousJoinedDate = null;
-        
+
         foreach ($tagTeams as $tagTeam) {
             if ($previousJoinedDate) {
                 expect($tagTeam->pivot->joined_at->greaterThanOrEqualTo($previousJoinedDate))->toBeTrue();

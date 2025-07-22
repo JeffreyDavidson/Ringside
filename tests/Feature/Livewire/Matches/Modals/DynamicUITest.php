@@ -99,6 +99,6 @@ describe('Dynamic Match Type UI', function () {
 
         // Verify competitors were reinitialized for tag team (2 sides)
         $component->assertSet('form.competitors.0', ['wrestlers' => [], 'tag_teams' => []])
-                  ->assertSet('form.competitors.1', ['wrestlers' => [], 'tag_teams' => []]);
+            ->assertSet('form.competitors.1', ['wrestlers' => [], 'tag_teams' => []]);
     });
 });

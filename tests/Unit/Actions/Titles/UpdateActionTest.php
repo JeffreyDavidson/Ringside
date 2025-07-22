@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\UpdateAction;
 use App\Data\Titles\TitleData;
+use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 
@@ -12,7 +13,7 @@ beforeEach(function () {
 });
 
 test('it updates a title', function () {
-    $data = new TitleData('New Example Title', null);
+    $data = new TitleData('New Example Title', TitleType::Singles, null);
     $title = Title::factory()->create();
 
     $this->titleRepository
@@ -29,7 +30,7 @@ test('it updates a title', function () {
 
 test('it activates an unactivated title if activation date is filled in request', function () {
     $datetime = now();
-    $data = new TitleData('New Example Title', $datetime);
+    $data = new TitleData('New Example Title', TitleType::Singles, $datetime);
     $title = Title::factory()->unactivated()->create();
 
     $this->titleRepository
@@ -39,8 +40,8 @@ test('it activates an unactivated title if activation date is filled in request'
         ->andReturns($title);
 
     $this->titleRepository
-        ->shouldReceive('activate')
-        ->with($title, $data->activation_date)
+        ->shouldReceive('createDebut')
+        ->with($title, $data->debut_date)
         ->once()
         ->andReturn($title);
 
@@ -49,7 +50,7 @@ test('it activates an unactivated title if activation date is filled in request'
 
 test('it updates a title with a future activated title activation date if activation date is filled in request', function () {
     $datetime = now()->addDays(2);
-    $data = new TitleData('New Example Title', $datetime);
+    $data = new TitleData('New Example Title', TitleType::Singles, $datetime);
     $title = Title::factory()->withFutureActivation()->create();
 
     $this->titleRepository
@@ -59,8 +60,8 @@ test('it updates a title with a future activated title activation date if activa
         ->andReturns($title);
 
     $this->titleRepository
-        ->shouldReceive('activate')
-        ->with($title, $data->activation_date)
+        ->shouldReceive('createDebut')
+        ->with($title, $data->debut_date)
         ->once()
         ->andReturn($title);
 

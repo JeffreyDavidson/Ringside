@@ -11,6 +11,7 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Event>
@@ -18,7 +19,6 @@ use Illuminate\Support\Str;
 class FormModal extends BaseFormModal
 {
     use PresentsVenuesList;
-
 
     protected function getFormClass(): string
     {
@@ -71,7 +71,7 @@ class FormModal extends BaseFormModal
         parent::openModal($modelId);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.events.modals.form-modal');
     }

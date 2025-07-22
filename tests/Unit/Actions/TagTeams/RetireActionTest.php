@@ -38,7 +38,7 @@ test('it retires a released tag team at a specific datetime', function () {
     $tagTeam = TagTeam::factory()->released()->create();
     $datetime = now()->addDays(2);
 
-    // UnifiedRetireAction handles all retirement logic internally  
+    // UnifiedRetireAction handles all retirement logic internally
     resolve(RetireAction::class)->handle($tagTeam, $datetime);
 });
 

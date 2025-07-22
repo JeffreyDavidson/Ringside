@@ -17,6 +17,8 @@ use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
+use Log;
 
 /**
  * Livewire modal component for wrestling match management within events.
@@ -250,20 +252,20 @@ class FormModal extends BaseFormModal
     /**
      * Component mount lifecycle - properly initialize eventId before form creation.
      *
-     * @param mixed $modelId Optional model ID for editing (Livewire standard)
+     * @param  mixed  $modelId  Optional model ID for editing (Livewire standard)
      */
     public function mount(mixed $modelId = null): void
     {
         parent::mount($modelId);
-        
+
         // Set eventId on form - this should always happen since eventId is required context
         if ($this->eventId > 0 && $this->form) {
             $this->form->eventId = $this->eventId;
         } elseif ($this->form) {
             // Log warning if eventId is not properly set (development aid)
-            \Log::warning('Matches FormModal: eventId not properly initialized', [
+            Log::warning('Matches FormModal: eventId not properly initialized', [
                 'eventId' => $this->eventId,
-                'component' => static::class
+                'component' => static::class,
             ]);
         }
     }
@@ -287,6 +289,7 @@ class FormModal extends BaseFormModal
         if (isset($this->model)) {
             return 'Edit Match';
         }
+
         return 'Create Match';
     }
 
@@ -294,9 +297,9 @@ class FormModal extends BaseFormModal
     {
         // Store whether we're creating or updating before the form submission
         $isCreating = $this->form->isCreating();
-        
+
         $result = parent::submitForm();
-        
+
         if ($result) {
             // Dispatch the appropriate event based on whether we created or updated
             if ($isCreating) {
@@ -304,11 +307,11 @@ class FormModal extends BaseFormModal
             } else {
                 $this->dispatch('matchUpdated');
             }
-            
+
             // Reset the form after successful submission
             $this->form->reset();
         }
-        
+
         return $result;
     }
 
@@ -322,13 +325,13 @@ class FormModal extends BaseFormModal
      */
     public function updatedFormMatchTypeId($value): void
     {
-        if (!$value) {
+        if (! $value) {
             return;
         }
 
         // Clear existing competitor data when match type changes
         $this->form->competitors = [];
-        
+
         // Initialize competitor structure based on match type
         $this->initializeCompetitorStructure($value);
     }
@@ -338,7 +341,7 @@ class FormModal extends BaseFormModal
      */
     public function getSelectedMatchType(): ?MatchType
     {
-        if (!$this->form->matchTypeId) {
+        if (! $this->form->matchTypeId) {
             return null;
         }
 
@@ -351,6 +354,7 @@ class FormModal extends BaseFormModal
     public function getMatchTypeAllowsWrestlersProperty(): bool
     {
         $matchType = $this->getSelectedMatchType();
+
         return $matchType ? $matchType->allowsWrestlers() : true;
     }
 
@@ -360,6 +364,7 @@ class FormModal extends BaseFormModal
     public function getMatchTypeAllowsTagTeamsProperty(): bool
     {
         $matchType = $this->getSelectedMatchType();
+
         return $matchType ? $matchType->allowsTagTeams() : false;
     }
 
@@ -369,6 +374,7 @@ class FormModal extends BaseFormModal
     public function getNumberOfSidesProperty(): int
     {
         $matchType = $this->getSelectedMatchType();
+
         return $matchType ? $matchType->getMinimumCompetitors() : 2;
     }
 
@@ -378,7 +384,8 @@ class FormModal extends BaseFormModal
     public function getMatchTypeNameProperty(): string
     {
         $matchType = $this->getSelectedMatchType();
-        return $matchType ? strtolower($matchType->name) : '';
+
+        return $matchType ? mb_strtolower($matchType->name) : '';
     }
 
     /**
@@ -387,15 +394,15 @@ class FormModal extends BaseFormModal
     private function initializeCompetitorStructure(int $matchTypeId): void
     {
         $matchType = MatchType::find($matchTypeId);
-        
-        if (!$matchType) {
+
+        if (! $matchType) {
             return;
         }
 
         $numberOfSides = $matchType->getMinimumCompetitors();
         $competitors = [];
 
-        $matchTypeName = strtolower($matchType->name);
+        $matchTypeName = mb_strtolower($matchType->name);
 
         // Initialize competitor structure based on match type specifics
         if (str_contains($matchTypeName, 'battle') || str_contains($matchTypeName, 'rumble') || str_contains($matchTypeName, 'royal')) {
@@ -417,7 +424,7 @@ class FormModal extends BaseFormModal
         $this->form->competitors = $competitors;
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.matches.modals.form-modal');
     }

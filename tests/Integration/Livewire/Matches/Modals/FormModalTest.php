@@ -115,7 +115,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
-                1 => ['wrestlers' => [$wrestler2->id]]
+                1 => ['wrestlers' => [$wrestler2->id]],
             ])
             ->set('form.referees', [$referee->id])
             ->set('form.preview', 'Epic wrestling match preview')
@@ -155,7 +155,6 @@ describe('FormModal Create Operations', function () {
         $component->assertHasErrors(['form.competitors']);
     });
 
-
     it('validates match type exists', function () {
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
@@ -165,7 +164,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.matchTypeId', 999)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
-                1 => ['wrestlers' => [$wrestler2->id]]
+                1 => ['wrestlers' => [$wrestler2->id]],
             ])
             ->call('save');
 
@@ -180,7 +179,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [999]],
-                1 => ['wrestlers' => [998]]
+                1 => ['wrestlers' => [998]],
             ])
             ->call('save');
 
@@ -197,7 +196,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
-                1 => ['wrestlers' => [$wrestler2->id]]
+                1 => ['wrestlers' => [$wrestler2->id]],
             ])
             ->set('form.referees', [999])
             ->call('save');
@@ -218,7 +217,7 @@ describe('FormModal Edit Operations', function () {
             ->set('form.matchTypeId', $newMatchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
-                1 => ['wrestlers' => [$wrestler2->id]]
+                1 => ['wrestlers' => [$wrestler2->id]],
             ])
             ->set('form.preview', 'Updated match preview')
             ->call('save');
@@ -261,7 +260,7 @@ describe('FormModal Title Championship Integration', function () {
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
-                1 => ['wrestlers' => [$wrestler2->id]]
+                1 => ['wrestlers' => [$wrestler2->id]],
             ])
             ->set('form.titles', [$title->id])
             ->call('save');
@@ -293,7 +292,7 @@ describe('FormModal Title Championship Integration', function () {
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
-                1 => ['wrestlers' => [$wrestler2->id]]
+                1 => ['wrestlers' => [$wrestler2->id]],
             ])
             ->set('form.titles', [$inactiveTitle->id])
             ->call('save');
@@ -313,7 +312,7 @@ describe('FormModal Tag Team Integration', function () {
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['tag_teams' => [$tagTeam1->id]],
-                1 => ['tag_teams' => [$tagTeam2->id]]
+                1 => ['tag_teams' => [$tagTeam2->id]],
             ])
             ->call('save');
 
@@ -357,7 +356,7 @@ describe('FormModal State Management', function () {
             ->set('form.matchTypeId', $matchType->id)
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
-                1 => ['wrestlers' => [$wrestler2->id]]
+                1 => ['wrestlers' => [$wrestler2->id]],
             ])
             ->call('save');
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Livewire\Concerns\ShowTableTrait;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Tests\Integration\Livewire\Base\Tables\BasePreviousTitleChampionshipsTableTest;
 
 /**
  * Unit tests for BasePreviousTitleChampionshipsTable abstract class structure.
@@ -17,7 +18,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
  * - Abstract class requirements
  *
  * @see BasePreviousTitleChampionshipsTable
- * @see Tests\Integration\Livewire\Base\Tables\BasePreviousTitleChampionshipsTableTest
+ * @see BasePreviousTitleChampionshipsTableTest
  */
 describe('BasePreviousTitleChampionshipsTable Unit Tests', function () {
     describe('class structure and inheritance', function () {

@@ -85,7 +85,7 @@ class CreateEditForm extends BaseForm
      *
      * @var Carbon|string|null Manager employment start date
      */
-    public string|null $employment_date = null;
+    public ?string $employment_date = null;
 
     /**
      * Load additional data when editing existing manager records.
@@ -175,14 +175,14 @@ class CreateEditForm extends BaseForm
     public function store(): bool
     {
         $this->validate();
-        
+
         $wasCreating = $this->isCreating();
         $result = $this->storeModel();
-        
+
         if ($result && $wasCreating) {
             $this->handlePostCreationTasks();
         }
-        
+
         return $result;
     }
 

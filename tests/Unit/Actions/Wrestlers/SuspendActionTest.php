@@ -7,6 +7,7 @@ use App\Exceptions\Status\CannotBeSuspendedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
+
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {

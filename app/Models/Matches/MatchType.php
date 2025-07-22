@@ -40,13 +40,13 @@ class MatchType extends Model
         parent::boot();
 
         static::creating(function ($matchType) {
-            if (empty($matchType->slug) && !empty($matchType->name)) {
+            if (empty($matchType->slug) && ! empty($matchType->name)) {
                 $matchType->slug = Str::slug($matchType->name);
             }
         });
 
         static::updating(function ($matchType) {
-            if ($matchType->isDirty('name') && !$matchType->isDirty('slug')) {
+            if ($matchType->isDirty('name') && ! $matchType->isDirty('slug')) {
                 $matchType->slug = Str::slug($matchType->name);
             }
         });

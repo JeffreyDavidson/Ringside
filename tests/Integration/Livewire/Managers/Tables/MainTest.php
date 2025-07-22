@@ -21,7 +21,7 @@ use Livewire\Livewire;
  * @group integration
  * @group livewire
  * @group tables
- * 
+ *
  * INTEGRATION TEST SCOPE:
  * - Component rendering with complex data relationships
  * - Filtering and search functionality integration

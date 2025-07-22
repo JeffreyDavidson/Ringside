@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Rules\Shared\CanChangeDebutDate;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for CanChangeDebutDate validation rule.
@@ -383,7 +385,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             $model->shouldReceive('isCurrentlyActive')->andReturn(true);
             $model->shouldReceive('wasActiveOn')
                 ->with(Mockery::on(function ($date) use ($targetDate) {
-                    return $date instanceof Illuminate\Support\Carbon &&
+                    return $date instanceof Carbon &&
                            $date->equalTo($targetDate);
                 }))
                 ->andReturn(true);
@@ -408,7 +410,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             $rule = new CanChangeDebutDate(null);
 
             // Assert
-            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(ValidationRule::class);
         });
 
         test('validate method signature matches interface', function () {

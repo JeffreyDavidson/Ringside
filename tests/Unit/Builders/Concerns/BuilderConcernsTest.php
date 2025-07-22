@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
+use App\Builders\Roster\SingleRosterMemberBuilder;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Builders\Roster\WrestlerBuilder;
+use App\Builders\Titles\TitleBuilder;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,8 +34,8 @@ describe('Builder Concerns Unit Tests', function () {
         test('trait is used by builders or base classes', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
             // SingleRosterMemberBuilder uses the trait, and other builders inherit from it
-            expect(App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasAvailabilityScopes::class);
-            expect(App\Builders\Roster\TagTeamBuilder::class)->usesTrait(HasAvailabilityScopes::class);
+            expect(SingleRosterMemberBuilder::class)->usesTrait(HasAvailabilityScopes::class);
+            expect(TagTeamBuilder::class)->usesTrait(HasAvailabilityScopes::class);
 
             // Verify that methods are available on concrete builders
             $builder = Wrestler::query();
@@ -181,9 +183,9 @@ describe('Builder Concerns Unit Tests', function () {
     describe('HasRetirementScopes trait functionality', function () {
         test('trait is used by builders or base classes', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
-            expect(App\Builders\Roster\SingleRosterMemberBuilder::class)->usesTrait(HasRetirementScopes::class);
-            expect(App\Builders\Roster\TagTeamBuilder::class)->usesTrait(HasRetirementScopes::class);
-            expect(App\Builders\Titles\TitleBuilder::class)->usesTrait(HasRetirementScopes::class);
+            expect(SingleRosterMemberBuilder::class)->usesTrait(HasRetirementScopes::class);
+            expect(TagTeamBuilder::class)->usesTrait(HasRetirementScopes::class);
+            expect(TitleBuilder::class)->usesTrait(HasRetirementScopes::class);
 
             // Verify that methods are available on concrete builders
             $builder = Wrestler::query();

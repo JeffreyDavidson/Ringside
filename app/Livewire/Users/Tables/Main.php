@@ -8,7 +8,6 @@ use App\Builders\Users\UserBuilder;
 use App\Enums\Users\Role;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\Model;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class Main extends BaseTable

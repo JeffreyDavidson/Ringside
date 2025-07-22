@@ -101,6 +101,7 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
         OfficiatesMatches::matches insteadof HasMatches;
         OfficiatesMatches::previousMatches insteadof HasMatches;
     }
+
     /** @use IsEmployable<RefereeEmployment, static> */
     use IsEmployable;
 

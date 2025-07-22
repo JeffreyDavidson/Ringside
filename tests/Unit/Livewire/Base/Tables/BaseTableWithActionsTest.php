@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Base\Tables\BaseTableWithActions;
 use App\Livewire\Concerns\Columns\HasActionColumn;
+use Tests\Integration\Livewire\Base\Tables\BaseTableWithActionsTest;
 
 /**
  * Unit tests for BaseTableWithActions abstract class structure.
@@ -17,7 +18,7 @@ use App\Livewire\Concerns\Columns\HasActionColumn;
  * - Class constants and configuration
  *
  * @see BaseTableWithActions
- * @see Tests\Integration\Livewire\Base\Tables\BaseTableWithActionsTest
+ * @see BaseTableWithActionsTest
  */
 describe('BaseTableWithActions Unit Tests', function () {
     describe('class structure and inheritance', function () {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Roster\WrestlerBuilder;
 use App\Models\Wrestlers\Wrestler;
 
 /**
@@ -17,7 +18,7 @@ use App\Models\Wrestlers\Wrestler;
  * These tests verify that the WrestlerQueryBuilder correctly integrates
  * with the data layer and returns proper business outcomes.
  *
- * @see App\Builders\Roster\WrestlerBuilder
+ * @see WrestlerBuilder
  */
 describe('WrestlerQueryBuilder Integration Tests', function () {
     beforeEach(function () {

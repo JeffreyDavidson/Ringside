@@ -8,6 +8,7 @@ use App\Models\Wrestlers\Wrestler;
 use App\Repositories\StableRepository;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
+
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
@@ -15,21 +16,21 @@ beforeEach(function () {
 
     $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
     $this->stableRepository = $this->mock(StableRepository::class);
-    
+
     // Add default expectations for complex methods that are always called
     $this->wrestlerRepository
         ->shouldReceive('removeFromCurrentTagTeam')
         ->byDefault();
-    
+
     // Add default expectation for stable removal calls
     $this->stableRepository
         ->shouldReceive('removeWrestler')
         ->byDefault();
-    
+
     $this->wrestlerRepository
         ->shouldReceive('removeFromCurrentStable')
         ->byDefault();
-    
+
     $this->wrestlerRepository
         ->shouldReceive('removeFromCurrentManagers')
         ->byDefault();

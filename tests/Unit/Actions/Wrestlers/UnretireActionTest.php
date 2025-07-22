@@ -7,6 +7,7 @@ use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
+
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
@@ -30,7 +31,6 @@ test('it unretires a retired wrestler at the current datetime by default', funct
         })
         ->andReturn($wrestler);
 
-
     resolve(UnretireAction::class)->handle($wrestler);
 });
 
@@ -43,7 +43,6 @@ test('it unretires a retired wrestler at a specific datetime', function () {
         ->once()
         ->with($wrestler, $datetime)
         ->andReturn($wrestler);
-
 
     resolve(UnretireAction::class)->handle($wrestler, $datetime);
 });

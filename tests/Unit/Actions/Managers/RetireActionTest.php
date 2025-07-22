@@ -3,12 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\RetireAction;
-use App\Events\Managers\ManagerRetired;
 use App\Exceptions\CannotBeRetiredException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
 
 use function Spatie\PestPluginTestTime\testTime;
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\BaseTableTrait;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Tests\Integration\Livewire\Base\Tables\BaseTableTest;
 
 /**
  * Unit tests for BaseTable abstract class structure.
@@ -17,7 +18,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
  * - Class constants and configuration
  *
  * @see BaseTable
- * @see Tests\Integration\Livewire\Base\Tables\BaseTableTest
+ * @see BaseTableTest
  */
 describe('BaseTable Unit Tests', function () {
     describe('class structure and inheritance', function () {

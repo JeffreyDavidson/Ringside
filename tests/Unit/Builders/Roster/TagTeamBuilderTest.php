@@ -120,6 +120,7 @@ test('unemployed tag teams can be retrieved', function () {
     $unemployedTagTeams = TagTeam::unemployed()->get();
 
     expect($unemployedTagTeams)
-        ->toHaveCount(1)
-        ->collectionHas($unemployedTagTeam);
+        ->toHaveCount(2)
+        ->collectionHas($unemployedTagTeam)
+        ->collectionHas($unbookableTagTeam);
 });

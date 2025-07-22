@@ -8,13 +8,13 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, User>
  */
 class FormModal extends BaseFormModal
 {
-
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
@@ -33,12 +33,12 @@ class FormModal extends BaseFormModal
     protected function getDummyDataFields(): array
     {
         return [
-            'first_name' => fn() => fake()->firstName(),
-            'last_name' => fn() => fake()->lastName(),
-            'email' => fn() => fake()->unique()->safeEmail(),
-            'password' => fn() => 'password123',
-            'password_confirmation' => fn() => 'password123',
-            'role' => fn() => 'basic',
+            'first_name' => fn () => fake()->firstName(),
+            'last_name' => fn () => fake()->lastName(),
+            'email' => fn () => fake()->unique()->safeEmail(),
+            'password' => fn () => 'password123',
+            'password_confirmation' => fn () => 'password123',
+            'role' => fn () => 'basic',
         ];
     }
 
@@ -69,9 +69,9 @@ class FormModal extends BaseFormModal
     {
         // Store whether we're creating or updating before the form submission
         $isCreating = $this->form->isCreating();
-        
+
         $result = parent::submitForm();
-        
+
         if ($result) {
             // Dispatch the appropriate event based on whether we created or updated
             if ($isCreating) {
@@ -79,11 +79,11 @@ class FormModal extends BaseFormModal
             } else {
                 $this->dispatch('userUpdated');
             }
-            
+
             // Reset the form after successful submission
             $this->form->reset();
         }
-        
+
         return $result;
     }
 
@@ -94,7 +94,7 @@ class FormModal extends BaseFormModal
         $this->form->reset();
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.users.modals.form-modal');
     }

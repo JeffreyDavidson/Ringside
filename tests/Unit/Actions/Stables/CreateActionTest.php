@@ -23,7 +23,6 @@ test('it creates a stable', function () {
         null,
         new Collection(),
         new Collection(),
-        new Collection(),
     );
 
     $this->stableRepository
@@ -32,8 +31,18 @@ test('it creates a stable', function () {
         ->with($data)
         ->andReturns($stable = new Stable());
 
-    AddMembersAction::shouldRun()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+    $this->stableRepository
+        ->shouldReceive('addWrestlers')
+        ->once()
+        ->with($stable, $data->wrestlers, \Mockery::type('Illuminate\Support\Carbon'));
+
+    $this->stableRepository
+        ->shouldReceive('addTagTeams')
+        ->once()
+        ->with($stable, $data->tagTeams, \Mockery::type('Illuminate\Support\Carbon'));
+
+    $this->stableRepository
+        ->shouldNotReceive('createActivity');
 
     resolve(CreateAction::class)->handle($data);
 });

@@ -2,15 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Actions\Managers\RetireAction as ManagerRetireAction;
 use App\Actions\Stables\RetireAction;
-use App\Actions\TagTeams\RetireAction as TagTeamRetireAction;
-use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
 use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
-use App\Repositories\StableRepository;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -20,7 +14,7 @@ beforeEach(function () {
 
 test('it retires an active stable at the current datetime by default', function () {
     $stable = Stable::factory()->active()->create();
-    
+
     // Verify stable is active before retirement
     expect($stable->isCurrentlyActive())->toBeTrue();
     expect($stable->isRetired())->toBeFalse();
@@ -86,15 +80,15 @@ test('it retires an inactive stable at a specific datetime', function () {
 
 test('it retires the current tag teams and current wrestlers of a stable', function () {
     $stable = Stable::factory()->active()->create();
-    
+
     // Verify stable has current members before retirement
     expect($stable->currentWrestlers()->count())->toBeGreaterThan(0);
     expect($stable->currentTagTeams()->count())->toBeGreaterThan(0);
-    
+
     // Get the current members before retirement
     $currentWrestlers = $stable->currentWrestlers;
     $currentTagTeams = $stable->currentTagTeams;
-    
+
     // Verify they are not retired before action
     foreach ($currentWrestlers as $wrestler) {
         expect($wrestler->isRetired())->toBeFalse();
@@ -109,7 +103,7 @@ test('it retires the current tag teams and current wrestlers of a stable', funct
     // Verify stable is retired
     $stable->refresh();
     expect($stable->isRetired())->toBeTrue();
-    
+
     // Verify current members were retired
     foreach ($currentWrestlers as $wrestler) {
         $wrestler->refresh();

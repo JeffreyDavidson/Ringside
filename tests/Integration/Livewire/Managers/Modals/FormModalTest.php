@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Managers\Manager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -346,7 +345,7 @@ describe('Managers FormModal Tests', function () {
             // Note: This behavior depends on the form implementation
             // The test documents current expected behavior
             $manager = Manager::where('first_name', 'Trimmed')->first();
-            if (!$manager) {
+            if (! $manager) {
                 // If trimming is not implemented, look for the untrimmed version
                 $manager = Manager::where('first_name', '  Trimmed  ')->first();
                 expect($manager)->not()->toBeNull();

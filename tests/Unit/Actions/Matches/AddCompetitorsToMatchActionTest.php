@@ -29,7 +29,7 @@ test('it adds wrestler competitors to a match', function () {
 
     $addWrestlersToMatchAction = $this->mock(AddWrestlersToMatchAction::class);
     $addTagTeamsToMatchAction = $this->mock(AddTagTeamsToMatchAction::class);
-    
+
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
@@ -63,7 +63,7 @@ test('it adds tag team competitors to a match', function () {
 
     $addWrestlersToMatchAction = $this->mock(AddWrestlersToMatchAction::class);
     $addTagTeamsToMatchAction = $this->mock(AddTagTeamsToMatchAction::class);
-    
+
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 

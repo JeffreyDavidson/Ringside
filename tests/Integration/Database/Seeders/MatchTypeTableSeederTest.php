@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Matches\MatchType;
+use Database\Seeders\MatchTypesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -21,7 +22,7 @@ use function Pest\Laravel\assertDatabaseHas;
  * the database with all required match types needed for the
  * wrestling application business logic.
  *
- * @see Database\Seeders\MatchTypesTableSeeder
+ * @see MatchTypesTableSeeder
  */
 describe('MatchTypesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {

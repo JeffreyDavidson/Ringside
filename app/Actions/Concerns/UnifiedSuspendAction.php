@@ -9,6 +9,8 @@ use App\Models\Contracts\HasTagTeamWrestlers;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\ProvidesCurrentTagTeams;
 use App\Models\Contracts\ProvidesCurrentWrestlers;
+use App\Models\Managers\Manager;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -121,7 +123,7 @@ class UnifiedSuspendAction
             if ($entity instanceof Manageable) {
                 $managersToSuspend = $entity->currentManagers()
                     ->get()
-                    ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isEmployed() && ! $manager->isSuspended());
+                    ->filter(fn (Manager $manager) => $manager->isEmployed() && ! $manager->isSuspended());
 
                 foreach ($managersToSuspend as $manager) {
                     StatusTransitionPipeline::suspend($manager, $date)->execute();
@@ -144,7 +146,7 @@ class UnifiedSuspendAction
             if ($entity instanceof HasTagTeamWrestlers) {
                 $wrestlersToSuspend = $entity->currentWrestlers()
                     ->get()
-                    ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestler->isEmployed() && ! $wrestler->isSuspended());
+                    ->filter(fn (Wrestler $wrestler) => $wrestler->isEmployed() && ! $wrestler->isSuspended());
 
                 foreach ($wrestlersToSuspend as $wrestler) {
                     StatusTransitionPipeline::suspend($wrestler, $date)->execute();
@@ -155,7 +157,7 @@ class UnifiedSuspendAction
             if ($entity instanceof Manageable) {
                 $managersToSuspend = $entity->currentManagers()
                     ->get()
-                    ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isEmployed() && ! $manager->isSuspended());
+                    ->filter(fn (Manager $manager) => $manager->isEmployed() && ! $manager->isSuspended());
 
                 foreach ($managersToSuspend as $manager) {
                     StatusTransitionPipeline::suspend($manager, $date)->execute();

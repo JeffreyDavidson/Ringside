@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Actions\Stables\UpdateAction;
 // use App\Actions\Stables\UpdateMembersAction;
 use App\Data\Stables\StableData;
-use App\Exceptions\Status\CannotUpdateStableException;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;

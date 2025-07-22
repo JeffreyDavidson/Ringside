@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Concerns\BaseTableTrait;
 use App\Livewire\Concerns\Columns\HasActionColumn;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Tests\Integration\Livewire\Concerns\BaseTableTraitTest;
 
 /**
  * Unit tests for BaseTableTrait structure and configuration.
@@ -17,7 +18,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
  * - Array type annotations
  *
  * @see BaseTableTrait
- * @see Tests\Integration\Livewire\Concerns\BaseTableTraitTest
+ * @see BaseTableTraitTest
  */
 describe('BaseTableTrait Unit Tests', function () {
     describe('trait integration', function () {

@@ -112,9 +112,9 @@ describe('FormModal Create Operations', function () {
         $this->assertDatabaseHas('stables', [
             'name' => 'The New World Order',
         ]);
-        
+
         // Check activity period was created correctly
-        $stable = \App\Models\Stables\Stable::where('name', 'The New World Order')->first();
+        $stable = Stable::where('name', 'The New World Order')->first();
         expect($stable->firstActivityPeriod)->not()->toBeNull();
         expect($stable->firstActivityPeriod->started_at->toDateString())->toBe('2024-01-01');
     });
@@ -177,7 +177,7 @@ describe('FormModal Create Operations', function () {
         $this->assertDatabaseHas('stables', [
             'name' => 'Test Stable',
         ]);
-        
+
         // Check activity period was created correctly
         $stable = Stable::where('name', 'Test Stable')->first();
         expect($stable->firstActivityPeriod)->not()->toBeNull();
@@ -206,7 +206,7 @@ describe('FormModal Edit Operations', function () {
             'id' => $stable->id,
             'name' => 'Updated Stable',
         ]);
-        
+
         // Check activity period was updated
         expect($stable->fresh()->firstActivityPeriod->started_at->toDateString())->toBe('2024-01-02');
     });

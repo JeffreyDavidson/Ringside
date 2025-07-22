@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Contracts\Injurable;
 use App\Repositories\Concerns\ManagesInjury;
 use App\Repositories\Support\BaseRepository;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -47,8 +48,8 @@ describe('ManagesInjury Trait', function () {
                 ->with(['started_at' => $injuryDate->toDateTimeString()])
                 ->andReturn((object) ['id' => 1, 'started_at' => $injuryDate, 'ended_at' => null]);
 
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $model->shouldReceive('injuries')->andReturn($injuriesMock);
 
             // Act
@@ -68,8 +69,8 @@ describe('ManagesInjury Trait', function () {
                 ->with(['started_at' => $injuryDate->toDateTimeString()])
                 ->andReturn((object) ['started_at' => $injuryDate]);
 
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $model->shouldReceive('injuries')->andReturn($injuriesMock);
 
             // Act
@@ -89,8 +90,8 @@ describe('ManagesInjury Trait', function () {
                 ->with(['started_at' => $injuryDate->toDateTimeString()])
                 ->andReturn((object) ['started_at' => $injuryDate, 'ended_at' => null]);
 
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $model->shouldReceive('injuries')->andReturn($injuriesMock);
 
             // Act & Assert
@@ -113,8 +114,8 @@ describe('ManagesInjury Trait', function () {
                 ->once()
                 ->andReturn($currentInjury);
 
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $model->shouldReceive('currentInjury')->andReturn($currentInjuryQuery);
 
             // Act
@@ -132,8 +133,8 @@ describe('ManagesInjury Trait', function () {
                 ->once()
                 ->andReturn(null);
 
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $model->shouldReceive('currentInjury')->andReturn($currentInjuryQuery);
 
             // Act
@@ -156,8 +157,8 @@ describe('ManagesInjury Trait', function () {
                 ->once()
                 ->andReturn($currentInjury);
 
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $model->shouldReceive('currentInjury')->andReturn($currentInjuryQuery);
 
             // Act
@@ -179,14 +180,14 @@ describe('ManagesInjury Trait', function () {
             $injuryDate = Carbon::now();
 
             // Create two different mock models
-            /** @var App\Models\Contracts\Injurable $model1 */
-            $model1 = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model1 */
+            $model1 = Mockery::mock(Injurable::class);
             $injuries1 = Mockery::mock(HasMany::class);
             $injuries1->shouldReceive('create')->once()->andReturn((object) []);
             $model1->shouldReceive('injuries')->andReturn($injuries1);
 
-            /** @var App\Models\Contracts\Injurable $model2 */
-            $model2 = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model2 */
+            $model2 = Mockery::mock(Injurable::class);
             $injuries2 = Mockery::mock(HasMany::class);
             $injuries2->shouldReceive('create')->once()->andReturn((object) []);
             $model2->shouldReceive('injuries')->andReturn($injuries2);
@@ -207,8 +208,8 @@ describe('ManagesInjury Trait', function () {
             $currentInjuryQuery = Mockery::mock(HasOne::class);
             $currentInjuryQuery->shouldReceive('first')->andReturn(null);
 
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $model->shouldReceive('currentInjury')->andReturn($currentInjuryQuery);
 
             // Act & Assert - Should not throw exception
@@ -223,8 +224,8 @@ describe('ManagesInjury Trait', function () {
             };
 
             $injuryDate = Carbon::now();
-            /** @var App\Models\Contracts\Injurable $model */
-            $model = Mockery::mock(App\Models\Contracts\Injurable::class);
+            /** @var Injurable $model */
+            $model = Mockery::mock(Injurable::class);
             $injuries = Mockery::mock(HasMany::class);
             $injuries->shouldReceive('create')->twice()->andReturn((object) []);
             $model->shouldReceive('injuries')->andReturn($injuries);

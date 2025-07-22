@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Base\BaseModal;
 use LivewireUI\Modal\ModalComponent;
+use Tests\Integration\Livewire\Concerns\BaseModalTest;
 
 /**
  * Unit tests for BaseModal abstract class structure.
@@ -16,7 +17,7 @@ use LivewireUI\Modal\ModalComponent;
  * - Abstract class requirements
  *
  * @see BaseModal
- * @see Tests\Integration\Livewire\Concerns\BaseModalTest
+ * @see BaseModalTest
  */
 describe('BaseModal Unit Tests', function () {
     describe('class structure and inheritance', function () {

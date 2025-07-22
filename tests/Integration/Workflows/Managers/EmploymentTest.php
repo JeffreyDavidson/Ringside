@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
-use App\Actions\Managers\InjureAction;
 use App\Actions\Managers\ReleaseAction;
-use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
@@ -80,7 +78,7 @@ describe('Manager Employment Workflows', function () {
             // Execute multi-action workflow within transaction context
             EmployAction::run($manager, Carbon::now());
             $employed = $manager->fresh();
-            
+
             // Then suspend the manager
             SuspendAction::run($employed, Carbon::now());
             $suspended = $manager->fresh();

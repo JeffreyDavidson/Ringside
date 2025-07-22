@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Roster\ManagerBuilder;
 use App\Models\Managers\Manager;
 
 /**
@@ -17,7 +18,7 @@ use App\Models\Managers\Manager;
  * all query scopes for filtering managers by their various statuses.
  * Managers are individual roster members who can be injured.
  *
- * @see App\Builders\Roster\ManagerBuilder
+ * @see ManagerBuilder
  */
 describe('ManagerQueryBuilder Unit Tests', function () {
     beforeEach(function () {

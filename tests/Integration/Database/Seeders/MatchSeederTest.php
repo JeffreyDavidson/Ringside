@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Matches\EventMatch;
+use Database\Seeders\EventMatchSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +18,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the EventMatchSeeder correctly populates
  * the database with event match records for development and testing purposes.
  *
- * @see Database\Seeders\EventMatchSeeder
+ * @see EventMatchSeeder
  */
 describe('EventMatchSeeder Integration Tests', function () {
     describe('seeder execution', function () {

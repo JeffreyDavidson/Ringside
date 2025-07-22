@@ -34,6 +34,7 @@ use LivewireUI\Modal\ModalComponent;
  * @template TModelType of Model
  *
  * @author Your Name
+ *
  * @since 1.0.0
  * @see BaseForm For form integration requirements
  * @see BaseFormModal For form-specific modal implementation
@@ -65,7 +66,7 @@ abstract class BaseModal extends ModalComponent
      * is instantiated. It handles the initial setup including model loading,
      * form binding, and state preparation for both create and edit operations.
      *
-     * @param int|string|null $modelId The ID of the model to edit, or null for creation mode
+     * @param  int|string|null  $modelId  The ID of the model to edit, or null for creation mode
      */
     public function mount(int|string|null $modelId = null): void
     {
@@ -113,7 +114,7 @@ abstract class BaseModal extends ModalComponent
         if (! isset($this->modelForm)) {
             return; // Cannot clear if form is not initialized
         }
-        
+
         if (isset($this->model) && ! is_null($this->model)) {
             $this->modelForm->setModel($this->model);
         } else {

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Matches\Tables;
 
 use App\Livewire\Base\Tables\BaseTable;
-use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
@@ -60,11 +59,11 @@ class Main extends BaseTable
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
                     $winner = $row->result?->getWinner();
-                    
+
                     if ($winner) {
-                        return $winner->name . ' by ' . $row->result?->decision->name;
+                        return $winner->name.' by '.$row->result?->decision->name;
                     }
-                    
+
                     return 'N/A';
                 }),
         ];

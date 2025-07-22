@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -35,16 +36,16 @@ class SplitStableAction extends BaseStableAction
     ): Stable {
         // Validate that the original stable can be split
         if (method_exists($originalStable, 'isRetired') && $originalStable->isRetired()) {
-            throw new \Exception('Cannot split a retired stable');
+            throw new Exception('Cannot split a retired stable');
         }
-        
-        if (method_exists($originalStable, 'isCurrentlyActive') && !$originalStable->isCurrentlyActive()) {
-            throw new \Exception('Cannot split an inactive stable');
+
+        if (method_exists($originalStable, 'isCurrentlyActive') && ! $originalStable->isCurrentlyActive()) {
+            throw new Exception('Cannot split an inactive stable');
         }
-        
+
         // Validate that the new stable name is unique
         if (Stable::where('name', $newStableName)->exists()) {
-            throw new \Exception('A stable with this name already exists');
+            throw new Exception('A stable with this name already exists');
         }
 
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {

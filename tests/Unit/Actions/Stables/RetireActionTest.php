@@ -56,6 +56,10 @@ test('it retires an active stable at the current datetime by default', function 
         ->shouldReceive('removeTagTeams')
         ->once();
 
+    $this->stableRepository
+        ->shouldReceive('removeWrestler')
+        ->zeroOrMoreTimes();
+
     resolve(RetireAction::class)->handle($stable);
 });
 
@@ -82,6 +86,10 @@ test('it retires an active stable at a specific datetime', function () {
     $this->stableRepository
         ->shouldReceive('removeTagTeams')
         ->once();
+
+    $this->stableRepository
+        ->shouldReceive('removeWrestler')
+        ->zeroOrMoreTimes();
 
     resolve(RetireAction::class)->handle($stable, $datetime);
 });
@@ -112,6 +120,10 @@ test('it retires an inactive stable at the current datetime by default', functio
         ->shouldReceive('removeTagTeams')
         ->once();
 
+    $this->stableRepository
+        ->shouldReceive('removeWrestler')
+        ->zeroOrMoreTimes();
+
     resolve(RetireAction::class)->handle($stable);
 });
 
@@ -135,6 +147,10 @@ test('it retires an inactive stable at a specific datetime', function () {
     $this->stableRepository
         ->shouldReceive('removeTagTeams')
         ->once();
+
+    $this->stableRepository
+        ->shouldReceive('removeWrestler')
+        ->zeroOrMoreTimes();
 
     resolve(RetireAction::class)->handle($stable, $datetime);
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
+use Database\Seeders\UsersTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -23,7 +24,7 @@ use function Pest\Laravel\assertDatabaseHas;
  * the database with the required user accounts for development and
  * testing purposes.
  *
- * @see Database\Seeders\UsersTableSeeder
+ * @see UsersTableSeeder
  */
 describe('UsersTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {

@@ -26,7 +26,7 @@ test('it creates a title', function () {
         ->andReturns(new Title());
 
     $this->titleRepository
-        ->shouldNotReceive('createActivation');
+        ->shouldNotReceive('createDebut');
 
     resolve(CreateAction::class)->handle($data);
 });
@@ -43,7 +43,7 @@ test('it activates a title if activation date is filled in request', function ()
         ->andReturn($title);
 
     $this->titleRepository
-        ->shouldReceive('createActivation')
+        ->shouldReceive('createDebut')
         ->once()
         ->with($title, $data->debut_date);
 
