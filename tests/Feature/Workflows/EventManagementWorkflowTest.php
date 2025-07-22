@@ -109,13 +109,15 @@ describe('Venue Creation and Setup Workflow', function () {
         $component->set('form.state', 'CA');
         $component->set('form.zipcode', '90210');
 
+        // And: Capture the venue name before submission (form gets reset after)
+        $venueName = $component->get('form.name');
+
         // And: Can submit the dummy data successfully
         $component
             ->call('submitForm')
             ->assertHasNoErrors();
 
         // And: Venue is created with the dummy data
-        $venueName = $component->get('form.name');
         expect(Venue::where('name', $venueName)->exists())->toBeTrue();
     });
 });

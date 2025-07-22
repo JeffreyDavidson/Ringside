@@ -54,7 +54,7 @@ describe('PreviousManagers Query Building', function () {
         $builder = $component->instance()->builder();
 
         expect($builder->getModel())->toBeInstanceOf(WrestlerManager::class);
-        expect($builder->toSql())->toContain('where "wrestler_id" = ?');
+        expect($builder->toSql())->toContain('and "wrestler_id" = ?');
         expect($builder->toSql())->toContain('"fired_at" is not null');
         expect($builder->toSql())->toContain('order by "hired_at" desc');
     });
