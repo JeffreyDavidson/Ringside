@@ -18,5 +18,5 @@ test('it deletes a referee', function () {
         ->once()
         ->with($referee);
 
-    resolve(DeleteAction::class)->handle($data);
+    resolve(DeleteAction::class)->handle($referee);
 });

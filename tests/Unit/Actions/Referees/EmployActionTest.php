@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\EmployAction;
-use App\Exceptions\CannotBeEmployedException;
+use App\Exceptions\Status\CannotBeEmployedException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
@@ -27,7 +27,7 @@ test('it employs an employable referee at the current datetime by default', func
         ->shouldNotReceive('unretire');
 
     $this->refereeRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Referee $employableReferee, Carbon $employmentDate) use ($referee, $datetime) {
             expect($employableReferee->is($referee))->toBeTrue()
@@ -52,7 +52,7 @@ test('it employs an employable referee at a specific datetime', function ($facto
         ->shouldNotReceive('unretire');
 
     $this->refereeRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
@@ -69,7 +69,7 @@ test('it employs a retired referee at the current datetime by default', function
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->withArgs(function (Referee $unretirableReferee, Carbon $unretireDate) use ($referee, $datetime) {
             expect($unretirableReferee->is($referee))->toBeTrue();
             expect($unretireDate->eq($datetime))->toBeTrue();
@@ -80,7 +80,7 @@ test('it employs a retired referee at the current datetime by default', function
         ->andReturn($referee);
 
     $this->refereeRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (Referee $employedReferee, Carbon $employmentDate) use ($referee, $datetime) {
             expect($employedReferee->is($referee))->toBeTrue();
@@ -98,13 +98,13 @@ test('it employs a retired referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->with($referee, $datetime)
         ->once()
         ->andReturn($referee);
 
     $this->refereeRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
