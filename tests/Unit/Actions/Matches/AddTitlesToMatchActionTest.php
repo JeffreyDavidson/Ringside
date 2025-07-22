@@ -15,7 +15,7 @@ beforeEach(function () {
 
 test('it adds titles to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    $titles = Title::factory()->count(1)->create();
+    $titles = Title::factory()->active()->count(1)->create();
 
     $this->eventMatchRepository
         ->shouldReceive('addTitleToMatch')
