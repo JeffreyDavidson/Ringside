@@ -66,9 +66,9 @@ class FormModal extends BaseFormModal
     {
         // Store whether we're creating or updating before the form submission
         $isCreating = $this->form->isCreating();
-        
+
         $result = parent::submitForm();
-        
+
         if ($result) {
             // Dispatch the appropriate event based on whether we created or updated
             if ($isCreating) {
@@ -76,11 +76,11 @@ class FormModal extends BaseFormModal
             } else {
                 $this->dispatch('venueUpdated');
             }
-            
+
             // Reset the form after successful submission
             $this->form->reset();
         }
-        
+
         return $result;
     }
 
