@@ -10,7 +10,7 @@ use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchFactory;
+use Database\Factories\Matches\MatchFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -45,14 +45,14 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, EventMatchLoser> $losers
  * @property-read Collection<int, Wrestler> $wrestlers
  *
- * @method static \Database\Factories\Matches\EventMatchFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
  *
  * @mixin \Eloquent
  */
-#[UseFactory(EventMatchFactory::class)]
+#[UseFactory(MatchFactory::class)]
 class EventMatch extends Model
 {
     use HasFactory;

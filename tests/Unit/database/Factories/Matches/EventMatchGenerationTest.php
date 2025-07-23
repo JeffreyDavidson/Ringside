@@ -26,7 +26,7 @@ use App\Models\Wrestlers\Wrestler;
  * realistic wrestling matches that comply with business rules and support
  * all match generation scenarios across the application.
  *
- * @see \Database\Factories\Matches\EventMatchFactory::generateFullMatch()
+ * @see \Database\Factories\Matches\MatchFactory::generateFullMatch()
  */
 describe('EventMatch Comprehensive Generation Unit Tests', function () {
     describe('basic match generation scenarios', function () {

@@ -9,10 +9,10 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
-use Database\Factories\Matches\EventMatchFactory;
+use Database\Factories\Matches\MatchFactory;
 
 /**
- * Unit tests for EventMatchFactory data generation and state management.
+ * Unit tests for MatchFactory data generation and state management.
  *
  * UNIT TEST SCOPE:
  * - Factory default attribute generation (realistic match data)
@@ -21,13 +21,13 @@ use Database\Factories\Matches\EventMatchFactory;
  * - Match configuration data (preview, match_number, results)
  * - Business rule compliance for match setup
  *
- * These tests verify that the EventMatchFactory generates consistent,
+ * These tests verify that the MatchFactory generates consistent,
  * realistic match data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see EventMatchFactory
+ * @see MatchFactory
  */
-describe('EventMatchFactory Unit Tests', function () {
+describe('MatchFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates match with correct default attributes', function () {
             // Arrange & Act

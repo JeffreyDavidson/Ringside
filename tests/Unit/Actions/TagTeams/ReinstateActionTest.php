@@ -58,4 +58,4 @@ test('it throws exception for reinstating a non reinstatable tag team', function
     'released',
     'retired',
     'unbookable',
-])->skip();
+]);

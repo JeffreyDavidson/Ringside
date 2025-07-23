@@ -9,14 +9,19 @@ use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchType;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\MatchCompetitorFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EventMatch>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matches\EventMatch>
  */
-class EventMatchFactory extends Factory
+class MatchFactory extends Factory
 {
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     */
+    protected $model = \App\Models\Matches\EventMatch::class;
     /**
      * Define the model's default state.
      *
@@ -69,12 +74,12 @@ class EventMatchFactory extends Factory
             return [
                 'match_type_id' => MatchType::factory()->singles(),
             ];
-        })->has(MatchCompetitorFactory::new()->state([
+        })->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 0,
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 1,
@@ -87,12 +92,12 @@ class EventMatchFactory extends Factory
             return [
                 'match_type_id' => MatchType::factory()->tagTeam(),
             ];
-        })->has(MatchCompetitorFactory::new()->state([
+        })->has(MatchCompetitor::factory()->state([
             'competitor_type' => TagTeam::class,
             'competitor_id' => TagTeam::factory(),
             'side_number' => 0,
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => TagTeam::class,
             'competitor_id' => TagTeam::factory(),
             'side_number' => 1,
@@ -105,17 +110,17 @@ class EventMatchFactory extends Factory
             return [
                 'match_type_id' => MatchType::factory()->tripleThread(),
             ];
-        })->has(MatchCompetitorFactory::new()->state([
+        })->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 0,
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 1,
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 2,
@@ -128,22 +133,22 @@ class EventMatchFactory extends Factory
             return [
                 'match_type_id' => MatchType::factory()->fatal4Way(),
             ];
-        })->has(MatchCompetitorFactory::new()->state([
+        })->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 0,
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 1,
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 2,
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
             'competitor_id' => Wrestler::factory(),
             'side_number' => 3,
@@ -160,7 +165,7 @@ class EventMatchFactory extends Factory
 
         for ($i = 0; $i < $competitorCount; $i++) {
             $competitorType = fake()->randomElement([Wrestler::class, TagTeam::class]);
-            $factory = $factory->has(MatchCompetitorFactory::new()->state([
+            $factory = $factory->has(MatchCompetitor::factory()->state([
                 'competitor_type' => $competitorType,
                 'competitor_id' => $competitorType::factory(),
                 'side_number' => $i,
@@ -170,37 +175,66 @@ class EventMatchFactory extends Factory
         return $factory;
     }
 
-    public function titleMatch($title = null): static
+    public function titleMatch($champion = null, $challenger = null, $title = null): static
     {
+        // Backward compatibility: if first param is a Title, treat it as the title
+        if ($champion instanceof \App\Models\Titles\Title) {
+            $title = $champion;
+            $champion = null;
+        }
+        
         $titleToUse = $title ?: \App\Models\Titles\Title::factory();
         
+        // Smart defaults: create champion and challenger if not provided
+        $championToUse = $champion ?: Wrestler::factory();
+        $challengerToUse = $challenger ?: Wrestler::factory();
+        
         return $this->state(function (array $attributes) {
-            return [];
+            return [
+                'match_type_id' => MatchType::factory()->singles(),
+            ];
         })->hasAttached($titleToUse, [], 'titles')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
-            'competitor_id' => Wrestler::factory(),
-            'side_number' => 0,
+            'competitor_id' => $championToUse,
+            'side_number' => 0, // Champion defending on side 0
         ]), 'competitors')
-        ->has(MatchCompetitorFactory::new()->state([
+        ->has(MatchCompetitor::factory()->state([
             'competitor_type' => Wrestler::class,
-            'competitor_id' => Wrestler::factory(),
-            'side_number' => 1,
+            'competitor_id' => $challengerToUse,
+            'side_number' => 1, // Challenger on side 1
         ]), 'competitors');
     }
 
-    public function titleDefense(): static
+    public function titleDefense($champion = null, $challenger = null, $title = null): static
     {
-        return $this->state(function (array $attributes) {
-            return [];
-        });
+        // Title defense is just an alias for titleMatch - same championship scenario
+        return $this->titleMatch($champion, $challenger, $title);
     }
 
-    public function tagTeamTitleMatch(): static
+    public function tagTeamTitleMatch($championTeam = null, $challengerTeam = null, $title = null): static
     {
+        $titleToUse = $title ?: \App\Models\Titles\Title::factory();
+        
+        // Smart defaults: create champion and challenger tag teams if not provided
+        $championToUse = $championTeam ?: TagTeam::factory();
+        $challengerToUse = $challengerTeam ?: TagTeam::factory();
+        
         return $this->state(function (array $attributes) {
-            return [];
-        });
+            return [
+                'match_type_id' => MatchType::factory()->tagTeam(),
+            ];
+        })->hasAttached($titleToUse, [], 'titles')
+        ->has(MatchCompetitor::factory()->state([
+            'competitor_type' => TagTeam::class,
+            'competitor_id' => $championToUse,
+            'side_number' => 0, // Champion team defending on side 0
+        ]), 'competitors')
+        ->has(MatchCompetitor::factory()->state([
+            'competitor_type' => TagTeam::class,
+            'competitor_id' => $challengerToUse,
+            'side_number' => 1, // Challenger team on side 1
+        ]), 'competitors');
     }
 
     public function forEvent($event): static

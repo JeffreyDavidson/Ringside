@@ -10,18 +10,18 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchFactory;
+use Database\Factories\Matches\MatchFactory;
 
 /**
- * Unit tests for EventMatchFactory comprehensive match generation.
+ * Unit tests for MatchFactory comprehensive match generation.
  *
- * These tests verify that the EventMatchFactory can generate complete event matches
+ * These tests verify that the MatchFactory can generate complete event matches
  * with proper competitors, results, winners/losers, and title match support.
  */
 describe('MatchFactory', function () {
     describe('basic match creation', function () {
         test('creates basic event match with default values', function () {
-            $eventMatch = EventMatchFactory::new()->create();
+            $eventMatch = EventMatch::factory()->create();
 
             expect($eventMatch)->toBeInstanceOf(EventMatch::class);
             expect($eventMatch->event_id)->toBeInt();
@@ -31,7 +31,7 @@ describe('MatchFactory', function () {
         });
 
         test('creates complete match with competitors and results', function () {
-            $eventMatch = EventMatchFactory::new()->complete()->create();
+            $eventMatch = EventMatch::factory()->complete()->create();
 
             // Factory complete() method returns empty state - verify it can be created
             expect($eventMatch->exists)->toBeTrue();
@@ -42,7 +42,7 @@ describe('MatchFactory', function () {
 
     describe('match type specific factories', function () {
         test('creates singles match with wrestler competitors', function () {
-            $eventMatch = EventMatchFactory::new()->singles()->create();
+            $eventMatch = EventMatch::factory()->singles()->create();
 
             expect($eventMatch->matchType->slug)->toBe('singles');
             expect($eventMatch->matchType->allowsWrestlers())->toBeTrue();
@@ -56,7 +56,7 @@ describe('MatchFactory', function () {
         });
 
         test('creates tag team match with mixed competitors', function () {
-            $eventMatch = EventMatchFactory::new()->tagTeam()->create();
+            $eventMatch = EventMatch::factory()->tagTeam()->create();
 
             expect($eventMatch->matchType->slug)->toBe('tag-team');
             expect($eventMatch->matchType->allowsWrestlers())->toBeTrue();
@@ -71,7 +71,7 @@ describe('MatchFactory', function () {
         });
 
         test('creates triple threat match with 3 mixed competitors', function () {
-            $eventMatch = EventMatchFactory::new()->tripleThreat()->create();
+            $eventMatch = EventMatch::factory()->tripleThreat()->create();
 
             expect($eventMatch->matchType->slug)->toBe('triple-threat');
             expect($eventMatch->matchType->getMinimumCompetitors())->toBe(3);
@@ -85,7 +85,7 @@ describe('MatchFactory', function () {
         });
 
         test('creates fatal four way match with 4 mixed competitors', function () {
-            $eventMatch = EventMatchFactory::new()->fatalFourWay()->create();
+            $eventMatch = EventMatch::factory()->fatalFourWay()->create();
 
             expect($eventMatch->matchType->slug)->toBe('fatal-4-way');
             expect($eventMatch->matchType->getMinimumCompetitors())->toBe(4);
@@ -100,7 +100,7 @@ describe('MatchFactory', function () {
 
         test('creates battle royal with specified number of competitors', function () {
             $competitorCount = 15;
-            $eventMatch = EventMatchFactory::new()->battleRoyal($competitorCount)->create();
+            $eventMatch = EventMatch::factory()->battleRoyal($competitorCount)->create();
 
             expect($eventMatch->matchType->slug)->toBe('battle-royal');
             expect($eventMatch->competitors)->toHaveCount($competitorCount);
@@ -116,7 +116,7 @@ describe('MatchFactory', function () {
     describe('title match scenarios', function () {
         test('creates title match with championship implications', function () {
             $title = Title::factory()->create();
-            $eventMatch = EventMatchFactory::new()->titleMatch($title)->create();
+            $eventMatch = EventMatch::factory()->titleMatch($title)->create();
 
             expect($eventMatch->titles)->toHaveCount(1);
             expect($eventMatch->titles->first()->id)->toBe($title->id);
@@ -126,7 +126,7 @@ describe('MatchFactory', function () {
 
         test('creates title defense with existing champion', function () {
             $title = Title::factory()->create(['type' => 'singles']);
-            $eventMatch = EventMatchFactory::new()->titleDefense($title)->create();
+            $eventMatch = EventMatch::factory()->titleDefense($title)->create();
 
             expect($eventMatch->titles)->toHaveCount(1);
             expect($eventMatch->titles->first()->id)->toBe($title->id);
@@ -146,7 +146,7 @@ describe('MatchFactory', function () {
 
         test('creates tag team title defense with existing champion', function () {
             $title = Title::factory()->create(['type' => 'tag-team']);
-            $eventMatch = EventMatchFactory::new()->titleDefense($title)->create();
+            $eventMatch = EventMatch::factory()->titleDefense($title)->create();
 
             expect($eventMatch->titles)->toHaveCount(1);
             expect($eventMatch->titles->first()->id)->toBe($title->id);
@@ -176,7 +176,7 @@ describe('MatchFactory', function () {
                 'won_at' => now()->subMonths(3),
             ]);
 
-            $eventMatch = EventMatchFactory::new()->titleDefense($title, $champion)->create();
+            $eventMatch = EventMatch::factory()->titleDefense($title, $champion)->create();
 
             expect($eventMatch->titles)->toHaveCount(1);
 
@@ -191,7 +191,7 @@ describe('MatchFactory', function () {
 
     describe('match results and winners/losers', function () {
         test('creates match with proper winner and loser distribution', function () {
-            $eventMatch = EventMatchFactory::new()->singles()->create();
+            $eventMatch = EventMatch::factory()->singles()->create();
 
             expect($eventMatch->result)->not->toBeNull();
             expect($eventMatch->winners)->toHaveCount(1);
@@ -204,7 +204,7 @@ describe('MatchFactory', function () {
         });
 
         test('creates battle royal with one winner and multiple losers', function () {
-            $eventMatch = EventMatchFactory::new()->battleRoyal(8)->create();
+            $eventMatch = EventMatch::factory()->battleRoyal(8)->create();
 
             expect($eventMatch->result)->not->toBeNull();
             expect($eventMatch->winners)->toHaveCount(1);
@@ -222,7 +222,7 @@ describe('MatchFactory', function () {
         });
 
         test('creates match with proper competitor side numbers', function () {
-            $eventMatch = EventMatchFactory::new()->singles()->create();
+            $eventMatch = EventMatch::factory()->singles()->create();
 
             $sideNumbers = $eventMatch->competitors->pluck('side_number')->sort()->values();
             expect($sideNumbers->all())->toBe([0, 1]);
@@ -231,35 +231,35 @@ describe('MatchFactory', function () {
 
     describe('additional match features', function () {
         test('adds referees to match', function () {
-            $eventMatch = EventMatchFactory::new()->withReferees(2)->create();
+            $eventMatch = EventMatch::factory()->withReferees(2)->create();
 
             expect($eventMatch->referees)->toHaveCount(2);
         });
 
         test('creates match with specific event', function () {
             $event = Event::factory()->create();
-            $eventMatch = EventMatchFactory::new()->forEvent($event)->create();
+            $eventMatch = EventMatch::factory()->forEvent($event)->create();
 
             expect($eventMatch->event_id)->toBe($event->id);
         });
 
         test('creates match with specific match type', function () {
             $matchType = MatchType::factory()->tagTeam()->create();
-            $eventMatch = EventMatchFactory::new()->withMatchType($matchType)->create();
+            $eventMatch = EventMatch::factory()->withMatchType($matchType)->create();
 
             expect($eventMatch->match_type_id)->toBe($matchType->id);
         });
 
         test('creates match with specific match number', function () {
             $matchNumber = 5;
-            $eventMatch = EventMatchFactory::new()->withMatchNumber($matchNumber)->create();
+            $eventMatch = EventMatch::factory()->withMatchNumber($matchNumber)->create();
 
             expect($eventMatch->match_number)->toBe($matchNumber);
         });
 
         test('creates match with preview', function () {
             $preview = 'This is going to be an epic match!';
-            $eventMatch = EventMatchFactory::new()->state(['preview' => $preview])->create();
+            $eventMatch = EventMatch::factory()->state(['preview' => $preview])->create();
 
             expect($eventMatch->preview)->toBe($preview);
         });
@@ -268,7 +268,7 @@ describe('MatchFactory', function () {
             $wrestler1 = Wrestler::factory()->create();
             $wrestler2 = Wrestler::factory()->create();
 
-            $eventMatch = EventMatchFactory::new()->withCompetitors([
+            $eventMatch = EventMatch::factory()->withCompetitors([
                 0 => $wrestler1,
                 1 => $wrestler2,
             ])->create();

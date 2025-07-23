@@ -38,8 +38,7 @@ test('it employs an employable manager at the current datetime by default', func
 })->with([
     'unemployed',
     'released',
-    'withFutureEmployment',
-])->skip();
+]);
 
 test('it employs an employable manager at a specific datetime', function ($factoryState) {
     $manager = Manager::factory()->{$factoryState}()->create();
@@ -58,8 +57,7 @@ test('it employs an employable manager at a specific datetime', function ($facto
 })->with([
     'unemployed',
     'released',
-    'withFutureEmployment',
-])->skip();
+]);
 
 test('it employs a retired manager at the current datetime by default', function () {
     $manager = Manager::factory()->retired()->create();
@@ -115,4 +113,5 @@ test('it throws exception for employing a non employable manager', function ($fa
     'suspended',
     'injured',
     'available',
+    'withFutureEmployment',
 ]);

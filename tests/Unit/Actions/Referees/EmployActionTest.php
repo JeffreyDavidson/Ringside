@@ -41,8 +41,7 @@ test('it employs an employable referee at the current datetime by default', func
 })->with([
     'unemployed',
     'released',
-    'withFutureEmployment',
-])->skip();
+]);
 
 test('it employs an employable referee at a specific datetime', function ($factoryState) {
     $referee = Referee::factory()->{$factoryState}()->create();
@@ -61,8 +60,7 @@ test('it employs an employable referee at a specific datetime', function ($facto
 })->with([
     'unemployed',
     'released',
-    'withFutureEmployment',
-])->skip();
+]);
 
 test('it employs a retired referee at the current datetime by default', function () {
     $referee = Referee::factory()->retired()->create();
@@ -120,4 +118,5 @@ test('invoke employs a released referee and redirects', function ($factoryState)
     'suspended',
     'injured',
     'bookable',
+    'withFutureEmployment',
 ]);

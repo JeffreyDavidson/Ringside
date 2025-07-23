@@ -38,8 +38,7 @@ test('it employs an employable wrestler at the current datetime by default', fun
 })->with([
     'unemployed',
     'released',
-    'withFutureEmployment',
-])->skip();
+]);
 
 test('it employs an employable wrestler at a specific datetime', function ($factoryState) {
     $wrestler = Wrestler::factory()->{$factoryState}()->create();
@@ -58,8 +57,7 @@ test('it employs an employable wrestler at a specific datetime', function ($fact
 })->with([
     'unemployed',
     'released',
-    'withFutureEmployment',
-])->skip();
+]);
 
 test('it employs a retired wrestler at the current datetime by default', function () {
     $wrestler = Wrestler::factory()->retired()->create();
@@ -117,4 +115,5 @@ test('it throws exception for employing a non employable wrestler', function ($f
     'suspended',
     'injured',
     'bookable',
+    'withFutureEmployment',
 ]);
