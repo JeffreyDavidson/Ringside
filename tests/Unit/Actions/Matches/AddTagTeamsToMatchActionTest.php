@@ -10,7 +10,7 @@ use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = $this->mock(MatchRepository::class);
+    $this->matchRepository = $this->mock(MatchRepository::class);
 });
 
 test('it adds tag teams to a match', function () {
@@ -18,7 +18,7 @@ test('it adds tag teams to a match', function () {
     $tagTeams = TagTeam::factory()->bookable()->count(1)->create();
     $sideNumber = 1;
 
-    $this->eventMatchRepository
+    $this->matchRepository
         ->shouldReceive('addTagTeamToMatch')
         ->with($eventMatch, Mockery::type(TagTeam::class), $sideNumber)
         ->times($tagTeams->count());

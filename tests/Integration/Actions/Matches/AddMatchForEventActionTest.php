@@ -13,14 +13,14 @@ use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 use Illuminate\Database\Eloquent\Collection;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
     $this->event = Event::factory()->scheduled()->create();
-    $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
+    $this->matchRepository = $this->mock(MatchRepository::class);
 });
 
 test('add a match to an event', function () {
@@ -37,7 +37,7 @@ test('add a match to an event', function () {
     ]);
     $data = new EventMatchData($matchType, $referees, new Collection(), $competitors, null);
 
-    $this->eventMatchRepository
+    $this->matchRepository
         ->shouldReceive('createForEvent')
         ->with($this->event, $data)
         ->andReturn($eventMatch = new EventMatch());
@@ -64,7 +64,7 @@ test('add a title match to an event', function () {
     ]);
     $data = new EventMatchData($matchType, $referees, $titles, $competitors, null);
 
-    $this->eventMatchRepository
+    $this->matchRepository
         ->shouldReceive('createForEvent')
         ->with($this->event, $data)
         ->once()

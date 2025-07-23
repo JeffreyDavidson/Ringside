@@ -162,16 +162,15 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     protected $fillable = [
         'name',
         'signature_move',
-        'status',
     ];
 
     /**
-     * The model's default values for attributes.
+     * The accessors to append to the model's array form.
      *
-     * @var array<string, string>
+     * @var list<string>
      */
-    protected $attributes = [
-        // Status is now computed from employment relationships
+    protected $appends = [
+        'status',
     ];
 
     /**

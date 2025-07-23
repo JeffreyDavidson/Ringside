@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddTitlesToMatchAction extends BaseEventMatchAction
+class AddTitlesToMatchAction extends BaseMatchAction
 {
     use AsAction;
 
@@ -77,7 +77,7 @@ class AddTitlesToMatchAction extends BaseEventMatchAction
         DB::transaction(function () use ($eventMatch, $eligibleTitles): void {
             // Add each eligible title as championship stakes
             $eligibleTitles->each(
-                fn (Title $title) => $this->eventMatchRepository->addTitleToMatch($eventMatch, $title)
+                fn (Title $title) => $this->matchRepository->addTitleToMatch($eventMatch, $title)
             );
         });
     }

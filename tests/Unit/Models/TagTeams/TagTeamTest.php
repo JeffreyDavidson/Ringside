@@ -51,7 +51,6 @@ describe('TagTeam Model Unit Tests', function () {
             expect($tagTeam->getFillable())->toEqual([
                 'name',
                 'signature_move',
-                'status',
             ]);
         });
 

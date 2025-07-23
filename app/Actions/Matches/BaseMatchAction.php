@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Actions\Concerns\ManagesDates;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 
 /**
  * Base class for all event match actions.
@@ -29,14 +29,14 @@ use App\Repositories\EventMatchRepository;
  * - Referees must be available and qualified for the match type
  * - Competitors must be available and not conflicted for the event date
  */
-abstract class BaseEventMatchAction
+abstract class BaseMatchAction
 {
     use ManagesDates;
 
     /**
      * Create a new base event match action instance.
      */
-    public function __construct(protected EventMatchRepository $eventMatchRepository) {}
+    public function __construct(protected MatchRepository $matchRepository) {}
 
     /**
      * Validate match competitors for proper side distribution.

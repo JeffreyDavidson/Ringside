@@ -10,14 +10,14 @@ use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = $this->mock(MatchRepository::class);
+    $this->matchRepository = $this->mock(MatchRepository::class);
 });
 
 test('it adds referees to a match', function () {
     $eventMatch = EventMatch::factory()->create();
     $referees = Referee::factory()->bookable()->count(1)->create();
 
-    $this->eventMatchRepository
+    $this->matchRepository
         ->shouldReceive('addRefereeToMatch')
         ->with($eventMatch, Mockery::type(Referee::class))
         ->times($referees->count());

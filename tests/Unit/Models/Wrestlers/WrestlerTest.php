@@ -52,7 +52,6 @@ describe('Wrestler Model Unit Tests', function () {
                 'weight',
                 'hometown',
                 'signature_move',
-                'status',
             ]);
         });
 

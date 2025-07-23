@@ -10,14 +10,14 @@ use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = $this->mock(MatchRepository::class);
+    $this->matchRepository = $this->mock(MatchRepository::class);
 });
 
 test('it adds titles to a match', function () {
     $eventMatch = EventMatch::factory()->create();
     $titles = Title::factory()->active()->count(1)->create();
 
-    $this->eventMatchRepository
+    $this->matchRepository
         ->shouldReceive('addTitleToMatch')
         ->with($eventMatch, Mockery::type(Title::class))
         ->times($titles->count());
