@@ -90,9 +90,10 @@ describe('TitleFactory Unit Tests', function () {
 
     describe('factory customization', function () {
         test('accepts custom status values', function () {
-            // Arrange & Act
-            $undebutedTitle = Title::factory()->make(['status' => TitleStatus::Undebuted]);
-            $activeTitle = Title::factory()->make(['status' => TitleStatus::Active]);
+            // Arrange & Act - Use factory state methods since status is computed from relationships
+            // Note: Activity status requires persisted relationships, so use create() instead of make()
+            $undebutedTitle = Title::factory()->create(); // Default is undebuted
+            $activeTitle = Title::factory()->active()->create();
 
             // Assert
             expect($undebutedTitle->status)->toBe(TitleStatus::Undebuted);

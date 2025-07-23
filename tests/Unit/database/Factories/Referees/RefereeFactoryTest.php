@@ -69,11 +69,11 @@ describe('RefereeFactory Unit Tests', function () {
 
     describe('factory customization', function () {
         test('accepts custom attribute overrides', function () {
-            // Arrange & Act
-            $referee = Referee::factory()->make([
+            // Arrange & Act - Use factory state method for employed status since status is computed
+            // Note: Employment status requires persisted relationships, so use create() instead of make()
+            $referee = Referee::factory()->employed()->create([
                 'first_name' => 'John',
                 'last_name' => 'Doe',
-                'status' => EmploymentStatus::Employed,
             ]);
 
             // Assert

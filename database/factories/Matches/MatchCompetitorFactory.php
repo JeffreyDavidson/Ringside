@@ -24,7 +24,7 @@ class MatchCompetitorFactory extends Factory
             'match_id' => EventMatch::factory(),
             'competitor_type' => 'wrestler',
             'competitor_id' => Wrestler::factory(),
-            'side_number' => fake()->randomDigitNotZero(),
+            'side_number' => fake()->numberBetween(1, 2), // Most matches have 2 sides
         ];
     }
 }
