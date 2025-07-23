@@ -108,8 +108,8 @@ describe('PresentsManagersList Unit Tests', function () {
             $source = file_get_contents($reflection->getFileName());
 
             // Check for expected query implementation
-            expect($source)->toContain('Manager::select(\'id\', \'name\')');
-            expect($source)->toContain('->pluck(\'name\', \'id\')');
+            expect($source)->toContain('Manager::select(\'id\', \'full_name\')');
+            expect($source)->toContain('->pluck(\'full_name\', \'id\')');
             expect($source)->toContain('->toArray()');
         });
     });
@@ -204,7 +204,7 @@ describe('PresentsManagersList Unit Tests', function () {
             $source = file_get_contents($reflection->getFileName());
 
             // Check for field selection optimization
-            expect($source)->toContain('select(\'id\', \'name\')');
+            expect($source)->toContain('select(\'id\', \'full_name\')');
         });
 
         test('uses efficient pluck method', function () {
@@ -212,7 +212,7 @@ describe('PresentsManagersList Unit Tests', function () {
             $source = file_get_contents($reflection->getFileName());
 
             // Check for pluck usage
-            expect($source)->toContain('pluck(\'name\', \'id\')');
+            expect($source)->toContain('pluck(\'full_name\', \'id\')');
         });
     });
 

@@ -38,7 +38,7 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             expect($championship->title_id)->toBeInt();
             expect($championship->champion_type)->toBe('wrestler');
             expect($championship->champion_id)->toBeInt();
-            expect($championship->won_event_match_id)->toBeInt();
+            expect($championship->won_event_match_id)->toBeNull(); // Default has no match
             expect($championship->lost_event_match_id)->toBeNull(); // Current championship
             expect($championship->won_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
             expect($championship->lost_at)->toBeNull(); // Current championship
@@ -79,14 +79,12 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             $title = Title::factory()->create();
 
             // Act
-            $championship = TitleChampionship::factory()->make([
+            $championship = TitleChampionship::factory()->forTagTeam()->make([
                 'title_id' => $title->id,
-                'champion_type' => 'tag_team',
-                'champion_id' => $tagTeam->id,
             ]);
             
             // Assert
-            expect($championship->champion_type)->toBe('tag_team');
+            expect($championship->champion_type)->toBe('tagTeam');
             expect($championship->champion_id)->toBe($tagTeam->id);
             expect($championship->title_id)->toBe($title->id);
         });

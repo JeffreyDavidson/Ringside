@@ -361,7 +361,7 @@ describe('WrestlerRepository Unit Tests', function () {
     describe('availability query methods', function () {
         test('can query available wrestlers for new tag team', function () {
             // Arrange
-            $bookableWrestler = Wrestler::factory()->bookable()->create();
+            $bookableWrestler = Wrestler::factory()->employed()->create(['status' => \App\Enums\Shared\EmploymentStatus::Employed]);
             $unemployedWrestler = Wrestler::factory()->unemployed()->create();
             $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
             $tagTeamWrestler = Wrestler::factory()->bookable()->onCurrentTagTeam()->create();
@@ -379,7 +379,7 @@ describe('WrestlerRepository Unit Tests', function () {
         test('can query available wrestlers for existing tag team', function () {
             // Arrange
             $tagTeam = TagTeam::factory()->create();
-            $bookableWrestler = Wrestler::factory()->bookable()->create();
+            $bookableWrestler = Wrestler::factory()->employed()->create(['status' => \App\Enums\Shared\EmploymentStatus::Employed]);
             $unemployedWrestler = Wrestler::factory()->unemployed()->create();
             $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
             $tagTeamWrestler = Wrestler::factory()->bookable()->onCurrentTagTeam($tagTeam)->create();

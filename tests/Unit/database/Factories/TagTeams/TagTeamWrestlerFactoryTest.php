@@ -7,6 +7,7 @@ namespace Tests\Unit\Database\Factories\TagTeams;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for TagTeamWrestlerFactory data generation and state management.
@@ -41,8 +42,10 @@ describe('TagTeamWrestlerFactory Unit Tests', function () {
             // Arrange & Act
             $tagTeamWrestler = TagTeamWrestler::factory()->make();
             
-            // Assert
-            expect($tagTeamWrestler->joined_at->isToday())->toBeTrue();
+            // Assert - Factory creates dates between 2 years ago and now
+            expect($tagTeamWrestler->joined_at)->toBeInstanceOf(Carbon::class);
+            expect($tagTeamWrestler->joined_at->isPast() || $tagTeamWrestler->joined_at->isToday())->toBeTrue();
+            expect($tagTeamWrestler->joined_at->greaterThan(now()->subYears(2)->subDay()))->toBeTrue();
         });
     });
 

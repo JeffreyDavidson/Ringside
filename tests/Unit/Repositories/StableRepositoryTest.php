@@ -640,7 +640,7 @@ describe('StableRepository Unit Tests', function () {
             $managers = collect(); // Empty collection for deprecated managers parameter
 
             // Act
-            $this->repository->updateStableMembers($stable, $newWrestlers, $newTagTeams, $managers, $updateDate);
+            $this->repository->updateStableMembers($stable, $newWrestlers, $newTagTeams, $updateDate);
 
             // Assert
             expect($stable->fresh()->currentWrestlers)->toHaveCount(1);
@@ -662,7 +662,7 @@ describe('StableRepository Unit Tests', function () {
             $managers = collect(); // Empty collection for deprecated managers parameter
 
             // Act
-            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams, $managers);
+            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams);
 
             // Assert
             expect($stable->fresh()->currentWrestlers)->toHaveCount(0);
@@ -685,7 +685,7 @@ describe('StableRepository Unit Tests', function () {
             $managers = collect(); // Empty collection for deprecated managers parameter
 
             // Act - Update with empty collections
-            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams, $managers, $updateDate);
+            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams, $updateDate);
 
             // Assert
             expect($stable->fresh()->currentWrestlers)->toHaveCount(0);

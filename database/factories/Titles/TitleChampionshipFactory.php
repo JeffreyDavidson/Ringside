@@ -28,7 +28,7 @@ class TitleChampionshipFactory extends Factory
 
         return [
             'title_id' => Title::factory(),
-            'champion_type' => get_class($wrestler),
+            'champion_type' => 'wrestler', // Use morph map key instead of full class name
             'champion_id' => $wrestler->id,
             'won_event_match_id' => null,
             'lost_event_match_id' => null,
@@ -36,6 +36,22 @@ class TitleChampionshipFactory extends Factory
             'lost_at' => null,
         ];
     }
+
+    /**
+     * Configure the factory for a tag team champion.
+     */
+    public function forTagTeam(): static
+    {
+        return $this->state(function () {
+            $tagTeam = \App\Models\TagTeams\TagTeam::factory()->create();
+            
+            return [
+                'champion_type' => 'tagTeam',
+                'champion_id' => $tagTeam->id,
+            ];
+        });
+    }
+
 
     /**
      * Indicate the date the title was won.
