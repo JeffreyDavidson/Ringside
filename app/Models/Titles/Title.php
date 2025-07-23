@@ -127,17 +127,16 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
      */
     protected $fillable = [
         'name',
-        'status',
         'type',
     ];
 
     /**
-     * The model's default values for attributes.
+     * The accessors to append to the model's array form.
      *
-     * @var array<string, string>
+     * @var list<string>
      */
-    protected $attributes = [
-        // Status is now computed from activity periods and retirement state
+    protected $appends = [
+        'status',
     ];
 
     /**

@@ -20,11 +20,11 @@ class EventMatchSeeder extends Seeder
         if (Event::count() === 0) {
             Event::factory()->count(3)->create();
         }
-        
+
         if (MatchType::count() === 0) {
             MatchType::factory()->count(5)->create();
         }
-        
+
         // Create some event matches
         EventMatch::factory()->count(10)->create();
     }

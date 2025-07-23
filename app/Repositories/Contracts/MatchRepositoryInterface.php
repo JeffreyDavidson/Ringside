@@ -12,7 +12,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
 
-interface EventMatchRepositoryInterface
+interface MatchRepositoryInterface
 {
     // CRUD operations
     public function createForEvent(Event $event, EventMatchData $eventMatchData): EventMatch;

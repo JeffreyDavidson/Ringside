@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\Stables;
 
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivityPeriod;
+use Database\Factories\Stables\StableActivityPeriodFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for StableActivityPeriodFactory data generation and state management.
@@ -21,24 +23,24 @@ use App\Models\Stables\StableActivityPeriod;
  * realistic activity period data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Stables\StableActivityPeriodFactory
+ * @see StableActivityPeriodFactory
  */
 describe('StableActivityPeriodFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates activity period with correct default attributes', function () {
             // Arrange & Act
             $activityPeriod = StableActivityPeriod::factory()->make();
-            
+
             // Assert
             expect($activityPeriod->stable_id)->toBeInt();
-            expect($activityPeriod->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
             expect($activityPeriod->ended_at)->toBeNull(); // Default is current activity
         });
 
         test('creates realistic activity dates', function () {
             // Arrange & Act
             $activityPeriod = StableActivityPeriod::factory()->make();
-            
+
             // Assert
             expect($activityPeriod->started_at->isToday())->toBeTrue();
         });
@@ -56,7 +58,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => null,
             ]);
-            
+
             // Assert
             expect($activityPeriod->stable_id)->toBe($stable->id);
             expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
@@ -75,7 +77,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
-            
+
             // Assert
             expect($activityPeriod->stable_id)->toBe($stable->id);
             expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
@@ -91,7 +93,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
 
             // Act
             $activityPeriod = StableActivityPeriod::factory()->make(['stable_id' => $stable->id]);
-            
+
             // Assert
             expect($activityPeriod->stable_id)->toBe($stable->id);
         });
@@ -106,7 +108,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
-            
+
             // Assert
             expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect($activityPeriod->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
@@ -117,7 +119,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $activityPeriod = StableActivityPeriod::factory()->create();
-            
+
             // Assert
             expect($activityPeriod->exists)->toBeTrue();
             expect($activityPeriod->id)->toBeGreaterThan(0);
@@ -126,9 +128,9 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
         test('maintains date consistency', function () {
             // Arrange & Act
             $activityPeriod = StableActivityPeriod::factory()->make();
-            
+
             // Assert
-            expect($activityPeriod->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
             if ($activityPeriod->ended_at) {
                 expect($activityPeriod->ended_at->isAfter($activityPeriod->started_at))->toBeTrue();
             }

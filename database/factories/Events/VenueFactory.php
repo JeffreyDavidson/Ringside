@@ -45,7 +45,7 @@ class VenueFactory extends Factory
     public function inactive(): static
     {
         return $this->state(fn (array $attributes) => [
-            'name' => $attributes['name'] . ' (Inactive)',
+            'name' => $attributes['name'].' (Inactive)',
         ]);
     }
 }

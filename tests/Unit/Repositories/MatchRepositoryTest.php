@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Collection;
 use function Spatie\PestPluginTestTime\testTime;
 
 /**
- * Unit tests for MatchRepository business logic and data operations.
+ * Unit tests for EventMatchRepository business logic and data operations.
  *
  * UNIT TEST SCOPE:
  * - Repository configuration and structure verification
@@ -27,10 +27,10 @@ use function Spatie\PestPluginTestTime\testTime;
  * - Side number assignment for competitors
  * - Match data handling and persistence
  *
- * These tests verify that the MatchRepository correctly implements
+ * These tests verify that the EventMatchRepository correctly implements
  * all business operations and data persistence requirements.
  *
- * @see MatchRepository
+ * @see EventMatchRepository
  */
 describe('MatchRepository Unit Tests', function () {
     beforeEach(function () {

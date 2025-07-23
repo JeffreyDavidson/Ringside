@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Database\Factories;
 
-use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
+use Database\Factories\Titles\TitleChampionshipFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for TitleChampionshipFactory data generation and state management.
@@ -25,29 +26,28 @@ use App\Models\Wrestlers\Wrestler;
  * realistic championship data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Titles\TitleChampionshipFactory
+ * @see TitleChampionshipFactory
  */
-
 describe('TitleChampionshipFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates championship with correct default attributes', function () {
             // Arrange & Act
             $championship = TitleChampionship::factory()->make();
-            
+
             // Assert
             expect($championship->title_id)->toBeInt();
             expect($championship->champion_type)->toBe('wrestler');
             expect($championship->champion_id)->toBeInt();
             expect($championship->won_event_match_id)->toBeNull(); // Default has no match
             expect($championship->lost_event_match_id)->toBeNull(); // Current championship
-            expect($championship->won_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($championship->won_at)->toBeInstanceOf(Carbon::class);
             expect($championship->lost_at)->toBeNull(); // Current championship
         });
 
         test('creates realistic championship timeline', function () {
             // Arrange & Act
             $championship = TitleChampionship::factory()->make();
-            
+
             // Assert
             expect($championship->won_at->isPast())->toBeTrue();
             expect($championship->won_at->isAfter(now()->subYear()))->toBeTrue();
@@ -66,7 +66,7 @@ describe('TitleChampionshipFactory Unit Tests', function () {
                 'champion_type' => 'wrestler',
                 'champion_id' => $wrestler->id,
             ]);
-            
+
             // Assert
             expect($championship->champion_type)->toBe('wrestler');
             expect($championship->champion_id)->toBe($wrestler->id);
@@ -79,10 +79,10 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             $title = Title::factory()->create();
 
             // Act
-            $championship = TitleChampionship::factory()->forTagTeam()->make([
+            $championship = TitleChampionship::factory()->forTagTeam($tagTeam)->make([
                 'title_id' => $title->id,
             ]);
-            
+
             // Assert
             expect($championship->champion_type)->toBe('tagTeam');
             expect($championship->champion_id)->toBe($tagTeam->id);
@@ -101,7 +101,7 @@ describe('TitleChampionshipFactory Unit Tests', function () {
                 'lost_at' => $lostDate,
                 'lost_event_match_id' => $lostMatch->id,
             ]);
-            
+
             // Assert
             expect($championship->won_at->format('Y-m-d H:i:s'))->toBe($wonDate->format('Y-m-d H:i:s'));
             expect($championship->lost_at->format('Y-m-d H:i:s'))->toBe($lostDate->format('Y-m-d H:i:s'));
@@ -114,7 +114,7 @@ describe('TitleChampionshipFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $championship = TitleChampionship::factory()->create();
-            
+
             // Assert
             expect($championship->exists)->toBeTrue();
             expect($championship->id)->toBeGreaterThan(0);

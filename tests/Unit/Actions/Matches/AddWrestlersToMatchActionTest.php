@@ -5,12 +5,12 @@ declare(strict_types=1);
 use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
+    $this->eventMatchRepository = $this->mock(MatchRepository::class);
 });
 
 test('it adds wrestlers to a match', function () {

@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\TagTeams;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
+use Database\Factories\TagTeams\TagTeamFactory;
 
 /**
  * Unit tests for TagTeamFactory data generation and state management.
@@ -20,14 +21,14 @@ use App\Models\TagTeams\TagTeam;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\TagTeams\TagTeamFactory
+ * @see TagTeamFactory
  */
 describe('TagTeamFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates tag team with correct default attributes', function () {
             // Arrange & Act
             $tagTeam = TagTeam::factory()->make();
-            
+
             // Assert
             expect($tagTeam->name)->toBeString();
             expect($tagTeam->name)->not->toBeEmpty();
@@ -37,10 +38,10 @@ describe('TagTeamFactory Unit Tests', function () {
         test('generates realistic tag team names', function () {
             // Arrange & Act
             $tagTeam = TagTeam::factory()->make();
-            
+
             // Assert
             expect($tagTeam->name)->toBeString();
-            expect(strlen($tagTeam->name))->toBeGreaterThan(3);
+            expect(mb_strlen($tagTeam->name))->toBeGreaterThan(3);
         });
     });
 
@@ -48,7 +49,7 @@ describe('TagTeamFactory Unit Tests', function () {
         test('employed state works correctly', function () {
             // Arrange & Act
             $tagTeam = TagTeam::factory()->employed()->create();
-            
+
             // Assert
             expect($tagTeam->isEmployed())->toBeTrue();
         });
@@ -56,7 +57,7 @@ describe('TagTeamFactory Unit Tests', function () {
         test('unemployed state works correctly', function () {
             // Arrange & Act
             $tagTeam = TagTeam::factory()->unemployed()->create();
-            
+
             // Assert
             expect($tagTeam->isEmployed())->toBeFalse();
         });
@@ -64,7 +65,7 @@ describe('TagTeamFactory Unit Tests', function () {
         test('retired state works correctly', function () {
             // Arrange & Act
             $tagTeam = TagTeam::factory()->retired()->create();
-            
+
             // Assert
             expect($tagTeam->isRetired())->toBeTrue();
         });
@@ -76,7 +77,8 @@ describe('TagTeamFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->employed()->make([
                 'name' => 'Custom Tag Team',
             ]);
-            
+            dd($tagTeam->status);
+
             // Assert
             expect($tagTeam->name)->toBe('Custom Tag Team');
             expect($tagTeam->status)->toBe(EmploymentStatus::Employed);
@@ -87,7 +89,7 @@ describe('TagTeamFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->make([
                 'name' => 'Override Team',
             ]);
-            
+
             // Assert
             expect($tagTeam->name)->toBe('Override Team');
             expect($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
@@ -99,7 +101,7 @@ describe('TagTeamFactory Unit Tests', function () {
             // Arrange & Act
             $tagTeam1 = TagTeam::factory()->make();
             $tagTeam2 = TagTeam::factory()->make();
-            
+
             // Assert
             expect($tagTeam1->name)->not->toBe($tagTeam2->name);
         });
@@ -107,7 +109,7 @@ describe('TagTeamFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $tagTeam = TagTeam::factory()->create();
-            
+
             // Assert
             expect($tagTeam->exists)->toBeTrue();
             expect($tagTeam->id)->toBeGreaterThan(0);

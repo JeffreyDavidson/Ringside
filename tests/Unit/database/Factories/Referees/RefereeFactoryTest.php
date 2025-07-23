@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
+use Database\Factories\Referees\RefereeFactory;
 
 /**
  * Unit tests for RefereeFactory data generation and state management.
@@ -20,14 +21,14 @@ use App\Models\Referees\Referee;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Referees\RefereeFactory
+ * @see RefereeFactory
  */
 describe('RefereeFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates referee with correct default attributes', function () {
             // Arrange & Act
             $referee = Referee::factory()->make();
-            
+
             // Assert
             expect($referee->first_name)->toBeString();
             expect($referee->first_name)->not->toBeEmpty();
@@ -39,12 +40,12 @@ describe('RefereeFactory Unit Tests', function () {
         test('generates realistic referee names', function () {
             // Arrange & Act
             $referee = Referee::factory()->make();
-            
+
             // Assert
             expect($referee->first_name)->toBeString();
-            expect(strlen($referee->first_name))->toBeGreaterThan(1);
+            expect(mb_strlen($referee->first_name))->toBeGreaterThan(1);
             expect($referee->last_name)->toBeString();
-            expect(strlen($referee->last_name))->toBeGreaterThan(1);
+            expect(mb_strlen($referee->last_name))->toBeGreaterThan(1);
         });
     });
 
@@ -52,7 +53,7 @@ describe('RefereeFactory Unit Tests', function () {
         test('unemployed state works correctly', function () {
             // Arrange & Act
             $referee = Referee::factory()->make(['status' => EmploymentStatus::Unemployed]);
-            
+
             // Assert
             expect($referee->status)->toBe(EmploymentStatus::Unemployed);
         });
@@ -60,7 +61,7 @@ describe('RefereeFactory Unit Tests', function () {
         test('employed state works correctly', function () {
             // Arrange & Act
             $referee = Referee::factory()->make(['status' => EmploymentStatus::Employed]);
-            
+
             // Assert
             expect($referee->status)->toBe(EmploymentStatus::Employed);
         });
@@ -74,7 +75,7 @@ describe('RefereeFactory Unit Tests', function () {
                 'last_name' => 'Doe',
                 'status' => EmploymentStatus::Employed,
             ]);
-            
+
             // Assert
             expect($referee->first_name)->toBe('John');
             expect($referee->last_name)->toBe('Doe');
@@ -87,7 +88,7 @@ describe('RefereeFactory Unit Tests', function () {
             // Arrange & Act
             $referee1 = Referee::factory()->make();
             $referee2 = Referee::factory()->make();
-            
+
             // Assert
             expect($referee1->first_name)->not->toBe($referee2->first_name);
         });
@@ -95,7 +96,7 @@ describe('RefereeFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $referee = Referee::factory()->create();
-            
+
             // Assert
             expect($referee->exists)->toBeTrue();
             expect($referee->id)->toBeGreaterThan(0);

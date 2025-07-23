@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Database\Factories\Matches;
 
 use App\Models\Matches\MatchDecision;
+use Database\Factories\Matches\MatchDecisionFactory;
 
 /**
  * Unit tests for MatchDecisionFactory data generation and state management.
@@ -19,14 +20,14 @@ use App\Models\Matches\MatchDecision;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Matches\MatchDecisionFactory
+ * @see MatchDecisionFactory
  */
 describe('MatchDecisionFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates match decision with correct default attributes', function () {
             // Arrange & Act
             $matchDecision = MatchDecision::factory()->make();
-            
+
             // Assert
             expect($matchDecision->name)->toBeString();
             expect($matchDecision->name)->not->toBeEmpty();
@@ -35,10 +36,10 @@ describe('MatchDecisionFactory Unit Tests', function () {
         test('generates realistic match decision names', function () {
             // Arrange & Act
             $matchDecision = MatchDecision::factory()->make();
-            
+
             // Assert
             expect($matchDecision->name)->toBeString();
-            expect(strlen($matchDecision->name))->toBeGreaterThan(2);
+            expect(mb_strlen($matchDecision->name))->toBeGreaterThan(2);
         });
     });
 
@@ -48,7 +49,7 @@ describe('MatchDecisionFactory Unit Tests', function () {
             $matchDecision = MatchDecision::factory()->make([
                 'name' => 'Custom Decision',
             ]);
-            
+
             // Assert
             expect($matchDecision->name)->toBe('Custom Decision');
         });
@@ -58,7 +59,7 @@ describe('MatchDecisionFactory Unit Tests', function () {
             $matchDecision = MatchDecision::factory()->make([
                 'name' => 'Override Decision',
             ]);
-            
+
             // Assert
             expect($matchDecision->name)->toBe('Override Decision');
         });
@@ -69,7 +70,7 @@ describe('MatchDecisionFactory Unit Tests', function () {
             // Arrange & Act
             $decision1 = MatchDecision::factory()->make();
             $decision2 = MatchDecision::factory()->make();
-            
+
             // Assert
             expect($decision1->name)->not->toBe($decision2->name);
         });
@@ -77,7 +78,7 @@ describe('MatchDecisionFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $matchDecision = MatchDecision::factory()->create();
-            
+
             // Assert
             expect($matchDecision->exists)->toBeTrue();
             expect($matchDecision->id)->toBeGreaterThan(0);

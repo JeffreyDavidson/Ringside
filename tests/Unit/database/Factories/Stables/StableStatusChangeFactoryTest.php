@@ -7,6 +7,8 @@ namespace Tests\Unit\Database\Factories\Stables;
 use App\Enums\Shared\ActivationStatus;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableStatusChange;
+use Database\Factories\Stables\StableStatusChangeFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for StableStatusChangeFactory data generation and state management.
@@ -22,24 +24,24 @@ use App\Models\Stables\StableStatusChange;
  * realistic status change data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Stables\StableStatusChangeFactory
+ * @see StableStatusChangeFactory
  */
 describe('StableStatusChangeFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates status change with correct default attributes', function () {
             // Arrange & Act
             $statusChange = StableStatusChange::factory()->make();
-            
+
             // Assert
             expect($statusChange->stable_id)->toBeInt();
             expect($statusChange->status)->toBeInstanceOf(ActivationStatus::class);
-            expect($statusChange->changed_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($statusChange->changed_at)->toBeInstanceOf(Carbon::class);
         });
 
         test('generates realistic status change timeline', function () {
             // Arrange & Act
             $statusChange = StableStatusChange::factory()->make();
-            
+
             // Assert
             expect($statusChange->changed_at->isPast())->toBeTrue();
             expect($statusChange->changed_at->isAfter(now()->subYear()))->toBeTrue();
@@ -47,8 +49,8 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
         test('creates valid activation status values', function () {
             // Arrange & Act
-            $statusChanges = collect(range(1, 10))->map(fn() => StableStatusChange::factory()->make());
-            
+            $statusChanges = collect(range(1, 10))->map(fn () => StableStatusChange::factory()->make());
+
             // Assert
             foreach ($statusChanges as $statusChange) {
                 expect($statusChange->status)->toBeInstanceOf(ActivationStatus::class);
@@ -66,7 +68,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
             $statusChange = StableStatusChange::factory()->active()->make([
                 'stable_id' => $stable->id,
             ]);
-            
+
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
             expect($statusChange->status)->toBe(ActivationStatus::Active);
@@ -80,7 +82,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
             $statusChange = StableStatusChange::factory()->inactive()->make([
                 'stable_id' => $stable->id,
             ]);
-            
+
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
             expect($statusChange->status)->toBe(ActivationStatus::Inactive);
@@ -94,7 +96,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
             $statusChange = StableStatusChange::factory()->retired()->make([
                 'stable_id' => $stable->id,
             ]);
-            
+
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
             expect($statusChange->status)->toBe(ActivationStatus::Retired);
@@ -108,7 +110,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
             $statusChange = StableStatusChange::factory()->unactivated()->make([
                 'stable_id' => $stable->id,
             ]);
-            
+
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
             expect($statusChange->status)->toBe(ActivationStatus::Unactivated);
@@ -122,7 +124,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Act
             $statusChange = StableStatusChange::factory()->make(['stable_id' => $stable->id]);
-            
+
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
         });
@@ -133,7 +135,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Act
             $statusChange = StableStatusChange::factory()->make(['changed_at' => $customDate]);
-            
+
             // Assert
             expect($statusChange->changed_at->format('Y-m-d H:i:s'))->toBe($customDate->format('Y-m-d H:i:s'));
         });
@@ -141,7 +143,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
         test('accepts custom status override', function () {
             // Arrange & Act
             $statusChange = StableStatusChange::factory()->make(['status' => ActivationStatus::Active]);
-            
+
             // Assert
             expect($statusChange->status)->toBe(ActivationStatus::Active);
         });
@@ -163,7 +165,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
                 'stable_id' => $stable->id,
                 'changed_at' => $laterDate,
             ]);
-            
+
             // Assert
             expect($earlierChange->changed_at->isBefore($laterChange->changed_at))->toBeTrue();
         });
@@ -179,7 +181,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
                 StableStatusChange::factory()->inactive()->make(['stable_id' => $stable->id]),
                 StableStatusChange::factory()->retired()->make(['stable_id' => $stable->id]),
             ]);
-            
+
             // Assert
             foreach ($statusChanges as $statusChange) {
                 expect($statusChange->stable_id)->toBe($stable->id);
@@ -192,7 +194,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
             // Arrange & Act
             $statusChange1 = StableStatusChange::factory()->make();
             $statusChange2 = StableStatusChange::factory()->make();
-            
+
             // Assert - timestamps should be different (faker generates different values)
             expect($statusChange1->changed_at->format('Y-m-d H:i:s'))->not->toBe($statusChange2->changed_at->format('Y-m-d H:i:s'));
         });
@@ -200,7 +202,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $statusChange = StableStatusChange::factory()->create();
-            
+
             // Assert
             expect($statusChange->exists)->toBeTrue();
             expect($statusChange->id)->toBeGreaterThan(0);
@@ -212,7 +214,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Act
             $statusChange = StableStatusChange::factory()->create(['stable_id' => $stable->id]);
-            
+
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
             expect(Stable::find($stable->id))->not->toBeNull();
@@ -220,13 +222,13 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
         test('generates consistent data format across multiple instances', function () {
             // Arrange & Act
-            $statusChanges = collect(range(1, 5))->map(fn() => StableStatusChange::factory()->make());
-            
+            $statusChanges = collect(range(1, 5))->map(fn () => StableStatusChange::factory()->make());
+
             // Assert
             foreach ($statusChanges as $statusChange) {
                 expect($statusChange->stable_id)->toBeInt();
                 expect($statusChange->status)->toBeInstanceOf(ActivationStatus::class);
-                expect($statusChange->changed_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+                expect($statusChange->changed_at)->toBeInstanceOf(Carbon::class);
                 expect($statusChange->changed_at->isPast())->toBeTrue();
             }
         });

@@ -8,6 +8,7 @@ use App\Models\Matches\EventMatchLoser;
 use App\Models\Matches\EventMatchResult;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use Database\Factories\Matches\EventMatchLoserFactory;
 
 /**
  * Unit tests for EventMatchLoserFactory data generation and state management.
@@ -23,14 +24,14 @@ use App\Models\Wrestlers\Wrestler;
  * realistic loser data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Matches\EventMatchLoserFactory
+ * @see EventMatchLoserFactory
  */
 describe('EventMatchLoserFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates loser with correct default attributes', function () {
             // Arrange & Act
             $loser = EventMatchLoser::factory()->make();
-            
+
             // Assert
             expect($loser->event_match_result_id)->toBeInt();
             expect($loser->loser_id)->toBeInt();
@@ -41,7 +42,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
         test('creates realistic loser associations', function () {
             // Arrange & Act
             $loser = EventMatchLoser::factory()->make();
-            
+
             // Assert
             expect($loser->loser_type)->toBe('wrestler');
             expect($loser->loser_id)->toBeInt();
@@ -60,7 +61,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
                 'loser_id' => $wrestler->id,
                 'loser_type' => 'wrestler',
             ]);
-            
+
             // Assert
             expect($loser->event_match_result_id)->toBe($result->id);
             expect($loser->loser_id)->toBe($wrestler->id);
@@ -78,7 +79,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
                 'loser_id' => $tagTeam->id,
                 'loser_type' => 'tag_team',
             ]);
-            
+
             // Assert
             expect($loser->event_match_result_id)->toBe($result->id);
             expect($loser->loser_id)->toBe($tagTeam->id);
@@ -93,7 +94,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
 
             // Act
             $loser = EventMatchLoser::factory()->make(['event_match_result_id' => $result->id]);
-            
+
             // Assert
             expect($loser->event_match_result_id)->toBe($result->id);
         });
@@ -107,7 +108,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
                 'loser_id' => $wrestler->id,
                 'loser_type' => 'wrestler',
             ]);
-            
+
             // Assert
             expect($loser->loser_id)->toBe($wrestler->id);
             expect($loser->loser_type)->toBe('wrestler');
@@ -122,7 +123,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
                 'loser_id' => $tagTeam->id,
                 'loser_type' => 'tag_team',
             ]);
-            
+
             // Assert
             expect($loser->loser_id)->toBe($tagTeam->id);
             expect($loser->loser_type)->toBe('tag_team');
@@ -133,7 +134,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $loser = EventMatchLoser::factory()->create();
-            
+
             // Assert
             expect($loser->exists)->toBeTrue();
             // Note: Pivot models don't reliably return IDs after create() due to Laravel limitations
@@ -141,8 +142,8 @@ describe('EventMatchLoserFactory Unit Tests', function () {
 
         test('maintains valid loser types', function () {
             // Arrange & Act
-            $losers = collect(range(1, 3))->map(fn() => EventMatchLoser::factory()->make());
-            
+            $losers = collect(range(1, 3))->map(fn () => EventMatchLoser::factory()->make());
+
             // Assert
             foreach ($losers as $loser) {
                 expect($loser->loser_type)->toBe('wrestler');
@@ -153,7 +154,7 @@ describe('EventMatchLoserFactory Unit Tests', function () {
         test('creates losers with valid match result associations', function () {
             // Arrange & Act
             $loser = EventMatchLoser::factory()->make();
-            
+
             // Assert
             expect($loser->event_match_result_id)->toBeInt();
             expect($loser->loser_id)->toBeInt();

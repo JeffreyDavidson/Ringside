@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories\Matches;
 
 use App\Models\Matches\EventMatchResult;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -44,8 +45,8 @@ class EventMatchLoserFactory extends Factory
     public function tagTeam(): static
     {
         return $this->state([
-            'loser_type' => \App\Models\TagTeams\TagTeam::class,
-            'loser_id' => \App\Models\TagTeams\TagTeam::factory(),
+            'loser_type' => TagTeam::class,
+            'loser_id' => TagTeam::factory(),
         ]);
     }
 }

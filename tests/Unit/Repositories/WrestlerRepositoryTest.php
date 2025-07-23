@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Data\Wrestlers\WrestlerData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
@@ -361,7 +362,7 @@ describe('WrestlerRepository Unit Tests', function () {
     describe('availability query methods', function () {
         test('can query available wrestlers for new tag team', function () {
             // Arrange
-            $bookableWrestler = Wrestler::factory()->employed()->create(['status' => \App\Enums\Shared\EmploymentStatus::Employed]);
+            $bookableWrestler = Wrestler::factory()->employed()->create(['status' => EmploymentStatus::Employed]);
             $unemployedWrestler = Wrestler::factory()->unemployed()->create();
             $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
             $tagTeamWrestler = Wrestler::factory()->bookable()->onCurrentTagTeam()->create();
@@ -379,7 +380,7 @@ describe('WrestlerRepository Unit Tests', function () {
         test('can query available wrestlers for existing tag team', function () {
             // Arrange
             $tagTeam = TagTeam::factory()->create();
-            $bookableWrestler = Wrestler::factory()->employed()->create(['status' => \App\Enums\Shared\EmploymentStatus::Employed]);
+            $bookableWrestler = Wrestler::factory()->employed()->create(['status' => EmploymentStatus::Employed]);
             $unemployedWrestler = Wrestler::factory()->unemployed()->create();
             $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
             $tagTeamWrestler = Wrestler::factory()->bookable()->onCurrentTagTeam($tagTeam)->create();

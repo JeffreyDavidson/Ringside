@@ -129,16 +129,15 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     protected $fillable = [
         'first_name',
         'last_name',
-        'status',
     ];
 
     /**
-     * The model's default values for attributes.
+     * The accessors to append to the model's array form.
      *
-     * @var array<string, string>
+     * @var list<string>
      */
-    protected $attributes = [
-        // Status is now computed from employment relationships
+    protected $appends = [
+        'status',
     ];
 
     /**

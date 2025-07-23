@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('scheduled events can be retrieved', function () {
     // Clear any existing events to ensure test isolation
     Event::query()->forceDelete();
-    
+
     $scheduledEvent = Event::factory()->scheduled()->create();
     $unscheduledEvent = Event::factory()->unscheduled()->create();
     $pastEvent = Event::factory()->past()->create();
@@ -26,7 +26,7 @@ test('scheduled events can be retrieved', function () {
 test('unscheduled events can be retrieved', function () {
     // Clear any existing events to ensure test isolation
     Event::query()->forceDelete();
-    
+
     $scheduledEvent = Event::factory()->scheduled()->create();
     $unscheduledEvent = Event::factory()->unscheduled()->create();
     $pastEvent = Event::factory()->past()->create();
@@ -41,7 +41,7 @@ test('unscheduled events can be retrieved', function () {
 test('past events can be retrieved', function () {
     // Clear any existing events to ensure test isolation
     Event::query()->forceDelete();
-    
+
     $scheduledEvent = Event::factory()->scheduled()->create();
     $unscheduledEvent = Event::factory()->unscheduled()->create();
     $pastEvent = Event::factory()->past()->create();

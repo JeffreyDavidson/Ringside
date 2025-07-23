@@ -49,6 +49,7 @@ class TagTeamWrestlerFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $joinedAt = Carbon::parse($attributes['joined_at']);
+
             return [
                 'left_at' => fake()->dateTimeBetween($joinedAt, 'now'),
             ];

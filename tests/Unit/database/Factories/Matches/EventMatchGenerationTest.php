@@ -6,7 +6,6 @@ use App\Enums\Titles\TitleType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchDecision;
-use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -301,7 +300,7 @@ describe('EventMatch Comprehensive Generation Unit Tests', function () {
                 'name' => 'No Decision',
                 'slug' => 'nodecision',
             ]);
-            
+
             // Act
             $match = EventMatch::factory()->generateFullMatch([
                 'match_type' => 'singles',

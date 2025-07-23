@@ -5,12 +5,12 @@ declare(strict_types=1);
 use App\Actions\Matches\AddRefereesToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
+    $this->eventMatchRepository = $this->mock(MatchRepository::class);
 });
 
 test('it adds referees to a match', function () {

@@ -12,12 +12,12 @@ beforeEach(function () {
 
 test('it deletes a stable', function () {
     $stable = $this->mock(Stable::class);
-    
+
     $stable->shouldReceive('hasDebuted')->andReturn(false);
     $stable->shouldReceive('getAttribute')->with('currentWrestlers')->andReturn(collect());
     $stable->shouldReceive('getAttribute')->with('currentTagTeams')->andReturn(collect());
-    $stable->shouldReceive('setAttribute')->with('currentWrestlers', \Mockery::any())->andReturn(null);
-    $stable->shouldReceive('setAttribute')->with('currentTagTeams', \Mockery::any())->andReturn(null);
+    $stable->shouldReceive('setAttribute')->with('currentWrestlers', Mockery::any())->andReturn(null);
+    $stable->shouldReceive('setAttribute')->with('currentTagTeams', Mockery::any())->andReturn(null);
 
     $this->stableRepository
         ->shouldReceive('removeWrestlers')

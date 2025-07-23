@@ -6,9 +6,11 @@ namespace Database\Factories\Titles;
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -24,12 +26,18 @@ class TitleChampionshipFactory extends Factory
      */
     public function definition(): array
     {
-        $wrestler = Wrestler::factory()->create();
+        $type = fake()->randomElement(['wrestler', 'tagTeam']);
+
+        $champion = match ($type) {
+            'wrestler' => $wrestler = Wrestler::factory()->create(),
+            'tagTeam' => $tagTeam = TagTeam::factory()->create(),
+            default => throw new Exception('Invalid champion type'),
+        };
 
         return [
             'title_id' => Title::factory(),
-            'champion_type' => 'wrestler', // Use morph map key instead of full class name
-            'champion_id' => $wrestler->id,
+            'champion_type' => $type, // Use morph map key instead of full class name
+            'champion_id' => $champion->id,
             'won_event_match_id' => null,
             'lost_event_match_id' => null,
             'won_at' => Carbon::yesterday(),
@@ -40,11 +48,26 @@ class TitleChampionshipFactory extends Factory
     /**
      * Configure the factory for a tag team champion.
      */
-    public function forTagTeam(): static
+    public function forWrestler(?Wrestler $wrestler = null): static
     {
-        return $this->state(function () {
-            $tagTeam = \App\Models\TagTeams\TagTeam::factory()->create();
-            
+        $wrestler = $wrestler ?? Wrestler::factory()->create();
+
+        return $this->state(function () use ($wrestler) {
+            return [
+                'champion_type' => 'wrestler',
+                'champion_id' => $wrestler->id,
+            ];
+        });
+    }
+
+    /**
+     * Configure the factory for a tag team champion.
+     */
+    public function forTagTeam(?TagTeam $tagTeam = null): static
+    {
+        $tagTeam = $tagTeam ?? TagTeam::factory()->create();
+
+        return $this->state(function () use ($tagTeam) {
             return [
                 'champion_type' => 'tagTeam',
                 'champion_id' => $tagTeam->id,
@@ -52,14 +75,13 @@ class TitleChampionshipFactory extends Factory
         });
     }
 
-
     /**
      * Indicate the date the title was won.
      */
     public function wonOn(string $date): static
     {
         return $this->state([
-            'won_at' => $date
+            'won_at' => $date,
         ]);
     }
 
@@ -69,7 +91,7 @@ class TitleChampionshipFactory extends Factory
     public function lostOn(?string $date): static
     {
         return $this->state([
-            'lost_at' => $date
+            'lost_at' => $date,
         ]);
     }
 

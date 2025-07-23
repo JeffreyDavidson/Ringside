@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories\TagTeams;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamEmployment;
 use App\Models\TagTeams\TagTeamRetirement;
@@ -126,7 +125,6 @@ class TagTeamFactory extends Factory
         return $this->has(TagTeamEmployment::factory()->started($employmentStartDate)->ended($employmentEndDate), 'employments')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
-
 
     public function withCurrentWrestlers($wrestlers, $joinDate = null): static
     {

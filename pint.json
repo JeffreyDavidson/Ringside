@@ -49,7 +49,6 @@
         }
     },
     "exclude": [
-        "database",
         "config",
         "bootstrap",
         "lang",

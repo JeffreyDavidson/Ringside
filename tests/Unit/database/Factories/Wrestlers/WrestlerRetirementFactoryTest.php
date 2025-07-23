@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\Wrestlers;
 
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerRetirement;
+use Database\Factories\Wrestlers\WrestlerRetirementFactory;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * realistic retirement data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Wrestlers\WrestlerRetirementFactory
+ * @see WrestlerRetirementFactory
  */
 describe('WrestlerRetirementFactory Unit Tests', function () {
     describe('default attribute generation', function () {

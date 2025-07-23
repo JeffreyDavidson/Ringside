@@ -8,6 +8,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\EventMatchWinner;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use Database\Factories\Matches\EventMatchWinnerFactory;
 
 /**
  * Unit tests for EventMatchWinnerFactory data generation and state management.
@@ -23,7 +24,7 @@ use App\Models\Wrestlers\Wrestler;
  * realistic winner data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Matches\EventMatchWinnerFactory
+ * @see EventMatchWinnerFactory
  */
 describe('EventMatchWinnerFactory Unit Tests', function () {
     describe('default attribute generation', function () {
@@ -143,7 +144,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
 
         test('maintains valid winner types', function () {
             // Arrange & Act
-            $winners = collect(range(1, 5))->map(fn() => EventMatchWinner::factory()->make());
+            $winners = collect(range(1, 5))->map(fn () => EventMatchWinner::factory()->make());
 
             // Assert
             foreach ($winners as $winner) {

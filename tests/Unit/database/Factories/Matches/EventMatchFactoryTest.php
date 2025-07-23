@@ -9,7 +9,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
-use App\Models\Events\Venue;
+use Database\Factories\Matches\EventMatchFactory;
 
 /**
  * Unit tests for EventMatchFactory data generation and state management.
@@ -25,14 +25,14 @@ use App\Models\Events\Venue;
  * realistic match data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Matches\EventMatchFactory
+ * @see EventMatchFactory
  */
 describe('EventMatchFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates match with correct default attributes', function () {
             // Arrange & Act
             $match = EventMatch::factory()->make();
-            
+
             // Assert
             expect($match->event_id)->toBeInt();
             expect($match->match_type_id)->toBeInt();
@@ -44,7 +44,7 @@ describe('EventMatchFactory Unit Tests', function () {
         test('generates realistic match match_number', function () {
             // Arrange & Act
             $match = EventMatch::factory()->make();
-            
+
             // Assert
             expect($match->match_number)->toBeInt();
             expect($match->match_number)->toBeBetween(1, 10);
@@ -58,7 +58,7 @@ describe('EventMatchFactory Unit Tests', function () {
 
             // Act
             $match = EventMatch::factory()->make(['preview' => $preview]);
-            
+
             // Assert
             expect($match->preview)->toBe($preview);
         });
@@ -69,7 +69,7 @@ describe('EventMatchFactory Unit Tests', function () {
 
             // Act
             $match = EventMatch::factory()->make(['referee_id' => $referee->id]);
-            
+
             // Assert
             expect($match->referee_id)->toBe($referee->id);
         });
@@ -80,7 +80,7 @@ describe('EventMatchFactory Unit Tests', function () {
 
             // Act
             $match = EventMatch::factory()->make(['match_decision_id' => $decision->id]);
-            
+
             // Assert
             expect($match->match_decision_id)->toBe($decision->id);
         });
@@ -93,7 +93,7 @@ describe('EventMatchFactory Unit Tests', function () {
 
             // Act
             $match = EventMatch::factory()->make(['event_id' => $event->id]);
-            
+
             // Assert
             expect($match->event_id)->toBe($event->id);
         });
@@ -104,7 +104,7 @@ describe('EventMatchFactory Unit Tests', function () {
 
             // Act
             $match = EventMatch::factory()->make(['match_type_id' => $matchType->id]);
-            
+
             // Assert
             expect($match->match_type_id)->toBe($matchType->id);
         });
@@ -112,7 +112,7 @@ describe('EventMatchFactory Unit Tests', function () {
         test('accepts custom match match_number', function () {
             // Arrange & Act
             $match = EventMatch::factory()->make(['match_number' => 5]);
-            
+
             // Assert
             expect($match->match_number)->toBe(5);
         });
@@ -122,7 +122,7 @@ describe('EventMatchFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $match = EventMatch::factory()->create();
-            
+
             // Assert
             expect($match->exists)->toBeTrue();
             expect($match->id)->toBeGreaterThan(0);
@@ -130,8 +130,8 @@ describe('EventMatchFactory Unit Tests', function () {
 
         test('maintains proper match match_number', function () {
             // Arrange & Act
-            $matches = collect(range(1, 5))->map(fn() => EventMatch::factory()->make());
-            
+            $matches = collect(range(1, 5))->map(fn () => EventMatch::factory()->make());
+
             // Assert
             foreach ($matches as $match) {
                 expect($match->match_number)->toBeInt();
@@ -142,7 +142,7 @@ describe('EventMatchFactory Unit Tests', function () {
         test('creates matches with valid relationships', function () {
             // Arrange & Act
             $match = EventMatch::factory()->make();
-            
+
             // Assert
             expect($match->event_id)->toBeInt();
             expect($match->match_type_id)->toBeInt();

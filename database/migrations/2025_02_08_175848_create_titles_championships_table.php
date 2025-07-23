@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use Illuminate\Database\Migrations\Migration;

@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\Referees;
 
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeInjury;
+use Database\Factories\Referees\RefereeInjuryFactory;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * realistic injury data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Referees\RefereeInjuryFactory
+ * @see RefereeInjuryFactory
  */
 describe('RefereeInjuryFactory Unit Tests', function () {
     describe('default attribute generation', function () {

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Stables\AddMembersAction;
 use App\Actions\Stables\CreateAction;
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
@@ -34,12 +33,12 @@ test('it creates a stable', function () {
     $this->stableRepository
         ->shouldReceive('addWrestlers')
         ->once()
-        ->with($stable, $data->wrestlers, \Mockery::type('Illuminate\Support\Carbon'));
+        ->with($stable, $data->wrestlers, Mockery::type('Illuminate\Support\Carbon'));
 
     $this->stableRepository
         ->shouldReceive('addTagTeams')
         ->once()
-        ->with($stable, $data->tagTeams, \Mockery::type('Illuminate\Support\Carbon'));
+        ->with($stable, $data->tagTeams, Mockery::type('Illuminate\Support\Carbon'));
 
     $this->stableRepository
         ->shouldNotReceive('createActivity');

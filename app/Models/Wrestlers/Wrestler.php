@@ -42,7 +42,6 @@ use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Users\User;
 use App\ValueObjects\Height;
 use Database\Factories\Wrestlers\WrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -53,9 +52,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Tests\Unit\Models\Wrestlers\WrestlerTest;
 
 /**
+ * @mixin \Eloquent
+ *
  * @implements Bookable<EventMatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableWrestler, static>
@@ -110,36 +110,6 @@ use Tests\Unit\Models\Wrestlers\WrestlerTest;
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
  *
  * @method string getNameLabel()
- *
- * @property-read TagTeamWrestler|WrestlerManager|null $pivot
- * @property-read TagTeam $currentTagTeam
- * @property-read mixed $display_name
- * @property-read TagTeam $previousTagTeam
- * @property-read User|null $user
- *
- * @method static WrestlerBuilder<static>|Wrestler available()
- * @method static WrestlerBuilder<static>|Wrestler availableOn(\Carbon\Carbon $date)
- * @method static WrestlerBuilder<static>|Wrestler bookable()
- * @method static WrestlerBuilder<static>|Wrestler employed()
- * @method static \Database\Factories\Wrestlers\WrestlerFactory factory($count = null, $state = [])
- * @method static WrestlerBuilder<static>|Wrestler futureEmployed()
- * @method static WrestlerBuilder<static>|Wrestler injured()
- * @method static WrestlerBuilder<static>|Wrestler newModelQuery()
- * @method static WrestlerBuilder<static>|Wrestler newQuery()
- * @method static WrestlerBuilder<static>|Wrestler notBookedOn(\Carbon\Carbon $date)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Wrestler onlyTrashed()
- * @method static WrestlerBuilder<static>|Wrestler query()
- * @method static WrestlerBuilder<static>|Wrestler released()
- * @method static WrestlerBuilder<static>|Wrestler retired()
- * @method static WrestlerBuilder<static>|Wrestler suspended()
- * @method static WrestlerBuilder<static>|Wrestler unavailable()
- * @method static WrestlerBuilder<static>|Wrestler unemployed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Wrestler withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|Wrestler withoutTrashed()
- *
- * @mixin \Eloquent
- *
- * @see WrestlerTest
  */
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
@@ -161,8 +131,11 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     use CanWinTitles;
 
     use HasEnumStatus;
+
     use HasFactory;
+
     use IsBookableCompetitor;
+
 
     /** @use IsEmployable<WrestlerEmployment, static> */
     use IsEmployable;
@@ -195,22 +168,34 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
         'weight',
         'hometown',
         'signature_move',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
         'status',
     ];
 
     /**
-     * The model's default values for attributes.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $attributes = [
-        // Status is now computed from employment relationships
-    ];
+    protected function casts(): array
+    {
+        return [
+            'height' => HeightCast::class,
+            'status' => EmploymentStatus::class,
+        ];
+    }
 
     /**
      * Get the computed status attribute.
      *
-     * Computes the employment status based on the wrestler's current relationships:
+     * Computes the employment status based on the tag team's current relationships:
      * - Retired: Has active retirement record
      * - Employed: Has active employment (started <= now)
      * - FutureEmployment: Has employment starting in future
@@ -246,23 +231,11 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     }
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'height' => HeightCast::class,
-            'status' => EmploymentStatus::class,
-        ];
-    }
-
-    /**
      * Check to see if the model is bookable.
      */
     public function isBookable(): bool
     {
         return ! ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
     }
+
 }

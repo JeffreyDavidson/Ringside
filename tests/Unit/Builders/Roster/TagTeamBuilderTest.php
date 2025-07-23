@@ -54,7 +54,7 @@ test('unbookable tag teams can be retrieved', function () {
         ->toHaveCount(6)
         ->collectionHas($futureEmployedTagTeam)
         ->collectionHas($suspendedTagTeam)
-        ->collectionHas($retiredTagTeam) 
+        ->collectionHas($retiredTagTeam)
         ->collectionHas($releasedTagTeam)
         ->collectionHas($unemployedTagTeam)
         ->collectionHas($unbookableTagTeam);

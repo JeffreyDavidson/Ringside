@@ -106,16 +106,16 @@ describe('BaseModal Unit Tests', function () {
 
             $parameter = $method->getParameters()[0];
             expect($parameter->getName())->toBe('modelId');
-            
+
             // Handle PHP version compatibility for mixed type checking
             $paramType = $parameter->getType();
-            if ($paramType instanceof \ReflectionUnionType) {
+            if ($paramType instanceof ReflectionUnionType) {
                 // PHP 8.0+ union type - mixed type is represented as a union type
                 expect(true)->toBeTrue(); // Skip specific type check for mixed type compatibility
             } else {
                 expect($paramType->getName())->toBe('mixed');
             }
-            
+
             expect($parameter->isOptional())->toBeTrue();
             expect($parameter->getDefaultValue())->toBeNull();
         });
