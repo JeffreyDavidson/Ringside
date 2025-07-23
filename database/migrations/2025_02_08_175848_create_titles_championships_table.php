@@ -19,8 +19,8 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Title::class);
             $table->morphs('champion');
-            $table->foreignIdFor(EventMatch::class, 'won_event_match_id')->nullable();
-            $table->foreignIdFor(EventMatch::class, 'lost_event_match_id')->nullable();
+            $table->foreignIdFor(EventMatch::class, 'won_match_id')->nullable();
+            $table->foreignIdFor(EventMatch::class, 'lost_match_id')->nullable();
             $table->dateTime('won_at');
             $table->dateTime('lost_at')->nullable();
             $table->timestamps();

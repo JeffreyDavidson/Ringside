@@ -33,7 +33,7 @@ describe('MatchCompetitorFactory Unit Tests', function () {
             $competitor = MatchCompetitor::factory()->make();
 
             // Assert
-            expect($competitor->event_match_id)->toBeInt();
+            expect($competitor->match_id)->toBeInt();
             expect($competitor->competitor_id)->toBeInt();
             expect($competitor->competitor_type)->toBeString();
             expect($competitor->competitor_type)->toBeIn(['wrestler', 'tag_team']);
@@ -57,13 +57,13 @@ describe('MatchCompetitorFactory Unit Tests', function () {
 
             // Act
             $competitor = MatchCompetitor::factory()->make([
-                'event_match_id' => $match->id,
+                'match_id' => $match->id,
                 'competitor_id' => $wrestler->id,
                 'competitor_type' => 'wrestler',
             ]);
 
             // Assert
-            expect($competitor->event_match_id)->toBe($match->id);
+            expect($competitor->match_id)->toBe($match->id);
             expect($competitor->competitor_id)->toBe($wrestler->id);
             expect($competitor->competitor_type)->toBe('wrestler');
         });
@@ -75,13 +75,13 @@ describe('MatchCompetitorFactory Unit Tests', function () {
 
             // Act
             $competitor = MatchCompetitor::factory()->make([
-                'event_match_id' => $match->id,
+                'match_id' => $match->id,
                 'competitor_id' => $tagTeam->id,
                 'competitor_type' => 'tag_team',
             ]);
 
             // Assert
-            expect($competitor->event_match_id)->toBe($match->id);
+            expect($competitor->match_id)->toBe($match->id);
             expect($competitor->competitor_id)->toBe($tagTeam->id);
             expect($competitor->competitor_type)->toBe('tag_team');
         });
@@ -103,10 +103,10 @@ describe('MatchCompetitorFactory Unit Tests', function () {
             $match = EventMatch::factory()->create();
 
             // Act
-            $competitor = MatchCompetitor::factory()->make(['event_match_id' => $match->id]);
+            $competitor = MatchCompetitor::factory()->make(['match_id' => $match->id]);
 
             // Assert
-            expect($competitor->event_match_id)->toBe($match->id);
+            expect($competitor->match_id)->toBe($match->id);
         });
 
         test('accepts custom competitor configuration', function () {
@@ -153,7 +153,7 @@ describe('MatchCompetitorFactory Unit Tests', function () {
             $competitor = MatchCompetitor::factory()->make();
 
             // Assert
-            expect($competitor->event_match_id)->toBeInt();
+            expect($competitor->match_id)->toBeInt();
             expect($competitor->competitor_id)->toBeInt();
             expect($competitor->competitor_type)->toBeString();
         });

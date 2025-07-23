@@ -25,7 +25,7 @@ class VenueFactory extends Factory
             'name' => Str::of($name)->append(' Arena')->value(),
             'street_address' => fake()->buildingNumber().' '.fake()->streetName(),
             'city' => fake()->city(),
-            'state' => fake()->state(),
+            'state' => fake()->stateAbbr(),
             'zipcode' => str(fake()->postcode())->substr(0, 5)->value(),
         ];
     }

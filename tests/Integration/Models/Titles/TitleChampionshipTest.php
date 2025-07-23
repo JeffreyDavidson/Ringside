@@ -59,7 +59,7 @@ describe('TitleChampionship Model', function () {
         ]);
 
         // Note: EventMatch creation moved to individual tests when needed
-        // since won_event_match_id is now nullable and not required for basic championship testing
+        // since won_match_id is now nullable and not required for basic championship testing
     });
 
     afterEach(function () {

@@ -33,7 +33,7 @@ describe('MatchWinnerFactory Unit Tests', function () {
             $winner = MatchWinner::factory()->make();
 
             // Assert
-            expect($winner->event_match_result_id)->toBeInt();
+            expect($winner->match_result_id)->toBeInt();
             expect($winner->winner_id)->toBeInt();
             expect($winner->winner_type)->toBeString();
             expect($winner->winner_type)->toBeIn(['wrestler', 'tag_team']);
@@ -44,7 +44,7 @@ describe('MatchWinnerFactory Unit Tests', function () {
             $winner = MatchWinner::factory()->make();
 
             // Assert
-            expect($winner->event_match_result_id)->toBeInt();
+            expect($winner->match_result_id)->toBeInt();
             expect($winner->winner_id)->toBeInt();
         });
     });
@@ -57,13 +57,13 @@ describe('MatchWinnerFactory Unit Tests', function () {
 
             // Act
             $winner = MatchWinner::factory()->make([
-                'event_match_id' => $match->id,
+                'match_id' => $match->id,
                 'winner_id' => $wrestler->id,
                 'winner_type' => 'wrestler',
             ]);
 
             // Assert
-            expect($winner->event_match_id)->toBe($match->id);
+            expect($winner->match_id)->toBe($match->id);
             expect($winner->winner_id)->toBe($wrestler->id);
             expect($winner->winner_type)->toBe('wrestler');
         });
@@ -75,13 +75,13 @@ describe('MatchWinnerFactory Unit Tests', function () {
 
             // Act
             $winner = MatchWinner::factory()->make([
-                'event_match_id' => $match->id,
+                'match_id' => $match->id,
                 'winner_id' => $tagTeam->id,
                 'winner_type' => 'tag_team',
             ]);
 
             // Assert
-            expect($winner->event_match_id)->toBe($match->id);
+            expect($winner->match_id)->toBe($match->id);
             expect($winner->winner_id)->toBe($tagTeam->id);
             expect($winner->winner_type)->toBe('tag_team');
         });
@@ -93,10 +93,10 @@ describe('MatchWinnerFactory Unit Tests', function () {
             $match = EventMatch::factory()->create();
 
             // Act
-            $winner = MatchWinner::factory()->make(['event_match_id' => $match->id]);
+            $winner = MatchWinner::factory()->make(['match_id' => $match->id]);
 
             // Assert
-            expect($winner->event_match_id)->toBe($match->id);
+            expect($winner->match_id)->toBe($match->id);
         });
 
         test('accepts custom winner configuration', function () {
@@ -120,13 +120,13 @@ describe('MatchWinnerFactory Unit Tests', function () {
 
             // Act
             $winner = MatchWinner::factory()->make([
-                'event_match_id' => $match->id,
+                'match_id' => $match->id,
                 'winner_id' => null,
                 'winner_type' => null,
             ]);
 
             // Assert
-            expect($winner->event_match_id)->toBe($match->id);
+            expect($winner->match_id)->toBe($match->id);
             expect($winner->winner_id)->toBeNull();
             expect($winner->winner_type)->toBeNull();
         });
@@ -159,7 +159,7 @@ describe('MatchWinnerFactory Unit Tests', function () {
             $winner = MatchWinner::factory()->make();
 
             // Assert
-            expect($winner->event_match_result_id)->toBeInt();
+            expect($winner->match_result_id)->toBeInt();
         });
     });
 });

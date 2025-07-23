@@ -213,7 +213,7 @@ namespace App\Models\Matches{
  *
  * @mixin \Eloquent
  * @property int $id
- * @property int $event_match_id
+ * @property int $match_id
  * @property string $competitor_type
  * @property int $competitor_id
  * @property int $side_number Numeric identifier for the side/team this competitor belongs to. Used to group competitors by side.
@@ -235,7 +235,7 @@ namespace App\Models\Matches{
  *
  * @mixin \Eloquent
  * @property int $id
- * @property int $event_match_id
+ * @property int $match_id
  * @property string $winner_type
  * @property int $winner_id
  * @property int $match_decision_id
@@ -872,15 +872,15 @@ namespace App\Models\Titles{
  * @mixin \Eloquent
  * @property int $id
  * @property int $title_id
- * @property int $event_match_id
+ * @property int $match_id
  * @property int $champion_id
  * @property string $champion_type
- * @property int|null $won_event_match_id
- * @property int|null $lost_event_match_id
+ * @property int|null $won_match_id
+ * @property int|null $lost_match_id
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
- * @property-read EventMatch|null $wonEventMatch
- * @property-read EventMatch|null $lostEventMatch
+ * @property-read EventMatch|null $wonMatch
+ * @property-read EventMatch|null $lostMatch
  * @property-read Title|null $title
  * @property-read Wrestler|TagTeam $champion
  * @property \Illuminate\Support\Carbon|null $created_at

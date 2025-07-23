@@ -183,7 +183,7 @@ describe('MatchRepository Unit Tests', function () {
             expect($eventMatch->fresh()->referees->first()->id)->toBe($referee->id);
 
             $this->assertDatabaseHas('events_matches_referees', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'referee_id' => $referee->id,
             ]);
         });
@@ -234,7 +234,7 @@ describe('MatchRepository Unit Tests', function () {
             expect($eventMatch->fresh()->titles->first()->id)->toBe($title->id);
 
             $this->assertDatabaseHas('events_matches_titles', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'title_id' => $title->id,
             ]);
         });
@@ -288,7 +288,7 @@ describe('MatchRepository Unit Tests', function () {
                 ->pivot->side_number->toBe($sideNumber);
 
             $this->assertDatabaseHas('events_matches_competitors', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'competitor_id' => $wrestler->id,
                 'competitor_type' => 'wrestler',
                 'side_number' => $sideNumber,
@@ -349,7 +349,7 @@ describe('MatchRepository Unit Tests', function () {
                 ->pivot->side_number->toBe($sideNumber);
 
             $this->assertDatabaseHas('events_matches_competitors', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'competitor_id' => $tagTeam->id,
                 'competitor_type' => 'tagTeam',
                 'side_number' => $sideNumber,
@@ -507,26 +507,26 @@ describe('MatchRepository Unit Tests', function () {
 
             // Assert - Verify database persistence
             $this->assertDatabaseHas('events_matches_competitors', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'competitor_id' => $wrestler->id,
                 'competitor_type' => 'wrestler',
                 'side_number' => 0,
             ]);
 
             $this->assertDatabaseHas('events_matches_competitors', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'competitor_id' => $tagTeam->id,
                 'competitor_type' => 'tagTeam',
                 'side_number' => 1,
             ]);
 
             $this->assertDatabaseHas('events_matches_referees', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'referee_id' => $referee->id,
             ]);
 
             $this->assertDatabaseHas('events_matches_titles', [
-                'event_match_id' => $eventMatch->id,
+                'match_id' => $eventMatch->id,
                 'title_id' => $title->id,
             ]);
         });

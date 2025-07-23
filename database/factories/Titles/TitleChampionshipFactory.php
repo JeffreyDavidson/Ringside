@@ -10,7 +10,6 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
-use Exception;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -29,17 +28,17 @@ class TitleChampionshipFactory extends Factory
         $type = fake()->randomElement(['wrestler', 'tagTeam']);
 
         $champion = match ($type) {
-            'wrestler' => $wrestler = Wrestler::factory()->create(),
-            'tagTeam' => $tagTeam = TagTeam::factory()->create(),
-            default => throw new Exception('Invalid champion type'),
+            'wrestler' => Wrestler::factory()->create(),
+            'tagTeam' => TagTeam::factory()->create(),
+            default => throw new \InvalidArgumentException("Unknown champion type: {$type}"),
         };
 
         return [
             'title_id' => Title::factory(),
             'champion_type' => $type, // Use morph map key instead of full class name
             'champion_id' => $champion->id,
-            'won_event_match_id' => null,
-            'lost_event_match_id' => null,
+            'won_match_id' => null,
+            'lost_match_id' => null,
             'won_at' => Carbon::yesterday(),
             'lost_at' => null,
         ];
@@ -98,7 +97,7 @@ class TitleChampionshipFactory extends Factory
     public function wonAtEventMatch(?EventMatch $eventMatch = null): static
     {
         return $this->state([
-            'won_event_match_id' => $eventMatch->id,
+            'won_match_id' => $eventMatch->id,
             'won_at' => $eventMatch->event->date,
         ]);
     }
@@ -109,7 +108,7 @@ class TitleChampionshipFactory extends Factory
         $wonEventMatch ?? EventMatch::factory()->for(Event::factory()->state(['date' => $lostEventMatch->event->date->subMonth(1)]))->create();
 
         return $this->state([
-            'lost_event_match_id' => $lostEventMatch->id,
+            'lost_match_id' => $lostEventMatch->id,
             'lost_at' => $lostEventMatch->event->date,
         ]);
     }

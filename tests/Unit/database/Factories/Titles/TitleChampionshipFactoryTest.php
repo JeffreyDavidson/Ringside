@@ -36,10 +36,10 @@ describe('TitleChampionshipFactory Unit Tests', function () {
 
             // Assert
             expect($championship->title_id)->toBeInt();
-            expect($championship->champion_type)->toBe('wrestler');
+            expect($championship->champion_type)->toBeIn(['wrestler', 'tagTeam']);
             expect($championship->champion_id)->toBeInt();
-            expect($championship->won_event_match_id)->toBeNull(); // Default has no match
-            expect($championship->lost_event_match_id)->toBeNull(); // Current championship
+            expect($championship->won_match_id)->toBeNull(); // Default has no match
+            expect($championship->lost_match_id)->toBeNull(); // Current championship
             expect($championship->won_at)->toBeInstanceOf(Carbon::class);
             expect($championship->lost_at)->toBeNull(); // Current championship
         });
@@ -99,13 +99,13 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             $championship = TitleChampionship::factory()->make([
                 'won_at' => $wonDate,
                 'lost_at' => $lostDate,
-                'lost_event_match_id' => $lostMatch->id,
+                'lost_match_id' => $lostMatch->id,
             ]);
 
             // Assert
             expect($championship->won_at->format('Y-m-d H:i:s'))->toBe($wonDate->format('Y-m-d H:i:s'));
             expect($championship->lost_at->format('Y-m-d H:i:s'))->toBe($lostDate->format('Y-m-d H:i:s'));
-            expect($championship->lost_event_match_id)->toBe($lostMatch->id);
+            expect($championship->lost_match_id)->toBe($lostMatch->id);
             expect($championship->lost_at->isAfter($championship->won_at))->toBeTrue();
         });
     });

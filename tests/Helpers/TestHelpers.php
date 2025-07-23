@@ -272,7 +272,7 @@ function createChampionshipScenario(string $championType = 'wrestler'): array
         'champion_id' => $champion->id,
         'champion_type' => $championType,
         'won_at' => now(),
-        'won_event_match_id' => $match->id,
+        'won_match_id' => $match->id,
     ]);
 
     return [

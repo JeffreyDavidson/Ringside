@@ -74,7 +74,8 @@ describe('TagTeamFactory Unit Tests', function () {
     describe('factory customization', function () {
         test('accepts custom attribute overrides', function () {
             // Arrange & Act - Use factory state method for employed status since status is computed
-            $tagTeam = TagTeam::factory()->employed()->make([
+            // Note: Employment status requires persisted relationships, so use create() instead of make()
+            $tagTeam = TagTeam::factory()->employed()->create([
                 'name' => 'Custom Tag Team',
             ]);
 

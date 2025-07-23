@@ -24,7 +24,7 @@ describe('MatchCompetitor Model Unit Tests', function () {
             $MatchCompetitor = new MatchCompetitor();
 
             expect($MatchCompetitor->getFillable())->toEqual([
-                'event_match_id',
+                'match_id',
                 'competitor_id',
                 'competitor_type',
                 'side_number',
