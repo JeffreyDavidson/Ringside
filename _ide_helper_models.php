@@ -191,8 +191,8 @@ namespace App\Models\Matches{
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read EventMatchCompetitor|null $pivot
- * @property-read EventMatchCompetitorsCollection<int, EventMatchCompetitor> $competitors
+ * @property-read MatchCompetitor|null $pivot
+ * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
  * @property-read MatchType|null $matchType
  * @property-read EventMatchResult|null $result
@@ -220,13 +220,13 @@ namespace App\Models\Matches{
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Wrestler|TagTeam $competitor
- * @method static \App\Collections\EventMatchCompetitorsCollection<int, static> all($columns = ['*'])
- * @method static \App\Collections\EventMatchCompetitorsCollection<int, static> get($columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor query()
+ * @method static \App\Collections\MatchCompetitorsCollection<int, static> all($columns = ['*'])
+ * @method static \App\Collections\MatchCompetitorsCollection<int, static> get($columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor query()
  */
-	class EventMatchCompetitor extends \Eloquent {}
+	class MatchCompetitor extends \Eloquent {}
 }
 
 namespace App\Models\Matches{
@@ -629,7 +629,7 @@ namespace App\Models\TagTeams{
  *
  *
  * @mixin \Eloquent
- * @implements Bookable<EventMatchCompetitor>
+ * @implements Bookable<MatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableTagTeam, static>
  * @implements Employable<TagTeamEmployment, static>
@@ -944,7 +944,7 @@ namespace App\Models\Wrestlers{
  *
  *
  * @mixin \Eloquent
- * @implements Bookable<EventMatchCompetitor>
+ * @implements Bookable<MatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableWrestler, static>
  * @implements CanBeATagTeamMember<TagTeamWrestler, static>

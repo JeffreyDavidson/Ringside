@@ -36,7 +36,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\EventMatchCompetitor;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
@@ -56,7 +56,7 @@ use Illuminate\Support\Carbon;
 /**
  * @mixin \Eloquent
  *
- * @implements Bookable<EventMatchCompetitor>
+ * @implements Bookable<MatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableWrestler, static>
  * @implements CanBeATagTeamMember<TagTeamWrestler, static>

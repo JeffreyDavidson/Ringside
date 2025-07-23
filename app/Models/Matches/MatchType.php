@@ -16,7 +16,6 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property string $slug
  * @property int|null $number_of_sides
- * @property array<string> $competitor_types JSON array of allowed competitor types (wrestler, tag_team)
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
@@ -61,7 +60,6 @@ class MatchType extends Model
         'name',
         'slug',
         'number_of_sides',
-        'competitor_types',
     ];
 
     /**
@@ -73,7 +71,6 @@ class MatchType extends Model
     {
         return [
             'number_of_sides' => 'integer',
-            'competitor_types' => 'array',
         ];
     }
 
@@ -84,11 +81,12 @@ class MatchType extends Model
      */
     public function getAllowedCompetitorTypes(): array
     {
-        if (empty($this->competitor_types)) {
-            return ['wrestler']; // Default to wrestler-only
-        }
-
-        return $this->competitor_types;
+        // Determine allowed types based on the match type slug
+        return match ($this->slug) {
+            'tag-team', 'mixed', 'tornado-tag-team', '6-man-tag-team', '8-man-tag-team', '10-man-tag-team' => ['wrestler', 'tag_team'],
+            'triple-threat', 'fatal-4-way', 'battle-royal', 'royal-rumble' => ['wrestler', 'tag_team'],
+            default => ['wrestler'], // Singles and other types default to wrestler-only
+        };
     }
 
     /**

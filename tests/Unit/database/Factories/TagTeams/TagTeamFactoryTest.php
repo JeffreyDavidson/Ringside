@@ -77,7 +77,6 @@ describe('TagTeamFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->employed()->make([
                 'name' => 'Custom Tag Team',
             ]);
-            dd($tagTeam->status);
 
             // Assert
             expect($tagTeam->name)->toBe('Custom Tag Team');

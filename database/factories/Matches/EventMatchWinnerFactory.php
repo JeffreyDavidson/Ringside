@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories\Matches;
 
-use App\Models\EventMatchCompetitor;
+use App\Models\MatchCompetitor;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<EventMatchCompetitor>
+ * @extends Factory<MatchCompetitor>
  */
 class EventMatchWinnerFactory extends Factory
 {

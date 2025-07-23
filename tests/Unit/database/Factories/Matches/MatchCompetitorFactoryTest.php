@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Tests\Unit\Database\Factories\Matches;
 
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\EventMatchCompetitor;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchCompetitorFactory;
+use Database\Factories\Matches\MatchCompetitorFactory;
 
 /**
- * Unit tests for EventMatchCompetitorFactory data generation and state management.
+ * Unit tests for MatchCompetitorFactory data generation and state management.
  *
  * UNIT TEST SCOPE:
  * - Factory default attribute generation (competitor associations)
@@ -20,17 +20,17 @@ use Database\Factories\Matches\EventMatchCompetitorFactory;
  * - Polymorphic competitor data (wrestler vs tag team competitors)
  * - Match competitor configuration and consistency
  *
- * These tests verify that the EventMatchCompetitorFactory generates consistent,
+ * These tests verify that the MatchCompetitorFactory generates consistent,
  * realistic competitor data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see EventMatchCompetitorFactory
+ * @see MatchCompetitorFactory
  */
-describe('EventMatchCompetitorFactory Unit Tests', function () {
+describe('MatchCompetitorFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates competitor with correct default attributes', function () {
             // Arrange & Act
-            $competitor = EventMatchCompetitor::factory()->make();
+            $competitor = MatchCompetitor::factory()->make();
 
             // Assert
             expect($competitor->event_match_id)->toBeInt();
@@ -41,7 +41,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
 
         test('creates realistic competitor side assignments', function () {
             // Arrange & Act
-            $competitor = EventMatchCompetitor::factory()->make();
+            $competitor = MatchCompetitor::factory()->make();
 
             // Assert
             expect($competitor->side_number)->toBeInt();
@@ -56,7 +56,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
             $wrestler = Wrestler::factory()->create();
 
             // Act
-            $competitor = EventMatchCompetitor::factory()->make([
+            $competitor = MatchCompetitor::factory()->make([
                 'event_match_id' => $match->id,
                 'competitor_id' => $wrestler->id,
                 'competitor_type' => 'wrestler',
@@ -74,7 +74,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->create();
 
             // Act
-            $competitor = EventMatchCompetitor::factory()->make([
+            $competitor = MatchCompetitor::factory()->make([
                 'event_match_id' => $match->id,
                 'competitor_id' => $tagTeam->id,
                 'competitor_type' => 'tag_team',
@@ -88,8 +88,8 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
 
         test('side assignment state works correctly', function () {
             // Arrange & Act
-            $competitor1 = EventMatchCompetitor::factory()->make(['side_number' => 1]);
-            $competitor2 = EventMatchCompetitor::factory()->make(['side_number' => 2]);
+            $competitor1 = MatchCompetitor::factory()->make(['side_number' => 1]);
+            $competitor2 = MatchCompetitor::factory()->make(['side_number' => 2]);
 
             // Assert
             expect($competitor1->side_number)->toBe(1);
@@ -103,7 +103,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
             $match = EventMatch::factory()->create();
 
             // Act
-            $competitor = EventMatchCompetitor::factory()->make(['event_match_id' => $match->id]);
+            $competitor = MatchCompetitor::factory()->make(['event_match_id' => $match->id]);
 
             // Assert
             expect($competitor->event_match_id)->toBe($match->id);
@@ -114,7 +114,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
             $wrestler = Wrestler::factory()->create();
 
             // Act
-            $competitor = EventMatchCompetitor::factory()->make([
+            $competitor = MatchCompetitor::factory()->make([
                 'competitor_id' => $wrestler->id,
                 'competitor_type' => 'wrestler',
                 'side_number' => 1,
@@ -130,7 +130,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
     describe('data consistency', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
-            $competitor = EventMatchCompetitor::factory()->create();
+            $competitor = MatchCompetitor::factory()->create();
 
             // Assert
             expect($competitor->exists)->toBeTrue();
@@ -139,7 +139,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
 
         test('maintains valid competitor types', function () {
             // Arrange & Act
-            $competitors = collect(range(1, 5))->map(fn () => EventMatchCompetitor::factory()->make());
+            $competitors = collect(range(1, 5))->map(fn () => MatchCompetitor::factory()->make());
 
             // Assert
             foreach ($competitors as $competitor) {
@@ -150,7 +150,7 @@ describe('EventMatchCompetitorFactory Unit Tests', function () {
 
         test('creates competitors with valid match associations', function () {
             // Arrange & Act
-            $competitor = EventMatchCompetitor::factory()->make();
+            $competitor = MatchCompetitor::factory()->make();
 
             // Assert
             expect($competitor->event_match_id)->toBeInt();

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
-use App\Collections\EventMatchCompetitorsCollection;
+use App\Collections\MatchCompetitorsCollection;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchCompetitorFactory;
+use Database\Factories\Matches\MatchCompetitorFactory;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,18 +26,18 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read Wrestler|TagTeam $competitor
  *
- * @method static EventMatchCompetitorsCollection<int, static> all($columns = ['*'])
- * @method static EventMatchCompetitorsCollection<int, static> get($columns = ['*'])
- * @method static \Database\Factories\Matches\EventMatchCompetitorFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor query()
+ * @method static MatchCompetitorsCollection<int, static> all($columns = ['*'])
+ * @method static MatchCompetitorsCollection<int, static> get($columns = ['*'])
+ * @method static \Database\Factories\Matches\MatchCompetitorFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor query()
  *
  * @mixin \Eloquent
  */
-#[CollectedBy(EventMatchCompetitorsCollection::class)]
-#[UseFactory(EventMatchCompetitorFactory::class)]
-class EventMatchCompetitor extends MorphPivot
+#[CollectedBy(MatchCompetitorsCollection::class)]
+#[UseFactory(MatchCompetitorFactory::class)]
+class MatchCompetitor extends MorphPivot
 {
     use HasFactory;
 

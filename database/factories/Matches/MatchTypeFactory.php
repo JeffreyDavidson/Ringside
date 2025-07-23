@@ -65,6 +65,14 @@ class MatchTypeFactory extends Factory
     }
 
     /**
+     * Alias for tripleThread to match test expectations.
+     */
+    public function tripleThreat(): static
+    {
+        return $this->tripleThread();
+    }
+
+    /**
      * Create a triangle match type.
      */
     public function triangle(): static
@@ -85,6 +93,26 @@ class MatchTypeFactory extends Factory
             'name' => 'Fatal 4 Way',
             'slug' => 'fatal-4-way',
             'number_of_sides' => 4,
+        ]);
+    }
+
+    /**
+     * Alias for fatal4Way to match test expectations.
+     */
+    public function fatalFourWay(): static
+    {
+        return $this->fatal4Way();
+    }
+
+    /**
+     * Create a mixed match type that allows both wrestlers and tag teams.
+     */
+    public function mixed(): static
+    {
+        return $this->state([
+            'name' => 'Mixed',
+            'slug' => 'mixed',
+            'number_of_sides' => 2,
         ]);
     }
 

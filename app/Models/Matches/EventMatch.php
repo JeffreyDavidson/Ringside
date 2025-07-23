@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
-use App\Collections\EventMatchCompetitorsCollection;
+use App\Collections\MatchCompetitorsCollection;
 use App\Models\Events\Event;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
@@ -32,8 +32,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read EventMatchCompetitor|null $pivot
- * @property-read EventMatchCompetitorsCollection<int, EventMatchCompetitor> $competitors
+ * @property-read MatchCompetitor|null $pivot
+ * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
  * @property-read MatchType|null $matchType
  * @property-read MatchStipulation|null $matchStipulation
@@ -130,34 +130,34 @@ class EventMatch extends Model
     /**
      * Get all the event match competitors for the match.
      *
-     * @return HasMany<EventMatchCompetitor, $this>
+     * @return HasMany<MatchCompetitor, $this>
      */
     public function competitors(): HasMany
     {
-        return $this->hasMany(EventMatchCompetitor::class);
+        return $this->hasMany(MatchCompetitor::class);
     }
 
     /**
      * Get the wrestlers involved in the match.
      *
-     * @return MorphToMany<Wrestler, $this, EventMatchCompetitor>
+     * @return MorphToMany<Wrestler, $this, MatchCompetitor>
      */
     public function wrestlers(): MorphToMany
     {
         return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors')
-            ->using(EventMatchCompetitor::class)
+            ->using(MatchCompetitor::class)
             ->withPivot('side_number');
     }
 
     /**
      * Get the tag teams involved in the match.
      *
-     * @return MorphToMany<TagTeam, $this, EventMatchCompetitor>
+     * @return MorphToMany<TagTeam, $this, MatchCompetitor>
      */
     public function tagTeams(): MorphToMany
     {
         return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors')
-            ->using(EventMatchCompetitor::class)
+            ->using(MatchCompetitor::class)
             ->withPivot('side_number');
     }
 

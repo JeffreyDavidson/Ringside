@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchType;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -17,7 +18,7 @@ use Database\Factories\Matches\EventMatchFactory;
  * These tests verify that the EventMatchFactory can generate complete event matches
  * with proper competitors, results, winners/losers, and title match support.
  */
-describe('EventMatchFactory', function () {
+describe('MatchFactory', function () {
     describe('basic match creation', function () {
         test('creates basic event match with default values', function () {
             $eventMatch = EventMatchFactory::new()->create();
