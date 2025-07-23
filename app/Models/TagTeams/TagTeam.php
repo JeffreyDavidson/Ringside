@@ -219,7 +219,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     protected function casts(): array
     {
         return [
-            'status' => EmploymentStatus::class,
+            // Status is computed attribute that already returns EmploymentStatus enum
         ];
     }
 

@@ -60,7 +60,8 @@ describe('Wrestler Model Unit Tests', function () {
             $casts = $wrestler->getCasts();
 
             expect($casts['height'])->toBe(HeightCast::class);
-            expect($casts['status'])->toBe(EmploymentStatus::class);
+            // Status is computed attribute, no cast needed
+            expect(array_key_exists('status', $casts))->toBeFalse();
         });
 
         test('has custom eloquent builder', function () {

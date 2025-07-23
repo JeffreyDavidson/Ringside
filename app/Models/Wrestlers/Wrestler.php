@@ -188,7 +188,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     {
         return [
             'height' => HeightCast::class,
-            'status' => EmploymentStatus::class,
+            // Status is computed attribute that already returns EmploymentStatus enum
         ];
     }
 
