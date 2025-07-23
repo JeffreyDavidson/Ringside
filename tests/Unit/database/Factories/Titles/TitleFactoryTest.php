@@ -93,7 +93,6 @@ describe('TitleFactory Unit Tests', function () {
             // Arrange & Act
             $undebutedTitle = Title::factory()->make(['status' => TitleStatus::Undebuted]);
             $activeTitle = Title::factory()->make(['status' => TitleStatus::Active]);
-            dd($activeTitle);
 
             // Assert
             expect($undebutedTitle->status)->toBe(TitleStatus::Undebuted);

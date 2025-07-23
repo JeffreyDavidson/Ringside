@@ -6,7 +6,7 @@ namespace App\Models\Matches;
 
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchLoserFactory;
+use Database\Factories\Matches\MatchLoserFactory;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,28 +19,28 @@ use Illuminate\Support\Carbon;
  * Event match loser model for tracking match losers.
  *
  * This model represents individual losers of a match, providing
- * symmetric querying capabilities alongside EventMatchWinner.
- * Associated with EventMatchResult to maintain connection between
+ * symmetric querying capabilities alongside MatchWinner.
+ * Associated with MatchResult to maintain connection between
  * decision and match outcomes.
  *
  * @property int $id
- * @property int $event_match_result_id
+ * @property int $match_result_id
  * @property string $loser_type
  * @property int $loser_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read EventMatchResult $eventMatchResult
+ * @property-read MatchResult $matchResult
  * @property-read Wrestler|TagTeam $loser
  *
- * @method static \Database\Factories\Matches\EventMatchLoserFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchLoser newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchLoser newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchLoser query()
+ * @method static \Database\Factories\Matches\MatchLoserFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchLoser newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchLoser newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchLoser query()
  *
  * @mixin \Eloquent
  */
-#[UseFactory(EventMatchLoserFactory::class)]
-class EventMatchLoser extends Model
+#[UseFactory(MatchLoserFactory::class)]
+class MatchLoser extends Model
 {
     use HasFactory;
 
@@ -57,7 +57,7 @@ class EventMatchLoser extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'event_match_result_id',
+        'match_result_id',
         'loser_type',
         'loser_id',
     ];
@@ -65,11 +65,11 @@ class EventMatchLoser extends Model
     /**
      * Get the event match result that owns this loser record.
      *
-     * @return BelongsTo<EventMatchResult, $this>
+     * @return BelongsTo<MatchResult, $this>
      */
-    public function eventMatchResult(): BelongsTo
+    public function matchResult(): BelongsTo
     {
-        return $this->belongsTo(EventMatchResult::class);
+        return $this->belongsTo(MatchResult::class);
     }
 
     /**

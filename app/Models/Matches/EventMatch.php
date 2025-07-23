@@ -37,12 +37,12 @@ use Illuminate\Support\Carbon;
  * @property-read Event $event
  * @property-read MatchType|null $matchType
  * @property-read MatchStipulation|null $matchStipulation
- * @property-read EventMatchResult|null $result
+ * @property-read MatchResult|null $result
  * @property-read Collection<int, Referee> $referees
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, Title> $titles
- * @property-read Collection<int, EventMatchWinner> $winners
- * @property-read Collection<int, EventMatchLoser> $losers
+ * @property-read Collection<int, MatchWinner> $winners
+ * @property-read Collection<int, MatchLoser> $losers
  * @property-read Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
@@ -94,7 +94,7 @@ class EventMatch extends Model
      */
     public function matchType(): BelongsTo
     {
-        return $this->belongsTo(MatchType::class);
+        return $this->belongsTo(MatchType::class, 'match_type_id');
     }
 
     /**
@@ -104,7 +104,7 @@ class EventMatch extends Model
      */
     public function matchStipulation(): BelongsTo
     {
-        return $this->belongsTo(MatchStipulation::class);
+        return $this->belongsTo(MatchStipulation::class, 'match_stipulation_id');
     }
 
     /**
@@ -114,7 +114,7 @@ class EventMatch extends Model
      */
     public function referees(): BelongsToMany
     {
-        return $this->belongsToMany(Referee::class, 'events_matches_referees');
+        return $this->belongsToMany(Referee::class, 'events_matches_referees', 'match_id');
     }
 
     /**
@@ -124,7 +124,7 @@ class EventMatch extends Model
      */
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class, 'events_matches_titles');
+        return $this->belongsToMany(Title::class, 'events_matches_titles', 'match_id');
     }
 
     /**
@@ -134,7 +134,7 @@ class EventMatch extends Model
      */
     public function competitors(): HasMany
     {
-        return $this->hasMany(MatchCompetitor::class);
+        return $this->hasMany(MatchCompetitor::class, 'match_id');
     }
 
     /**
@@ -144,7 +144,7 @@ class EventMatch extends Model
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors')
+        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors', 'match_id')
             ->using(MatchCompetitor::class)
             ->withPivot('side_number');
     }
@@ -156,7 +156,7 @@ class EventMatch extends Model
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors')
+        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors', 'match_id')
             ->using(MatchCompetitor::class)
             ->withPivot('side_number');
     }
@@ -164,30 +164,30 @@ class EventMatch extends Model
     /**
      * Get the result of the match.
      *
-     * @return HasOne<EventMatchResult, $this>
+     * @return HasOne<MatchResult, $this>
      */
     public function result(): HasOne
     {
-        return $this->hasOne(EventMatchResult::class);
+        return $this->hasOne(MatchResult::class, 'match_id');
     }
 
     /**
      * Get all winners of the match through the result.
      *
-     * @return HasManyThrough<EventMatchWinner, EventMatchResult, $this>
+     * @return HasManyThrough<MatchWinner, MatchResult, $this>
      */
     public function winners(): HasManyThrough
     {
-        return $this->hasManyThrough(EventMatchWinner::class, EventMatchResult::class);
+        return $this->hasManyThrough(MatchWinner::class, MatchResult::class);
     }
 
     /**
      * Get all losers of the match through the result.
      *
-     * @return HasManyThrough<EventMatchLoser, EventMatchResult, $this>
+     * @return HasManyThrough<MatchLoser, MatchResult, $this>
      */
     public function losers(): HasManyThrough
     {
-        return $this->hasManyThrough(EventMatchLoser::class, EventMatchResult::class);
+        return $this->hasManyThrough(MatchLoser::class, MatchResult::class);
     }
 }

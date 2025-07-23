@@ -195,7 +195,7 @@ namespace App\Models\Matches{
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
  * @property-read MatchType|null $matchType
- * @property-read EventMatchResult|null $result
+ * @property-read MatchResult|null $result
  * @property-read Collection<int, Referee> $referees
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, Title> $titles
@@ -244,11 +244,11 @@ namespace App\Models\Matches{
  * @property-read MatchDecision $decision
  * @property-read Wrestler|TagTeam $winner
  * @property-read EventMatch $eventMatch
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult query()
  */
-	class EventMatchResult extends \Eloquent {}
+	class MatchResult extends \Eloquent {}
 }
 
 namespace App\Models\Matches{

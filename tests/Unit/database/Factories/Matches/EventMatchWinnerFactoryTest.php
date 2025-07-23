@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Tests\Unit\Database\Factories\Matches;
 
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\EventMatchWinner;
+use App\Models\Matches\MatchWinner;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchWinnerFactory;
+use Database\Factories\Matches\MatchWinnerFactory;
 
 /**
- * Unit tests for EventMatchWinnerFactory data generation and state management.
+ * Unit tests for MatchWinnerFactory data generation and state management.
  *
  * UNIT TEST SCOPE:
  * - Factory default attribute generation (winner associations)
@@ -20,17 +20,17 @@ use Database\Factories\Matches\EventMatchWinnerFactory;
  * - Polymorphic winner data (wrestler vs tag team winners)
  * - Match result configuration and consistency
  *
- * These tests verify that the EventMatchWinnerFactory generates consistent,
+ * These tests verify that the MatchWinnerFactory generates consistent,
  * realistic winner data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see EventMatchWinnerFactory
+ * @see MatchWinnerFactory
  */
-describe('EventMatchWinnerFactory Unit Tests', function () {
+describe('MatchWinnerFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates winner with correct default attributes', function () {
             // Arrange & Act
-            $winner = EventMatchWinner::factory()->make();
+            $winner = MatchWinner::factory()->make();
 
             // Assert
             expect($winner->event_match_result_id)->toBeInt();
@@ -41,7 +41,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
 
         test('generates single winner by default', function () {
             // Arrange & Act
-            $winner = EventMatchWinner::factory()->make();
+            $winner = MatchWinner::factory()->make();
 
             // Assert
             expect($winner->event_match_result_id)->toBeInt();
@@ -56,7 +56,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
             $wrestler = Wrestler::factory()->create();
 
             // Act
-            $winner = EventMatchWinner::factory()->make([
+            $winner = MatchWinner::factory()->make([
                 'event_match_id' => $match->id,
                 'winner_id' => $wrestler->id,
                 'winner_type' => 'wrestler',
@@ -74,7 +74,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->create();
 
             // Act
-            $winner = EventMatchWinner::factory()->make([
+            $winner = MatchWinner::factory()->make([
                 'event_match_id' => $match->id,
                 'winner_id' => $tagTeam->id,
                 'winner_type' => 'tag_team',
@@ -93,7 +93,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
             $match = EventMatch::factory()->create();
 
             // Act
-            $winner = EventMatchWinner::factory()->make(['event_match_id' => $match->id]);
+            $winner = MatchWinner::factory()->make(['event_match_id' => $match->id]);
 
             // Assert
             expect($winner->event_match_id)->toBe($match->id);
@@ -104,7 +104,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
             $wrestler = Wrestler::factory()->create();
 
             // Act
-            $winner = EventMatchWinner::factory()->make([
+            $winner = MatchWinner::factory()->make([
                 'winner_id' => $wrestler->id,
                 'winner_type' => 'wrestler',
             ]);
@@ -119,7 +119,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
             $match = EventMatch::factory()->create();
 
             // Act
-            $winner = EventMatchWinner::factory()->make([
+            $winner = MatchWinner::factory()->make([
                 'event_match_id' => $match->id,
                 'winner_id' => null,
                 'winner_type' => null,
@@ -135,7 +135,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
     describe('data consistency', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
-            $winner = EventMatchWinner::factory()->create();
+            $winner = MatchWinner::factory()->create();
 
             // Assert
             expect($winner->exists)->toBeTrue();
@@ -144,7 +144,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
 
         test('maintains valid winner types', function () {
             // Arrange & Act
-            $winners = collect(range(1, 5))->map(fn () => EventMatchWinner::factory()->make());
+            $winners = collect(range(1, 5))->map(fn () => MatchWinner::factory()->make());
 
             // Assert
             foreach ($winners as $winner) {
@@ -156,7 +156,7 @@ describe('EventMatchWinnerFactory Unit Tests', function () {
 
         test('creates winners with valid match result associations', function () {
             // Arrange & Act
-            $winner = EventMatchWinner::factory()->make();
+            $winner = MatchWinner::factory()->make();
 
             // Assert
             expect($winner->event_match_result_id)->toBeInt();

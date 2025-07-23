@@ -45,13 +45,9 @@ describe('SplitStableAction Integration Tests', function () {
         $this->transferWrestlers = $this->wrestlers->take(2);
         $this->transferTagTeams = $this->tagTeams->take(1);
 
-        // Managers are not directly associated with stables, so empty collection
-        $this->transferManagers = collect();
-
         // Create new stable name
         $this->newStableName = 'New Split Stable';
 
-        // Create members array for split action (no managers - they're not directly associated with stables)
         $this->membersForNewStable = [
             'wrestlers' => $this->transferWrestlers,
             'tagTeams' => $this->transferTagTeams,
@@ -187,7 +183,6 @@ describe('SplitStableAction Integration Tests', function () {
             // Split with only wrestlers
             $membersForSplit = [
                 'wrestlers' => $this->transferWrestlers,
-                // No tag teams or managers
             ];
 
             $newStable = SplitStableAction::run(
@@ -212,7 +207,6 @@ describe('SplitStableAction Integration Tests', function () {
             // Split with only tag teams
             $membersForSplit = [
                 'tagTeams' => $this->transferTagTeams,
-                // No wrestlers or managers
             ];
 
             $newStable = SplitStableAction::run(
@@ -307,7 +301,7 @@ describe('SplitStableAction Integration Tests', function () {
 
         test('split validates member availability before transfer', function () {
             // Create unemployed wrestler
-            $unemployedWrestler = Wrestler::factory()->create(['status' => EmploymentStatus::Unemployed]);
+            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
 
             $splitDate = Carbon::now();
 

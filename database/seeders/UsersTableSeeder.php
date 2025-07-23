@@ -30,7 +30,7 @@ class UsersTableSeeder extends Seeder
         ]
         )->create();
 
-        User::factory()->basicUser()->count(300)->sequence(fn (Sequence $sequence) => [
+        User::factory()->basicUser()->count(10)->sequence(fn (Sequence $sequence) => [
             'first_name' => ($sequence->index !== 0 ? Str::of(Number::spellOrdinal($sequence->index + 1).' ')->title() : '').ucwords(Role::Basic->value),
             'last_name' => 'User',
             'email' => Role::Basic->value.($sequence->index ? Number::format($sequence->index + 1) : '').'@example.com',

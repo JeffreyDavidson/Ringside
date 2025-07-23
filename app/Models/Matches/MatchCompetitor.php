@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $event_match_id
+ * @property int $match_id
  * @property string $competitor_type
  * @property int $competitor_id
  * @property int $side_number Numeric identifier for the side/team this competitor belongs to. Used to group competitors by side.
@@ -54,7 +54,7 @@ class MatchCompetitor extends MorphPivot
      * @var list<string>
      */
     protected $fillable = [
-        'event_match_id',
+        'match_id',
         'competitor_id',
         'competitor_type',
         'side_number',

@@ -17,7 +17,7 @@ return new class extends Migration
     {
         Schema::create('events_matches_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(EventMatch::class);
+            $table->foreignIdFor(EventMatch::class, 'match_id');
             $table->morphs('winner');
             $table->foreignIdFor(MatchDecision::class);
             $table->timestamps();

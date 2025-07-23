@@ -9,7 +9,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchType;
 use Illuminate\Database\Seeder;
 
-class EventMatchSeeder extends Seeder
+class MatchesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.

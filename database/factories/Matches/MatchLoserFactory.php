@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Database\Factories\Matches;
 
-use App\Models\Matches\EventMatchResult;
+use App\Models\Matches\MatchResult;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matches\EventMatchLoser>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matches\MatchLoser>
  */
-class EventMatchLoserFactory extends Factory
+class MatchLoserFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -22,7 +22,7 @@ class EventMatchLoserFactory extends Factory
     public function definition(): array
     {
         return [
-            'event_match_result_id' => EventMatchResult::factory(),
+            'match_result_id' => MatchResult::factory(),
             'loser_type' => Wrestler::class,
             'loser_id' => Wrestler::factory(),
         ];

@@ -6,13 +6,14 @@ namespace Database\Factories\Matches;
 
 use App\Models\MatchCompetitor;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchResult;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<MatchCompetitor>
  */
-class EventMatchWinnerFactory extends Factory
+class MatchWinnerFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -22,10 +23,9 @@ class EventMatchWinnerFactory extends Factory
     public function definition(): array
     {
         return [
-            'event_match_id' => EventMatch::factory(),
-            'competitor_type' => 'wrestler',
-            'competitor_id' => Wrestler::factory(),
-            'side_number' => fake()->randomDigitNotZero(),
+            'match_result_id' => MatchResult::factory(),
+            'winner_type' => 'wrestler',
+            'winner_id' => Wrestler::factory(),
         ];
     }
 }

@@ -6,10 +6,10 @@ use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Database\Seeders\UsersTableSeeder;
-use Illuminate\Support\Facades\Artisan;
-
 use function Pest\Laravel\assertDatabaseCount;
+
 use function Pest\Laravel\assertDatabaseHas;
+use Illuminate\Support\Facades\Artisan;
 
 /**
  * Integration tests for UsersTableSeeder data seeding and validation.
@@ -39,7 +39,7 @@ describe('UsersTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'UsersTableSeeder']);
 
             // Assert - 2 administrators + 300 basic users = 302 total
-            assertDatabaseCount('users', 302);
+            assertDatabaseCount('users', 12);
         });
     });
 
@@ -98,7 +98,7 @@ describe('UsersTableSeeder Integration Tests', function () {
 
         test('creates correct number of basic users', function () {
             // Assert
-            expect(User::where('role', Role::Basic)->count())->toBe(300);
+            expect(User::where('role', Role::Basic)->count())->toBe(10);
         });
 
         test('creates primary basic user', function () {
@@ -150,7 +150,7 @@ describe('UsersTableSeeder Integration Tests', function () {
             $users = User::all();
 
             // Assert
-            expect($users->pluck('email')->unique())->toHaveCount(302);
+            expect($users->pluck('email')->unique())->toHaveCount(12);
         });
 
         test('all users have unique phone numbers', function () {
@@ -158,7 +158,7 @@ describe('UsersTableSeeder Integration Tests', function () {
             $users = User::all();
 
             // Assert
-            expect($users->pluck('phone_number')->unique())->toHaveCount(302);
+            expect($users->pluck('phone_number')->unique())->toHaveCount(12);
         });
 
         test('all users have valid role assignments', function () {

@@ -21,9 +21,9 @@ use Illuminate\Database\Eloquent\Relations\MorphPivot;
 describe('MatchCompetitor Model Unit Tests', function () {
     describe('model attributes and configuration', function () {
         test('has correct fillable properties', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor();
 
-            expect($eventMatchCompetitor->getFillable())->toEqual([
+            expect($MatchCompetitor->getFillable())->toEqual([
                 'event_match_id',
                 'competitor_id',
                 'competitor_type',
@@ -32,37 +32,37 @@ describe('MatchCompetitor Model Unit Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
-            $casts = $eventMatchCompetitor->getCasts();
+            $MatchCompetitor = new MatchCompetitor();
+            $casts = $MatchCompetitor->getCasts();
 
             expect($casts)->toBeArray();
             // MorphPivot models don't explicitly define 'id' cast
         });
 
         test('uses correct table name', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor();
 
-            expect($eventMatchCompetitor->getTable())->toBe('events_matches_competitors');
+            expect($MatchCompetitor->getTable())->toBe('events_matches_competitors');
         });
 
         test('has correct default values', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor();
 
             // Model has no custom default values
-            expect($eventMatchCompetitor)->toBeInstanceOf(MatchCompetitor::class);
+            expect($MatchCompetitor)->toBeInstanceOf(MatchCompetitor::class);
         });
 
         test('has custom eloquent builder', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor();
 
             // Model has no custom builder
-            expect($eventMatchCompetitor->query())->toBeObject();
+            expect($MatchCompetitor->query())->toBeObject();
         });
 
         test('extends MorphPivot base class', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor();
 
-            expect($eventMatchCompetitor)->toBeInstanceOf(MorphPivot::class);
+            expect($MatchCompetitor)->toBeInstanceOf(MorphPivot::class);
         });
 
         test('uses custom collection class', function () {
@@ -72,8 +72,8 @@ describe('MatchCompetitor Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('extends MorphPivot class', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
-            expect($eventMatchCompetitor)->toBeInstanceOf(MorphPivot::class);
+            $MatchCompetitor = new MatchCompetitor();
+            expect($MatchCompetitor)->toBeInstanceOf(MorphPivot::class);
         });
     });
 
@@ -104,15 +104,15 @@ describe('MatchCompetitor Model Unit Tests', function () {
 
     describe('business logic methods', function () {
         test('has competitor relationship method', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor();
 
-            expect(method_exists($eventMatchCompetitor, 'competitor'))->toBeTrue();
+            expect(method_exists($MatchCompetitor, 'competitor'))->toBeTrue();
         });
 
         test('has getCompetitor business method', function () {
-            $eventMatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor();
 
-            expect(method_exists($eventMatchCompetitor, 'getCompetitor'))->toBeTrue();
+            expect(method_exists($MatchCompetitor, 'getCompetitor'))->toBeTrue();
         });
     });
 });

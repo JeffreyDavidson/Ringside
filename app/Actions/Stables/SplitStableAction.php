@@ -56,7 +56,6 @@ class SplitStableAction extends BaseStableAction
                     start_date: null,
                     tagTeams: new Collection(),
                     wrestlers: new Collection(),
-                    managers: new Collection()
                 )
             );
 
@@ -86,9 +85,6 @@ class SplitStableAction extends BaseStableAction
                     // Skip unemployed tag teams without throwing an exception
                 }
             }
-
-            // Note: Managers are not directly associated with stables
-            // They are managed through their wrestlers/tag teams
 
             return $newStable;
         });

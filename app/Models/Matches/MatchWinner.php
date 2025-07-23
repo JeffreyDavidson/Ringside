@@ -6,7 +6,7 @@ namespace App\Models\Matches;
 
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchWinnerFactory;
+use Database\Factories\Matches\MatchWinnerFactory;
 use Exception;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,31 +16,31 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
- * Event match winner model for tracking match winners.
+ * Match winner model for tracking match winners.
  *
  * This model represents individual winners of a match, allowing
  * multiple winners per match result (e.g., tag team partners,
- * handicap match winners). Associated with EventMatchResult to
+ * handicap match winners). Associated with MatchResult to
  * maintain connection between decision and winners.
  *
  * @property int $id
- * @property int $event_match_result_id
+ * @property int $match_result_id
  * @property string $winner_type
  * @property int $winner_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read EventMatchResult $eventMatchResult
+ * @property-read MatchResult $matchResult
  * @property-read Wrestler|TagTeam $winner
  *
- * @method static \Database\Factories\Matches\EventMatchWinnerFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchWinner newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchWinner newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchWinner query()
+ * @method static \Database\Factories\Matches\MatchWinnerFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchWinner newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchWinner newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchWinner query()
  *
  * @mixin \Eloquent
  */
-#[UseFactory(EventMatchWinnerFactory::class)]
-class EventMatchWinner extends Model
+#[UseFactory(MatchWinnerFactory::class)]
+class MatchWinner extends Model
 {
     use HasFactory;
 
@@ -57,7 +57,7 @@ class EventMatchWinner extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'event_match_result_id',
+        'match_result_id',
         'winner_type',
         'winner_id',
     ];
@@ -65,11 +65,11 @@ class EventMatchWinner extends Model
     /**
      * Get the event match result that owns this winner record.
      *
-     * @return BelongsTo<EventMatchResult, $this>
+     * @return BelongsTo<MatchResult, $this>
      */
-    public function eventMatchResult(): BelongsTo
+    public function matchResult(): BelongsTo
     {
-        return $this->belongsTo(EventMatchResult::class);
+        return $this->belongsTo(MatchResult::class);
     }
 
     /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
-use Database\Factories\Matches\EventMatchResultFactory;
+use Database\Factories\Matches\MatchResultFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,23 +15,23 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $event_match_id
+ * @property int $match_id
  * @property int $match_decision_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read MatchDecision $decision
- * @property-read EventMatch $eventMatch
- * @property-read Collection<int, EventMatchWinner> $winners
- * @property-read Collection<int, EventMatchLoser> $losers
+ * @property-read EventMatch $match
+ * @property-read Collection<int, MatchWinner> $winners
+ * @property-read Collection<int, MatchLoser> $losers
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult query()
  *
  * @mixin \Eloquent
  */
-#[UseFactory(EventMatchResultFactory::class)]
-class EventMatchResult extends Model
+#[UseFactory(MatchResultFactory::class)]
+class MatchResult extends Model
 {
     use HasFactory;
 
@@ -48,7 +48,7 @@ class EventMatchResult extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'event_match_id',
+        'match_id',
         'match_decision_id',
     ];
 
@@ -57,7 +57,7 @@ class EventMatchResult extends Model
      *
      * @return BelongsTo<EventMatch, $this>
      */
-    public function eventMatch(): BelongsTo
+    public function match(): BelongsTo
     {
         return $this->belongsTo(EventMatch::class);
     }
@@ -75,20 +75,20 @@ class EventMatchResult extends Model
     /**
      * Get all winners of the event match.
      *
-     * @return HasMany<EventMatchWinner, $this>
+     * @return HasMany<MatchWinner, $this>
      */
     public function winners(): HasMany
     {
-        return $this->hasMany(EventMatchWinner::class);
+        return $this->hasMany(MatchWinner::class);
     }
 
     /**
      * Get all losers of the event match.
      *
-     * @return HasMany<EventMatchLoser, $this>
+     * @return HasMany<MatchLoser, $this>
      */
     public function losers(): HasMany
     {
-        return $this->hasMany(EventMatchLoser::class);
+        return $this->hasMany(MatchLoser::class);
     }
 }

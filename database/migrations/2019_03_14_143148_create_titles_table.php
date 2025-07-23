@@ -21,8 +21,6 @@ return new class extends Migration
             $table->nullableMorphs('previous_champion');
             $table->timestamps();
             $table->softDeletes();
-
-            $table->index('status');
         });
     }
 };

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matches\EventMatchResult>
  */
-class EventMatchResultFactory extends Factory
+class MatchResultFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -21,7 +21,7 @@ class EventMatchResultFactory extends Factory
     public function definition(): array
     {
         return [
-            'event_match_id' => EventMatch::factory(),
+            'match_id' => EventMatch::factory(),
             'match_decision_id' => MatchDecision::factory(),
         ];
     }
