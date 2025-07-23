@@ -60,7 +60,9 @@ class EventMatchFactory extends Factory
     public function singles(): static
     {
         return $this->state(function (array $attributes) {
-            return [];
+            return [
+                'match_type_id' => MatchType::factory()->singles(),
+            ];
         });
     }
 
