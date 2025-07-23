@@ -73,7 +73,7 @@ describe('ManagerFactory Unit Tests', function () {
 
         test('employed state works correctly', function () {
             // Arrange & Act
-            $manager = Manager::factory()->make(['status' => EmploymentStatus::Employed]);
+            $manager = Manager::factory()->employed()->create();
 
             // Assert
             expect($manager->status)->toBe(EmploymentStatus::Employed);
@@ -81,7 +81,7 @@ describe('ManagerFactory Unit Tests', function () {
 
         test('released state works correctly', function () {
             // Arrange & Act
-            $manager = Manager::factory()->make(['status' => EmploymentStatus::Released]);
+            $manager = Manager::factory()->released()->create();
 
             // Assert
             expect($manager->status)->toBe(EmploymentStatus::Released);
@@ -89,7 +89,7 @@ describe('ManagerFactory Unit Tests', function () {
 
         test('future employment state works correctly', function () {
             // Arrange & Act
-            $manager = Manager::factory()->make(['status' => EmploymentStatus::FutureEmployment]);
+            $manager = Manager::factory()->withFutureEmployment()->create();
 
             // Assert
             expect($manager->status)->toBe(EmploymentStatus::FutureEmployment);
@@ -98,11 +98,10 @@ describe('ManagerFactory Unit Tests', function () {
 
     describe('factory customization', function () {
         test('accepts custom attribute overrides', function () {
-            // Arrange & Act
-            $manager = Manager::factory()->make([
+            // Arrange & Act - Use factory state method for employed status since status is computed
+            $manager = Manager::factory()->employed()->create([
                 'first_name' => 'John',
                 'last_name' => 'Doe',
-                'status' => EmploymentStatus::Employed,
             ]);
 
             // Assert

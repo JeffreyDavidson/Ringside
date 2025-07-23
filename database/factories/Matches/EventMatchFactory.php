@@ -176,7 +176,17 @@ class EventMatchFactory extends Factory
         
         return $this->state(function (array $attributes) {
             return [];
-        })->hasAttached($titleToUse, [], 'titles');
+        })->hasAttached($titleToUse, [], 'titles')
+        ->has(MatchCompetitorFactory::new()->state([
+            'competitor_type' => Wrestler::class,
+            'competitor_id' => Wrestler::factory(),
+            'side_number' => 0,
+        ]), 'competitors')
+        ->has(MatchCompetitorFactory::new()->state([
+            'competitor_type' => Wrestler::class,
+            'competitor_id' => Wrestler::factory(),
+            'side_number' => 1,
+        ]), 'competitors');
     }
 
     public function titleDefense(): static
