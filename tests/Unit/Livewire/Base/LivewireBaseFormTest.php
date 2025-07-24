@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Base\BaseForm;
 use Livewire\Form;
+use Tests\Integration\Livewire\Base\BaseFormTest;
 
 /**
  * Unit tests for LivewireBaseForm abstract class structure.
@@ -16,7 +17,7 @@ use Livewire\Form;
  * - Generic type annotations
  *
  * @see BaseForm
- * @see Tests\Integration\Livewire\Base\BaseFormTest
+ * @see BaseFormTest
  */
 describe('BaseForm Unit Tests', function () {
     describe('class structure and inheritance', function () {

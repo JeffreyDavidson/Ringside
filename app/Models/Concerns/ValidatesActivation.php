@@ -225,10 +225,6 @@ trait ValidatesActivation
         if ($this->isCurrentlyActive()) {
             throw CannotBeActivatedException::activated();
         }
-
-        if ($this->isRetired()) {
-            throw CannotBeActivatedException::retired();
-        }
     }
 
     /**

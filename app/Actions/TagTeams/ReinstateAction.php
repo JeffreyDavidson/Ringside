@@ -7,7 +7,9 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\ReinstateAction as ManagersReinstateAction;
 use App\Actions\Wrestlers\ReinstateAction as WrestlersReinstateAction;
 use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -64,9 +66,9 @@ class ReinstateAction extends BaseTagTeamAction
 
             // Reinstate suspended wrestlers and managers who were suspended with this team
             $wrestlersToReinstate = $tagTeam->currentWrestlers
-                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestler->isSuspended());
+                ->filter(fn (Wrestler $wrestler) => $wrestler->isSuspended());
             $managersToReinstate = $tagTeam->currentManagers
-                ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isSuspended());
+                ->filter(fn (Manager $manager) => $manager->isSuspended());
 
             $this->reinstateMembers($wrestlersToReinstate, $managersToReinstate, $reinstatementDate, $this->wrestlersReinstateAction, $this->managersReinstateAction);
         });

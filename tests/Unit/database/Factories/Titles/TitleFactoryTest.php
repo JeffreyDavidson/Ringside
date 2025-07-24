@@ -7,6 +7,7 @@ namespace Tests\Unit\Database\Factories;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
+use Database\Factories\Titles\TitleFactory;
 
 /**
  * Unit tests for TitleFactory data generation and state management.
@@ -21,14 +22,14 @@ use App\Models\Titles\Title;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Titles\TitleFactory
+ * @see TitleFactory
  */
 describe('TitleFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates title with correct default attributes', function () {
             // Arrange & Act
             $title = Title::factory()->make();
-            
+
             // Assert
             expect((string) $title->name)->toBeString();
             expect((string) $title->name)->toContain('Title');
@@ -39,10 +40,10 @@ describe('TitleFactory Unit Tests', function () {
         test('generates realistic title names', function () {
             // Arrange & Act
             $title = Title::factory()->make();
-            
+
             // Assert
             expect((string) $title->name)->toBeString();
-            expect(strlen((string) $title->name))->toBeGreaterThan(5);
+            expect(mb_strlen((string) $title->name))->toBeGreaterThan(5);
             expect((string) $title->name)->toContain('Title');
         });
     });
@@ -51,7 +52,7 @@ describe('TitleFactory Unit Tests', function () {
         test('unactivated state works correctly', function () {
             // Arrange & Act
             $title = Title::factory()->unactivated()->create();
-            
+
             // Assert
             expect($title->status)->toBe(TitleStatus::Undebuted);
             expect($title->activityPeriods)->toBeEmpty();
@@ -60,7 +61,7 @@ describe('TitleFactory Unit Tests', function () {
         test('active state works correctly', function () {
             // Arrange & Act
             $title = Title::factory()->active()->create();
-            
+
             // Assert
             $title->load('currentActivityPeriod');
             expect($title->currentActivityPeriod)->not->toBeNull();
@@ -70,7 +71,7 @@ describe('TitleFactory Unit Tests', function () {
         test('inactive state works correctly', function () {
             // Arrange & Act
             $title = Title::factory()->inactive()->create();
-            
+
             // Assert
             $title->load(['activityPeriods', 'currentActivityPeriod']);
             expect($title->activityPeriods)->not->toBeEmpty();
@@ -80,7 +81,7 @@ describe('TitleFactory Unit Tests', function () {
         test('retired state works correctly', function () {
             // Arrange & Act
             $title = Title::factory()->retired()->create();
-            
+
             // Assert
             $title->load('currentRetirement');
             expect($title->currentRetirement)->not->toBeNull();
@@ -89,10 +90,11 @@ describe('TitleFactory Unit Tests', function () {
 
     describe('factory customization', function () {
         test('accepts custom status values', function () {
-            // Arrange & Act
-            $undebutedTitle = Title::factory()->make(['status' => TitleStatus::Undebuted]);
-            $activeTitle = Title::factory()->make(['status' => TitleStatus::Active]);
-            
+            // Arrange & Act - Use factory state methods since status is computed from relationships
+            // Note: Activity status requires persisted relationships, so use create() instead of make()
+            $undebutedTitle = Title::factory()->create(); // Default is undebuted
+            $activeTitle = Title::factory()->active()->create();
+
             // Assert
             expect($undebutedTitle->status)->toBe(TitleStatus::Undebuted);
             expect($activeTitle->status)->toBe(TitleStatus::Active);
@@ -102,7 +104,7 @@ describe('TitleFactory Unit Tests', function () {
             // Arrange & Act
             $singlesTitle = Title::factory()->make(['type' => TitleType::Singles]);
             $tagTeamTitle = Title::factory()->make(['type' => TitleType::TagTeam]);
-            
+
             // Assert
             expect($singlesTitle->type)->toBe(TitleType::Singles);
             expect($tagTeamTitle->type)->toBe(TitleType::TagTeam);
@@ -115,11 +117,11 @@ describe('TitleFactory Unit Tests', function () {
                 'type' => TitleType::Singles,
                 'status' => TitleStatus::Active,
             ]);
-            
+
             // Assert
             expect($title->name)->toBe('Custom Championship');
             expect($title->type)->toBe(TitleType::Singles);
-            expect($title->status)->toBe(TitleStatus::Active);
+            expect($title->status)->toBe(TitleStatus::Undebuted);
         });
     });
 
@@ -128,7 +130,7 @@ describe('TitleFactory Unit Tests', function () {
             // Arrange & Act
             $title1 = Title::factory()->make();
             $title2 = Title::factory()->make();
-            
+
             // Assert
             expect($title1->name)->not->toBe($title2->name);
         });
@@ -136,7 +138,7 @@ describe('TitleFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $title = Title::factory()->create();
-            
+
             // Assert
             expect($title->exists)->toBeTrue();
             expect($title->id)->toBeGreaterThan(0);

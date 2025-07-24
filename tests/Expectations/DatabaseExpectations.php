@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Database-specific custom expectations for testing.
@@ -87,7 +88,7 @@ expect()->extend('toExistInDatabase', function (?string $table = null, array $at
     $table = $table ?? $this->value->getTable();
     $attributes = empty($attributes) ? ['id' => $this->value->id] : $attributes;
 
-    return Illuminate\Support\Facades\DB::table($table)->where($attributes)->exists();
+    return DB::table($table)->where($attributes)->exists();
 });
 
 expect()->extend('toBePersistedCorrectly', function () {

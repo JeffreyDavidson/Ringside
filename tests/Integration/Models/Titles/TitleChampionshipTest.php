@@ -25,7 +25,7 @@ use Illuminate\Support\Carbon;
  * Consolidated from multiple championship test files to provide comprehensive
  * coverage of championship workflows, table operations, and business rules.
  *
- * @see \App\Models\Titles\TitleChampionship
+ * @see TitleChampionship
  */
 describe('TitleChampionship Model', function () {
     beforeEach(function () {
@@ -59,7 +59,7 @@ describe('TitleChampionship Model', function () {
         ]);
 
         // Note: EventMatch creation moved to individual tests when needed
-        // since won_event_match_id is now nullable and not required for basic championship testing
+        // since won_match_id is now nullable and not required for basic championship testing
     });
 
     afterEach(function () {
@@ -154,7 +154,7 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             $duration = $championship->won_at->diffInDays($championship->lost_at);
-            
+
             if ($period === 'week') {
                 expect($duration)->toBeLessThan(14);
             } elseif ($period === 'months') {
@@ -200,7 +200,7 @@ describe('TitleChampionship Model', function () {
             $allChampionships = $this->title->championships()->get();
 
             expect($allChampionships)->toHaveCount(2);
-            
+
             $championIds = $allChampionships->pluck('champion_id')->toArray();
             expect($championIds)->toContain($this->wrestler->id);
             expect($championIds)->toContain($this->secondWrestler->id);
@@ -247,7 +247,7 @@ describe('TitleChampionship Model', function () {
             $championshipsWithRelations = TitleChampionship::with(['title', 'champion'])->get();
 
             expect($championshipsWithRelations)->toHaveCount(1);
-            
+
             $championship = $championshipsWithRelations->first();
             expect($championship->relationLoaded('title'))->toBeTrue();
             expect($championship->relationLoaded('champion'))->toBeTrue();
@@ -306,7 +306,7 @@ describe('TitleChampionship Model', function () {
             $currentChampionships = TitleChampionship::where('title_id', $this->title->id)
                 ->whereNull('lost_at')
                 ->count();
-                
+
             // Note: This test shows the need for business rule validation
             expect($currentChampionships)->toBeGreaterThan(1); // Shows validation is needed
         });
@@ -349,7 +349,7 @@ describe('TitleChampionship Model', function () {
 
             // Verify total championships
             expect($this->title->championships()->count())->toBe(3);
-            
+
             // Verify current champion is the wrestler (who regained the title)
             $currentChampion = $this->title->currentChampionship->champion;
             expect($currentChampion->id)->toBe($this->wrestler->id);

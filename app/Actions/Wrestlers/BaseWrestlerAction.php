@@ -6,6 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Actions\Concerns\ManagesDates;
 use App\Actions\Managers\EmployAction as ManagersEmployAction;
+use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
@@ -38,8 +39,8 @@ abstract class BaseWrestlerAction
     protected function employCurrentManagers(Wrestler $wrestler, Carbon $employmentDate, ManagersEmployAction $managersEmployAction): void
     {
         $wrestler->currentManagers
-            ->filter(fn (\App\Models\Managers\Manager $manager) => ! $manager->isEmployed())
-            ->each(fn (\App\Models\Managers\Manager $manager) => $managersEmployAction->handle($manager, $employmentDate));
+            ->filter(fn (Manager $manager) => ! $manager->isEmployed())
+            ->each(fn (Manager $manager) => $managersEmployAction->handle($manager, $employmentDate));
     }
 
     /**

@@ -459,7 +459,6 @@ class WrestlerRepository extends BaseRepository implements ManagesEmploymentInte
             })
             ->orWhere(function (WrestlerBuilder $query): void {
                 $query->employed()
-                    ->where('status', EmploymentStatus::Employed)
                     ->whereDoesntHave('currentTagTeam');
             });
     }

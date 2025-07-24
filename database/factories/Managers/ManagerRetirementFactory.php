@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Managers;
 
 use App\Models\Managers\Manager;
@@ -20,7 +22,7 @@ class ManagerRetirementFactory extends Factory
     {
         return [
             'manager_id' => Manager::factory(),
-            'started_at' => now()->toDateTimeString()
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 

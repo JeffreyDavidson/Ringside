@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Stables\Stable;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('active stables can be retrieved', function () {
     $activeStable = Stable::factory()->active()->create();

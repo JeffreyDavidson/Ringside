@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories\Referees;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeEmployment;
 use App\Models\Referees\RefereeInjury;
@@ -92,5 +91,4 @@ class RefereeFactory extends Factory
         return $this->has(RefereeEmployment::factory()->started($start), 'employments')
             ->has(RefereeInjury::factory()->started($now), 'injuries');
     }
-
 }

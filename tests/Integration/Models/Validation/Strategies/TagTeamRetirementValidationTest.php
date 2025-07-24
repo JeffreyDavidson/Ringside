@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Exceptions\Status\CannotBeRetiredException;
-use App\Models\Validation\Strategies\TagTeamRetirementValidation;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Validation\Strategies\TagTeamRetirementValidation;
 
 /**
  * Integration tests for TagTeamRetirementValidation strategy.
@@ -26,7 +26,7 @@ describe('TagTeamRetirementValidation', function () {
             $this->strategy->validate($tagTeam);
             expectValidEntityState($tagTeam);
         } else {
-            expect(fn() => $this->strategy->validate($tagTeam))
+            expect(fn () => $this->strategy->validate($tagTeam))
                 ->toThrow(CannotBeRetiredException::class);
         }
         expect(true)->toBeTrue();
@@ -51,7 +51,7 @@ describe('TagTeamRetirementValidation', function () {
         $wrestler2 = createBookableWrestler();
 
         $tagTeam->wrestlers()->attach([$wrestler1->id, $wrestler2->id], [
-            'joined_at' => now()->subMonths(6)
+            'joined_at' => now()->subMonths(6),
         ]);
 
         // Tag team retirement validation should consider wrestler states

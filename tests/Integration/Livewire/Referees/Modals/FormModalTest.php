@@ -309,7 +309,7 @@ describe('Referees FormModal Tests', function () {
             if ($startDate !== null && $startDate !== '') {
                 expect($startDate)->toMatch('/^\d{4}-\d{2}-\d{2}/'); // YYYY-MM-DD format
             }
-            
+
             // Always verify the component executed successfully
             expect($startDate === null || is_string($startDate))->toBeTrue();
         });

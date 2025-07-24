@@ -23,8 +23,8 @@ use Illuminate\Support\Carbon;
  * @property int $event_match_id
  * @property int $champion_id
  * @property string $champion_type
- * @property int|null $won_event_match_id
- * @property int|null $lost_event_match_id
+ * @property int|null $won_match_id
+ * @property int|null $lost_match_id
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
  * @property-read EventMatch|null $wonEventMatch
@@ -68,8 +68,8 @@ class TitleChampionship extends Model
         'title_id',
         'champion_type',
         'champion_id',
-        'won_event_match_id',
-        'lost_event_match_id',
+        'won_match_id',
+        'lost_match_id',
         'won_at',
         'lost_at',
     ];
@@ -115,7 +115,7 @@ class TitleChampionship extends Model
      */
     public function wonEventMatch(): BelongsTo
     {
-        return $this->belongsTo(EventMatch::class, 'won_event_match_id');
+        return $this->belongsTo(EventMatch::class, 'won_match_id');
     }
 
     /**
@@ -125,7 +125,7 @@ class TitleChampionship extends Model
      */
     public function lostEventMatch(): BelongsTo
     {
-        return $this->belongsTo(EventMatch::class, 'lost_event_match_id');
+        return $this->belongsTo(EventMatch::class, 'lost_match_id');
     }
 
     /**

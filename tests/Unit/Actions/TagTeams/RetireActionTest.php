@@ -3,236 +3,109 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\RetireAction;
-use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
-use App\Repositories\TagTeamRepository;
-use Illuminate\Support\Carbon;
 
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
-
-    $this->tagTeamRepository = $this->mock(TagTeamRepository::class);
 });
 
 test('it retires a bookable tag team at the current datetime by default', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
-    $datetime = now();
-
-    $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
-
-    $this->tagTeamRepository
-        ->shouldReceive('release')
-        ->once()
-        ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
-            expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
-            expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
 
     resolve(RetireAction::class)->handle($tagTeam);
+    
+    // Assert the tag team was retired
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(\App\Enums\Shared\EmploymentStatus::Retired);
+    expect($tagTeam->retirements)->toHaveCount(1);
+    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it retires a bookable tag team at a specific datetime', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
     $datetime = now()->addDays(2);
 
-    $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
-
-    $this->tagTeamRepository
-        ->shouldReceive('release')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
     resolve(RetireAction::class)->handle($tagTeam, $datetime);
+    
+    // Assert the tag team was retired at the specific datetime
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(\App\Enums\Shared\EmploymentStatus::Retired);
+    expect($tagTeam->retirements)->toHaveCount(1);
+    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
 });
 
 test('it retires a released tag team at the current datetime by default', function () {
     $tagTeam = TagTeam::factory()->released()->create();
-    $datetime = now();
-
-    $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
-
-    $this->tagTeamRepository
-        ->shouldNotReceive('release');
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
-            expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
 
     resolve(RetireAction::class)->handle($tagTeam);
+    
+    // Assert the tag team was retired
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(\App\Enums\Shared\EmploymentStatus::Retired);
+    expect($tagTeam->retirements)->toHaveCount(1);
+    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it retires a released tag team at a specific datetime', function () {
+    $tagTeam = TagTeam::factory()->released()->create();
+    $datetime = now()->addDays(2);
+
+    resolve(RetireAction::class)->handle($tagTeam, $datetime);
+    
+    // Assert the tag team was retired at the specific datetime
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(\App\Enums\Shared\EmploymentStatus::Retired);
+    expect($tagTeam->retirements)->toHaveCount(1);
+    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
+});
+
+test('it throws exception when trying to retire a suspended tag team due to wrestler suspension', function () {
+    // Create bookable tag team and manually suspend it (which suspends wrestlers too)
     $tagTeam = TagTeam::factory()->bookable()->create();
-    $datetime = now()->addDays(2);
+    \App\Actions\TagTeams\SuspendAction::run($tagTeam);
 
-    $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
-
-    $this->tagTeamRepository
-        ->shouldReceive('release')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
-    resolve(RetireAction::class)->handle($tagTeam, $datetime);
+    // Expect exception because suspended wrestlers prevent tag team retirement
+    expect(fn() => resolve(RetireAction::class)->handle($tagTeam))
+        ->toThrow(\App\Exceptions\Status\CannotBeRetiredException::class);
 });
 
-test('it retires a suspended tag team at the current datetime by default', function () {
-    $tagTeam = TagTeam::factory()->suspended()->create();
-    $datetime = now();
+test('it throws exception when trying to retire a suspended tag team at specific datetime due to wrestler suspension', function () {
+    // Create bookable tag team and manually suspend it (which suspends wrestlers too)
+    $tagTeam = TagTeam::factory()->bookable()->create();
+    \App\Actions\TagTeams\SuspendAction::run($tagTeam);
+    $datetime = now()->addDays(2);
 
-    $this->tagTeamRepository
-        ->shouldReceive('reinstate')
-        ->once()
-        ->withArgs(function (TagTeam $reinstatableTagTeam, Carbon $reinstatementDate) use ($tagTeam, $datetime) {
-            expect($reinstatableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($reinstatementDate->eq($datetime))->toBeTrue();
+    // Expect exception because suspended wrestlers prevent tag team retirement
+    expect(fn() => resolve(RetireAction::class)->handle($tagTeam, $datetime))
+        ->toThrow(\App\Exceptions\Status\CannotBeRetiredException::class);
+});
 
-            return true;
-        })
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('release')
-        ->once()
-        ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
-            expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
-            expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
+test('it retires an employed tag team at the current datetime by default', function () {
+    $tagTeam = TagTeam::factory()->employed()->create();
 
     resolve(RetireAction::class)->handle($tagTeam);
+    
+    // Assert the tag team was retired
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(\App\Enums\Shared\EmploymentStatus::Retired);
+    expect($tagTeam->retirements)->toHaveCount(1);
+    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
-test('it retires a suspended tag team at a specific datetime', function () {
-    $tagTeam = TagTeam::factory()->suspended()->create();
+test('it retires an employed tag team at a specific datetime', function () {
+    $tagTeam = TagTeam::factory()->employed()->create();
     $datetime = now()->addDays(2);
 
-    $this->tagTeamRepository
-        ->shouldReceive('reinstate')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('release')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
     resolve(RetireAction::class)->handle($tagTeam, $datetime);
-});
-
-test('it retires an unbookable tag team at the current datetime by default', function () {
-    $tagTeam = TagTeam::factory()->unbookable()->create();
-    $datetime = now();
-
-    $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
-
-    $this->tagTeamRepository
-        ->shouldReceive('release')
-        ->once()
-        ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
-            expect($releasableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($releaseDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->withArgs(function (TagTeam $retirableTagTeam, Carbon $retirementDate) use ($tagTeam, $datetime) {
-            expect($retirableTagTeam->is($tagTeam))->toBeTrue()
-                ->and($retirementDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($tagTeam);
-
-    resolve(RetireAction::class)->handle($tagTeam);
-});
-
-test('it retires an unbookable tag team at a specific datetime', function () {
-    $tagTeam = TagTeam::factory()->unbookable()->create();
-    $datetime = now()->addDays(2);
-
-    $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
-
-    $this->tagTeamRepository
-        ->shouldReceive('release')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
-    $this->tagTeamRepository
-        ->shouldReceive('retire')
-        ->once()
-        ->with($tagTeam, $datetime)
-        ->andReturns($tagTeam);
-
-    resolve(RetireAction::class)->handle($tagTeam, $datetime);
+    
+    // Assert the tag team was retired at the specific datetime
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(\App\Enums\Shared\EmploymentStatus::Retired);
+    expect($tagTeam->retirements)->toHaveCount(1);
+    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
 });
 
 test('it throws exception for retiring a non retirable tag team', function ($factoryState) {

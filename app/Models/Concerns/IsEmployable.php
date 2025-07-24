@@ -273,7 +273,7 @@ trait IsEmployable
      */
     public function isUnemployed(): bool
     {
-        return !$this->isEmployed();
+        return ! $this->isEmployed();
     }
 
     /**

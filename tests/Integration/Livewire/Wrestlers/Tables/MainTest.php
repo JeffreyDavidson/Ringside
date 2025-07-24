@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
 use App\Actions\Wrestlers\InjureAction;
-use App\Actions\Wrestlers\ReleaseAction;
-use App\Actions\Wrestlers\RetireAction;
-use App\Actions\Wrestlers\SuspendAction;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;

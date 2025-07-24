@@ -7,6 +7,7 @@ namespace App\Livewire\Referees\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Referees\Forms\CreateEditForm;
 use App\Models\Referees\Referee;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Referee>
@@ -36,16 +37,16 @@ class FormModal extends BaseFormModal
     protected function getDummyDataFields(): array
     {
         return [
-            'first_name' => fn() => fake()->firstName(),
-            'last_name' => fn() => fake()->lastName(),
-            'employment_date' => fn() => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+            'first_name' => fn () => fake()->firstName(),
+            'last_name' => fn () => fake()->lastName(),
+            'employment_date' => fn () => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
         ];
     }
 
     public function mount($modelId = null): void
     {
         parent::mount($modelId);
-        
+
         // Set the title field to use full_name instead of name
         $this->modelTitleField = 'full_name';
         $this->titleField = 'full_name';
@@ -54,9 +55,9 @@ class FormModal extends BaseFormModal
     public function openModal(mixed $modelId = null): void
     {
         parent::openModal($modelId);
-        
+
         // Store original model data if editing
-        if (isset($this->model) && !is_null($this->model)) {
+        if (isset($this->model) && ! is_null($this->model)) {
             $this->originalModelData = [
                 'first_name' => $this->model->first_name,
                 'last_name' => $this->model->last_name,
@@ -66,7 +67,6 @@ class FormModal extends BaseFormModal
             $this->originalModelData = null;
         }
     }
-
 
     public function clear(): void
     {
@@ -87,7 +87,7 @@ class FormModal extends BaseFormModal
         }
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.referees.modals.form-modal');
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Events\Event;
 use App\Rules\Events\DateCanBeChanged;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * Unit tests for DateCanBeChanged validation rule.
@@ -124,7 +125,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             $rule = new DateCanBeChanged(null);
 
             // Assert
-            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(ValidationRule::class);
         });
 
         test('validate method signature matches interface', function () {

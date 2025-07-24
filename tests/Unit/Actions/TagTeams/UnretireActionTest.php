@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\UnretireAction;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\TagTeams\TagTeam;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
@@ -23,7 +23,7 @@ test('it unretires a retired tag team at the current datetime by default', funct
     $datetime = now();
 
     $this->tagTeamRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->withArgs(function (TagTeam $unretirableTagTeam, Carbon $unretireDate) use ($tagTeam, $datetime) {
             expect($unretirableTagTeam->is($tagTeam))->toBeTrue()
@@ -34,7 +34,7 @@ test('it unretires a retired tag team at the current datetime by default', funct
         ->andReturns($tagTeam);
 
     $this->tagTeamRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (TagTeam $employableTagTeam, Carbon $employmentDate) use ($tagTeam, $datetime) {
             expect($employableTagTeam->is($tagTeam))->toBeTrue()
@@ -52,13 +52,13 @@ test('it unretires a retired tag team at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->tagTeamRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
     $this->tagTeamRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);

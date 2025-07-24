@@ -73,7 +73,7 @@ class CreateEditForm extends BaseForm
      *
      * @var string|null Title type (string to prevent auto-casting issues)
      */
-    public string|null $type = '';
+    public ?string $type = '';
 
     /**
      * Title activation start date for championship history tracking.
@@ -84,7 +84,7 @@ class CreateEditForm extends BaseForm
      *
      * @var string|null Title activation start date (string to prevent auto-casting)
      */
-    public string|null $start_date = '';
+    public ?string $start_date = '';
 
     /**
      * Load additional data when editing existing title records.
@@ -118,14 +118,14 @@ class CreateEditForm extends BaseForm
     public function store(): bool
     {
         $this->validate();
-        
+
         $wasCreating = $this->isCreating();
         $result = $this->storeModel();
-        
+
         if ($result && $wasCreating) {
             $this->handlePostCreationTasks();
         }
-        
+
         return $result;
     }
 

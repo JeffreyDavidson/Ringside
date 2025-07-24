@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\InjureAction;
-use App\Exceptions\CannotBeInjuredException;
+use App\Exceptions\Status\CannotBeInjuredException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ test('it injures a bookable referee at the current datetime by default', functio
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldReceive('injure')
+        ->shouldReceive('createInjury')
         ->once()
         ->withArgs(function (Referee $injurableReferee, Carbon $injuryDate) use ($referee, $datetime) {
             expect($injurableReferee->is($referee))->toBeTrue()
@@ -39,7 +39,7 @@ test('it injures a bookable referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldReceive('injure')
+        ->shouldReceive('createInjury')
         ->once()
         ->with($referee, $datetime)
         ->andReturn($referee);

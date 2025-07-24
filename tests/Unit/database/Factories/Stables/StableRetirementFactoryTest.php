@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\Stables;
 
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableRetirement;
+use Database\Factories\Stables\StableRetirementFactory;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * realistic retirement data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Stables\StableRetirementFactory
+ * @see StableRetirementFactory
  */
 describe('StableRetirementFactory Unit Tests', function () {
     describe('default attribute generation', function () {

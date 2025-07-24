@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories\Events;
 
-use App\Enums\EventStatus;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;

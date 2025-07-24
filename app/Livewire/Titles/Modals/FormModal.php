@@ -9,13 +9,13 @@ use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Title>
  */
 class FormModal extends BaseFormModal
 {
-
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
@@ -59,11 +59,11 @@ class FormModal extends BaseFormModal
         } else {
             Gate::authorize('create', Title::class);
         }
-        
+
         parent::openModal($modelId);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.titles.modals.form-modal');
     }

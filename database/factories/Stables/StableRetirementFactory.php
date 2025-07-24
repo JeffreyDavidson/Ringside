@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Stables;
 
 use App\Models\Stables\Stable;
@@ -21,7 +23,7 @@ class StableRetirementFactory extends Factory
     {
         return [
             'stable_id' => Stable::factory(),
-            'started_at' => now()->toDateTimeString()
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 

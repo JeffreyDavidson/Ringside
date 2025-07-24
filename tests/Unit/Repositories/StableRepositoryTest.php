@@ -305,10 +305,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentWrestlers)->toHaveCount(1);
             expect($stable->fresh()->currentWrestlers->first()->id)->toBe($wrestler->id);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_wrestlers', [
                 'stable_id' => $stable->id,
-                'member_id' => $wrestler->id,
-                'member_type' => 'wrestler',
+                'wrestler_id' => $wrestler->id,
                 'joined_at' => $joinDate,
                 'left_at' => null,
             ]);
@@ -330,10 +329,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentWrestlers)->toHaveCount(0);
             expect($stable->fresh()->previousWrestlers)->toHaveCount(1);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_wrestlers', [
                 'stable_id' => $stable->id,
-                'member_id' => $wrestler->id,
-                'member_type' => 'wrestler',
+                'wrestler_id' => $wrestler->id,
                 'joined_at' => $joinDate,
                 'left_at' => $leaveDate,
             ]);
@@ -387,10 +385,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentTagTeams)->toHaveCount(1);
             expect($stable->fresh()->currentTagTeams->first()->id)->toBe($tagTeam->id);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_tag_teams', [
                 'stable_id' => $stable->id,
-                'member_id' => $tagTeam->id,
-                'member_type' => 'tagTeam',
+                'tag_team_id' => $tagTeam->id,
                 'joined_at' => $joinDate,
                 'left_at' => null,
             ]);
@@ -412,10 +409,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentTagTeams)->toHaveCount(0);
             expect($stable->fresh()->previousTagTeams)->toHaveCount(1);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_tag_teams', [
                 'stable_id' => $stable->id,
-                'member_id' => $tagTeam->id,
-                'member_type' => 'tagTeam',
+                'tag_team_id' => $tagTeam->id,
                 'joined_at' => $joinDate,
                 'left_at' => $leaveDate,
             ]);
@@ -469,10 +465,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentWrestlers)->toHaveCount(1);
             expect($stable->fresh()->currentWrestlers->first()->id)->toBe($wrestler->id);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_wrestlers', [
                 'stable_id' => $stable->id,
-                'member_id' => $wrestler->id,
-                'member_type' => 'wrestler',
+                'wrestler_id' => $wrestler->id,
                 'joined_at' => $joinDate,
                 'left_at' => null,
             ]);
@@ -491,10 +486,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentTagTeams)->toHaveCount(1);
             expect($stable->fresh()->currentTagTeams->first()->id)->toBe($tagTeam->id);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_tag_teams', [
                 'stable_id' => $stable->id,
-                'member_id' => $tagTeam->id,
-                'member_type' => 'tagTeam',
+                'tag_team_id' => $tagTeam->id,
                 'joined_at' => $joinDate,
                 'left_at' => null,
             ]);
@@ -530,10 +524,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentWrestlers)->toHaveCount(0);
             expect($stable->fresh()->previousWrestlers)->toHaveCount(1);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_wrestlers', [
                 'stable_id' => $stable->id,
-                'member_id' => $wrestler->id,
-                'member_type' => 'wrestler',
+                'wrestler_id' => $wrestler->id,
                 'joined_at' => $joinDate,
                 'left_at' => $leaveDate,
             ]);
@@ -555,10 +548,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentTagTeams)->toHaveCount(0);
             expect($stable->fresh()->previousTagTeams)->toHaveCount(1);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_tag_teams', [
                 'stable_id' => $stable->id,
-                'member_id' => $tagTeam->id,
-                'member_type' => 'tagTeam',
+                'tag_team_id' => $tagTeam->id,
                 'joined_at' => $joinDate,
                 'left_at' => $leaveDate,
             ]);
@@ -640,7 +632,7 @@ describe('StableRepository Unit Tests', function () {
             $managers = collect(); // Empty collection for deprecated managers parameter
 
             // Act
-            $this->repository->updateStableMembers($stable, $newWrestlers, $newTagTeams, $managers, $updateDate);
+            $this->repository->updateStableMembers($stable, $newWrestlers, $newTagTeams, $updateDate);
 
             // Assert
             expect($stable->fresh()->currentWrestlers)->toHaveCount(1);
@@ -662,7 +654,7 @@ describe('StableRepository Unit Tests', function () {
             $managers = collect(); // Empty collection for deprecated managers parameter
 
             // Act
-            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams, $managers);
+            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams);
 
             // Assert
             expect($stable->fresh()->currentWrestlers)->toHaveCount(0);
@@ -685,7 +677,7 @@ describe('StableRepository Unit Tests', function () {
             $managers = collect(); // Empty collection for deprecated managers parameter
 
             // Act - Update with empty collections
-            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams, $managers, $updateDate);
+            $this->repository->updateStableMembers($stable, $emptyWrestlers, $emptyTagTeams, $updateDate);
 
             // Assert
             expect($stable->fresh()->currentWrestlers)->toHaveCount(0);
@@ -785,9 +777,9 @@ describe('StableRepository Unit Tests', function () {
             expect($stable->fresh()->currentWrestlers)->toHaveCount(0);
             expect($stable->fresh()->previousWrestlers)->toHaveCount(1);
 
-            $this->assertDatabaseHas('stables_members', [
+            $this->assertDatabaseHas('stables_wrestlers', [
                 'stable_id' => $stable->id,
-                'member_id' => $wrestler->id,
+                'wrestler_id' => $wrestler->id,
                 'joined_at' => $sameDateTime,
                 'left_at' => $sameDateTime,
             ]);

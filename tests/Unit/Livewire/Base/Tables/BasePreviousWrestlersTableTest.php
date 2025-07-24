@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Base\Tables\BasePreviousWrestlersTable;
 use App\Livewire\Concerns\ShowTableTrait;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Tests\Integration\Livewire\Base\Tables\BasePreviousWrestlersTableTest;
 
 /**
  * Unit tests for BasePreviousWrestlersTable abstract class structure.
@@ -17,7 +18,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
  * - Abstract class requirements
  *
  * @see BasePreviousWrestlersTable
- * @see Tests\Integration\Livewire\Base\Tables\BasePreviousWrestlersTableTest
+ * @see BasePreviousWrestlersTableTest
  */
 describe('BasePreviousWrestlersTable Unit Tests', function () {
     describe('class structure and inheritance', function () {

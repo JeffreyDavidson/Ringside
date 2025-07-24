@@ -303,8 +303,9 @@ abstract class BaseForm extends Form
         // Try to access the field (handles both properties and accessors)
         try {
             $value = $this->formModel->{$fieldName};
+
             return (string) ($value ?? 'Unknown');
-        } catch (\Exception) {
+        } catch (Exception) {
             // Fallback for non-existent fields or other errors
             return 'Unknown';
         }

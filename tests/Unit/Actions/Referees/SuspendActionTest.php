@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\SuspendAction;
-use App\Exceptions\CannotBeSuspendedException;
+use App\Exceptions\Status\CannotBeSuspendedException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ test('it suspends a bookable referee at the current datetime by default', functi
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldReceive('suspend')
+        ->shouldReceive('createSuspension')
         ->once()
         ->withArgs(function (Referee $suspendableReferee, Carbon $suspensionDate) use ($referee, $datetime) {
             expect($suspendableReferee->is($referee))->toBeTrue()
@@ -39,7 +39,7 @@ test('it suspends a bookable referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldReceive('suspend')
+        ->shouldReceive('createSuspension')
         ->once()
         ->with($referee, $datetime)
         ->andReturn($referee);

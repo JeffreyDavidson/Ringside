@@ -243,7 +243,7 @@ describe('User Role Integration Tests', function () {
 
             // Basic user should not be able to change other users' roles either
             expect(Gate::denies('changeUserRoles', User::class))->toBeTrue();
-            
+
             // Privilege escalation protection is enforced at the policy level,
             // not by ignoring model state changes
             expect(Gate::denies('manageUsers', User::class))->toBeTrue();

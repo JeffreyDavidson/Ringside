@@ -8,11 +8,11 @@ use App\Livewire\Venues\Modals\FormModal as VenueFormModal;
 use App\Livewire\Venues\Tables\Main as VenuesTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use function Pest\Laravel\actingAs;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-
 use Livewire\Livewire;
+
+use function Pest\Laravel\actingAs;
 
 /**
  * Feature tests for complete event management workflows.

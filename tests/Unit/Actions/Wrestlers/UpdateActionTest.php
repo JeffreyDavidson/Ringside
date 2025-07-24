@@ -39,8 +39,8 @@ test('it employs an employable wrestler if start date is filled in request', fun
         ->andReturns($wrestler);
 
     $this->wrestlerRepository
-        ->shouldReceive('employ')
-        ->with($wrestler, $data->start_date)
+        ->shouldReceive('createEmployment')
+        ->with($wrestler, $data->employment_date)
         ->once()
         ->andReturn($wrestler);
 
@@ -58,5 +58,11 @@ test('it updates a future employed wrestler employment date if start date is fil
         ->with($wrestler, $data)
         ->andReturns($wrestler);
 
+    $this->wrestlerRepository
+        ->shouldReceive('createEmployment')
+        ->once()
+        ->with($wrestler, $datetime)
+        ->andReturn($wrestler);
+
     resolve(UpdateAction::class)->handle($wrestler, $data);
-})->skip();
+});

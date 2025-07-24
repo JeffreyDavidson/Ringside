@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Wrestlers;
 
 use App\Models\Wrestlers\Wrestler;
@@ -20,7 +22,7 @@ class WrestlerRetirementFactory extends Factory
     {
         return [
             'wrestler_id' => Wrestler::factory(),
-            'started_at' => now()->toDateTimeString()
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 

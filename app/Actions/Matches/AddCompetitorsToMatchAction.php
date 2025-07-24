@@ -7,21 +7,21 @@ namespace App\Actions\Matches;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddCompetitorsToMatchAction extends BaseEventMatchAction
+class AddCompetitorsToMatchAction extends BaseMatchAction
 {
     use AsAction;
 
     public function __construct(
-        EventMatchRepository $eventMatchRepository
+        MatchRepository $matchRepository
     ) {
-        parent::__construct($eventMatchRepository);
+        parent::__construct($matchRepository);
     }
 
     /**
