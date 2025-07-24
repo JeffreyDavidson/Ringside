@@ -8,6 +8,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HandlesDates;
 use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasConfig;
 use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasOptions;
 use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
+use Tests\Integration\Livewire\Components\Tables\Filters\FirstEmploymentFilterTest;
 
 /**
  * Unit tests for FirstEmploymentFilter custom filter class structure.
@@ -21,7 +22,7 @@ use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
  * - Method signatures and return types
  *
  * @see FirstEmploymentFilter
- * @see Tests\Integration\Livewire\Components\Tables\Filters\FirstEmploymentFilterTest
+ * @see FirstEmploymentFilterTest
  */
 describe('FirstEmploymentFilter Unit Tests', function () {
     describe('class structure and inheritance', function () {

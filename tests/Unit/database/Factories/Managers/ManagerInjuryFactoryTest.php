@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\Managers;
 
 use App\Models\Managers\Manager;
 use App\Models\Managers\ManagerInjury;
+use Database\Factories\Managers\ManagerInjuryFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for ManagerInjuryFactory data generation and state management.
@@ -21,24 +23,24 @@ use App\Models\Managers\ManagerInjury;
  * realistic injury data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Managers\ManagerInjuryFactory
+ * @see ManagerInjuryFactory
  */
 describe('ManagerInjuryFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates injury with correct default attributes', function () {
             // Arrange & Act
             $injury = ManagerInjury::factory()->make();
-            
+
             // Assert
             expect($injury->manager_id)->toBeInt();
-            expect($injury->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($injury->started_at)->toBeInstanceOf(Carbon::class);
             expect($injury->ended_at)->toBeNull(); // Default is current injury
         });
 
         test('creates realistic injury dates', function () {
             // Arrange & Act
             $injury = ManagerInjury::factory()->make();
-            
+
             // Assert
             expect($injury->started_at->isToday())->toBeTrue();
         });
@@ -56,7 +58,7 @@ describe('ManagerInjuryFactory Unit Tests', function () {
                 'started_at' => $injuredDate,
                 'ended_at' => null,
             ]);
-            
+
             // Assert
             expect($injury->manager_id)->toBe($manager->id);
             expect($injury->started_at->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
@@ -75,7 +77,7 @@ describe('ManagerInjuryFactory Unit Tests', function () {
                 'started_at' => $injuredDate,
                 'ended_at' => $clearedDate,
             ]);
-            
+
             // Assert
             expect($injury->manager_id)->toBe($manager->id);
             expect($injury->started_at->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
@@ -91,7 +93,7 @@ describe('ManagerInjuryFactory Unit Tests', function () {
 
             // Act
             $injury = ManagerInjury::factory()->make(['manager_id' => $manager->id]);
-            
+
             // Assert
             expect($injury->manager_id)->toBe($manager->id);
         });
@@ -106,7 +108,7 @@ describe('ManagerInjuryFactory Unit Tests', function () {
                 'started_at' => $injuredDate,
                 'ended_at' => $clearedDate,
             ]);
-            
+
             // Assert
             expect($injury->started_at->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
             expect($injury->ended_at->format('Y-m-d H:i:s'))->toBe($clearedDate->format('Y-m-d H:i:s'));
@@ -117,7 +119,7 @@ describe('ManagerInjuryFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $injury = ManagerInjury::factory()->create();
-            
+
             // Assert
             expect($injury->exists)->toBeTrue();
             expect($injury->id)->toBeGreaterThan(0);
@@ -126,9 +128,9 @@ describe('ManagerInjuryFactory Unit Tests', function () {
         test('maintains date consistency', function () {
             // Arrange & Act
             $injury = ManagerInjury::factory()->make();
-            
+
             // Assert
-            expect($injury->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($injury->started_at)->toBeInstanceOf(Carbon::class);
             if ($injury->ended_at) {
                 expect($injury->ended_at->isAfter($injury->started_at))->toBeTrue();
             }

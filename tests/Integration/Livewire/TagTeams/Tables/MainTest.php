@@ -3,11 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\EmployAction;
-use App\Actions\TagTeams\ReinstateAction;
 use App\Actions\TagTeams\ReleaseAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
-use App\Actions\TagTeams\UnretireAction;
 use App\Livewire\TagTeams\Tables\Main;
 use App\Livewire\TagTeams\Tables\TagTeamsTable;
 use App\Models\TagTeams\TagTeam;

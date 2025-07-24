@@ -12,4 +12,9 @@ class CannotBeActivatedException extends Exception
     {
         return new self('This model is already activated.');
     }
+
+    public static function retired(): self
+    {
+        return new self('This entity is retired and cannot be reactivated.');
+    }
 }

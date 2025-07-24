@@ -43,10 +43,6 @@ test('it creates a stable', function () {
         ->shouldReceive('addTagTeams')
         ->once()
         ->with($stable, $data->tagTeams, Mockery::type(Carbon::class));
-    $this->stableRepository
-        ->shouldReceive('addManagers')
-        ->once()
-        ->with($stable, $data->managers, Mockery::type(Carbon::class));
 
     // Should not create activity since no start_date provided
     $this->stableRepository

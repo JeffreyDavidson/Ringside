@@ -5,11 +5,9 @@ declare(strict_types=1);
 use App\Actions\Managers\RemoveFromCurrentWrestlersAction;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
-    Event::fake();
-
     $this->managerRepository = $this->mock(ManagerRepository::class);
 });
 
@@ -19,7 +17,7 @@ test('it can remove current wrestlers from a manager', function () {
     $this->managerRepository
         ->shouldReceive('removeFromCurrentWrestlers')
         ->once()
-        ->with($manager);
+        ->with($manager, Mockery::type(Carbon::class));
 
     resolve(RemoveFromCurrentWrestlersAction::class)->handle($manager);
 });

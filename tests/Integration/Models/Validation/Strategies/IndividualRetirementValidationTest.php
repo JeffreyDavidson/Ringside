@@ -28,7 +28,7 @@ describe('IndividualRetirementValidation', function () {
             $this->strategy->validate($wrestler);
             expectValidEntityState($wrestler);
         } else {
-            expect(fn() => $this->strategy->validate($wrestler))
+            expect(fn () => $this->strategy->validate($wrestler))
                 ->toThrow(CannotBeRetiredException::class);
         }
         expect(true)->toBeTrue();
@@ -47,12 +47,15 @@ describe('IndividualRetirementValidation', function () {
 
     describe('edge cases', function () {
         test('handles entities without hasFutureEmployment method', function () {
-            $mockEntity = new class extends Model {
-                public function hasStatus(EmploymentStatus $status): bool {
+            $mockEntity = new class extends Model
+            {
+                public function hasStatus(EmploymentStatus $status): bool
+                {
                     return false;
                 }
 
-                public function isRetired(): bool {
+                public function isRetired(): bool
+                {
                     return false;
                 }
 
@@ -65,12 +68,15 @@ describe('IndividualRetirementValidation', function () {
         });
 
         test('handles entities without isRetired method', function () {
-            $mockEntity = new class extends Model {
-                public function hasStatus(EmploymentStatus $status): bool {
+            $mockEntity = new class extends Model
+            {
+                public function hasStatus(EmploymentStatus $status): bool
+                {
                     return false;
                 }
 
-                public function hasFutureEmployment(): bool {
+                public function hasFutureEmployment(): bool
+                {
                     return false;
                 }
 
@@ -83,12 +89,15 @@ describe('IndividualRetirementValidation', function () {
         });
 
         test('handles entities without hasStatus method', function () {
-            $mockEntity = new class extends Model {
-                public function isRetired(): bool {
+            $mockEntity = new class extends Model
+            {
+                public function isRetired(): bool
+                {
                     return false;
                 }
 
-                public function hasFutureEmployment(): bool {
+                public function hasFutureEmployment(): bool
+                {
                     return false;
                 }
 

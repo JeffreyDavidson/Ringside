@@ -142,19 +142,8 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
      * @var list<string>
      */
     protected $appends = [
-        // full_name is a virtual column, no need to append
+        'status',
     ];
-
-    /**
-     * The model's default values for attributes.
-     *
-     * @var array<string, string>
-     */
-    protected $attributes = [
-        // Status is now computed from employment relationships
-    ];
-
-    // full_name is handled by virtual column in database
 
     /**
      * Get the computed status attribute.
@@ -202,7 +191,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     protected function casts(): array
     {
         return [
-            // Status is now computed from employment relationships
+            'status' => EmploymentStatus::class,
         ];
     }
 }

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\ClearInjuryAction;
-use App\Exceptions\CannotBeClearedFromInjuryException;
+use App\Exceptions\Status\CannotBeClearedFromInjuryException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
@@ -21,15 +21,14 @@ test('it clears an injury of an injured referee at the current datetime by defau
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldReceive('clearInjury')
+        ->shouldReceive('endInjury')
         ->once()
         ->withArgs(function (Referee $healedReferee, Carbon $recoveryDate) use ($referee, $datetime) {
             expect($healedReferee->is($referee))->toBeTrue()
                 ->and($recoveryDate->eq($datetime))->toBeTrue();
 
             return true;
-        })
-        ->andReturn($referee);
+        });
 
     resolve(ClearInjuryAction::class)->handle($referee);
 });
@@ -39,10 +38,9 @@ test('it clears an injury of an injured referee at a specific datetime', functio
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldReceive('clearInjury')
+        ->shouldReceive('endInjury')
         ->once()
-        ->with($referee, $datetime)
-        ->andReturn($referee);
+        ->with($referee, $datetime);
 
     resolve(ClearInjuryAction::class)->handle($referee, $datetime);
 });

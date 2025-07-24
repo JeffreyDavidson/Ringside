@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * Tests cover the tag team-specific stable membership functionality with real database
  * relationships using the stables_tag_teams pivot table.
  *
- * @see \App\Models\Stables\StableTagTeam
+ * @see StableTagTeam
  */
 describe('StableTagTeam Pivot Model', function () {
     beforeEach(function () {

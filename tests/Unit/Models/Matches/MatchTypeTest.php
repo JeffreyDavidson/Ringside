@@ -31,7 +31,6 @@ describe('MatchType Model Unit Tests', function () {
                 'name',
                 'slug',
                 'number_of_sides',
-                'competitor_types',
             ]);
         });
 

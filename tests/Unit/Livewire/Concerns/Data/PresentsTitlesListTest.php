@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Concerns\Data\PresentsTitlesList;
 use Livewire\Attributes\Computed;
+use Tests\Integration\Livewire\Concerns\Data\PresentsTitlesListTest;
 
 /**
  * Unit tests for PresentsTitlesList trait structure.
@@ -16,7 +17,7 @@ use Livewire\Attributes\Computed;
  * - Livewire computed attribute usage
  *
  * @see PresentsTitlesList
- * @see Tests\Integration\Livewire\Concerns\Data\PresentsTitlesListTest
+ * @see PresentsTitlesListTest
  */
 describe('PresentsTitlesList Unit Tests', function () {
     describe('trait structure', function () {

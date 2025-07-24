@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\TagTeams;
 
 use App\Models\TagTeams\TagTeam;
@@ -20,7 +22,7 @@ class TagTeamRetirementFactory extends Factory
     {
         return [
             'tag_team_id' => TagTeam::factory(),
-            'started_at' => now()->toDateTimeString()
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 

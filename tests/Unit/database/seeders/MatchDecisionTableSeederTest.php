@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use function Pest\Laravel\assertDatabaseCount;
-
-use function Pest\Laravel\assertDatabaseHas;
 use Illuminate\Support\Facades\Artisan;
+
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
 
 test('all needed match decisions are saved in database', function () {
     Artisan::call('db:seed', ['--class' => 'MatchDecisionsTableSeeder']);

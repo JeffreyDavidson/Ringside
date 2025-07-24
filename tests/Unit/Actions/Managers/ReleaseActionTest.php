@@ -3,18 +3,14 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\ReleaseAction;
-use App\Events\Managers\ManagerReleased;
 use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Event;
 
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
-    Event::fake();
-
     testTime()->freeze();
 
     $this->managerRepository = $this->mock(ManagerRepository::class);
@@ -25,30 +21,18 @@ test('it releases an employed manager at the current datetime by default', funct
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('createReinstatement');
-
-    $this->managerRepository
-        ->shouldNotReceive('clearInjury');
-
-    $this->managerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
                 ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
         })
-        ->once()
-        ->andReturn($manager);
+        ->once();
 
     resolve(ReleaseAction::class)->handle($manager);
 
-    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
-        expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
+    // No event is dispatched by the ReleaseAction
 });
 
 test('it releases an employed manager at a specific datetime', function () {
@@ -56,25 +40,13 @@ test('it releases an employed manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('createReinstatement');
-
-    $this->managerRepository
-        ->shouldNotReceive('clearInjury');
-
-    $this->managerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
-        ->with($manager, $datetime)
-        ->andReturn($manager);
+        ->with($manager, $datetime);
 
     resolve(ReleaseAction::class)->handle($manager, $datetime);
 
-    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
-        expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
+    // No event is dispatched by the ReleaseAction
 });
 
 test('it releases a suspended manager at the current datetime by default', function () {
@@ -82,38 +54,28 @@ test('it releases a suspended manager at the current datetime by default', funct
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('createReinstatement')
+        ->shouldReceive('endSuspension')
         ->once()
-        ->withArgs(function (Manager $reinstatableManager, Carbon $releaseDate) use ($manager, $datetime) {
-            expect($reinstatableManager->is($manager))->toBeTrue()
+        ->withArgs(function (Manager $suspendedManager, Carbon $releaseDate) use ($manager, $datetime) {
+            expect($suspendedManager->is($manager))->toBeTrue()
                 ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
-        })
-        ->andReturn($manager);
+        });
 
     $this->managerRepository
-        ->shouldNotReceive('clearInjury');
-
-    $this->managerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
                 ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
-        })
-        ->andReturn($manager);
+        });
 
     resolve(ReleaseAction::class)->handle($manager);
 
-    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
-        expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
+    // No event is dispatched by the ReleaseAction
 });
 
 test('it releases a suspended manager at a specific datetime', function () {
@@ -121,28 +83,18 @@ test('it releases a suspended manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('createReinstatement')
+        ->shouldReceive('endSuspension')
         ->once()
-        ->with($manager, $datetime)
-        ->andReturn($manager);
+        ->with($manager, $datetime);
 
     $this->managerRepository
-        ->shouldNotReceive('clearInjury');
-
-    $this->managerRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
-        ->with($manager, $datetime)
-        ->andReturn($manager);
+        ->with($manager, $datetime);
 
     resolve(ReleaseAction::class)->handle($manager, $datetime);
 
-    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
-        expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
+    // No event is dispatched by the ReleaseAction
 });
 
 test('it releases an injured manager at the current datetime by default', function () {
@@ -150,38 +102,28 @@ test('it releases an injured manager at the current datetime by default', functi
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('createReinstatement');
+        ->shouldReceive('endInjury')
+        ->once()
+        ->withArgs(function (Manager $injuredManager, Carbon $releaseDate) use ($manager, $datetime) {
+            expect($injuredManager->is($manager))->toBeTrue()
+                ->and($releaseDate->eq($datetime))->toBeTrue();
+
+            return true;
+        });
 
     $this->managerRepository
-        ->shouldReceive('clearInjury')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
             expect($releasableManager->is($manager))->toBeTrue()
                 ->and($releaseDate->eq($datetime))->toBeTrue();
 
             return true;
-        })
-        ->andReturn($manager);
-
-    $this->managerRepository
-        ->shouldReceive('release')
-        ->once()
-        ->withArgs(function (Manager $releasableManager, Carbon $releaseDate) use ($manager, $datetime) {
-            expect($releasableManager->is($manager))->toBeTrue()
-                ->and($releaseDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturn($manager);
+        });
 
     resolve(ReleaseAction::class)->handle($manager);
 
-    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
-        expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
+    // No event is dispatched by the ReleaseAction
 });
 
 test('it releases an injured manager at a specific datetime', function () {
@@ -189,28 +131,18 @@ test('it releases an injured manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('createReinstatement');
+        ->shouldReceive('endInjury')
+        ->once()
+        ->with($manager, $datetime);
 
     $this->managerRepository
-        ->shouldReceive('clearInjury')
+        ->shouldReceive('endEmployment')
         ->once()
-        ->with($manager, $datetime)
-        ->andReturn($manager);
-
-    $this->managerRepository
-        ->shouldReceive('release')
-        ->once()
-        ->with($manager, $datetime)
-        ->andReturn($manager);
+        ->with($manager, $datetime);
 
     resolve(ReleaseAction::class)->handle($manager, $datetime);
 
-    Event::assertDispatched(ManagerReleased::class, function ($event) use ($manager, $datetime) {
-        expect($event->manager->is($manager))->toBeTrue()
-            ->and($event->releaseDate->eq($datetime))->toBeTrue();
-
-        return true;
-    });
+    // No event is dispatched by the ReleaseAction
 });
 
 test('it throws an exception for releasing a non releasable manager', function ($factoryState) {

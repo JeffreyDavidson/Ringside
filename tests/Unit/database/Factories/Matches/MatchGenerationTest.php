@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
+namespace Tests\Unit\Database\Factories\Matches;
+
 use App\Enums\Titles\TitleType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchDecision;
-use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -14,7 +15,7 @@ use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 
 /**
- * Unit tests for EventMatch comprehensive generation capabilities.
+ * Unit tests for Match comprehensive generation capabilities.
  *
  * UNIT TEST SCOPE:
  * - Comprehensive match generation with full configuration
@@ -23,13 +24,13 @@ use App\Models\Wrestlers\Wrestler;
  * - Winner/loser assignment strategies and no-outcome scenarios
  * - Complex multi-competitor and multi-title scenarios
  *
- * These tests verify that the EventMatch factory can generate complex,
+ * These tests verify that the Match factory can generate complex,
  * realistic wrestling matches that comply with business rules and support
  * all match generation scenarios across the application.
  *
- * @see \Database\Factories\Matches\EventMatchFactory::generateFullMatch()
+ * @see \Database\Factories\Matches\MatchFactory::generateFullMatch()
  */
-describe('EventMatch Comprehensive Generation Unit Tests', function () {
+describe('Match Comprehensive Generation Unit Tests', function () {
     describe('basic match generation scenarios', function () {
         test('generates simple singles match with minimal config', function () {
             // Arrange & Act
@@ -301,7 +302,7 @@ describe('EventMatch Comprehensive Generation Unit Tests', function () {
                 'name' => 'No Decision',
                 'slug' => 'nodecision',
             ]);
-            
+
             // Act
             $match = EventMatch::factory()->generateFullMatch([
                 'match_type' => 'singles',

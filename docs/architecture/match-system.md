@@ -42,9 +42,9 @@ The match system handles complex wrestling match scenarios with flexible competi
 - **Rationale**: Wrestling matches have complex outcome scenarios
 
 ### Match Result Architecture
-- **EventMatchResult**: Central result record linking to match decision
-- **EventMatchWinner**: Polymorphic pivot for all match winners
-- **EventMatchLoser**: Polymorphic pivot for all match losers
+- **MatchResult**: Central result record linking to match decision
+- **MatchWinner**: Polymorphic pivot for all match winners
+- **MatchLoser**: Polymorphic pivot for all match losers
 - **MatchDecision**: Determines if winners/losers should be recorded
 
 ## Related Documentation

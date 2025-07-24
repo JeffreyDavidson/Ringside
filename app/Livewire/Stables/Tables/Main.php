@@ -19,7 +19,6 @@ use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Models\Stables\Stable;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;

@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\Managers;
 
 use App\Models\Managers\Manager;
 use App\Models\Managers\ManagerSuspension;
+use Database\Factories\Managers\ManagerSuspensionFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for ManagerSuspensionFactory data generation and state management.
@@ -21,24 +23,24 @@ use App\Models\Managers\ManagerSuspension;
  * realistic suspension data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Managers\ManagerSuspensionFactory
+ * @see ManagerSuspensionFactory
  */
 describe('ManagerSuspensionFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates suspension with correct default attributes', function () {
             // Arrange & Act
             $suspension = ManagerSuspension::factory()->make();
-            
+
             // Assert
             expect($suspension->manager_id)->toBeInt();
-            expect($suspension->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($suspension->started_at)->toBeInstanceOf(Carbon::class);
             expect($suspension->ended_at)->toBeNull(); // Default is current suspension
         });
 
         test('creates realistic suspension dates', function () {
             // Arrange & Act
             $suspension = ManagerSuspension::factory()->make();
-            
+
             // Assert
             expect($suspension->started_at->isToday())->toBeTrue();
         });
@@ -56,7 +58,7 @@ describe('ManagerSuspensionFactory Unit Tests', function () {
                 'started_at' => $suspendedDate,
                 'ended_at' => null,
             ]);
-            
+
             // Assert
             expect($suspension->manager_id)->toBe($manager->id);
             expect($suspension->started_at->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
@@ -75,7 +77,7 @@ describe('ManagerSuspensionFactory Unit Tests', function () {
                 'started_at' => $suspendedDate,
                 'ended_at' => $reinstatedDate,
             ]);
-            
+
             // Assert
             expect($suspension->manager_id)->toBe($manager->id);
             expect($suspension->started_at->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
@@ -91,7 +93,7 @@ describe('ManagerSuspensionFactory Unit Tests', function () {
 
             // Act
             $suspension = ManagerSuspension::factory()->make(['manager_id' => $manager->id]);
-            
+
             // Assert
             expect($suspension->manager_id)->toBe($manager->id);
         });
@@ -106,7 +108,7 @@ describe('ManagerSuspensionFactory Unit Tests', function () {
                 'started_at' => $suspendedDate,
                 'ended_at' => $reinstatedDate,
             ]);
-            
+
             // Assert
             expect($suspension->started_at->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
             expect($suspension->ended_at->format('Y-m-d H:i:s'))->toBe($reinstatedDate->format('Y-m-d H:i:s'));
@@ -117,7 +119,7 @@ describe('ManagerSuspensionFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $suspension = ManagerSuspension::factory()->create();
-            
+
             // Assert
             expect($suspension->exists)->toBeTrue();
             expect($suspension->id)->toBeGreaterThan(0);
@@ -126,9 +128,9 @@ describe('ManagerSuspensionFactory Unit Tests', function () {
         test('maintains date consistency', function () {
             // Arrange & Act
             $suspension = ManagerSuspension::factory()->make();
-            
+
             // Assert
-            expect($suspension->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($suspension->started_at)->toBeInstanceOf(Carbon::class);
             if ($suspension->ended_at) {
                 expect($suspension->ended_at->isAfter($suspension->started_at))->toBeTrue();
             }

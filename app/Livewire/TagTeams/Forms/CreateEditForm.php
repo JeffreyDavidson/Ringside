@@ -9,7 +9,6 @@ use App\Livewire\Concerns\ManagesEmployment;
 use App\Models\TagTeams\TagTeam;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 /**
@@ -115,7 +114,7 @@ class CreateEditForm extends BaseForm
      *
      * @var string|null Employment start date (string to prevent auto-casting issues)
      */
-    public string|null $employment_date = '';
+    public ?string $employment_date = '';
 
     /**
      * Load additional data when editing existing tag team records.
@@ -164,10 +163,10 @@ class CreateEditForm extends BaseForm
     public function store(): bool
     {
         $this->validate();
-        
+
         $wasCreating = $this->isCreating();
         $result = $this->storeModel();
-        
+
         if ($result) {
             if ($wasCreating) {
                 $this->handlePostCreationTasks();
@@ -180,7 +179,7 @@ class CreateEditForm extends BaseForm
                 }
             }
         }
-        
+
         return $result;
     }
 

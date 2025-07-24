@@ -50,8 +50,7 @@ class UpdateAction extends BaseStableAction
             $this->stableRepository->updateStableMembers(
                 $stable,
                 $stableData->wrestlers,
-                $stableData->tagTeams,
-                $stableData->managers
+                $stableData->tagTeams
             );
 
             return $stable;

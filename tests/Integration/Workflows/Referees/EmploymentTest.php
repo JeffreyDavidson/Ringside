@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\EmployAction;
-use App\Actions\Referees\InjureAction;
 use App\Actions\Referees\ReleaseAction;
-use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
@@ -78,7 +76,7 @@ describe('Referee Employment Workflows', function () {
             // Execute multi-action workflow within transaction context
             EmployAction::run($referee, Carbon::now());
             $employed = $referee->fresh();
-            
+
             // Then suspend the referee
             SuspendAction::run($employed, Carbon::now());
             $suspended = $referee->fresh();
@@ -154,6 +152,5 @@ describe('Referee Employment Workflows', function () {
             expect($released->isSuspended())->toBeFalse();
         });
     });
-
 
 });

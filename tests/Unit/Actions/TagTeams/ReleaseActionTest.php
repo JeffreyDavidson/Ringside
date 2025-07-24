@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\ReleaseAction;
-use App\Exceptions\CannotBeReleasedException;
+use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\TagTeams\TagTeam;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ test('it releases a bookable tag team at the current datetime by default', funct
     $datetime = now();
 
     $this->tagTeamRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
@@ -31,6 +31,14 @@ test('it releases a bookable tag team at the current datetime by default', funct
         })
         ->andReturns($tagTeam);
 
+    $this->tagTeamRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeManagers')
+        ->once();
+
     resolve(ReleaseAction::class)->handle($tagTeam);
 });
 
@@ -39,10 +47,18 @@ test('it releases a bookable tag team at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->tagTeamRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeManagers')
+        ->once();
 
     resolve(ReleaseAction::class)->handle($tagTeam, $datetime);
 });
@@ -52,7 +68,7 @@ test('it releases a suspended tag team at the current datetime by default', func
     $datetime = now();
 
     $this->tagTeamRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->withArgs(function (TagTeam $reinstatableTagTeam, Carbon $reinstatementDate) use ($tagTeam, $datetime) {
             expect($reinstatableTagTeam->is($tagTeam))->toBeTrue()
@@ -63,7 +79,7 @@ test('it releases a suspended tag team at the current datetime by default', func
         ->andReturns($tagTeam);
 
     $this->tagTeamRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
@@ -72,6 +88,14 @@ test('it releases a suspended tag team at the current datetime by default', func
             return true;
         })
         ->andReturns($tagTeam);
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeManagers')
+        ->once();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 });
@@ -81,29 +105,37 @@ test('it releases a suspended tag team at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->tagTeamRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
 
     $this->tagTeamRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeManagers')
+        ->once();
 
     resolve(ReleaseAction::class)->handle($tagTeam, $datetime);
 });
 
 test('it releases an unbookable tag team at the current datetime by default', function () {
-    $tagTeam = TagTeam::factory()->unbookable()->create();
+    $tagTeam = TagTeam::factory()->employed()->create();
     $datetime = now();
 
     $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->tagTeamRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (TagTeam $releasableTagTeam, Carbon $releaseDate) use ($tagTeam, $datetime) {
             expect($releasableTagTeam->is($tagTeam))->toBeTrue()
@@ -113,21 +145,37 @@ test('it releases an unbookable tag team at the current datetime by default', fu
         })
         ->andReturns($tagTeam);
 
+    $this->tagTeamRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeManagers')
+        ->once();
+
     resolve(ReleaseAction::class)->handle($tagTeam);
 });
 
 test('it releases an unbookable tag team at a specific datetime', function () {
-    $tagTeam = TagTeam::factory()->unbookable()->create();
+    $tagTeam = TagTeam::factory()->employed()->create();
     $datetime = now()->addDays(2);
 
     $this->tagTeamRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->tagTeamRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeWrestlers')
+        ->once();
+
+    $this->tagTeamRepository
+        ->shouldReceive('removeManagers')
+        ->once();
 
     resolve(ReleaseAction::class)->handle($tagTeam, $datetime);
 });

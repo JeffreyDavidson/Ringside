@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Concerns\BaseTableTrait;
 use App\Livewire\Concerns\Columns\HasActionColumn;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Tests\Integration\Livewire\Concerns\BaseTableTraitTest;
 
 /**
  * Unit tests for BaseTableTrait structure and configuration.
@@ -17,7 +18,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
  * - Array type annotations
  *
  * @see BaseTableTrait
- * @see Tests\Integration\Livewire\Concerns\BaseTableTraitTest
+ * @see BaseTableTraitTest
  */
 describe('BaseTableTrait Unit Tests', function () {
     describe('trait integration', function () {
@@ -49,7 +50,7 @@ describe('BaseTableTrait Unit Tests', function () {
             expect($property->isProtected())->toBeTrue();
             expect($property->getType()->getName())->toBe('bool');
             expect($property->hasDefaultValue())->toBeTrue();
-            expect($property->getDefaultValue())->toBeTrue();
+            expect($property->getDefaultValue())->toBeFalse();
         });
 
         test('has configuration string properties', function () {

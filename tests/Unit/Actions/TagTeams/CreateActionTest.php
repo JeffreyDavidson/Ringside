@@ -7,7 +7,6 @@ use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\TagTeamRepository;
-use Illuminate\Support\Carbon;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -35,10 +34,13 @@ test('it creates a tag team without tag team partners and employment', function 
         ->andReturns(new TagTeam());
 
     $this->tagTeamRepository
-        ->shouldNotReceive('addTagTeamPartner');
+        ->shouldNotReceive('addWrestlers');
 
     $this->tagTeamRepository
-        ->shouldNotReceive('employ');
+        ->shouldNotReceive('addManagers');
+
+    $this->tagTeamRepository
+        ->shouldNotReceive('createEmployment');
 
     resolve(CreateAction::class)->handle($data);
 });
@@ -64,31 +66,20 @@ test('it employs a tag team and tag team partners and employment when start date
         ->andReturns($tagTeam = new TagTeam());
 
     $this->tagTeamRepository
-        ->shouldReceive('addTagTeamPartner')
+        ->shouldReceive('addWrestlers')
         ->once()
-        ->withArgs(function (TagTeam $tagTeamToAddWrestlers, Wrestler $wrestlerToAdd, Carbon $joinDate) use ($tagTeam, $wrestlerA, $datetime) {
-            expect($tagTeamToAddWrestlers->is($tagTeam))->toBeTrue()
-                ->and($wrestlerToAdd->is($wrestlerA))->toBeTrue()
-                ->and($joinDate->eq($datetime))->toBeTrue();
+        ->withArgs(function ($tagTeamArg, $wrestlersCollection, $dateArg) use ($tagTeam, $datetime) {
+            expect($tagTeamArg->is($tagTeam))->toBeTrue()
+                ->and($dateArg->eq($datetime))->toBeTrue();
 
             return true;
-        })
-        ->andReturn($tagTeam);
+        });
 
     $this->tagTeamRepository
-        ->shouldReceive('addTagTeamPartner')
-        ->once()
-        ->withArgs(function (TagTeam $tagTeamToAddWrestlers, Wrestler $wrestlerToAdd, Carbon $joinDate) use ($tagTeam, $wrestlerB, $datetime) {
-            expect($tagTeamToAddWrestlers->is($tagTeam))->toBeTrue()
-                ->and($wrestlerToAdd->is($wrestlerB))->toBeTrue()
-                ->and($joinDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturn($tagTeam);
+        ->shouldNotReceive('addManagers');
 
     $this->tagTeamRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);

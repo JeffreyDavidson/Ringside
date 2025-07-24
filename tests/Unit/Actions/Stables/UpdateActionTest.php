@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\UpdateAction;
-use App\Actions\Stables\UpdateMembersAction;
 use App\Data\Stables\StableData;
-use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -28,7 +26,6 @@ test('wrestlers of stable are synced when stable is updated', function () {
         null,
         new Collection(),
         $newStableWrestlers,
-        new Collection()
     );
 
     $this->stableRepository
@@ -38,10 +35,11 @@ test('wrestlers of stable are synced when stable is updated', function () {
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldNotReceive('activate');
+        ->shouldReceive('updateStableMembers')
+        ->once();
 
-    UpdateMembersAction::shouldRun()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+    $this->stableRepository
+        ->shouldNotReceive('createActivation');
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });
@@ -58,7 +56,6 @@ test('tag teams of stable are synced when stable is updated', function () {
         null,
         $newStableTagTeams,
         new Collection(),
-        new Collection()
     );
 
     $this->stableRepository
@@ -68,41 +65,11 @@ test('tag teams of stable are synced when stable is updated', function () {
         ->andReturns($stable);
 
     $this->stableRepository
-        ->shouldNotReceive('activate');
-
-    UpdateMembersAction::shouldRun()
-        ->once()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
-
-    resolve(UpdateAction::class)->handle($stable, $data);
-});
-
-test('managers of stable are synced when stable is updated', function () {
-    $formerStableManagers = Manager::factory()->count(2)->create();
-    $stable = Stable::factory()
-        ->hasAttached($formerStableManagers, ['hired_at' => now()->toDateTimeString()])
-        ->create();
-    $newStableManagers = Manager::factory()->count(2)->create();
-
-    $data = new StableData(
-        'New Stable Name',
-        null,
-        new Collection(),
-        new Collection(),
-        $newStableManagers
-    );
+        ->shouldReceive('updateStableMembers')
+        ->once();
 
     $this->stableRepository
-        ->shouldReceive('update')
-        ->once()
-        ->with($stable, $data)
-        ->andReturns($stable);
-
-    $this->stableRepository
-        ->shouldNotReceive('activate');
-
-    UpdateMembersAction::shouldRun()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+        ->shouldNotReceive('createActivation');
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\RetireAction;
-use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
@@ -24,13 +24,13 @@ test('it retires a bookable referee at the current datetime by default', functio
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->refereeRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldNotReceive('endInjury');
 
     $this->refereeRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
@@ -41,7 +41,7 @@ test('it retires a bookable referee at the current datetime by default', functio
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
@@ -59,19 +59,19 @@ test('it retires a bookable referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->refereeRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldNotReceive('endInjury');
 
     $this->refereeRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
@@ -84,7 +84,7 @@ test('it retires a suspended referee at the current datetime by default', functi
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->withArgs(function (Referee $reinstatableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($reinstatableReferee->is($referee))->toBeTrue()
@@ -95,10 +95,10 @@ test('it retires a suspended referee at the current datetime by default', functi
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldNotReceive('endInjury');
 
     $this->refereeRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
@@ -109,7 +109,7 @@ test('it retires a suspended referee at the current datetime by default', functi
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
@@ -127,22 +127,22 @@ test('it retires a suspended referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldNotReceive('endInjury');
 
     $this->refereeRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
@@ -155,10 +155,10 @@ test('it retires an injured referee at the current datetime by default', functio
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->refereeRepository
-        ->shouldReceive('clearInjury')
+        ->shouldReceive('endInjury')
         ->once()
         ->withArgs(function (Referee $clearableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($clearableReferee->is($referee))->toBeTrue()
@@ -169,7 +169,7 @@ test('it retires an injured referee at the current datetime by default', functio
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->withArgs(function (Referee $releasableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($releasableReferee->is($referee))->toBeTrue()
@@ -180,7 +180,7 @@ test('it retires an injured referee at the current datetime by default', functio
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
@@ -198,22 +198,22 @@ test('it retires an injured referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->refereeRepository
-        ->shouldReceive('clearInjury')
+        ->shouldReceive('endInjury')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('release')
+        ->shouldReceive('endEmployment')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);
@@ -226,16 +226,16 @@ test('it retires a released referee at the current datetime by default', functio
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->refereeRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldNotReceive('endInjury');
 
     $this->refereeRepository
-        ->shouldNotReceive('release');
+        ->shouldNotReceive('endEmployment');
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->withArgs(function (Referee $retirableReferee, Carbon $retirementDate) use ($referee, $datetime) {
             expect($retirableReferee->is($referee))->toBeTrue()
@@ -253,16 +253,16 @@ test('it retires a released referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldNotReceive('reinstate');
+        ->shouldNotReceive('endSuspension');
 
     $this->refereeRepository
-        ->shouldNotReceive('clearInjury');
+        ->shouldNotReceive('endInjury');
 
     $this->refereeRepository
-        ->shouldNotReceive('release');
+        ->shouldNotReceive('endEmployment');
 
     $this->refereeRepository
-        ->shouldReceive('retire')
+        ->shouldReceive('createRetirement')
         ->once()
         ->with($referee, $datetime)
         ->andReturns($referee);

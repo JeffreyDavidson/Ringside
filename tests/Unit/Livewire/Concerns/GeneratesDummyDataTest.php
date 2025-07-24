@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\GeneratesDummyData;
+use Tests\Integration\Livewire\Concerns\GeneratesDummyDataTest;
 
 /**
  * Unit tests for GeneratesDummyData trait structure.
@@ -15,7 +16,7 @@ use App\Livewire\Concerns\GeneratesDummyData;
  * - Trait naming and namespace
  *
  * @see GeneratesDummyData
- * @see Tests\Integration\Livewire\Concerns\GeneratesDummyDataTest
+ * @see GeneratesDummyDataTest
  */
 describe('GeneratesDummyData Unit Tests', function () {
     describe('trait structure', function () {

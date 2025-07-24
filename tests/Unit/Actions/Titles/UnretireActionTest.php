@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\UnretireAction;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ test('it unretires a retired title and redirects', function () {
     $datetime = now();
 
     $this->titleRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->withArgs(function (Title $unretireTitle, Carbon $unretireDate) use ($title, $datetime) {
             expect($unretireTitle->is($title))->toBeTrue()
@@ -32,15 +32,7 @@ test('it unretires a retired title and redirects', function () {
         ->andReturn($title);
 
     $this->titleRepository
-        ->shouldReceive('activate')
-        ->once()
-        ->withArgs(function (Title $employableTitle, Carbon $unretireDate) use ($title, $datetime) {
-            expect($employableTitle->is($title))->toBeTrue()
-                ->and($unretireDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturn($title);
+        ->shouldNotReceive('createReinstatement');
 
     resolve(UnretireAction::class)->handle($title);
 });
@@ -50,16 +42,13 @@ test('it unretires a retired title at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->titleRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->with($title, $datetime)
         ->andReturn($title);
 
     $this->titleRepository
-        ->shouldReceive('activate')
-        ->once()
-        ->with($title, $datetime)
-        ->andReturn($title);
+        ->shouldNotReceive('createReinstatement');
 
     resolve(UnretireAction::class)->handle($title, $datetime);
 });

@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
  * Pivot model for stable-tag team relationships.
  *
  * This model handles the many-to-many relationship between
- * stables and tag teams. It tracks when tag teams join and 
+ * stables and tag teams. It tracks when tag teams join and
  * leave stables through timestamp fields.
  *
  * @property int $id

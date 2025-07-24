@@ -14,6 +14,7 @@ use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Database\Query\Expression;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // Replace Laravel's default make:test command with our enhanced version
-        $this->app->singleton('command.test.make', function (\Illuminate\Contracts\Foundation\Application $app) {
+        $this->app->singleton('command.test.make', function (Application $app) {
             return new EnhancedTestMakeCommand($app['files']);
         });
     }

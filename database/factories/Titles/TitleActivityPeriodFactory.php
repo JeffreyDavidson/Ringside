@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
 class TitleActivityPeriodFactory extends Factory
 {
     protected $model = TitleActivityPeriod::class;
+
     /**
      * Define the model's default state.
      *

@@ -18,5 +18,13 @@ test('it restores a deleted tag team', function () {
         ->once()
         ->with($tagTeam);
 
+    $this->tagTeamRepository
+        ->shouldReceive('addWrestlers')
+        ->zeroOrMoreTimes();
+
+    $this->tagTeamRepository
+        ->shouldReceive('addManagers')
+        ->zeroOrMoreTimes();
+
     RestoreAction::run($tagTeam);
 });

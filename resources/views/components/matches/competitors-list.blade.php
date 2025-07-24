@@ -1,9 +1,9 @@
 @aware(['match'])
 
-@foreach ($match->competitors->propertlyFormattedCompetitors() as $eventMatchCompetitors)
-    @foreach ($eventMatchCompetitors as $eventMatchCompetitor)
+@foreach ($match->competitors->propertlyFormattedCompetitors() as $MatchCompetitors)
+    @foreach ($MatchCompetitors as $MatchCompetitor)
         @php
-            $competitor = $eventMatchCompetitor->competitor;
+            $competitor = $MatchCompetitor->competitor;
             $resource = str($competitor->getTable())->replace('_', '-')->value();
         @endphp
 

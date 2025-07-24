@@ -145,14 +145,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory(): Factory
-    {
-        return UserFactory::new();
-    }
-
-    /**
      * Undocumented function
      *
      * @return HasMany<Wrestler, static>

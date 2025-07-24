@@ -263,7 +263,7 @@ describe('UsersTable Component', function () {
         test('component maintains state between interactions', function () {
             $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
             $jane = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
-            
+
             // Ensure virtual columns are computed
             $john->fresh();
             $jane->fresh();

@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
+use Database\Seeders\ManagersTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the ManagersTableSeeder correctly populates
  * the database with manager records for development and testing purposes.
  *
- * @see Database\Seeders\ManagersTableSeeder
+ * @see ManagersTableSeeder
  */
 describe('ManagersTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -51,7 +53,7 @@ describe('ManagersTableSeeder Integration Tests', function () {
                 expect($manager->first_name)->not->toBeEmpty();
                 expect($manager->last_name)->toBeString();
                 expect($manager->last_name)->not->toBeEmpty();
-                expect($manager->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
+                expect($manager->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -89,7 +91,7 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect($manager->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
+                expect($manager->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 

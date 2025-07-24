@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Concerns\Columns\HasActionColumn;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Tests\Integration\Livewire\Concerns\Columns\HasActionColumnTest;
 
 /**
  * Unit tests for HasActionColumn trait structure.
@@ -16,7 +17,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
  * - Laravel Livewire Tables integration
  *
  * @see HasActionColumn
- * @see Tests\Integration\Livewire\Concerns\Columns\HasActionColumnTest
+ * @see HasActionColumnTest
  */
 describe('HasActionColumn Unit Tests', function () {
     describe('trait structure', function () {

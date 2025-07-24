@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\Wrestlers;
 
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerSuspension;
+use Database\Factories\Wrestlers\WrestlerSuspensionFactory;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * realistic suspension data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Wrestlers\WrestlerSuspensionFactory
+ * @see WrestlerSuspensionFactory
  */
 describe('WrestlerSuspensionFactory Unit Tests', function () {
     describe('default attribute generation', function () {
