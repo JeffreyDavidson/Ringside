@@ -33,7 +33,7 @@ describe('MatchLoserFactory Unit Tests', function () {
             $loser = MatchLoser::factory()->make();
 
             // Assert
-            expect($loser->event_match_result_id)->toBeInt();
+            expect($loser->match_result_id)->toBeInt();
             expect($loser->loser_id)->toBeInt();
             expect($loser->loser_type)->toBeString();
             expect($loser->loser_type)->toBe('wrestler');
@@ -57,13 +57,13 @@ describe('MatchLoserFactory Unit Tests', function () {
 
             // Act
             $loser = MatchLoser::factory()->make([
-                'event_match_result_id' => $result->id,
+                'match_result_id' => $result->id,
                 'loser_id' => $wrestler->id,
                 'loser_type' => 'wrestler',
             ]);
 
             // Assert
-            expect($loser->event_match_result_id)->toBe($result->id);
+            expect($loser->match_result_id)->toBe($result->id);
             expect($loser->loser_id)->toBe($wrestler->id);
             expect($loser->loser_type)->toBe('wrestler');
         });
@@ -75,13 +75,13 @@ describe('MatchLoserFactory Unit Tests', function () {
 
             // Act
             $loser = MatchLoser::factory()->make([
-                'event_match_result_id' => $result->id,
+                'match_result_id' => $result->id,
                 'loser_id' => $tagTeam->id,
                 'loser_type' => 'tag_team',
             ]);
 
             // Assert
-            expect($loser->event_match_result_id)->toBe($result->id);
+            expect($loser->match_result_id)->toBe($result->id);
             expect($loser->loser_id)->toBe($tagTeam->id);
             expect($loser->loser_type)->toBe('tag_team');
         });
@@ -93,10 +93,10 @@ describe('MatchLoserFactory Unit Tests', function () {
             $result = MatchResult::factory()->create();
 
             // Act
-            $loser = MatchLoser::factory()->make(['event_match_result_id' => $result->id]);
+            $loser = MatchLoser::factory()->make(['match_result_id' => $result->id]);
 
             // Assert
-            expect($loser->event_match_result_id)->toBe($result->id);
+            expect($loser->match_result_id)->toBe($result->id);
         });
 
         test('accepts custom loser configuration', function () {
@@ -156,7 +156,7 @@ describe('MatchLoserFactory Unit Tests', function () {
             $loser = MatchLoser::factory()->make();
 
             // Assert
-            expect($loser->event_match_result_id)->toBeInt();
+            expect($loser->match_result_id)->toBeInt();
             expect($loser->loser_id)->toBeInt();
             expect($loser->loser_type)->toBeString();
         });

@@ -23,7 +23,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Singles match', function () {
-        $matchType = MatchType::factory()->create(['name' => 'Singles']);
+        $matchType = MatchType::factory()->singles()->create();
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
@@ -36,7 +36,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Tag Team match', function () {
-        $matchType = MatchType::factory()->create(['name' => 'Tag Team']);
+        $matchType = MatchType::factory()->tagTeam()->create();
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
@@ -48,7 +48,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Triple Threat match', function () {
-        $matchType = MatchType::factory()->create(['name' => 'Triple Threat']);
+        $matchType = MatchType::factory()->tripleThreat()->create();
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
@@ -62,7 +62,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Fatal Four Way match', function () {
-        $matchType = MatchType::factory()->create(['name' => 'Fatal 4 Way']);
+        $matchType = MatchType::factory()->fatalFourWay()->create();
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
@@ -76,7 +76,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Battle Royal match', function () {
-        $matchType = MatchType::factory()->create(['name' => 'Battle Royal']);
+        $matchType = MatchType::factory()->battleRoyal()->create();
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
@@ -89,8 +89,8 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('clears competitor data when match type changes', function () {
-        $singlesType = MatchType::factory()->create(['name' => 'Singles']);
-        $tagTeamType = MatchType::factory()->create(['name' => 'Tag Team']);
+        $singlesType = MatchType::factory()->singles()->create();
+        $tagTeamType = MatchType::factory()->tagTeam()->create();
 
         $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')

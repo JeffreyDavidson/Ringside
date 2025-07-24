@@ -23,7 +23,7 @@ class MatchLoserFactory extends Factory
     {
         return [
             'match_result_id' => MatchResult::factory(),
-            'loser_type' => Wrestler::class,
+            'loser_type' => 'wrestler',
             'loser_id' => Wrestler::factory(),
         ];
     }
@@ -34,7 +34,7 @@ class MatchLoserFactory extends Factory
     public function wrestler(): static
     {
         return $this->state([
-            'loser_type' => Wrestler::class,
+            'loser_type' => 'wrestler',
             'loser_id' => Wrestler::factory(),
         ]);
     }
@@ -45,7 +45,7 @@ class MatchLoserFactory extends Factory
     public function tagTeam(): static
     {
         return $this->state([
-            'loser_type' => TagTeam::class,
+            'loser_type' => 'tagTeam',
             'loser_id' => TagTeam::factory(),
         ]);
     }

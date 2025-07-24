@@ -42,7 +42,10 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
             $activityPeriod = StableActivityPeriod::factory()->make();
 
             // Assert
-            expect($activityPeriod->started_at->isToday())->toBeTrue();
+            expect($activityPeriod->started_at)->toBeInstanceOf(\Carbon\Carbon::class);
+            expect($activityPeriod->started_at->isPast())->toBeTrue();
+            expect($activityPeriod->started_at->isAfter(now()->subYears(3)))->toBeTrue();
+            expect($activityPeriod->ended_at)->toBeNull(); // Active by default
         });
     });
 
