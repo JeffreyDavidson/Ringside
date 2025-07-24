@@ -27,8 +27,7 @@ test('wrestlers of stable are synced when stable is updated', function () {
         'New Stable Name',
         null,
         new Collection(),
-        $newStableWrestlers,
-        new Collection()
+        $newStableWrestlers
     );
 
     $this->stableRepository
@@ -40,7 +39,7 @@ test('wrestlers of stable are synced when stable is updated', function () {
     $this->stableRepository
         ->shouldReceive('updateStableMembers')
         ->once()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+        ->with($stable, $data->wrestlers, $data->tagTeams);
 
     // UpdateMembersAction::shouldRun()
     //     ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
@@ -59,7 +58,6 @@ test('tag teams of stable are synced when stable is updated', function () {
         'New Stable Name',
         null,
         $newStableTagTeams,
-        new Collection(),
         new Collection()
     );
 
@@ -72,7 +70,7 @@ test('tag teams of stable are synced when stable is updated', function () {
     $this->stableRepository
         ->shouldReceive('updateStableMembers')
         ->once()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+        ->with($stable, $data->wrestlers, $data->tagTeams);
 
     // UpdateMembersAction::shouldRun()
     //     ->once()
@@ -91,7 +89,6 @@ test('it throws exception when trying to change establishment date of active sta
     $data = new StableData(
         'New Stable Name',
         $newDate,
-        new Collection(),
         new Collection(),
         new Collection()
     );
@@ -116,7 +113,6 @@ test('it allows establishment date change for inactive stable', function () {
         'New Stable Name',
         $newDate,
         new Collection(),
-        new Collection(),
         new Collection()
     );
 
@@ -134,7 +130,7 @@ test('it allows establishment date change for inactive stable', function () {
     $this->stableRepository
         ->shouldReceive('updateStableMembers')
         ->once()
-        ->with($stable, $data->wrestlers, $data->tagTeams, $data->managers);
+        ->with($stable, $data->wrestlers, $data->tagTeams);
 
     resolve(UpdateAction::class)->handle($stable, $data);
 });

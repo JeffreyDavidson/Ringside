@@ -23,7 +23,7 @@ use Illuminate\Support\Carbon;
 describe('Title Activation Action Integration', function () {
 
     beforeEach(function () {
-        $this->title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+        $this->title = Title::factory()->undebuted()->create();
     });
 
     describe('DebutAction integration', function () {
@@ -61,7 +61,7 @@ describe('Title Activation Action Integration', function () {
         });
 
         test('debut action integrates with status transition pipeline', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
 
             expect($title->status)->toBe(TitleStatus::Undebuted);
             expect($title->isCurrentlyActive())->toBeFalse();
@@ -78,7 +78,7 @@ describe('Title Activation Action Integration', function () {
 
     describe('multiple action integration', function () {
         test('debut then pull workflow maintains data consistency', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
 
             // Initial state
             expect($title->status)->toBe(TitleStatus::Undebuted);
@@ -100,7 +100,7 @@ describe('Title Activation Action Integration', function () {
         });
 
         test('debut with future date handles scheduling', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
             $futureDate = Carbon::now()->addDays(7);
 
             DebutAction::run($title, $futureDate);
@@ -134,7 +134,7 @@ describe('Title Activation Action Integration', function () {
 
     describe('transaction integrity', function () {
         test('debut action maintains transaction integrity', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
 
             // Verify the action handles transactions properly
             DebutAction::run($title, Carbon::now());
@@ -150,7 +150,7 @@ describe('Title Activation Action Integration', function () {
         });
 
         test('action rollback maintains data consistency on failure', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
 
             // This test would require mocking a failure scenario
             // For now, just verify normal operation doesn't leave partial state
@@ -168,7 +168,7 @@ describe('Title Activation Action Integration', function () {
 
     describe('business rule integration', function () {
         test('debut respects business validation rules', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
 
             // Test that debut follows business rules
             DebutAction::run($title, Carbon::now());
@@ -182,7 +182,7 @@ describe('Title Activation Action Integration', function () {
         });
 
         test('debut enables title activity capability', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
 
             // Undebuted title should not be active
             expect($title->isCurrentlyActive())->toBeFalse();
@@ -197,7 +197,7 @@ describe('Title Activation Action Integration', function () {
         });
 
         test('activity periods do not overlap inappropriately', function () {
-            $title = Title::factory()->create(['status' => TitleStatus::Undebuted]);
+            $title = Title::factory()->undebuted()->create();
 
             // Debut title
             DebutAction::run($title, Carbon::now());
