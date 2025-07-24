@@ -6,6 +6,7 @@ use App\Actions\Titles\RetireAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
