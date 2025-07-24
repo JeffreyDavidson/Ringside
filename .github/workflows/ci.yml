@@ -1,4 +1,4 @@
-name: run-phpstan
+name: CI Pipeline
 
 on:
   push:
@@ -7,23 +7,22 @@ on:
       - '*/*'       # matches every branch containing a single '/'
       - '**'        # matches every branch
       - '!master'
-      - '!development'
 
 jobs:
-  test:
+  ci:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         php: [8.4]
-        laravel: [12]
+        laravel: [12.*]
         stability: [prefer-dist]
 
-    name: PHPStan - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    name: CI - PHP-${{ matrix.php }} - Laravel-${{ matrix.laravel }}
     env:
-      extensionKey: phpextensions-${{ matrix.os }}-P${{ matrix.php }}
-      extensions: dom, curl, libxml, mbstring, zip, pcntl, pcov, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, exif, iconv, fileinfo
+      extensionKey: phpextensions-${{ matrix.os }}-P${{ matrix.php }}-L${{ matrix.laravel }}
+      extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, fileinfo, :psr
 
     steps:
       - name: Checkout code
@@ -41,16 +40,17 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.extcache.outputs.dir }}
-          key: ${{ steps.extcache.outputs.key }}
-          restore-keys: ${{ steps.extcache.outputs.key }}
+          key: ${{ matrix.os }}-${{ steps.extcache.outputs.key }}
+          restore-keys: ${{ matrix.os }}-${{ steps.extcache.outputs.key }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: ${{ env.extensions }}
-          coverage: pcov
-          tools: phpunit:11.4
+          tools: phpunit:latest
+          ini-values: memory_limit=512M
+          coverage: none
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,8 +65,8 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: phpstan-${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: phpstan-${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-
+          key: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-
 
       - name: Add token
         env:
@@ -76,19 +76,35 @@ jobs:
 
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer require "laravel/framework:${{ matrix.laravel }}.*" --no-interaction --no-update
+        run: composer require "laravel/framework:${{ matrix.laravel }}" --no-interaction --no-update
 
       - name: Update dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer update --${{ matrix.stability }} --no-interaction -W
+        run: composer update --${{ matrix.stability }} --no-interaction
 
-      - name: Install PHPStan
-        run: composer require larastan/larastan:^3.0 --dev --no-interaction -W
+      - name: Setup Laravel application
+        run: |
+          cp .env.testing .env
+          php artisan key:generate
+          php artisan config:cache
 
-      - uses: actions/cache@v4
+      - name: Setup problem matchers for PHPUnit
+        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Run Feature Tests
+        run: php ./vendor/bin/pest --ci --testsuite "Feature" --no-coverage --parallel
+
+      - name: Run Integration Tests
+        run: php ./vendor/bin/pest --ci --testsuite "Integration" --no-coverage --parallel
+
+      - name: Run Unit Tests
+        run: php ./vendor/bin/pest --ci --testsuite "Unit" --no-coverage --parallel
+
+      - name: Cache PHPStan results
+        uses: actions/cache@v4
         with:
           path: ./build/phpstan
           key: phpstan-${{ matrix.os }}-P${{ matrix.php }}-L${{ matrix.laravel }}
 
-      - name: Run PHPStan Tests
-        run: ./vendor/bin/phpstan analyse
+      - name: Run PHPStan Static Analysis
+        run: composer test:types

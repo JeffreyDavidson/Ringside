@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04]
-        php: [8.3]
-        laravel: [11]
+        php: [8.4]
+        laravel: [12]
         stability: [prefer-dist]
 
     name: PCOV - ${{ matrix.os }} - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
@@ -83,6 +83,12 @@ jobs:
       - name: Update dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer update --${{ matrix.stability }} --no-interaction
+
+      - name: Setup Laravel application
+        run: |
+          cp .env.testing .env
+          php artisan key:generate
+          php artisan config:cache
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
