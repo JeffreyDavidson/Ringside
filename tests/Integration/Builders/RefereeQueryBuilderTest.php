@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Roster\RefereeBuilder;
 use App\Models\Referees\Referee;
 
 /**
@@ -17,7 +18,7 @@ use App\Models\Referees\Referee;
  * all query scopes for filtering referees by their various statuses.
  * Referees are individual roster members who can be injured.
  *
- * @see App\Builders\Roster\RefereeBuilder
+ * @see RefereeBuilder
  */
 describe('RefereeQueryBuilder Unit Tests', function () {
     beforeEach(function () {

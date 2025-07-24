@@ -8,13 +8,13 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Wrestler>
  */
 class FormModal extends BaseFormModal
 {
-
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
@@ -43,7 +43,7 @@ class FormModal extends BaseFormModal
         ];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.wrestlers.modals.form-modal');
     }

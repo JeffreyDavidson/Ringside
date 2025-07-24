@@ -32,8 +32,8 @@ describe('TitleChampionship Model Unit Tests', function () {
                 'title_id',
                 'champion_type',
                 'champion_id',
-                'won_event_match_id',
-                'lost_event_match_id',
+                'won_match_id',
+                'lost_match_id',
                 'won_at',
                 'lost_at',
             ]);

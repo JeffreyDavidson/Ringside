@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Contracts\Suspendable;
 use App\Repositories\Concerns\ManagesSuspension;
 use App\Repositories\Support\BaseRepository;
 use Illuminate\Database\Eloquent\Model;
@@ -82,8 +83,8 @@ describe('ManagesSuspension Trait', function () {
                 ->with(['started_at' => $suspensionDate])
                 ->andReturn((object) ['id' => 1, 'started_at' => $suspensionDate, 'ended_at' => null]);
 
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $model->shouldReceive('suspensions')->andReturn($suspensionsMock);
 
             // Act
@@ -103,8 +104,8 @@ describe('ManagesSuspension Trait', function () {
                 ->with(['started_at' => $suspensionDate])
                 ->andReturn((object) ['started_at' => $suspensionDate]);
 
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $model->shouldReceive('suspensions')->andReturn($suspensionsMock);
 
             // Act
@@ -124,8 +125,8 @@ describe('ManagesSuspension Trait', function () {
                 ->with(['started_at' => $suspensionDate])
                 ->andReturn((object) ['started_at' => $suspensionDate, 'ended_at' => null]);
 
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $model->shouldReceive('suspensions')->andReturn($suspensionsMock);
 
             // Act & Assert
@@ -148,8 +149,8 @@ describe('ManagesSuspension Trait', function () {
                 ->once()
                 ->andReturn($currentSuspension);
 
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $model->shouldReceive('currentSuspension')->andReturn($currentSuspensionQuery);
 
             // Act
@@ -167,8 +168,8 @@ describe('ManagesSuspension Trait', function () {
                 ->once()
                 ->andReturn(null);
 
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $model->shouldReceive('currentSuspension')->andReturn($currentSuspensionQuery);
 
             // Act
@@ -191,8 +192,8 @@ describe('ManagesSuspension Trait', function () {
                 ->once()
                 ->andReturn($currentSuspension);
 
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $model->shouldReceive('currentSuspension')->andReturn($currentSuspensionQuery);
 
             // Act
@@ -214,12 +215,12 @@ describe('ManagesSuspension Trait', function () {
             $suspensionDate = Carbon::now();
 
             // Create two different mock models
-            $model1 = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            $model1 = Mockery::mock(Suspendable::class);
             $suspensions1 = Mockery::mock(HasMany::class);
             $suspensions1->shouldReceive('create')->once()->andReturn((object) []);
             $model1->shouldReceive('suspensions')->andReturn($suspensions1);
 
-            $model2 = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            $model2 = Mockery::mock(Suspendable::class);
             $suspensions2 = Mockery::mock(HasMany::class);
             $suspensions2->shouldReceive('create')->once()->andReturn((object) []);
             $model2->shouldReceive('suspensions')->andReturn($suspensions2);
@@ -240,8 +241,8 @@ describe('ManagesSuspension Trait', function () {
             $currentSuspensionQuery = Mockery::mock(HasOne::class);
             $currentSuspensionQuery->shouldReceive('first')->andReturn(null);
 
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $model->shouldReceive('currentSuspension')->andReturn($currentSuspensionQuery);
 
             // Act & Assert - Should not throw exception
@@ -256,8 +257,8 @@ describe('ManagesSuspension Trait', function () {
             };
 
             $suspensionDate = Carbon::now();
-            /** @var App\Models\Contracts\Suspendable $model */
-            $model = Mockery::mock(App\Models\Contracts\Suspendable::class);
+            /** @var Suspendable $model */
+            $model = Mockery::mock(Suspendable::class);
             $suspensions = Mockery::mock(HasMany::class);
             $suspensions->shouldReceive('create')->twice()->andReturn((object) []);
             $model->shouldReceive('suspensions')->andReturn($suspensions);

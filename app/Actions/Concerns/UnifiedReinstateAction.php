@@ -9,6 +9,7 @@ use App\Models\Contracts\HasTagTeamWrestlers;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\ProvidesCurrentTagTeams;
 use App\Models\Contracts\ProvidesCurrentWrestlers;
+use App\Models\Contracts\Suspendable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -295,7 +296,7 @@ class UnifiedReinstateAction
             if ($hasMethod) {
                 $members = $entity->{$relationshipMethod}()
                     ->get()
-                    ->filter(fn (Model $member) => $member instanceof \App\Models\Contracts\Suspendable && $member->isSuspended());
+                    ->filter(fn (Model $member) => $member instanceof Suspendable && $member->isSuspended());
 
                 foreach ($members as $member) {
                     static::run($member, $reinstatementDate, $notes);

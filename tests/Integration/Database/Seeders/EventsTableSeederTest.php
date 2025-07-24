@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\Events\Event;
+use Database\Seeders\EventsTableSeeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the EventsTableSeeder correctly populates
  * the database with event records for development and testing purposes.
  *
- * @see Database\Seeders\EventsTableSeeder
+ * @see EventsTableSeeder
  */
 describe('EventsTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -51,7 +53,7 @@ describe('EventsTableSeeder Integration Tests', function () {
             foreach ($events as $event) {
                 expect($event->name)->toBeString();
                 expect($event->name)->not->toBeEmpty();
-                expect($event->date)->toBeInstanceOf(Illuminate\Support\Carbon::class);
+                expect($event->date)->toBeInstanceOf(Carbon::class);
                 // venue_id can be null for future events without assigned venues
                 if ($event->venue_id !== null) {
                     expect($event->venue_id)->toBeInt();
@@ -78,7 +80,7 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($events as $event) {
-                expect($event->date)->toBeInstanceOf(Illuminate\Support\Carbon::class);
+                expect($event->date)->toBeInstanceOf(Carbon::class);
                 // Events should be in the past or future (not null)
                 expect($event->date)->not()->toBeNull();
             }

@@ -240,7 +240,7 @@ describe('VenuesTable Integration Tests', function () {
             // Create event before venue is deleted (venue gets deleted in setUp)
             $venue = Venue::factory()->create(['name' => 'Test Restore Venue']);
             $event = Event::factory()->atVenue($venue)->create();
-            
+
             // Now delete the venue
             $venue->delete();
 
@@ -251,7 +251,7 @@ describe('VenuesTable Integration Tests', function () {
 
             $restoredVenue = Venue::find($venue->id);
             $event->refresh(); // Refresh the event to get latest venue relationship
-            
+
             // Debug the relationship
             expect($restoredVenue)->not()->toBeNull();
             expect($event->venue_id)->toBe($restoredVenue->id);

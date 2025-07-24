@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Models\Wrestlers\Wrestler;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
@@ -33,7 +35,7 @@ class PreviousWrestlers extends DataTableComponent
                 $query->where('stable_id', $this->stableId)
                     ->whereNotNull('left_at');
             })
-            ->with(['stables' => function (\Illuminate\Database\Eloquent\Relations\BelongsToMany $query) {
+            ->with(['stables' => function (BelongsToMany $query) {
                 $query->where('stable_id', $this->stableId)
                     ->whereNotNull('left_at')
                     ->withPivot(['joined_at', 'left_at']);
@@ -52,13 +54,13 @@ class PreviousWrestlers extends DataTableComponent
             Column::make(__('stables.date_joined'))
                 ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->joined_at ?
                     (is_string($row->stables->first()->pivot->joined_at) ?
-                        \Carbon\Carbon::parse($row->stables->first()->pivot->joined_at)->format('Y-m-d') :
+                        Carbon::parse($row->stables->first()->pivot->joined_at)->format('Y-m-d') :
                         $row->stables->first()->pivot->joined_at->format('Y-m-d')
                     ) : ''),
             Column::make(__('stables.date_left'))
                 ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->left_at ?
                     (is_string($row->stables->first()->pivot->left_at) ?
-                        \Carbon\Carbon::parse($row->stables->first()->pivot->left_at)->format('Y-m-d') :
+                        Carbon::parse($row->stables->first()->pivot->left_at)->format('Y-m-d') :
                         $row->stables->first()->pivot->left_at->format('Y-m-d')
                     ) : ''),
         ];

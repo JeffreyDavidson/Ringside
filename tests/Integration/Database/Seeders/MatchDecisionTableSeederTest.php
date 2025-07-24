@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\Matches\MatchDecision;
+use Database\Seeders\MatchDecisionsTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -20,7 +22,7 @@ use function Pest\Laravel\assertDatabaseHas;
  * the database with all required match decision types needed for the
  * wrestling application business logic.
  *
- * @see Database\Seeders\MatchDecisionsTableSeeder
+ * @see MatchDecisionsTableSeeder
  */
 describe('MatchDecisionsTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -74,7 +76,7 @@ describe('MatchDecisionsTableSeeder Integration Tests', function () {
 
         test('all match decisions have unique names', function () {
             // Arrange
-            $matchDecisions = App\Models\Matches\MatchDecision::all();
+            $matchDecisions = MatchDecision::all();
 
             // Assert
             expect($matchDecisions->pluck('name')->unique())->toHaveCount(10);
@@ -82,7 +84,7 @@ describe('MatchDecisionsTableSeeder Integration Tests', function () {
 
         test('all match decisions have unique slugs', function () {
             // Arrange
-            $matchDecisions = App\Models\Matches\MatchDecision::all();
+            $matchDecisions = MatchDecision::all();
 
             // Assert
             expect($matchDecisions->pluck('slug')->unique())->toHaveCount(10);

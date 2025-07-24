@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -216,7 +218,7 @@ expect()->extend('toHaveDefaultBuilder', function () {
 
     $builder = $this->value->query();
 
-    return $builder instanceof Illuminate\Database\Eloquent\Builder;
+    return $builder instanceof Builder;
 });
 
 // Attribute Validation
@@ -276,7 +278,7 @@ expect()->extend('toHaveFactory', function () {
 
     $class = is_object($this->value) ? get_class($this->value) : $this->value;
 
-    return in_array(Illuminate\Database\Eloquent\Factories\HasFactory::class, class_uses_recursive($class));
+    return in_array(HasFactory::class, class_uses_recursive($class));
 });
 
 expect()->extend('toHaveWorkingFactory', function () {

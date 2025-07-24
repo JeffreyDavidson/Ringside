@@ -100,9 +100,9 @@ describe('UserBuilder Unit Tests', function () {
         test('builder supports method chaining', function () {
             // Create a test admin user to ensure we have data
             $adminUser = User::factory()->administrator()->create([
-                'status' => UserStatus::Active
+                'status' => UserStatus::Active,
             ]);
-            
+
             $result = User::query()
                 ->where('role', Role::Administrator)
                 ->where('status', UserStatus::Active)

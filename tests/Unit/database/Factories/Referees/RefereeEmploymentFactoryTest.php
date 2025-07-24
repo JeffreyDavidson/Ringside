@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\Referees;
 
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeEmployment;
+use Database\Factories\Referees\RefereeEmploymentFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for RefereeEmploymentFactory data generation and state management.
@@ -21,24 +23,24 @@ use App\Models\Referees\RefereeEmployment;
  * realistic employment data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Referees\RefereeEmploymentFactory
+ * @see RefereeEmploymentFactory
  */
 describe('RefereeEmploymentFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates employment with correct default attributes', function () {
             // Arrange & Act
             $employment = RefereeEmployment::factory()->make();
-            
+
             // Assert
             expect($employment->referee_id)->toBeInt();
-            expect($employment->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($employment->started_at)->toBeInstanceOf(Carbon::class);
             expect($employment->ended_at)->toBeNull(); // Default is current employment
         });
 
         test('creates realistic employment dates', function () {
             // Arrange & Act
             $employment = RefereeEmployment::factory()->make();
-            
+
             // Assert
             expect($employment->started_at->isToday())->toBeTrue();
         });
@@ -56,7 +58,7 @@ describe('RefereeEmploymentFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => null,
             ]);
-            
+
             // Assert
             expect($employment->referee_id)->toBe($referee->id);
             expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
@@ -75,7 +77,7 @@ describe('RefereeEmploymentFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
-            
+
             // Assert
             expect($employment->referee_id)->toBe($referee->id);
             expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
@@ -91,7 +93,7 @@ describe('RefereeEmploymentFactory Unit Tests', function () {
 
             // Act
             $employment = RefereeEmployment::factory()->make(['referee_id' => $referee->id]);
-            
+
             // Assert
             expect($employment->referee_id)->toBe($referee->id);
         });
@@ -106,7 +108,7 @@ describe('RefereeEmploymentFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
-            
+
             // Assert
             expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect($employment->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
@@ -117,7 +119,7 @@ describe('RefereeEmploymentFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $employment = RefereeEmployment::factory()->create();
-            
+
             // Assert
             expect($employment->exists)->toBeTrue();
             expect($employment->id)->toBeGreaterThan(0);
@@ -126,9 +128,9 @@ describe('RefereeEmploymentFactory Unit Tests', function () {
         test('maintains date consistency', function () {
             // Arrange & Act
             $employment = RefereeEmployment::factory()->make();
-            
+
             // Assert
-            expect($employment->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($employment->started_at)->toBeInstanceOf(Carbon::class);
             if ($employment->ended_at) {
                 expect($employment->ended_at->isAfter($employment->started_at))->toBeTrue();
             }

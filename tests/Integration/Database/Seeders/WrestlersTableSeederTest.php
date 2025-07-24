@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
+use Database\Seeders\WrestlersTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the WrestlersTableSeeder correctly populates
  * the database with wrestler records for development and testing purposes.
  *
- * @see Database\Seeders\WrestlersTableSeeder
+ * @see WrestlersTableSeeder
  */
 describe('WrestlersTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -99,7 +101,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($wrestlers as $wrestler) {
-                expect($wrestler->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
+                expect($wrestler->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 

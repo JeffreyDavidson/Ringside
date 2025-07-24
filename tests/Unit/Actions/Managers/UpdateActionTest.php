@@ -40,7 +40,7 @@ test('it employs an employable manager if start date is filled in request', func
 
     $this->managerRepository
         ->shouldReceive('createEmployment')
-        ->with($manager, $data->start_date)
+        ->with($manager, $data->employment_date)
         ->once()
         ->andReturn($manager);
 
@@ -60,9 +60,9 @@ test('it updates a future employed manager employment date if start date is fill
 
     $this->managerRepository
         ->shouldReceive('createEmployment')
-        ->with($manager, $data->start_date)
+        ->with($manager, $data->employment_date)
         ->once()
         ->andReturn($manager);
 
     resolve(UpdateAction::class)->handle($manager, $data);
-})->skip();
+});

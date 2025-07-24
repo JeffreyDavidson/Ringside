@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\ManagesEmployment;
+use Tests\Integration\Livewire\Concerns\ManagesEmploymentTest;
 
 /**
  * Unit tests for ManagesEmployment trait structure.
@@ -14,7 +15,7 @@ use App\Livewire\Concerns\ManagesEmployment;
  * - Trait naming and namespace
  *
  * @see ManagesEmployment
- * @see Tests\Integration\Livewire\Concerns\ManagesEmploymentTest
+ * @see ManagesEmploymentTest
  */
 describe('ManagesEmployment Unit Tests', function () {
     describe('trait structure', function () {

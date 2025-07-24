@@ -36,6 +36,7 @@ class StableActivityPeriodFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $startedAt = Carbon::parse($attributes['started_at']);
+
             return [
                 'ended_at' => fake()->dateTimeBetween($startedAt, 'now'),
             ];

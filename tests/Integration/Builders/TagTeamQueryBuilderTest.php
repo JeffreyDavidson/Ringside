@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Builders\TagTeamBuilder;
 use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
 
 /**
  * Unit tests for TagTeamQueryBuilder query scopes and methods.
@@ -19,7 +19,7 @@ use App\Models\Wrestlers\Wrestler;
  * all query scopes for filtering tag teams by their various statuses.
  * Note: TagTeams cannot be injured (individual people only).
  *
- * @see App\Builders\TagTeamBuilder
+ * @see TagTeamBuilder
  */
 describe('TagTeamQueryBuilder Unit Tests', function () {
     beforeEach(function () {

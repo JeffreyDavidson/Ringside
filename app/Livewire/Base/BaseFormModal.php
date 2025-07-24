@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use App\Livewire\Base\BaseForm;
-use App\Livewire\Base\BaseModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use Illuminate\Database\Eloquent\Model;
 

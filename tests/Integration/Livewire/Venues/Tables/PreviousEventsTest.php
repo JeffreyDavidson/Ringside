@@ -231,11 +231,11 @@ describe('PreviousEventsTable Integration Tests', function () {
 
             expect(property_exists($table, 'databaseTableName'))->toBeTrue();
             expect(property_exists($table, 'resourceName'))->toBeTrue();
-            
+
             $databaseTableNameProperty = $reflection->getProperty('databaseTableName');
             $databaseTableNameProperty->setAccessible(true);
             expect($databaseTableNameProperty->getValue($table))->toBe('events');
-            
+
             $resourceNameProperty = $reflection->getProperty('resourceName');
             $resourceNameProperty->setAccessible(true);
             expect($resourceNameProperty->getValue($table))->toBe('events');

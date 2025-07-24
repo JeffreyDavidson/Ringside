@@ -9,13 +9,13 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddMatchForEventAction extends BaseEventMatchAction
+class AddMatchForEventAction extends BaseMatchAction
 {
     use AsAction;
 
@@ -23,12 +23,12 @@ class AddMatchForEventAction extends BaseEventMatchAction
      * Create a new add match for event action instance.
      */
     public function __construct(
-        EventMatchRepository $eventMatchRepository,
+        MatchRepository $matchRepository,
         protected AddRefereesToMatchAction $addRefereesToMatchAction,
         protected AddTitlesToMatchAction $addTitlesToMatchAction,
         protected AddCompetitorsToMatchAction $addCompetitorsToMatchAction
     ) {
-        parent::__construct($eventMatchRepository);
+        parent::__construct($matchRepository);
     }
 
     /**
@@ -115,7 +115,7 @@ class AddMatchForEventAction extends BaseEventMatchAction
 
         return DB::transaction(function () use ($event, $eventMatchData): EventMatch {
             // Create the base match record
-            $createdMatch = $this->eventMatchRepository->createForEvent($event, $eventMatchData);
+            $createdMatch = $this->matchRepository->createForEvent($event, $eventMatchData);
 
             // Add referees for match officiating (required for all matches)
             if ($eventMatchData->referees->isNotEmpty()) {

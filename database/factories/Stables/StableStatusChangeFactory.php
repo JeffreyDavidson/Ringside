@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Stables;
 
-use App\Enums\Shared\ActivationStatus;
+use App\Enums\Stables\StableStatus;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +22,7 @@ class StableStatusChangeFactory extends Factory
     {
         return [
             'stable_id' => Stable::factory(),
-            'status' => fake()->randomElement(ActivationStatus::cases()),
+            'status' => fake()->randomElement(StableStatus::cases()),
             'changed_at' => fake()->dateTimeBetween('-1 year', 'now'),
         ];
     }
@@ -33,7 +33,7 @@ class StableStatusChangeFactory extends Factory
     public function activated(): static
     {
         return $this->state([
-            'status' => ActivationStatus::Active,
+            'status' => StableStatus::Active,
         ]);
     }
 
@@ -43,7 +43,53 @@ class StableStatusChangeFactory extends Factory
     public function deactivated(): static
     {
         return $this->state([
-            'status' => ActivationStatus::Inactive,
+            'status' => StableStatus::Inactive,
+        ]);
+    }
+
+    /**
+     * Configure the factory to create an active status change.
+     */
+    public function active(): static
+    {
+        return $this->activated();
+    }
+
+    /**
+     * Configure the factory to create an inactive status change.
+     */
+    public function inactive(): static
+    {
+        return $this->deactivated();
+    }
+
+    /**
+     * Configure the factory to create a retired status change.
+     */
+    public function retired(): static
+    {
+        return $this->state([
+            'status' => StableStatus::Retired,
+        ]);
+    }
+
+    /**
+     * Configure the factory to create an unactivated status change.
+     */
+    public function unactivated(): static
+    {
+        return $this->state([
+            'status' => StableStatus::Unformed,
+        ]);
+    }
+
+    /**
+     * Configure the factory to create a pending establishment status change.
+     */
+    public function pendingEstablishment(): static
+    {
+        return $this->state([
+            'status' => StableStatus::PendingEstablishment,
         ]);
     }
 }

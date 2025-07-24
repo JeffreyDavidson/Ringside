@@ -27,7 +27,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\EventMatchCompetitor;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
 use App\Models\Titles\TitleChampionship;
@@ -43,7 +43,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
- * @implements Bookable<EventMatchCompetitor>
+ * @implements Bookable<MatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableTagTeam, static>
  * @implements Employable<TagTeamEmployment, static>
@@ -165,12 +165,12 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     ];
 
     /**
-     * The model's default values for attributes.
+     * The accessors to append to the model's array form.
      *
-     * @var array<string, string>
+     * @var list<string>
      */
-    protected $attributes = [
-        // Status is now computed from employment relationships
+    protected $appends = [
+        'status',
     ];
 
     /**
@@ -219,7 +219,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     protected function casts(): array
     {
         return [
-            'status' => EmploymentStatus::class,
+            // Status is computed attribute that already returns EmploymentStatus enum
         ];
     }
 

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\UnretireAction;
-use App\Exceptions\CannotBeUnretiredException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
 use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
@@ -21,22 +21,11 @@ test('it unretires a retired tag team at the current datetime by default', funct
     $datetime = now();
 
     $this->stableRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->withArgs(function (Stable $unretirableStable, Carbon $unretireDate) use ($stable, $datetime) {
             expect($unretirableStable->is($stable))->toBeTrue()
                 ->and($unretireDate->eq($datetime))->toBeTrue();
-
-            return true;
-        })
-        ->andReturns($stable);
-
-    $this->stableRepository
-        ->shouldReceive('activate')
-        ->once()
-        ->withArgs(function (Stable $employableStable, Carbon $employmentDate) use ($stable, $datetime) {
-            expect($employableStable->is($stable))->toBeTrue()
-                ->and($employmentDate->eq($datetime))->toBeTrue();
 
             return true;
         })
@@ -50,13 +39,7 @@ test('it unretires a retired tag team at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->stableRepository
-        ->shouldReceive('unretire')
-        ->once()
-        ->with($stable, $datetime)
-        ->andReturns($stable);
-
-    $this->stableRepository
-        ->shouldReceive('activate')
+        ->shouldReceive('endRetirement')
         ->once()
         ->with($stable, $datetime)
         ->andReturns($stable);

@@ -117,7 +117,7 @@ test('it throws exception for retiring a suspended tag team at the current datet
         ->suspended()
         ->create();
 
-    expect(fn() => resolve(RetireAction::class)->handle($tagTeam))
+    expect(fn () => resolve(RetireAction::class)->handle($tagTeam))
         ->toThrow(CannotBeRetiredException::class);
 });
 
@@ -130,7 +130,7 @@ test('it throws exception for retiring a suspended tag team at a specific dateti
         ->create();
     $datetime = now()->addDays(2);
 
-    expect(fn() => resolve(RetireAction::class)->handle($tagTeam, $datetime))
+    expect(fn () => resolve(RetireAction::class)->handle($tagTeam, $datetime))
         ->toThrow(CannotBeRetiredException::class);
 });
 

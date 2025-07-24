@@ -37,7 +37,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-
     /**
      * User's first name for identification and display purposes.
      *
@@ -108,7 +107,7 @@ class CreateEditForm extends BaseForm
         // Clear password fields for security when editing existing users
         $this->password = '';
         $this->password_confirmation = '';
-        
+
         // Additional user data can be loaded here as needed:
         // $this->roles = $this->formModel?->roles->pluck('name')->toArray() ?? [];
     }

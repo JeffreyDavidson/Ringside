@@ -11,8 +11,8 @@ use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\Contracts\EventMatchRepositoryInterface;
-use Tests\Unit\Repositories\EventMatchRepositoryTest;
+use App\Repositories\Contracts\MatchRepositoryInterface;
+use Tests\Unit\Repositories\MatchRepositoryTest;
 
 /**
  * Repository for EventMatch model business operations and data persistence.
@@ -21,9 +21,9 @@ use Tests\Unit\Repositories\EventMatchRepositoryTest;
  * participant management (wrestlers, tag teams, referees, titles), and
  * side number assignment for competitive match organization.
  *
- * @see EventMatchRepositoryTest
+ * @see MatchRepositoryTest
  */
-class EventMatchRepository implements EventMatchRepositoryInterface
+class MatchRepository implements MatchRepositoryInterface
 {
     /**
      * Create a new event match for a given event with the given data.

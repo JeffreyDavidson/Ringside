@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
  * - Cross-action data consistency
  * - Transaction integrity across multiple actions
  * - Complex business process validation
- * 
+ *
  * Note: TagTeams have complex wrestler requirements for suspension/retirement actions,
  * so this test focuses on core employ/release workflows.
  */
@@ -175,7 +175,7 @@ describe('TagTeam Employment Workflows', function () {
 
             $refreshedTagTeam = $tagTeam->fresh();
             expect($refreshedTagTeam->status)->toBe(EmploymentStatus::FutureEmployment);
-            
+
             // Future employment won't be current until the date arrives
             $futureEmployment = $refreshedTagTeam->employments()->latest()->first();
             expect($futureEmployment->started_at->toDateTimeString())
@@ -192,7 +192,7 @@ describe('TagTeam Employment Workflows', function () {
             // Multiple release/employ cycles
             ReleaseAction::run($tagTeam, Carbon::now());
             expect($tagTeam->fresh()->employments()->whereNull('ended_at')->count())->toBe(0);
-            
+
             EmployAction::run($tagTeam, Carbon::now());
             expect($tagTeam->fresh()->employments()->whereNull('ended_at')->count())->toBe(1);
 

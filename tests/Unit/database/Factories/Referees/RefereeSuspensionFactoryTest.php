@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\Referees;
 
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeSuspension;
+use Database\Factories\Referees\RefereeSuspensionFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for RefereeSuspensionFactory data generation and state management.
@@ -21,7 +23,7 @@ use App\Models\Referees\RefereeSuspension;
  * realistic suspension data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Referees\RefereeSuspensionFactory
+ * @see RefereeSuspensionFactory
  */
 describe('RefereeSuspensionFactory Unit Tests', function () {
     describe('default attribute generation', function () {
@@ -31,7 +33,7 @@ describe('RefereeSuspensionFactory Unit Tests', function () {
 
             // Assert
             expect($suspension->referee_id)->toBeInt();
-            expect($suspension->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($suspension->started_at)->toBeInstanceOf(Carbon::class);
             expect($suspension->ended_at)->toBeNull(); // Default is current suspension
         });
 
@@ -128,7 +130,7 @@ describe('RefereeSuspensionFactory Unit Tests', function () {
             $suspension = RefereeSuspension::factory()->make();
 
             // Assert
-            expect($suspension->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($suspension->started_at)->toBeInstanceOf(Carbon::class);
             if ($suspension->ended_at) {
                 expect($suspension->ended_at->isAfter($suspension->started_at))->toBeTrue();
             }

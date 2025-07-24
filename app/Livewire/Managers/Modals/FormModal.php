@@ -7,6 +7,7 @@ namespace App\Livewire\Managers\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Manager>
@@ -16,7 +17,7 @@ class FormModal extends BaseFormModal
     public function mount(mixed $modelId = null): void
     {
         parent::mount($modelId);
-        
+
         // Override title field to use full_name for managers
         $this->modelTitleField = 'full_name';
         $this->titleField = 'full_name';
@@ -46,7 +47,7 @@ class FormModal extends BaseFormModal
         ];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.managers.modals.form-modal');
     }

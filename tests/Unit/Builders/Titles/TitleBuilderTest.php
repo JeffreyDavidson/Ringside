@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Titles\Title;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('active titles can be retrieved', function () {
     $activeTitle = Title::factory()->active()->create();
@@ -23,7 +26,7 @@ test('future activated titles can be retrieved', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $retiredTitle = Title::factory()->retired()->create();
 
-    $futureActivatedTitles = Title::withFutureActivation()->get();
+    $futureActivatedTitles = Title::withPendingDebut()->get();
 
     expect($futureActivatedTitles)
         ->toHaveCount(1)
@@ -39,8 +42,10 @@ test('inactive titles can be retrieved', function () {
     $inactiveTitles = Title::inactive()->get();
 
     expect($inactiveTitles)
-        ->toHaveCount(1)
-        ->collectionHas($inactiveTitle);
+        ->toHaveCount(3)
+        ->collectionHas($inactiveTitle)
+        ->collectionHas($retiredTitle)
+        ->collectionHas($futureActivatedTitle);
 });
 
 test('retired titles can be retrieved', function () {

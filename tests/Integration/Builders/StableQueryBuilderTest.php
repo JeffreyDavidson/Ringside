@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Stables\StableBuilder;
 use App\Models\Stables\Stable;
 
 /**
@@ -17,7 +18,7 @@ use App\Models\Stables\Stable;
  * all query scopes for filtering stables by their various statuses.
  * Note: Stables use activity periods rather than employment for status tracking.
  *
- * @see App\Builders\Stables\StableBuilder
+ * @see StableBuilder
  */
 describe('StableQueryBuilder Unit Tests', function () {
     beforeEach(function () {

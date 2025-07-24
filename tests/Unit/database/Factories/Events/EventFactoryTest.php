@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories;
 
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use Database\Factories\Events\EventFactory;
 
 /**
  * Unit tests for EventFactory data generation and state management.
@@ -21,14 +22,14 @@ use App\Models\Events\Venue;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Events\EventFactory
+ * @see EventFactory
  */
 describe('EventFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates event with correct default attributes', function () {
             // Arrange & Act
             $event = Event::factory()->make();
-            
+
             // Assert
             expect($event->name)->toBeString();
             expect($event->name)->not->toBeEmpty();
@@ -40,17 +41,17 @@ describe('EventFactory Unit Tests', function () {
         test('generates realistic event names', function () {
             // Arrange & Act
             $event = Event::factory()->make();
-            
+
             // Assert
             expect($event->name)->toBeString();
-            expect(strlen($event->name))->toBeGreaterThan(3);
+            expect(mb_strlen($event->name))->toBeGreaterThan(3);
             expect($event->name)->toBe(ucwords($event->name));
         });
 
         test('sets default nullable fields correctly', function () {
             // Arrange & Act
             $event = Event::factory()->make();
-            
+
             // Assert
             expect($event->date)->toBeNull();
             expect($event->venue_id)->toBeNull();
@@ -69,7 +70,7 @@ describe('EventFactory Unit Tests', function () {
                 'venue_id' => $venue->id,
                 'date' => $date,
             ]);
-            
+
             // Assert
             expect($event->venue_id)->toBe($venue->id);
             expect($event->date->format('Y-m-d H:i:s'))->toBe($date->format('Y-m-d H:i:s'));
@@ -81,7 +82,7 @@ describe('EventFactory Unit Tests', function () {
 
             // Act
             $event = Event::factory()->make(['preview' => $preview]);
-            
+
             // Assert
             expect($event->preview)->toBe($preview);
         });
@@ -92,7 +93,7 @@ describe('EventFactory Unit Tests', function () {
 
             // Act
             $event = Event::factory()->make(['date' => $pastDate]);
-            
+
             // Assert
             expect($event->date->format('Y-m-d H:i:s'))->toBe($pastDate->format('Y-m-d H:i:s'));
             expect($event->date->isPast())->toBeTrue();
@@ -104,7 +105,7 @@ describe('EventFactory Unit Tests', function () {
 
             // Act
             $event = Event::factory()->make(['date' => $futureDate]);
-            
+
             // Assert
             expect($event->date->format('Y-m-d H:i:s'))->toBe($futureDate->format('Y-m-d H:i:s'));
             expect($event->date->isFuture())->toBeTrue();
@@ -118,7 +119,7 @@ describe('EventFactory Unit Tests', function () {
                 'name' => 'Custom Event',
                 'preview' => 'Custom preview content',
             ]);
-            
+
             // Assert
             expect($event->name)->toBe('Custom Event');
             expect($event->preview)->toBe('Custom preview content');
@@ -129,7 +130,7 @@ describe('EventFactory Unit Tests', function () {
             $event = Event::factory()->make([
                 'name' => 'Override Event',
             ]);
-            
+
             // Assert
             expect($event->name)->toBe('Override Event');
             expect($event->date)->toBeNull();
@@ -139,19 +140,25 @@ describe('EventFactory Unit Tests', function () {
     });
 
     describe('data consistency', function () {
-        test('generates unique event names', function () {
+        test('generates realistic event names', function () {
             // Arrange & Act
-            $event1 = Event::factory()->make();
-            $event2 = Event::factory()->make();
-            
-            // Assert
-            expect($event1->name)->not->toBe($event2->name);
+            $events = collect(range(1, 10))->map(fn () => Event::factory()->make());
+
+            // Assert - Test that names are realistic and properly formatted
+            foreach ($events as $event) {
+                expect($event->name)->toBeString()
+                    ->and($event->name)->not->toBeEmpty();
+            }
+
+            // Verify we get some variety in a larger sample (statistical uniqueness)
+            $eventNames = $events->pluck('name')->unique();
+            expect($eventNames->count())->toBeGreaterThan(1, 'Expected some variety in event names over 10 samples');
         });
 
         test('generates consistent data format', function () {
             // Arrange & Act
-            $events = collect(range(1, 5))->map(fn() => Event::factory()->make());
-            
+            $events = collect(range(1, 5))->map(fn () => Event::factory()->make());
+
             // Assert
             foreach ($events as $event) {
                 expect($event->name)->toBeString();
@@ -163,7 +170,7 @@ describe('EventFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $event = Event::factory()->create();
-            
+
             // Assert
             expect($event->exists)->toBeTrue();
             expect($event->id)->toBeGreaterThan(0);

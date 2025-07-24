@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Tests\Integration\Livewire\Components\Tables\Columns\FirstEmploymentDateColumnTest;
 
 /**
  * Unit tests for FirstEmploymentDateColumn custom column class structure.
@@ -16,7 +17,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
  * - Label callback functionality
  *
  * @see FirstEmploymentDateColumn
- * @see Tests\Integration\Livewire\Components\Tables\Columns\FirstEmploymentDateColumnTest
+ * @see FirstEmploymentDateColumnTest
  */
 describe('FirstEmploymentDateColumn Unit Tests', function () {
     describe('class structure and inheritance', function () {

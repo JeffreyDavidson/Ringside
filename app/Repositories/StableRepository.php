@@ -205,9 +205,8 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
      *
      * @param  Collection<int, Wrestler>  $wrestlers
      * @param  Collection<int, TagTeam>  $tagTeams
-     * @param  Collection<int, Manager>  $managers  (deprecated - no longer used)
      */
-    public function updateStableMembers(Stable $stable, Collection $wrestlers, Collection $tagTeams, Collection $managers, ?Carbon $date = null): void
+    public function updateStableMembers(Stable $stable, Collection $wrestlers, Collection $tagTeams, ?Carbon $date = null): void
     {
         $updateDate = $date ?? now();
 

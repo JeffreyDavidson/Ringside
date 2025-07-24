@@ -46,4 +46,44 @@ class TitleStatusChangeFactory extends Factory
             'status' => ActivationStatus::Inactive,
         ]);
     }
+
+    /**
+     * Configure the factory to create an inactive status change.
+     */
+    public function inactive(): static
+    {
+        return $this->state([
+            'status' => ActivationStatus::Inactive,
+        ]);
+    }
+
+    /**
+     * Configure the factory to create an active status change.
+     */
+    public function active(): static
+    {
+        return $this->state([
+            'status' => ActivationStatus::Active,
+        ]);
+    }
+
+    /**
+     * Configure the factory to create a retired status change.
+     */
+    public function retired(): static
+    {
+        return $this->state([
+            'status' => ActivationStatus::Retired,
+        ]);
+    }
+
+    /**
+     * Configure the factory to create an unactivated status change.
+     */
+    public function unactivated(): static
+    {
+        return $this->state([
+            'status' => ActivationStatus::Unactivated,
+        ]);
+    }
 }

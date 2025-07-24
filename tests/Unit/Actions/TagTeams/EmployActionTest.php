@@ -28,7 +28,7 @@ test('it employs an unemployed tag team at the current datetime by default', fun
     $datetime = now();
 
     $this->tagTeamRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->withArgs(function (TagTeam $employableTagTeam, Carbon $employmentDate) use ($tagTeam, $datetime) {
             expect($employableTagTeam->is($tagTeam))->toBeTrue()
@@ -51,7 +51,7 @@ test('it employs an unemployed tag team at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->tagTeamRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);

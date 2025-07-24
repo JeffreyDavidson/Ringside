@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Titles;
 
 use App\Models\Titles\Title;
@@ -20,7 +22,7 @@ class TitleRetirementFactory extends Factory
     {
         return [
             'title_id' => Title::factory(),
-            'started_at' => now()->toDateTimeString()
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 

@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
  *
  * WORKFLOW TEST SCOPE:
  * - Multi-action employment workflows
- * - Cross-action data consistency  
+ * - Cross-action data consistency
  * - Transaction integrity across multiple actions
  * - Complex business process validation
  * - Career lifecycle scenarios
@@ -311,10 +311,10 @@ describe('Wrestler Employment Workflows', function () {
             // Execute complex workflow
             EmployAction::run($wrestler, Carbon::now());
             $employed = $wrestler->fresh();
-            
+
             SuspendAction::run($employed, Carbon::now());
             $suspended = $wrestler->fresh();
-            
+
             ReinstateAction::run($suspended, Carbon::now());
             $reinstated = $wrestler->fresh();
 
@@ -355,7 +355,7 @@ describe('Wrestler Employment Workflows', function () {
 
             $refreshedWrestler = $wrestler->fresh();
             expect($refreshedWrestler->status)->toBe(EmploymentStatus::FutureEmployment);
-            
+
             // Future employment won't be current until the date arrives
             $futureEmployment = $refreshedWrestler->employments()->latest()->first();
             expect($futureEmployment->started_at->toDateTimeString())
@@ -372,10 +372,10 @@ describe('Wrestler Employment Workflows', function () {
             // Multiple injury/heal cycles
             InjureAction::run($wrestler, Carbon::now());
             expect($wrestler->fresh()->injuries()->whereNull('ended_at')->count())->toBe(1);
-            
+
             HealAction::run($wrestler, Carbon::now());
             expect($wrestler->fresh()->injuries()->whereNull('ended_at')->count())->toBe(0);
-            
+
             InjureAction::run($wrestler, Carbon::now());
             expect($wrestler->fresh()->injuries()->whereNull('ended_at')->count())->toBe(1);
 

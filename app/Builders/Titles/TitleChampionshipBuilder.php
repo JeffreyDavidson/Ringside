@@ -6,6 +6,7 @@ namespace App\Builders\Titles;
 
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Custom query builder for the TitleChampionship model.
@@ -131,7 +132,7 @@ class TitleChampionshipBuilder extends Builder
     public function withReignLength(): static
     {
         // Use database-agnostic date calculation
-        $driverName = \Illuminate\Support\Facades\DB::connection()->getDriverName();
+        $driverName = DB::connection()->getDriverName();
 
         $reignLengthSql = match ($driverName) {
             'mysql' => 'DATEDIFF(COALESCE(lost_at, NOW()), won_at) as reign_length',

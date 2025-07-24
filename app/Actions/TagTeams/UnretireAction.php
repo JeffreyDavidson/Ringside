@@ -7,7 +7,9 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\UnretireAction as ManagersUnretireAction;
 use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
 use App\Exceptions\Status\CannotBeUnretiredException;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -67,9 +69,9 @@ class UnretireAction extends BaseTagTeamAction
 
             // Unretire current wrestlers and managers who were retired with the team
             $wrestlersToUnretire = $tagTeam->currentWrestlers
-                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => $wrestler->isRetired());
+                ->filter(fn (Wrestler $wrestler) => $wrestler->isRetired());
             $managersToUnretire = $tagTeam->currentManagers
-                ->filter(fn (\App\Models\Managers\Manager $manager) => $manager->isRetired());
+                ->filter(fn (Manager $manager) => $manager->isRetired());
 
             $this->unretireMembers($wrestlersToUnretire, $managersToUnretire, $unretiredDate, $this->wrestlersUnretireAction, $this->managersUnretireAction);
 

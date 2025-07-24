@@ -9,6 +9,8 @@ use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -77,9 +79,9 @@ class RetireAction extends BaseStableAction
             // Retire current members who are available
             // Note: Managers are not direct stable members and are not retired with the stable
             $wrestlersToRetire = $stable->currentWrestlers
-                ->filter(fn (\App\Models\Wrestlers\Wrestler $wrestler) => ! $wrestler->isRetired());
+                ->filter(fn (Wrestler $wrestler) => ! $wrestler->isRetired());
             $tagTeamsToRetire = $stable->currentTagTeams
-                ->filter(fn (\App\Models\TagTeams\TagTeam $tagTeam) => ! $tagTeam->isRetired());
+                ->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isRetired());
 
             $this->retireMembers(
                 $wrestlersToRetire,

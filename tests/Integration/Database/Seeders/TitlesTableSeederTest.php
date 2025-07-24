@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\Titles\TitleStatus;
 use App\Models\Titles\Title;
+use Database\Seeders\TitlesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the TitlesTableSeeder correctly populates
  * the database with title records for development and testing purposes.
  *
- * @see Database\Seeders\TitlesTableSeeder
+ * @see TitlesTableSeeder
  */
 describe('TitlesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -49,7 +51,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
             foreach ($titles as $title) {
                 expect($title->name)->toBeString();
                 expect($title->name)->not->toBeEmpty();
-                expect($title->status)->toBeInstanceOf(App\Enums\Titles\TitleStatus::class);
+                expect($title->status)->toBeInstanceOf(TitleStatus::class);
             }
         });
 
@@ -91,7 +93,7 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($titles as $title) {
-                expect($title->status)->toBeInstanceOf(App\Enums\Titles\TitleStatus::class);
+                expect($title->status)->toBeInstanceOf(TitleStatus::class);
             }
         });
 

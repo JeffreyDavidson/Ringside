@@ -14,8 +14,8 @@ beforeEach(function () {
 
     // Create states table for testing - Sushi models need manual table creation in tests
     // to work with Laravel's validation rules like Rule::exists()
-    \Schema::dropIfExists('states');
-    \Schema::create('states', function ($table) {
+    Schema::dropIfExists('states');
+    Schema::create('states', function ($table) {
         $table->id();
         $table->string('name');
         $table->string('code');
@@ -24,13 +24,13 @@ beforeEach(function () {
 
     // Populate with all states from the Sushi model data
     collect((new State())->rows)->each(function ($stateData) {
-        \DB::table('states')->insert(array_merge($stateData, [
+        DB::table('states')->insert(array_merge($stateData, [
             'created_at' => now(),
             'updated_at' => now(),
         ]));
     });
 
-    $this->state = \DB::table('states')->where('name', 'California')->first();
+    $this->state = DB::table('states')->where('name', 'California')->first();
 });
 
 describe('Form Modal Initialization', function () {
@@ -344,11 +344,11 @@ describe('Form Modal Dummy Data', function () {
             ->call('openModal')
             ->call('fillDummyFields');
 
-        $modal->assertSet('form.name', fn($value) => str_contains($value, 'Arena'));
-        $modal->assertSet('form.street_address', fn($value) => !empty($value));
-        $modal->assertSet('form.city', fn($value) => !empty($value));
-        $modal->assertSet('form.state', fn($value) => !empty($value));
-        $modal->assertSet('form.zipcode', fn($value) => is_numeric($value) && strlen((string)$value) === 5);
+        $modal->assertSet('form.name', fn ($value) => str_contains($value, 'Arena'));
+        $modal->assertSet('form.street_address', fn ($value) => ! empty($value));
+        $modal->assertSet('form.city', fn ($value) => ! empty($value));
+        $modal->assertSet('form.state', fn ($value) => ! empty($value));
+        $modal->assertSet('form.zipcode', fn ($value) => is_numeric($value) && mb_strlen((string) $value) === 5);
     });
 
     it('can submit form with dummy data', function () {

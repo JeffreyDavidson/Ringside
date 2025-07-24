@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Rules\Matches\CorrectNumberOfSides;
+use Illuminate\Contracts\Validation\DataAwareRule;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * Unit tests for CorrectNumberOfSides validation rule.
@@ -26,8 +28,8 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             $rule = new CorrectNumberOfSides();
 
             // Assert
-            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\DataAwareRule::class);
-            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(DataAwareRule::class);
+            expect($rule)->toBeInstanceOf(ValidationRule::class);
         });
 
         test('setData method stores data correctly', function () {

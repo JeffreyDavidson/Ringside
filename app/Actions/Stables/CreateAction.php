@@ -55,7 +55,6 @@ class CreateAction extends BaseStableAction
 
             $this->stableRepository->addWrestlers($stable, $stableData->wrestlers, $joinDate);
             $this->stableRepository->addTagTeams($stable, $stableData->tagTeams, $joinDate);
-            $this->stableRepository->addManagers($stable, $stableData->managers, $joinDate);
 
             if (isset($stableData->start_date)) {
                 $this->stableRepository->createActivity($stable, $stableData->start_date);

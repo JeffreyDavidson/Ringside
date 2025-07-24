@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -15,7 +16,7 @@ class AddTagTeamPartnersAction extends BaseTagTeamAction
     /**
      * Update a given tag team with given wrestlers.
      *
-     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
     public function handle(TagTeam $tagTeam, Collection $wrestlers): void
     {

@@ -29,6 +29,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
  * - Event dispatching for real-time updates
  *
  * @author Your Name
+ *
  * @since 1.0.0
  */
 abstract class BaseTable extends DataTableComponent
@@ -42,7 +43,7 @@ abstract class BaseTable extends DataTableComponent
     /**
      * Delete a model with proper authorization checking.
      *
-     * @param Model $model The model to delete
+     * @param  Model  $model  The model to delete
      */
     protected function deleteModel(Model $model): void
     {

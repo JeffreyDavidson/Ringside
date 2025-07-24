@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\Titles;
 
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleRetirement;
+use Database\Factories\Titles\TitleRetirementFactory;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * realistic retirement data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Titles\TitleRetirementFactory
+ * @see TitleRetirementFactory
  */
 describe('TitleRetirementFactory Unit Tests', function () {
     describe('default attribute generation', function () {

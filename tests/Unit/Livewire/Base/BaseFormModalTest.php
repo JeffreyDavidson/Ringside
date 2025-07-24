@@ -6,6 +6,7 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Base\BaseModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use Livewire\Component;
+use Tests\Integration\Livewire\Base\BaseFormModalTest;
 
 /**
  * Unit tests for BaseFormModal abstract class structure.
@@ -18,7 +19,7 @@ use Livewire\Component;
  * - Class constants and configuration
  *
  * @see BaseFormModal
- * @see Tests\Integration\Livewire\Base\BaseFormModalTest
+ * @see BaseFormModalTest
  */
 describe('BaseFormModal Unit Tests', function () {
     describe('class structure and inheritance', function () {

@@ -8,6 +8,9 @@ use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchType;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 
@@ -57,13 +60,12 @@ class CreateEditForm extends BaseForm
      * Links the match to a specific wrestling event where it will take place.
      * This is always required since matches cannot exist without an event.
      * Provided by route model binding, not user input.
-     * 
+     *
      * Default value of 0 indicates uninitialized - will be set during component mount.
      *
      * @var int Event database ID
      */
     public int $eventId = 0;
-
 
     /**
      * Match promotional preview content for marketing purposes.
@@ -125,14 +127,14 @@ class CreateEditForm extends BaseForm
     public function store(): bool
     {
         $result = parent::store();
-        
+
         if ($result) {
             $this->syncRelationships();
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Update an existing event match.
      *
@@ -143,11 +145,11 @@ class CreateEditForm extends BaseForm
     public function update(): bool
     {
         $result = parent::update();
-        
+
         if ($result) {
             $this->syncRelationships();
         }
-        
+
         return $result;
     }
 
@@ -233,7 +235,7 @@ class CreateEditForm extends BaseForm
             if (isset($sideCompetitors['tag_teams'])) {
                 foreach ($sideCompetitors['tag_teams'] as $tagTeamId) {
                     $this->formModel->competitors()->create([
-                        'competitor_type' => \App\Models\TagTeams\TagTeam::class,
+                        'competitor_type' => TagTeam::class,
                         'competitor_id' => $tagTeamId,
                         'side_number' => $sideNumber,
                     ]);
@@ -274,7 +276,7 @@ class CreateEditForm extends BaseForm
     private function getNextMatchNumber(): int
     {
         $maxMatchNumber = EventMatch::where('event_id', $this->eventId)->max('match_number');
-        
+
         return ($maxMatchNumber ?? 0) + 1;
     }
 
@@ -317,20 +319,20 @@ class CreateEditForm extends BaseForm
             'referees.*' => ['integer', 'exists:referees,id'],
             'titles' => ['sometimes', 'array'],
             'titles.*' => [
-                'integer', 
+                'integer',
                 'exists:titles,id',
                 function ($attribute, $value, $fail) {
-                    $title = \App\Models\Titles\Title::find($value);
+                    $title = Title::find($value);
                     if ($title && $title->status->value !== 'active') {
                         $fail('The selected title must be active.');
                     }
-                }
+                },
             ],
         ];
 
         // Add dynamic competitor validation based on match type
         $competitorRules = $this->getCompetitorValidationRules();
-        
+
         return array_merge($baseRules, $competitorRules);
     }
 
@@ -342,7 +344,7 @@ class CreateEditForm extends BaseForm
     private function getCompetitorValidationRules(): array
     {
         // If no match type is selected yet, use basic validation
-        if (!$this->matchTypeId) {
+        if (! $this->matchTypeId) {
             return [
                 'competitors' => ['sometimes', 'array'],
                 'competitors.*.wrestlers' => ['sometimes', 'array'],
@@ -353,9 +355,9 @@ class CreateEditForm extends BaseForm
         }
 
         // Get the match type from database to determine validation rules
-        $matchType = \App\Models\Matches\MatchType::find($this->matchTypeId);
-        
-        if (!$matchType) {
+        $matchType = MatchType::find($this->matchTypeId);
+
+        if (! $matchType) {
             return [
                 'competitors' => ['sometimes', 'array'],
             ];
@@ -367,13 +369,13 @@ class CreateEditForm extends BaseForm
     /**
      * Get specific validation rules for a match type.
      *
-     * @param \App\Models\Matches\MatchType $matchType
+     * @param  MatchType  $matchType
      * @return array<string, array<string>>
      */
     private function getValidationForMatchType($matchType): array
     {
-        $matchTypeName = strtolower($matchType->name);
-        
+        $matchTypeName = mb_strtolower($matchType->name);
+
         // Singles Match: 2 sides, 1 wrestler each
         if (str_contains($matchTypeName, 'singles')) {
             return [
@@ -384,7 +386,7 @@ class CreateEditForm extends BaseForm
                 'competitors.1.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
             ];
         }
-        
+
         // Tag Team Match: 2 sides, 2+ wrestlers or tag teams
         if (str_contains($matchTypeName, 'tag') || str_contains($matchTypeName, 'team')) {
             return [
@@ -401,7 +403,7 @@ class CreateEditForm extends BaseForm
                 'competitors.1.tag_teams.*' => ['integer', 'exists:tag_teams,id'],
             ];
         }
-        
+
         // Triple Threat: 3 sides, 1 wrestler each
         if (str_contains($matchTypeName, 'triple') || str_contains($matchTypeName, 'three')) {
             return [

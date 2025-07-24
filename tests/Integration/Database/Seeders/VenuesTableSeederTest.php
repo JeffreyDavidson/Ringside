@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Events\Venue;
+use Database\Seeders\VenuesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -21,7 +22,7 @@ use function Pest\Laravel\assertDatabaseHas;
  * the database with the required venue records for development and
  * testing purposes.
  *
- * @see Database\Seeders\VenuesTableSeeder
+ * @see VenuesTableSeeder
  */
 describe('VenuesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {

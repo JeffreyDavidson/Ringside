@@ -3,10 +3,11 @@
 declare(strict_types=1);
 
 use App\Models\Matches\EventMatch;
+use Database\Seeders\MatchesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
- * Integration tests for EventMatchSeeder data seeding and validation.
+ * Integration tests for MatchesTableSeeder data seeding and validation.
  *
  * INTEGRATION TEST SCOPE:
  * - Seeder execution and database population
@@ -14,23 +15,23 @@ use Illuminate\Support\Facades\Artisan;
  * - Data consistency and count verification
  * - Event match attribute validation
  *
- * These tests verify that the EventMatchSeeder correctly populates
+ * These tests verify that the MatchesTableSeeder correctly populates
  * the database with event match records for development and testing purposes.
  *
- * @see Database\Seeders\EventMatchSeeder
+ * @see MatchesTableSeeder
  */
-describe('EventMatchSeeder Integration Tests', function () {
+describe('MatchesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
         test('successfully runs without errors', function () {
             // Act & Assert - Should not throw any exceptions
-            expect(fn () => Artisan::call('db:seed', ['--class' => 'EventMatchSeeder']))
+            expect(fn () => Artisan::call('db:seed', ['--class' => 'MatchesTableSeeder']))
                 ->not()->toThrow(Exception::class);
             expect(true)->toBeTrue();
         });
 
         test('creates event matches in database', function () {
             // Arrange & Act
-            Artisan::call('db:seed', ['--class' => 'EventMatchSeeder']);
+            Artisan::call('db:seed', ['--class' => 'MatchesTableSeeder']);
 
             // Assert - Should create multiple event matches
             expect(EventMatch::count())->toBeGreaterThan(0);
@@ -40,7 +41,7 @@ describe('EventMatchSeeder Integration Tests', function () {
 
     describe('event match attributes', function () {
         beforeEach(function () {
-            Artisan::call('db:seed', ['--class' => 'EventMatchSeeder']);
+            Artisan::call('db:seed', ['--class' => 'MatchesTableSeeder']);
         });
 
         test('event matches have required attributes', function () {
@@ -85,7 +86,7 @@ describe('EventMatchSeeder Integration Tests', function () {
 
     describe('data consistency', function () {
         beforeEach(function () {
-            Artisan::call('db:seed', ['--class' => 'EventMatchSeeder']);
+            Artisan::call('db:seed', ['--class' => 'MatchesTableSeeder']);
         });
 
         test('event matches have valid event associations', function () {
@@ -129,7 +130,7 @@ describe('EventMatchSeeder Integration Tests', function () {
             $initialCount = EventMatch::count();
 
             // Act
-            Artisan::call('db:seed', ['--class' => 'EventMatchSeeder']);
+            Artisan::call('db:seed', ['--class' => 'MatchesTableSeeder']);
 
             // Assert - Should maintain or increase count
             expect(EventMatch::count())->toBeGreaterThanOrEqual($initialCount);

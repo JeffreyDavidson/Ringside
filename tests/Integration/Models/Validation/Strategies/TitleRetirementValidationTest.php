@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Exceptions\Status\CannotBeRetiredException;
-use App\Models\Validation\Strategies\TitleRetirementValidation;
 use App\Models\Titles\Title;
+use App\Models\Validation\Strategies\TitleRetirementValidation;
 
 /**
  * Integration tests for TitleRetirementValidation strategy.
@@ -21,18 +21,18 @@ describe('TitleRetirementValidation', function () {
 
     test('validates title retirement rules correctly', function ($factoryState, $shouldPass) {
         $title = Title::factory()->{$factoryState}()->create();
-        
+
         if ($shouldPass) {
-            expect(fn() => $this->strategy->validate($title))->not()->toThrow(CannotBeRetiredException::class);
+            expect(fn () => $this->strategy->validate($title))->not()->toThrow(CannotBeRetiredException::class);
         } else {
-            expect(fn() => $this->strategy->validate($title))
+            expect(fn () => $this->strategy->validate($title))
                 ->toThrow(CannotBeRetiredException::class);
         }
     })->with([
         // Can retire: titles that have been active
         ['active', true],
         ['inactive', true],
-        
+
         // Cannot retire: titles that never debuted or are already retired
         ['undebuted', false],
         ['unactivated', false],
@@ -42,10 +42,10 @@ describe('TitleRetirementValidation', function () {
     test('validates title with active championship', function () {
         // Create an active title (must have been debuted to have championships)
         $title = Title::factory()->active()->create();
-        
+
         // Title with active championship should still be retirable
         // (championship will be ended as part of retirement process)
-        expect(fn() => $this->strategy->validate($title))
+        expect(fn () => $this->strategy->validate($title))
             ->not()->toThrow(CannotBeRetiredException::class);
     });
 });

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Data\Shared\VenueData;
+use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
 use App\Repositories\Contracts\VenueRepositoryInterface;
 use App\Repositories\VenueRepository;

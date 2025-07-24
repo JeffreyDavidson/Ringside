@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Referees;
 
 use App\Models\Referees\Referee;
@@ -21,7 +23,7 @@ class RefereeRetirementFactory extends Factory
     {
         return [
             'referee_id' => Referee::factory(),
-            'started_at' => now()->toDateTimeString()
+            'started_at' => now()->toDateTimeString(),
         ];
     }
 

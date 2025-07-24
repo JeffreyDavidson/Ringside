@@ -191,11 +191,11 @@ namespace App\Models\Matches{
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read EventMatchCompetitor|null $pivot
- * @property-read EventMatchCompetitorsCollection<int, EventMatchCompetitor> $competitors
+ * @property-read MatchCompetitor|null $pivot
+ * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
  * @property-read MatchType|null $matchType
- * @property-read EventMatchResult|null $result
+ * @property-read MatchResult|null $result
  * @property-read Collection<int, Referee> $referees
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, Title> $titles
@@ -213,20 +213,20 @@ namespace App\Models\Matches{
  *
  * @mixin \Eloquent
  * @property int $id
- * @property int $event_match_id
+ * @property int $match_id
  * @property string $competitor_type
  * @property int $competitor_id
  * @property int $side_number Numeric identifier for the side/team this competitor belongs to. Used to group competitors by side.
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Wrestler|TagTeam $competitor
- * @method static \App\Collections\EventMatchCompetitorsCollection<int, static> all($columns = ['*'])
- * @method static \App\Collections\EventMatchCompetitorsCollection<int, static> get($columns = ['*'])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchCompetitor query()
+ * @method static \App\Collections\MatchCompetitorsCollection<int, static> all($columns = ['*'])
+ * @method static \App\Collections\MatchCompetitorsCollection<int, static> get($columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor query()
  */
-	class EventMatchCompetitor extends \Eloquent {}
+	class MatchCompetitor extends \Eloquent {}
 }
 
 namespace App\Models\Matches{
@@ -235,7 +235,7 @@ namespace App\Models\Matches{
  *
  * @mixin \Eloquent
  * @property int $id
- * @property int $event_match_id
+ * @property int $match_id
  * @property string $winner_type
  * @property int $winner_id
  * @property int $match_decision_id
@@ -244,11 +244,11 @@ namespace App\Models\Matches{
  * @property-read MatchDecision $decision
  * @property-read Wrestler|TagTeam $winner
  * @property-read EventMatch $eventMatch
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatchResult query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult query()
  */
-	class EventMatchResult extends \Eloquent {}
+	class MatchResult extends \Eloquent {}
 }
 
 namespace App\Models\Matches{
@@ -629,7 +629,7 @@ namespace App\Models\TagTeams{
  *
  *
  * @mixin \Eloquent
- * @implements Bookable<EventMatchCompetitor>
+ * @implements Bookable<MatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableTagTeam, static>
  * @implements Employable<TagTeamEmployment, static>
@@ -872,15 +872,15 @@ namespace App\Models\Titles{
  * @mixin \Eloquent
  * @property int $id
  * @property int $title_id
- * @property int $event_match_id
+ * @property int $match_id
  * @property int $champion_id
  * @property string $champion_type
- * @property int|null $won_event_match_id
- * @property int|null $lost_event_match_id
+ * @property int|null $won_match_id
+ * @property int|null $lost_match_id
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
- * @property-read EventMatch|null $wonEventMatch
- * @property-read EventMatch|null $lostEventMatch
+ * @property-read EventMatch|null $wonMatch
+ * @property-read EventMatch|null $lostMatch
  * @property-read Title|null $title
  * @property-read Wrestler|TagTeam $champion
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -944,7 +944,7 @@ namespace App\Models\Wrestlers{
  *
  *
  * @mixin \Eloquent
- * @implements Bookable<EventMatchCompetitor>
+ * @implements Bookable<MatchCompetitor>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableWrestler, static>
  * @implements CanBeATagTeamMember<TagTeamWrestler, static>

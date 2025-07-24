@@ -11,6 +11,7 @@ use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Stables\Forms\CreateEditForm;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Stable>
@@ -20,7 +21,6 @@ class FormModal extends BaseFormModal
     use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
-
 
     protected function getFormClass(): string
     {
@@ -54,7 +54,7 @@ class FormModal extends BaseFormModal
         return 'Create Stable';
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.stables.modals.form-modal');
     }

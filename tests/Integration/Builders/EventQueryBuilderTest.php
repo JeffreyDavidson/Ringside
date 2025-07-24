@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Builders\Events\EventBuilder;
 use App\Models\Events\Event;
 
 /**
@@ -15,7 +16,7 @@ use App\Models\Events\Event;
  * These tests verify that the EventQueryBuilder correctly implements
  * all query scopes for filtering events by their scheduling status.
  *
- * @see App\Builders\Events\EventBuilder
+ * @see EventBuilder
  */
 describe('EventQueryBuilder Unit Tests', function () {
     beforeEach(function () {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Database\Factories;
 
 use App\Models\Events\Venue;
+use Database\Factories\Events\VenueFactory;
 
 /**
  * Unit tests for VenueFactory data generation and state management.
@@ -19,14 +20,14 @@ use App\Models\Events\Venue;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Events\VenueFactory
+ * @see VenueFactory
  */
 describe('VenueFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates venue with correct default attributes', function () {
             // Arrange & Act
             $venue = Venue::factory()->make();
-            
+
             // Assert
             expect($venue->name)->toBeString();
             expect($venue->name)->toContain('Arena');
@@ -40,26 +41,26 @@ describe('VenueFactory Unit Tests', function () {
         test('generates realistic venue names', function () {
             // Arrange & Act
             $venue = Venue::factory()->make();
-            
+
             // Assert
             expect($venue->name)->toBeString();
-            expect(strlen($venue->name))->toBeGreaterThan(3);
+            expect(mb_strlen($venue->name))->toBeGreaterThan(3);
             expect($venue->name)->toContain('Arena');
         });
 
         test('generates valid address components', function () {
             // Arrange & Act
             $venue = Venue::factory()->make();
-            
+
             // Assert
             expect($venue->street_address)->toBeString();
-            expect(strlen($venue->street_address))->toBeGreaterThan(5);
+            expect(mb_strlen($venue->street_address))->toBeGreaterThan(5);
             expect($venue->city)->toBeString();
-            expect(strlen($venue->city))->toBeGreaterThan(2);
+            expect(mb_strlen($venue->city))->toBeGreaterThan(2);
             expect($venue->state)->toBeString();
-            expect(strlen($venue->state))->toBe(2);
+            expect(mb_strlen($venue->state))->toBe(2);
             expect($venue->zipcode)->toBeString();
-            expect(strlen($venue->zipcode))->toBe(5);
+            expect(mb_strlen($venue->zipcode))->toBe(5);
         });
     });
 
@@ -71,7 +72,7 @@ describe('VenueFactory Unit Tests', function () {
                 'city' => 'Custom City',
                 'state' => 'CC',
             ]);
-            
+
             // Assert
             expect($venue->name)->toBe('Custom Arena');
             expect($venue->city)->toBe('Custom City');
@@ -83,7 +84,7 @@ describe('VenueFactory Unit Tests', function () {
             $venue = Venue::factory()->make([
                 'name' => 'Override Arena',
             ]);
-            
+
             // Assert
             expect($venue->name)->toBe('Override Arena');
             expect($venue->street_address)->toBeString();
@@ -98,15 +99,15 @@ describe('VenueFactory Unit Tests', function () {
             // Arrange & Act
             $venue1 = Venue::factory()->make();
             $venue2 = Venue::factory()->make();
-            
+
             // Assert
             expect($venue1->name)->not->toBe($venue2->name);
         });
 
         test('generates consistent data format', function () {
             // Arrange & Act
-            $venues = collect(range(1, 5))->map(fn() => Venue::factory()->make());
-            
+            $venues = collect(range(1, 5))->map(fn () => Venue::factory()->make());
+
             // Assert
             foreach ($venues as $venue) {
                 expect($venue->name)->toBeString();

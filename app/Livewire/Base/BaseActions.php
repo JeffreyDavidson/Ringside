@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -39,6 +40,7 @@ use Livewire\Component;
  * @template TModel of Model The Eloquent model type this component manages
  *
  * @author Your Name
+ *
  * @since 1.0.0
  * @see Actions For concrete implementation examples
  *
@@ -95,12 +97,12 @@ abstract class BaseActions extends Component
      * 4. Success and error message handling
      * 5. Exception catching and user-friendly error display
      *
-     * @param string $ability The Gate ability to check for authorization
-     * @param Model $model The model instance to perform the action on
-     * @param string $actionClass The fully qualified action class name
-     * @param string $successMessage The message to display on successful action
-     * @param string $eventName The event name to dispatch on success
-     * @param mixed ...$actionParams Additional parameters to pass to the action
+     * @param  string  $ability  The Gate ability to check for authorization
+     * @param  Model  $model  The model instance to perform the action on
+     * @param  string  $actionClass  The fully qualified action class name
+     * @param  string  $successMessage  The message to display on successful action
+     * @param  string  $eventName  The event name to dispatch on success
+     * @param  mixed  ...$actionParams  Additional parameters to pass to the action
      *
      * @example
      * ```php
@@ -144,10 +146,10 @@ abstract class BaseActions extends Component
         try {
             $action = resolve($actionClass);
             $action->handle($model, ...$actionParams);
-            
+
             $this->dispatch($eventName);
             session()->flash('status', $successMessage);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             session()->flash('error', $e->getMessage());
         }
     }

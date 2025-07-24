@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\TagTeams;
 
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamRetirement;
+use Database\Factories\TagTeams\TagTeamRetirementFactory;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * realistic retirement data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\TagTeams\TagTeamRetirementFactory
+ * @see TagTeamRetirementFactory
  */
 describe('TagTeamRetirementFactory Unit Tests', function () {
     describe('default attribute generation', function () {

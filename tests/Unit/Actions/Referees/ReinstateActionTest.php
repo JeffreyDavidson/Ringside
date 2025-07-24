@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\ReinstateAction;
-use App\Exceptions\CannotBeReinstatedException;
+use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;
@@ -21,7 +21,7 @@ test('it reinstates a suspended referee at the current datetime by default', fun
     $datetime = now();
 
     $this->refereeRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->withArgs(function (Referee $reinstatableReferee, Carbon $reinstatementDate) use ($referee, $datetime) {
             expect($reinstatableReferee->is($referee))->toBeTrue()
@@ -39,7 +39,7 @@ test('it reinstates a suspended referee at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->refereeRepository
-        ->shouldReceive('reinstate')
+        ->shouldReceive('endSuspension')
         ->once()
         ->with($referee, $datetime)
         ->andReturn($referee);

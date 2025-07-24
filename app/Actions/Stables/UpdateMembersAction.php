@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Models\Manager;
 use App\Models\Stables\Stable;
+use App\Models\TagTeam;
+use App\Models\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -16,9 +19,9 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update a stable's members.
      *
-     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
-     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
-     * @param  Collection<int, \App\Models\Manager>  $managers
+     * @param  Collection<int, Wrestler>  $wrestlers
+     * @param  Collection<int, TagTeam>  $tagTeams
+     * @param  Collection<int, Manager>  $managers
      */
     public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams, Collection $managers): void
     {
@@ -32,7 +35,7 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update wrestlers attached to a stable.
      *
-     * @param  Collection<int, \App\Models\Wrestler>  $wrestlers
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
     private function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now): void
     {
@@ -51,7 +54,7 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update tag teams attached to a stable.
      *
-     * @param  Collection<int, \App\Models\TagTeam>  $tagTeams
+     * @param  Collection<int, TagTeam>  $tagTeams
      */
     private function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now): void
     {
@@ -70,7 +73,7 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update managers attached to a stable.
      *
-     * @param  Collection<int, \App\Models\Manager>  $managers
+     * @param  Collection<int, Manager>  $managers
      */
     private function updateManagers(Stable $stable, Collection $managers, Carbon $now): void
     {

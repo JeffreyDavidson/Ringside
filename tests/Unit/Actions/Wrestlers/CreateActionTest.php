@@ -54,9 +54,9 @@ test('it employs a wrestler if start date is filled in request', function () {
         ->andReturn($wrestler);
 
     $this->wrestlerRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
-        ->with($wrestler, $data->start_date);
+        ->with($wrestler, $data->employment_date);
 
     resolve(CreateAction::class)->handle($data);
 });

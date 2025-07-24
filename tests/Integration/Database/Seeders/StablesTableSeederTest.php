@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\Stables\StableStatus;
 use App\Models\Stables\Stable;
+use Database\Seeders\StablesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the StablesTableSeeder correctly populates
  * the database with stable records for development and testing purposes.
  *
- * @see Database\Seeders\StablesTableSeeder
+ * @see StablesTableSeeder
  */
 describe('StablesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -49,7 +51,7 @@ describe('StablesTableSeeder Integration Tests', function () {
             foreach ($stables as $stable) {
                 expect($stable->name)->toBeString();
                 expect($stable->name)->not->toBeEmpty();
-                expect($stable->status)->toBeInstanceOf(App\Enums\Stables\StableStatus::class);
+                expect($stable->status)->toBeInstanceOf(StableStatus::class);
             }
         });
 
@@ -84,7 +86,7 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect($stable->status)->toBeInstanceOf(App\Enums\Stables\StableStatus::class);
+                expect($stable->status)->toBeInstanceOf(StableStatus::class);
             }
         });
 

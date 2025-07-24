@@ -5,12 +5,12 @@ declare(strict_types=1);
 use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
+    $this->matchRepository = $this->mock(MatchRepository::class);
 });
 
 test('it adds wrestlers to a match', function () {
@@ -18,7 +18,7 @@ test('it adds wrestlers to a match', function () {
     $wrestlers = Wrestler::factory()->bookable()->count(1)->create();
     $sideNumber = 1;
 
-    $this->eventMatchRepository
+    $this->matchRepository
         ->shouldReceive('addWrestlerToMatch')
         ->with($eventMatch, Mockery::type(Wrestler::class), $sideNumber)
         ->times($wrestlers->count());

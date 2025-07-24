@@ -7,6 +7,7 @@ namespace Tests\Unit\Database\Factories;
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
+use Database\Factories\Users\UserFactory;
 
 /**
  * Unit tests for UserFactory data generation and state management.
@@ -21,14 +22,14 @@ use App\Models\Users\User;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Users\UserFactory
+ * @see UserFactory
  */
 describe('UserFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates user with correct default attributes', function () {
             // Arrange & Act
             $user = User::factory()->make();
-            
+
             // Assert
             expect($user)->toBeInstanceOf(User::class);
             expect($user->first_name)->toBeString();
@@ -44,18 +45,18 @@ describe('UserFactory Unit Tests', function () {
         test('generates realistic user names', function () {
             // Arrange & Act
             $user = User::factory()->make();
-            
+
             // Assert
             expect($user->first_name)->toBeString();
-            expect(strlen($user->first_name))->toBeGreaterThan(1);
+            expect(mb_strlen($user->first_name))->toBeGreaterThan(1);
             expect($user->last_name)->toBeString();
-            expect(strlen($user->last_name))->toBeGreaterThan(1);
+            expect(mb_strlen($user->last_name))->toBeGreaterThan(1);
         });
 
         test('generates valid email addresses', function () {
             // Arrange & Act
             $user = User::factory()->make();
-            
+
             // Assert
             expect($user->email)->toBeString();
             expect($user->email)->toContain('@');
@@ -68,7 +69,7 @@ describe('UserFactory Unit Tests', function () {
         test('administrator state works correctly', function () {
             // Arrange & Act
             $admin = User::factory()->administrator()->make();
-            
+
             // Assert
             expect($admin->role)->toBe(Role::Administrator);
             expect($admin->isAdministrator())->toBeTrue();
@@ -77,7 +78,7 @@ describe('UserFactory Unit Tests', function () {
         test('unverified state works correctly', function () {
             // Arrange & Act
             $unverified = User::factory()->unverified()->make();
-            
+
             // Assert
             expect($unverified->status)->toBe(UserStatus::Unverified);
         });
@@ -85,7 +86,7 @@ describe('UserFactory Unit Tests', function () {
         test('basic user state is default', function () {
             // Arrange & Act
             $user = User::factory()->make();
-            
+
             // Assert
             expect($user->role)->toBe(Role::Basic);
             expect($user->isAdministrator())->toBeFalse();
@@ -100,7 +101,7 @@ describe('UserFactory Unit Tests', function () {
                 'last_name' => 'Doe',
                 'email' => 'john@example.com',
             ]);
-            
+
             // Assert
             expect($user->first_name)->toBe('John');
             expect($user->last_name)->toBe('Doe');
@@ -112,7 +113,7 @@ describe('UserFactory Unit Tests', function () {
             $user = User::factory()->make([
                 'first_name' => 'Custom',
             ]);
-            
+
             // Assert
             expect($user->first_name)->toBe('Custom');
             expect($user->last_name)->toBeString();
@@ -126,15 +127,15 @@ describe('UserFactory Unit Tests', function () {
             // Arrange & Act
             $user1 = User::factory()->make();
             $user2 = User::factory()->make();
-            
+
             // Assert
             expect($user1->email)->not->toBe($user2->email);
         });
 
         test('generates consistent data format', function () {
             // Arrange & Act
-            $users = collect(range(1, 5))->map(fn() => User::factory()->make());
-            
+            $users = collect(range(1, 5))->map(fn () => User::factory()->make());
+
             // Assert
             foreach ($users as $user) {
                 expect($user->first_name)->toBeString();
@@ -148,7 +149,7 @@ describe('UserFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $user = User::factory()->create();
-            
+
             // Assert
             expect($user->exists)->toBeTrue();
             expect($user->id)->toBeGreaterThan(0);

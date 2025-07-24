@@ -47,7 +47,6 @@ class CreateEditForm extends BaseForm
 {
     use PresentsVenuesList;
 
-
     /**
      * Event name for promotional and administrative purposes.
      *
@@ -68,7 +67,7 @@ class CreateEditForm extends BaseForm
      *
      * @var string|null Event date and time (string to prevent auto-casting issues)
      */
-    public string|null $date = '';
+    public ?string $date = '';
 
     /**
      * Venue identifier for event location assignment.

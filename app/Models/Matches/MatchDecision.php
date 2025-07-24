@@ -38,13 +38,13 @@ class MatchDecision extends Model
         parent::boot();
 
         static::creating(function ($matchDecision) {
-            if (empty($matchDecision->slug) && !empty($matchDecision->name)) {
+            if (empty($matchDecision->slug) && ! empty($matchDecision->name)) {
                 $matchDecision->slug = Str::slug($matchDecision->name);
             }
         });
 
         static::updating(function ($matchDecision) {
-            if ($matchDecision->isDirty('name') && !$matchDecision->isDirty('slug')) {
+            if ($matchDecision->isDirty('name') && ! $matchDecision->isDirty('slug')) {
                 $matchDecision->slug = Str::slug($matchDecision->name);
             }
         });

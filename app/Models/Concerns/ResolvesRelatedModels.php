@@ -174,7 +174,7 @@ trait ResolvesRelatedModels
     private function performModelResolution(string $suffix): string
     {
         $declaringClass = static::class;
-        
+
         // Handle Mockery mock classes - extract the original class name
         if (str_starts_with($declaringClass, 'Mockery_')) {
             // Extract original class from Mockery mock class name
@@ -184,7 +184,7 @@ trait ResolvesRelatedModels
                 $declaringClass = implode('\\', array_slice($parts, 2));
             }
         }
-        
+
         $baseModelName = class_basename($declaringClass);
 
         // Build the related model class name by replacing only the class name, not the namespace

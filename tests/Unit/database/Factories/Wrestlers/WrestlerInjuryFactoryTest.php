@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\Wrestlers;
 
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerInjury;
+use Database\Factories\Wrestlers\WrestlerInjuryFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for WrestlerInjuryFactory data generation and state management.
@@ -21,7 +23,7 @@ use App\Models\Wrestlers\WrestlerInjury;
  * realistic injury data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Wrestlers\WrestlerInjuryFactory
+ * @see WrestlerInjuryFactory
  */
 describe('WrestlerInjuryFactory Unit Tests', function () {
     describe('default attribute generation', function () {
@@ -31,7 +33,7 @@ describe('WrestlerInjuryFactory Unit Tests', function () {
 
             // Assert
             expect($injury->wrestler_id)->toBeInt();
-            expect($injury->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($injury->started_at)->toBeInstanceOf(Carbon::class);
             expect($injury->ended_at)->toBeNull(); // Default is current injury
         });
 
@@ -128,7 +130,7 @@ describe('WrestlerInjuryFactory Unit Tests', function () {
             $injury = WrestlerInjury::factory()->make();
 
             // Assert
-            expect($injury->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($injury->started_at)->toBeInstanceOf(Carbon::class);
             if ($injury->ended_at) {
                 expect($injury->ended_at->isAfter($injury->started_at))->toBeTrue();
             }

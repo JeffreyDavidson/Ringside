@@ -300,7 +300,7 @@ describe('EventsTable Component Integration', function () {
             // Verify component loads without performance issues
             // Simply verify we created the expected number of events
             expect(Event::count())->toBe(30);
-            
+
             // Verify component renders successfully with large dataset
             $component->assertSuccessful();
         });

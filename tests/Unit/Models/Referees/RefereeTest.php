@@ -46,7 +46,6 @@ describe('Referee Model Unit Tests', function () {
             expect($referee->getFillable())->toEqual([
                 'first_name',
                 'last_name',
-                'status',
             ]);
         });
 

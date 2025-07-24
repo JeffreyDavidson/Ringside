@@ -36,7 +36,6 @@ describe('Title Model Unit Tests', function () {
 
             expect($title->getFillable())->toEqual([
                 'name',
-                'status',
                 'type',
             ]);
         });

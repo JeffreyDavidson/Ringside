@@ -68,6 +68,15 @@ class Event extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'status',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Users\Modals\FormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
+use App\Livewire\Users\Modals\FormModal;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
@@ -100,7 +100,7 @@ describe('FormModal Create Operations', function () {
         $component->assertHasErrors([
             'form.first_name' => 'required',
             'form.last_name' => 'required',
-            'form.email' => 'required', 
+            'form.email' => 'required',
             'form.password' => 'required',
         ]);
     });
@@ -270,7 +270,7 @@ describe('FormModal Edit Operations', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        
+
         $user->refresh();
         expect($user->password)->not->toBe($originalPassword);
         expect(Hash::check('newpassword123', $user->password))->toBeTrue();
@@ -328,7 +328,7 @@ describe('FormModal Role Management', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        
+
         $user = User::where('email', 'john@example.com')->first();
         expect($user->role->value)->toBe('administrator');
     });
@@ -342,7 +342,7 @@ describe('FormModal Role Management', function () {
             ->call('save');
 
         $component->assertHasNoErrors();
-        
+
         $user->refresh();
         expect($user->role->value)->toBe('administrator');
     });

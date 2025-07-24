@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\Managers;
 
 use App\Models\Managers\Manager;
 use App\Models\Managers\ManagerRetirement;
+use Database\Factories\Managers\ManagerRetirementFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for ManagerRetirementFactory data generation and state management.
@@ -21,24 +23,24 @@ use App\Models\Managers\ManagerRetirement;
  * realistic retirement data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Managers\ManagerRetirementFactory
+ * @see ManagerRetirementFactory
  */
 describe('ManagerRetirementFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates retirement with correct default attributes', function () {
             // Arrange & Act
             $retirement = ManagerRetirement::factory()->make();
-            
+
             // Assert
             expect($retirement->manager_id)->toBeInt();
-            expect($retirement->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($retirement->started_at)->toBeInstanceOf(Carbon::class);
             expect($retirement->ended_at)->toBeNull(); // Default is current retirement
         });
 
         test('creates realistic retirement dates', function () {
             // Arrange & Act
             $retirement = ManagerRetirement::factory()->make();
-            
+
             // Assert
             expect($retirement->started_at->isToday())->toBeTrue();
         });
@@ -56,7 +58,7 @@ describe('ManagerRetirementFactory Unit Tests', function () {
                 'started_at' => $retiredDate,
                 'ended_at' => null,
             ]);
-            
+
             // Assert
             expect($retirement->manager_id)->toBe($manager->id);
             expect($retirement->started_at->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
@@ -75,7 +77,7 @@ describe('ManagerRetirementFactory Unit Tests', function () {
                 'started_at' => $retiredDate,
                 'ended_at' => $endedDate,
             ]);
-            
+
             // Assert
             expect($retirement->manager_id)->toBe($manager->id);
             expect($retirement->started_at->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
@@ -91,7 +93,7 @@ describe('ManagerRetirementFactory Unit Tests', function () {
 
             // Act
             $retirement = ManagerRetirement::factory()->make(['manager_id' => $manager->id]);
-            
+
             // Assert
             expect($retirement->manager_id)->toBe($manager->id);
         });
@@ -106,7 +108,7 @@ describe('ManagerRetirementFactory Unit Tests', function () {
                 'started_at' => $retiredDate,
                 'ended_at' => $endedDate,
             ]);
-            
+
             // Assert
             expect($retirement->started_at->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
             expect($retirement->ended_at->format('Y-m-d H:i:s'))->toBe($endedDate->format('Y-m-d H:i:s'));
@@ -117,7 +119,7 @@ describe('ManagerRetirementFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $retirement = ManagerRetirement::factory()->create();
-            
+
             // Assert
             expect($retirement->exists)->toBeTrue();
             expect($retirement->id)->toBeGreaterThan(0);
@@ -126,9 +128,9 @@ describe('ManagerRetirementFactory Unit Tests', function () {
         test('maintains date consistency', function () {
             // Arrange & Act
             $retirement = ManagerRetirement::factory()->make();
-            
+
             // Assert
-            expect($retirement->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($retirement->started_at)->toBeInstanceOf(Carbon::class);
             if ($retirement->ended_at) {
                 expect($retirement->ended_at->isAfter($retirement->started_at))->toBeTrue();
             }

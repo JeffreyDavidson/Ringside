@@ -110,7 +110,7 @@ describe('FormModal Create Operations', function () {
         $component->assertHasErrors([
             'form.name' => 'required',
         ]);
-        
+
         // Date and venue_id are nullable per business logic
         $component->assertHasNoErrors(['form.date', 'form.venue_id']);
     });

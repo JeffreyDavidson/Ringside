@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Rules\Shared\CanChangeEmploymentDate;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for CanChangeEmploymentDate validation rule.
@@ -308,7 +310,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             $model->shouldReceive('isEmployed')->andReturn(true);
             $model->shouldReceive('employedOn')
                 ->with(Mockery::on(function ($date) use ($targetDate) {
-                    return $date instanceof Illuminate\Support\Carbon &&
+                    return $date instanceof Carbon &&
                            $date->equalTo($targetDate);
                 }))
                 ->andReturn(true);
@@ -334,7 +336,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             $rule = new CanChangeEmploymentDate(null);
 
             // Assert
-            expect($rule)->toBeInstanceOf(Illuminate\Contracts\Validation\ValidationRule::class);
+            expect($rule)->toBeInstanceOf(ValidationRule::class);
         });
 
         test('validate method signature matches interface', function () {

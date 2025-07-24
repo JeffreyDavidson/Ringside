@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\TagTeams\TagTeam;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('bookable tag teams can be retrieved', function () {
     $futureEmployedTagTeam = TagTeam::factory()->withFutureEmployment()->create();
@@ -48,7 +51,12 @@ test('unbookable tag teams can be retrieved', function () {
     $unbookableTagTeams = TagTeam::unbookable()->get();
 
     expect($unbookableTagTeams)
-        ->toHaveCount(1)
+        ->toHaveCount(6)
+        ->collectionHas($futureEmployedTagTeam)
+        ->collectionHas($suspendedTagTeam)
+        ->collectionHas($retiredTagTeam)
+        ->collectionHas($releasedTagTeam)
+        ->collectionHas($unemployedTagTeam)
         ->collectionHas($unbookableTagTeam);
 });
 
@@ -112,6 +120,7 @@ test('unemployed tag teams can be retrieved', function () {
     $unemployedTagTeams = TagTeam::unemployed()->get();
 
     expect($unemployedTagTeams)
-        ->toHaveCount(1)
-        ->collectionHas($unemployedTagTeam);
+        ->toHaveCount(2)
+        ->collectionHas($unemployedTagTeam)
+        ->collectionHas($unbookableTagTeam);
 });

@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
+use Database\Seeders\TagTeamsTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the TagTeamsTableSeeder correctly populates
  * the database with tag team records for development and testing purposes.
  *
- * @see Database\Seeders\TagTeamsTableSeeder
+ * @see TagTeamsTableSeeder
  */
 describe('TagTeamsTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -49,7 +51,7 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
             foreach ($tagTeams as $tagTeam) {
                 expect($tagTeam->name)->toBeString();
                 expect($tagTeam->name)->not->toBeEmpty();
-                expect($tagTeam->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
+                expect($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -88,7 +90,7 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect($tagTeam->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
+                expect($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 

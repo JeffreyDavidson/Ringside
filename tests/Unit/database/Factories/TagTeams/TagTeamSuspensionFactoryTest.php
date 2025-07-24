@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories\TagTeams;
 
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamSuspension;
+use Database\Factories\TagTeams\TagTeamSuspensionFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for TagTeamSuspensionFactory data generation and state management.
@@ -21,7 +23,7 @@ use App\Models\TagTeams\TagTeamSuspension;
  * realistic suspension data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\TagTeams\TagTeamSuspensionFactory
+ * @see TagTeamSuspensionFactory
  */
 describe('TagTeamSuspensionFactory Unit Tests', function () {
     describe('default attribute generation', function () {
@@ -31,7 +33,7 @@ describe('TagTeamSuspensionFactory Unit Tests', function () {
 
             // Assert
             expect($suspension->tag_team_id)->toBeInt();
-            expect($suspension->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($suspension->started_at)->toBeInstanceOf(Carbon::class);
             expect($suspension->ended_at)->toBeNull(); // Default is current suspension
         });
 
@@ -128,7 +130,7 @@ describe('TagTeamSuspensionFactory Unit Tests', function () {
             $suspension = TagTeamSuspension::factory()->make();
 
             // Assert
-            expect($suspension->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($suspension->started_at)->toBeInstanceOf(Carbon::class);
             if ($suspension->ended_at) {
                 expect($suspension->ended_at->isAfter($suspension->started_at))->toBeTrue();
             }

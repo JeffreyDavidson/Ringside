@@ -38,7 +38,6 @@ describe('Stable Model Unit Tests', function () {
 
             expect($stable->getFillable())->toEqual([
                 'name',
-                'status',
             ]);
         });
 

@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use App\Models\Wrestlers\Wrestler;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
  * Integration test helper functions for complex scenarios.
- * 
+ *
  * These functions set up realistic test scenarios that mirror
  * real-world wrestling promotion operations.
  */
@@ -47,7 +47,7 @@ function createChampionshipStoryline(): array
     $title = Title::factory()->active()->create(['name' => 'World Championship']);
     $champion = Wrestler::factory()->bookable()->create(['name' => 'Current Champion']);
     $challenger = Wrestler::factory()->bookable()->create(['name' => 'Challenger']);
-    
+
     // Create current championship
     $championship = TitleChampionship::factory()
         ->for($title, 'title')
@@ -107,7 +107,7 @@ function createStableLifecycleScenario(): array
     foreach ($wrestlers as $wrestler) {
         $stable->wrestlers()->attach($wrestler->id, ['joined_at' => Carbon::now()->subMonths(6)]);
     }
-    
+
     $stable->tagTeams()->attach($tagTeam->id, ['joined_at' => Carbon::now()->subMonths(3)]);
 
     return [
@@ -126,7 +126,7 @@ function createInjuryStoryline(): array
 {
     $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Injury Prone Wrestler']);
     $title = Title::factory()->active()->create(['name' => 'Championship At Risk']);
-    
+
     // Create championship
     $championship = TitleChampionship::factory()
         ->for($title, 'title')
@@ -150,13 +150,13 @@ function createInjuryStoryline(): array
 function createRetirementCeremonyScenario(): array
 {
     $legend = Wrestler::factory()->bookable()->create(['name' => 'Wrestling Legend']);
-    
+
     // Create extensive career history
     $employments = [];
     for ($i = 0; $i < 3; $i++) {
         $startDate = Carbon::now()->subYears(10 - ($i * 3));
         $endDate = $i < 2 ? $startDate->copy()->addYears(2) : null;
-        
+
         $employments[] = $legend->employments()->create([
             'started_at' => $startDate,
             'ended_at' => $endDate,
@@ -166,7 +166,7 @@ function createRetirementCeremonyScenario(): array
     // Create championship history
     $titles = Title::factory()->count(3)->active()->create();
     $championships = [];
-    
+
     foreach ($titles as $index => $title) {
         $championships[] = TitleChampionship::factory()
             ->for($title, 'title')
@@ -194,7 +194,7 @@ function createTournamentScenario(int $participantCount = 8): array
 {
     $participants = Wrestler::factory()->count($participantCount)->bookable()->create();
     $tournamentTitle = Title::factory()->active()->create(['name' => 'Tournament Championship']);
-    
+
     // Create tournament matches (simplified)
     $rounds = ceil(log($participantCount, 2));
     $winner = $participants->first();
@@ -225,8 +225,8 @@ function createCompanyMergerScenario(): array
     $companyAWrestlers = Wrestler::factory()->count(5)->bookable()->create();
     $companyATitle = Title::factory()->active()->create(['name' => 'Company A Championship']);
     $companyAChampion = $companyAWrestlers->first();
-    
-    // Company B roster  
+
+    // Company B roster
     $companyBWrestlers = Wrestler::factory()->count(5)->bookable()->create();
     $companyBTitle = Title::factory()->active()->create(['name' => 'Company B Championship']);
     $companyBChampion = $companyBWrestlers->first();
@@ -287,7 +287,7 @@ function setupRealisticTestState(): array
     }
 
     $roster['championships'] = collect($championships);
-    
+
     return $roster;
 }
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories\Stables;
 
-use App\Enums\Stables\StableStatus;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivation;
 use App\Models\Stables\StableRetirement;

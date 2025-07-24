@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * Tests cover the wrestler-specific stable membership functionality with real database
  * relationships using the stables_wrestlers pivot table.
  *
- * @see \App\Models\Stables\StableWrestler
+ * @see StableWrestler
  */
 describe('StableWrestler Pivot Model', function () {
     beforeEach(function () {

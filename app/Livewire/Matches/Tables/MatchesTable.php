@@ -6,7 +6,7 @@ namespace App\Livewire\Matches\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\EventMatchCompetitor;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use Exception;
@@ -46,7 +46,7 @@ class MatchesTable extends DataTableComponent
     public function configure(): void
     {
         Gate::authorize('viewList', EventMatch::class);
-        
+
         $this->addAdditionalSelects([
             'events_matches.event_id',
         ]);
@@ -63,7 +63,7 @@ class MatchesTable extends DataTableComponent
             Column::make(__('matches.match_type'), 'matchType.name')->searchable(),
             ArrayColumn::make(__('matches.competitors'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(function (int $index, EventMatchCompetitor $value): string {
+                ->outputFormat(function (int $index, MatchCompetitor $value): string {
                     $competitor = $value->getCompetitor();
                     $type = str($competitor->getMorphClass())->kebab()->plural();
 

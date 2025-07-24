@@ -11,7 +11,7 @@ use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasEnumStatus;
-use App\Models\Concerns\HasMatches;
+use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
@@ -52,7 +52,6 @@ describe('Wrestler Model Unit Tests', function () {
                 'weight',
                 'hometown',
                 'signature_move',
-                'status',
             ]);
         });
 
@@ -61,7 +60,8 @@ describe('Wrestler Model Unit Tests', function () {
             $casts = $wrestler->getCasts();
 
             expect($casts['height'])->toBe(HeightCast::class);
-            expect($casts['status'])->toBe(EmploymentStatus::class);
+            // Status is computed attribute, no cast needed
+            expect(array_key_exists('status', $casts))->toBeFalse();
         });
 
         test('has custom eloquent builder', function () {
@@ -84,7 +84,7 @@ describe('Wrestler Model Unit Tests', function () {
             expect(Wrestler::class)->usesTrait(CanWinTitles::class);
             expect(Wrestler::class)->usesTrait(HasEnumStatus::class);
             expect(Wrestler::class)->usesTrait(HasFactory::class);
-            expect(Wrestler::class)->usesTrait(HasMatches::class);
+            expect(Wrestler::class)->usesTrait(IsBookableCompetitor::class);
             expect(Wrestler::class)->usesTrait(IsEmployable::class);
             expect(Wrestler::class)->usesTrait(IsInjurable::class);
             expect(Wrestler::class)->usesTrait(IsRetirable::class);

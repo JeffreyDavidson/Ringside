@@ -51,6 +51,6 @@ class StableRetirementValidation implements RetirementValidationStrategy
      */
     private function isUnactivated(Model $stable): bool
     {
-        return method_exists($stable, 'hasActivityPeriods') && !$stable->hasActivityPeriods();
+        return method_exists($stable, 'hasActivityPeriods') && ! $stable->hasActivityPeriods();
     }
 }

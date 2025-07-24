@@ -26,7 +26,7 @@ use Livewire\Livewire;
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
-    
+
     $this->title = Title::factory()->create([
         'name' => 'Test Championship Title',
     ]);
@@ -35,7 +35,7 @@ beforeEach(function () {
 describe('Actions Component Initialization', function () {
     it('can mount with title', function () {
         $component = Livewire::test(Actions::class, ['title' => $this->title]);
-        
+
         $component->assertOk();
         $component->assertSet('title.id', $this->title->id);
         $component->assertSet('title.name', 'Test Championship Title');
@@ -43,7 +43,7 @@ describe('Actions Component Initialization', function () {
 
     it('renders actions component view', function () {
         $component = Livewire::test(Actions::class, ['title' => $this->title]);
-        
+
         $component->assertViewIs('livewire.titles.components.actions');
     });
 });
@@ -58,7 +58,7 @@ describe('Title Debut Actions', function () {
 
         $component->assertHasNoErrors();
         $component->assertDispatched('title-updated');
-        
+
         // Verify the title status changed through the action
         expect($title->fresh()->isCurrentlyActive())->toBeTrue();
     });
@@ -85,7 +85,7 @@ describe('Title Retirement Actions', function () {
 
         $component->assertHasNoErrors();
         $component->assertDispatched('title-updated');
-        
+
         // Verify the title status changed
         expect($title->fresh()->isRetired())->toBeTrue();
     });
@@ -99,7 +99,7 @@ describe('Title Retirement Actions', function () {
 
         $component->assertHasNoErrors();
         $component->assertDispatched('title-updated');
-        
+
         // Verify the title is no longer retired
         expect($title->fresh()->isRetired())->toBeFalse();
     });
@@ -152,11 +152,11 @@ describe('Title Actions Authorization', function () {
         $user = User::factory()->create(); // Non-admin user
 
         $actions = ['debut', 'retire', 'unretire', 'deactivate', 'reinstate', 'restore'];
-        
+
         foreach ($actions as $method) {
             $component = Livewire::actingAs($user)
                 ->test(Actions::class, ['title' => $this->title]);
-            
+
             $component->call($method)
                 ->assertForbidden();
         }
@@ -166,7 +166,7 @@ describe('Title Actions Authorization', function () {
 describe('Title Actions Event Dispatching', function () {
     it('dispatches title-updated event on successful actions', function () {
         $title = Title::factory()->undebuted()->create();
-        
+
         $component = Livewire::actingAs($this->admin)
             ->test(Actions::class, ['title' => $title]);
 
@@ -176,7 +176,7 @@ describe('Title Actions Event Dispatching', function () {
 
     it('does not dispatch events on failed actions', function () {
         $user = User::factory()->create(); // Non-admin user
-        
+
         $component = Livewire::actingAs($user)
             ->test(Actions::class, ['title' => $this->title]);
 

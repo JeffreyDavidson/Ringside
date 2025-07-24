@@ -11,6 +11,9 @@ use App\Builders\Contracts\HasSuspension;
 use App\Builders\Roster\SingleRosterMemberBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 /**
  * Unit tests for SingleRosterMemberBuilder abstract base class.

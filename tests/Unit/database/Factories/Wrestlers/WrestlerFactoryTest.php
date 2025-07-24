@@ -7,6 +7,7 @@ namespace Tests\Unit\Database\Factories;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
+use Database\Factories\Wrestlers\WrestlerFactory;
 
 /**
  * Unit tests for WrestlerFactory data generation and state management.
@@ -22,9 +23,8 @@ use App\ValueObjects\Height;
  * realistic test data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Wrestlers\WrestlerFactory
+ * @see WrestlerFactory
  */
-
 describe('wrestler factory states', function () {
     test('wrestler factory creates wrestler with realistic data', function () {
         $wrestler = Wrestler::factory()->make();

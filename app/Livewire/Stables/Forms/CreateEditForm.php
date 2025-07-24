@@ -72,7 +72,7 @@ class CreateEditForm extends BaseForm
      *
      * @var string|null Stable activation start date (string to prevent auto-casting)
      */
-    public string|null $started_at = null;
+    public ?string $started_at = null;
 
     /**
      * Stable deactivation end date for faction history tracking.
@@ -82,7 +82,7 @@ class CreateEditForm extends BaseForm
      *
      * @var string|null Stable deactivation end date (string to prevent auto-casting)
      */
-    public string|null $ended_at = null;
+    public ?string $ended_at = null;
 
     /**
      * Array of wrestler IDs to be assigned to the stable.
@@ -114,12 +114,12 @@ class CreateEditForm extends BaseForm
     {
         if (! empty($this->started_at)) {
             $data = ['started_at' => $this->started_at];
-            
+
             // Include end date if provided
             if (! empty($this->ended_at)) {
                 $data['ended_at'] = $this->ended_at;
             }
-            
+
             $this->formModel->activityPeriods()->create($data);
         }
     }
@@ -159,10 +159,10 @@ class CreateEditForm extends BaseForm
     public function store(): bool
     {
         $this->validate();
-        
+
         $wasCreating = $this->isCreating();
         $result = $this->storeModel();
-        
+
         if ($result) {
             if ($wasCreating) {
                 $this->handlePostCreationTasks();
@@ -170,7 +170,7 @@ class CreateEditForm extends BaseForm
                 $this->handlePostUpdateTasks();
             }
         }
-        
+
         return $result;
     }
 
@@ -186,7 +186,7 @@ class CreateEditForm extends BaseForm
         if ($this->started_at) {
             $this->handleActivityPeriodCreation();
         }
-        
+
         // Handle member assignments
         $this->handleMemberAssignments();
     }
@@ -211,15 +211,15 @@ class CreateEditForm extends BaseForm
      */
     protected function handleMemberAssignments(): void
     {
-        if (!empty($this->wrestlers)) {
+        if (! empty($this->wrestlers)) {
             $wrestlerData = [];
             foreach ($this->wrestlers as $wrestlerId) {
                 $wrestlerData[$wrestlerId] = ['joined_at' => $this->started_at ?? now()];
             }
             $this->formModel->wrestlers()->attach($wrestlerData);
         }
-        
-        if (!empty($this->tag_teams)) {
+
+        if (! empty($this->tag_teams)) {
             $tagTeamData = [];
             foreach ($this->tag_teams as $tagTeamId) {
                 $tagTeamData[$tagTeamId] = ['joined_at' => $this->started_at ?? now()];
@@ -291,7 +291,7 @@ class CreateEditForm extends BaseForm
         ];
 
         // Add validation that ended_at is after started_at if both are provided
-        if (!empty($this->started_at) && !empty($this->ended_at)) {
+        if (! empty($this->started_at) && ! empty($this->ended_at)) {
             $rules['ended_at'][] = 'after:started_at';
         }
 

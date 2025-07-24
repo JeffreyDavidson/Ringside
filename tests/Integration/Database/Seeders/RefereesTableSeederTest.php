@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
+use Database\Seeders\RefereesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
 /**
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Artisan;
  * These tests verify that the RefereesTableSeeder correctly populates
  * the database with referee records for development and testing purposes.
  *
- * @see Database\Seeders\RefereesTableSeeder
+ * @see RefereesTableSeeder
  */
 describe('RefereesTableSeeder Integration Tests', function () {
     describe('seeder execution', function () {
@@ -51,7 +53,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
                 expect($referee->first_name)->not->toBeEmpty();
                 expect($referee->last_name)->toBeString();
                 expect($referee->last_name)->not->toBeEmpty();
-                expect($referee->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
+                expect($referee->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -89,7 +91,7 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($referees as $referee) {
-                expect($referee->status)->toBeInstanceOf(App\Enums\Shared\EmploymentStatus::class);
+                expect($referee->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 

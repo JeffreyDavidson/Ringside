@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * Tests cover the CanJoinTagTeams trait implementation and TagTeamWrestler
  * pivot model functionality with real database relationships.
  *
- * @see \App\Models\TagTeams\TagTeamWrestler
+ * @see TagTeamWrestler
  */
 describe('TagTeamWrestler Pivot Model', function () {
     beforeEach(function () {
@@ -25,7 +25,7 @@ describe('TagTeamWrestler Pivot Model', function () {
         $this->tagTeam = TagTeam::factory()->create([
             'name' => 'The Hardy Boyz',
         ]);
-        
+
         // Create employment for tag team manually
         $this->tagTeam->employments()->create([
             'started_at' => now()->subDays(3),
@@ -40,7 +40,7 @@ describe('TagTeamWrestler Pivot Model', function () {
         $this->secondTagTeam = TagTeam::factory()->create([
             'name' => 'The Dudley Boyz',
         ]);
-        
+
         // Create employment for second tag team manually
         $this->secondTagTeam->employments()->create([
             'started_at' => now()->subDays(3),

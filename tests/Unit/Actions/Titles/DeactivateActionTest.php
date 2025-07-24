@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\DeactivateAction;
-use App\Exceptions\CannotBeDeactivatedException;
+use App\Exceptions\Status\CannotBePulledException;
 use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
@@ -24,7 +24,7 @@ test('it deactivates an active title at the current datetime by default', functi
     $datetime = now();
 
     $this->titleRepository
-        ->shouldReceive('deactivate')
+        ->shouldReceive('pull')
         ->once()
         ->withArgs(function (Title $deactivatableTitle, Carbon $deactivationDate) use ($title, $datetime) {
             expect($deactivatableTitle->is($title))->toBeTrue()
@@ -42,9 +42,9 @@ test('it deactivates an active title at a specific datetime', function () {
     $datetime = now();
 
     $this->titleRepository
-        ->shouldReceive('deactivate')
+        ->shouldReceive('pull')
         ->once()
-        ->with($title, $datetime)
+        ->with($title, $datetime, null)
         ->andReturn($title);
 
     resolve(DeactivateAction::class)->handle($title, $datetime);
@@ -54,7 +54,7 @@ test('it throws exception for deactivating a non deactivatable title', function 
     $title = Title::factory()->{$factoryState}()->create();
 
     resolve(DeactivateAction::class)->handle($title);
-})->throws(CannotBeDeactivatedException::class)->with([
+})->throws(CannotBePulledException::class)->with([
     'unactivated',
     'withFutureActivation',
     'inactive',

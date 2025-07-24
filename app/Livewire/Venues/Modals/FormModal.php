@@ -8,13 +8,13 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Venue>
  */
 class FormModal extends BaseFormModal
 {
-
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
@@ -57,7 +57,7 @@ class FormModal extends BaseFormModal
         return 'Create Venue';
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.venues.modals.form-modal');
     }

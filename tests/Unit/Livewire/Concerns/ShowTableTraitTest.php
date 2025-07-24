@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\ShowTableTrait;
+use Tests\Integration\Livewire\Concerns\ShowTableTraitTest;
 
 /**
  * Unit tests for ShowTableTrait structure and configuration.
@@ -14,7 +15,7 @@ use App\Livewire\Concerns\ShowTableTrait;
  * - Trait naming and namespace
  *
  * @see ShowTableTrait
- * @see Tests\Integration\Livewire\Concerns\ShowTableTraitTest
+ * @see ShowTableTraitTest
  */
 describe('ShowTableTrait Unit Tests', function () {
     describe('trait structure', function () {

@@ -7,9 +7,11 @@ namespace App\Livewire\TagTeams\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, TagTeam>
@@ -25,14 +27,13 @@ class FormModal extends BaseFormModal
 
     public function getManagersProperty()
     {
-        return \App\Models\Managers\Manager::select('id', 'first_name', 'last_name')
+        return Manager::select('id', 'first_name', 'last_name')
             ->get()
             ->mapWithKeys(function ($manager) {
-                return [$manager->id => $manager->first_name . ' ' . $manager->last_name];
+                return [$manager->id => $manager->first_name.' '.$manager->last_name];
             })
             ->toArray();
     }
-
 
     protected function getFormClass(): string
     {
@@ -64,7 +65,7 @@ class FormModal extends BaseFormModal
         ];
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view($this->modalFormPath ?? 'livewire.tag-teams.modals.form-modal');
     }

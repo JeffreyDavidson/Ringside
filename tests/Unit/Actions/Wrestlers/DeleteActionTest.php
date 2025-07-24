@@ -14,6 +14,11 @@ test('it deletes a wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
     $this->wrestlerRepository
+        ->shouldReceive('removeFromCurrentManagers')
+        ->once()
+        ->withAnyArgs();
+
+    $this->wrestlerRepository
         ->shouldReceive('delete')
         ->once()
         ->with($wrestler);

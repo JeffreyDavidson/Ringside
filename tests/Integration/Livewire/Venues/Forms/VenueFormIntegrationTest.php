@@ -7,6 +7,8 @@ use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Unique;
 use Livewire\Component;
 
 /**
@@ -54,7 +56,7 @@ describe('VenueForm Integration Tests', function () {
 
             // Should contain Rule::unique validation for venues table
             $hasUniqueRule = collect($rules['name'])->contains(function ($rule) {
-                return $rule instanceof Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Unique;
             });
             expect($hasUniqueRule)->toBeTrue();
         });
@@ -85,7 +87,7 @@ describe('VenueForm Integration Tests', function () {
 
             // Should validate against states table
             $hasExistsRule = collect($rules['state'])->contains(function ($rule) {
-                return $rule instanceof Illuminate\Validation\Rules\Exists;
+                return $rule instanceof Exists;
             });
             expect($hasExistsRule)->toBeTrue();
         });
@@ -155,7 +157,7 @@ describe('VenueForm Integration Tests', function () {
 
             // Check that unique rule is configured for venues table
             $uniqueRule = collect($rules['name'])->first(function ($rule) {
-                return $rule instanceof Illuminate\Validation\Rules\Unique;
+                return $rule instanceof Unique;
             });
 
             expect($uniqueRule)->not()->toBeNull();
@@ -177,7 +179,7 @@ describe('VenueForm Integration Tests', function () {
 
             // Should validate that state exists in states table
             $existsRule = collect($rules['state'])->first(function ($rule) {
-                return $rule instanceof Illuminate\Validation\Rules\Exists;
+                return $rule instanceof Exists;
             });
 
             expect($existsRule)->not()->toBeNull();

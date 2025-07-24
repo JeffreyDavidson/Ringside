@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
 
 test('bookable wrestlers can be retrieved', function () {
     $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();

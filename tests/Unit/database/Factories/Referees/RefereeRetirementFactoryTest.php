@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\Referees;
 
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeRetirement;
+use Database\Factories\Referees\RefereeRetirementFactory;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
  * realistic retirement data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Referees\RefereeRetirementFactory
+ * @see RefereeRetirementFactory
  */
 describe('RefereeRetirementFactory Unit Tests', function () {
     describe('default attribute generation', function () {

@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
  * Pivot model for stable-wrestler relationships.
  *
  * This model handles the many-to-many relationship between
- * stables and wrestlers. It tracks when wrestlers join and 
+ * stables and wrestlers. It tracks when wrestlers join and
  * leave stables through timestamp fields.
  *
  * @property int $id

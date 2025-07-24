@@ -6,6 +6,8 @@ namespace Tests\Unit\Database\Factories;
 
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
+use Database\Factories\Wrestlers\WrestlerEmploymentFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for WrestlerEmploymentFactory data generation and state management.
@@ -21,25 +23,24 @@ use App\Models\Wrestlers\WrestlerEmployment;
  * realistic employment data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see \Database\Factories\Wrestlers\WrestlerEmploymentFactory
+ * @see WrestlerEmploymentFactory
  */
-
 describe('WrestlerEmploymentFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates employment with correct default attributes', function () {
             // Arrange & Act
             $employment = WrestlerEmployment::factory()->make();
-            
+
             // Assert
             expect($employment->wrestler_id)->toBeInt();
-            expect($employment->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($employment->started_at)->toBeInstanceOf(Carbon::class);
             expect($employment->ended_at)->toBeNull(); // Default is current employment
         });
 
         test('creates realistic employment dates', function () {
             // Arrange & Act
             $employment = WrestlerEmployment::factory()->make();
-            
+
             // Assert
             expect($employment->started_at->isToday())->toBeTrue();
         });
@@ -57,7 +58,7 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => null,
             ]);
-            
+
             // Assert
             expect($employment->wrestler_id)->toBe($wrestler->id);
             expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
@@ -76,7 +77,7 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
-            
+
             // Assert
             expect($employment->wrestler_id)->toBe($wrestler->id);
             expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
@@ -92,7 +93,7 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
 
             // Act
             $employment = WrestlerEmployment::factory()->make(['wrestler_id' => $wrestler->id]);
-            
+
             // Assert
             expect($employment->wrestler_id)->toBe($wrestler->id);
         });
@@ -107,7 +108,7 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
-            
+
             // Assert
             expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect($employment->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
@@ -118,7 +119,7 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
             $employment = WrestlerEmployment::factory()->create();
-            
+
             // Assert
             expect($employment->exists)->toBeTrue();
             expect($employment->id)->toBeGreaterThan(0);
@@ -127,9 +128,9 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
         test('maintains date consistency', function () {
             // Arrange & Act
             $employment = WrestlerEmployment::factory()->make();
-            
+
             // Assert
-            expect($employment->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+            expect($employment->started_at)->toBeInstanceOf(Carbon::class);
             if ($employment->ended_at) {
                 expect($employment->ended_at->isAfter($employment->started_at))->toBeTrue();
             }

@@ -13,7 +13,6 @@ use App\Models\Titles\TitleRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
-
 /**
  * @extends Factory<Title>
  */
@@ -30,7 +29,6 @@ class TitleFactory extends Factory
 
         return [
             'name' => str(fake()->unique()->words(2, true))->title()->append($titleType->value === 'singles' ? ' Title' : ' Titles'),
-            'status' => TitleStatus::Undebuted,
             'type' => $titleType,
             'current_champion_id' => null,
             'previous_champion_id' => null,
@@ -41,7 +39,7 @@ class TitleFactory extends Factory
     {
         $activationDate = Carbon::yesterday();
 
-        return $this->state(fn () => ['status' => TitleStatus::Active])
+        return $this
             ->has(TitleActivityPeriod::factory()->started($activationDate), 'activations');
     }
 
@@ -51,13 +49,13 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => TitleStatus::Inactive])
+        return $this
             ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations');
     }
 
     public function withFutureActivation(): static
     {
-        return $this->state(fn () => ['status' => TitleStatus::PendingDebut])
+        return $this
             ->has(TitleActivityPeriod::factory()->started(Carbon::tomorrow()), 'activations');
     }
 
@@ -67,14 +65,14 @@ class TitleFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
-        return $this->state(fn () => ['status' => TitleStatus::Inactive])
+        return $this
             ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations')
             ->has(TitleRetirement::factory()->started($end), 'retirements');
     }
 
     public function unactivated(): static
     {
-        return $this->state(fn () => ['status' => TitleStatus::Undebuted]);
+        return $this;
     }
 
     public function withChampion($champion): static
@@ -97,7 +95,7 @@ class TitleFactory extends Factory
 
     public function undebuted(): static
     {
-        return $this->state(fn () => ['status' => TitleStatus::Undebuted]);
+        return $this;
     }
 
     public function withFutureDebut(): static
@@ -113,13 +111,13 @@ class TitleFactory extends Factory
     public function withActivationPeriod($startDate = null, $endDate = null): static
     {
         $startDate = $startDate ?? Carbon::yesterday();
-        
+
         if ($endDate) {
-            return $this->state(fn () => ['status' => TitleStatus::Inactive])
+            return $this
                 ->has(TitleActivityPeriod::factory()->started($startDate)->ended($endDate), 'activations');
         }
-        
-        return $this->state(fn () => ['status' => TitleStatus::Active])
+
+        return $this
             ->has(TitleActivityPeriod::factory()->started($startDate), 'activations');
     }
 }

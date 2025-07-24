@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\ManagesActivityPeriods;
+use Tests\Integration\Livewire\Concerns\ManagesActivityPeriodsTest;
 
 /**
  * Unit tests for ManagesActivityPeriods trait structure.
@@ -15,7 +16,7 @@ use App\Livewire\Concerns\ManagesActivityPeriods;
  * - Exception handling annotations
  *
  * @see ManagesActivityPeriods
- * @see Tests\Integration\Livewire\Concerns\ManagesActivityPeriodsTest
+ * @see ManagesActivityPeriodsTest
  */
 describe('ManagesActivityPeriods Unit Tests', function () {
     describe('trait structure', function () {

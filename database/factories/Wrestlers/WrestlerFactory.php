@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories\Wrestlers;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
@@ -33,7 +32,6 @@ class WrestlerFactory extends Factory
             'weight' => fake()->numberBetween(180, 500),
             'hometown' => fake()->city().', '.fake()->state(),
             'signature_move' => null,
-            // Status is now computed from employment relationships
         ];
     }
 

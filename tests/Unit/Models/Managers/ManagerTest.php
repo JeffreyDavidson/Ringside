@@ -38,7 +38,6 @@ describe('Manager Model Unit Tests', function () {
             expect($manager->getFillable())->toEqual([
                 'first_name',
                 'last_name',
-                'status',
             ]);
         });
 

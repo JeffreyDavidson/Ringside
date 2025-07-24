@@ -13,11 +13,11 @@ use Livewire\Livewire;
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
-    
+
     $this->tagTeam = TagTeam::factory()->create([
         'name' => 'Test Tag Team',
     ]);
-    
+
     $this->wrestler = Wrestler::factory()->create([
         'name' => 'Test Wrestler',
     ]);
@@ -26,7 +26,7 @@ beforeEach(function () {
 describe('Previous Wrestlers Table Component', function () {
     it('can mount with tag team ID', function () {
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertOk();
         $table->assertSet('tagTeamId', $this->tagTeam->id);
     });
@@ -56,9 +56,9 @@ describe('Previous Wrestlers Table Component', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertSee($this->wrestler->name); // Should see the wrestler who left
-        
+
         $table->assertDontSee($currentWrestler->name); // Should not see the current wrestler
     });
 
@@ -90,10 +90,10 @@ describe('Previous Wrestlers Table Component', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         // Should be ordered by joined_at descending (most recent first)
         $table->assertSee($wrestler1->name) // joined 10 days ago
-            ->assertSee($wrestler2->name) // joined 20 days ago  
+            ->assertSee($wrestler2->name) // joined 20 days ago
             ->assertSee($wrestler3->name); // joined 30 days ago
     });
 
@@ -118,14 +118,14 @@ describe('Previous Wrestlers Table Component', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertSee($this->wrestler->name);
         $table->assertDontSee($otherWrestler->name);
     });
 
     it('handles empty previous wrestlers list', function () {
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertOk();
         $table->assertSee('No items found, try to broaden your search');
     });
@@ -141,7 +141,7 @@ describe('Previous Wrestlers Table Columns', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertSee($this->wrestler->name);
         $table->assertSee($this->wrestler->name);
         $table->assertSee(route('wrestlers.show', $this->wrestler));
@@ -159,7 +159,7 @@ describe('Previous Wrestlers Table Columns', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertSee($this->wrestler->name);
         $table->assertSee($joinedDate->format('Y-m-d'));
         $table->assertSee($leftDate->format('Y-m-d'));
@@ -177,7 +177,7 @@ describe('Previous Wrestlers Table Columns', function () {
         $this->wrestler->delete();
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertOk();
         $table->assertSee('Unknown');
     });
@@ -186,14 +186,14 @@ describe('Previous Wrestlers Table Columns', function () {
 describe('Previous Wrestlers Table Configuration', function () {
     it('uses correct database table name', function () {
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         // Just verify the component loads correctly
         $table->assertOk();
     });
 
     it('sets correct resource name', function () {
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         // Just verify the component loads correctly
         $table->assertOk();
     });
@@ -207,7 +207,7 @@ describe('Previous Wrestlers Table Configuration', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         // Just verify the component loads and displays the data
         $table->assertSee($this->wrestler->name);
     });
@@ -232,7 +232,7 @@ describe('Previous Wrestlers Table Business Logic', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         // Should show both membership periods
         $table->assertSee($this->wrestler->name);
     });
@@ -246,9 +246,9 @@ describe('Previous Wrestlers Table Business Logic', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertSee($this->wrestler->name);
-        
+
         // Just verify the component loads and displays data correctly
         $table->assertOk();
     });
@@ -265,7 +265,7 @@ describe('Previous Wrestlers Table Business Logic', function () {
         $this->wrestler->delete();
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         // Should still work but show "Unknown" for the name
         $table->assertOk();
         $table->assertSee('Unknown');
@@ -292,7 +292,7 @@ describe('Previous Wrestlers Table Business Logic', function () {
         ]);
 
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
-        
+
         $table->assertSee($recentWrestler->name)
             ->assertSee($oldWrestler->name);
     });

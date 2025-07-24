@@ -21,7 +21,7 @@ test('it unretires a retired manager at the current datetime by default', functi
     $datetime = now();
 
     $this->managerRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->withArgs(function (Manager $unretireManager, Carbon $unretireDate) use ($manager, $datetime) {
             expect($unretireManager->is($manager))->toBeTrue()
@@ -50,7 +50,7 @@ test('it unretires a retired manager at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->managerRepository
-        ->shouldReceive('unretire')
+        ->shouldReceive('endRetirement')
         ->once()
         ->with($manager, $datetime)
         ->andReturn($manager);

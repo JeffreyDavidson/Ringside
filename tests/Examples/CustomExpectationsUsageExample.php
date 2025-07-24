@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Builders\Roster\WrestlerBuilder;
+use App\Models\Concerns\IsRetirable;
 use App\Models\Managers\Manager;
+use App\Models\Matches\MatchType;
 use App\Models\Stables\Stable;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
@@ -108,7 +111,7 @@ describe('Custom Expectations Usage Examples', function () {
             expect('StatesTableSeeder')->toSeedSuccessfully();
 
             // Verify seeded data uniqueness
-            $matchTypes = App\Models\Matches\MatchType::all();
+            $matchTypes = MatchType::all();
             expect($matchTypes)->toHaveUniqueNames();
         });
     });
@@ -123,7 +126,7 @@ describe('Custom Expectations Usage Examples', function () {
             expect($wrestler)->toHaveCorrectFillable([
                 'name', 'height', 'weight', 'hometown', 'signature_move', 'status',
             ]);
-            expect($wrestler)->toHaveCustomBuilder(App\Builders\Roster\WrestlerBuilder::class);
+            expect($wrestler)->toHaveCustomBuilder(WrestlerBuilder::class);
             expect($wrestler)->toHaveFactory();
             expect($wrestler)->toHaveWorkingFactory();
         });
@@ -135,7 +138,7 @@ describe('Custom Expectations Usage Examples', function () {
             // Assert - Title-specific validation
             expect($title)->toHaveCorrectTable('titles');
             expect($title)->toImplementInterface('App\Models\Contracts\Retirable');
-            expect($title)->usesTrait(App\Models\Concerns\IsRetirable::class);
+            expect($title)->usesTrait(IsRetirable::class);
 
             // Test with factory data
             $titleWithData = Title::factory()->make();

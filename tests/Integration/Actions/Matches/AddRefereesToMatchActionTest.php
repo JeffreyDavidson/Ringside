@@ -5,20 +5,20 @@ declare(strict_types=1);
 use App\Actions\Matches\AddRefereesToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
-use App\Repositories\EventMatchRepository;
+use App\Repositories\MatchRepository;
 use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
     $this->seed(MatchTypesTableSeeder::class);
-    $this->eventMatchRepository = $this->mock(EventMatchRepository::class);
-    $this->app->instance(EventMatchRepository::class, $this->eventMatchRepository);
+    $this->matchRepository = $this->mock(MatchRepository::class);
+    $this->app->instance(MatchRepository::class, $this->matchRepository);
 });
 
 test('it adds referees to a match', function () {
     $eventMatch = EventMatch::factory()->create();
     $referees = Referee::factory()->bookable()->count(1)->create();
 
-    $this->eventMatchRepository
+    $this->matchRepository
         ->shouldReceive('addRefereeToMatch')
         ->with($eventMatch, Mockery::type(Referee::class))
         ->times($referees->count());

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\SuspendAction;
-use App\Exceptions\CannotBeSuspendedException;
+use App\Exceptions\Status\CannotBeSuspendedException;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\TagTeamRepository;
@@ -27,7 +27,7 @@ test('it suspends a bookable tag team at the current datetime by default', funct
     $datetime = now();
 
     $this->tagTeamRepository
-        ->shouldReceive('suspend')
+        ->shouldReceive('createSuspension')
         ->once()
         ->withArgs(function (TagTeam $suspendableTagTeam, Carbon $suspensionDate) use ($tagTeam, $datetime) {
             expect($suspendableTagTeam->is($tagTeam))->toBeTrue()
@@ -45,7 +45,7 @@ test('it suspends a bookable tag team at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     $this->tagTeamRepository
-        ->shouldReceive('suspend')
+        ->shouldReceive('createSuspension')
         ->once()
         ->with($tagTeam, $datetime)
         ->andReturns($tagTeam);

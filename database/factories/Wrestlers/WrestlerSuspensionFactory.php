@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Wrestlers;
 
 use App\Models\Wrestlers\Wrestler;

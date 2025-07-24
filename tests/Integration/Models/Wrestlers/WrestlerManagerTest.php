@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * Tests cover the CanBeManaged trait implementation and WrestlerManager
  * pivot model functionality with real database relationships.
  *
- * @see \App\Models\Wrestlers\WrestlerManager
+ * @see WrestlerManager
  */
 describe('WrestlerManager Pivot Model', function () {
     beforeEach(function () {
@@ -127,7 +127,7 @@ describe('WrestlerManager Pivot Model', function () {
             ]);
 
             expectPreviousRelationshipsEnded($this->wrestler);
-            
+
             $previousManager = $this->wrestler->previousManagers()->first();
             expect($previousManager->pivot->fired_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
         });

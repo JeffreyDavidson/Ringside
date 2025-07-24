@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
-use App\Collections\EventMatchCompetitorsCollection;
+use App\Collections\MatchCompetitorsCollection;
 use App\Models\Events\Event;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use Database\Factories\Matches\EventMatchFactory;
+use Database\Factories\Matches\MatchFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,27 +32,27 @@ use Illuminate\Support\Carbon;
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read EventMatchCompetitor|null $pivot
- * @property-read EventMatchCompetitorsCollection<int, EventMatchCompetitor> $competitors
+ * @property-read MatchCompetitor|null $pivot
+ * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
  * @property-read MatchType|null $matchType
  * @property-read MatchStipulation|null $matchStipulation
- * @property-read EventMatchResult|null $result
+ * @property-read MatchResult|null $result
  * @property-read Collection<int, Referee> $referees
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, Title> $titles
- * @property-read Collection<int, EventMatchWinner> $winners
- * @property-read Collection<int, EventMatchLoser> $losers
+ * @property-read Collection<int, MatchWinner> $winners
+ * @property-read Collection<int, MatchLoser> $losers
  * @property-read Collection<int, Wrestler> $wrestlers
  *
- * @method static \Database\Factories\Matches\EventMatchFactory factory($count = null, $state = [])
+ * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
  *
  * @mixin \Eloquent
  */
-#[UseFactory(EventMatchFactory::class)]
+#[UseFactory(MatchFactory::class)]
 class EventMatch extends Model
 {
     use HasFactory;
@@ -94,7 +94,7 @@ class EventMatch extends Model
      */
     public function matchType(): BelongsTo
     {
-        return $this->belongsTo(MatchType::class);
+        return $this->belongsTo(MatchType::class, 'match_type_id');
     }
 
     /**
@@ -104,7 +104,7 @@ class EventMatch extends Model
      */
     public function matchStipulation(): BelongsTo
     {
-        return $this->belongsTo(MatchStipulation::class);
+        return $this->belongsTo(MatchStipulation::class, 'match_stipulation_id');
     }
 
     /**
@@ -114,7 +114,7 @@ class EventMatch extends Model
      */
     public function referees(): BelongsToMany
     {
-        return $this->belongsToMany(Referee::class, 'events_matches_referees');
+        return $this->belongsToMany(Referee::class, 'events_matches_referees', 'match_id');
     }
 
     /**
@@ -124,70 +124,70 @@ class EventMatch extends Model
      */
     public function titles(): BelongsToMany
     {
-        return $this->belongsToMany(Title::class, 'events_matches_titles');
+        return $this->belongsToMany(Title::class, 'events_matches_titles', 'match_id');
     }
 
     /**
      * Get all the event match competitors for the match.
      *
-     * @return HasMany<EventMatchCompetitor, $this>
+     * @return HasMany<MatchCompetitor, $this>
      */
     public function competitors(): HasMany
     {
-        return $this->hasMany(EventMatchCompetitor::class);
+        return $this->hasMany(MatchCompetitor::class, 'match_id');
     }
 
     /**
      * Get the wrestlers involved in the match.
      *
-     * @return MorphToMany<Wrestler, $this, EventMatchCompetitor>
+     * @return MorphToMany<Wrestler, $this, MatchCompetitor>
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors')
-            ->using(EventMatchCompetitor::class)
+        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors', 'match_id')
+            ->using(MatchCompetitor::class)
             ->withPivot('side_number');
     }
 
     /**
      * Get the tag teams involved in the match.
      *
-     * @return MorphToMany<TagTeam, $this, EventMatchCompetitor>
+     * @return MorphToMany<TagTeam, $this, MatchCompetitor>
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors')
-            ->using(EventMatchCompetitor::class)
+        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors', 'match_id')
+            ->using(MatchCompetitor::class)
             ->withPivot('side_number');
     }
 
     /**
      * Get the result of the match.
      *
-     * @return HasOne<EventMatchResult, $this>
+     * @return HasOne<MatchResult, $this>
      */
     public function result(): HasOne
     {
-        return $this->hasOne(EventMatchResult::class);
+        return $this->hasOne(MatchResult::class, 'match_id');
     }
 
     /**
      * Get all winners of the match through the result.
      *
-     * @return HasManyThrough<EventMatchWinner, EventMatchResult, $this>
+     * @return HasManyThrough<MatchWinner, MatchResult, $this>
      */
     public function winners(): HasManyThrough
     {
-        return $this->hasManyThrough(EventMatchWinner::class, EventMatchResult::class);
+        return $this->hasManyThrough(MatchWinner::class, MatchResult::class);
     }
 
     /**
      * Get all losers of the match through the result.
      *
-     * @return HasManyThrough<EventMatchLoser, EventMatchResult, $this>
+     * @return HasManyThrough<MatchLoser, MatchResult, $this>
      */
     public function losers(): HasManyThrough
     {
-        return $this->hasManyThrough(EventMatchLoser::class, EventMatchResult::class);
+        return $this->hasManyThrough(MatchLoser::class, MatchResult::class);
     }
 }

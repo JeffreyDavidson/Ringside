@@ -113,6 +113,11 @@ describe('CanJoinStables Trait Unit Tests', function () {
             {
                 use CanJoinStables;
 
+                public function resolveStablePivotModel(): string
+                {
+                    return StableWrestler::class;
+                }
+
                 public function testResolveStablePivotModel(): string
                 {
                     return $this->resolveStablePivotModel();
@@ -128,6 +133,11 @@ describe('CanJoinStables Trait Unit Tests', function () {
                 use CanJoinStables;
 
                 protected static ?string $resolvedStablePivotModel = null;
+
+                public function resolveStablePivotModel(): string
+                {
+                    return self::$resolvedStablePivotModel ?? StableWrestler::class;
+                }
 
                 public function setCustomPivotClass(string $customClass): void
                 {

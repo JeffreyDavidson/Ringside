@@ -40,9 +40,9 @@ test('it employs a referee if start date is provided', function () {
         ->andReturn($referee);
 
     $this->refereeRepository
-        ->shouldReceive('employ')
+        ->shouldReceive('createEmployment')
         ->once()
-        ->with($referee, $data->start_date);
+        ->with($referee, $data->employment_date);
 
     resolve(CreateAction::class)->handle($data);
 });

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddRefereesToMatchAction extends BaseEventMatchAction
+class AddRefereesToMatchAction extends BaseMatchAction
 {
     use AsAction;
 
@@ -77,7 +77,7 @@ class AddRefereesToMatchAction extends BaseEventMatchAction
         DB::transaction(function () use ($eventMatch, $eligibleReferees): void {
             // Add each eligible referee to officiate the match
             $eligibleReferees->each(
-                fn (Referee $referee) => $this->eventMatchRepository->addRefereeToMatch($eventMatch, $referee)
+                fn (Referee $referee) => $this->matchRepository->addRefereeToMatch($eventMatch, $referee)
             );
         });
     }
