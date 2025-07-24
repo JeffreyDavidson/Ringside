@@ -23,13 +23,12 @@ class UpdateMembersAction extends BaseStableAction
      * @param  Collection<int, TagTeam>  $tagTeams
      * @param  Collection<int, Manager>  $managers
      */
-    public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams, Collection $managers): void
+    public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams): void
     {
         $now = now();
 
         $this->updateWrestlers($stable, $wrestlers, $now);
         $this->updateTagTeams($stable, $tagTeams, $now);
-        $this->updateManagers($stable, $managers, $now);
     }
 
     /**
@@ -67,25 +66,6 @@ class UpdateMembersAction extends BaseStableAction
 
             $this->stableRepository->removeTagTeams($stable, $formerTagTeams, $now);
             $this->stableRepository->addTagTeams($stable, $newTagTeams, $now);
-        }
-    }
-
-    /**
-     * Update managers attached to a stable.
-     *
-     * @param  Collection<int, Manager>  $managers
-     */
-    private function updateManagers(Stable $stable, Collection $managers, Carbon $now): void
-    {
-        if ($stable->currentManagers->isEmpty()) {
-            $this->stableRepository->addManagers($stable, $managers, $now);
-        } else {
-            $currentManagers = $stable->currentManagers;
-            $formerManagers = $currentManagers->diff($managers);
-            $newManagers = $managers->diff($currentManagers);
-
-            $this->stableRepository->removeManagers($stable, $formerManagers, $now);
-            $this->stableRepository->addManagers($stable, $newManagers, $now);
         }
     }
 }

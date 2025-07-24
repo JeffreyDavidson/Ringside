@@ -23,7 +23,6 @@ test('it creates a stable', function () {
         null,
         new Collection(),
         new Collection(),
-        new Collection(),
     );
 
     $stable = new Stable();

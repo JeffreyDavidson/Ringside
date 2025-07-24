@@ -32,7 +32,6 @@ class UpdateAction extends BaseStableAction
      * $stableData = new StableData([
      *     'name' => 'Updated Stable Name',
      *     'wrestlers' => [$wrestler1, $wrestler2, $wrestler3],
-     *     'managers' => [$manager1]
      * ]);
      * $updatedStable = UpdateAction::run($stable, $stableData);
      * ```
