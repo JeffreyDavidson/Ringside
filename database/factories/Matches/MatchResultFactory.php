@@ -9,6 +9,7 @@ use App\Models\Matches\MatchDecision;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use InvalidArgumentException;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Matches\EventMatchResult>
@@ -23,11 +24,11 @@ class MatchResultFactory extends Factory
     public function definition(): array
     {
         $winnerType = fake()->randomElement(['wrestler', 'tagTeam']);
-        
+
         $winner = match ($winnerType) {
             'wrestler' => Wrestler::factory()->create(),
             'tagTeam' => TagTeam::factory()->create(),
-            default => throw new \InvalidArgumentException("Unknown winner type: {$winnerType}"),
+            default => throw new InvalidArgumentException("Unknown winner type: {$winnerType}"),
         };
 
         return [

@@ -6,8 +6,9 @@ namespace Tests\Unit\Database\Factories\Matches;
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchType;
+use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -262,7 +263,7 @@ describe('MatchFactory', function () {
 
         test('creates match with specific referee association', function () {
             // Arrange
-            $referee = \App\Models\Referees\Referee::factory()->create();
+            $referee = Referee::factory()->create();
 
             // Act
             $eventMatch = EventMatch::factory()->withReferees(1)->create();
@@ -280,7 +281,7 @@ describe('MatchFactory', function () {
             // Assert
             expect($eventMatch->result)->not->toBeNull();
             expect($eventMatch->result->match_decision_id)->toBeNumeric();
-            expect($eventMatch->result->decision)->toBeInstanceOf(\App\Models\Matches\MatchDecision::class);
+            expect($eventMatch->result->decision)->toBeInstanceOf(MatchDecision::class);
         });
 
         test('creates match with specific event', function () {
