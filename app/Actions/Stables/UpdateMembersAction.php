@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Models\Manager;
 use App\Models\Stables\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -19,9 +18,11 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update a stable's members.
      *
+     * Note: Managers are NOT directly associated with stables.
+     * They are automatically associated through wrestlers/tag teams.
+     *
      * @param  Collection<int, Wrestler>  $wrestlers
      * @param  Collection<int, TagTeam>  $tagTeams
-     * @param  Collection<int, Manager>  $managers
      */
     public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams): void
     {
