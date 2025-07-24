@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Data\Wrestlers\WrestlerData;
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;

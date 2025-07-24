@@ -6,7 +6,6 @@ namespace App\Repositories;
 
 use App\Builders\Roster\WrestlerBuilder;
 use App\Data\Wrestlers\WrestlerData;
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;

@@ -7,7 +7,6 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 /**
