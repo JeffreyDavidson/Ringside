@@ -276,7 +276,6 @@ class MatchCompetitorsCollection extends Collection
         return $this->groupBy('side_number')
             ->map(function (BaseCollection $competitorsOnSide) {
                 return collect($competitorsOnSide)
-                    ->filter(fn (MatchCompetitor $competitor) => $competitor instanceof MatchCompetitor)
                     ->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor())
                     ->values(); // Reset keys to sequential integers
             });
