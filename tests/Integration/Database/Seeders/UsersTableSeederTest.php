@@ -6,10 +6,10 @@ use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Database\Seeders\UsersTableSeeder;
-use function Pest\Laravel\assertDatabaseCount;
-
-use function Pest\Laravel\assertDatabaseHas;
 use Illuminate\Support\Facades\Artisan;
+
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
 
 /**
  * Integration tests for UsersTableSeeder data seeding and validation.

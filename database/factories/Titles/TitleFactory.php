@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories\Titles;
 
-use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleActivityPeriod;

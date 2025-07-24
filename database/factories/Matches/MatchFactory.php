@@ -7,9 +7,9 @@ namespace Database\Factories\Matches;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use App\Models\Matches\MatchResult;
 use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchLoser;
+use App\Models\Matches\MatchResult;
 use App\Models\Matches\MatchType;
 use App\Models\Matches\MatchWinner;
 use App\Models\Referees\Referee;
@@ -19,6 +19,8 @@ use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 /**
  * @extends Factory<EventMatch>
@@ -27,14 +29,15 @@ class MatchFactory extends Factory
 {
     // Constants for competitor types
     private const COMPETITOR_TYPE_WRESTLER = 'wrestler';
+
     private const COMPETITOR_TYPE_TAG_TEAM = 'tag_team';
 
     /**
      * The name of the factory's corresponding model.
      *
-     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     * @var class-string<Model>
      */
-    protected $model = \App\Models\Matches\EventMatch::class;
+    protected $model = EventMatch::class;
 
     /**
      * Define the model's default state.
@@ -68,12 +71,12 @@ class MatchFactory extends Factory
     public function titleMatch($champion = null, $challenger = null, $title = null): static
     {
         // Backward compatibility: if first param is a Title, treat it as the title
-        if ($champion instanceof \App\Models\Titles\Title) {
+        if ($champion instanceof Title) {
             $title = $champion;
             $champion = null;
         }
 
-        return $this->afterCreating(function (EventMatch $eventMatch) use ($title, $champion, $challenger) {
+        return $this->afterCreating(function (EventMatch $eventMatch) use ($title, $champion) {
             $title ??= Title::factory()->create();
             $eventMatch->titles()->attach($title);
 
@@ -303,7 +306,7 @@ class MatchFactory extends Factory
         return match ($competitorType) {
             self::COMPETITOR_TYPE_WRESTLER => Wrestler::factory()->create(),
             self::COMPETITOR_TYPE_TAG_TEAM => TagTeam::factory()->create(),
-            default => throw new \InvalidArgumentException("Unknown competitor type: {$competitorType}"),
+            default => throw new InvalidArgumentException("Unknown competitor type: {$competitorType}"),
         };
     }
 
@@ -357,7 +360,7 @@ class MatchFactory extends Factory
     {
         // Pick a random winner from the competitors
         $winner = $competitors->random();
-        
+
         return MatchResult::factory()->create([
             'match_id' => $eventMatch->id,
             'match_decision_id' => MatchDecision::factory()->create()->id,
@@ -369,8 +372,7 @@ class MatchFactory extends Factory
     /**
      * Generate a complete match with comprehensive configuration.
      *
-     * @param array<string, mixed> $config Configuration options
-     * @return static
+     * @param  array<string, mixed>  $config  Configuration options
      */
     public function generateFullMatch(array $config): static
     {
@@ -379,7 +381,7 @@ class MatchFactory extends Factory
 
         // Set match type
         $matchType = $this->resolveMatchType($config['match_type'] ?? 'singles');
-        
+
         return $this->state([
             'match_type_id' => $matchType->id,
         ])->afterCreating(function (EventMatch $eventMatch) {
@@ -460,7 +462,7 @@ class MatchFactory extends Factory
             if (is_string($competitor)) {
                 // Handle type hints or names
                 if (in_array($competitor, ['wrestler', 'tag_team'])) {
-                    $model = $competitor === 'wrestler' 
+                    $model = $competitor === 'wrestler'
                         ? Wrestler::factory()->create()
                         : TagTeam::factory()->create();
                 } else {
@@ -531,7 +533,7 @@ class MatchFactory extends Factory
      */
     private function attachTitles(EventMatch $eventMatch, array $titles): void
     {
-        $titleIds = array_map(fn($title) => $title->id, $titles);
+        $titleIds = array_map(fn ($title) => $title->id, $titles);
         $eventMatch->titles()->attach($titleIds);
     }
 
@@ -546,7 +548,7 @@ class MatchFactory extends Factory
             $eventMatch->referees()->attach($refereeModels->pluck('id'));
         } elseif (is_array($referees)) {
             // Use specific referee models
-            $refereeIds = array_map(fn($referee) => $referee->id, $referees);
+            $refereeIds = array_map(fn ($referee) => $referee->id, $referees);
             $eventMatch->referees()->attach($refereeIds);
         }
     }
@@ -557,7 +559,7 @@ class MatchFactory extends Factory
     private function createFullMatchResult(EventMatch $eventMatch, array $config): void
     {
         $competitors = $eventMatch->competitors;
-        
+
         if ($competitors->isEmpty()) {
             return;
         }
@@ -573,6 +575,7 @@ class MatchFactory extends Factory
                 'winner_type' => null,
                 'winner_id' => null,
             ]);
+
             return;
         }
 
@@ -613,7 +616,7 @@ class MatchFactory extends Factory
     {
         // Try to find existing decision first
         $decision = MatchDecision::where('slug', $decisionType)->first();
-        
+
         if ($decision) {
             return $decision;
         }
@@ -628,36 +631,36 @@ class MatchFactory extends Factory
     /**
      * Resolve winners and losers based on strategy.
      *
-     * @return array{0: \Illuminate\Support\Collection, 1: \Illuminate\Support\Collection}
+     * @return array{0: Collection, 1: Collection}
      */
     private function resolveWinnersAndLosers($competitors, string $strategy): array
     {
         $competitorsCollection = collect($competitors);
-        
+
         return match ($strategy) {
             'first' => [
-                collect([$competitorsCollection->first()]), 
-                $competitorsCollection->skip(1)
+                collect([$competitorsCollection->first()]),
+                $competitorsCollection->skip(1),
             ],
             'last' => [
-                collect([$competitorsCollection->last()]), 
-                $competitorsCollection->take($competitorsCollection->count() - 1)
+                collect([$competitorsCollection->last()]),
+                $competitorsCollection->take($competitorsCollection->count() - 1),
             ],
             'multiple' => [
-                $winners = $competitorsCollection->random(fake()->numberBetween(1, $competitorsCollection->count() - 1)), 
-                $competitorsCollection->diff($winners)
+                $winners = $competitorsCollection->random(fake()->numberBetween(1, $competitorsCollection->count() - 1)),
+                $competitorsCollection->diff($winners),
             ],
             'all_but_one' => [
                 $competitorsCollection->take($competitorsCollection->count() - 1),
-                collect([$competitorsCollection->last()])
+                collect([$competitorsCollection->last()]),
             ],
             'single', 'random' => [
-                $winner = collect([$competitorsCollection->random()]), 
-                $competitorsCollection->diff($winner)
+                $winner = collect([$competitorsCollection->random()]),
+                $competitorsCollection->diff($winner),
             ],
             default => [
-                $winner = collect([$competitorsCollection->random()]), 
-                $competitorsCollection->diff($winner)
+                $winner = collect([$competitorsCollection->random()]),
+                $competitorsCollection->diff($winner),
             ],
         };
     }

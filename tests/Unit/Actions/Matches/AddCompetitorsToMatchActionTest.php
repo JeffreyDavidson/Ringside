@@ -34,12 +34,12 @@ test('it adds wrestler competitors to a match', function () {
 
     $addWrestlersToMatchAction
         ->shouldReceive('handle')
-        ->with($eventMatch, \Mockery::type('Illuminate\Support\Collection'), 0)
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 0)
         ->once();
 
     $addWrestlersToMatchAction
         ->shouldReceive('handle')
-        ->with($eventMatch, \Mockery::type('Illuminate\Support\Collection'), 1)
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 1)
         ->once();
 
     $addTagTeamsToMatchAction
@@ -68,12 +68,12 @@ test('it adds tag team competitors to a match', function () {
 
     $addTagTeamsToMatchAction
         ->shouldReceive('handle')
-        ->with($eventMatch, \Mockery::type('Illuminate\Support\Collection'), 0)
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 0)
         ->once();
 
     $addTagTeamsToMatchAction
         ->shouldReceive('handle')
-        ->with($eventMatch, \Mockery::type('Illuminate\Support\Collection'), 1)
+        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 1)
         ->once();
 
     $addWrestlersToMatchAction

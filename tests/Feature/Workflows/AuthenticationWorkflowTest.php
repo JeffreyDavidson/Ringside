@@ -31,11 +31,11 @@ describe('Guest User Authentication Journey', function () {
         ];
 
         foreach ($protectedRoutes as $route) {
-            {
-                // Then: Should be redirected to login
-                get(route($route))
-                    ->assertRedirect(route('login'));
-            }
+
+            // Then: Should be redirected to login
+            get(route($route))
+                ->assertRedirect(route('login'));
+
         }
     });
 
