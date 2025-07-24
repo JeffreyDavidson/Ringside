@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -83,8 +82,6 @@ class MatchWinner extends Model
 
     /**
      * Get the winner entity through the competitor relationship.
-     *
-     * @return Wrestler|TagTeam
      */
     public function winner(): Wrestler|TagTeam
     {

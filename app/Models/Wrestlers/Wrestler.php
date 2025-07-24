@@ -131,11 +131,8 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     use CanWinTitles;
 
     use HasEnumStatus;
-
     use HasFactory;
-
     use IsBookableCompetitor;
-
 
     /** @use IsEmployable<WrestlerEmployment, static> */
     use IsEmployable;
@@ -237,5 +234,4 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     {
         return ! ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
     }
-
 }

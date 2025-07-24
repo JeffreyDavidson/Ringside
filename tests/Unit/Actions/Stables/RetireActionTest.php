@@ -2,15 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Actions\Managers\RetireAction as ManagerRetireAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
 use App\Exceptions\Status\CannotBeRetiredException;
-use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
 use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
 

@@ -12,6 +12,7 @@ use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
+use InvalidArgumentException;
 
 /**
  * @extends Factory<TitleChampionship>
@@ -30,7 +31,7 @@ class TitleChampionshipFactory extends Factory
         $champion = match ($type) {
             'wrestler' => Wrestler::factory()->create(),
             'tagTeam' => TagTeam::factory()->create(),
-            default => throw new \InvalidArgumentException("Unknown champion type: {$type}"),
+            default => throw new InvalidArgumentException("Unknown champion type: {$type}"),
         };
 
         return [

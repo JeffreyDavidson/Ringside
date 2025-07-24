@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchResultFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,7 +28,7 @@ use Illuminate\Support\Carbon;
  * @property-read EventMatch $match
  * @property-read Collection<int, MatchWinner> $winners
  * @property-read Collection<int, MatchLoser> $losers
- * @property-read \App\Models\Wrestlers\Wrestler|\App\Models\TagTeams\TagTeam $winner
+ * @property-read Wrestler|TagTeam $winner
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newQuery()
