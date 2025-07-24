@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04]
-        php: [8.3]
-        laravel: [11]
+        php: [8.4]
+        laravel: [12]
         stability: [prefer-dist]
 
     name: PCOV - ${{ matrix.os }} - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
