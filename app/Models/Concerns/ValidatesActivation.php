@@ -7,7 +7,7 @@ namespace App\Models\Concerns;
 use App\Exceptions\CannotBeActivatedException;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Exceptions\CannotBeDebutedException;
-use App\Exceptions\CannotBeDisbandedException;
+use App\Exceptions\Status\CannotBeDisbandedException;
 
 /**
  * Provides comprehensive activation validation functionality for models.
