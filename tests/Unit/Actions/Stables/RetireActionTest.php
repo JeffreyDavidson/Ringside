@@ -155,18 +155,14 @@ test('it retires an inactive stable at a specific datetime', function () {
     resolve(RetireAction::class)->handle($stable, $datetime);
 });
 
-test('it retires the current tag teams and current wrestlers and current managers of a stable', function () {
-    $tagTeams = TagTeam::factory()->bookable()->count(1)->create();
-    $wrestlers = Wrestler::factory()->bookable()->count(1)->create();
-    $managers = Manager::factory()->employed()->count(1)->create();
+test('it retires the current tag teams and current wrestlers of a stable', function () {
+    // Create an active stable (which creates its own wrestlers and tag teams)
+    $stable = Stable::factory()->active()->create();
     $datetime = now();
 
-    $stable = Stable::factory()
-        ->hasAttached($tagTeams, ['joined_at' => now()])
-        ->hasAttached($wrestlers, ['joined_at' => now()])
-        ->hasAttached($managers, ['hired_at' => now()])
-        ->active()
-        ->create();
+    // Count how many current members there are for the expectations
+    $currentWrestlersCount = $stable->currentWrestlers()->count();
+    $currentTagTeamsCount = $stable->currentTagTeams()->count();
 
     $this->stableRepository
         ->shouldReceive('endActivity')
@@ -175,17 +171,26 @@ test('it retires the current tag teams and current wrestlers and current manager
         ->andReturns($stable);
 
     $this->stableRepository
+        ->shouldReceive('removeWrestlers')
+        ->once()
+        ->with($stable, $stable->currentWrestlers, $datetime);
+
+    $this->stableRepository
+        ->shouldReceive('removeTagTeams')
+        ->once()
+        ->with($stable, $stable->currentTagTeams, $datetime);
+
+    $this->stableRepository
         ->shouldReceive('createRetirement')
         ->once()
         ->with($stable, $datetime)
         ->andReturns($stable);
 
-    TagTeamRetireAction::shouldRun()->times(2);
-    WrestlerRetireAction::shouldRun()->times(2);
-    ManagerRetireAction::shouldRun()->times(1);
+    TagTeamRetireAction::shouldRun()->times($currentTagTeamsCount);
+    WrestlerRetireAction::shouldRun()->times($currentWrestlersCount);
 
     resolve(RetireAction::class)->handle($stable, $datetime);
-})->skip();
+});
 
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();

@@ -25,11 +25,11 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int $match_result_id
- * @property string $loser_type
- * @property int $loser_id
+ * @property int $match_competitor_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read MatchResult $matchResult
+ * @property-read MatchCompetitor $competitor
  * @property-read Wrestler|TagTeam $loser
  *
  * @method static \Database\Factories\Matches\MatchLoserFactory factory($count = null, $state = [])
@@ -58,8 +58,7 @@ class MatchLoser extends Model
      */
     protected $fillable = [
         'match_result_id',
-        'loser_type',
-        'loser_id',
+        'match_competitor_id',
     ];
 
     /**
@@ -73,13 +72,23 @@ class MatchLoser extends Model
     }
 
     /**
-     * Get the loser of the event match.
+     * Get the match competitor that lost.
      *
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<MatchCompetitor, $this>
      */
-    public function loser(): MorphTo
+    public function competitor(): BelongsTo
     {
-        return $this->morphTo(__FUNCTION__, 'loser_type', 'loser_id');
+        return $this->belongsTo(MatchCompetitor::class, 'match_competitor_id');
+    }
+
+    /**
+     * Get the loser entity through the competitor relationship.
+     *
+     * @return Wrestler|TagTeam
+     */
+    public function loser(): Wrestler|TagTeam
+    {
+        return $this->competitor->competitor;
     }
 
     /**
@@ -89,12 +98,28 @@ class MatchLoser extends Model
      */
     public function getLoser(): Wrestler|TagTeam
     {
-        $loser = $this->loser;
+        $loser = $this->loser();
 
         return match ($loser::class) {
             Wrestler::class,
             TagTeam::class => $loser,
             default => throw new Exception('Unexpected loser type: '.$loser::class),
         };
+    }
+
+    /**
+     * Get loser type for backward compatibility.
+     */
+    public function getLoserTypeAttribute(): string
+    {
+        return $this->competitor->competitor_type;
+    }
+
+    /**
+     * Get loser ID for backward compatibility.
+     */
+    public function getLoserIdAttribute(): int
+    {
+        return $this->competitor->competitor_id;
     }
 }

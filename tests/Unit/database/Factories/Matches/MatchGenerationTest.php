@@ -31,9 +31,6 @@ use App\Models\Wrestlers\Wrestler;
  * @see \Database\Factories\Matches\MatchFactory::generateFullMatch()
  */
 describe('Match Comprehensive Generation Unit Tests', function () {
-    beforeEach(function () {
-        $this->markTestSkipped('generateFullMatch() method not yet implemented - part of enhanced match factory (backlog)');
-    });
     describe('basic match generation scenarios', function () {
         test('generates simple singles match with minimal config', function () {
             // Arrange & Act

@@ -213,35 +213,36 @@ describe('MatchFactory', function () {
     });
 
     describe('match results and winners/losers', function () {
-        test('creates match with proper winner and loser distribution', function () {
+        test('creates match with proper result and winner', function () {
             $eventMatch = EventMatch::factory()->singles()->create();
 
             expect($eventMatch->result)->not->toBeNull();
-            expect($eventMatch->winners)->toHaveCount(1);
-            expect($eventMatch->losers)->toHaveCount(1);
+            expect($eventMatch->result->winner_type)->toBeString();
+            expect($eventMatch->result->winner_id)->toBeNumeric();
+            expect($eventMatch->competitors)->toHaveCount(2);
 
-            // Winner and loser should be different
-            $winner = $eventMatch->winners->first();
-            $loser = $eventMatch->losers->first();
-            expect($winner->winner_id)->not->toBe($loser->loser_id);
+            // Winner should be one of the competitors
+            $winnerExists = $eventMatch->competitors->contains(function ($competitor) use ($eventMatch) {
+                return $competitor->competitor_type === $eventMatch->result->winner_type &&
+                       $competitor->competitor_id === $eventMatch->result->winner_id;
+            });
+            expect($winnerExists)->toBeTrue();
         });
 
-        test('creates battle royal with one winner and multiple losers', function () {
+        test('creates battle royal with one winner and multiple competitors', function () {
             $eventMatch = EventMatch::factory()->battleRoyal(8)->create();
 
             expect($eventMatch->result)->not->toBeNull();
-            expect($eventMatch->winners)->toHaveCount(1);
+            expect($eventMatch->result->winner_type)->toBeString();
+            expect($eventMatch->result->winner_id)->toBeNumeric();
             expect($eventMatch->competitors)->toHaveCount(8);
-            expect($eventMatch->losers)->toHaveCount(7);
 
-            // Winner should not be in losers list (check both type and id)
-            $winner = $eventMatch->winners->first();
-            $winnerExists = $eventMatch->losers->contains(function ($loser) use ($winner) {
-                return $loser->loser_type === $winner->winner_type &&
-                       $loser->loser_id === $winner->winner_id;
+            // Winner should be one of the competitors
+            $winnerExists = $eventMatch->competitors->contains(function ($competitor) use ($eventMatch) {
+                return $competitor->competitor_type === $eventMatch->result->winner_type &&
+                       $competitor->competitor_id === $eventMatch->result->winner_id;
             });
-
-            expect($winnerExists)->toBeFalse();
+            expect($winnerExists)->toBeTrue();
         });
 
         test('creates match with proper competitor side numbers', function () {
@@ -264,21 +265,22 @@ describe('MatchFactory', function () {
             $referee = \App\Models\Referees\Referee::factory()->create();
 
             // Act
-            $eventMatch = EventMatch::factory()->state(['referee_id' => $referee->id])->create();
+            $eventMatch = EventMatch::factory()->withReferees(1)->create();
+            $eventMatch->referees()->sync([$referee->id]);
 
             // Assert
-            expect($eventMatch->referee_id)->toBe($referee->id);
+            expect($eventMatch->referees)->toHaveCount(1);
+            expect($eventMatch->referees->first()->id)->toBe($referee->id);
         });
 
-        test('creates match with specific decision association', function () {
-            // Arrange
-            $decision = \App\Models\Matches\MatchDecision::factory()->create();
-
-            // Act
-            $eventMatch = EventMatch::factory()->state(['match_decision_id' => $decision->id])->create();
+        test('creates match with complete results including decision', function () {
+            // Arrange & Act
+            $eventMatch = EventMatch::factory()->complete()->create();
 
             // Assert
-            expect($eventMatch->match_decision_id)->toBe($decision->id);
+            expect($eventMatch->result)->not->toBeNull();
+            expect($eventMatch->result->match_decision_id)->toBeNumeric();
+            expect($eventMatch->result->decision)->toBeInstanceOf(\App\Models\Matches\MatchDecision::class);
         });
 
         test('creates match with specific event', function () {

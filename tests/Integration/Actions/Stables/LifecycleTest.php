@@ -8,6 +8,10 @@ use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
+use App\Exceptions\Status\CannotBeActivatedException;
+use App\Exceptions\Status\CannotBeDebutedException;
+use App\Exceptions\Status\CannotBeDisbandedException;
+use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 
@@ -273,21 +277,21 @@ describe('Stable Activation Action Integration', function () {
             $activeStable = Stable::factory()->active()->create();
 
             expect(fn () => DebutAction::run($activeStable, Carbon::now()))
-                ->toThrow(Exception::class);
+                ->toThrow(CannotBeDebutedException::class);
         });
 
         test('disband action requires active status', function () {
             $inactiveStable = Stable::factory()->inactive()->create();
 
             expect(fn () => DisbandAction::run($inactiveStable, Carbon::now()))
-                ->toThrow(Exception::class);
+                ->toThrow(CannotBeDisbandedException::class);
         });
 
         test('reunite action requires disbanded status', function () {
             $activeStable = Stable::factory()->active()->create();
 
             expect(fn () => ReuniteAction::run($activeStable, Carbon::now()))
-                ->toThrow(Exception::class);
+                ->toThrow(CannotBeActivatedException::class);
         });
 
         test('retire action works from active or disbanded status', function () {
@@ -307,7 +311,7 @@ describe('Stable Activation Action Integration', function () {
             $activeStable = Stable::factory()->active()->create();
 
             expect(fn () => UnretireAction::run($activeStable, Carbon::now()))
-                ->toThrow(Exception::class);
+                ->toThrow(CannotBeUnretiredException::class);
         });
     });
 });

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\ActivateAction;
-use App\Exceptions\CannotBeActivatedException;
+use App\Exceptions\Status\CannotBeActivatedException;
 use App\Models\Titles\Title;
 use App\Repositories\TitleRepository;
 use Illuminate\Support\Carbon;
@@ -23,23 +23,40 @@ test('it activates an activatable title at the current datetime by default', fun
     $this->titleRepository
         ->shouldNotReceive('unretire');
 
-    $this->titleRepository
-        ->shouldReceive('createActivation')
-        ->once()
-        ->withArgs(function (Title $activatableTitle, Carbon $activationDate) use ($title, $datetime) {
-            expect($activatableTitle->is($title))->toBeTrue()
-                ->and($activationDate->eq($datetime))->toBeTrue();
+    if ($factoryState === 'unactivated') {
+        // For unactivated titles, debut action is called
+        $this->titleRepository
+            ->shouldReceive('createDebut')
+            ->once()
+            ->withArgs(function (Title $activatableTitle, Carbon $activationDate, $notes) use ($title, $datetime) {
+                expect($activatableTitle->is($title))->toBeTrue()
+                    ->and($activationDate->eq($datetime))->toBeTrue()
+                    ->and($notes)->toBeNull();
 
-            return true;
-        })
-        ->andReturn($title);
+                return true;
+            })
+            ->andReturn($title);
+    } else {
+        // For inactive/withFutureActivation titles, reinstatement action is called
+        $this->titleRepository
+            ->shouldReceive('createReinstatement')
+            ->once()
+            ->withArgs(function (Title $activatableTitle, Carbon $activationDate, $notes) use ($title, $datetime) {
+                expect($activatableTitle->is($title))->toBeTrue()
+                    ->and($activationDate->eq($datetime))->toBeTrue()
+                    ->and($notes)->toBeNull();
+
+                return true;
+            })
+            ->andReturn($title);
+    }
 
     resolve(ActivateAction::class)->handle($title);
 })->with([
     'unactivated',
     'inactive',
     'withFutureActivation',
-])->skip();
+]);
 
 test('it activates an activatable title at a specific datetime', function ($factoryState) {
     $title = Title::factory()->{$factoryState}()->create();
@@ -48,18 +65,28 @@ test('it activates an activatable title at a specific datetime', function ($fact
     $this->titleRepository
         ->shouldNotReceive('unretire');
 
-    $this->titleRepository
-        ->shouldReceive('createActivation')
-        ->once()
-        ->with($title, $datetime)
-        ->andReturns($title);
+    if ($factoryState === 'unactivated') {
+        // For unactivated titles, debut action is called
+        $this->titleRepository
+            ->shouldReceive('createDebut')
+            ->once()
+            ->with($title, $datetime, null)
+            ->andReturns($title);
+    } else {
+        // For inactive/withFutureActivation titles, reinstatement action is called
+        $this->titleRepository
+            ->shouldReceive('createReinstatement')
+            ->once()
+            ->with($title, $datetime, null)
+            ->andReturns($title);
+    }
 
     resolve(ActivateAction::class)->handle($title, $datetime);
 })->with([
     'unactivated',
     'inactive',
     'withFutureActivation',
-])->skip();
+]);
 
 test('it activates a retired title at the current datetime by default', function () {
     $title = Title::factory()->retired()->create();

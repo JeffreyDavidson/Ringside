@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\CannotBeActivatedException;
-use App\Exceptions\CannotBeDeactivatedException;
-use App\Exceptions\CannotBeDebutedException;
+use App\Exceptions\Status\CannotBeActivatedException;
+use App\Exceptions\Status\CannotBeDeactivatedException;
+use App\Exceptions\Status\CannotBeDebutedException;
 use App\Exceptions\Status\CannotBeDisbandedException;
 
 /**

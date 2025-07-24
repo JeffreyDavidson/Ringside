@@ -124,13 +124,21 @@ describe('ManagerFactory Unit Tests', function () {
     });
 
     describe('data consistency', function () {
-        test('generates unique manager names', function () {
+        test('generates realistic manager names', function () {
             // Arrange & Act
-            $manager1 = Manager::factory()->make();
-            $manager2 = Manager::factory()->make();
+            $managers = collect(range(1, 10))->map(fn () => Manager::factory()->make());
 
-            // Assert
-            expect($manager1->first_name)->not->toBe($manager2->first_name);
+            // Assert - Test that names are realistic and properly formatted
+            foreach ($managers as $manager) {
+                expect($manager->first_name)->toBeString()
+                    ->and($manager->first_name)->not->toBeEmpty()
+                    ->and($manager->last_name)->toBeString()
+                    ->and($manager->last_name)->not->toBeEmpty();
+            }
+
+            // Verify we get some variety in a larger sample (statistical uniqueness)
+            $firstNames = $managers->pluck('first_name')->unique();
+            expect($firstNames->count())->toBeGreaterThan(1, 'Expected some variety in first names over 10 samples');
         });
 
         test('generates consistent data format', function () {

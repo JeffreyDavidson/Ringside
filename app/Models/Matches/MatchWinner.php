@@ -25,11 +25,11 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int $match_result_id
- * @property string $winner_type
- * @property int $winner_id
+ * @property int $match_competitor_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read MatchResult $matchResult
+ * @property-read MatchCompetitor $competitor
  * @property-read Wrestler|TagTeam $winner
  *
  * @method static \Database\Factories\Matches\MatchWinnerFactory factory($count = null, $state = [])
@@ -58,8 +58,7 @@ class MatchWinner extends Model
      */
     protected $fillable = [
         'match_result_id',
-        'winner_type',
-        'winner_id',
+        'match_competitor_id',
     ];
 
     /**
@@ -73,13 +72,23 @@ class MatchWinner extends Model
     }
 
     /**
-     * Get the winner of the event match.
+     * Get the match competitor that won.
      *
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<MatchCompetitor, $this>
      */
-    public function winner(): MorphTo
+    public function competitor(): BelongsTo
     {
-        return $this->morphTo(__FUNCTION__, 'winner_type', 'winner_id');
+        return $this->belongsTo(MatchCompetitor::class, 'match_competitor_id');
+    }
+
+    /**
+     * Get the winner entity through the competitor relationship.
+     *
+     * @return Wrestler|TagTeam
+     */
+    public function winner(): Wrestler|TagTeam
+    {
+        return $this->competitor->competitor;
     }
 
     /**
@@ -89,12 +98,28 @@ class MatchWinner extends Model
      */
     public function getWinner(): Wrestler|TagTeam
     {
-        $winner = $this->winner;
+        $winner = $this->winner();
 
         return match ($winner::class) {
             Wrestler::class,
             TagTeam::class => $winner,
             default => throw new Exception('Unexpected winner type: '.$winner::class),
         };
+    }
+
+    /**
+     * Get winner type for backward compatibility.
+     */
+    public function getWinnerTypeAttribute(): string
+    {
+        return $this->competitor->competitor_type;
+    }
+
+    /**
+     * Get winner ID for backward compatibility.
+     */
+    public function getWinnerIdAttribute(): int
+    {
+        return $this->competitor->competitor_id;
     }
 }
