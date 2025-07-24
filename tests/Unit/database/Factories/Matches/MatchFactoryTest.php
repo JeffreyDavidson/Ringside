@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Tests\Unit\Database\Factories\Matches;
+
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -28,6 +30,27 @@ describe('MatchFactory', function () {
             expect($eventMatch->match_number)->toBeInt();
             expect($eventMatch->match_type_id)->toBeInt();
             expect($eventMatch->preview)->toBeNull();
+        });
+
+        test('generates realistic match number within bounds', function () {
+            // Arrange & Act
+            $eventMatch = EventMatch::factory()->create();
+
+            // Assert
+            expect($eventMatch->match_number)->toBeInt();
+            expect($eventMatch->match_number)->toBeBetween(1, 10);
+        });
+
+        test('maintains consistent match number generation', function () {
+            // Arrange & Act
+            $matches = collect(range(1, 5))->map(fn () => EventMatch::factory()->make());
+
+            // Assert
+            foreach ($matches as $match) {
+                expect($match->match_number)->toBeInt();
+                expect($match->match_number)->toBeGreaterThan(0);
+                expect($match->match_number)->toBeBetween(1, 10);
+            }
         });
 
         test('creates complete match with competitors and results', function () {
@@ -234,6 +257,28 @@ describe('MatchFactory', function () {
             $eventMatch = EventMatch::factory()->withReferees(2)->create();
 
             expect($eventMatch->referees)->toHaveCount(2);
+        });
+
+        test('creates match with specific referee association', function () {
+            // Arrange
+            $referee = \App\Models\Referees\Referee::factory()->create();
+
+            // Act
+            $eventMatch = EventMatch::factory()->state(['referee_id' => $referee->id])->create();
+
+            // Assert
+            expect($eventMatch->referee_id)->toBe($referee->id);
+        });
+
+        test('creates match with specific decision association', function () {
+            // Arrange
+            $decision = \App\Models\Matches\MatchDecision::factory()->create();
+
+            // Act
+            $eventMatch = EventMatch::factory()->state(['match_decision_id' => $decision->id])->create();
+
+            // Assert
+            expect($eventMatch->match_decision_id)->toBe($decision->id);
         });
 
         test('creates match with specific event', function () {

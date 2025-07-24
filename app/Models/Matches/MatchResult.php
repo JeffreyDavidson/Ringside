@@ -11,18 +11,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $match_id
  * @property int $match_decision_id
+ * @property string $winner_type
+ * @property int $winner_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read MatchDecision $decision
  * @property-read EventMatch $match
  * @property-read Collection<int, MatchWinner> $winners
  * @property-read Collection<int, MatchLoser> $losers
+ * @property-read \App\Models\Wrestlers\Wrestler|\App\Models\TagTeams\TagTeam $winner
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchResult newQuery()
@@ -50,6 +54,8 @@ class MatchResult extends Model
     protected $fillable = [
         'match_id',
         'match_decision_id',
+        'winner_type',
+        'winner_id',
     ];
 
     /**
@@ -90,5 +96,15 @@ class MatchResult extends Model
     public function losers(): HasMany
     {
         return $this->hasMany(MatchLoser::class);
+    }
+
+    /**
+     * Get the winner of the event match.
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function winner(): MorphTo
+    {
+        return $this->morphTo(__FUNCTION__, 'winner_type', 'winner_id');
     }
 }

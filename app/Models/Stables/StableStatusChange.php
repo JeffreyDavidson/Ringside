@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Stables;
 
-use App\Enums\Shared\ActivationStatus;
+use App\Enums\Stables\StableStatus;
 use Database\Factories\Stables\StableStatusChangeFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int $stable_id
- * @property ActivationStatus $status
+ * @property StableStatus $status
  * @property Carbon $changed_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -54,7 +54,7 @@ class StableStatusChange extends Model
     protected function casts(): array
     {
         return [
-            'status' => ActivationStatus::class,
+            'status' => StableStatus::class,
             'changed_at' => 'datetime',
         ];
     }

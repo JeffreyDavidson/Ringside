@@ -59,8 +59,9 @@ describe('RefereeFactory Unit Tests', function () {
         });
 
         test('employed state works correctly', function () {
-            // Arrange & Act
-            $referee = Referee::factory()->make(['status' => EmploymentStatus::Employed]);
+            // Arrange & Act - Use factory state method for employed status since status is computed
+            // Note: Employment status requires persisted relationships, so use create() instead of make()
+            $referee = Referee::factory()->employed()->create();
 
             // Assert
             expect($referee->status)->toBe(EmploymentStatus::Employed);

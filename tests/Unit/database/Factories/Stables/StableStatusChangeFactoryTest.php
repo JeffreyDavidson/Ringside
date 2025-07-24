@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Database\Factories\Stables;
 
-use App\Enums\Shared\ActivationStatus;
+use App\Enums\Stables\StableStatus;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableStatusChange;
 use Database\Factories\Stables\StableStatusChangeFactory;
@@ -34,7 +34,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Assert
             expect($statusChange->stable_id)->toBeInt();
-            expect($statusChange->status)->toBeInstanceOf(ActivationStatus::class);
+            expect($statusChange->status)->toBeInstanceOf(StableStatus::class);
             expect($statusChange->changed_at)->toBeInstanceOf(Carbon::class);
         });
 
@@ -53,8 +53,8 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Assert
             foreach ($statusChanges as $statusChange) {
-                expect($statusChange->status)->toBeInstanceOf(ActivationStatus::class);
-                expect($statusChange->status)->toBeIn(ActivationStatus::cases());
+                expect($statusChange->status)->toBeInstanceOf(StableStatus::class);
+                expect($statusChange->status)->toBeIn(StableStatus::cases());
             }
         });
     });
@@ -71,7 +71,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
-            expect($statusChange->status)->toBe(ActivationStatus::Active);
+            expect($statusChange->status)->toBe(StableStatus::Active);
         });
 
         test('inactive state works correctly', function () {
@@ -85,7 +85,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
-            expect($statusChange->status)->toBe(ActivationStatus::Inactive);
+            expect($statusChange->status)->toBe(StableStatus::Inactive);
         });
 
         test('retired state works correctly', function () {
@@ -99,7 +99,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
-            expect($statusChange->status)->toBe(ActivationStatus::Retired);
+            expect($statusChange->status)->toBe(StableStatus::Retired);
         });
 
         test('unactivated state works correctly', function () {
@@ -113,7 +113,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
             // Assert
             expect($statusChange->stable_id)->toBe($stable->id);
-            expect($statusChange->status)->toBe(ActivationStatus::Unactivated);
+            expect($statusChange->status)->toBe(StableStatus::Unformed);
         });
     });
 
@@ -142,10 +142,10 @@ describe('StableStatusChangeFactory Unit Tests', function () {
 
         test('accepts custom status override', function () {
             // Arrange & Act
-            $statusChange = StableStatusChange::factory()->make(['status' => ActivationStatus::Active]);
+            $statusChange = StableStatusChange::factory()->make(['status' => StableStatus::Active]);
 
             // Assert
-            expect($statusChange->status)->toBe(ActivationStatus::Active);
+            expect($statusChange->status)->toBe(StableStatus::Active);
         });
     });
 
@@ -227,7 +227,7 @@ describe('StableStatusChangeFactory Unit Tests', function () {
             // Assert
             foreach ($statusChanges as $statusChange) {
                 expect($statusChange->stable_id)->toBeInt();
-                expect($statusChange->status)->toBeInstanceOf(ActivationStatus::class);
+                expect($statusChange->status)->toBeInstanceOf(StableStatus::class);
                 expect($statusChange->changed_at)->toBeInstanceOf(Carbon::class);
                 expect($statusChange->changed_at->isPast())->toBeTrue();
             }
