@@ -84,7 +84,7 @@ jobs:
 
       - name: Setup Laravel application
         run: |
-          cp .env.example .env
+          cp .env.testing .env
           php artisan key:generate
           php artisan config:cache
 
