@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\RetireAction;
-use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Wrestlers\Wrestler;
 use App\Repositories\StableRepository;
 use App\Repositories\WrestlerRepository;

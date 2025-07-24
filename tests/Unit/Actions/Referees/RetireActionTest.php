@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\RetireAction;
-use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Referees\Referee;
 use App\Repositories\RefereeRepository;
 use Illuminate\Support\Carbon;

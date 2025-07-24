@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\CannotBeRetiredException;
+use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Contracts\RetirementValidationStrategy;
 use Illuminate\Database\Eloquent\Model;
 
