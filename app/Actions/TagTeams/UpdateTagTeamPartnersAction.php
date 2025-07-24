@@ -36,7 +36,7 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
 
             $newTagTeamPartners = $wrestlers->except($formerTagTeamPartners->modelKeys());
 
-            $this->tagTeamRepository->syncTagTeamPartners($tagTeam, $formerTagTeamPartners, $newTagTeamPartners, $joinDate);
+            $this->tagTeamRepository->syncWrestlers($tagTeam, $formerTagTeamPartners, $newTagTeamPartners, $joinDate);
         }
     }
 }
