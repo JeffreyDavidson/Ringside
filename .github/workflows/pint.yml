@@ -33,3 +33,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Fix styling
+          commit_user_name: Jeffrey Davidson
+          commit_user_email: 3826104+JeffreyDavidson@users.noreply.github.com
+          commit_author: Jeffrey Davidson <3826104+JeffreyDavidson@users.noreply.github.com>
