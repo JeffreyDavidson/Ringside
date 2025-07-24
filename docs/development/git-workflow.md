@@ -197,6 +197,8 @@ git rebase development
 2. Keep commits focused on single changes
 3. Write descriptive commit messages
 4. Push regularly to backup work
+5. Only include necessary files for each specific commit
+6. Make as many commits as needed - don't bundle unrelated changes
 
 ### Before Creating PR
 1. Ensure branch is up to date with development
@@ -204,10 +206,154 @@ git rebase development
 3. Review your own changes first
 4. Write comprehensive PR description
 
+## Commit Best Practices
+
+### Focus Each Commit on a Single Purpose
+
+**✅ GOOD - Focused commits:**
+```bash
+# Separate commits for different concerns
+git add tests/Unit/Models/TitleTest.php
+git commit -m "test: add Title model validation tests"
+
+git add app/Models/Title.php
+git commit -m "feat: add status validation to Title model"
+
+git add database/migrations/add_status_to_titles.php
+git commit -m "feat: add status column to titles table"
+```
+
+**❌ BAD - Mixed concerns in one commit:**
+```bash
+# Don't bundle unrelated changes
+git add tests/Unit/Models/TitleTest.php app/Models/Title.php app/Models/Wrestler.php
+git commit -m "fix various issues"
+```
+
+### Include Only Necessary Files
+
+**Each commit should contain ONLY the files needed for that specific change:**
+
+```bash
+# Example: Fixing a specific bug
+git add app/Actions/Titles/DebutAction.php
+git add tests/Unit/Actions/Titles/DebutActionTest.php
+git commit -m "fix: resolve title debut validation error"
+
+# Example: Adding new feature  
+git add app/Livewire/Components/MatchForm.php
+git add resources/views/livewire/match-form.blade.php
+git add tests/Feature/Livewire/MatchFormTest.php
+git commit -m "feat: add dynamic match type selection UI"
+```
+
+### Make Multiple Commits Per Branch
+
+**Don't bundle everything into one commit. Break work into logical steps:**
+
+```bash
+# Good workflow - multiple focused commits on a branch
+git checkout -b feature/user-notifications
+
+# Step 1: Database changes
+git add database/migrations/create_notifications_table.php
+git commit -m "feat: create notifications table migration"
+
+# Step 2: Model and logic
+git add app/Models/Notification.php
+git add app/Services/NotificationService.php  
+git commit -m "feat: add Notification model and service logic"
+
+# Step 3: Tests
+git add tests/Unit/Models/NotificationTest.php
+git add tests/Unit/Services/NotificationServiceTest.php
+git commit -m "test: add comprehensive notification tests"
+
+# Step 4: UI components
+git add app/Livewire/NotificationCenter.php
+git add resources/views/livewire/notification-center.blade.php
+git commit -m "feat: add notification center UI component"
+
+# Step 5: Integration
+git add app/Http/Controllers/NotificationController.php
+git add routes/web.php
+git commit -m "feat: add notification routes and controller"
+```
+
+### Commit Message Guidelines
+
+Follow conventional commit format:
+
+```bash
+# Types
+feat:     # New feature
+fix:      # Bug fix  
+docs:     # Documentation changes
+test:     # Adding or updating tests
+refactor: # Code refactoring
+style:    # Code style changes (formatting, etc.)
+chore:    # Maintenance tasks
+
+# Examples
+git commit -m "feat: add user role-based permissions"
+git commit -m "fix: resolve null pointer exception in UserService"
+git commit -m "test: add integration tests for auth workflow"
+git commit -m "docs: update API documentation for user endpoints"
+git commit -m "refactor: extract common validation logic"
+```
+
+### When to Split vs Combine Files
+
+**Split into separate commits when:**
+- Changes serve different purposes
+- Files are in different domains/modules
+- One change is a prerequisite for another
+- Changes have different risk levels
+
+**Combine in same commit when:**
+- Files are tightly coupled for the change
+- All changes are required for feature to work
+- Changes are purely syntactic (e.g., renaming across files)
+
+**Example - Split approach:**
+```bash
+# Database schema change
+git add database/migrations/add_status_to_titles.php
+git commit -m "feat: add status column to titles table"
+
+# Model updates to use new column
+git add app/Models/Title.php
+git commit -m "feat: integrate status column in Title model"
+
+# Update tests for new functionality
+git add tests/Unit/Models/TitleTest.php
+git commit -m "test: add tests for Title status functionality"
+
+# UI changes to display status
+git add resources/views/titles/show.blade.php
+git add app/Livewire/TitleDetails.php
+git commit -m "feat: display title status in UI"
+```
+
+### Review Your Commits Before Pushing
+
+```bash
+# Review commit history
+git log --oneline -10
+
+# Review specific commit
+git show <commit-hash>
+
+# Interactive rebase to clean up if needed (before pushing)
+git rebase -i HEAD~3
+```
+
 ## Quality Gates
 
 ### Pre-Commit Checks
 - [ ] On correct branch (not master/development)
+- [ ] Only necessary files included for this specific change
+- [ ] Commit serves single, clear purpose
 - [ ] Code follows style guidelines
 - [ ] Tests are passing
 - [ ] Documentation is updated
@@ -215,7 +361,9 @@ git rebase development
 ### Pre-Push Checks  
 - [ ] Branch is up to date with development
 - [ ] All commits have descriptive messages
+- [ ] Each commit is focused and purposeful
 - [ ] No sensitive data in commits
+- [ ] Commit history tells a clear story
 - [ ] Ready for team review
 
 ## Emergency Procedures
@@ -248,19 +396,25 @@ git revert -m 1 <merge-commit-hash>
 ### DO:
 ✅ Always check current branch before committing  
 ✅ Use descriptive branch names  
-✅ Make small, focused commits  
-✅ Write clear commit messages  
+✅ Make small, focused commits with single purpose
+✅ Include only necessary files for each specific commit
+✅ Make multiple commits per branch - don't bundle unrelated changes
+✅ Write clear commit messages using conventional format
 ✅ Create PRs for all changes  
 ✅ Keep branches up to date  
-✅ Delete merged branches  
+✅ Delete merged branches
+✅ Review commit history before pushing
 
 ### DON'T:
 ❌ Commit directly to master/development  
 ❌ Use generic branch names like "fix" or "update"  
-❌ Make large, unfocused commits  
+❌ Make large, unfocused commits with mixed concerns
+❌ Bundle unrelated files in the same commit
+❌ Use vague commit messages like "fix stuff" or "updates"
 ❌ Push untested code  
 ❌ Leave stale branches  
-❌ Force push to shared branches  
+❌ Force push to shared branches
+❌ Include files that aren't necessary for the specific change  
 
 ## Tools and Aliases
 
