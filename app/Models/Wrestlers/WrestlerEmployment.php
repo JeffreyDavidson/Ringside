@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(WrestlerEmploymentFactory::class)]
 class WrestlerEmployment extends Model
 {
+    /** @use HasFactory<WrestlerEmploymentFactory> */
     use HasFactory;
 
     /**

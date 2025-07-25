@@ -115,7 +115,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, Suspendable
 {
-    /** @use BelongsToUser */
     use BelongsToUser;
 
     /** @use CanBeManaged<WrestlerManager, static> */
@@ -130,7 +129,9 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
 
+    /** @use HasEnumStatus<EmploymentStatus> */
     use HasEnumStatus;
+    /** @use HasFactory<WrestlerFactory> */
     use HasFactory;
     use IsBookableCompetitor;
 
