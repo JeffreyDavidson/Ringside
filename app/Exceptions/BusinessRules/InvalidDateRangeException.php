@@ -37,7 +37,7 @@ use Illuminate\Support\Carbon;
  * throw InvalidDateRangeException::overlapsExisting($newPeriod, $existingPeriod, 'injury');
  * ```
  */
-class InvalidDateRangeException extends BaseBusinessException
+final class InvalidDateRangeException extends BaseBusinessException
 {
     /**
      * Exception for end date being before start date.

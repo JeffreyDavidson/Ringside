@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper storyline continuity and character relationships
  * - Prevents unauthorized team modifications that could affect contracts
  */
-class WrestlerNotOnCurrentTagTeamException extends BaseBusinessException
+final class WrestlerNotOnCurrentTagTeamException extends BaseBusinessException
 {
     /**
      * Wrestler is not currently a member of the specified tag team.
@@ -42,8 +42,7 @@ class WrestlerNotOnCurrentTagTeamException extends BaseBusinessException
         $wrestler = $wrestlerName ? "Wrestler '{$wrestlerName}'" : 'Wrestler';
         $team = $tagTeamName ? " tag team '{$tagTeamName}'" : ' tag team';
 
-        /** @var static */
-        return new self("{$wrestler} is not currently a member of the{$team}.");
+        return new static("{$wrestler} is not currently a member of the{$team}.");
     }
 
     /**
@@ -57,7 +56,7 @@ class WrestlerNotOnCurrentTagTeamException extends BaseBusinessException
         $wrestler = $wrestlerName ? "Wrestler '{$wrestlerName}'" : 'Wrestler';
         $team = $tagTeamName ? " tag team '{$tagTeamName}'" : ' tag team';
 
-        return new self("{$wrestler} is a former member but not currently active on the{$team}.");
+        return new static("{$wrestler} is a former member but not currently active on the{$team}.");
     }
 
     /**
@@ -72,6 +71,6 @@ class WrestlerNotOnCurrentTagTeamException extends BaseBusinessException
         $wrestler = $wrestlerName ? "wrestler '{$wrestlerName}'" : 'wrestler';
         $team = $tagTeamName ? " tag team '{$tagTeamName}'" : ' tag team';
 
-        return new self("Cannot {$operation} {$wrestler} - not a current member of the{$team}.");
+        return new static("Cannot {$operation} {$wrestler} - not a current member of the{$team}.");
     }
 }

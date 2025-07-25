@@ -39,7 +39,7 @@ use Illuminate\Support\Carbon;
  * throw MembershipConflictException::managerOverload($manager, $maxClients, $currentClients);
  * ```
  */
-class MembershipConflictException extends BaseBusinessException
+final class MembershipConflictException extends BaseBusinessException
 {
     /**
      * Exception for wrestler already being in a stable.

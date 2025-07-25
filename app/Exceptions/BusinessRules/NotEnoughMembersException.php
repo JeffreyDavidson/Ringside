@@ -30,7 +30,7 @@ use App\Models\TagTeams\TagTeam;
  * - Ensures proper match structure and competitive balance
  * - Prevents booking errors that could damage promotion reputation
  */
-class NotEnoughMembersException extends BaseBusinessException
+final class NotEnoughMembersException extends BaseBusinessException
 {
     /**
      * Tag team does not have the required number of wrestlers.
