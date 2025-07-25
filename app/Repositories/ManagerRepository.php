@@ -106,6 +106,14 @@ class ManagerRepository extends BaseRepository implements ManagerRepositoryInter
     }
 
     /**
+     * Clear an injury for a manager.
+     */
+    public function clearInjury(Manager $manager, Carbon $recoveryDate): void
+    {
+        $this->endInjury($manager, $recoveryDate);
+    }
+
+    /**
      * Restore a soft-deleted manager.
      */
     public function restore(Manager $manager): void

@@ -30,7 +30,6 @@ class PullAction extends BaseTitleAction
      * @param  Title  $title  The title to pull
      * @param  Carbon|null  $pullDate  The pull date (defaults to now)
      * @param  string|null  $notes  Optional notes about the pull
-     *
      * @throws CannotBeDeactivatedException When title cannot be pulled due to business rules
      *
      * @example
@@ -58,7 +57,6 @@ class PullAction extends BaseTitleAction
      * Ensure the title can be pulled from active competition.
      *
      * @param  Title  $title  The title to validate
-     *
      * @throws CannotBePulledException When the title cannot be pulled
      */
     private function ensureCanBePulled(Title $title): void

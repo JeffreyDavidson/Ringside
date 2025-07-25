@@ -11,6 +11,7 @@ use App\Models\Contracts\HasStableMembership;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\ProvidesCurrentTagTeams;
 use App\Models\Contracts\ProvidesCurrentWrestlers;
+use App\Models\Titles\Title;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -59,7 +60,6 @@ class UnifiedRetireAction
      * @param  Model  $entity  The entity to retire (Wrestler, Manager, Referee, TagTeam, Title, Stable)
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @param  string|null  $notes  Optional notes for the retirement record
-     *
      * @throws Exception When entity cannot be retired due to business rules
      *
      * @example
@@ -285,10 +285,12 @@ class UnifiedRetireAction
             }
 
             // End current championship if title has an active champion
-            $currentChampionship = $entity->currentChampionship;
-            if ($currentChampionship) {
-                // End the championship when title is retired
-                $currentChampionship->update(['lost_at' => $date]);
+            if ($entity instanceof Title) {
+                $currentChampionship = $entity->currentChampionship;
+                if ($currentChampionship) {
+                    // End the championship when title is retired
+                    $currentChampionship->update(['lost_at' => $date]);
+                }
             }
         });
     }

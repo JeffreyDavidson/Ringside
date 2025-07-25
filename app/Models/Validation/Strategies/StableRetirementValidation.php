@@ -25,7 +25,6 @@ class StableRetirementValidation implements RetirementValidationStrategy
      * - Must not already be retired
      *
      * @param  Model  $stable  The stable entity to validate
-     *
      * @throws CannotBeRetiredException When retirement is not allowed
      */
     public function validate(Model $stable): void

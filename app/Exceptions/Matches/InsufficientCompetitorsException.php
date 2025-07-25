@@ -64,7 +64,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
      */
     public static function qualifiedForTitle(Model $title, int $required, int $qualified): static
     {
-        $titleName = $title->name ?? "ID: {$title->id}";
+        $titleName = $title->getAttribute('name') ?? "ID: {$title->getAttribute('id')}";
 
         return new self(
             "Insufficient qualified contenders for championship '{$titleName}'. Required: {$required}, Qualified: {$qualified}. Title matches require eligible challengers."
@@ -136,7 +136,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
      */
     public static function forVenueCapacity(Model $venue, int $requiredCompetitors, int $availableCompetitors): static
     {
-        $venueName = $venue->name ?? "ID: {$venue->id}";
+        $venueName = $venue->getAttribute('name') ?? "ID: {$venue->getAttribute('id')}";
 
         return new self(
             "Insufficient competitors for venue '{$venueName}' capacity requirements. Required: {$requiredCompetitors}, Available: {$availableCompetitors}. Venue size demands more participants."

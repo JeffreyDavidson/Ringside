@@ -32,7 +32,6 @@ class EmployAction extends BaseManagerAction
      *
      * @param  Manager  $manager  The manager to employ
      * @param  Carbon|null  $startDate  The employment start date (defaults to now)
-     *
      * @throws Exception When manager cannot be employed due to business rules
      *
      * @example

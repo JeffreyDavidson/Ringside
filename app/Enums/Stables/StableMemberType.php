@@ -36,9 +36,8 @@ enum StableMemberType: string
      * and returns the appropriate enum value.
      *
      * @param  Model  $model  The model to detect type for
-     * @return self The corresponding enum value
-     *
      * @throws InvalidArgumentException If the model type is not supported
+     * @return self The corresponding enum value
      */
     public static function fromModel(Model $model): self
     {

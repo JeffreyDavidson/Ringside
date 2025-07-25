@@ -45,7 +45,6 @@ trait ManagesRetirement
      *
      * @param  T  $model  The model to retire
      * @param  Carbon  $startDate  The date when the retirement begins
-     *
      * @throws QueryException If the retirement creation fails
      */
     public function createRetirement(Retirable $model, Carbon $startDate): void
@@ -79,7 +78,6 @@ trait ManagesRetirement
      *
      * @param  T  $model  The model whose retirement should be ended
      * @param  Carbon  $endDate  The date when the retirement ends (comeback date)
-     *
      * @throws QueryException If the retirement update fails
      */
     public function endRetirement(Retirable $model, Carbon $endDate): void

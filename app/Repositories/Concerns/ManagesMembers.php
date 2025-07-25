@@ -55,7 +55,6 @@ trait ManagesMembers
      * @param  string  $relationship  The relationship method name (e.g., 'wrestlers', 'managers')
      * @param  Model  $member  The member being added (e.g., Wrestler, Manager)
      * @param  Carbon  $joinDate  The date when the member joins
-     *
      * @throws QueryException If the relationship creation fails
      *
      * @example
@@ -82,7 +81,6 @@ trait ManagesMembers
      * @param  string  $relationship  The relationship method name (e.g., 'wrestlers', 'managers')
      * @param  Model  $member  The member being removed (e.g., Wrestler, Manager)
      * @param  Carbon  $leaveDate  The date when the member leaves
-     *
      * @throws QueryException If the relationship update fails
      *
      * @example
@@ -109,7 +107,6 @@ trait ManagesMembers
      * @param  string  $relationship  The relationship method name (e.g., 'wrestlers', 'managers')
      * @param  Model  $member  The member being removed (e.g., Wrestler, Manager)
      * @param  Carbon  $leaveDate  The date when the member leaves
-     *
      * @throws QueryException If the relationship update fails
      *
      * @example

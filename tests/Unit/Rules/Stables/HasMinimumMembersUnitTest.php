@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
  * Unit tests for HasMinimumMembers validation rule.
  *
  * UNIT TEST SCOPE:
- * - Mathematical calculation logic (tag teams × 2 + wrestlers)
+ * - Mathematical calculation logic (tag teams * 2 + wrestlers)
  * - Collection counting and member calculation
  * - Minimum member threshold validation against Stable constant
  * - Error message formatting with dynamic counts

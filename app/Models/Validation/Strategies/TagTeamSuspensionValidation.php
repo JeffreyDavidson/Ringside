@@ -21,7 +21,6 @@ class TagTeamSuspensionValidation implements SuspensionValidationStrategy
      * Validate that a TagTeam can be suspended.
      *
      * @param  Model  $tagTeam  The TagTeam entity to validate
-     *
      * @throws CannotBeSuspendedException When suspension is not allowed
      */
     public function validate(Model $tagTeam): void
@@ -37,7 +36,6 @@ class TagTeamSuspensionValidation implements SuspensionValidationStrategy
      * Validate the TagTeam's own status for suspension.
      *
      * @param  Model  $tagTeam  The TagTeam to validate
-     *
      * @throws CannotBeSuspendedException When TagTeam status prevents suspension
      */
     private function validateTagTeamStatus(Model $tagTeam): void
@@ -71,7 +69,6 @@ class TagTeamSuspensionValidation implements SuspensionValidationStrategy
      * Validate current wrestlers for TagTeam suspension.
      *
      * @param  Model  $tagTeam  The TagTeam to validate
-     *
      * @throws CannotBeSuspendedException When wrestlers prevent TagTeam suspension
      */
     private function validateCurrentWrestlers(Model $tagTeam): void

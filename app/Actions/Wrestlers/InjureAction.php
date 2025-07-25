@@ -24,7 +24,6 @@ class InjureAction extends BaseWrestlerAction
      *
      * @param  Wrestler  $wrestler  The wrestler to injure
      * @param  Carbon|null  $injuryDate  The injury start date (defaults to now)
-     *
      * @throws CannotBeInjuredException When wrestler cannot be injured due to business rules
      *
      * @example

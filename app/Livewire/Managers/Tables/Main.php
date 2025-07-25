@@ -72,7 +72,7 @@ class Main extends BaseTable
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')
-                ->label(fn (Manager $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Manager $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];

@@ -25,7 +25,6 @@ class ReleaseAction extends BaseRefereeAction
      *
      * @param  Referee  $referee  The referee to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
-     *
      * @throws CannotBeReleasedException When referee cannot be released due to business rules
      *
      * @example

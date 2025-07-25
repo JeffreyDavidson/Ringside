@@ -45,11 +45,14 @@ use Tests\Unit\Models\Managers\ManagerTest;
  * @property int $id
  * @property string $first_name
  * @property string $last_name
+ *
  * @property-read string $full_name
+ *
  * @property EmploymentStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read ManagerEmployment|null $currentEmployment
  * @property-read ManagerEmployment|null $firstEmployment
  * @property-read ManagerEmployment|null $futureEmployment
@@ -104,6 +107,8 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
 {
     use DefinesManagedAliases;
     use HasBelongsToOne;
+
+    /** @use HasFactory<ManagerFactory> */
     use HasFactory;
 
     /** @use IsEmployable<ManagerEmployment, static> */

@@ -25,7 +25,6 @@ class SuspendAction extends BaseManagerAction
      *
      * @param  Manager  $manager  The manager to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
-     *
      * @throws CannotBeSuspendedException When manager cannot be suspended due to business rules
      *
      * @example

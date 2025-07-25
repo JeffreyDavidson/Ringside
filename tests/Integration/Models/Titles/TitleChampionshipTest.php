@@ -6,7 +6,6 @@ use App\Actions\Titles\RetireAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
-use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -233,7 +232,7 @@ describe('TitleChampionship Model', function () {
                 }
             }
 
-            expect(TitleChampionship::count())->toBe(15); // 3 titles × 5 wrestlers
+            expect(TitleChampionship::count())->toBe(15); // 3 titles * 5 wrestlers
         });
 
         test('eager loading relationships works correctly', function () {

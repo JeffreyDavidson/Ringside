@@ -19,7 +19,6 @@ interface EmploymentValidationStrategy
      * Validate that the entity can be employed.
      *
      * @param  Model  $entity  The entity to validate for employment
-     *
      * @throws CannotBeEmployedException When employment is not allowed
      */
     public function validate(Model $entity): void;

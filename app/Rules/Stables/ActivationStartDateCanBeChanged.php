@@ -21,7 +21,7 @@ class ActivationStartDateCanBeChanged implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->stable->isCurrentlyActivated() && ! $this->stable->activatedOn(Carbon::parse($value))) {
+        if ($this->stable->isCurrentlyActive() && ! $this->stable->wasActiveOn(Carbon::parse($value))) {
             $fail("{$this->stable->name} is currently activated and the activation date cannot be changed.");
         }
     }

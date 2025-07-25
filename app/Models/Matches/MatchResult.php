@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property int $winner_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read MatchDecision $decision
  * @property-read EventMatch $match
  * @property-read Collection<int, MatchWinner> $winners
@@ -39,6 +40,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchResultFactory::class)]
 class MatchResult extends Model
 {
+    /** @use HasFactory<MatchResultFactory> */
     use HasFactory;
 
     /**

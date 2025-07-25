@@ -28,7 +28,7 @@ class EnhancedTestMakeCommand extends TestMakeCommand
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(): ?bool
     {
         $name = $this->getNameInput();
 
@@ -46,20 +46,20 @@ class EnhancedTestMakeCommand extends TestMakeCommand
                 );
 
                 if ($useRingside) {
-                    $this->info('✨ Generating standardized model test with Ringside...');
+                    $this->info('* Generating standardized model test with Ringside...');
 
                     $result = $this->call('ringside:make:test', [
                         '--unit' => $this->option('unit'),
                         '--model' => $modelName,
                     ]);
 
-                    return $result === 0 ? 0 : 1;
+                    return $result === 0 ? true : false;
                 }
             }
         }
 
         // Fall back to Laravel's default behavior
-        return (int) parent::handle();
+        return parent::handle();
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Titles\Modals;
 
 use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\Gate;
@@ -16,6 +17,8 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    use GeneratesDummyData;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
@@ -37,7 +40,7 @@ class FormModal extends BaseFormModal
             'name' => fn () => Str::of(fake()->words(2, true))->title()->append(' Title')->value(),
             'type' => fn () => fake()->randomElement(['singles', 'tag-team']),
             'introduction' => fn () => fake()->optional(0.8)->paragraphs(2, true),
-            'active_at' => fn () => fake()->optional(0.6)->dateTimeBetween('-1 year', 'now')?->format('Y-m-d H:i:s'),
+            'active_at' => fn () => $this->generateOptionalStartDate('Y-m-d H:i:s', 0.6, '-1 year', 'now'),
         ];
     }
 

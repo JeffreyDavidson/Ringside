@@ -74,7 +74,7 @@ class Main extends BaseTable
                         ->orWhere('last_name', 'like', '%'.$searchTerm.'%');
                 }),
             Column::make(__('core.status'), 'status')
-                ->label(fn (Referee $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Referee $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
@@ -99,7 +99,7 @@ class Main extends BaseTable
                     'retired' => 'Retired',
                 ])
                 ->filter(function (RefereeBuilder $builder, string $value) {
-                    /** @var RefereeBuilder $builder */
+                    /** @var RefereeBuilder<Referee> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
                         'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),

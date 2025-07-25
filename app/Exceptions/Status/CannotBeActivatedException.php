@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Protects comeback storylines and return event planning
  * - Ensures proper regulatory compliance and reactivation protocols
  */
-class CannotBeActivatedException extends BaseBusinessException
+final class CannotBeActivatedException extends BaseBusinessException
 {
     /**
      * Entity is already in an active state and cannot be reactivated.
@@ -62,7 +62,7 @@ class CannotBeActivatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be reactivated.");
+        return new static("This{$context} is retired and cannot be reactivated.");
     }
 
     /**
@@ -77,7 +77,7 @@ class CannotBeActivatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has never been activated and cannot be reactivated. Use debut workflow instead.");
+        return new static("This{$context} has never been activated and cannot be reactivated. Use debut workflow instead.");
     }
 
     /**
@@ -90,7 +90,7 @@ class CannotBeActivatedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be reactivated because replacement exists: {$replacementEntity}.");
+        return new static("This{$context} cannot be reactivated because replacement exists: {$replacementEntity}.");
     }
 
     /**
@@ -103,7 +103,7 @@ class CannotBeActivatedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be reactivated: {$prerequisite}.");
+        return new static("This{$context} cannot be reactivated: {$prerequisite}.");
     }
 
     /**
@@ -116,7 +116,7 @@ class CannotBeActivatedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be reactivated due to conflict: {$conflict}.");
+        return new static("This{$context} cannot be reactivated due to conflict: {$conflict}.");
     }
 
     /**
@@ -129,6 +129,6 @@ class CannotBeActivatedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be reactivated without {$authorizationLevel} authorization.");
+        return new static("This{$context} cannot be reactivated without {$authorizationLevel} authorization.");
     }
 }

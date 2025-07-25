@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Models\Stables\StableTagTeam;
 use App\Models\TagTeams\TagTeam;
 use Carbon\Carbon;
 use Exception;
@@ -52,17 +53,41 @@ class PreviousTagTeams extends DataTableComponent
                 ->title(fn (TagTeam $row) => $row->name ?? 'Unknown')
                 ->location(fn (TagTeam $row) => route('tag-teams.show', $row)),
             Column::make(__('stables.date_joined'))
-                ->label(fn (TagTeam $row) => $row->stables->first()?->pivot?->joined_at ?
-                    (is_string($row->stables->first()->pivot->joined_at) ?
-                        Carbon::parse($row->stables->first()->pivot->joined_at)->format('Y-m-d') :
-                        $row->stables->first()->pivot->joined_at->format('Y-m-d')
-                    ) : ''),
+                ->label(function (TagTeam $row): string {
+                    $stable = $row->stables->first();
+                    if (! $stable || ! isset($stable->pivot)) {
+                        return '';
+                    }
+
+                    /** @var StableTagTeam $pivot */
+                    $pivot = $stable->pivot;
+                    $joinedAt = $pivot->getAttribute('joined_at');
+                    if (! $joinedAt) {
+                        return '';
+                    }
+
+                    return is_string($joinedAt) ?
+                        Carbon::parse($joinedAt)->format('Y-m-d') :
+                        $joinedAt->format('Y-m-d');
+                }),
             Column::make(__('stables.date_left'))
-                ->label(fn (TagTeam $row) => $row->stables->first()?->pivot?->left_at ?
-                    (is_string($row->stables->first()->pivot->left_at) ?
-                        Carbon::parse($row->stables->first()->pivot->left_at)->format('Y-m-d') :
-                        $row->stables->first()->pivot->left_at->format('Y-m-d')
-                    ) : ''),
+                ->label(function (TagTeam $row): string {
+                    $stable = $row->stables->first();
+                    if (! $stable || ! isset($stable->pivot)) {
+                        return '';
+                    }
+
+                    /** @var StableTagTeam $pivot */
+                    $pivot = $stable->pivot;
+                    $leftAt = $pivot->getAttribute('left_at');
+                    if (! $leftAt) {
+                        return '';
+                    }
+
+                    return is_string($leftAt) ?
+                        Carbon::parse($leftAt)->format('Y-m-d') :
+                        $leftAt->format('Y-m-d');
+                }),
         ];
     }
 

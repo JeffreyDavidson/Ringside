@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Referees\Modals;
 
 use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Referees\Forms\CreateEditForm;
 use App\Models\Referees\Referee;
 use Illuminate\View\View;
@@ -14,8 +15,12 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    use GeneratesDummyData;
+
     /**
      * Store original model data for resetting purposes
+     *
+     * @var array<string, mixed>|null
      */
     public ?array $originalModelData = null;
 
@@ -39,7 +44,7 @@ class FormModal extends BaseFormModal
         return [
             'first_name' => fn () => fake()->firstName(),
             'last_name' => fn () => fake()->lastName(),
-            'employment_date' => fn () => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+            'employment_date' => fn () => $this->generateOptionalStartDate(),
         ];
     }
 
@@ -57,7 +62,7 @@ class FormModal extends BaseFormModal
         parent::openModal($modelId);
 
         // Store original model data if editing
-        if (isset($this->model) && ! is_null($this->model)) {
+        if (isset($this->model)) {
             $this->originalModelData = [
                 'first_name' => $this->model->first_name,
                 'last_name' => $this->model->last_name,

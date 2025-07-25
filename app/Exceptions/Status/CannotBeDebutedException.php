@@ -30,7 +30,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper stable formation ceremonies and member introductions
  * - Prevents confusion between debuts and reactivations in promotional materials
  */
-class CannotBeDebutedException extends BaseBusinessException
+final class CannotBeDebutedException extends BaseBusinessException
 {
     /**
      * Entity has already been debuted and cannot be debuted again.
@@ -55,7 +55,7 @@ class CannotBeDebutedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be debuted.");
+        return new static("This{$context} is retired and cannot be debuted.");
     }
 
     /**
@@ -68,7 +68,7 @@ class CannotBeDebutedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be debuted: {$prerequisite}.");
+        return new static("This{$context} cannot be debuted: {$prerequisite}.");
     }
 
     /**
@@ -81,7 +81,7 @@ class CannotBeDebutedException extends BaseBusinessException
     {
         $context = $titleName ? " title '{$titleName}'" : ' title';
 
-        return new self("This{$context} cannot be debuted due to championship conflict: {$conflict}.");
+        return new static("This{$context} cannot be debuted due to championship conflict: {$conflict}.");
     }
 
     /**
@@ -95,7 +95,7 @@ class CannotBeDebutedException extends BaseBusinessException
     {
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
 
-        return new self("This{$context} cannot be debuted with {$currentCount} members (minimum {$minimumRequired} required).");
+        return new static("This{$context} cannot be debuted with {$currentCount} members (minimum {$minimumRequired} required).");
     }
 
     /**
@@ -108,7 +108,7 @@ class CannotBeDebutedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be debuted due to scheduling conflict: {$schedulingConflict}.");
+        return new static("This{$context} cannot be debuted due to scheduling conflict: {$schedulingConflict}.");
     }
 
     /**
@@ -121,6 +121,6 @@ class CannotBeDebutedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be debuted without {$authorizationLevel} authorization.");
+        return new static("This{$context} cannot be debuted without {$authorizationLevel} authorization.");
     }
 }
