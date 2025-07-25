@@ -62,7 +62,6 @@ trait ManagesSuspension
      *
      * @param  Suspendable<Model, Model>  $model  The model to suspend
      * @param  Carbon  $startDate  The date when the suspension begins
-     *
      * @throws QueryException If the suspension creation fails
      *
      * @example
@@ -89,7 +88,6 @@ trait ManagesSuspension
      *
      * @param  Suspendable<Model, Model>  $model  The model whose suspension should be ended
      * @param  Carbon  $endDate  The date when the suspension ends
-     *
      * @throws QueryException If the suspension update fails
      *
      * @example

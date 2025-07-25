@@ -140,7 +140,6 @@ trait ManagesDates
      *
      * @param  Carbon  $startDate  The start date of the period
      * @param  Carbon  $endDate  The end date of the period
-     *
      * @throws InvalidArgumentException When the date range is invalid
      *
      * @example

@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read MatchCompetitor|null $pivot
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event

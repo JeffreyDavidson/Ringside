@@ -60,7 +60,6 @@ class UnifiedRetireAction
      * @param  Model  $entity  The entity to retire (Wrestler, Manager, Referee, TagTeam, Title, Stable)
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @param  string|null  $notes  Optional notes for the retirement record
-     *
      * @throws Exception When entity cannot be retired due to business rules
      *
      * @example

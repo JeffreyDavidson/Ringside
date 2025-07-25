@@ -30,7 +30,6 @@ class RetireAction extends BaseTagTeamAction
      *
      * @param  TagTeam  $tagTeam  The tag team to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     *
      * @throws Exception When tag team cannot be retired due to business rules
      *
      * @example

@@ -63,7 +63,6 @@ class UnifiedSuspendAction
      * @param  Model  $entity  The entity to suspend (Wrestler, Manager, Referee, TagTeam)
      * @param  Carbon|null  $suspensionDate  The suspension date (defaults to now)
      * @param  string|null  $notes  Optional notes for the suspension record
-     *
      * @throws Exception When entity cannot be suspended due to business rules
      *
      * @example

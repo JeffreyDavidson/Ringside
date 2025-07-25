@@ -46,7 +46,6 @@ class UnretireAction extends BaseStableAction
      *
      * @param  Stable  $stable  The stable to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     *
      * @throws CannotBeUnretiredException When stable cannot be unretired due to business rules
      *
      * @example

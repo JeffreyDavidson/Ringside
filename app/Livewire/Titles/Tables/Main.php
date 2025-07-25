@@ -134,10 +134,10 @@ class Main extends BaseTable
             Column::make(__('titles.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn (Title $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Title $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             Column::make(__('titles.current_champion'), 'champion_name')
-                ->label(fn (Title $row) => $row->currentChampion()?->name ?? 'Vacant'),
+                ->label(fn (Title $row) => $row->currentChampion()->name ?? 'Vacant'),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
     }
@@ -217,12 +217,12 @@ class Main extends BaseTable
     }
 
     /**
-     * Pull a title from active competition.
+     * Put a title on hold (remove from active competition).
      *
-     * @param  Title  $title  The title to pull
+     * @param  Title  $title  The title to put on hold
      * @return RedirectResponse Redirect response with success or error message
      */
-    public function pull(Title $title): RedirectResponse
+    public function putOnHold(Title $title): RedirectResponse
     {
         Gate::authorize('pull', $title);
 

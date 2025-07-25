@@ -33,7 +33,6 @@ class HealAction extends BaseManagerAction
      *
      * @param  Manager  $manager  The injured manager to heal
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
-     *
      * @throws CannotBeClearedFromInjuryException When manager cannot be healed due to business rules
      *
      * @example

@@ -26,7 +26,6 @@ class ReleaseAction extends BaseManagerAction
      *
      * @param  Manager  $manager  The manager to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
-     *
      * @throws CannotBeReleasedException When manager cannot be released due to business rules
      *
      * @example

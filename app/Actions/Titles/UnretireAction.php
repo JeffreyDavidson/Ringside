@@ -27,7 +27,6 @@ class UnretireAction extends BaseTitleAction
      *
      * @param  Title  $title  The title to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     *
      * @throws CannotBeUnretiredException When title cannot be unretired due to business rules
      *
      * @example

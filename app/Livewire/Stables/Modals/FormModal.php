@@ -8,6 +8,7 @@ use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
+use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Stables\Forms\CreateEditForm;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Str;
@@ -18,6 +19,7 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    use GeneratesDummyData;
     use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
@@ -41,7 +43,7 @@ class FormModal extends BaseFormModal
     {
         return [
             'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'start_date' => fn () => ($date = fake()->optional(0.8)->dateTimeBetween('now', '+3 month')) ? $date->format('Y-m-d H:i:s') : null,
+            'start_date' => fn () => $this->generateOptionalStartDate(),
         ];
     }
 

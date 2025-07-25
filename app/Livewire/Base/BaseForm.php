@@ -419,9 +419,9 @@ abstract class BaseForm extends Form
      * - Cache invalidation
      * - Audit logging
      *
-     * @return bool True on successful storage, false on failure
      *
      * @throws ValidationException If validation fails
+     * @return bool True on successful storage, false on failure
      *
      * @see getModelData() For data transformation implementation
      * @see rules() For validation rule definition
@@ -498,9 +498,9 @@ abstract class BaseForm extends Form
      * - Saves changes to the database
      * - Maintains the existing model reference
      *
-     * @return bool True if the model was successfully saved, false otherwise
      *
      * @throws Exception If model creation or update fails
+     * @return bool True if the model was successfully saved, false otherwise
      *
      * @see getModelData() For data transformation requirements
      * @see isCreating() For operation mode detection

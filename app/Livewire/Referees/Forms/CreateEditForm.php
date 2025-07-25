@@ -27,7 +27,6 @@ use Illuminate\Support\Carbon;
  * - Integration with match assignment and scheduling systems
  * - Official personnel record management for wrestling operations
  *
- * @extends BaseForm<RefereeForm, Referee>
  *
  * @author Your Name
  *

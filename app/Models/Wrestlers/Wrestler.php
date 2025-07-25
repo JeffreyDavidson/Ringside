@@ -76,6 +76,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read WrestlerEmployment|null $currentEmployment
  * @property-read WrestlerEmployment|null $firstEmployment
  * @property-read WrestlerEmployment|null $futureEmployment

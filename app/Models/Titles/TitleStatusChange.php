@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $changed_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Title|null $title
  *
  * @method static \Database\Factories\Titles\TitleStatusChangeFactory factory($count = null, $state = [])

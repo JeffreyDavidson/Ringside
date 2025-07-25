@@ -200,9 +200,9 @@ trait IsSuspendable
      *
      * The resolution can be overridden by calling the fakeSuspensionModel() method (useful for testing).
      *
-     * @return class-string<TSuspension> The fully qualified class name of the suspension model
      *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return class-string<TSuspension> The fully qualified class name of the suspension model
      *
      * @see fakeSuspensionModel() For overriding the resolved model class
      *

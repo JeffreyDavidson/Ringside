@@ -61,9 +61,9 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * Results are ordered by join date in descending order to show the
      * most recent previous memberships first.
      *
-     * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
      *
      * @throws Exception If wrestlerId is not set
+     * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
      *
      * @example
      * ```php

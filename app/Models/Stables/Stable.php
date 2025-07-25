@@ -39,6 +39,7 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read StableStatusChange|null $debutStatusChange
  * @property-read StableStatusChange|null $latestStatusChange
  * @property-read Collection<int, StableStatusChange> $statusChanges

@@ -6,6 +6,7 @@ namespace App\Livewire\TagTeams\Modals;
 
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
+use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
@@ -18,14 +19,15 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    use GeneratesDummyData;
     use PresentsWrestlersList;
 
-    public function getWrestlersListProperty(): Collection
+    public function getWrestlersListProperty()
     {
         return Wrestler::all();
     }
 
-    public function getManagersProperty(): Collection
+    public function getManagersProperty(): array
     {
         return Manager::select('id', 'first_name', 'last_name')
             ->get()
@@ -59,7 +61,7 @@ class FormModal extends BaseFormModal
         return [
             'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
             'signature_move' => fn () => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
-            'start_date' => fn () => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+            'start_date' => fn () => $this->generateOptionalStartDate(),
             'wrestlerA' => fn () => $wrestlerA->id,
             'wrestlerB' => fn () => $wrestlerB->id,
         ];

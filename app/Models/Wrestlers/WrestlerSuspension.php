@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $ended_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Wrestler|null $wrestler
  *
  * @method static \Database\Factories\Wrestlers\WrestlerSuspensionFactory factory($count = null, $state = [])

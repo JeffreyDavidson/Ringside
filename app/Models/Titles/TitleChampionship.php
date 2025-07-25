@@ -27,10 +27,12 @@ use Illuminate\Support\Carbon;
  * @property int|null $lost_match_id
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
+ *
  * @property-read EventMatch|null $wonEventMatch
  * @property-read EventMatch|null $lostEventMatch
  * @property-read Title|null $title
  * @property-read Wrestler|TagTeam $champion
+ *
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *

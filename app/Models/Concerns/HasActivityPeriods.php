@@ -449,9 +449,9 @@ trait HasActivityPeriods
      * conventions. For example, if the parent model is 'Title', it will look for
      * a 'TitleActivityPeriod' model class.
      *
-     * @return class-string<TActivityPeriod> The fully qualified class name of the activity period model
      *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return class-string<TActivityPeriod> The fully qualified class name of the activity period model
      *
      * @see fakeActivityPeriodModel() For overriding the resolved model class
      *

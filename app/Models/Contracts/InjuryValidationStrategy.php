@@ -19,7 +19,6 @@ interface InjuryValidationStrategy
      * Validate that the entity can be injured.
      *
      * @param  Model  $entity  The entity to validate for injury
-     *
      * @throws CannotBeInjuredException When injury is not allowed
      */
     public function validate(Model $entity): void;

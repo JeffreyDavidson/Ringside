@@ -24,7 +24,6 @@ class SuspendAction extends BaseWrestlerAction
      *
      * @param  Wrestler  $wrestler  The wrestler to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
-     *
      * @throws CannotBeSuspendedException When wrestler cannot be suspended due to business rules
      *
      * @example
