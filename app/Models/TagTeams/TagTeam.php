@@ -129,6 +129,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
 
+    /** @use HasFactory<TagTeamFactory> */
     use HasFactory;
     use IsBookableCompetitor;
 

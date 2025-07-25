@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(TagTeamEmploymentFactory::class)]
 class TagTeamEmployment extends Model
 {
+    /** @use HasFactory<TagTeamEmploymentFactory> */
     use HasFactory;
 
     /**
