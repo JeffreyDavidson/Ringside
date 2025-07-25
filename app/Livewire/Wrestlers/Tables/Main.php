@@ -49,7 +49,7 @@ class Main extends BaseTable
             Column::make(__('wrestlers.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn (Wrestler $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Wrestler $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             Column::make(__('wrestlers.height'), 'height'),
             Column::make(__('wrestlers.weight'), 'weight'),
@@ -109,6 +109,8 @@ class Main extends BaseTable
 
     /**
      * Override the default action column to use wrestler-specific actions.
+     *
+     * @var array<string, string>
      */
     protected $listeners = ['wrestler-action' => 'handleWrestlerAction'];
 
