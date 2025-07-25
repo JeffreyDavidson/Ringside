@@ -170,7 +170,7 @@ class Main extends BaseTable
                     'with_pending_debut' => 'Pending Debut',
                 ])
                 ->filter(function (Builder $builder, string $value): void {
-                    /** @var TitleBuilder $builder */
+                    /** @var TitleBuilder<Title> $builder */
                     match ($value) {
                         'undebuted' => $builder->undebuted(),
                         'active' => $builder->active(),

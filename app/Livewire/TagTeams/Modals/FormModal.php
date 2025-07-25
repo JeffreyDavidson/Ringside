@@ -11,6 +11,7 @@ use App\Livewire\TagTeams\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -22,11 +23,17 @@ class FormModal extends BaseFormModal
     use GeneratesDummyData;
     use PresentsWrestlersList;
 
+    /**
+     * @return Collection<int, Wrestler>
+     */
     public function getWrestlersListProperty()
     {
         return Wrestler::all();
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function getManagersProperty(): array
     {
         return Manager::select('id', 'first_name', 'last_name')

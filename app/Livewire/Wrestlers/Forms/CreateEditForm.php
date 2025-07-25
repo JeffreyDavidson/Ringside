@@ -28,11 +28,8 @@ use Illuminate\Validation\Rule;
  * - Wrestling persona data (signature moves, career information)
  * - Custom validation rules for wrestling industry requirements
  *
-
+ * @extends BaseForm<CreateEditForm, Wrestler>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see Height For height value object operations

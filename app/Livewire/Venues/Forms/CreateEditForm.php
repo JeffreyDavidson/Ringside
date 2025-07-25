@@ -25,11 +25,8 @@ use Illuminate\Validation\Rule;
  * - ZIP code format validation for postal accuracy
  * - Location data integrity for event management systems
  *
-
+ * @extends BaseForm<CreateEditForm, Venue>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  *
  * @property string $name Venue's official name for events and promotion

@@ -28,11 +28,8 @@ use Illuminate\Validation\Rule;
  * - Event uniqueness validation across the system
  * - Cached venue list presentation for efficient form rendering
  *
-
+ * @extends BaseForm<CreateEditForm, Event>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality
  * @see PresentsVenuesList For venue selection functionality
  * @see Event For the underlying event model

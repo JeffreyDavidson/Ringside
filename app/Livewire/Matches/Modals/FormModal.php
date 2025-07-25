@@ -35,10 +35,8 @@ use Log;
  * - Dynamic view rendering based on match type
  * - Wrestling match data generation for testing
  *
+ * @extends BaseFormModal<CreateEditForm, EventMatch>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseFormModal For modal functionality and patterns
  * @see EventMatch For the underlying match model structure
  */
@@ -320,7 +318,7 @@ class FormModal extends BaseFormModal
      * 2. Initialize the correct competitor structure
      * 3. Reset validation state
      */
-    public function updatedFormMatchTypeId($value): void
+    public function updatedFormMatchTypeId(mixed $value): void
     {
         if (! $value) {
             return;

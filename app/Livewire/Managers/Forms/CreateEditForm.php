@@ -27,11 +27,8 @@ use Illuminate\Support\Carbon;
  * - Integration with wrestler representation and storyline systems
  * - Personnel record management for wrestling entertainment operations
  *
-
+ * @extends BaseForm<CreateEditForm, Manager>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see CanChangeEmploymentDate For custom validation rules
