@@ -37,7 +37,7 @@ class FormModal extends BaseFormModal
             'name' => fn () => Str::of(fake()->words(2, true))->title()->append(' Title')->value(),
             'type' => fn () => fake()->randomElement(['singles', 'tag-team']),
             'introduction' => fn () => fake()->optional(0.8)->paragraphs(2, true),
-            'active_at' => fn () => fake()->optional(0.6)->dateTimeBetween('-1 year', 'now')?->format('Y-m-d H:i:s'),
+            'active_at' => fn () => ($date = fake()->optional(0.6)->dateTimeBetween('-1 year', 'now')) ? $date->format('Y-m-d H:i:s') : null,
         ];
     }
 
