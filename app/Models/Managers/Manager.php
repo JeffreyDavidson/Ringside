@@ -104,6 +104,8 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
 {
     use DefinesManagedAliases;
     use HasBelongsToOne;
+
+    /** @use HasFactory<ManagerFactory> */
     use HasFactory;
 
     /** @use IsEmployable<ManagerEmployment, static> */

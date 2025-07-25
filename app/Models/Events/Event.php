@@ -51,7 +51,9 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(EventBuilder::class)]
 class Event extends Model
 {
+    /** @use HasFactory<EventFactory> */
     use HasFactory;
+
     use HasMatches;
     use SoftDeletes;
 

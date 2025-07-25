@@ -47,7 +47,9 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(VenueBuilder::class)]
 class Venue extends Model
 {
+    /** @use HasFactory<VenueFactory> */
     use HasFactory;
+
     use HoldsEvents;
     use SoftDeletes;
 
