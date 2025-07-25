@@ -42,7 +42,6 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property-read StableStatusChange|null $debutStatusChange
  * @property-read StableStatusChange|null $latestStatusChange
  * @property-read Collection<int, StableStatusChange> $statusChanges
- * @property-read StableMember|null $pivot
  * @property-read StableRetirement|null $currentRetirement
  * @property-read StableRetirement|null $previousRetirement
  * @property-read Collection<int, StableRetirement> $retirements

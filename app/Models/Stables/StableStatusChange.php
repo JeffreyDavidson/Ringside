@@ -33,6 +33,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(StableStatusChangeFactory::class)]
 class StableStatusChange extends Model
 {
+    /** @use HasFactory<StableStatusChangeFactory> */
     use HasFactory;
 
     /**
