@@ -38,7 +38,7 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
             throw CannotBeSuspendedException::retired();
         }
 
-        if (method_exists($entity, 'hasFutureEmployment') && $entity->hasFutureEmployment()) {
+        if ($entity->hasFutureEmployment()) {
             throw CannotBeSuspendedException::hasFutureEmployment();
         }
 

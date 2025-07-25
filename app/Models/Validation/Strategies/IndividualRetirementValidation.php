@@ -50,7 +50,7 @@ class IndividualRetirementValidation implements RetirementValidationStrategy
         //     throw CannotBeRetiredException::released();
         // }
 
-        if (method_exists($entity, 'hasFutureEmployment') && $entity->hasFutureEmployment()) {
+        if ($entity->hasFutureEmployment()) {
             throw CannotBeRetiredException::hasFutureEmployment();
         }
 
