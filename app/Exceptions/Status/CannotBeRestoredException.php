@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper audit trails for deletion and restoration activities
  * - Prevents unauthorized data recovery that could affect active operations
  */
-class CannotBeRestoredException extends BaseBusinessException
+final class CannotBeRestoredException extends BaseBusinessException
 {
     /**
      * Entity is not currently deleted and cannot be restored.
@@ -41,7 +41,7 @@ class CannotBeRestoredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is not deleted and cannot be restored.");
+        return new static("This{$context} is not deleted and cannot be restored.");
     }
 
     /**
@@ -54,7 +54,7 @@ class CannotBeRestoredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be restored due to dependency conflict: {$conflictingDependency}.");
+        return new static("This{$context} cannot be restored due to dependency conflict: {$conflictingDependency}.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeRestoredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be restored because replacement exists: {$replacementEntity}.");
+        return new static("This{$context} cannot be restored because replacement exists: {$replacementEntity}.");
     }
 
     /**
@@ -80,7 +80,7 @@ class CannotBeRestoredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has been permanently deleted and cannot be restored.");
+        return new static("This{$context} has been permanently deleted and cannot be restored.");
     }
 
     /**
@@ -93,7 +93,7 @@ class CannotBeRestoredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be restored without {$authorizationLevel} authorization.");
+        return new static("This{$context} cannot be restored without {$authorizationLevel} authorization.");
     }
 
     /**
@@ -106,6 +106,6 @@ class CannotBeRestoredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be restored: {$reason}.");
+        return new static("This{$context} cannot be restored: {$reason}.");
     }
 }

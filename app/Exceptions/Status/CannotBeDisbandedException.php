@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper member release and reallocation procedures
  * - Prevents disruption of active feuds and championship pursuits
  */
-class CannotBeDisbandedException extends BaseBusinessException
+final class CannotBeDisbandedException extends BaseBusinessException
 {
     /**
      * Stable is not currently active and cannot be disbanded.
@@ -40,7 +40,7 @@ class CannotBeDisbandedException extends BaseBusinessException
     {
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
 
-        return new self("This{$context} is not active and cannot be disbanded.");
+        return new static("This{$context} is not active and cannot be disbanded.");
     }
 
     /**
@@ -52,7 +52,7 @@ class CannotBeDisbandedException extends BaseBusinessException
     {
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
 
-        return new self("This{$context} is already disbanded.");
+        return new static("This{$context} is already disbanded.");
     }
 
     /**
@@ -64,7 +64,7 @@ class CannotBeDisbandedException extends BaseBusinessException
     {
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
 
-        return new self("This{$context} is retired and cannot be disbanded.");
+        return new static("This{$context} is retired and cannot be disbanded.");
     }
 
     /**
@@ -76,7 +76,7 @@ class CannotBeDisbandedException extends BaseBusinessException
     {
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
 
-        return new self("This{$context} has not been officially activated and cannot be disbanded.");
+        return new static("This{$context} has not been officially activated and cannot be disbanded.");
     }
 
     /**
@@ -89,7 +89,7 @@ class CannotBeDisbandedException extends BaseBusinessException
     {
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
 
-        return new self("This{$context} cannot be disbanded due to active storyline: {$storylineDetails}.");
+        return new static("This{$context} cannot be disbanded due to active storyline: {$storylineDetails}.");
     }
 
     /**
@@ -103,6 +103,6 @@ class CannotBeDisbandedException extends BaseBusinessException
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
         $titles = implode(', ', $championshipTitles);
 
-        return new self("This{$context} cannot be disbanded while members hold championships: {$titles}.");
+        return new static("This{$context} cannot be disbanded while members hold championships: {$titles}.");
     }
 }

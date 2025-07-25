@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper storyline injury integration and recovery timelines
  * - Prevents administrative errors that could affect medical benefits
  */
-class CannotBeInjuredException extends BaseBusinessException
+final class CannotBeInjuredException extends BaseBusinessException
 {
     /**
      * Entity is unemployed and cannot be injured.
@@ -41,7 +41,7 @@ class CannotBeInjuredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is unemployed and cannot be injured.");
+        return new static("This{$context} is unemployed and cannot be injured.");
     }
 
     /**
@@ -54,7 +54,7 @@ class CannotBeInjuredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is released and cannot be injured.");
+        return new static("This{$context} is released and cannot be injured.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeInjuredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be injured.");
+        return new static("This{$context} is retired and cannot be injured.");
     }
 
     /**
@@ -80,7 +80,7 @@ class CannotBeInjuredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has not been officially employed and cannot be injured.");
+        return new static("This{$context} has not been officially employed and cannot be injured.");
     }
 
     /**
@@ -95,7 +95,7 @@ class CannotBeInjuredException extends BaseBusinessException
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
         $injury = $currentInjury ? " ({$currentInjury})" : '';
 
-        return new self("This{$context} is already currently injured{$injury}.");
+        return new static("This{$context} is already currently injured{$injury}.");
     }
 
     /**
@@ -110,7 +110,7 @@ class CannotBeInjuredException extends BaseBusinessException
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
         $reason = $suspensionReason ? " ({$suspensionReason})" : '';
 
-        return new self("This{$context} is suspended{$reason} and cannot be injured.");
+        return new static("This{$context} is suspended{$reason} and cannot be injured.");
     }
 
     /**
@@ -123,6 +123,6 @@ class CannotBeInjuredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be injured due to medical coverage issue: {$coverageIssue}.");
+        return new static("This{$context} cannot be injured due to medical coverage issue: {$coverageIssue}.");
     }
 }

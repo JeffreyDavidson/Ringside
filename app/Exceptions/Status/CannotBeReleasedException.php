@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper notice periods and severance compliance
  * - Prevents premature releases that could affect ongoing storylines
  */
-class CannotBeReleasedException extends BaseBusinessException
+final class CannotBeReleasedException extends BaseBusinessException
 {
     /**
      * Entity is unemployed and cannot be released.
@@ -41,7 +41,7 @@ class CannotBeReleasedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is unemployed and cannot be released.");
+        return new static("This{$context} is unemployed and cannot be released.");
     }
 
     /**
@@ -54,7 +54,7 @@ class CannotBeReleasedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is already released.");
+        return new static("This{$context} is already released.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeReleasedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be released.");
+        return new static("This{$context} is retired and cannot be released.");
     }
 
     /**
@@ -80,7 +80,7 @@ class CannotBeReleasedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has not been officially employed and cannot be released.");
+        return new static("This{$context} has not been officially employed and cannot be released.");
     }
 
     /**
@@ -95,7 +95,7 @@ class CannotBeReleasedException extends BaseBusinessException
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
         $titles = implode(', ', $championshipTitles);
 
-        return new self("This{$context} holds active championships ({$titles}) and cannot be released until titles are vacated.");
+        return new static("This{$context} holds active championships ({$titles}) and cannot be released until titles are vacated.");
     }
 
     /**
@@ -109,6 +109,6 @@ class CannotBeReleasedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} requires {$noticePeriodDays} days notice before release can be processed.");
+        return new static("This{$context} requires {$noticePeriodDays} days notice before release can be processed.");
     }
 }

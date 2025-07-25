@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper medical clearances for returning performers
  * - Prevents unauthorized comebacks that could devalue retirement ceremonies
  */
-class CannotBeUnretiredException extends BaseBusinessException
+final class CannotBeUnretiredException extends BaseBusinessException
 {
     /**
      * Entity is not currently retired and cannot be unretired.
@@ -41,7 +41,7 @@ class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is not retired and cannot be unretired.");
+        return new static("This{$context} is not retired and cannot be unretired.");
     }
 
     /**
@@ -54,7 +54,7 @@ class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has permanent retirement status and cannot be unretired.");
+        return new static("This{$context} has permanent retirement status and cannot be unretired.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be unretired due to medical restriction: {$medicalRestriction}.");
+        return new static("This{$context} cannot be unretired due to medical restriction: {$medicalRestriction}.");
     }
 
     /**
@@ -80,7 +80,7 @@ class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be unretired without {$authorizationLevel} authorization.");
+        return new static("This{$context} cannot be unretired without {$authorizationLevel} authorization.");
     }
 
     /**
@@ -93,6 +93,6 @@ class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be unretired due to contractual limitation: {$contractualLimitation}.");
+        return new static("This{$context} cannot be unretired due to contractual limitation: {$contractualLimitation}.");
     }
 }
