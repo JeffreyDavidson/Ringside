@@ -179,7 +179,6 @@ class AddMatchForEventAction extends BaseMatchAction
      * Validate match data for completeness and business rules.
      *
      * @param  EventMatchData  $eventMatchData  The match data to validate
-     *
      * @throws InvalidArgumentException When validation fails
      */
     private function validateMatchData(EventMatchData $eventMatchData): void

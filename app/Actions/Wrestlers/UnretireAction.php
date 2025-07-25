@@ -64,7 +64,6 @@ class UnretireAction extends BaseWrestlerAction
      *
      * @param  Wrestler  $wrestler  The wrestler to unretire
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)
-     *
      * @throws CannotBeUnretiredException When wrestler cannot be unretired due to business rules
      *
      * @example

@@ -6,6 +6,7 @@ namespace App\Livewire\Concerns\Columns;
 
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
+/** @phpstan-ignore-next-line trait.unused */
 trait HasStatusColumn
 {
     protected function getDefaultStatusColumn(): Column

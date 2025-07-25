@@ -30,21 +30,21 @@ use LivewireUI\Modal\ModalComponent;
  * - Consistent modal lifecycle management
  * - Type safety through generics
  *
- * @template TModelForm of BaseForm
+ * @template TModelForm of \App\Livewire\Base\BaseForm
  * @template TModelType of Model
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For form integration requirements
  * @see BaseFormModal For form-specific modal implementation
  */
 abstract class BaseModal extends ModalComponent
 {
+    /**
+     * @var TModelType|null
+     */
     protected ?Model $model;
 
     /**
-     * @var TModelForm
+     * @var TModelForm|null
      */
     protected $modelForm;
 
@@ -111,11 +111,11 @@ abstract class BaseModal extends ModalComponent
      */
     public function clear(): void
     {
-        if (! isset($this->modelForm)) {
+        if ($this->modelForm === null) {
             return; // Cannot clear if form is not initialized
         }
 
-        if (isset($this->model) && ! is_null($this->model)) {
+        if ($this->model !== null) {
             $this->modelForm->setModel($this->model);
         } else {
             $this->modelForm->reset();

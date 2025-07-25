@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Models\Manager;
 use App\Models\Stables\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -19,17 +18,18 @@ class UpdateMembersAction extends BaseStableAction
     /**
      * Update a stable's members.
      *
+     * Note: Managers are NOT directly associated with stables.
+     * They are automatically associated through wrestlers/tag teams.
+     *
      * @param  Collection<int, Wrestler>  $wrestlers
      * @param  Collection<int, TagTeam>  $tagTeams
-     * @param  Collection<int, Manager>  $managers
      */
-    public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams, Collection $managers): void
+    public function handle(Stable $stable, Collection $wrestlers, Collection $tagTeams): void
     {
         $now = now();
 
         $this->updateWrestlers($stable, $wrestlers, $now);
         $this->updateTagTeams($stable, $tagTeams, $now);
-        $this->updateManagers($stable, $managers, $now);
     }
 
     /**
@@ -67,25 +67,6 @@ class UpdateMembersAction extends BaseStableAction
 
             $this->stableRepository->removeTagTeams($stable, $formerTagTeams, $now);
             $this->stableRepository->addTagTeams($stable, $newTagTeams, $now);
-        }
-    }
-
-    /**
-     * Update managers attached to a stable.
-     *
-     * @param  Collection<int, Manager>  $managers
-     */
-    private function updateManagers(Stable $stable, Collection $managers, Carbon $now): void
-    {
-        if ($stable->currentManagers->isEmpty()) {
-            $this->stableRepository->addManagers($stable, $managers, $now);
-        } else {
-            $currentManagers = $stable->currentManagers;
-            $formerManagers = $currentManagers->diff($managers);
-            $newManagers = $managers->diff($currentManagers);
-
-            $this->stableRepository->removeManagers($stable, $formerManagers, $now);
-            $this->stableRepository->addManagers($stable, $newManagers, $now);
         }
     }
 }

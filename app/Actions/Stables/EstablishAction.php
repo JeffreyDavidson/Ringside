@@ -25,7 +25,6 @@ class EstablishAction extends BaseStableAction
      *
      * @param  Stable  $stable  The stable to establish
      * @param  Carbon|null  $activationDate  The establishment date (defaults to now)
-     *
      * @throws CannotBeActivatedException When stable cannot be established due to business rules
      *
      * @example

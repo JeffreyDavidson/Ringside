@@ -60,7 +60,6 @@ class UnifiedInjureAction
      * @param  Model  $entity  The entity to injure (Wrestler, Manager, Referee only)
      * @param  Carbon|null  $injuryDate  The injury date (defaults to now)
      * @param  string|null  $notes  Optional notes for the injury record (injury description)
-     *
      * @throws Exception When entity cannot be injured due to business rules or entity type
      *
      * @example
@@ -95,7 +94,6 @@ class UnifiedInjureAction
      * Validate that the entity can be injured.
      *
      * @param  Model  $entity  The entity to validate
-     *
      * @throws InvalidArgumentException When entity type cannot be injured
      */
     protected function validateInjurable(Model $entity): void

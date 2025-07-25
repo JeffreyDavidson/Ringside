@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper historical record keeping and status transitions
  * - Prevents administrative errors that could affect event planning
  */
-class CannotBeDeactivatedException extends BaseBusinessException
+final class CannotBeDeactivatedException extends BaseBusinessException
 {
     /**
      * Entity is not currently activated and cannot be deactivated.
@@ -54,7 +54,7 @@ class CannotBeDeactivatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is already deactivated.");
+        return new static("This{$context} is already deactivated.");
     }
 
     /**
@@ -75,7 +75,7 @@ class CannotBeDeactivatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has a future activation scheduled and cannot be deactivated.");
+        return new static("This{$context} has a future activation scheduled and cannot be deactivated.");
     }
 
     /**
@@ -88,7 +88,7 @@ class CannotBeDeactivatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be deactivated.");
+        return new static("This{$context} is retired and cannot be deactivated.");
     }
 
     /**
@@ -101,6 +101,6 @@ class CannotBeDeactivatedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be deactivated due to active dependency: {$dependency}.");
+        return new static("This{$context} cannot be deactivated due to active dependency: {$dependency}.");
     }
 }

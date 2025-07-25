@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper pension and benefit calculations for retirees
  * - Preserves legacy storylines and character development continuity
  */
-class CannotBeRetiredException extends BaseBusinessException
+final class CannotBeRetiredException extends BaseBusinessException
 {
     /**
      * Entity is unemployed and cannot be retired.
@@ -54,7 +54,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is released and cannot be retired.");
+        return new static("This{$context} is released and cannot be retired.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is unactivated and cannot be retired.");
+        return new static("This{$context} is unactivated and cannot be retired.");
     }
 
     /**
@@ -80,7 +80,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has not been officially employed and cannot be retired.");
+        return new static("This{$context} has not been officially employed and cannot be retired.");
     }
 
     /**
@@ -93,7 +93,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is already retired.");
+        return new static("This{$context} is already retired.");
     }
 
     /**
@@ -106,7 +106,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has not been officially activated and cannot be retired.");
+        return new static("This{$context} has not been officially activated and cannot be retired.");
     }
 
     /**
@@ -118,7 +118,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' tag team';
 
-        return new self("This{$context} has no active wrestlers and cannot be retired.");
+        return new static("This{$context} has no active wrestlers and cannot be retired.");
     }
 
     /**
@@ -131,7 +131,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' team';
 
-        return new self("Tag{$context} cannot be retired because wrestler '{$wrestlerName}' is injured.");
+        return new static("Tag{$context} cannot be retired because wrestler '{$wrestlerName}' is injured.");
     }
 
     /**
@@ -144,7 +144,7 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' team';
 
-        return new self("Tag{$context} cannot be retired because wrestler '{$wrestlerName}' is suspended.");
+        return new static("Tag{$context} cannot be retired because wrestler '{$wrestlerName}' is suspended.");
     }
 
     /**
@@ -159,7 +159,7 @@ class CannotBeRetiredException extends BaseBusinessException
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' team';
         $reasonText = $reason ? " ({$reason})" : '';
 
-        return new self("Tag{$context} cannot be retired because wrestler '{$wrestlerName}' cannot be retired{$reasonText}.");
+        return new static("Tag{$context} cannot be retired because wrestler '{$wrestlerName}' cannot be retired{$reasonText}.");
     }
 
     /**
@@ -174,7 +174,7 @@ class CannotBeRetiredException extends BaseBusinessException
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
         $titles = implode(', ', $championshipTitles);
 
-        return new self("This{$context} holds active championships ({$titles}) and cannot be retired until titles are vacated.");
+        return new static("This{$context} holds active championships ({$titles}) and cannot be retired until titles are vacated.");
     }
 
     /**
@@ -188,6 +188,6 @@ class CannotBeRetiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} cannot be retired due to unresolved contractual obligation: {$contractualObligation}.");
+        return new static("This{$context} cannot be retired due to unresolved contractual obligation: {$contractualObligation}.");
     }
 }

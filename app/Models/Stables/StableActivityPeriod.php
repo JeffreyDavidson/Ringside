@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $ended_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Stable|null $stable
  *
  * @method static \Database\Factories\Stables\StableActivityPeriodFactory factory($count = null, $state = [])
@@ -30,6 +31,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(StableActivityPeriodFactory::class)]
 class StableActivityPeriod extends Model
 {
+    /** @use HasFactory<StableActivityPeriodFactory> */
     use HasFactory;
 
     /**

@@ -19,7 +19,6 @@ interface SuspensionValidationStrategy
      * Validate that the entity can be suspended.
      *
      * @param  Model  $entity  The entity to validate for suspension
-     *
      * @throws CannotBeSuspendedException When suspension is not allowed
      */
     public function validate(Model $entity): void;

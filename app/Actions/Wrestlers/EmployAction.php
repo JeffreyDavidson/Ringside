@@ -27,7 +27,6 @@ class EmployAction extends BaseWrestlerAction
      *
      * @param  Wrestler  $wrestler  The wrestler to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     *
      * @throws Exception When wrestler cannot be employed due to business rules
      *
      * @example

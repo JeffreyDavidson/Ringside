@@ -69,7 +69,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
                     if ($row->result) {
-                        $winner = $row->result->getWinner();
+                        $winner = $row->result->winner;
                         $type = str($winner->getMorphClass())->kebab()->plural();
 
                         return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result->decision->name;

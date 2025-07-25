@@ -58,7 +58,7 @@ class Main extends BaseTable
             Column::make(__('stables.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn (Stable $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Stable $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
@@ -81,7 +81,7 @@ class Main extends BaseTable
                     'with_future_establishment' => 'Pending Establishment',
                 ])
                 ->filter(function (Builder $builder, string $value): void {
-                    /** @var StableBuilder $builder */
+                    /** @var StableBuilder<Stable> $builder */
                     match ($value) {
                         'unestablished' => $builder->unestablished(),
                         'established' => $builder->established(),

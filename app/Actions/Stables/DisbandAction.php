@@ -26,7 +26,6 @@ class DisbandAction extends BaseStableAction
      *
      * @param  Stable  $stable  The stable to disband
      * @param  Carbon|null  $disbandDate  The disbandment date (defaults to now)
-     *
      * @throws CannotBeDisbandedException If the stable cannot be disbanded
      *
      * @example

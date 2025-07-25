@@ -25,7 +25,6 @@ class EmployAction extends BaseRefereeAction
      *
      * @param  Referee  $referee  The referee to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     *
      * @throws Exception When referee cannot be employed due to business rules
      *
      * @example

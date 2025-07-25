@@ -39,10 +39,10 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read StableStatusChange|null $debutStatusChange
  * @property-read StableStatusChange|null $latestStatusChange
  * @property-read Collection<int, StableStatusChange> $statusChanges
- * @property-read StableMember|null $pivot
  * @property-read StableRetirement|null $currentRetirement
  * @property-read StableRetirement|null $previousRetirement
  * @property-read Collection<int, StableRetirement> $retirements
@@ -112,7 +112,9 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
         HasActivityPeriods::isInactive insteadof HasStatusHistory;
     }
 
+    /** @use HasFactory<StableFactory> */
     use HasFactory;
+
     use HasMembers;
 
     /** @use HasStatusHistory<StableStatusChange, static> */

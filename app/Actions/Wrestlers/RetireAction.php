@@ -27,7 +27,6 @@ class RetireAction extends BaseWrestlerAction
      *
      * @param  Wrestler  $wrestler  The wrestler to retire
      * @param  Carbon|null  $retirementDate  The retirement start date (defaults to now)
-     *
      * @throws CannotBeRetiredException When wrestler cannot be retired due to business rules
      *
      * @example

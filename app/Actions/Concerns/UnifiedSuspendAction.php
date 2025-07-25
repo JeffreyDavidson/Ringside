@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Actions\Concerns;
 
 use App\Enums\Shared\RosterMemberType;
+use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasTagTeamWrestlers;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\ProvidesCurrentTagTeams;
 use App\Models\Contracts\ProvidesCurrentWrestlers;
+use App\Models\Contracts\Suspendable;
 use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 use Exception;
@@ -61,7 +63,6 @@ class UnifiedSuspendAction
      * @param  Model  $entity  The entity to suspend (Wrestler, Manager, Referee, TagTeam)
      * @param  Carbon|null  $suspensionDate  The suspension date (defaults to now)
      * @param  string|null  $notes  Optional notes for the suspension record
-     *
      * @throws Exception When entity cannot be suspended due to business rules
      *
      * @example
@@ -253,7 +254,10 @@ class UnifiedSuspendAction
             if ($hasMethod) {
                 $members = $entity->{$relationshipMethod}()
                     ->get()
-                    ->filter(fn (Model $member) => $member->isEmployed() && ! $member->isSuspended());
+                    ->filter(function (Model $member): bool {
+                        return $member instanceof Employable && $member instanceof Suspendable
+                            && $member->isEmployed() && ! $member->isSuspended();
+                    });
 
                 foreach ($members as $member) {
                     static::run($member, $suspensionDate, $notes);

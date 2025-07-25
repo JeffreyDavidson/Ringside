@@ -36,7 +36,6 @@ class IndividualRetirementValidation implements RetirementValidationStrategy
      * where an entity is first released from employment, then later retired.
      *
      * @param  Model  $entity  The individual entity to validate
-     *
      * @throws CannotBeRetiredException When retirement is not allowed
      */
     public function validate(Model $entity): void

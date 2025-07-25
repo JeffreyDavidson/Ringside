@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property int $match_competitor_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read MatchResult $matchResult
  * @property-read MatchCompetitor $competitor
  * @property-read Wrestler|TagTeam $loser
@@ -41,6 +42,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchLoserFactory::class)]
 class MatchLoser extends Model
 {
+    /** @use HasFactory<MatchLoserFactory> */
     use HasFactory;
 
     /**

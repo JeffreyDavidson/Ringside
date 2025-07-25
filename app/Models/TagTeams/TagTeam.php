@@ -56,10 +56,13 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string|null $signature_move
  * @property EmploymentStatus $status
+ *
  * @property-read int $combined_weight
+ *
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read TagTeamWrestler|TagTeamManager|null $pivot
  * @property-read TagTeamEmployment|null $currentEmployment
  * @property-read TagTeamEmployment|null $firstEmployment
@@ -129,7 +132,9 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
 
+    /** @use HasFactory<TagTeamFactory> */
     use HasFactory;
+
     use IsBookableCompetitor;
 
     /** @use IsEmployable<TagTeamEmployment, static> */

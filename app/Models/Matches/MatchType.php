@@ -29,6 +29,7 @@ use Illuminate\Support\Str;
 #[UseFactory(MatchTypeFactory::class)]
 class MatchType extends Model
 {
+    /** @use HasFactory<MatchTypeFactory> */
     use HasFactory;
 
     /**

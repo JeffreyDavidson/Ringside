@@ -1,0 +1,53 @@
+ -- ----------------------------------------------------------------------------------------------- 
+     [32mError[39m                                                                                          
+ -- ----------------------------------------------------------------------------------------------- 
+     Child process error (exit code 255):                                                           
+     In StableRepository.php line 266:                                                              
+                                                                                                    
+                                                                                                    
+       Declaration of                                                                               
+     App\Repositories\StableRepository::addMember(App\Models\Stab                                   
+       les\Stable $stable,                                                                          
+     App\Models\Wrestlers\Wrestler|App\Models\TagTeams\TagTe                                        
+       am $member, Illuminate\Support\Carbon $startDate): void must be                              
+     compatible                                                                                     
+       with                                                                                         
+     App\Repositories\Contracts\ManagesStableMembersInterface::addMember(Ap                         
+       p\Models\Stables\Stable $stable,                                                             
+     App\Models\Wrestlers\Wrestler|App\Models\T                                                     
+       agTeams\TagTeam|App\Models\Managers\Manager $member,                                         
+     Illuminate\Support\Car                                                                         
+       bon $startDate): void                                                                        
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+     Warning: Module "herd" is already loaded in Unknown on line 0                                  
+     Warning: Module "herd" is already loaded in Unknown on line 0                                  
+                                                                                                    
+      ! [NOTE] The Xdebug PHP extension is active, but "--xdebug" is not used.                      
+     This                                                                                           
+      !        may slow down performance and the process will not halt at                           
+                                                                                                    
+      !        breakpoints.                                                                         
+                                                                                                    
+                                                                                                    
+     Fatal error: Declaration of                                                                    
+     App\Repositories\StableRepository::addMember(App\Models\Stables\Stable                         
+     $stable, App\Models\Wrestlers\Wrestler|App\Models\TagTeams\TagTeam                             
+     $member, Illuminate\Support\Carbon $startDate): void must be compatible                        
+     with                                                                                           
+     App\Repositories\Contracts\ManagesStableMembersInterface::addMember(App\Models\Stables\Stable  
+     $stable,                                                                                       
+     App\Models\Wrestlers\Wrestler|App\Models\TagTeams\TagTeam|App\Models\Managers\Manager          
+     $member, Illuminate\Support\Carbon $startDate): void in                                        
+     /Users/jeffreydavidson/Herd/ringside/app/Repositories/StableRepository.php                     
+     on line 266                                                                                    
+      while running parallel worker                                                                 
+ -- ----------------------------------------------------------------------------------------------- 
+
+
+[37;41m                                                                                [39;49m
+[37;41m [ERROR] Found 1 error                                                          [39;49m
+[37;41m                                                                                [39;49m
+

@@ -25,9 +25,8 @@ use Illuminate\Validation\Rule;
  * - User identification and contact information
  * - Role-based access control preparation
  *
- * @extends BaseForm<Form, User>
+ * @extends BaseForm<CreateEditForm, User>
  *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  *
  * @property string $name Full name for user identification and display

@@ -27,18 +27,15 @@ use Illuminate\Support\Carbon;
  * - Integration with match assignment and scheduling systems
  * - Official personnel record management for wrestling operations
  *
- * @extends BaseForm<RefereeForm, Referee>
+ * @extends BaseForm<CreateEditForm, Referee>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see CanChangeEmploymentDate For custom validation rules
  *
  * @property string $first_name Referee's first name for identification
  * @property string $last_name Referee's last name for identification
- * @property Carbon|string|null $employment_date Employment start date
+ * @property string|null $employment_date Employment start date
  */
 class CreateEditForm extends BaseForm
 {
@@ -83,7 +80,7 @@ class CreateEditForm extends BaseForm
      * scheduling availability, and operational planning for wrestling events
      * requiring qualified officiating staff.
      *
-     * @var Carbon|string|null Referee employment start date
+     * @var string|null Referee employment start date
      */
     public ?string $employment_date = null;
 

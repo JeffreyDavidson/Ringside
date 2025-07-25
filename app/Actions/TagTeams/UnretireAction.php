@@ -44,7 +44,6 @@ class UnretireAction extends BaseTagTeamAction
      *
      * @param  TagTeam  $tagTeam  The tag team to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     *
      * @throws CannotBeUnretiredException When tag team cannot be unretired due to business rules
      *
      * @example

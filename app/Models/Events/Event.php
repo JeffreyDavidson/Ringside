@@ -28,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read EventStatus $status
  * @property-read Venue|null $venue
  * @property-read Collection<int, EventMatch> $matches
@@ -51,7 +52,9 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(EventBuilder::class)]
 class Event extends Model
 {
+    /** @use HasFactory<EventFactory> */
     use HasFactory;
+
     use HasMatches;
     use SoftDeletes;
 
@@ -132,6 +135,8 @@ class Event extends Model
 
     /**
      * Get the computed status of the event based on its date.
+     *
+     * @return Attribute<EventStatus, never>
      */
     protected function status(): Attribute
     {

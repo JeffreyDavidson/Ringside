@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property int $side_number Numeric identifier for the side/team this competitor belongs to. Used to group competitors by side.
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Wrestler|TagTeam $competitor
  *
  * @method static MatchCompetitorsCollection<int, static> all($columns = ['*'])
@@ -39,6 +40,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchCompetitorFactory::class)]
 class MatchCompetitor extends MorphPivot
 {
+    /** @use HasFactory<MatchCompetitorFactory> */
     use HasFactory;
 
     /**

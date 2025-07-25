@@ -39,16 +39,19 @@ use Illuminate\Support\Carbon;
  * @implements Injurable<RefereeInjury, static>
  * @implements Retirable<RefereeRetirement, static>
  * @implements Suspendable<RefereeSuspension, static>
- * @implements Bookable<Referee, static>
+ * @implements Bookable<Referee>
  *
  * @property int $id
  * @property string $first_name
  * @property string $last_name
+ *
  * @property-read string $full_name
+ *
  * @property EmploymentStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read RefereeEmployment|null $currentEmployment
  * @property-read RefereeEmployment|null $firstEmployment
  * @property-read RefereeEmployment|null $futureEmployment
@@ -96,7 +99,9 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(RefereeBuilder::class)]
 class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
 {
+    /** @use HasFactory<RefereeFactory> */
     use HasFactory;
+
     use HasMatches, OfficiatesMatches {
         OfficiatesMatches::matches insteadof HasMatches;
         OfficiatesMatches::previousMatches insteadof HasMatches;

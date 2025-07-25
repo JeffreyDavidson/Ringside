@@ -26,7 +26,6 @@ class UnretireAction extends BaseRefereeAction
      *
      * @param  Referee  $referee  The referee to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     *
      * @throws CannotBeUnretiredException When referee cannot be unretired due to business rules
      *
      * @example

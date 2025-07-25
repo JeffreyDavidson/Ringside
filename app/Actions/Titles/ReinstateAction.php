@@ -27,7 +27,6 @@ class ReinstateAction extends BaseTitleAction
      * @param  Title  $title  The title to reinstate
      * @param  Carbon|null  $reinstateDate  The reinstatement date (defaults to now)
      * @param  string|null  $notes  Optional notes about the reinstatement
-     *
      * @throws CannotBeActivatedException When title cannot be reinstated due to business rules
      *
      * @example

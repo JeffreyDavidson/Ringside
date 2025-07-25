@@ -6,6 +6,7 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\TagTeams\TagTeamWrestler;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -60,9 +61,9 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * Results are ordered by join date in descending order to show the
      * most recent previous memberships first.
      *
-     * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
      *
      * @throws Exception If wrestlerId is not set
+     * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
      *
      * @example
      * ```php
@@ -104,5 +105,44 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
         $this->addAdditionalSelects([
             'tag_teams_wrestlers.tag_team_id',
         ]);
+    }
+
+    /**
+     * Get the partner wrestler name for the given tag team relationship.
+     */
+    protected function getPartnerName(TagTeamWrestler $row): string
+    {
+        $partner = $this->getPartner($row);
+
+        return $partner ? $partner->name : 'Unknown';
+    }
+
+    /**
+     * Get the route to the partner wrestler for the given tag team relationship.
+     */
+    protected function getPartnerRoute(TagTeamWrestler $row): string
+    {
+        $partner = $this->getPartner($row);
+
+        return $partner ? route('wrestlers.show', $partner) : '#';
+    }
+
+    /**
+     * Get the partner wrestler for the given tag team relationship.
+     */
+    private function getPartner(TagTeamWrestler $row): ?Wrestler
+    {
+        // Find the other wrestler in this tag team during the same time period
+        $partnerRecord = TagTeamWrestler::where('tag_team_id', $row->tag_team_id)
+            ->where('wrestler_id', '!=', $row->wrestler_id)
+            ->where('joined_at', '<=', $row->left_at ?? now())
+            ->where(function ($query) use ($row) {
+                $query->whereNull('left_at')
+                    ->orWhere('left_at', '>=', $row->joined_at);
+            })
+            ->with('wrestler')
+            ->first();
+
+        return $partnerRecord?->wrestler;
     }
 }

@@ -262,7 +262,7 @@ describe('Breadcrumb and Context Navigation Workflow', function () {
         $stable = Stable::factory()->create(['name' => 'Evolution']);
         $tagTeam = TagTeam::factory()->create(['name' => 'D-Generation X']);
 
-        // When: Deep navigation path: Dashboard → Wrestlers → Wrestler Detail → Related entities
+        // When: Deep navigation path: Dashboard -> Wrestlers -> Wrestler Detail -> Related entities
         actingAs($admin)
             ->get(route('dashboard'))
             ->assertOk()

@@ -136,7 +136,7 @@ describe('Manager Employment Workflows', function () {
         test('complex multi-action management workflows maintain data consistency', function () {
             $manager = Manager::factory()->retired()->create();
 
-            // Retire → Employ → Suspend → Release workflow
+            // Retire -> Employ -> Suspend -> Release workflow
             EmployAction::run($manager, Carbon::now());
             $employed = $manager->fresh();
             expect($employed->isEmployed())->toBeTrue();

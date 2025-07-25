@@ -136,24 +136,6 @@ class CreateEditForm extends BaseForm
     }
 
     /**
-     * Update an existing event match.
-     *
-     * Updates the match with all relationships properly synced.
-     *
-     * @return bool True if the match was successfully updated
-     */
-    public function update(): bool
-    {
-        $result = parent::update();
-
-        if ($result) {
-            $this->syncRelationships();
-        }
-
-        return $result;
-    }
-
-    /**
      * Load additional data when editing existing event match records.
      *
      * Handles complex relationship data loading for edit operations,

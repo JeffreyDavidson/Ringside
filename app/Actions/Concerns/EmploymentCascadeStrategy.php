@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Models\Contracts\Employable;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -222,7 +223,9 @@ class EmploymentCascadeStrategy
                 }
 
                 $unemployedEntities = $entity->{$relationship}
-                    ->filter(fn (Model $relatedEntity) => ! $relatedEntity->isEmployed());
+                    ->filter(function (Model $relatedEntity): bool {
+                        return $relatedEntity instanceof Employable && ! $relatedEntity->isEmployed();
+                    });
 
                 foreach ($unemployedEntities as $relatedEntity) {
                     StatusTransitionPipeline::employ($relatedEntity, $date)->execute();
