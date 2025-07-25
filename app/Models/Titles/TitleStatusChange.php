@@ -31,6 +31,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(TitleStatusChangeFactory::class)]
 class TitleStatusChange extends Model
 {
+    /** @use HasFactory<TitleStatusChangeFactory> */
     use HasFactory;
 
     /**

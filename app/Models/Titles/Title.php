@@ -105,6 +105,8 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
     }
 
     use HasChampionships;
+    
+    /** @use HasFactory<TitleFactory> */
     use HasFactory;
 
     /** @use HasStatusHistory<TitleStatusChange, static> */

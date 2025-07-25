@@ -50,6 +50,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TitleChampionshipBuilder::class)]
 class TitleChampionship extends Model
 {
+    /** @use HasFactory<TitleChampionshipFactory> */
     use HasFactory;
 
     /**

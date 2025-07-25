@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(TitleRetirementFactory::class)]
 class TitleRetirement extends Model
 {
+    /** @use HasFactory<TitleRetirementFactory> */
     use HasFactory;
 
     /**
