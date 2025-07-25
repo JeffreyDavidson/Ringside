@@ -55,6 +55,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(UserBuilder::class)]
 class User extends Authenticatable
 {
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
     /**

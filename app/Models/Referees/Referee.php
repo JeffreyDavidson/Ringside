@@ -39,7 +39,7 @@ use Illuminate\Support\Carbon;
  * @implements Injurable<RefereeInjury, static>
  * @implements Retirable<RefereeRetirement, static>
  * @implements Suspendable<RefereeSuspension, static>
- * @implements Bookable<Referee, static>
+ * @implements Bookable<Referee>
  *
  * @property int $id
  * @property string $first_name
