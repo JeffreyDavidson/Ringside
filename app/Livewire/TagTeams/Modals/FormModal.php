@@ -20,12 +20,12 @@ class FormModal extends BaseFormModal
 {
     use PresentsWrestlersList;
 
-    public function getWrestlersListProperty()
+    public function getWrestlersListProperty(): Collection
     {
         return Wrestler::all();
     }
 
-    public function getManagersProperty()
+    public function getManagersProperty(): Collection
     {
         return Manager::select('id', 'first_name', 'last_name')
             ->get()

@@ -74,6 +74,8 @@ trait HasActivityPeriods
 
     /**
      * Alias for activityPeriods relationship for backward compatibility.
+     *
+     * @return HasMany<TActivityPeriod, TModel>
      */
     public function activations(): HasMany
     {
