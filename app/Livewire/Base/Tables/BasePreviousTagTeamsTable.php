@@ -22,6 +22,16 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
     public function configure(): void {}
 
     /**
+     * Get the partner wrestler name for the given tag team relationship.
+     */
+    abstract protected function getPartnerName(TagTeamWrestler $row): string;
+
+    /**
+     * Get the route to the partner wrestler for the given tag team relationship.
+     */
+    abstract protected function getPartnerRoute(TagTeamWrestler $row): string;
+
+    /**
      * Undocumented function
      *
      * @return array<int, Column>
@@ -33,8 +43,8 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
                 ->title(fn (TagTeamWrestler $row) => $row->tagTeam->name)
                 ->location(fn (TagTeamWrestler $row) => route('tag-teams.show', $row->tagTeam)),
             LinkColumn::make(__('tag-teams.partner'))
-                ->title(fn (TagTeamWrestler $row) => $row->partner->name)
-                ->location(fn (TagTeamWrestler $row) => route('wrestlers.show', $row->partner)),
+                ->title(fn (TagTeamWrestler $row) => $this->getPartnerName($row))
+                ->location(fn (TagTeamWrestler $row) => $this->getPartnerRoute($row)),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('stables.date_left'), 'left_at')

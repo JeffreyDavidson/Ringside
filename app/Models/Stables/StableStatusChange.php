@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $changed_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Stable $stable
  *
  * @method static \Database\Factories\Stables\StableStatusChangeFactory factory($count = null, $state = [])
@@ -33,6 +34,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(StableStatusChangeFactory::class)]
 class StableStatusChange extends Model
 {
+    /** @use HasFactory<StableStatusChangeFactory> */
     use HasFactory;
 
     /**

@@ -393,7 +393,7 @@ class WrestlerRepository extends BaseRepository implements ManagesEmploymentInte
     public function getAvailableForBooking(): Collection
     {
         return Wrestler::query()
-            ->where(function (WrestlerBuilder $query): void {
+            ->where(function ($query): void {
                 $query->employed()
                     ->whereDoesntHave('currentTagTeam');
             })
@@ -408,7 +408,7 @@ class WrestlerRepository extends BaseRepository implements ManagesEmploymentInte
     public function getUnemployed(): Collection
     {
         return Wrestler::query()
-            ->where(function (WrestlerBuilder $query): void {
+            ->where(function ($query): void {
                 $query->unemployed();
             })
             ->get();
@@ -422,7 +422,7 @@ class WrestlerRepository extends BaseRepository implements ManagesEmploymentInte
     public function getFutureEmployed(): Collection
     {
         return Wrestler::query()
-            ->where(function (WrestlerBuilder $query): void {
+            ->where(function ($query): void {
                 $query->futureEmployed();
             })
             ->get();
@@ -450,13 +450,13 @@ class WrestlerRepository extends BaseRepository implements ManagesEmploymentInte
     private function getBaseAvailableWrestlers(): WrestlerBuilder
     {
         return Wrestler::query()
-            ->where(function (WrestlerBuilder $query): void {
+            ->where(function ($query): void {
                 $query->unemployed();
             })
-            ->orWhere(function (WrestlerBuilder $query): void {
+            ->orWhere(function ($query): void {
                 $query->futureEmployed();
             })
-            ->orWhere(function (WrestlerBuilder $query): void {
+            ->orWhere(function ($query): void {
                 $query->employed()
                     ->whereDoesntHave('currentTagTeam');
             });

@@ -8,5 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 interface Activatable
 {
+    /**
+     * @return HasMany<Model, $this>
+     */
     public function activations(): HasMany;
 }

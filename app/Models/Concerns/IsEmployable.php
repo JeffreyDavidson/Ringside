@@ -420,9 +420,9 @@ trait IsEmployable
      *
      * The resolution can be overridden by calling the fakeEmploymentModel() method (useful for testing).
      *
-     * @return class-string<TEmployment> The fully qualified class name of the employment model
      *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return class-string<TEmployment> The fully qualified class name of the employment model
      *
      * @see fakeEmploymentModel() For overriding the resolved model class
      *

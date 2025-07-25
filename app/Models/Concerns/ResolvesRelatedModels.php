@@ -67,9 +67,8 @@ trait ResolvesRelatedModels
      * it will resolve to 'WrestlerEmployment' in the same namespace.
      *
      * @param  string  $suffix  The suffix to append to the base model name (e.g., 'Employment', 'Retirement')
-     * @return string The fully qualified class name of the resolved model
-     *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return string The fully qualified class name of the resolved model
      *
      * @example
      * ```php
@@ -167,9 +166,8 @@ trait ResolvesRelatedModels
      * Perform the actual model class resolution.
      *
      * @param  string  $suffix  The suffix to append to the base model name
-     * @return string The fully qualified class name of the resolved model
-     *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return string The fully qualified class name of the resolved model
      */
     private function performModelResolution(string $suffix): string
     {

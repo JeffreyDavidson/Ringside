@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Models\Stables\StableWrestler;
 use App\Models\Wrestlers\Wrestler;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
@@ -35,10 +36,9 @@ class PreviousWrestlers extends DataTableComponent
                 $query->where('stable_id', $this->stableId)
                     ->whereNotNull('left_at');
             })
-            ->with(['stables' => function (BelongsToMany $query) {
+            ->with(['stables' => function (Relation $query) {
                 $query->where('stable_id', $this->stableId)
-                    ->whereNotNull('left_at')
-                    ->withPivot(['joined_at', 'left_at']);
+                    ->whereNotNull('left_at');
             }]);
     }
 
@@ -52,17 +52,41 @@ class PreviousWrestlers extends DataTableComponent
                 ->title(fn (Wrestler $row) => $row->name ?? 'Unknown')
                 ->location(fn (Wrestler $row) => route('wrestlers.show', $row)),
             Column::make(__('stables.date_joined'))
-                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->joined_at ?
-                    (is_string($row->stables->first()->pivot->joined_at) ?
-                        Carbon::parse($row->stables->first()->pivot->joined_at)->format('Y-m-d') :
-                        $row->stables->first()->pivot->joined_at->format('Y-m-d')
-                    ) : ''),
+                ->label(function (Wrestler $row): string {
+                    $stable = $row->stables->first();
+                    if (! $stable || ! isset($stable->pivot)) {
+                        return '';
+                    }
+
+                    /** @var StableWrestler $pivot */
+                    $pivot = $stable->pivot;
+                    $joinedAt = $pivot->getAttribute('joined_at');
+                    if (! $joinedAt) {
+                        return '';
+                    }
+
+                    return is_string($joinedAt) ?
+                        Carbon::parse($joinedAt)->format('Y-m-d') :
+                        $joinedAt->format('Y-m-d');
+                }),
             Column::make(__('stables.date_left'))
-                ->label(fn (Wrestler $row) => $row->stables->first()?->pivot?->left_at ?
-                    (is_string($row->stables->first()->pivot->left_at) ?
-                        Carbon::parse($row->stables->first()->pivot->left_at)->format('Y-m-d') :
-                        $row->stables->first()->pivot->left_at->format('Y-m-d')
-                    ) : ''),
+                ->label(function (Wrestler $row): string {
+                    $stable = $row->stables->first();
+                    if (! $stable || ! isset($stable->pivot)) {
+                        return '';
+                    }
+
+                    /** @var StableWrestler $pivot */
+                    $pivot = $stable->pivot;
+                    $leftAt = $pivot->getAttribute('left_at');
+                    if (! $leftAt) {
+                        return '';
+                    }
+
+                    return is_string($leftAt) ?
+                        Carbon::parse($leftAt)->format('Y-m-d') :
+                        $leftAt->format('Y-m-d');
+                }),
         ];
     }
 

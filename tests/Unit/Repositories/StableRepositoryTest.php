@@ -96,7 +96,6 @@ describe('StableRepository Unit Tests', function () {
                 null,
                 new Collection(),
                 new Collection(),
-                new Collection()
             );
 
             // Act
@@ -120,7 +119,6 @@ describe('StableRepository Unit Tests', function () {
                 null,
                 new Collection(),
                 new Collection(),
-                new Collection()
             );
 
             // Act

@@ -26,7 +26,6 @@ class UnretireAction extends BaseManagerAction
      *
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     *
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
      *
      * @example

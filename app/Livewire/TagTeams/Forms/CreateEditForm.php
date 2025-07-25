@@ -27,11 +27,8 @@ use Illuminate\Validation\Rule;
  * - Tag team partnership data (formation dates, career information)
  * - Custom validation rules for wrestling tag team requirements
  *
- * @extends BaseForm<TagTeamForm, TagTeam>
+ * @extends BaseForm<CreateEditForm, TagTeam>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see CanChangeEmploymentDate For custom validation rules

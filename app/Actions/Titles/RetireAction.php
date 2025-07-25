@@ -27,7 +27,6 @@ class RetireAction extends BaseTitleAction
      *
      * @param  Title  $title  The title to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     *
      * @throws CannotBeRetiredException When title cannot be retired due to business rules
      *
      * @example

@@ -47,7 +47,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function injured(Model $entity, ?Carbon $injuryDate = null): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
         $injuryInfo = $injuryDate ? " since {$injuryDate->format('Y-m-d')}" : '';
 
@@ -61,7 +61,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function suspended(Model $entity, ?string $reason = null): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
         $reasonInfo = $reason ? " (Reason: {$reason})" : '';
 
@@ -75,7 +75,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function retired(Model $entity, ?Carbon $retirementDate = null): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
         $retirementInfo = $retirementDate ? " since {$retirementDate->format('Y-m-d')}" : '';
 
@@ -89,7 +89,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function unemployed(Model $entity): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -102,7 +102,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function inactive(Model $entity, ?string $reason = null): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
         $reasonInfo = $reason ? " ({$reason})" : '';
 
@@ -116,7 +116,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function schedulingConflict(Model $entity, Carbon $requestedDate, string $conflictDetails): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -129,9 +129,9 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function doubleBooked(Model $entity, Model $existingBooking): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
-        $bookingId = $existingBooking->id ?? 'unknown';
+        $bookingId = $existingBooking->getAttribute('id') ?? 'unknown';
 
         return new self(
             "{$entityType} '{$entityName}' is already booked for event/match {$bookingId} and cannot be double-booked. Resolve conflict or choose available entity."
@@ -143,7 +143,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function doesNotMeetRequirements(Model $entity, string $requirement): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -156,7 +156,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function wrongLocation(Model $entity, string $requiredLocation, string $currentLocation): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -169,7 +169,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function contractualRestriction(Model $entity, string $restriction): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -182,7 +182,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function insufficientNotice(Model $entity, int $requiredDays, int $actualDays): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -195,7 +195,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function overBooked(Model $entity, int $maxAppearances, int $currentBookings): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -208,7 +208,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function medicalClearanceRequired(Model $entity, string $requirement): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -221,7 +221,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function temporarilyRestricted(Model $entity, Carbon $restrictionEnd, string $reason): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -234,7 +234,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function ageRestriction(Model $entity, int $age, string $restriction): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -247,7 +247,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function specialAccommodationRequired(Model $entity, string $accommodation): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(
@@ -260,7 +260,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function personalReasons(Model $entity, ?string $details = null): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
         $detailsInfo = $details ? " ({$details})" : '';
 
@@ -274,7 +274,7 @@ class EntityNotAvailableException extends BaseBusinessException
      */
     public static function externalCommitments(Model $entity, string $commitment): static
     {
-        $entityName = $entity->name ?? "ID: {$entity->id}";
+        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
         return new self(

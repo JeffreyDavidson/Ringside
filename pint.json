@@ -46,7 +46,18 @@
         },
         "whitespace_after_comma_in_array": {
             "ensure_single_space": true
-        }
+        },
+        "phpdoc_separation": {
+            "groups": [
+                ["deprecated", "link", "see", "since"],
+                ["param", "return", "throws"],
+                ["var", "type"]
+            ]
+        },
+        "phpdoc_order": true,
+        "phpdoc_trim": true,
+        "phpdoc_no_empty_return": true,
+        "phpdoc_no_useless_inheritdoc": true
     },
     "exclude": [
         "config",

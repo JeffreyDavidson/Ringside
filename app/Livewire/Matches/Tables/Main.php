@@ -48,8 +48,8 @@ class Main extends BaseTable
     {
         return [
             LinkColumn::make(__('event-matches.event'))
-                ->title(fn (EventMatch $row) => $row->event ? $row->event->name : 'Unknown Event')
-                ->location(fn (EventMatch $row) => $row->event ? route('events.show', $row->event) : ''),
+                ->title(fn (EventMatch $row) => $row->event->name)
+                ->location(fn (EventMatch $row) => route('events.show', $row->event)),
             Column::make(__('event-matches.match_number'), 'match_number')
                 ->searchable(),
             Column::make(__('event-matches.match_type'), 'matchType.name')
@@ -58,7 +58,7 @@ class Main extends BaseTable
                 ->label(fn (EventMatch $row) => $row->competitors->map(fn ($competitor) => $competitor->getCompetitor()->name)->join(' vs ')),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
-                    $winner = $row->result?->getWinner();
+                    $winner = $row->result?->winner;
 
                     if ($winner) {
                         return $winner->name.' by '.$row->result?->decision->name;

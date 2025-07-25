@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $ended_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Title|null $title
  *
  * @method static \Database\Factories\Titles\TitleActivityPeriodFactory factory($count = null, $state = [])
@@ -30,6 +31,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(TitleActivityPeriodFactory::class)]
 class TitleActivityPeriod extends Model
 {
+    /** @use HasFactory<TitleActivityPeriodFactory> */
     use HasFactory;
 
     /**

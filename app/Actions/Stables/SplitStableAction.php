@@ -35,11 +35,11 @@ class SplitStableAction extends BaseStableAction
         Carbon $date
     ): Stable {
         // Validate that the original stable can be split
-        if (method_exists($originalStable, 'isRetired') && $originalStable->isRetired()) {
+        if ($originalStable->isRetired()) {
             throw new Exception('Cannot split a retired stable');
         }
 
-        if (method_exists($originalStable, 'isCurrentlyActive') && ! $originalStable->isCurrentlyActive()) {
+        if (! $originalStable->isCurrentlyActive()) {
             throw new Exception('Cannot split an inactive stable');
         }
 

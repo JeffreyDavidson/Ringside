@@ -55,7 +55,6 @@ trait ManagesInjury
      *
      * @param  Injurable<Model, Model>  $model  The model to injure
      * @param  Carbon  $startDate  The date when the injury begins
-     *
      * @throws QueryException If the injury creation fails
      *
      * @example
@@ -78,7 +77,6 @@ trait ManagesInjury
      *
      * @param  Injurable<Model, Model>  $model  The model whose injury should be ended
      * @param  Carbon  $endDate  The date when the injury ends (recovery date)
-     *
      * @throws QueryException If the injury update fails
      *
      * @example

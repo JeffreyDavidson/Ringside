@@ -316,9 +316,9 @@ trait HasStatusHistory
      * conventions. For example, if the parent model is 'Title', it will look for
      * a 'TitleStatusChange' model class.
      *
-     * @return class-string<TStatusChange> The fully qualified class name of the status change model
      *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return class-string<TStatusChange> The fully qualified class name of the status change model
      *
      * @see fakeStatusChangeModel() For overriding the resolved model class
      *

@@ -49,7 +49,6 @@ class UnifiedEmployAction
      * @param  Model  $entity  The entity to employ (Wrestler, Manager, Referee, TagTeam)
      * @param  Carbon|null  $employmentDate  The employment date (defaults to now)
      * @param  string|null  $notes  Optional notes for the employment record
-     *
      * @throws Exception When entity cannot be employed due to business rules
      *
      * @example

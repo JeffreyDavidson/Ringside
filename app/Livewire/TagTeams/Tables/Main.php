@@ -66,7 +66,7 @@ class Main extends BaseTable
             Column::make(__('tag-teams.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn (TagTeam $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (TagTeam $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             FirstEmploymentDateColumn::make(__('employments.started_at')),
         ];
@@ -91,7 +91,7 @@ class Main extends BaseTable
                     'retired' => 'Retired',
                 ])
                 ->filter(function (TagTeamBuilder $builder, string $value) {
-                    /** @var TagTeamBuilder $builder */
+                    /** @var TagTeamBuilder<TagTeam> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
                         'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),

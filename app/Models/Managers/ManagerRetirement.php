@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $ended_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Manager|null $manager
  *
  * @method static \Database\Factories\Managers\ManagerRetirementFactory factory($count = null, $state = [])
@@ -30,6 +31,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(ManagerRetirementFactory::class)]
 class ManagerRetirement extends Model
 {
+    /** @use HasFactory<ManagerRetirementFactory> */
     use HasFactory;
 
     /**

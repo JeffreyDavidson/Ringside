@@ -26,7 +26,6 @@ class HealAction extends BaseRefereeAction
      *
      * @param  Referee  $referee  The injured referee to heal
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
-     *
      * @throws CannotBeClearedFromInjuryException When referee cannot be healed due to business rules
      *
      * @example

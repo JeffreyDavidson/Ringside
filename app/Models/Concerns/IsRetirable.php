@@ -200,9 +200,9 @@ trait IsRetirable
      *
      * The resolution can be overridden by calling the fakeRetirementModel() method (useful for testing).
      *
-     * @return class-string<TRetirement> The fully qualified class name of the retirement model
      *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return class-string<TRetirement> The fully qualified class name of the retirement model
      *
      * @see fakeRetirementModel() For overriding the resolved model class
      *

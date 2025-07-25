@@ -116,9 +116,8 @@ interface HasStableMembership
      *
      * @param  Stable  $stable  The stable to join
      * @param  Carbon|null  $startDate  The membership start date (defaults to now)
-     * @return bool True if the entity successfully joined the stable
-     *
      * @throws MembershipConflictException If the entity cannot join
+     * @return bool True if the entity successfully joined the stable
      *
      * @example
      * ```php

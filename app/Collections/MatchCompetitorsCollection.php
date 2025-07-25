@@ -69,7 +69,9 @@ class MatchCompetitorsCollection extends Collection
      */
     public function countPerSide(): BaseCollection
     {
-        return $this->groupBy('side_number')->map->count();
+        return $this->groupBy('side_number')->map->count()->mapWithKeys(function (int $count, mixed $side): array {
+            return [(int) $side => $count];
+        });
     }
 
     /**
@@ -276,7 +278,6 @@ class MatchCompetitorsCollection extends Collection
         return $this->groupBy('side_number')
             ->map(function (BaseCollection $competitorsOnSide) {
                 return collect($competitorsOnSide)
-                    ->filter(fn (MatchCompetitor $competitor) => $competitor instanceof MatchCompetitor)
                     ->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor())
                     ->values(); // Reset keys to sequential integers
             });

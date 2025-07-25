@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $fired_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Manager $manager
  * @property-read Wrestler $wrestler
  *

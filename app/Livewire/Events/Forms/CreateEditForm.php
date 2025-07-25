@@ -28,11 +28,8 @@ use Illuminate\Validation\Rule;
  * - Event uniqueness validation across the system
  * - Cached venue list presentation for efficient form rendering
  *
- * @extends BaseForm<EventForm, Event>
+ * @extends BaseForm<CreateEditForm, Event>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality
  * @see PresentsVenuesList For venue selection functionality
  * @see Event For the underlying event model
@@ -112,7 +109,7 @@ class CreateEditForm extends BaseForm
     public function loadExtraData(): void
     {
         // Map venue_id from model to venue_id form field
-        if ($this->formModel && isset($this->formModel->venue_id)) {
+        if (isset($this->formModel->venue_id)) {
             $this->venue_id = $this->formModel->venue_id;
         }
 

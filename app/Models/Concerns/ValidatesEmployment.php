@@ -94,7 +94,7 @@ trait ValidatesEmployment
         if ($this->isEmployed()) {
             throw CannotBeEmployedException::employed();
         }
-        if (method_exists($this, 'hasFutureEmployment') && $this->hasFutureEmployment()) {
+        if ($this->hasFutureEmployment()) {
             throw CannotBeEmployedException::employed();
         }
     }

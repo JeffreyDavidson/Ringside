@@ -48,7 +48,6 @@ class RetireAction extends BaseStableAction
      *
      * @param  Stable  $stable  The stable to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     *
      * @throws CannotBeRetiredException When stable cannot be retired due to business rules
      *
      * @example

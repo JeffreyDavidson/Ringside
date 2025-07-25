@@ -135,7 +135,7 @@ describe('Referee Employment Workflows', function () {
         test('complex multi-action employment workflows maintain data consistency', function () {
             $referee = Referee::factory()->retired()->create();
 
-            // Retire → Employ → Suspend → Release workflow
+            // Retire -> Employ -> Suspend -> Release workflow
             EmployAction::run($referee, Carbon::now());
             $employed = $referee->fresh();
             expect($employed->isEmployed())->toBeTrue();

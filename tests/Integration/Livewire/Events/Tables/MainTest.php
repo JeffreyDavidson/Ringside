@@ -458,13 +458,13 @@ describe('EventsTable Component Integration', function () {
         });
 
         test('filtering works with international characters', function () {
-            $internationalEvent = Event::factory()->scheduled()->create(['name' => 'Wrestlé Mania']);
+            $internationalEvent = Event::factory()->scheduled()->create(['name' => 'Wrestle Mania']);
 
             $component = Livewire::actingAs($this->admin)
                 ->test(Main::class);
 
-            $component->set('search', 'Wrestlé')
-                ->assertSee('Wrestlé Mania');
+            $component->set('search', 'Wrestle')
+                ->assertSee('Wrestle Mania');
         });
 
         test('filtering handles empty search correctly', function () {

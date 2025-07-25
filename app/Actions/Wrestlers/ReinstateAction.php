@@ -24,7 +24,6 @@ class ReinstateAction extends BaseWrestlerAction
      *
      * @param  Wrestler  $wrestler  The wrestler to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
-     *
      * @throws CannotBeReinstatedException When wrestler cannot be reinstated due to business rules
      *
      * @example

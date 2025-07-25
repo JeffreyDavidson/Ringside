@@ -6,6 +6,7 @@ namespace App\Models\TagTeams;
 
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamWrestlerFactory;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -19,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $left_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read TagTeam|null $tagTeam
  * @property-read Wrestler|null $wrestler
  *
@@ -31,6 +33,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(TagTeamWrestlerFactory::class)]
 class TagTeamWrestler extends Pivot
 {
+    /** @use HasFactory<TagTeamWrestlerFactory> */
     use HasFactory;
 
     /**

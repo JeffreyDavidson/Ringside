@@ -21,7 +21,6 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
      * Validate that an individual entity can be suspended.
      *
      * @param  Model  $entity  The individual entity to validate
-     *
      * @throws CannotBeSuspendedException When suspension is not allowed
      */
     public function validate(Model $entity): void

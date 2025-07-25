@@ -28,11 +28,8 @@ use Illuminate\Validation\Rule;
  * - Wrestling-specific validation (titles must end with "Title" or "Titles")
  * - Integration with title activation relationship system
  *
- * @extends BaseForm<TitleForm, Title>
+ * @extends BaseForm<CreateEditForm, Title>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see ManagesActivityPeriods For activation period tracking
  * @see CanChangeDebutDate For custom activation validation

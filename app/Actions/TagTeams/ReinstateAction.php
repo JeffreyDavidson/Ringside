@@ -42,7 +42,6 @@ class ReinstateAction extends BaseTagTeamAction
      *
      * @param  TagTeam  $tagTeam  The tag team to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
-     *
      * @throws CannotBeReinstatedException When tag team cannot be reinstated due to business rules
      *
      * @example

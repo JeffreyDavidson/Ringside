@@ -93,26 +93,6 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
         $this->removeMemberFromGroup($stable, 'tagTeams', $tagTeam, $removalDate);
     }
 
-    /**
-     * Add a manager to the stable.
-     *
-     * @deprecated Managers are now associated through wrestlers/tag teams
-     */
-    public function addManager(Stable $stable, Manager $manager, Carbon $joinDate): void
-    {
-        // No-op: Managers are now associated through wrestlers/tag teams
-    }
-
-    /**
-     * Remove a manager from the stable.
-     *
-     * @deprecated Managers are now associated through wrestlers/tag teams
-     */
-    public function removeManager(Stable $stable, Manager $manager, Carbon $removalDate): void
-    {
-        // No-op: Managers are now associated through wrestlers/tag teams
-    }
-
     // Bulk operations
     /**
      * @param  Collection<int, Wrestler>  $wrestlers
@@ -135,16 +115,6 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     }
 
     /**
-     * @param  Collection<int, Manager>  $managers
-     *
-     * @deprecated Managers are now associated through wrestlers/tag teams
-     */
-    public function addManagers(Stable $stable, Collection $managers, Carbon $joinDate): void
-    {
-        // No-op: Managers are now associated through wrestlers/tag teams
-    }
-
-    /**
      * @param  Collection<int, Wrestler>  $wrestlers
      */
     public function removeWrestlers(Stable $stable, Collection $wrestlers, Carbon $removalDate): void
@@ -162,17 +132,6 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
         $tagTeams->each(function (TagTeam $tagTeam) use ($stable, $removalDate): void {
             $this->removeTagTeam($stable, $tagTeam, $removalDate);
         });
-    }
-
-    /**
-     * @param  Collection<int, Manager>  $managers
-     *
-     * @deprecated Managers are now associated through wrestlers/tag teams, no direct removal needed
-     */
-    public function removeManagers(Stable $stable, Collection $managers, Carbon $removalDate): void
-    {
-        // No-op: Managers are now associated through wrestlers/tag teams
-        // Their associations automatically end when wrestler/tag team memberships end
     }
 
     /**
@@ -304,14 +263,13 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     /**
      * Add a member to the stable.
      */
-    public function addMember(Stable $stable, Wrestler|TagTeam|Manager $member, Carbon $startDate): void
+    public function addMember(Stable $stable, Wrestler|TagTeam $member, Carbon $startDate): void
     {
         // Determine the relationship type based on the member type
         // @phpstan-ignore-next-line instanceof.alwaysTrue
         $relationship = match (true) {
             $member instanceof Wrestler => 'wrestlers',
             $member instanceof TagTeam => 'tagTeams',
-            $member instanceof Manager => null, // Managers no longer directly join stables
             default => throw new InvalidArgumentException('Invalid member type for stable'),
         };
 
@@ -324,14 +282,13 @@ class StableRepository extends BaseRepository implements ManagesActivityInterfac
     /**
      * Remove a member from the stable.
      */
-    public function removeMember(Stable $stable, Wrestler|TagTeam|Manager $member, Carbon $endDate): void
+    public function removeMember(Stable $stable, Wrestler|TagTeam $member, Carbon $endDate): void
     {
         // Determine the relationship type based on the member type
         // @phpstan-ignore-next-line instanceof.alwaysTrue
         $relationship = match (true) {
             $member instanceof Wrestler => 'wrestlers',
             $member instanceof TagTeam => 'tagTeams',
-            $member instanceof Manager => null, // Managers no longer directly leave stables
             default => throw new InvalidArgumentException('Invalid member type for stable'),
         };
 

@@ -28,7 +28,6 @@ class ReleaseAction extends BaseWrestlerAction
      *
      * @param  Wrestler  $wrestler  The wrestler to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
-     *
      * @throws CannotBeReleasedException When wrestler cannot be released due to business rules
      *
      * @example

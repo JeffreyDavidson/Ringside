@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $ended_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read Referee|null $referee
  *
  * @method static \Database\Factories\Referees\RefereeInjuryFactory factory($count = null, $state = [])
@@ -30,6 +31,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(RefereeInjuryFactory::class)]
 class RefereeInjury extends Model
 {
+    /** @use HasFactory<RefereeInjuryFactory> */
     use HasFactory;
 
     /**

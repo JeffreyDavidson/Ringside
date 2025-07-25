@@ -26,7 +26,6 @@ class SuspendAction extends BaseTagTeamAction
      *
      * @param  TagTeam  $tagTeam  The tag team to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
-     *
      * @throws Exception When tag team cannot be suspended due to business rules
      *
      * @example

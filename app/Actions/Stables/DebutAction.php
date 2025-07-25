@@ -36,7 +36,6 @@ class DebutAction extends BaseStableAction
      *
      * @param  Stable  $stable  The stable to debut
      * @param  Carbon|null  $debutDate  The debut date (defaults to now)
-     *
      * @throws CannotBeDebutedException When stable cannot be debuted due to business rules
      *
      * @example

@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Protects payroll calculations and appearance fee management
  * - Ensures proper regulatory compliance and union obligations
  */
-class CannotBeEmployedException extends BaseBusinessException
+final class CannotBeEmployedException extends BaseBusinessException
 {
     /**
      * Entity is already employed and cannot be re-employed.
@@ -54,7 +54,7 @@ class CannotBeEmployedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be employed.");
+        return new static("This{$context} is retired and cannot be employed.");
     }
 
     /**
@@ -69,7 +69,7 @@ class CannotBeEmployedException extends BaseBusinessException
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
         $reason = $suspensionReason ? " ({$suspensionReason})" : '';
 
-        return new self("This{$context} is currently suspended{$reason} and cannot be employed.");
+        return new static("This{$context} is currently suspended{$reason} and cannot be employed.");
     }
 
     /**
@@ -82,7 +82,7 @@ class CannotBeEmployedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be employed due to contractual conflict: {$conflict}.");
+        return new static("This{$context} cannot be employed due to contractual conflict: {$conflict}.");
     }
 
     /**
@@ -95,6 +95,6 @@ class CannotBeEmployedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be employed: missing {$requirement}.");
+        return new static("This{$context} cannot be employed: missing {$requirement}.");
     }
 }

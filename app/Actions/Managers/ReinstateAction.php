@@ -32,7 +32,6 @@ final class ReinstateAction extends BaseManagerAction
      *
      * @param  Manager  $manager  The manager to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
-     *
      * @throws CannotBeReinstatedException When manager cannot be reinstated due to business rules
      *
      * @example

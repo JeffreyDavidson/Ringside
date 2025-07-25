@@ -86,7 +86,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function titleMatchWithoutTitle(Model $match): static
     {
-        $matchId = $match->id ?? 'new';
+        $matchId = $match->getAttribute('id') ?? 'new';
 
         return new self(
             "Title match (ID: {$matchId}) must have at least one championship title assigned. Title matches require active championship stakes."
@@ -98,7 +98,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function nonTitleMatchWithTitle(Model $match, string $titleName): static
     {
-        $matchId = $match->id ?? 'new';
+        $matchId = $match->getAttribute('id') ?? 'new';
 
         return new self(
             "Non-title match (ID: {$matchId}) cannot have championship '{$titleName}' assigned. Remove title or change to title match type."
@@ -110,7 +110,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function invalidMatchType(string $matchType, Model $event): static
     {
-        $eventName = $event->name ?? "Event ID: {$event->id}";
+        $eventName = $event->getAttribute('name') ?? "Event ID: {$event->getAttribute('id')}";
 
         return new self(
             "Match type '{$matchType}' is not valid for event '{$eventName}'. Check event restrictions and supported match types."
@@ -122,7 +122,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function duplicateCompetitor(Model $competitor): static
     {
-        $competitorName = $competitor->name ?? "ID: {$competitor->id}";
+        $competitorName = $competitor->getAttribute('name') ?? "ID: {$competitor->getAttribute('id')}";
         $competitorType = class_basename($competitor);
 
         return new self(
@@ -147,7 +147,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function missingReferee(Model $match): static
     {
-        $matchId = $match->id ?? 'new';
+        $matchId = $match->getAttribute('id') ?? 'new';
 
         return new self(
             "Match (ID: {$matchId}) requires at least one qualified referee assignment. All matches must have proper officiating."
@@ -159,7 +159,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function refereeConflict(Model $referee, string $reason): static
     {
-        $refereeName = $referee->name ?? "ID: {$referee->id}";
+        $refereeName = $referee->getAttribute('name') ?? "ID: {$referee->getAttribute('id')}";
 
         return new self(
             "Referee '{$refereeName}' cannot be assigned to match: {$reason}. Assign a different qualified referee."
@@ -181,7 +181,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function schedulingConflict(Model $match, string $conflictDetails): static
     {
-        $matchId = $match->id ?? 'new';
+        $matchId = $match->getAttribute('id') ?? 'new';
 
         return new self(
             "Scheduling conflict for match (ID: {$matchId}): {$conflictDetails}. Resolve conflicts before finalizing match."
@@ -193,8 +193,8 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function championshipEligibilityViolation(Model $competitor, Model $title): static
     {
-        $competitorName = $competitor->name ?? "ID: {$competitor->id}";
-        $titleName = $title->name ?? "ID: {$title->id}";
+        $competitorName = $competitor->getAttribute('name') ?? "ID: {$competitor->getAttribute('id')}";
+        $titleName = $title->getAttribute('name') ?? "ID: {$title->getAttribute('id')}";
         $competitorType = class_basename($competitor);
 
         return new self(
@@ -207,7 +207,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function inactiveTitle(Model $title): static
     {
-        $titleName = $title->name ?? "ID: {$title->id}";
+        $titleName = $title->getAttribute('name') ?? "ID: {$title->getAttribute('id')}";
 
         return new self(
             "Championship '{$titleName}' is inactive and cannot be used in matches. Activate the title or remove it from the match."
@@ -219,7 +219,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
      */
     public static function venueCapabilityRequired(Model $venue, string $requirement): static
     {
-        $venueName = $venue->name ?? "ID: {$venue->id}";
+        $venueName = $venue->getAttribute('name') ?? "ID: {$venue->getAttribute('id')}";
 
         return new self(
             "Venue '{$venueName}' does not support required capability: {$requirement}. Choose a venue with appropriate facilities."

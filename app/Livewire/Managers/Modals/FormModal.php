@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Modals;
 
 use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Managers\Forms\CreateEditForm;
 use App\Models\Managers\Manager;
 use Illuminate\View\View;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    use GeneratesDummyData;
+
     public function mount(mixed $modelId = null): void
     {
         parent::mount($modelId);
@@ -43,7 +46,7 @@ class FormModal extends BaseFormModal
         return [
             'first_name' => fn () => fake()->firstName(),
             'last_name' => fn () => fake()->lastName(),
-            'start_date' => fn () => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+            'start_date' => fn () => $this->generateOptionalStartDate(),
         ];
     }
 

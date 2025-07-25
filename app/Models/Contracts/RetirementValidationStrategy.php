@@ -19,7 +19,6 @@ interface RetirementValidationStrategy
      * Validate that the entity can be retired.
      *
      * @param  Model  $entity  The entity to validate for retirement
-     *
      * @throws CannotBeRetiredException When retirement is not allowed
      */
     public function validate(Model $entity): void;

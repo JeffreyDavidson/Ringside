@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $ended_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read TagTeam|null $tagTeam
  *
  * @method static \Database\Factories\TagTeams\TagTeamSuspensionFactory factory($count = null, $state = [])
@@ -30,6 +31,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(TagTeamSuspensionFactory::class)]
 class TagTeamSuspension extends Model
 {
+    /** @use HasFactory<TagTeamSuspensionFactory> */
     use HasFactory;
 
     /**

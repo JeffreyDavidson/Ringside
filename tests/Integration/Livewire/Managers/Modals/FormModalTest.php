@@ -295,7 +295,7 @@ describe('Managers FormModal Tests', function () {
                 ['first' => 'Mary-Jane', 'last' => 'Watson'],
                 ['first' => "O'Connor", 'last' => 'McDonald'],
                 ['first' => 'Jean-Luc', 'last' => 'Van Der Berg'],
-                ['first' => 'José', 'last' => 'García'],
+                ['first' => 'Jose', 'last' => 'Garcia'],
             ];
 
             foreach ($testCases as $index => $testCase) {

@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper storyline consequences for character actions
  * - Prevents administrative errors that could affect union relations
  */
-class CannotBeSuspendedException extends BaseBusinessException
+final class CannotBeSuspendedException extends BaseBusinessException
 {
     /**
      * Entity is unemployed and cannot be suspended.
@@ -54,7 +54,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has not been officially employed and cannot be suspended.");
+        return new static("This{$context} has not been officially employed and cannot be suspended.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be suspended.");
+        return new static("This{$context} is retired and cannot be suspended.");
     }
 
     /**
@@ -80,7 +80,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is released and cannot be suspended.");
+        return new static("This{$context} is released and cannot be suspended.");
     }
 
     /**
@@ -93,7 +93,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is already suspended.");
+        return new static("This{$context} is already suspended.");
     }
 
     /**
@@ -106,7 +106,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is injured and cannot be suspended.");
+        return new static("This{$context} is injured and cannot be suspended.");
     }
 
     /**
@@ -118,7 +118,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' tag team';
 
-        return new self("This{$context} has no active wrestlers and cannot be suspended.");
+        return new static("This{$context} has no active wrestlers and cannot be suspended.");
     }
 
     /**
@@ -131,7 +131,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' team';
 
-        return new self("Tag{$context} cannot be suspended because wrestler '{$wrestlerName}' is already suspended.");
+        return new static("Tag{$context} cannot be suspended because wrestler '{$wrestlerName}' is already suspended.");
     }
 
     /**
@@ -144,7 +144,7 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' team';
 
-        return new self("Tag{$context} cannot be suspended because wrestler '{$wrestlerName}' is injured.");
+        return new static("Tag{$context} cannot be suspended because wrestler '{$wrestlerName}' is injured.");
     }
 
     /**
@@ -159,7 +159,7 @@ class CannotBeSuspendedException extends BaseBusinessException
         $context = $tagTeamName ? " team '{$tagTeamName}'" : ' team';
         $reasonText = $reason ? " ({$reason})" : '';
 
-        return new self("Tag{$context} cannot be suspended because wrestler '{$wrestlerName}' cannot be suspended{$reasonText}.");
+        return new static("Tag{$context} cannot be suspended because wrestler '{$wrestlerName}' cannot be suspended{$reasonText}.");
     }
 
     /**
@@ -173,6 +173,6 @@ class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} holds the {$championshipTitle} and cannot be suspended during their reign.");
+        return new static("This{$context} holds the {$championshipTitle} and cannot be suspended during their reign.");
     }
 }

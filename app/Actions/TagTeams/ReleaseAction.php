@@ -44,7 +44,6 @@ class ReleaseAction extends BaseTagTeamAction
      *
      * @param  TagTeam  $tagTeam  The tag team to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
-     *
      * @throws CannotBeReleasedException When tag team cannot be released due to business rules
      *
      * @example

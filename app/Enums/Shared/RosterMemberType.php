@@ -47,9 +47,8 @@ enum RosterMemberType: string
      * and returns the appropriate enum value.
      *
      * @param  Model  $model  The model to detect type for
-     * @return self The corresponding enum value
-     *
      * @throws InvalidArgumentException If the model type is not a supported roster member
+     * @return self The corresponding enum value
      *
      * @example
      * ```php
@@ -444,9 +443,8 @@ enum RosterMemberType: string
      *
      * @param  Model  $model  The model to get strategy for
      * @param  string  $operation  The operation type ('suspension', 'retirement')
-     * @return class-string The validation strategy class name
-     *
      * @throws InvalidArgumentException If the operation type is not supported
+     * @return class-string The validation strategy class name
      *
      * @example
      * ```php

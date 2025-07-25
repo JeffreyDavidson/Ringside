@@ -97,6 +97,12 @@ use Illuminate\Database\Eloquent\Model;
  * <button wire:click="modal.fillDummyFields">Fill Test Data</button>
  * ```
  */
+/**
+ * @template TForm of BaseForm
+ * @template TModel of Model
+ *
+ * @extends BaseModal<TForm, TModel>
+ */
 abstract class BaseFormModal extends BaseModal
 {
     use GeneratesDummyData;
@@ -214,7 +220,7 @@ abstract class BaseFormModal extends BaseModal
     /**
      * The form instance for this modal.
      *
-     * @var BaseForm
+     * @var TForm|null
      */
     public $form;
 
@@ -269,7 +275,7 @@ abstract class BaseFormModal extends BaseModal
         // Ensure form has the correct model before submission
         // This handles cases where Livewire form property hydration
         // loses the model state between mount and submission
-        if (isset($this->model) && $this->form) {
+        if (isset($this->model) && $this->form !== null) {
             $this->form->setModel($this->model);
         }
 
@@ -334,7 +340,7 @@ abstract class BaseFormModal extends BaseModal
         $this->modelType = new $modelClass();
 
         // Initialize the form if it doesn't exist (Livewire auto-initialization)
-        if (! isset($this->form)) {
+        if ($this->form === null) {
             $formClass = $this->getFormClass();
             $this->form = new $formClass($this, 'form');
         }

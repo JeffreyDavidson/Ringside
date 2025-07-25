@@ -55,7 +55,6 @@ trait ManagesActivity
      *
      * @param  HasActivityPeriods  $model  The model to activate
      * @param  Carbon  $startDate  The date when the activity period begins
-     *
      * @throws QueryException If the activity period creation fails
      *
      * @example
@@ -81,7 +80,6 @@ trait ManagesActivity
      *
      * @param  HasActivityPeriods  $model  The model whose activity period should be ended
      * @param  Carbon  $endDate  The date when the activity period ends
-     *
      * @throws QueryException If the activity period update fails
      *
      * @example

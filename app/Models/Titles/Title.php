@@ -39,6 +39,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read TitleStatusChange|null $debutStatusChange
  * @property-read TitleStatusChange|null $latestStatusChange
  * @property-read Collection<int, TitleStatusChange> $statusChanges
@@ -48,11 +49,13 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TitleRetirement> $previousRetirements
  * @property-read TitleChampionship|null $currentChampionship
  * @property-read Collection<int, TitleChampionship> $championships
+ *
  * @property TitleType $type
  * @property string|null $current_champion_type
  * @property int|null $current_champion_id
  * @property string|null $previous_champion_type
  * @property int|null $previous_champion_id
+ *
  * @property-read Collection<int, TitleActivityPeriod> $activations
  * @property-read Collection<int, TitleActivityPeriod> $activityPeriods
  * @property-read TitleActivityPeriod|null $currentActivityPeriod
@@ -105,6 +108,8 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
     }
 
     use HasChampionships;
+
+    /** @use HasFactory<TitleFactory> */
     use HasFactory;
 
     /** @use HasStatusHistory<TitleStatusChange, static> */

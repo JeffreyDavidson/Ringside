@@ -200,9 +200,9 @@ trait IsInjurable
      *
      * The resolution can be overridden by calling the fakeInjuryModel() method (useful for testing).
      *
-     * @return class-string<TInjury> The fully qualified class name of the injury model
      *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return class-string<TInjury> The fully qualified class name of the injury model
      *
      * @see fakeInjuryModel() For overriding the resolved model class
      *

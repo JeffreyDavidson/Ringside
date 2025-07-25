@@ -25,7 +25,6 @@ class ReuniteAction extends BaseStableAction
      *
      * @param  Stable  $stable  The stable to reunite
      * @param  Carbon|null  $reuniteDate  The reunite date (defaults to now)
-     *
      * @throws CannotBeActivatedException When stable cannot be reunited due to business rules
      *
      * @example

@@ -312,8 +312,7 @@ class StableMembershipOrchestrator
                 name: $this->newStableName,
                 start_date: null,
                 tagTeams: collect(),
-                wrestlers: collect(),
-                managers: collect()
+                wrestlers: collect()
             ));
         }
 
@@ -333,8 +332,7 @@ class StableMembershipOrchestrator
             name: $newName,
             start_date: null,
             tagTeams: collect(),
-            wrestlers: collect(),
-            managers: collect()
+            wrestlers: collect()
         ));
 
         $this->targetStable = $newStable;
@@ -404,18 +402,16 @@ class StableMembershipOrchestrator
     /**
      * Execute manager transfer operation.
      *
+     * NOTE: Managers are NOT directly associated with stables.
+     * They are automatically associated through wrestlers/tag teams that are members.
+     * This method is intentionally empty to maintain interface compatibility.
+     *
      * @param  Collection<int, Manager>  $managers
      */
     protected function executeManagerTransfer(Collection $managers, Carbon $date): ?Stable
     {
-        foreach ($managers as $manager) {
-            if ($this->sourceStable) {
-                $this->stableRepository->removeManager($this->sourceStable, $manager, $date);
-            }
-            if ($this->targetStable) {
-                $this->stableRepository->addManager($this->targetStable, $manager, $date);
-            }
-        }
+        // No-op: Managers are associated through wrestlers/tag teams, not directly with stables
+        // Manager associations are automatically handled when wrestlers/tag teams join/leave stables
 
         return $this->targetStable;
     }

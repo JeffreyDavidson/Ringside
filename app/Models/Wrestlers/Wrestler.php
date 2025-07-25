@@ -76,6 +76,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read WrestlerEmployment|null $currentEmployment
  * @property-read WrestlerEmployment|null $firstEmployment
  * @property-read WrestlerEmployment|null $futureEmployment
@@ -115,7 +116,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, Suspendable
 {
-    /** @use BelongsToUser */
     use BelongsToUser;
 
     /** @use CanBeManaged<WrestlerManager, static> */
@@ -130,8 +130,12 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
 
+    /** @use HasEnumStatus<EmploymentStatus> */
     use HasEnumStatus;
+
+    /** @use HasFactory<WrestlerFactory> */
     use HasFactory;
+
     use IsBookableCompetitor;
 
     /** @use IsEmployable<WrestlerEmployment, static> */

@@ -301,9 +301,9 @@ class ActionPipeline
     /**
      * Execute all operations in the pipeline within a database transaction.
      *
-     * @return array<string, mixed> Results from all operations
      *
      * @throws Exception When operations fail and continueOnError is false
+     * @return array<string, mixed> Results from all operations
      */
     public function execute(): array
     {

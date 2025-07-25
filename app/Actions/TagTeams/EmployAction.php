@@ -29,7 +29,6 @@ class EmployAction extends BaseTagTeamAction
      *
      * @param  TagTeam  $tagTeam  The tag team to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     *
      * @throws Exception When tag team cannot be employed due to business rules
      *
      * @example

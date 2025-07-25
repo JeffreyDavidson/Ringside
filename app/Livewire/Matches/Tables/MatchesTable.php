@@ -87,7 +87,7 @@ class MatchesTable extends DataTableComponent
             Column::make(__('matches.result'))
                 ->label(
                     function (EventMatch $row, Column $column): string {
-                        $winner = $row->result?->getWinner();
+                        $winner = $row->result?->winner;
 
                         if ($winner) {
                             $type = str($winner->getMorphClass())->kebab()->plural();

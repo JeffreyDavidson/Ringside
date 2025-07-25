@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper suspension resolution and administrative closure
  * - Prevents premature reinstatements that could undermine authority
  */
-class CannotBeReinstatedException extends BaseBusinessException
+final class CannotBeReinstatedException extends BaseBusinessException
 {
     /**
      * Entity is unemployed and cannot be reinstated.
@@ -54,7 +54,7 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is released and cannot be reinstated.");
+        return new static("This{$context} is released and cannot be reinstated.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is retired and cannot be reinstated.");
+        return new static("This{$context} is retired and cannot be reinstated.");
     }
 
     /**
@@ -80,7 +80,7 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} has not been officially employed and cannot be reinstated.");
+        return new static("This{$context} has not been officially employed and cannot be reinstated.");
     }
 
     /**
@@ -93,7 +93,7 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is already bookable and does not need reinstatement.");
+        return new static("This{$context} is already bookable and does not need reinstatement.");
     }
 
     /**
@@ -108,7 +108,7 @@ class CannotBeReinstatedException extends BaseBusinessException
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
         $injury = $injuryDetails ? " ({$injuryDetails})" : '';
 
-        return new self("This{$context} is injured{$injury} and cannot be reinstated until medically cleared.");
+        return new static("This{$context} is injured{$injury} and cannot be reinstated until medically cleared.");
     }
 
     /**
@@ -121,7 +121,7 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} is already available and does not need reinstatement.");
+        return new static("This{$context} is already available and does not need reinstatement.");
     }
 
     /**
@@ -134,7 +134,7 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be reinstated due to unresolved suspension condition: {$unresolvedCondition}.");
+        return new static("This{$context} cannot be reinstated due to unresolved suspension condition: {$unresolvedCondition}.");
     }
 
     /**
@@ -147,6 +147,6 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} cannot be reinstated while disciplinary review is pending.");
+        return new static("This{$context} cannot be reinstated while disciplinary review is pending.");
     }
 }

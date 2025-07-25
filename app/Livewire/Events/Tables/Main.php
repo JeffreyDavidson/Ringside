@@ -58,7 +58,7 @@ class Main extends BaseTable
             Column::make(__('events.name'), 'name')
                 ->searchable(),
             Column::make(__('core.status'), 'status')
-                ->label(fn (Event $row) => $row->status?->label() ?? 'Unknown')
+                ->label(fn (Event $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             DateColumn::make(__('events.date'), 'date')
                 ->inputFormat('Y-m-d H:i:s')

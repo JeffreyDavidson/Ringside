@@ -36,7 +36,6 @@ trait ManagesEmployment
      *
      * @param  T  $model  The model to employ
      * @param  Carbon  $startDate  The date when employment begins
-     *
      * @throws QueryException If the employment creation fails
      *
      * @example
@@ -77,7 +76,6 @@ trait ManagesEmployment
      *
      * @param  T  $model  The model whose employment should be ended
      * @param  Carbon  $endDate  The date when employment ends
-     *
      * @throws QueryException If the employment update fails
      */
     public function endEmployment(Employable $model, Carbon $endDate): void
@@ -109,7 +107,6 @@ trait ManagesEmployment
      *
      * @param  T  $model  The model to release
      * @param  Carbon  $releaseDate  The date when the release occurs
-     *
      * @throws QueryException If the release operation fails
      */
     public function createRelease(Employable $model, Carbon $releaseDate): void
@@ -131,7 +128,6 @@ trait ManagesEmployment
      *
      * @param  T  $model  The model to reinstate
      * @param  Carbon  $reinstatementDate  The date when reinstatement begins
-     *
      * @throws QueryException If the reinstatement operation fails
      */
     public function createReinstatement(Employable $model, Carbon $reinstatementDate): void

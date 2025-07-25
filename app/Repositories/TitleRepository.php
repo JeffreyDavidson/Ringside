@@ -87,9 +87,9 @@ class TitleRepository extends BaseRepository implements ManagesActivityInterface
         }
 
         // Get the champion and handle potential null case
-        /** @var Wrestler|TagTeam|null $champion */
+        /** @var Wrestler|TagTeam $champion */
         $champion = $championship->champion;
-        $championName = $champion?->name ?? 'Unknown';
+        $championName = $champion->name ?? 'Unknown';
 
         // Access the calculated reign_length attribute
         /** @var int $reignLength */

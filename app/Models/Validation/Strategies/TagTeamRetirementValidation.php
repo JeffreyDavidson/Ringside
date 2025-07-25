@@ -33,7 +33,6 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
      * - Ensures no wrestlers are injured or suspended
      *
      * @param  Model  $tagTeam  The TagTeam entity to validate
-     *
      * @throws CannotBeRetiredException When retirement is not allowed
      */
     public function validate(Model $tagTeam): void
@@ -49,7 +48,6 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
      * Validate the TagTeam's own status for retirement.
      *
      * @param  Model  $tagTeam  The TagTeam to validate
-     *
      * @throws CannotBeRetiredException When TagTeam status prevents retirement
      */
     private function validateTagTeamStatus(Model $tagTeam): void
@@ -74,7 +72,6 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
      * status to ensure the entire tag team can be retired properly.
      *
      * @param  Model  $tagTeam  The TagTeam to validate
-     *
      * @throws CannotBeRetiredException When wrestlers prevent TagTeam retirement
      */
     private function validateCurrentWrestlers(Model $tagTeam): void

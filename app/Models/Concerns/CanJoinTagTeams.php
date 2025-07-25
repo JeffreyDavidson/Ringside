@@ -210,9 +210,9 @@ trait CanJoinTagTeams
      * conventions. For example, if the parent model is 'Wrestler', it will look for
      * a 'TagTeamWrestler' pivot model class.
      *
-     * @return class-string<TPivotModel> The fully qualified class name of the pivot model
      *
      * @throws RuntimeException If the resolved model class doesn't exist
+     * @return class-string<TPivotModel> The fully qualified class name of the pivot model
      *
      * @example
      * For a 'Wrestler' model, this will resolve to 'App\\Models\\TagTeamWrestler'

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns;
 
+use DateTime;
 use Throwable;
 
 /**
@@ -16,9 +17,6 @@ use Throwable;
  * The trait works with both direct property assignment and form object patterns,
  * making it flexible for different form architectures.
  *
- * @author Your Name
- *
- * @since 1.0.0
  *
  * @example
  * ```php
@@ -389,5 +387,38 @@ trait GeneratesDummyData
         $dateTime = fake()->dateTimeBetween('now', $maxPeriod);
 
         return $dateTime->format('Y-m-d');
+    }
+
+    /**
+     * Generate an optional start date with proper DateTime handling.
+     *
+     * Returns a formatted date string with specified probability, handling
+     * PHPStan nullsafe operator issues with DateTime objects by properly
+     * checking for null values before calling format().
+     *
+     * @param  string  $format  The date format to use (default: 'Y-m-d H:i:s')
+     * @param  float  $probability  The probability of returning a date (default: 0.8)
+     * @param  string  $maxPeriod  Maximum future period (default: '+3 month')
+     * @return string|null The formatted date string or null
+     *
+     * @example
+     * ```php
+     * // Common usage in FormModal getDummyDataFields()
+     * 'start_date' => fn () => $this->generateOptionalStartDate(),
+     * 'employment_date' => fn () => $this->generateOptionalStartDate('Y-m-d', 0.7),
+     * ```
+     */
+    protected function generateOptionalStartDate(
+        string $format = 'Y-m-d H:i:s',
+        float $probability = 0.8,
+        string $minPeriod = 'now',
+        string $maxPeriod = '+3 month'
+    ): ?string {
+        // Directly check probability to avoid PHPStan confusion with fake()->optional()
+        if (fake()->boolean((int) ($probability * 100))) {
+            return fake()->dateTimeBetween($minPeriod, $maxPeriod)->format($format);
+        }
+
+        return null;
     }
 }

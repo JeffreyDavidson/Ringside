@@ -29,7 +29,7 @@ use App\Exceptions\BaseBusinessException;
  * - Ensures proper insurance compliance and liability management
  * - Supports accurate medical record keeping and recovery tracking
  */
-class CannotBeClearedFromInjuryException extends BaseBusinessException
+final class CannotBeClearedFromInjuryException extends BaseBusinessException
 {
     /**
      * Entity is not currently injured and cannot be cleared from injury.
@@ -54,7 +54,7 @@ class CannotBeClearedFromInjuryException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be cleared from injury due to insufficient medical documentation: {$missingDocumentation}.");
+        return new static("This{$context} cannot be cleared from injury due to insufficient medical documentation: {$missingDocumentation}.");
     }
 
     /**
@@ -67,7 +67,7 @@ class CannotBeClearedFromInjuryException extends BaseBusinessException
     {
         $context = $entityType ? " {$entityType}" : ' entity';
 
-        return new self("This{$context} cannot be cleared from injury due to ongoing treatment: {$ongoingTreatment}.");
+        return new static("This{$context} cannot be cleared from injury due to ongoing treatment: {$ongoingTreatment}.");
     }
 
     /**
@@ -80,6 +80,6 @@ class CannotBeClearedFromInjuryException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new self("This{$context} cannot be cleared from injury without proper medical authorization.");
+        return new static("This{$context} cannot be cleared from injury without proper medical authorization.");
     }
 }

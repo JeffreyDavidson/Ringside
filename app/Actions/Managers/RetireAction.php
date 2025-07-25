@@ -28,7 +28,6 @@ class RetireAction extends BaseManagerAction
      *
      * @param  Manager  $manager  The manager to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     *
      * @throws CannotBeRetiredException When manager cannot be retired due to business rules
      *
      * @example

@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
  * @property-read MatchCompetitor|null $pivot
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
@@ -55,6 +56,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchFactory::class)]
 class EventMatch extends Model
 {
+    /** @use HasFactory<MatchFactory> */
     use HasFactory;
 
     /**

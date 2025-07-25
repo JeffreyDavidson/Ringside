@@ -35,11 +35,8 @@ use Log;
  * - Dynamic view rendering based on match type
  * - Wrestling match data generation for testing
  *
- * @extends BaseFormModal<EventMatchForm, EventMatch>
+ * @extends BaseFormModal<CreateEditForm, EventMatch>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseFormModal For modal functionality and patterns
  * @see EventMatch For the underlying match model structure
  */
@@ -166,7 +163,6 @@ class FormModal extends BaseFormModal
         // Most matches have 1 referee, some special matches might have 2
         $refereeCount = fake()->randomFloat(null, 0, 1) < 0.9 ? 1 : 2;
 
-        /** @phpstan-ignore-next-line */
         return Referee::factory()->count($refereeCount)->create()->pluck('id')->toArray();
     }
 
@@ -202,7 +198,6 @@ class FormModal extends BaseFormModal
         // For now, generate 2-4 wrestlers (singles to tag team)
         $wrestlerCount = fake()->numberBetween(2, 4);
 
-        /** @phpstan-ignore-next-line */
         return Wrestler::factory()->count($wrestlerCount)->create()->pluck('id')->toArray();
     }
 
@@ -323,7 +318,7 @@ class FormModal extends BaseFormModal
      * 2. Initialize the correct competitor structure
      * 3. Reset validation state
      */
-    public function updatedFormMatchTypeId($value): void
+    public function updatedFormMatchTypeId(mixed $value): void
     {
         if (! $value) {
             return;

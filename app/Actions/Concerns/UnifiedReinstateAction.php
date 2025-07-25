@@ -61,7 +61,6 @@ class UnifiedReinstateAction
      * @param  Model  $entity  The entity to reinstate (Wrestler, Manager, Referee, TagTeam)
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
      * @param  string|null  $notes  Optional notes for the reinstatement record
-     *
      * @throws Exception When entity cannot be reinstated due to business rules
      *
      * @example

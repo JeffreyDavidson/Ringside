@@ -33,7 +33,6 @@ class TitleRetirementValidation implements RetirementValidationStrategy
      * - Must not have future activation scheduled
      *
      * @param  Model  $entity  The Title entity to validate
-     *
      * @throws CannotBeRetiredException When retirement is not allowed
      */
     public function validate(Model $entity): void

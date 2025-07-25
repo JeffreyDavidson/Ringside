@@ -38,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read Role $role
  * @property-read string $formatted_phone_number
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
@@ -55,6 +56,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(UserBuilder::class)]
 class User extends Authenticatable
 {
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
     /**

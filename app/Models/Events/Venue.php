@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
+ *
  * @property-read Collection<int, Event> $events
  * @property-read Collection<int, Event> $previousEvents
  * @property-read Collection<int, Event> $futureEvents
@@ -47,7 +48,9 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(VenueBuilder::class)]
 class Venue extends Model
 {
+    /** @use HasFactory<VenueFactory> */
     use HasFactory;
+
     use HoldsEvents;
     use SoftDeletes;
 

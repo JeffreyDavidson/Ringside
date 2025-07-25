@@ -7,7 +7,6 @@ namespace App\Repositories\Contracts;
 use App\Data\Stables\StableData;
 use App\Models\Contracts\HasActivityPeriods;
 use App\Models\Contracts\Retirable;
-use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -51,10 +50,6 @@ interface StableRepositoryInterface
 
     public function removeTagTeam(Stable $stable, TagTeam $tagTeam, Carbon $removalDate): void;
 
-    public function addManager(Stable $stable, Manager $manager, Carbon $joinDate): void;
-
-    public function removeManager(Stable $stable, Manager $manager, Carbon $removalDate): void;
-
     // Member operations - Bulk
     /**
      * @param  Collection<int, Wrestler>  $wrestlers
@@ -67,11 +62,6 @@ interface StableRepositoryInterface
     public function addTagTeams(Stable $stable, Collection $tagTeams, Carbon $joinDate): void;
 
     /**
-     * @param  Collection<int, Manager>  $managers
-     */
-    public function addManagers(Stable $stable, Collection $managers, Carbon $joinDate): void;
-
-    /**
      * @param  Collection<int, Wrestler>  $wrestlers
      */
     public function removeWrestlers(Stable $stable, Collection $wrestlers, Carbon $removalDate): void;
@@ -80,11 +70,6 @@ interface StableRepositoryInterface
      * @param  Collection<int, TagTeam>  $tagTeams
      */
     public function removeTagTeams(Stable $stable, Collection $tagTeams, Carbon $removalDate): void;
-
-    /**
-     * @param  Collection<int, Manager>  $managers
-     */
-    public function removeManagers(Stable $stable, Collection $managers, Carbon $removalDate): void;
 
     // Disassembly operations
     public function disassembleAllMembers(Stable $stable, Carbon $disassembleDate): void;
