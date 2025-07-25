@@ -96,7 +96,9 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(RefereeBuilder::class)]
 class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
 {
+    /** @use HasFactory<RefereeFactory> */
     use HasFactory;
+
     use HasMatches, OfficiatesMatches {
         OfficiatesMatches::matches insteadof HasMatches;
         OfficiatesMatches::previousMatches insteadof HasMatches;

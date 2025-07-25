@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(StableActivityPeriodFactory::class)]
 class StableActivityPeriod extends Model
 {
+    /** @use HasFactory<StableActivityPeriodFactory> */
     use HasFactory;
 
     /**

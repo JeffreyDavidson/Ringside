@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  */
 class StableActivation extends Model
 {
+    /** @use HasFactory<StableActivationFactory> */
     use HasFactory;
 
     protected $table = 'stables_activations';

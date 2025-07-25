@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(RefereeInjuryFactory::class)]
 class RefereeInjury extends Model
 {
+    /** @use HasFactory<RefereeInjuryFactory> */
     use HasFactory;
 
     /**

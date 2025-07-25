@@ -112,7 +112,9 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
         HasActivityPeriods::isInactive insteadof HasStatusHistory;
     }
 
+    /** @use HasFactory<StableFactory> */
     use HasFactory;
+
     use HasMembers;
 
     /** @use HasStatusHistory<StableStatusChange, static> */
