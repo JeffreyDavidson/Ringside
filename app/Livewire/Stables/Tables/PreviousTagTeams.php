@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Models\Stables\StableTagTeam;
 use App\Models\TagTeams\TagTeam;
 use Carbon\Carbon;
 use Exception;
@@ -58,7 +59,7 @@ class PreviousTagTeams extends DataTableComponent
                         return '';
                     }
 
-                    /** @var \App\Models\Stables\StableTagTeam $pivot */
+                    /** @var StableTagTeam $pivot */
                     $pivot = $stable->pivot;
                     $joinedAt = $pivot->getAttribute('joined_at');
                     if (! $joinedAt) {
@@ -76,7 +77,7 @@ class PreviousTagTeams extends DataTableComponent
                         return '';
                     }
 
-                    /** @var \App\Models\Stables\StableTagTeam $pivot */
+                    /** @var StableTagTeam $pivot */
                     $pivot = $stable->pivot;
                     $leftAt = $pivot->getAttribute('left_at');
                     if (! $leftAt) {
