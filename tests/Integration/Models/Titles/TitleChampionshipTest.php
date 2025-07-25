@@ -232,7 +232,7 @@ describe('TitleChampionship Model', function () {
                 }
             }
 
-            expect(TitleChampionship::count())->toBe(15); // 3 titles × 5 wrestlers
+            expect(TitleChampionship::count())->toBe(15); // 3 titles * 5 wrestlers
         });
 
         test('eager loading relationships works correctly', function () {

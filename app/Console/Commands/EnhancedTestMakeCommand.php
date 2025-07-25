@@ -46,7 +46,7 @@ class EnhancedTestMakeCommand extends TestMakeCommand
                 );
 
                 if ($useRingside) {
-                    $this->info('✨ Generating standardized model test with Ringside...');
+                    $this->info('* Generating standardized model test with Ringside...');
 
                     $result = $this->call('ringside:make:test', [
                         '--unit' => $this->option('unit'),
