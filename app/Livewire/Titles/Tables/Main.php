@@ -15,6 +15,7 @@ use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -208,7 +209,7 @@ class Main extends BaseTable
 
         try {
             resolve(DebutAction::class)->handle($title);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -227,7 +228,7 @@ class Main extends BaseTable
 
         try {
             resolve(PullAction::class)->handle($title);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -263,7 +264,7 @@ class Main extends BaseTable
 
         try {
             resolve(RetireAction::class)->handle($title);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -282,7 +283,7 @@ class Main extends BaseTable
 
         try {
             resolve(UnretireAction::class)->handle($title);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 

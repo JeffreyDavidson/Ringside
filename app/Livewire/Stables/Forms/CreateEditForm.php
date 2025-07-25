@@ -39,7 +39,7 @@ use Illuminate\Validation\Rule;
  * @see CanChangeDebutDate For custom activation validation
  *
  * @property string $name Stable's official name for storylines and promotion
- * @property Carbon|string|null $start_date Stable activation start date
+ * @property string|null $start_date Stable activation start date
  */
 class CreateEditForm extends BaseForm
 {

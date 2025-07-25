@@ -38,7 +38,7 @@ use Illuminate\Support\Carbon;
  *
  * @property string $first_name Manager's first name for identification
  * @property string $last_name Manager's last name for identification
- * @property Carbon|string|null $employment_date Employment start date
+ * @property string|null $employment_date Employment start date
  */
 class CreateEditForm extends BaseForm
 {
@@ -83,7 +83,7 @@ class CreateEditForm extends BaseForm
      * payroll management, benefits administration, and availability
      * scheduling for wrestling programming and events.
      *
-     * @var Carbon|string|null Manager employment start date
+     * @var string|null Manager employment start date
      */
     public ?string $employment_date = null;
 
