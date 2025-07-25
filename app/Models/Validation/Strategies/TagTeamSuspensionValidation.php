@@ -54,7 +54,7 @@ class TagTeamSuspensionValidation implements SuspensionValidationStrategy
             throw CannotBeSuspendedException::retired();
         }
 
-        if ($tagTeam->hasFutureEmployment()) {
+        if (method_exists($tagTeam, 'hasFutureEmployment') && $tagTeam->hasFutureEmployment()) {
             throw CannotBeSuspendedException::hasFutureEmployment();
         }
 

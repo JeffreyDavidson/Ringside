@@ -29,7 +29,9 @@
       "Bash(done)",
       "Bash(cat:*)",
       "Bash(php:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(vendor/bin/phpstan analyse:*)",
+      "Bash(./vendor/bin/phpstan analyse --memory-limit=512M --error-format=json)"
     ],
     "deny": [],
     "defaultMode": "plan"

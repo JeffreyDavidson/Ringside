@@ -58,7 +58,7 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
             throw CannotBeRetiredException::unemployed();
         }
 
-        if ($tagTeam->hasFutureEmployment()) {
+        if (method_exists($tagTeam, 'hasFutureEmployment') && $tagTeam->hasFutureEmployment()) {
             throw CannotBeRetiredException::hasFutureEmployment();
         }
 
