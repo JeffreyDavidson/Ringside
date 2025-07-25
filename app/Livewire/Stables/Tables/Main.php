@@ -81,7 +81,7 @@ class Main extends BaseTable
                     'with_future_establishment' => 'Pending Establishment',
                 ])
                 ->filter(function (Builder $builder, string $value): void {
-                    /** @var StableBuilder $builder */
+                    /** @var StableBuilder<Stable> $builder */
                     match ($value) {
                         'unestablished' => $builder->unestablished(),
                         'established' => $builder->established(),

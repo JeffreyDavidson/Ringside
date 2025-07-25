@@ -99,7 +99,7 @@ class Main extends BaseTable
                     'retired' => 'Retired',
                 ])
                 ->filter(function (RefereeBuilder $builder, string $value) {
-                    /** @var RefereeBuilder $builder */
+                    /** @var RefereeBuilder<Referee> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
                         'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
