@@ -54,11 +54,13 @@ class PreviousTagTeams extends DataTableComponent
             Column::make(__('stables.date_joined'))
                 ->label(function (TagTeam $row): string {
                     $stable = $row->stables->first();
-                    if (! $stable || ! $stable->pivot) {
+                    if (! $stable || ! isset($stable->pivot)) {
                         return '';
                     }
 
-                    $joinedAt = $stable->pivot->getAttribute('joined_at');
+                    /** @var \App\Models\Stables\StableTagTeam $pivot */
+                    $pivot = $stable->pivot;
+                    $joinedAt = $pivot->getAttribute('joined_at');
                     if (! $joinedAt) {
                         return '';
                     }
@@ -70,11 +72,13 @@ class PreviousTagTeams extends DataTableComponent
             Column::make(__('stables.date_left'))
                 ->label(function (TagTeam $row): string {
                     $stable = $row->stables->first();
-                    if (! $stable || ! $stable->pivot) {
+                    if (! $stable || ! isset($stable->pivot)) {
                         return '';
                     }
 
-                    $leftAt = $stable->pivot->getAttribute('left_at');
+                    /** @var \App\Models\Stables\StableTagTeam $pivot */
+                    $pivot = $stable->pivot;
+                    $leftAt = $pivot->getAttribute('left_at');
                     if (! $leftAt) {
                         return '';
                     }
