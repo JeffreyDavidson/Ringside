@@ -58,7 +58,7 @@ class Main extends BaseTable
                 ->label(fn (EventMatch $row) => $row->competitors->map(fn ($competitor) => $competitor->getCompetitor()->name)->join(' vs ')),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
-                    $winner = $row->result?->getWinner();
+                    $winner = $row->result?->winner;
 
                     if ($winner) {
                         return $winner->name.' by '.$row->result?->decision->name;
