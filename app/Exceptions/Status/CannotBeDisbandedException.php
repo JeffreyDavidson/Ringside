@@ -40,7 +40,7 @@ final class CannotBeDisbandedException extends BaseBusinessException
     {
         $context = $stableName ? " stable '{$stableName}'" : ' stable';
 
-        return new static("This{$context} is not active and cannot be disbanded.");
+        return new self("This{$context} is not active and cannot be disbanded.");
     }
 
     /**

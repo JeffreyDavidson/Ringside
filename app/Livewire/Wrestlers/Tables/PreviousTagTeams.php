@@ -6,6 +6,7 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\TagTeams\TagTeamWrestler;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -112,6 +113,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     protected function getPartnerName(TagTeamWrestler $row): string
     {
         $partner = $this->getPartner($row);
+
         return $partner ? $partner->name : 'Unknown';
     }
 
@@ -121,13 +123,14 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     protected function getPartnerRoute(TagTeamWrestler $row): string
     {
         $partner = $this->getPartner($row);
+
         return $partner ? route('wrestlers.show', $partner) : '#';
     }
 
     /**
      * Get the partner wrestler for the given tag team relationship.
      */
-    private function getPartner(TagTeamWrestler $row): ?\App\Models\Wrestlers\Wrestler
+    private function getPartner(TagTeamWrestler $row): ?Wrestler
     {
         // Find the other wrestler in this tag team during the same time period
         $partnerRecord = TagTeamWrestler::where('tag_team_id', $row->tag_team_id)

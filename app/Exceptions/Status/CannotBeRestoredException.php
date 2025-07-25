@@ -41,7 +41,7 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is not deleted and cannot be restored.");
+        return new self("This{$context} is not deleted and cannot be restored.");
     }
 
     /**

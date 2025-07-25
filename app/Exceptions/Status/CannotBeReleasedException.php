@@ -41,7 +41,7 @@ final class CannotBeReleasedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is unemployed and cannot be released.");
+        return new self("This{$context} is unemployed and cannot be released.");
     }
 
     /**

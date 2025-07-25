@@ -28,7 +28,7 @@ use Illuminate\Validation\Rule;
  * - Event uniqueness validation across the system
  * - Cached venue list presentation for efficient form rendering
  *
- * @extends BaseForm<EventForm, Event>
+ * @extends BaseForm
  *
  * @author Your Name
  *

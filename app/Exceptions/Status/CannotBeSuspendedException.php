@@ -41,7 +41,7 @@ final class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is unemployed and cannot be suspended.");
+        return new self("This{$context} is unemployed and cannot be suspended.");
     }
 
     /**

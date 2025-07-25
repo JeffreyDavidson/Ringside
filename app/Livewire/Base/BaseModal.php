@@ -44,7 +44,7 @@ abstract class BaseModal extends ModalComponent
     protected ?Model $model;
 
     /**
-     * @var TModelForm
+     * @var TModelForm|null
      */
     protected $modelForm;
 
@@ -111,11 +111,11 @@ abstract class BaseModal extends ModalComponent
      */
     public function clear(): void
     {
-        if (! isset($this->modelForm)) {
+        if ($this->modelForm === null) {
             return; // Cannot clear if form is not initialized
         }
 
-        if (isset($this->model) && ! is_null($this->model)) {
+        if ($this->model !== null) {
             $this->modelForm->setModel($this->model);
         } else {
             $this->modelForm->reset();

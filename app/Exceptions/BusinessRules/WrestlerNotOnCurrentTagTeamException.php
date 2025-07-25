@@ -42,7 +42,7 @@ final class WrestlerNotOnCurrentTagTeamException extends BaseBusinessException
         $wrestler = $wrestlerName ? "Wrestler '{$wrestlerName}'" : 'Wrestler';
         $team = $tagTeamName ? " tag team '{$tagTeamName}'" : ' tag team';
 
-        return new static("{$wrestler} is not currently a member of the{$team}.");
+        return new self("{$wrestler} is not currently a member of the{$team}.");
     }
 
     /**

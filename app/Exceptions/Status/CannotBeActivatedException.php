@@ -41,7 +41,7 @@ final class CannotBeActivatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is already activated and cannot be reactivated.");
+        return new self("This{$context} is already activated and cannot be reactivated.");
     }
 
     /**

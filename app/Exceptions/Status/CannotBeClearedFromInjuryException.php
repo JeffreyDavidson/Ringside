@@ -41,7 +41,7 @@ final class CannotBeClearedFromInjuryException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is not injured and cannot be cleared from an injury.");
+        return new self("This{$context} is not injured and cannot be cleared from an injury.");
     }
 
     /**

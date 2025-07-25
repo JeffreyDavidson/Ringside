@@ -41,7 +41,7 @@ final class CannotBeDeactivatedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is not currently activated.");
+        return new self("This{$context} is not currently activated.");
     }
 
     /**

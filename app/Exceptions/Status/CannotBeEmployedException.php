@@ -41,7 +41,7 @@ final class CannotBeEmployedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is already employed and cannot be re-employed.");
+        return new self("This{$context} is already employed and cannot be re-employed.");
     }
 
     /**

@@ -25,7 +25,7 @@ use Illuminate\Validation\Rule;
  * - ZIP code format validation for postal accuracy
  * - Location data integrity for event management systems
  *
- * @extends BaseForm<VenueForm, Venue>
+ * @extends BaseForm
  *
  * @author Your Name
  *

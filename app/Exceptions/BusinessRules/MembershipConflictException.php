@@ -50,7 +50,7 @@ final class MembershipConflictException extends BaseBusinessException
         $currentStableName = $currentStable->getAttribute('name') ?? "ID: {$currentStable->getKey()}";
         $newStableName = $newStable->getAttribute('name') ?? "ID: {$newStable->getKey()}";
 
-        return new static(
+        return new self(
             "Wrestler '{$wrestlerName}' is already a member of stable '{$currentStableName}' and cannot join '{$newStableName}'. Remove from current stable first or choose different wrestler."
         );
     }

@@ -44,7 +44,7 @@ final class NotEnoughMembersException extends BaseBusinessException
         $requiredCount = TagTeam::NUMBER_OF_WRESTLERS_ON_TEAM;
 
         if ($currentCount !== null) {
-            return new static(sprintf(
+            return new self(sprintf(
                 'Tag team%s has %d wrestlers but requires exactly %d wrestlers to operate.',
                 $context,
                 $currentCount,
@@ -52,7 +52,7 @@ final class NotEnoughMembersException extends BaseBusinessException
             ));
         }
 
-        return new static(sprintf(
+        return new self(sprintf(
             'Tag team%s must contain exactly %d wrestlers to operate.',
             $context,
             $requiredCount

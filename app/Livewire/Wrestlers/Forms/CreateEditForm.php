@@ -28,7 +28,7 @@ use Illuminate\Validation\Rule;
  * - Wrestling persona data (signature moves, career information)
  * - Custom validation rules for wrestling industry requirements
  *
- * @extends BaseForm<WrestlerForm, Wrestler>
+ * @extends BaseForm
  *
  * @author Your Name
  *

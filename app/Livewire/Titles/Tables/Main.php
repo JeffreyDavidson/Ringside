@@ -197,18 +197,22 @@ class Main extends BaseTable
     }
 
     /**
-     * Activate a title for competition.
+     * Debut a title for competition.
      *
-     * @param  Title  $title  The title to activate
+     * @param  Title  $title  The title to debut
      * @return RedirectResponse Redirect response with success or error message
      */
-    public function activate(Title $title): RedirectResponse
+    public function debut(Title $title): RedirectResponse
     {
-        return $this->executeAction(
-            DebutAction::class,
-            $title,
-            'debut'
-        );
+        Gate::authorize('debut', $title);
+
+        try {
+            resolve(DebutAction::class)->handle($title);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
     }
 
     /**
@@ -217,13 +221,17 @@ class Main extends BaseTable
      * @param  Title  $title  The title to pull
      * @return RedirectResponse Redirect response with success or error message
      */
-    public function deactivate(Title $title): RedirectResponse
+    public function pull(Title $title): RedirectResponse
     {
-        return $this->executeAction(
-            PullAction::class,
-            $title,
-            'pull'
-        );
+        Gate::authorize('pull', $title);
+
+        try {
+            resolve(PullAction::class)->handle($title);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
     }
 
     /**
@@ -251,11 +259,15 @@ class Main extends BaseTable
      */
     public function retire(Title $title): RedirectResponse
     {
-        return $this->executeAction(
-            RetireAction::class,
-            $title,
-            'retire'
-        );
+        Gate::authorize('retire', $title);
+
+        try {
+            resolve(RetireAction::class)->handle($title);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
     }
 
     /**
@@ -266,11 +278,15 @@ class Main extends BaseTable
      */
     public function unretire(Title $title): RedirectResponse
     {
-        return $this->executeAction(
-            UnretireAction::class,
-            $title,
-            'unretire'
-        );
+        Gate::authorize('unretire', $title);
+
+        try {
+            resolve(UnretireAction::class)->handle($title);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
     }
 
     public function handleTitleAction(string $action, int $titleId): void

@@ -34,7 +34,7 @@ class FormModal extends BaseFormModal
     {
         return [
             'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'hometown' => fn () => fake()->city().', '.fake('en_US')->stateAbbr(),
+            'hometown' => fn () => fake()->city().', '.fake('en_US')->state(),
             'height_feet' => fn () => fake()->numberBetween(5, 7),
             'height_inches' => fn () => fake()->numberBetween(0, 11),
             'weight' => fn () => fake()->numberBetween(180, 350),

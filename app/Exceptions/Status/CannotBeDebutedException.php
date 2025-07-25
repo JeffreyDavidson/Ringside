@@ -42,7 +42,7 @@ final class CannotBeDebutedException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} has already been debuted and cannot be debuted again.");
+        return new self("This{$context} has already been debuted and cannot be debuted again.");
     }
 
     /**

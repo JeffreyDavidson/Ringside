@@ -46,7 +46,7 @@ final class InvalidDateRangeException extends BaseBusinessException
     {
         $contextInfo = $context ? " for {$context}" : '';
 
-        return new static(
+        return new self(
             "Invalid date range{$contextInfo}: end date ({$endDate->format('Y-m-d')}) cannot be before start date ({$startDate->format('Y-m-d')}). Ensure logical date ordering."
         );
     }

@@ -41,7 +41,7 @@ final class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = $entityType && $entityName ? " {$entityType} '{$entityName}'" : ' entity';
 
-        return new static("This{$context} is not retired and cannot be unretired.");
+        return new self("This{$context} is not retired and cannot be unretired.");
     }
 
     /**
