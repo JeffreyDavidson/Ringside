@@ -131,6 +131,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
 
     /** @use HasFactory<TagTeamFactory> */
     use HasFactory;
+
     use IsBookableCompetitor;
 
     /** @use IsEmployable<TagTeamEmployment, static> */

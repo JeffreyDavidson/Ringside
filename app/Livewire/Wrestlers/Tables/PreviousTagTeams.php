@@ -105,4 +105,41 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
             'tag_teams_wrestlers.tag_team_id',
         ]);
     }
+
+    /**
+     * Get the partner wrestler name for the given tag team relationship.
+     */
+    protected function getPartnerName(TagTeamWrestler $row): string
+    {
+        $partner = $this->getPartner($row);
+        return $partner ? $partner->name : 'Unknown';
+    }
+
+    /**
+     * Get the route to the partner wrestler for the given tag team relationship.
+     */
+    protected function getPartnerRoute(TagTeamWrestler $row): string
+    {
+        $partner = $this->getPartner($row);
+        return $partner ? route('wrestlers.show', $partner) : '#';
+    }
+
+    /**
+     * Get the partner wrestler for the given tag team relationship.
+     */
+    private function getPartner(TagTeamWrestler $row): ?\App\Models\Wrestlers\Wrestler
+    {
+        // Find the other wrestler in this tag team during the same time period
+        $partnerRecord = TagTeamWrestler::where('tag_team_id', $row->tag_team_id)
+            ->where('wrestler_id', '!=', $row->wrestler_id)
+            ->where('joined_at', '<=', $row->left_at ?? now())
+            ->where(function ($query) use ($row) {
+                $query->whereNull('left_at')
+                    ->orWhere('left_at', '>=', $row->joined_at);
+            })
+            ->with('wrestler')
+            ->first();
+
+        return $partnerRecord?->wrestler;
+    }
 }

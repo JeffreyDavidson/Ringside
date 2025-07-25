@@ -31,7 +31,9 @@
       "Bash(php:*)",
       "Bash(rg:*)",
       "Bash(vendor/bin/phpstan analyse:*)",
-      "Bash(./vendor/bin/phpstan analyse --memory-limit=512M --error-format=json)"
+      "Bash(./vendor/bin/phpstan analyse --memory-limit=512M --error-format=json)",
+      "Bash(vendor/bin/phpstan analyze:*)",
+      "Bash(composer lint:*)"
     ],
     "deny": [],
     "defaultMode": "plan"

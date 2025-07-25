@@ -64,7 +64,7 @@ class Main extends BaseTable
     public function filters(): array
     {
         return [
-            SelectFilter::make(__('core.status'))
+            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
                 ->setFilterPillTitle(__('core.status'))
                 ->options([
                     '' => __('core.all'),

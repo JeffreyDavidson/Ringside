@@ -131,8 +131,10 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
 
     /** @use HasEnumStatus<EmploymentStatus> */
     use HasEnumStatus;
+
     /** @use HasFactory<WrestlerFactory> */
     use HasFactory;
+
     use IsBookableCompetitor;
 
     /** @use IsEmployable<WrestlerEmployment, static> */

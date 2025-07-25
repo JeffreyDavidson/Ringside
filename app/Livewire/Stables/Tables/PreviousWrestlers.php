@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Models\Stables\StableWrestler;
 use App\Models\Wrestlers\Wrestler;
 use Carbon\Carbon;
 use Exception;
@@ -35,7 +36,7 @@ class PreviousWrestlers extends DataTableComponent
                 $query->where('stable_id', $this->stableId)
                     ->whereNotNull('left_at');
             })
-            ->with(['stables' => function (BelongsToMany $query) {
+            ->with(['stables' => function (BelongsToMany $query): void {
                 $query->where('stable_id', $this->stableId)
                     ->whereNotNull('left_at')
                     ->withPivot(['joined_at', 'left_at']);
@@ -58,7 +59,7 @@ class PreviousWrestlers extends DataTableComponent
                         return '';
                     }
 
-                    /** @var \App\Models\Stables\StableWrestler $pivot */
+                    /** @var StableWrestler $pivot */
                     $pivot = $stable->pivot;
                     $joinedAt = $pivot->getAttribute('joined_at');
                     if (! $joinedAt) {
@@ -76,7 +77,7 @@ class PreviousWrestlers extends DataTableComponent
                         return '';
                     }
 
-                    /** @var \App\Models\Stables\StableWrestler $pivot */
+                    /** @var StableWrestler $pivot */
                     $pivot = $stable->pivot;
                     $leftAt = $pivot->getAttribute('left_at');
                     if (! $leftAt) {
