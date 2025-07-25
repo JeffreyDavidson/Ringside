@@ -42,7 +42,8 @@
       "Bash(app/Livewire/Users/Forms/CreateEditForm.php.bak )",
       "Bash(app/Livewire/Venues/Forms/CreateEditForm.php.bak )",
       "Bash(app/Livewire/Wrestlers/Forms/CreateEditForm.php.bak )",
-      "Bash(app/Livewire/TagTeams/Forms/CreateEditForm.php.bak)"
+      "Bash(app/Livewire/TagTeams/Forms/CreateEditForm.php.bak)",
+      "Bash(for:*)"
     ],
     "deny": [],
     "defaultMode": "plan"

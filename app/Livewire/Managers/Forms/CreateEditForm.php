@@ -27,7 +27,7 @@ use Illuminate\Support\Carbon;
  * - Integration with wrestler representation and storyline systems
  * - Personnel record management for wrestling entertainment operations
  *
- * @extends BaseForm
+
  *
  * @author Your Name
  *

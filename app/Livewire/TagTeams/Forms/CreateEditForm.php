@@ -27,7 +27,7 @@ use Illuminate\Validation\Rule;
  * - Tag team partnership data (formation dates, career information)
  * - Custom validation rules for wrestling tag team requirements
  *
- * @extends BaseForm
+
  *
  * @author Your Name
  *
