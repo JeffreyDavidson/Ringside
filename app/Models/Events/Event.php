@@ -134,6 +134,8 @@ class Event extends Model
 
     /**
      * Get the computed status of the event based on its date.
+     *
+     * @return Attribute<EventStatus, never>
      */
     protected function status(): Attribute
     {
