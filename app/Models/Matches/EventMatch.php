@@ -55,6 +55,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchFactory::class)]
 class EventMatch extends Model
 {
+    /** @use HasFactory<MatchFactory> */
     use HasFactory;
 
     /**

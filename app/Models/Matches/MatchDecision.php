@@ -28,6 +28,7 @@ use Illuminate\Support\Str;
 #[UseFactory(MatchDecisionFactory::class)]
 class MatchDecision extends Model
 {
+    /** @use HasFactory<MatchDecisionFactory> */
     use HasFactory;
 
     /**

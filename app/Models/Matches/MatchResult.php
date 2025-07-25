@@ -39,6 +39,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchResultFactory::class)]
 class MatchResult extends Model
 {
+    /** @use HasFactory<MatchResultFactory> */
     use HasFactory;
 
     /**

@@ -39,6 +39,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchCompetitorFactory::class)]
 class MatchCompetitor extends MorphPivot
 {
+    /** @use HasFactory<MatchCompetitorFactory> */
     use HasFactory;
 
     /**

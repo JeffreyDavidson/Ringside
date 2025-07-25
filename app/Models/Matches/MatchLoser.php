@@ -41,6 +41,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchLoserFactory::class)]
 class MatchLoser extends Model
 {
+    /** @use HasFactory<MatchLoserFactory> */
     use HasFactory;
 
     /**

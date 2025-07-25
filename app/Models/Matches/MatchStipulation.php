@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchStipulationFactory::class)]
 class MatchStipulation extends Model
 {
+    /** @use HasFactory<MatchStipulationFactory> */
     use HasFactory;
 
     /**
