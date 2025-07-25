@@ -100,6 +100,8 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @template TForm of BaseForm
  * @template TModel of Model
+ *
+ * @extends BaseModal<TForm, TModel>
  */
 abstract class BaseFormModal extends BaseModal
 {

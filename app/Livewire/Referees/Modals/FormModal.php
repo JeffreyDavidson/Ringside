@@ -19,6 +19,8 @@ class FormModal extends BaseFormModal
 
     /**
      * Store original model data for resetting purposes
+     *
+     * @var array<string, mixed>|null
      */
     public ?array $originalModelData = null;
 
@@ -60,7 +62,7 @@ class FormModal extends BaseFormModal
         parent::openModal($modelId);
 
         // Store original model data if editing
-        if (isset($this->model) && ! is_null($this->model)) {
+        if (isset($this->model)) {
             $this->originalModelData = [
                 'first_name' => $this->model->first_name,
                 'last_name' => $this->model->last_name,

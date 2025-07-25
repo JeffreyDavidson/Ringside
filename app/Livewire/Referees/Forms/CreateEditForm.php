@@ -27,10 +27,8 @@ use Illuminate\Support\Carbon;
  * - Integration with match assignment and scheduling systems
  * - Official personnel record management for wrestling operations
  *
+ * @extends BaseForm<CreateEditForm, Referee>
  *
- * @author Your Name
- *
- * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see ManagesEmployment For employment tracking capabilities
  * @see CanChangeEmploymentDate For custom validation rules

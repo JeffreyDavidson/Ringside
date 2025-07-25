@@ -109,7 +109,7 @@ class CreateEditForm extends BaseForm
     public function loadExtraData(): void
     {
         // Map venue_id from model to venue_id form field
-        if ($this->formModel && isset($this->formModel->venue_id)) {
+        if (isset($this->formModel->venue_id)) {
             $this->venue_id = $this->formModel->venue_id;
         }
 

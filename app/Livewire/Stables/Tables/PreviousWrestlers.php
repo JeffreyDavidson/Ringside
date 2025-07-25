@@ -9,6 +9,7 @@ use App\Models\Wrestlers\Wrestler;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
@@ -35,7 +36,7 @@ class PreviousWrestlers extends DataTableComponent
                 $query->where('stable_id', $this->stableId)
                     ->whereNotNull('left_at');
             })
-            ->with(['stables' => function (Builder $query) {
+            ->with(['stables' => function (Relation $query) {
                 $query->where('stable_id', $this->stableId)
                     ->whereNotNull('left_at');
             }]);
