@@ -39,7 +39,7 @@ class FormModal extends BaseFormModal
         return [
             'first_name' => fn () => fake()->firstName(),
             'last_name' => fn () => fake()->lastName(),
-            'employment_date' => fn () => fake()->optional(0.8)->dateTimeBetween('now', '+3 month')?->format('Y-m-d H:i:s'),
+            'employment_date' => fn () => ($date = fake()->optional(0.8)->dateTimeBetween('now', '+3 month')) ? $date->format('Y-m-d H:i:s') : null,
         ];
     }
 

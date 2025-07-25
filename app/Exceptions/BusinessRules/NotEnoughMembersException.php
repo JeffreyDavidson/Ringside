@@ -44,7 +44,7 @@ class NotEnoughMembersException extends BaseBusinessException
         $requiredCount = TagTeam::NUMBER_OF_WRESTLERS_ON_TEAM;
 
         if ($currentCount !== null) {
-            return new self(sprintf(
+            return new static(sprintf(
                 'Tag team%s has %d wrestlers but requires exactly %d wrestlers to operate.',
                 $context,
                 $currentCount,
@@ -52,7 +52,7 @@ class NotEnoughMembersException extends BaseBusinessException
             ));
         }
 
-        return new self(sprintf(
+        return new static(sprintf(
             'Tag team%s must contain exactly %d wrestlers to operate.',
             $context,
             $requiredCount
@@ -70,7 +70,7 @@ class NotEnoughMembersException extends BaseBusinessException
     {
         $context = $stableName ? " '{$stableName}'" : '';
 
-        return new self(sprintf(
+        return new static(sprintf(
             'Stable%s has %d members but requires at least %d members to operate.',
             $context,
             $currentCount,
@@ -89,7 +89,7 @@ class NotEnoughMembersException extends BaseBusinessException
     {
         $context = $matchType ? " {$matchType}" : '';
 
-        return new self(sprintf(
+        return new static(sprintf(
             'Match%s has %d competitors but requires at least %d competitors.',
             $context,
             $currentCount,
@@ -108,7 +108,7 @@ class NotEnoughMembersException extends BaseBusinessException
     {
         $context = $championshipName ? " for {$championshipName}" : '';
 
-        return new self(sprintf(
+        return new static(sprintf(
             'Championship match%s has %d challengers but requires at least %d challengers.',
             $context,
             $currentChallengerCount,

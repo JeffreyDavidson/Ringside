@@ -46,7 +46,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $contextInfo = $context ? " for {$context}" : '';
 
-        return new self(
+        return new static(
             "Invalid date range{$contextInfo}: end date ({$endDate->format('Y-m-d')}) cannot be before start date ({$startDate->format('Y-m-d')}). Ensure logical date ordering."
         );
     }
@@ -58,7 +58,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $duration = $startDate->diffInDays($endDate);
 
-        return new self(
+        return new static(
             "Date range from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')} ({$duration} days) violates business rule: {$rule}"
         );
     }
@@ -70,7 +70,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $actualDays = $startDate->diffInDays($endDate);
 
-        return new self(
+        return new static(
             "{$context} period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')} is too short ({$actualDays} days). Minimum required: {$minimumDays} days."
         );
     }
@@ -82,7 +82,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $actualDays = $startDate->diffInDays($endDate);
 
-        return new self(
+        return new static(
             "{$context} period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')} is too long ({$actualDays} days). Maximum allowed: {$maximumDays} days."
         );
     }
@@ -101,7 +101,7 @@ class InvalidDateRangeException extends BaseBusinessException
         $existingStart = $existingPeriod['start']->format('Y-m-d');
         $existingEnd = $existingPeriod['end']->format('Y-m-d');
 
-        return new self(
+        return new static(
             "New {$type} period ({$newStart} to {$newEnd}) overlaps with existing period ({$existingStart} to {$existingEnd}). Periods cannot overlap."
         );
     }
@@ -111,7 +111,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function futureNotAllowed(Carbon $date, string $context): static
     {
-        return new self(
+        return new static(
             "{$context} date ({$date->format('Y-m-d')}) cannot be in the future. Use current or past date only."
         );
     }
@@ -121,7 +121,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function pastNotAllowed(Carbon $date, string $context): static
     {
-        return new self(
+        return new static(
             "{$context} date ({$date->format('Y-m-d')}) cannot be in the past. Use current or future date only."
         );
     }
@@ -131,7 +131,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function notAlignedWithBusinessCalendar(Carbon $startDate, Carbon $endDate, string $requirement): static
     {
-        return new self(
+        return new static(
             "Date range from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')} does not align with business calendar requirement: {$requirement}"
         );
     }
@@ -141,7 +141,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function invalidEmploymentPeriod(Carbon $startDate, Carbon $endDate, string $reason): static
     {
-        return new self(
+        return new static(
             "Invalid employment period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
         );
     }
@@ -151,7 +151,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function invalidInjuryPeriod(Carbon $startDate, Carbon $endDate, string $reason): static
     {
-        return new self(
+        return new static(
             "Invalid injury period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
         );
     }
@@ -161,7 +161,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function invalidSuspensionPeriod(Carbon $startDate, Carbon $endDate, string $reason): static
     {
-        return new self(
+        return new static(
             "Invalid suspension period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
         );
     }
@@ -171,7 +171,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function invalidChampionshipReign(Carbon $startDate, Carbon $endDate, string $reason): static
     {
-        return new self(
+        return new static(
             "Invalid championship reign from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
         );
     }
@@ -181,7 +181,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function invalidEventDate(Carbon $eventDate, string $reason): static
     {
-        return new self(
+        return new static(
             "Invalid event date ({$eventDate->format('Y-m-d')}): {$reason}"
         );
     }
@@ -193,7 +193,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $duration = $startDate->diffInDays($endDate);
 
-        return new self(
+        return new static(
             "Invalid {$contractType} contract period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')} ({$duration} days). Check contract terms and business rules."
         );
     }
@@ -205,7 +205,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $ageAtEvent = $birthDate->diffInYears($eventDate);
 
-        return new self(
+        return new static(
             "Age restriction violation: person born on {$birthDate->format('Y-m-d')} would be {$ageAtEvent} years old on {$eventDate->format('Y-m-d')}, but minimum age is {$minimumAge}."
         );
     }
@@ -215,7 +215,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function seasonalRestriction(Carbon $date, string $restriction): static
     {
-        return new self(
+        return new static(
             "Date {$date->format('Y-m-d')} violates seasonal restriction: {$restriction}"
         );
     }
@@ -227,7 +227,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $actualGap = $endDate1->diffInDays($startDate2);
 
-        return new self(
+        return new static(
             "Invalid gap in {$context}: {$actualGap} days between {$endDate1->format('Y-m-d')} and {$startDate2->format('Y-m-d')}. Required gap: {$requiredGapDays} days."
         );
     }
@@ -239,7 +239,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $daysBack = now()->diffInDays($date);
 
-        return new self(
+        return new static(
             "Retroactive {$context} date ({$date->format('Y-m-d')}) is {$daysBack} days in the past. Maximum retroactive period: {$maxRetroactiveDays} days."
         );
     }
@@ -251,7 +251,7 @@ class InvalidDateRangeException extends BaseBusinessException
     {
         $dayName = $date->format('l');
 
-        return new self(
+        return new static(
             "{$context} date ({$date->format('Y-m-d')}) falls on {$dayName}. Business days (Monday-Friday) required."
         );
     }
@@ -261,7 +261,7 @@ class InvalidDateRangeException extends BaseBusinessException
      */
     public static function crossesFiscalYear(Carbon $startDate, Carbon $endDate, string $fiscalYearEnd): static
     {
-        return new self(
+        return new static(
             "Date range from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')} crosses fiscal year boundary ({$fiscalYearEnd}). Periods cannot span fiscal years."
         );
     }

@@ -50,7 +50,7 @@ class MembershipConflictException extends BaseBusinessException
         $currentStableName = $currentStable->getAttribute('name') ?? "ID: {$currentStable->getKey()}";
         $newStableName = $newStable->getAttribute('name') ?? "ID: {$newStable->getKey()}";
 
-        return new self(
+        return new static(
             "Wrestler '{$wrestlerName}' is already a member of stable '{$currentStableName}' and cannot join '{$newStableName}'. Remove from current stable first or choose different wrestler."
         );
     }
@@ -64,7 +64,7 @@ class MembershipConflictException extends BaseBusinessException
         $currentTeamName = $currentTeam->getAttribute('name') ?? "ID: {$currentTeam->getKey()}";
         $newTeamName = $newTeam->getAttribute('name') ?? "ID: {$newTeam->getKey()}";
 
-        return new self(
+        return new static(
             "Wrestler '{$wrestlerName}' is already a member of tag team '{$currentTeamName}' and cannot join '{$newTeamName}'. Remove from current team first or choose different wrestler."
         );
     }
@@ -78,7 +78,7 @@ class MembershipConflictException extends BaseBusinessException
         $currentStableName = $currentStable->getAttribute('name') ?? "ID: {$currentStable->getKey()}";
         $newStableName = $newStable->getAttribute('name') ?? "ID: {$newStable->getKey()}";
 
-        return new self(
+        return new static(
             "Tag team '{$teamName}' is already a member of stable '{$currentStableName}' and cannot join '{$newStableName}'. Remove from current stable first or choose different team."
         );
     }
@@ -90,7 +90,7 @@ class MembershipConflictException extends BaseBusinessException
     {
         $managerName = $manager->getAttribute('name') ?? "ID: {$manager->getKey()}";
 
-        return new self(
+        return new static(
             "Manager '{$managerName}' already manages {$currentClients} clients (maximum: {$maxClients}) and cannot take additional clients. Remove existing clients or choose different manager."
         );
     }
@@ -108,7 +108,7 @@ class MembershipConflictException extends BaseBusinessException
         $currentManagerName = $currentManager->getAttribute('name') ?? "ID: {$currentManager->getKey()}";
         $newManagerName = $newManager->getAttribute('name') ?? "ID: {$newManager->getKey()}";
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' already has manager '{$currentManagerName}' and cannot be assigned to '{$newManagerName}'. Remove current manager first or choose different entity."
         );
     }
@@ -123,7 +123,7 @@ class MembershipConflictException extends BaseBusinessException
         $group1Name = $group1->getAttribute('name') ?? "ID: {$group1->getKey()}";
         $group2Name = $group2->getAttribute('name') ?? "ID: {$group2->getKey()}";
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' has overlapping membership in '{$group1Name}' and '{$group2Name}' during period {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}. Memberships cannot overlap."
         );
     }
@@ -135,7 +135,7 @@ class MembershipConflictException extends BaseBusinessException
     {
         $stableName = $stable->getAttribute('name') ?? "ID: {$stable->getKey()}";
 
-        return new self(
+        return new static(
             "Stable '{$stableName}' has {$currentMembers} members but requires minimum of {$requiredMinimum}. Add more members or modify stable requirements."
         );
     }
@@ -147,7 +147,7 @@ class MembershipConflictException extends BaseBusinessException
     {
         $teamName = $tagTeam->getAttribute('name') ?? "ID: {$tagTeam->getKey()}";
 
-        return new self(
+        return new static(
             "Tag team '{$teamName}' has {$currentMembers} members but requires exactly {$requiredMembers}. Adjust membership to meet requirements."
         );
     }
@@ -163,7 +163,7 @@ class MembershipConflictException extends BaseBusinessException
             return ($entity['name'] ?? "ID: {$entity['id']}")." ({$entity['type']})";
         }, $membershipChain));
 
-        return new self(
+        return new static(
             "Circular membership dependency detected: {$chainDescription}. Resolve circular references in membership structure."
         );
     }
@@ -176,7 +176,7 @@ class MembershipConflictException extends BaseBusinessException
         $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
         $entityType = class_basename($entity);
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' cannot manage itself. Choose different manager or entity."
         );
     }
@@ -191,7 +191,7 @@ class MembershipConflictException extends BaseBusinessException
         $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
         $groupType = class_basename($group);
 
-        return new self(
+        return new static(
             "Retired {$entityType} '{$entityName}' cannot join {$groupType} '{$groupName}'. Only active entities can have new memberships."
         );
     }
@@ -206,7 +206,7 @@ class MembershipConflictException extends BaseBusinessException
         $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
         $groupType = class_basename($group);
 
-        return new self(
+        return new static(
             "Suspended {$entityType} '{$entityName}' cannot join {$groupType} '{$groupName}'. Resolve suspension before adding new memberships."
         );
     }
@@ -221,7 +221,7 @@ class MembershipConflictException extends BaseBusinessException
         $exclusiveGroupName = $exclusiveGroup->getAttribute('name') ?? "ID: {$exclusiveGroup->getKey()}";
         $newGroupName = $newGroup->getAttribute('name') ?? "ID: {$newGroup->getKey()}";
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' has exclusive membership in '{$exclusiveGroupName}' and cannot join '{$newGroupName}'. End exclusive membership first."
         );
     }
@@ -236,7 +236,7 @@ class MembershipConflictException extends BaseBusinessException
         $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
         $groupType = class_basename($group);
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' (gender: {$entityGender}) cannot join {$groupType} '{$groupName}' which requires {$requiredGender} members only."
         );
     }
@@ -251,7 +251,7 @@ class MembershipConflictException extends BaseBusinessException
         $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
         $groupType = class_basename($group);
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' (age: {$entityAge}) cannot join {$groupType} '{$groupName}' which requires minimum age of {$minimumAge}."
         );
     }
@@ -266,7 +266,7 @@ class MembershipConflictException extends BaseBusinessException
         $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
         $groupType = class_basename($group);
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' (experience: {$entityLevel}) cannot join {$groupType} '{$groupName}' which requires {$requiredLevel} experience level."
         );
     }
@@ -281,7 +281,7 @@ class MembershipConflictException extends BaseBusinessException
         $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
         $groupType = class_basename($group);
 
-        return new self(
+        return new static(
             "{$entityType} '{$entityName}' cannot join {$groupType} '{$groupName}' due to contractual conflict: {$conflictDetails}"
         );
     }
