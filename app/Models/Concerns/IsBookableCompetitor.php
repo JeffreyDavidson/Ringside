@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 /**
  * Provides match relationships for models that can be booked as competitors.
  *
- * This trait implements the Bookable interface for competitor models
+ * This trait implements the BookableCompetitor interface for competitor models
  * that participate in matches through the event_match_competitors pivot table.
  * It's designed to be used by models like Wrestler and TagTeam.
  */
@@ -20,7 +20,7 @@ trait IsBookableCompetitor
     /**
      * Get all matches this competitor has participated in.
      *
-     * @return MorphToMany<EventMatch, static, MatchCompetitor>
+     * @return MorphToMany<EventMatch, $this, MatchCompetitor>
      */
     public function matches(): MorphToMany
     {
@@ -31,7 +31,7 @@ trait IsBookableCompetitor
     /**
      * Get previous matches this competitor has participated in.
      *
-     * @return MorphToMany<EventMatch, static, MatchCompetitor>
+     * @return MorphToMany<EventMatch, $this, MatchCompetitor>
      */
     public function previousMatches(): MorphToMany
     {

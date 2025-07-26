@@ -17,7 +17,7 @@ use App\Models\Concerns\ProvidesTagTeamWrestlers;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesRetirement;
 use App\Models\Concerns\ValidatesSuspension;
-use App\Models\Contracts\Bookable;
+use App\Models\Contracts\BookableCompetitor;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
@@ -27,7 +27,6 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
 use App\Models\Titles\TitleChampionship;
@@ -43,7 +42,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
- * @implements Bookable<MatchCompetitor>
+ * @implements BookableCompetitor<static>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableTagTeam, static>
  * @implements Employable<TagTeamEmployment, static>
@@ -121,7 +120,7 @@ use Illuminate\Support\Carbon;
  */
 #[UseFactory(TagTeamFactory::class)]
 #[UseEloquentBuilder(TagTeamBuilder::class)]
-class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampion, Employable, HasTagTeamWrestlers, Manageable, Retirable, Suspendable
+class TagTeam extends Model implements BookableCompetitor, CanBeAStableMember, CanBeChampion, Employable, HasTagTeamWrestlers, Manageable, Retirable, Suspendable
 {
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;

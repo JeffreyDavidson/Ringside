@@ -14,6 +14,9 @@ use Illuminate\Support\Carbon;
  *
  * This contract defines the interface for models that can be activated and deactivated
  * over time, tracking periods of activity with start and end dates.
+ *
+ * @template TActivityPeriod of Model
+ * @template TDeclaringModel of Model
  */
 interface HasActivityPeriods
 {
@@ -63,11 +66,15 @@ interface HasActivityPeriods
 
     /**
      * Get all activity periods for this model.
+     *
+     * @return HasMany<TActivityPeriod, TDeclaringModel>
      */
     public function activityPeriods(): HasMany;
 
     /**
      * Get the current activity period.
+     *
+     * @return HasOne<TActivityPeriod, TDeclaringModel>
      */
     public function currentActivityPeriod(): HasOne;
 }

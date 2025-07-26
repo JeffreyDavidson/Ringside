@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * Provides match relationships for models that officiate matches.
  *
- * This trait implements the Bookable interface for models
+ * This trait implements the BookableOfficial interface for models
  * that officiate matches through the events_matches_referees pivot table.
  * It's designed to be used by officials like referees.
  */
@@ -19,7 +19,7 @@ trait OfficiatesMatches
     /**
      * Get all matches this official has officiated.
      *
-     * @return BelongsToMany<EventMatch, static>
+     * @return BelongsToMany<EventMatch, $this>
      */
     public function matches(): BelongsToMany
     {
@@ -29,7 +29,7 @@ trait OfficiatesMatches
     /**
      * Get previous matches this official has officiated.
      *
-     * @return BelongsToMany<EventMatch, static>
+     * @return BelongsToMany<EventMatch, $this>
      */
     public function previousMatches(): BelongsToMany
     {
