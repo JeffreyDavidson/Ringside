@@ -33,8 +33,14 @@ class DeactivateAction
             }
 
             // End all current member tenures
-            $stable->currentWrestlerTenures()->update(['left_at' => $deactivationDate]);
-            $stable->currentTagTeamTenures()->update(['left_at' => $deactivationDate]);
+            $stable->currentWrestlers()->updateExistingPivot(
+                $stable->currentWrestlers()->pluck('wrestler_id'),
+                ['left_at' => $deactivationDate]
+            );
+            $stable->currentTagTeams()->updateExistingPivot(
+                $stable->currentTagTeams()->pluck('tag_team_id'),
+                ['left_at' => $deactivationDate]
+            );
         });
     }
 

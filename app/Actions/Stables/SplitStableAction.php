@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +24,7 @@ class SplitStableAction
      *
      * @param  Stable  $originalStable  The stable to split
      * @param  string  $newStableName  Name for the new stable
-     * @param  array<string, mixed>  $membersForNewStable  Array of members to move to new stable, grouped by type
+     * @param  array{wrestlers?: array<int, Wrestler>, tagTeams?: array<int, TagTeam>}  $membersForNewStable  Array of members to move to new stable, grouped by type
      * @param  Carbon  $date  The date when the split operation occurs
      * @return Stable The newly created stable
      */

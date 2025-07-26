@@ -64,7 +64,10 @@ class UpdateAction
     {
         return DB::transaction(function () use ($tagTeam, $tagTeamData): TagTeam {
             // Update the tag team's basic information
-            $tagTeam->update($tagTeamData->toArray());
+            $tagTeam->update([
+                'name' => $tagTeamData->name,
+                'signature_move' => $tagTeamData->signature_move,
+            ]);
             $updateDate = now();
 
             // Handle member changes (wrestlers and managers)

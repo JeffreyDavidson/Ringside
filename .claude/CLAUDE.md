@@ -400,6 +400,40 @@ For detailed architecture information, see the documentation in `docs/architectu
   - Wrestler bookability is separate (affected by injury, suspension, etc.)
   - An injured wrestler can still have a manager managing their career
 
+### Data Object Pattern
+
+**Data objects are pure data containers - NEVER add methods:**
+
+```php
+// ✅ CORRECT: Pure data container
+readonly class StableData
+{
+    public function __construct(
+        public string $name,
+        public ?Carbon $start_date,
+        public Collection $tagTeams,
+        public Collection $wrestlers,
+    ) {}
+}
+
+// ✅ CORRECT: Access properties directly in Actions
+$stable = Stable::create([
+    'name' => $stableData->name,
+]);
+
+// ❌ WRONG: Never add toArray() or other methods to Data objects
+readonly class StableData
+{
+    public function toArray(): array { /* NEVER DO THIS */ }
+}
+```
+
+**Key Principles:**
+- Data objects should ONLY have constructor and public readonly properties
+- Actions access data via properties: `$data->property`
+- No `toArray()`, `validate()`, `transform()`, or other methods on Data objects
+- Keep Data objects as simple, immutable data containers
+
 ### Policy Pattern
 
 **All policies use before hook pattern:**
