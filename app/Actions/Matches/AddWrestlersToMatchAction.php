@@ -6,21 +6,14 @@ namespace App\Actions\Matches;
 
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\MatchRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddWrestlersToMatchAction extends BaseMatchAction
+class AddWrestlersToMatchAction
 {
     use AsAction;
-
-    public function __construct(
-        MatchRepository $matchRepository
-    ) {
-        parent::__construct($matchRepository);
-    }
 
     /**
      * Add wrestlers to an event match.
@@ -83,13 +76,12 @@ class AddWrestlersToMatchAction extends BaseMatchAction
 
         DB::transaction(function () use ($eventMatch, $eligibleWrestlers, $sideNumber): void {
             // Add each eligible wrestler to the specified side
-            $eligibleWrestlers->each(
-                fn (Wrestler $wrestler) => $this->matchRepository->addWrestlerToMatch(
-                    $eventMatch,
-                    $wrestler,
-                    $sideNumber
-                )
-            );
+            $eligibleWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $sideNumber) {
+                $eventMatch->competitors()->create([
+                    'wrestler_id' => $wrestler->id,
+                    'side_number' => $sideNumber,
+                ]);
+            });
         });
     }
 
