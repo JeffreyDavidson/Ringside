@@ -101,7 +101,7 @@ trait CanJoinStables
             default => str_contains($morphClass, '@anonymous') ? 'App\Models\StableMembers' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
-        /** @var BelongsToMany<Stable, static> $relation */
+        /** @var BelongsToMany<Stable, static, TPivotModel> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
             $table,
@@ -194,7 +194,7 @@ trait CanJoinStables
             default => str_contains($morphClass, '@anonymous') ? 'App\Models\StableMembers' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
-        /** @var BelongsToMany<Stable, static> $relation */
+        /** @var BelongsToMany<Stable, static, TPivotModel> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
             $table,

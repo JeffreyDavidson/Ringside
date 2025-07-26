@@ -20,8 +20,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  * Models implementing this interface should also use the CanBeManaged trait
  * to get the complete management functionality implementation.
  *
- * @template-covariant TPivotModel of Pivot The pivot model for the manager relationship
- * @template-covariant TModel of Model The model that can be managed
+ * @template TPivotModel of Pivot The pivot model for the manager relationship
+ * @template TModel of Model The model that can be managed
  *
  * @see CanBeManaged For the trait implementation
  *

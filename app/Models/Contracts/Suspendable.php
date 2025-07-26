@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * Models implementing this interface should also use the IsSuspendable trait
  * to get the complete suspension functionality implementation.
  *
- * @template-covariant TSuspension of Model The suspension model class
- * @template-covariant TModel of Model The model that can be suspended
+ * @template TSuspension of Model The suspension model class
+ * @template TModel of Model The model that can be suspended
  *
  * @see IsSuspendable For the trait implementation
  *

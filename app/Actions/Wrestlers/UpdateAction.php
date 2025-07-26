@@ -47,7 +47,13 @@ class UpdateAction
     {
         return DB::transaction(function () use ($wrestler, $wrestlerData): Wrestler {
             // Update the wrestler's basic information
-            $wrestler->update($wrestlerData->toArray());
+            $wrestler->update([
+                'name' => $wrestlerData->name,
+                'height' => $wrestlerData->height,
+                'weight' => $wrestlerData->weight,
+                'hometown' => $wrestlerData->hometown,
+                'signature_move' => $wrestlerData->signature_move,
+            ]);
 
             // Track if wrestler was just employed
             $wasEmployed = $wrestler->isEmployed();

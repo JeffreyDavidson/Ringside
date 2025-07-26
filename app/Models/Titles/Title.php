@@ -31,6 +31,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @implements Debutable<TitleStatusChange, static>
+ * @implements HasActivityPeriodsContract<TitleActivityPeriod, static>
  * @implements Retirable<TitleRetirement, static>
  *
  * @property int $id

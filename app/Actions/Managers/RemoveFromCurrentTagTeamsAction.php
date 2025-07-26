@@ -15,6 +15,10 @@ class RemoveFromCurrentTagTeamsAction
     public function handle(Manager $manager, ?Carbon $removalDate = null): void
     {
         $removalDate = $removalDate ?? now();
-        $manager->currentTagTeamTenures()->update(['ended_at' => $removalDate]);
+
+        $manager->tagTeams()->wherePivotNull('fired_at')->updateExistingPivot(
+            $manager->tagTeams()->wherePivotNull('fired_at')->pluck('tag_team_id'),
+            ['fired_at' => $removalDate]
+        );
     }
 }

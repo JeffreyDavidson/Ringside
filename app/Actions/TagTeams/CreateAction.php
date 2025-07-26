@@ -149,7 +149,7 @@ class CreateAction
         );
 
         // Update the status field to reflect employment
-        $tagTeam->update(['status' => EmploymentStatus::Employed]); // @phpstan-ignore-line method.notFound
+        $tagTeam->update(['status' => EmploymentStatus::Employed]);
 
         // Employ wrestlers if they're not already employed
         $wrestlers

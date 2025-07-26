@@ -49,7 +49,9 @@ class CreateAction
     public function handle(StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stableData): Stable {
-            $stable = Stable::create($stableData->toArray());
+            $stable = Stable::create([
+                'name' => $stableData->name,
+            ]);
 
             $joinDate = $stableData->start_date ?? now();
 

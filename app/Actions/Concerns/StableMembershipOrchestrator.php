@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
-use App\Data\Stables\StableData;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\StableRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -49,8 +47,6 @@ use Illuminate\Support\Facades\DB;
  */
 class StableMembershipOrchestrator
 {
-    protected StableRepository $stableRepository;
-
     protected ?Stable $sourceStable = null;
 
     protected ?Stable $targetStable = null;
@@ -66,14 +62,6 @@ class StableMembershipOrchestrator
     protected ?Carbon $effectiveDate = null;
 
     /**
-     * Create a new stable membership orchestrator.
-     */
-    public function __construct(StableRepository $stableRepository)
-    {
-        $this->stableRepository = $stableRepository;
-    }
-
-    /**
      * Create orchestrator for stable merger operation.
      *
      * @param  Stable  $primaryStable  The stable that will absorb members
@@ -82,7 +70,7 @@ class StableMembershipOrchestrator
      */
     public static function mergeStables(Stable $primaryStable, Stable $secondaryStable, ?string $newName = null): self
     {
-        $orchestrator = new self(app(StableRepository::class));
+        $orchestrator = new self();
         $orchestrator->sourceStable = $secondaryStable;
         $orchestrator->targetStable = $primaryStable;
         $orchestrator->newStableName = $newName;
@@ -101,7 +89,7 @@ class StableMembershipOrchestrator
      */
     public static function splitStable(Stable $originalStable, string $newStableName): self
     {
-        $orchestrator = new self(app(StableRepository::class));
+        $orchestrator = new self();
         $orchestrator->sourceStable = $originalStable;
         $orchestrator->newStableName = $newStableName;
 
@@ -119,7 +107,7 @@ class StableMembershipOrchestrator
      */
     public static function transferMembers(Stable $fromStable, Stable $toStable): self
     {
-        $orchestrator = new self(app(StableRepository::class));
+        $orchestrator = new self();
         $orchestrator->sourceStable = $fromStable;
         $orchestrator->targetStable = $toStable;
 
@@ -308,12 +296,9 @@ class StableMembershipOrchestrator
 
         // Rename primary stable if requested
         if ($this->newStableName) {
-            $this->stableRepository->update($primary, new StableData(
-                name: $this->newStableName,
-                start_date: null,
-                tagTeams: collect(),
-                wrestlers: collect()
-            ));
+            $primary->update([
+                'name' => $this->newStableName,
+            ]);
         }
 
         // Retire the secondary stable
@@ -328,12 +313,9 @@ class StableMembershipOrchestrator
     protected function executeSplit(Stable $original, string $newName, Carbon $date): Stable
     {
         // Create new stable
-        $newStable = $this->stableRepository->create(new StableData(
-            name: $newName,
-            start_date: null,
-            tagTeams: collect(),
-            wrestlers: collect()
-        ));
+        $newStable = Stable::create([
+            'name' => $newName,
+        ]);
 
         $this->targetStable = $newStable;
 
@@ -347,14 +329,30 @@ class StableMembershipOrchestrator
     {
         // Transfer wrestlers
         foreach ($from->currentWrestlers as $wrestler) {
-            $this->stableRepository->removeWrestler($from, $wrestler, $date);
-            $this->stableRepository->addWrestler($to, $wrestler, $date);
+            // End membership in source stable
+            $from->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
+                $wrestler->id,
+                ['left_at' => $date]
+            );
+            // Add to target stable
+            $to->wrestlers()->attach($wrestler->id, [
+                'joined_at' => $date,
+                'left_at' => null,
+            ]);
         }
 
         // Transfer tag teams
         foreach ($from->currentTagTeams as $tagTeam) {
-            $this->stableRepository->removeTagTeam($from, $tagTeam, $date);
-            $this->stableRepository->addTagTeam($to, $tagTeam, $date);
+            // End membership in source stable
+            $from->tagTeams()->wherePivotNull('left_at')->updateExistingPivot(
+                $tagTeam->id,
+                ['left_at' => $date]
+            );
+            // Add to target stable
+            $to->tagTeams()->attach($tagTeam->id, [
+                'joined_at' => $date,
+                'left_at' => null,
+            ]);
         }
 
         // Note: Managers are not directly transferred between stables
@@ -370,10 +368,16 @@ class StableMembershipOrchestrator
     {
         foreach ($wrestlers as $wrestler) {
             if ($this->sourceStable) {
-                $this->stableRepository->removeWrestler($this->sourceStable, $wrestler, $date);
+                $this->sourceStable->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
+                    $wrestler->id,
+                    ['left_at' => $date]
+                );
             }
             if ($this->targetStable) {
-                $this->stableRepository->addWrestler($this->targetStable, $wrestler, $date);
+                $this->targetStable->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $date,
+                    'left_at' => null,
+                ]);
             }
         }
 
@@ -389,10 +393,16 @@ class StableMembershipOrchestrator
     {
         foreach ($tagTeams as $tagTeam) {
             if ($this->sourceStable) {
-                $this->stableRepository->removeTagTeam($this->sourceStable, $tagTeam, $date);
+                $this->sourceStable->tagTeams()->wherePivotNull('left_at')->updateExistingPivot(
+                    $tagTeam->id,
+                    ['left_at' => $date]
+                );
             }
             if ($this->targetStable) {
-                $this->stableRepository->addTagTeam($this->targetStable, $tagTeam, $date);
+                $this->targetStable->tagTeams()->attach($tagTeam->id, [
+                    'joined_at' => $date,
+                    'left_at' => null,
+                ]);
             }
         }
 

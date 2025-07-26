@@ -113,7 +113,7 @@ class AddMatchForEventAction
             // Create the base match record
             $createdMatch = EventMatch::create([
                 'event_id' => $event->id,
-                'match_type_id' => $eventMatchData->match_type_id,
+                'match_type_id' => $eventMatchData->matchType->id,
                 'preview' => $eventMatchData->preview,
             ]);
 

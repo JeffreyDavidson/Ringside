@@ -31,18 +31,20 @@ trait ProvidesDisplayName
      */
     public function getDisplayName(): string
     {
-        if ((array_key_exists('name', $this->getAttributes()) || property_exists($this, 'name')) && $this->name) {
-            return $this->name;
+        if ((array_key_exists('name', $this->getAttributes()) || property_exists($this, 'name')) && $this->getAttribute('name')) {
+            return $this->getAttribute('name');
         }
 
-        if ((array_key_exists('full_name', $this->getAttributes()) || property_exists($this, 'full_name')) && $this->full_name) {
-            return $this->full_name;
+        if ((array_key_exists('full_name', $this->getAttributes()) || property_exists($this, 'full_name')) && $this->getAttribute('full_name')) {
+            return $this->getAttribute('full_name');
         }
 
+        $firstName = $this->getAttribute('first_name');
+        $lastName = $this->getAttribute('last_name');
         if ((array_key_exists('first_name', $this->getAttributes()) || property_exists($this, 'first_name')) &&
             (array_key_exists('last_name', $this->getAttributes()) || property_exists($this, 'last_name')) &&
-            ($this->first_name !== null || $this->last_name !== null)) {
-            return mb_trim("{$this->first_name} {$this->last_name}");
+            ($firstName !== null || $lastName !== null)) {
+            return mb_trim("{$firstName} {$lastName}");
         }
 
         throw new LogicException(sprintf(
