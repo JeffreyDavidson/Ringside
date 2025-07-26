@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
@@ -62,11 +63,15 @@ interface HasActivityPeriods
 
     /**
      * Get all activity periods for this model.
+     *
+     * @return HasMany<Model, static>
      */
     public function activityPeriods(): HasMany;
 
     /**
      * Get the current activity period.
+     *
+     * @return HasOne<Model, static>
      */
     public function currentActivityPeriod(): HasOne;
 }

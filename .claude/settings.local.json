@@ -46,7 +46,9 @@
       "Bash(for:*)",
       "Bash(./vendor/bin/phpstan:*)",
       "Bash(vendor/bin/pint:*)",
-      "Bash(composer test:*)"
+      "Bash(composer test:*)",
+      "Bash(LANG=C ./vendor/bin/phpstan analyse:*)",
+      "Bash(LANG=C LC_ALL=C ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G)"
     ],
     "deny": [],
     "defaultMode": "plan"
