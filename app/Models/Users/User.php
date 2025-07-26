@@ -147,9 +147,9 @@ class User extends Authenticatable
     }
 
     /**
-     * Undocumented function
+     * Get all wrestlers owned by this user.
      *
-     * @return HasMany<Wrestler, static>
+     * @return HasMany<Wrestler, $this>
      */
     public function wrestlers(): HasMany
     {

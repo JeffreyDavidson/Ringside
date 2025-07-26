@@ -67,7 +67,7 @@ trait HasActivityPeriods
     public function activityPeriods(): HasMany
     {
         /** @var HasMany<TActivityPeriod, TModel> $relation */
-        $relation = $this->hasMany($this->resolveActivityPeriodModelClass(), null, null, null, $this->getActivityPeriodTableName());
+        $relation = $this->hasMany($this->resolveActivityPeriodModelClass());
 
         return $relation;
     }

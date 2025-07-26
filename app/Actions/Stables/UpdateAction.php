@@ -39,7 +39,9 @@ class UpdateAction
     public function handle(Stable $stable, StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stable, $stableData): Stable {
-            $stable->update($stableData->toArray());
+            $stable->update([
+                'name' => $stableData->name,
+            ]);
 
             if (isset($stableData->start_date)) {
                 $this->validateEstablishmentDateChange($stable);

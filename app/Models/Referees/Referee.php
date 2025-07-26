@@ -17,7 +17,7 @@ use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesInjury;
 use App\Models\Concerns\ValidatesRetirement;
 use App\Models\Concerns\ValidatesSuspension;
-use App\Models\Contracts\Bookable;
+use App\Models\Contracts\BookableOfficial;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
@@ -39,7 +39,7 @@ use Illuminate\Support\Carbon;
  * @implements Injurable<RefereeInjury, static>
  * @implements Retirable<RefereeRetirement, static>
  * @implements Suspendable<RefereeSuspension, static>
- * @implements Bookable<Referee>
+ * @implements BookableOfficial<static>
  *
  * @property int $id
  * @property string $first_name
@@ -97,7 +97,7 @@ use Illuminate\Support\Carbon;
  */
 #[UseFactory(RefereeFactory::class)]
 #[UseEloquentBuilder(RefereeBuilder::class)]
-class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
+class Referee extends Model implements BookableOfficial, Employable, HasDisplayName, Injurable, Retirable, Suspendable
 {
     /** @use HasFactory<RefereeFactory> */
     use HasFactory;

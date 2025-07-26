@@ -41,7 +41,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for invalid competitor count for match type.
      */
-    public static function invalidCompetitorCount(int $actualCount, string $matchType): static
+    public static function invalidCompetitorCount(int $actualCount, string $matchType): self
     {
         return new self(
             "Invalid competitor count for {$matchType}. Got {$actualCount} competitors, but this match type requires a different number."
@@ -51,7 +51,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for insufficient competitors to form a match.
      */
-    public static function insufficientCompetitors(int $required, int $actual): static
+    public static function insufficientCompetitors(int $required, int $actual): self
     {
         return new self(
             "Insufficient competitors for match. Required: {$required}, Actual: {$actual}. Matches must have at least {$required} competitors."
@@ -61,7 +61,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for too many competitors for match type.
      */
-    public static function tooManyCompetitors(int $maximum, int $actual, string $matchType): static
+    public static function tooManyCompetitors(int $maximum, int $actual, string $matchType): self
     {
         return new self(
             "Too many competitors for {$matchType}. Maximum: {$maximum}, Actual: {$actual}. This match type cannot accommodate more than {$maximum} competitors."
@@ -70,8 +70,10 @@ class InvalidMatchConfigurationException extends BaseBusinessException
 
     /**
      * Exception for invalid side distribution in multi-competitor match.
+     *
+     * @param  array<int, int>  $sides
      */
-    public static function invalidSideDistribution(array $sides, string $matchType): static
+    public static function invalidSideDistribution(array $sides, string $matchType): self
     {
         $sideCount = count($sides);
         $distribution = implode(', ', array_map(fn (int $side, int $count) => "Side {$side}: {$count}", array_keys($sides), $sides));
@@ -84,7 +86,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for title match without championship title assigned.
      */
-    public static function titleMatchWithoutTitle(Model $match): static
+    public static function titleMatchWithoutTitle(Model $match): self
     {
         $matchId = $match->getAttribute('id') ?? 'new';
 
@@ -96,7 +98,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for non-title match with title assigned.
      */
-    public static function nonTitleMatchWithTitle(Model $match, string $titleName): static
+    public static function nonTitleMatchWithTitle(Model $match, string $titleName): self
     {
         $matchId = $match->getAttribute('id') ?? 'new';
 
@@ -108,7 +110,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for invalid match type for event context.
      */
-    public static function invalidMatchType(string $matchType, Model $event): static
+    public static function invalidMatchType(string $matchType, Model $event): self
     {
         $eventName = $event->getAttribute('name') ?? "Event ID: {$event->getAttribute('id')}";
 
@@ -120,7 +122,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for competitor appearing multiple times in same match.
      */
-    public static function duplicateCompetitor(Model $competitor): static
+    public static function duplicateCompetitor(Model $competitor): self
     {
         $competitorName = $competitor->getAttribute('name') ?? "ID: {$competitor->getAttribute('id')}";
         $competitorType = class_basename($competitor);
@@ -132,8 +134,10 @@ class InvalidMatchConfigurationException extends BaseBusinessException
 
     /**
      * Exception for conflicting competitor types in match.
+     *
+     * @param  array<int, string>  $types
      */
-    public static function conflictingCompetitorTypes(array $types): static
+    public static function conflictingCompetitorTypes(array $types): self
     {
         $typeList = implode(', ', $types);
 
@@ -145,7 +149,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for missing required referee assignment.
      */
-    public static function missingReferee(Model $match): static
+    public static function missingReferee(Model $match): self
     {
         $matchId = $match->getAttribute('id') ?? 'new';
 
@@ -157,7 +161,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for referee conflict or unavailability.
      */
-    public static function refereeConflict(Model $referee, string $reason): static
+    public static function refereeConflict(Model $referee, string $reason): self
     {
         $refereeName = $referee->getAttribute('name') ?? "ID: {$referee->getAttribute('id')}";
 
@@ -169,7 +173,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for invalid match rules or stipulations.
      */
-    public static function invalidMatchRules(string $rules, string $reason): static
+    public static function invalidMatchRules(string $rules, string $reason): self
     {
         return new self(
             "Invalid match rules '{$rules}': {$reason}. Review match stipulations and rule compatibility."
@@ -179,7 +183,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for match scheduling conflicts.
      */
-    public static function schedulingConflict(Model $match, string $conflictDetails): static
+    public static function schedulingConflict(Model $match, string $conflictDetails): self
     {
         $matchId = $match->getAttribute('id') ?? 'new';
 
@@ -191,7 +195,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for championship eligibility violations.
      */
-    public static function championshipEligibilityViolation(Model $competitor, Model $title): static
+    public static function championshipEligibilityViolation(Model $competitor, Model $title): self
     {
         $competitorName = $competitor->getAttribute('name') ?? "ID: {$competitor->getAttribute('id')}";
         $titleName = $title->getAttribute('name') ?? "ID: {$title->getAttribute('id')}";
@@ -205,7 +209,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for inactive title being used in match.
      */
-    public static function inactiveTitle(Model $title): static
+    public static function inactiveTitle(Model $title): self
     {
         $titleName = $title->getAttribute('name') ?? "ID: {$title->getAttribute('id')}";
 
@@ -217,7 +221,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for match requiring specific venue capabilities.
      */
-    public static function venueCapabilityRequired(Model $venue, string $requirement): static
+    public static function venueCapabilityRequired(Model $venue, string $requirement): self
     {
         $venueName = $venue->getAttribute('name') ?? "ID: {$venue->getAttribute('id')}";
 

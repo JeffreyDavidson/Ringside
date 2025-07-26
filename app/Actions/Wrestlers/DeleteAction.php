@@ -61,15 +61,13 @@ class DeleteAction
             }
 
             // Handle tag team impact if wrestler is in a current tag team
-            if ($wrestler->currentTagTeam !== null) {
-                // Remove the wrestler from the tag team
-                $wrestler->currentTagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
-                    'left_at' => $deletionDate,
-                ]);
+            $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot(
+                $wrestler->tagTeams()->wherePivotNull('left_at')->pluck('tag_team_id'),
+                ['left_at' => $deletionDate]
+            );
 
-                // Note: Tag team bookability is handled automatically by the isBookable() method
-                // which checks if the team has sufficient active members
-            }
+            // Note: Tag team bookability is handled automatically by the isBookable() method
+            // which checks if the team has sufficient active members
 
             // Handle manager relationships - end management relationships
             $wrestler->currentManagers->each(function ($manager) use ($wrestler, $deletionDate) {

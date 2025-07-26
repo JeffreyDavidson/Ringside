@@ -42,7 +42,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors for specific match type.
      */
-    public static function forMatchType(string $matchType, int $required, int $available): static
+    public static function forMatchType(string $matchType, int $required, int $available): self
     {
         return new self(
             "Insufficient competitors for {$matchType}. Required: {$required}, Available: {$available}. This match type needs {$required} eligible competitors to proceed."
@@ -52,7 +52,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors for tournament format.
      */
-    public static function forTournament(string $tournamentName, int $required, int $available): static
+    public static function forTournament(string $tournamentName, int $required, int $available): self
     {
         return new self(
             "Insufficient competitors for '{$tournamentName}' tournament. Required: {$required}, Available: {$available}. Tournament brackets require exact competitor counts."
@@ -62,7 +62,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient qualified title contenders.
      */
-    public static function qualifiedForTitle(Model $title, int $required, int $qualified): static
+    public static function qualifiedForTitle(Model $title, int $required, int $qualified): self
     {
         $titleName = $title->getAttribute('name') ?? "ID: {$title->getAttribute('id')}";
 
@@ -74,7 +74,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors of specific type.
      */
-    public static function ofType(string $competitorType, int $required, int $available): static
+    public static function ofType(string $competitorType, int $required, int $available): self
     {
         return new self(
             "Insufficient {$competitorType} competitors. Required: {$required}, Available: {$available}. This match requires {$required} {$competitorType} participants."
@@ -84,7 +84,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient wrestlers for wrestling-specific match.
      */
-    public static function wrestlers(int $required, int $available): static
+    public static function wrestlers(int $required, int $available): self
     {
         return new self(
             "Insufficient wrestlers for match. Required: {$required}, Available: {$available}. Wrestling matches need sufficient individual competitors."
@@ -94,7 +94,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient tag teams for tag team match.
      */
-    public static function tagTeams(int $required, int $available): static
+    public static function tagTeams(int $required, int $available): self
     {
         return new self(
             "Insufficient tag teams for match. Required: {$required}, Available: {$available}. Tag team matches require multiple active teams."
@@ -104,7 +104,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient active roster members.
      */
-    public static function activeRoster(int $required, int $active, int $total): static
+    public static function activeRoster(int $required, int $active, int $total): self
     {
         return new self(
             "Insufficient active roster members. Required: {$required}, Active: {$active} (Total: {$total}). More competitors need to be employed/activated."
@@ -114,7 +114,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors in specific division.
      */
-    public static function inDivision(string $division, int $required, int $available): static
+    public static function inDivision(string $division, int $required, int $available): self
     {
         return new self(
             "Insufficient competitors in {$division} division. Required: {$required}, Available: {$available}. Division needs more eligible participants."
@@ -124,7 +124,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors meeting weight class.
      */
-    public static function inWeightClass(string $weightClass, int $required, int $available): static
+    public static function inWeightClass(string $weightClass, int $required, int $available): self
     {
         return new self(
             "Insufficient competitors in {$weightClass} weight class. Required: {$required}, Available: {$available}. Weight class restrictions limit participant pool."
@@ -134,7 +134,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors for venue capacity.
      */
-    public static function forVenueCapacity(Model $venue, int $requiredCompetitors, int $availableCompetitors): static
+    public static function forVenueCapacity(Model $venue, int $requiredCompetitors, int $availableCompetitors): self
     {
         $venueName = $venue->getAttribute('name') ?? "ID: {$venue->getAttribute('id')}";
 
@@ -146,7 +146,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors meeting experience requirements.
      */
-    public static function withExperience(string $experienceLevel, int $required, int $available): static
+    public static function withExperience(string $experienceLevel, int $required, int $available): self
     {
         return new self(
             "Insufficient {$experienceLevel} competitors. Required: {$required}, Available: {$available}. Match requires participants with {$experienceLevel} experience level."
@@ -156,7 +156,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors for storyline requirements.
      */
-    public static function forStoryline(string $storyline, int $required, int $available): static
+    public static function forStoryline(string $storyline, int $required, int $available): self
     {
         return new self(
             "Insufficient competitors for '{$storyline}' storyline. Required: {$required}, Available: {$available}. Storyline development requires specific participant count."
@@ -166,7 +166,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient substitutes/alternates.
      */
-    public static function substitutes(int $required, int $available): static
+    public static function substitutes(int $required, int $available): self
     {
         return new self(
             "Insufficient substitute competitors. Required: {$required}, Available: {$available}. Backup competitors needed for contingency planning."
@@ -176,7 +176,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors on specific date.
      */
-    public static function onDate(string $date, int $required, int $available, string $reason = ''): static
+    public static function onDate(string $date, int $required, int $available, string $reason = ''): self
     {
         $reasonText = $reason ? " ({$reason})" : '';
 
@@ -188,7 +188,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient gender-specific competitors.
      */
-    public static function ofGender(string $gender, int $required, int $available): static
+    public static function ofGender(string $gender, int $required, int $available): self
     {
         return new self(
             "Insufficient {$gender} competitors. Required: {$required}, Available: {$available}. Gender-specific divisions require adequate representation."
@@ -198,7 +198,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors after eliminations.
      */
-    public static function afterEliminations(string $context, int $remaining, int $required): static
+    public static function afterEliminations(string $context, int $remaining, int $required): self
     {
         return new self(
             "Insufficient competitors remaining in {$context}. Remaining: {$remaining}, Required: {$required}. Eliminations have reduced participants below requirements."
@@ -208,7 +208,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for insufficient competitors with specific qualification.
      */
-    public static function withQualification(string $qualification, int $required, int $qualified): static
+    public static function withQualification(string $qualification, int $required, int $qualified): self
     {
         return new self(
             "Insufficient competitors with {$qualification} qualification. Required: {$required}, Qualified: {$qualified}. Special qualifications limit eligible participants."
@@ -218,7 +218,7 @@ class InsufficientCompetitorsException extends BaseBusinessException
     /**
      * Exception for roster size constraints.
      */
-    public static function rosterConstraints(int $maxAllowed, int $currentBooked, int $requestedAdditional): static
+    public static function rosterConstraints(int $maxAllowed, int $currentBooked, int $requestedAdditional): self
     {
         $totalRequested = $currentBooked + $requestedAdditional;
 

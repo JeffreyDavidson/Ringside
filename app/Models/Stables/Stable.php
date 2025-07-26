@@ -31,6 +31,7 @@ use Tests\Unit\Models\Stables\StableTest;
 
 /**
  * @implements Debutable<StableStatusChange, static>
+ * @implements HasActivityPeriodsContract<StableActivityPeriod, static>
  * @implements Retirable<StableRetirement, static>
  *
  * @property int $id

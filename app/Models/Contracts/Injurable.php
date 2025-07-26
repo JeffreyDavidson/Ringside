@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * Models implementing this interface should also use the IsInjurable trait
  * to get the complete injury functionality implementation.
  *
- * @template-covariant TInjury of Model The injury model class
- * @template-covariant TModel of Model The model that can be injured
+ * @template TInjury of Model The injury model class
+ * @template TModel of Model The model that can be injured
  *
  * @see IsInjurable For the trait implementation
  *

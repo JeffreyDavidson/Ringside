@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * Models implementing this interface should also use the IsEmployable trait
  * to get the complete employment functionality implementation.
  *
- * @template-covariant TEmployment of Model The employment model class
- * @template-covariant TModel of Model The model that can be employed
+ * @template TEmployment of Model The employment model class
+ * @template TModel of Model The model that can be employed
  *
  * @see IsEmployable For the trait implementation
  *

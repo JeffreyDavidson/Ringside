@@ -46,7 +46,14 @@
       "Bash(for:*)",
       "Bash(./vendor/bin/phpstan:*)",
       "Bash(vendor/bin/pint:*)",
-      "Bash(composer test:*)"
+      "Bash(composer test:*)",
+      "Bash(LANG=C ./vendor/bin/phpstan analyse:*)",
+      "Bash(LANG=C LC_ALL=C ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G)",
+      "Bash(LANG=C LC_ALL=C ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G --error-format=json)",
+      "Bash(LANG=C vendor/bin/phpstan analyse --no-progress --error-format=raw)",
+      "Bash(LANG=C vendor/bin/phpstan analyse --no-progress --error-format=raw --memory-limit=256M)",
+      "Bash(LANG=C vendor/bin/phpstan analyse --no-progress --error-format=raw --memory-limit=512M)",
+      "Bash(LANG=C vendor/bin/phpstan:*)"
     ],
     "deny": [],
     "defaultMode": "plan"

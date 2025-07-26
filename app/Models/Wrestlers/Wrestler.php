@@ -24,7 +24,7 @@ use App\Models\Concerns\ValidatesInjury;
 use App\Models\Concerns\ValidatesRestoration;
 use App\Models\Concerns\ValidatesRetirement;
 use App\Models\Concerns\ValidatesSuspension;
-use App\Models\Contracts\Bookable;
+use App\Models\Contracts\BookableCompetitor;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeATagTeamMember;
 use App\Models\Contracts\CanBeChampion;
@@ -36,7 +36,6 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
@@ -56,7 +55,7 @@ use Illuminate\Support\Carbon;
 /**
  * @mixin \Eloquent
  *
- * @implements Bookable<MatchCompetitor>
+ * @implements BookableCompetitor<static>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableWrestler, static>
  * @implements CanBeATagTeamMember<TagTeamWrestler, static>
@@ -114,7 +113,7 @@ use Illuminate\Support\Carbon;
  */
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
-class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, Suspendable
+class Wrestler extends Model implements BookableCompetitor, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, Suspendable
 {
     use BelongsToUser;
 

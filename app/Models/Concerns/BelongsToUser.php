@@ -19,7 +19,7 @@ trait BelongsToUser
     /**
      * Get the user that owns this model.
      *
-     * @return BelongsTo<User, static>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

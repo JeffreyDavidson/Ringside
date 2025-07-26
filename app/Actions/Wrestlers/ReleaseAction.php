@@ -47,14 +47,23 @@ class ReleaseAction
         $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($wrestler, $releaseDate): void {
-            // End current tag team partnerships
-            $wrestler->currentTagTeamTenure()->update(['ended_at' => $releaseDate]);
+            // End current tag team partnership
+            $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot(
+                $wrestler->tagTeams()->wherePivotNull('left_at')->pluck('tag_team_id'),
+                ['left_at' => $releaseDate]
+            );
 
             // End current stable membership
-            $wrestler->currentStableTenure()->update(['ended_at' => $releaseDate]);
+            $wrestler->stables()->wherePivotNull('left_at')->updateExistingPivot(
+                $wrestler->stables()->wherePivotNull('left_at')->pluck('stable_id'),
+                ['left_at' => $releaseDate]
+            );
 
             // End current manager relationships
-            $wrestler->currentManagerTenures()->update(['ended_at' => $releaseDate]);
+            $wrestler->currentManagers()->updateExistingPivot(
+                $wrestler->currentManagers()->pluck('manager_id'),
+                ['fired_at' => $releaseDate]
+            );
 
             // End current championships
             $wrestler->currentChampionships()->update(['lost_at' => $releaseDate]);

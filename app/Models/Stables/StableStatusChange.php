@@ -71,7 +71,7 @@ class StableStatusChange extends Model
     /**
      * Get the stable that owns this status change.
      *
-     * @return BelongsTo<Stable, StableStatusChange>
+     * @return BelongsTo<Stable, $this>
      */
     public function stable(): BelongsTo
     {
