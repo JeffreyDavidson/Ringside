@@ -278,11 +278,11 @@ class StatusTransitionPipeline
             'started_at' => $this->effectiveDate,
             'ended_at' => null,
         ];
-        
+
         if ($this->notes) {
             $data['notes'] = $this->notes;
         }
-        
+
         $this->entity->{$table}()->create($data);
     }
 
@@ -330,11 +330,11 @@ class StatusTransitionPipeline
         // End current suspension/injury
         $suspensionTable = $this->getTableName('suspensions');
         $injuryTable = $this->getTableName('injuries');
-        
+
         $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
             'ended_at' => $this->effectiveDate,
         ]);
-        
+
         $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
             'ended_at' => $this->effectiveDate,
         ]);

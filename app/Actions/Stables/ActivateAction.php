@@ -40,7 +40,7 @@ class ActivateAction
             );
         }
 
-        $stable->activities()->create([
+        $stable->activityPeriods()->create([
             'started_at' => $startDate,
             'ended_at' => null,
         ]);

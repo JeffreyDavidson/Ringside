@@ -70,7 +70,7 @@ class CreateAction
             }
 
             if (isset($stableData->start_date)) {
-                $stable->activities()->create([
+                $stable->activityPeriods()->create([
                     'started_at' => $stableData->start_date,
                     'ended_at' => null,
                 ]);

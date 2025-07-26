@@ -55,7 +55,7 @@ class UpdateAction
             // Handle conditional debut creation - only debut titles that have never debuted before
             // Note: This will not reactivate pulled titles - use ReinstateAction for that
             if (! is_null($titleData->debut_date) && ! $title->hasDebuted()) {
-                $title->activities()->create([
+                $title->activityPeriods()->create([
                     'started_at' => $titleData->debut_date,
                     'ended_at' => null,
                 ]);

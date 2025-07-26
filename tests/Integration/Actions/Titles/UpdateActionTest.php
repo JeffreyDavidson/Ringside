@@ -94,7 +94,7 @@ test('it updates title without affecting existing activation', function () {
 test('it updates introduction date correctly', function () {
     $originalDate = now()->subYears(10);
     $newDate = now()->subYears(8);
-    
+
     $title = Title::factory()->create([
         'name' => 'Championship',
         'introduction_date' => $originalDate,

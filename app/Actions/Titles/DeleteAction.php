@@ -55,7 +55,7 @@ class DeleteAction
             // Handle title status cleanup based on current state
             if ($title->hasDebuted() && $title->isCurrentlyActive()) {
                 // End active status (pull the title from active competition)
-                $title->activities()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
+                $title->activityPeriods()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             } elseif ($title->isRetired()) {
                 // End retirement period (retired titles are not active)
                 $title->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);

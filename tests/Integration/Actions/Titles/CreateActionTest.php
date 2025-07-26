@@ -32,7 +32,7 @@ test('it creates a title with basic information', function () {
 
 test('it creates title with activation date', function () {
     $activationDate = now();
-    
+
     $data = new TitleData(
         name: 'Intercontinental Championship',
         introduction_date: now()->subYears(3),
@@ -78,7 +78,7 @@ test('it creates title without activation by default', function () {
 
 test('it handles future introduction dates', function () {
     $futureDate = now()->addDays(30);
-    
+
     $data = new TitleData(
         name: 'Future Championship',
         introduction_date: $futureDate
@@ -97,7 +97,7 @@ test('it handles future introduction dates', function () {
 
 test('it creates title with same introduction and activation date', function () {
     $date = now();
-    
+
     $data = new TitleData(
         name: 'World Heavyweight Championship',
         introduction_date: $date,

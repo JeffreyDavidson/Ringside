@@ -43,7 +43,7 @@ class UpdateAction
 
             if (isset($stableData->start_date)) {
                 $this->validateEstablishmentDateChange($stable);
-                $stable->activities()->create([
+                $stable->activityPeriods()->create([
                     'started_at' => $stableData->start_date,
                     'ended_at' => null,
                 ]);

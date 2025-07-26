@@ -53,7 +53,7 @@ class SplitStableAction
             ]);
 
             // Create activity period to make the stable active
-            $newStable->activities()->create([
+            $newStable->activityPeriods()->create([
                 'started_at' => $date,
                 'ended_at' => null,
             ]);
