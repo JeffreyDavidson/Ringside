@@ -7,7 +7,7 @@ namespace App\Actions\Stables;
 use App\Models\Stables\Stable;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseStableAction
+class RestoreAction
 {
     use AsAction;
 
@@ -30,6 +30,6 @@ class RestoreAction extends BaseStableAction
      */
     public function handle(Stable $stable): void
     {
-        $this->stableRepository->restore($stable);
+        $stable->restore();
     }
 }

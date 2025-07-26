@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseManagerAction
+class UnretireAction
 {
     use AsAction;
 
@@ -41,14 +42,23 @@ class UnretireAction extends BaseManagerAction
     {
         $manager->ensureCanBeUnretired();
 
-        $unretiredDate = $this->getEffectiveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($manager, $unretiredDate): void {
             // End the current retirement record
-            $this->managerRepository->endRetirement($manager, $unretiredDate);
+            $currentRetirement = $manager->currentRetirement()->first();
+            if ($currentRetirement) {
+                $currentRetirement->update(['ended_at' => $unretiredDate]);
+            }
 
             // Create a new employment record starting from the unretirement date
-            $this->managerRepository->createEmployment($manager, $unretiredDate);
+            $manager->employments()->updateOrCreate(
+                ['ended_at' => null],
+                ['started_at' => $unretiredDate->toDateTimeString()]
+            );
+
+            // Update the status field to reflect employment
+            $manager->update(['status' => EmploymentStatus::Employed]);
         });
     }
 }

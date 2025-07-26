@@ -6,18 +6,11 @@ namespace App\Actions\Venues;
 
 use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
-use App\Repositories\VenueRepository;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseVenueAction
+class UpdateAction
 {
     use AsAction;
-
-    public function __construct(
-        VenueRepository $venueRepository
-    ) {
-        parent::__construct($venueRepository);
-    }
 
     /**
      * Update a venue.
@@ -42,6 +35,14 @@ class UpdateAction extends BaseVenueAction
      */
     public function handle(Venue $venue, VenueData $venueData): Venue
     {
-        return $this->venueRepository->update($venue, $venueData);
+        $venue->update([
+            'name' => $venueData->name,
+            'street_address' => $venueData->street_address,
+            'city' => $venueData->city,
+            'state' => $venueData->state,
+            'zipcode' => $venueData->zipcode,
+        ]);
+
+        return $venue;
     }
 }

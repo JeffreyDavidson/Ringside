@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseStableAction
+class UpdateAction
 {
     use AsAction;
 
@@ -39,18 +39,62 @@ class UpdateAction extends BaseStableAction
     public function handle(Stable $stable, StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stable, $stableData): Stable {
-            $this->stableRepository->update($stable, $stableData);
+            $stable->update($stableData->toArray());
 
             if (isset($stableData->start_date)) {
                 $this->validateEstablishmentDateChange($stable);
-                $this->stableRepository->createEstablishment($stable, $stableData->start_date);
+                $stable->activityPeriods()->create([
+                    'started_at' => $stableData->start_date,
+                    'ended_at' => null,
+                ]);
             }
 
-            $this->stableRepository->updateStableMembers(
-                $stable,
-                $stableData->wrestlers,
-                $stableData->tagTeams
-            );
+            // Update stable membership - wrestlers and tag teams only (no managers)
+            $now = now();
+
+            // Update wrestlers
+            if (isset($stableData->wrestlers)) {
+                $currentWrestlers = $stable->currentWrestlers;
+                $formerWrestlers = $currentWrestlers->diff($stableData->wrestlers);
+                $newWrestlers = $stableData->wrestlers->diff($currentWrestlers);
+
+                // Remove former wrestlers
+                $formerWrestlers->each(function ($wrestler) use ($stable, $now) {
+                    $stable->wrestlers()->updateExistingPivot($wrestler->id, [
+                        'left_at' => $now,
+                    ]);
+                });
+
+                // Add new wrestlers
+                foreach ($newWrestlers as $wrestler) {
+                    $stable->wrestlers()->attach($wrestler->id, [
+                        'joined_at' => $now,
+                        'left_at' => null,
+                    ]);
+                }
+            }
+
+            // Update tag teams
+            if (isset($stableData->tagTeams)) {
+                $currentTagTeams = $stable->currentTagTeams;
+                $formerTagTeams = $currentTagTeams->diff($stableData->tagTeams);
+                $newTagTeams = $stableData->tagTeams->diff($currentTagTeams);
+
+                // Remove former tag teams
+                $formerTagTeams->each(function ($tagTeam) use ($stable, $now) {
+                    $stable->tagTeams()->updateExistingPivot($tagTeam->id, [
+                        'left_at' => $now,
+                    ]);
+                });
+
+                // Add new tag teams
+                foreach ($newTagTeams as $tagTeam) {
+                    $stable->tagTeams()->attach($tagTeam->id, [
+                        'joined_at' => $now,
+                        'left_at' => null,
+                    ]);
+                }
+            }
 
             return $stable;
         });

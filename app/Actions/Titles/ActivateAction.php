@@ -14,7 +14,7 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * This handles both unretiring and debuting titles to make them active.
  * Use DebutAction for new code that only needs to debut non-retired titles.
  */
-class ActivateAction extends BaseTitleAction
+class ActivateAction
 {
     use AsAction;
 
@@ -22,9 +22,7 @@ class ActivateAction extends BaseTitleAction
         private DebutAction $debutAction,
         private ReinstateAction $reinstateAction,
         private UnretireAction $unretireAction
-    ) {
-        parent::__construct($this->debutAction->titleRepository);
-    }
+    ) {}
 
     /**
      * Activate a title.

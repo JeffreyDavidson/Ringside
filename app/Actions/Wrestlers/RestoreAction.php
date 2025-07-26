@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseWrestlerAction
+class RestoreAction
 {
     use AsAction;
 
@@ -28,10 +28,10 @@ class RestoreAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $restoreDate = null): void
     {
-        $restoreDate = $this->getEffectiveDate($restoreDate);
+        $restoreDate = $restoreDate ?? now();
 
         DB::transaction(function () use ($wrestler): void {
-            $this->wrestlerRepository->restore($wrestler);
+            $wrestler->restore();
 
             // Note: No automatic relationship restoration to avoid conflicts.
             // All employment, tag team, stable, and manager relationships

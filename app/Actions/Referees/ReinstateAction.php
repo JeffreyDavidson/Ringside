@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseRefereeAction
+class ReinstateAction
 {
     use AsAction;
 
@@ -40,10 +40,13 @@ class ReinstateAction extends BaseRefereeAction
     {
         $referee->ensureCanBeReinstated();
 
-        $reinstatementDate = $this->getEffectiveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
         DB::transaction(function () use ($referee, $reinstatementDate): void {
-            $this->refereeRepository->endSuspension($referee, $reinstatementDate);
+            $currentSuspension = $referee->currentSuspension()->first();
+            if ($currentSuspension) {
+                $currentSuspension->update(['ended_at' => $reinstatementDate]);
+            }
         });
     }
 }

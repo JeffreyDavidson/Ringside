@@ -7,16 +7,16 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
 use App\Data\TagTeams\TagTeamData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseTagTeamAction
+class UpdateAction
 {
     use AsAction;
 
@@ -24,12 +24,9 @@ class UpdateAction extends BaseTagTeamAction
      * Create a new update action instance.
      */
     public function __construct(
-        protected TagTeamRepository $tagTeamRepository,
         protected WrestlersEmployAction $wrestlersEmployAction,
         protected ManagersEmployAction $managersEmployAction
-    ) {
-        parent::__construct($tagTeamRepository);
-    }
+    ) {}
 
     /**
      * Update a tag team.
@@ -67,8 +64,8 @@ class UpdateAction extends BaseTagTeamAction
     {
         return DB::transaction(function () use ($tagTeam, $tagTeamData): TagTeam {
             // Update the tag team's basic information
-            $this->tagTeamRepository->update($tagTeam, $tagTeamData);
-            $updateDate = $this->getEffectiveDate();
+            $tagTeam->update($tagTeamData->toArray());
+            $updateDate = now();
 
             // Handle member changes (wrestlers and managers)
             $newWrestlers = $this->updateWrestlerPartnerships($tagTeam, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB], $updateDate);
@@ -79,7 +76,11 @@ class UpdateAction extends BaseTagTeamAction
 
             // Create employment record if employment_date is provided and tag team is eligible
             if (! is_null($tagTeamData->employment_date) && ! $tagTeam->isEmployed()) {
-                $this->tagTeamRepository->createEmployment($tagTeam, $tagTeamData->employment_date);
+                $tagTeam->employments()->create([
+                    'started_at' => $tagTeamData->employment_date,
+                    'ended_at' => null,
+                    'status' => EmploymentStatus::Employed,
+                ]);
             }
 
             return $tagTeam;
@@ -105,14 +106,23 @@ class UpdateAction extends BaseTagTeamAction
         $wrestlersToRemove = $currentWrestlers->diff($newWrestlersCollection);
 
         if ($wrestlersToRemove->isNotEmpty()) {
-            $this->tagTeamRepository->removeWrestlers($tagTeam, $wrestlersToRemove, $updateDate);
+            $wrestlersToRemove->each(function (Wrestler $wrestler) use ($tagTeam, $updateDate) {
+                $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $updateDate,
+                ]);
+            });
         }
 
         // Add new wrestlers who are not currently in the team
         $wrestlersToAdd = $newWrestlersCollection->diff($currentWrestlers);
 
         if ($wrestlersToAdd->isNotEmpty()) {
-            $this->tagTeamRepository->addWrestlers($tagTeam, $wrestlersToAdd, $updateDate);
+            foreach ($wrestlersToAdd as $wrestler) {
+                $tagTeam->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $updateDate,
+                    'left_at' => null,
+                ]);
+            }
         }
 
         return $wrestlersToAdd->values();
@@ -136,14 +146,23 @@ class UpdateAction extends BaseTagTeamAction
         $managersToRemove = $currentManagers->diff($newManagersCollection);
 
         if ($managersToRemove->isNotEmpty()) {
-            $this->tagTeamRepository->removeManagers($tagTeam, $managersToRemove, $updateDate);
+            $managersToRemove->each(function (Manager $manager) use ($tagTeam, $updateDate) {
+                $tagTeam->managers()->updateExistingPivot($manager->id, [
+                    'fired_at' => $updateDate,
+                ]);
+            });
         }
 
         // Add new managers who are not currently managing the team
         $managersToAdd = $newManagersCollection->diff($currentManagers);
 
         if ($managersToAdd->isNotEmpty()) {
-            $this->tagTeamRepository->addManagers($tagTeam, $managersToAdd, $updateDate);
+            foreach ($managersToAdd as $manager) {
+                $tagTeam->managers()->attach($manager->id, [
+                    'hired_at' => $updateDate,
+                    'fired_at' => null,
+                ]);
+            }
         }
 
         return $managersToAdd->values();

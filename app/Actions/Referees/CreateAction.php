@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Data\Referees\RefereeData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseRefereeAction
+class CreateAction
 {
     use AsAction;
 
@@ -37,10 +38,23 @@ class CreateAction extends BaseRefereeAction
     public function handle(RefereeData $refereeData): Referee
     {
         return DB::transaction(function () use ($refereeData): Referee {
-            $referee = $this->refereeRepository->create($refereeData);
+            // Create the base referee record
+            /** @var Referee $referee */
+            $referee = Referee::query()->create([
+                'first_name' => $refereeData->first_name,
+                'last_name' => $refereeData->last_name,
+            ]);
 
+            // Create employment record if employment_date is provided
             if (isset($refereeData->employment_date)) {
-                $this->refereeRepository->createEmployment($referee, $refereeData->employment_date);
+                // Create employment record
+                $referee->employments()->updateOrCreate(
+                    ['ended_at' => null],
+                    ['started_at' => $refereeData->employment_date->toDateTimeString()]
+                );
+
+                // Update the status field to reflect employment
+                $referee->update(['status' => EmploymentStatus::Employed]);
             }
 
             return $referee;
