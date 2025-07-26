@@ -70,6 +70,8 @@ class MatchDecision extends Model
         'time-limit-draw', // Time Limit Draw
         'no-decision',     // No Decision
         'reverse-decision', // Reverse Decision
+        'double-countout', // Double Count Out
+        'double-disqualification', // Double Disqualification
     ];
 
     /**

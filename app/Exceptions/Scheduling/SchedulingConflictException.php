@@ -42,13 +42,13 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for venue being double-booked.
      */
-    public static function venueConflict(Model $venue, Model $existingEvent, Model $newEvent): static
+    public static function venueConflict(Model $venue, Model $existingEvent, Model $newEvent): self
     {
         $venueName = $venue->getAttribute('name') ?? "ID: {$venue->getAttribute('id')}";
         $existingEventName = $existingEvent->getAttribute('name') ?? "ID: {$existingEvent->getAttribute('id')}";
         $newEventName = $newEvent->getAttribute('name') ?? "ID: {$newEvent->getAttribute('id')}";
 
-        return new static(
+        return new self(
             "Venue '{$venueName}' is already booked for event '{$existingEventName}' and cannot be double-booked for '{$newEventName}'. Choose different venue or reschedule event."
         );
     }
@@ -56,13 +56,13 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for date/time scheduling conflicts.
      */
-    public static function dateConflict(Model $entity, Carbon $conflictDate, Model $conflictingBooking): static
+    public static function dateConflict(Model $entity, Carbon $conflictDate, Model $conflictingBooking): self
     {
         $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
         $bookingName = $conflictingBooking->getAttribute('name') ?? "ID: {$conflictingBooking->getAttribute('id')}";
 
-        return new static(
+        return new self(
             "{$entityType} '{$entityName}' has existing booking '{$bookingName}' on {$conflictDate->format('Y-m-d H:i')}. Resolve scheduling conflict or choose different date/entity."
         );
     }
@@ -70,9 +70,9 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for resource availability conflicts.
      */
-    public static function resourceConflict(string $resource, Carbon $date, string $conflictingUse): static
+    public static function resourceConflict(string $resource, Carbon $date, string $conflictingUse): self
     {
-        return new static(
+        return new self(
             "Resource '{$resource}' is not available on {$date->format('Y-m-d H:i')} due to '{$conflictingUse}'. Schedule for different time or secure additional resources."
         );
     }
@@ -80,12 +80,12 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for event scheduling conflicts.
      */
-    public static function eventConflict(Model $event1, Model $event2, string $conflictType): static
+    public static function eventConflict(Model $event1, Model $event2, string $conflictType): self
     {
         $event1Name = $event1->getAttribute('name') ?? "ID: {$event1->getAttribute('id')}";
         $event2Name = $event2->getAttribute('name') ?? "ID: {$event2->getAttribute('id')}";
 
-        return new static(
+        return new self(
             "Events '{$event1Name}' and '{$event2Name}' have {$conflictType} conflict. Adjust scheduling to prevent overlap."
         );
     }
@@ -93,12 +93,12 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for competitor availability conflicts.
      */
-    public static function competitorConflict(Model $competitor, Carbon $requestedDate, string $existingCommitment): static
+    public static function competitorConflict(Model $competitor, Carbon $requestedDate, string $existingCommitment): self
     {
         $competitorName = $competitor->getAttribute('name') ?? "ID: {$competitor->getAttribute('id')}";
         $competitorType = class_basename($competitor);
 
-        return new static(
+        return new self(
             "{$competitorType} '{$competitorName}' is not available on {$requestedDate->format('Y-m-d')} due to existing commitment: {$existingCommitment}. Choose different date or competitor."
         );
     }
@@ -106,12 +106,12 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for referee scheduling conflicts.
      */
-    public static function refereeConflict(Model $referee, Carbon $matchDate, Model $conflictingMatch): static
+    public static function refereeConflict(Model $referee, Carbon $matchDate, Model $conflictingMatch): self
     {
         $refereeName = $referee->getAttribute('name') ?? "ID: {$referee->getAttribute('id')}";
         $conflictingMatchId = $conflictingMatch->getAttribute('id') ?? 'unknown';
 
-        return new static(
+        return new self(
             "Referee '{$refereeName}' is already assigned to match {$conflictingMatchId} on {$matchDate->format('Y-m-d H:i')}. Assign different referee or reschedule."
         );
     }
@@ -119,11 +119,11 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for title scheduling conflicts.
      */
-    public static function titleConflict(Model $title, Carbon $date, string $conflictingMatch): static
+    public static function titleConflict(Model $title, Carbon $date, string $conflictingMatch): self
     {
         $titleName = $title->getAttribute('name') ?? "ID: {$title->getAttribute('id')}";
 
-        return new static(
+        return new self(
             "Championship '{$titleName}' is already scheduled for defense on {$date->format('Y-m-d')} in {$conflictingMatch}. Titles cannot be defended multiple times on same date."
         );
     }
@@ -131,9 +131,9 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for broadcast/media scheduling conflicts.
      */
-    public static function broadcastConflict(Carbon $date, string $existingBroadcast, string $newBroadcast): static
+    public static function broadcastConflict(Carbon $date, string $existingBroadcast, string $newBroadcast): self
     {
-        return new static(
+        return new self(
             "Broadcast conflict on {$date->format('Y-m-d H:i')}: '{$existingBroadcast}' already scheduled, cannot add '{$newBroadcast}'. Coordinate broadcast scheduling."
         );
     }
@@ -141,9 +141,9 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for seasonal/holiday scheduling restrictions.
      */
-    public static function seasonalRestriction(Carbon $date, string $restriction): static
+    public static function seasonalRestriction(Carbon $date, string $restriction): self
     {
-        return new static(
+        return new self(
             "Scheduling restriction on {$date->format('Y-m-d')}: {$restriction}. Choose unrestricted date or obtain special approval."
         );
     }
@@ -151,12 +151,12 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for travel/logistics conflicts.
      */
-    public static function travelConflict(Model $entity, Carbon $date, string $travelRequirement): static
+    public static function travelConflict(Model $entity, Carbon $date, string $travelRequirement): self
     {
         $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
-        return new static(
+        return new self(
             "{$entityType} '{$entityName}' has travel conflict on {$date->format('Y-m-d')}: {$travelRequirement}. Allow sufficient travel time or choose local entity."
         );
     }
@@ -164,12 +164,12 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for minimum rest period violations.
      */
-    public static function insufficientRest(Model $entity, Carbon $lastAppearance, int $requiredRestDays, int $actualRestDays): static
+    public static function insufficientRest(Model $entity, Carbon $lastAppearance, int $requiredRestDays, int $actualRestDays): self
     {
         $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
-        return new static(
+        return new self(
             "{$entityType} '{$entityName}' last appeared on {$lastAppearance->format('Y-m-d')} and requires {$requiredRestDays} days rest, but only {$actualRestDays} days provided. Allow sufficient recovery time."
         );
     }
@@ -177,12 +177,12 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for contractual exclusivity periods.
      */
-    public static function exclusivityPeriod(Model $entity, Carbon $startDate, Carbon $endDate, string $exclusiveCommitment): static
+    public static function exclusivityPeriod(Model $entity, Carbon $startDate, Carbon $endDate, string $exclusiveCommitment): self
     {
         $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getAttribute('id')}";
         $entityType = class_basename($entity);
 
-        return new static(
+        return new self(
             "{$entityType} '{$entityName}' has exclusivity period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')} for '{$exclusiveCommitment}'. Schedule outside exclusivity period."
         );
     }
@@ -190,9 +190,9 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for booking window violations.
      */
-    public static function outsideBookingWindow(Carbon $eventDate, int $requiredDaysNotice, int $actualDaysNotice): static
+    public static function outsideBookingWindow(Carbon $eventDate, int $requiredDaysNotice, int $actualDaysNotice): self
     {
-        return new static(
+        return new self(
             "Event scheduled for {$eventDate->format('Y-m-d')} requires {$requiredDaysNotice} days notice but only {$actualDaysNotice} days provided. Book further in advance or request exception."
         );
     }
@@ -200,11 +200,11 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for capacity/audience scheduling conflicts.
      */
-    public static function capacityConflict(Model $venue, Carbon $date, int $requiredCapacity, int $availableCapacity): static
+    public static function capacityConflict(Model $venue, Carbon $date, int $requiredCapacity, int $availableCapacity): self
     {
         $venueName = $venue->getAttribute('name') ?? "ID: {$venue->getAttribute('id')}";
 
-        return new static(
+        return new self(
             "Venue '{$venueName}' on {$date->format('Y-m-d')} requires {$requiredCapacity} capacity but only {$availableCapacity} available. Choose larger venue or reduce requirements."
         );
     }
@@ -212,9 +212,9 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for equipment/setup scheduling conflicts.
      */
-    public static function equipmentConflict(string $equipment, Carbon $date, string $conflictingSetup): static
+    public static function equipmentConflict(string $equipment, Carbon $date, string $conflictingSetup): self
     {
-        return new static(
+        return new self(
             "Equipment '{$equipment}' is not available on {$date->format('Y-m-d')} due to '{$conflictingSetup}' setup requirements. Schedule for different time or secure additional equipment."
         );
     }
@@ -222,9 +222,9 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for staff scheduling conflicts.
      */
-    public static function staffConflict(string $staffRole, Carbon $date, string $conflictingAssignment): static
+    public static function staffConflict(string $staffRole, Carbon $date, string $conflictingAssignment): self
     {
-        return new static(
+        return new self(
             "{$staffRole} staff unavailable on {$date->format('Y-m-d')} due to '{$conflictingAssignment}'. Assign different staff or reschedule."
         );
     }
@@ -232,11 +232,11 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for regulatory/permit scheduling conflicts.
      */
-    public static function permitConflict(Model $venue, Carbon $date, string $permitIssue): static
+    public static function permitConflict(Model $venue, Carbon $date, string $permitIssue): self
     {
         $venueName = $venue->getAttribute('name') ?? "ID: {$venue->getAttribute('id')}";
 
-        return new static(
+        return new self(
             "Venue '{$venueName}' on {$date->format('Y-m-d')} has permit conflict: {$permitIssue}. Obtain proper permits or choose compliant venue/date."
         );
     }
@@ -244,9 +244,9 @@ class SchedulingConflictException extends BaseBusinessException
     /**
      * Exception for overlapping tournament brackets.
      */
-    public static function tournamentConflict(string $tournament1, string $tournament2, Carbon $overlapPeriod): static
+    public static function tournamentConflict(string $tournament1, string $tournament2, Carbon $overlapPeriod): self
     {
-        return new static(
+        return new self(
             "Tournaments '{$tournament1}' and '{$tournament2}' have overlapping schedules around {$overlapPeriod->format('Y-m-d')}. Stagger tournament dates to prevent conflicts."
         );
     }

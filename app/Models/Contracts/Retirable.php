@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * Models implementing this interface should also use the IsRetirable trait
  * to get the complete retirement functionality implementation.
  *
- * @template-covariant TRetirement of Model The retirement model class
- * @template-covariant TModel of Model The model that can be retired
+ * @template TRetirement of Model The retirement model class
+ * @template TModel of Model The model that can be retired
  *
  * @see IsRetirable For the trait implementation
  *

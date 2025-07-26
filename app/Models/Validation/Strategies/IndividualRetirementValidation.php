@@ -68,15 +68,4 @@ class IndividualRetirementValidation implements RetirementValidationStrategy
     {
         return method_exists($entity, 'hasStatus') ? $entity->hasStatus(EmploymentStatus::Unemployed) : false;
     }
-
-    /**
-     * Check if the entity is released.
-     *
-     * @param  Model  $entity  The entity to check
-     * @return bool True if released, false otherwise
-     */
-    private function isReleased(Model $entity): bool
-    {
-        return method_exists($entity, 'hasStatus') ? $entity->hasStatus(EmploymentStatus::Released) : false;
-    }
 }
