@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -60,11 +61,27 @@ class DeleteAction extends BaseTagTeamAction
             if ($tagTeam->isEmployed()) {
                 // End suspension if active
                 if ($tagTeam->isSuspended()) {
-                    $this->tagTeamRepository->endSuspension($tagTeam, $deletionDate);
+                    $currentSuspension = $tagTeam->currentSuspension()->first();
+
+                    if ($currentSuspension) {
+                        $currentSuspension->update([
+                            'ended_at' => $deletionDate,
+                        ]);
+                    }
                 }
 
                 // End employment
-                $this->tagTeamRepository->endEmployment($tagTeam, $deletionDate);
+                $currentEmployment = $tagTeam->currentEmployment()->first();
+
+                if ($currentEmployment) {
+                    // End the employment relationship
+                    $currentEmployment->update([
+                        'ended_at' => $deletionDate,
+                    ]);
+
+                    // Update the status field to reflect released state
+                    $tagTeam->update(['status' => EmploymentStatus::Released]); // @phpstan-ignore-line method.notFound
+                }
             } elseif ($tagTeam->isRetired()) {
                 // End retirement if active (retired tag teams are not employed)
                 $this->tagTeamRepository->endRetirement($tagTeam, $deletionDate);

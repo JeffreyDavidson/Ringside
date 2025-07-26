@@ -30,7 +30,11 @@ class HealAction extends BaseWrestlerAction
         $recoveryDate = $this->getEffectiveDate($recoveryDate);
 
         DB::transaction(function () use ($wrestler, $recoveryDate): void {
-            $this->wrestlerRepository->endInjury($wrestler, $recoveryDate);
+            $currentInjury = $wrestler->currentInjury()->first();
+
+            if ($currentInjury) {
+                $currentInjury->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+            }
 
             // Note: Tag team bookability is handled automatically by the isBookable() method
             // which checks if all current wrestlers are available for competition

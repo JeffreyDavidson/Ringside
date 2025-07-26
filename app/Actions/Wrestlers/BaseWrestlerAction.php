@@ -51,7 +51,13 @@ abstract class BaseWrestlerAction
      */
     protected function removeCurrentManagers(Wrestler $wrestler, Carbon $removalDate): void
     {
-        $this->wrestlerRepository->removeFromCurrentManagers($wrestler, $removalDate);
+        $wrestler->currentManagers()->get()->each(function (Manager $manager) use ($wrestler, $removalDate) {
+            $wrestler->managers()
+                ->wherePivot('ended_at', null)
+                ->updateExistingPivot($manager->id, [
+                    'ended_at' => $removalDate,
+                ]);
+        });
     }
 
     /**

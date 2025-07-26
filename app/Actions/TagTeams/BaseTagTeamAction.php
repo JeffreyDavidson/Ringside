@@ -53,13 +53,6 @@ abstract class BaseTagTeamAction
     use ManagesDates;
 
     /**
-     * Create a new base tag team action instance.
-     */
-    public function __construct(
-        protected TagTeamRepository $tagTeamRepository
-    ) {}
-
-    /**
      * Employ pre-filtered members (wrestlers and managers).
      *
      * @param  Collection<int, Wrestler>  $wrestlers  Pre-filtered wrestlers to employ
@@ -206,7 +199,9 @@ abstract class BaseTagTeamAction
         $formerWrestlers->each(function (Wrestler $wrestler) use ($restorationDate) {
             $currentTagTeams = $wrestler->currentTagTeams; // @phpstan-ignore-line property.notFound
             $currentTagTeams->each(function (TagTeam $currentTeam) use ($wrestler, $restorationDate) {
-                $this->tagTeamRepository->removeWrestler($currentTeam, $wrestler, $restorationDate);
+                $currentTeam->wrestlers()->wherePivotNull('left_at')->updateExistingPivot($wrestler->getKey(), [
+                    'left_at' => $restorationDate->toDateTimeString(),
+                ]);
             });
         });
 
