@@ -31,14 +31,14 @@ test('it creates a wrestler with basic information', function () {
     expect($result->hometown)->toBe('West Newbury, Massachusetts');
     expect($result->weight)->toBe(251);
     expect($result->signature_move)->toBe('Attitude Adjustment');
-    
+
     $this->assertDatabaseHas('wrestlers', [
         'name' => 'John Cena',
         'hometown' => 'West Newbury, Massachusetts',
         'weight' => 251,
         'signature_move' => 'Attitude Adjustment',
     ]);
-    
+
     // Should not create employment record when no employment date provided
     $this->assertDatabaseMissing('wrestlers_employments', [
         'wrestler_id' => $result->id,
@@ -47,7 +47,7 @@ test('it creates a wrestler with basic information', function () {
 
 test('it creates a wrestler with employment when employment date is provided', function () {
     $employmentDate = now();
-    
+
     $data = new WrestlerData(
         name: 'The Rock',
         height: Height::fromFeetAndInches(6, 5),
@@ -61,14 +61,14 @@ test('it creates a wrestler with employment when employment date is provided', f
 
     expect($result->name)->toBe('The Rock');
     expect($result->isEmployed())->toBeTrue();
-    
+
     $this->assertDatabaseHas('wrestlers', [
         'name' => 'The Rock',
         'hometown' => 'Miami, Florida',
         'weight' => 260,
         'signature_move' => 'Rock Bottom',
     ]);
-    
+
     // Should create employment record
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $result->id,
@@ -79,7 +79,7 @@ test('it creates a wrestler with employment when employment date is provided', f
 
 test('it creates wrestler with all optional fields', function () {
     $employmentDate = now();
-    
+
     $data = new WrestlerData(
         name: 'Stone Cold Steve Austin',
         height: Height::fromFeetAndInches(6, 2),
@@ -98,7 +98,7 @@ test('it creates wrestler with all optional fields', function () {
     expect($result->hometown)->toBe('Austin, Texas');
     expect($result->weight)->toBe(252);
     expect($result->signature_move)->toBe('Stone Cold Stunner');
-    
+
     // Verify database state
     $this->assertDatabaseHas('wrestlers', [
         'id' => $result->id,
@@ -107,7 +107,7 @@ test('it creates wrestler with all optional fields', function () {
         'weight' => 252,
         'signature_move' => 'Stone Cold Stunner',
     ]);
-    
+
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),

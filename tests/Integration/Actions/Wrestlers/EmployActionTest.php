@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
-use App\Models\Wrestlers\Wrestler;
 use App\Models\Managers\Manager;
+use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -14,14 +14,14 @@ beforeEach(function () {
 
 test('it employs an unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create();
-    
+
     expect($wrestler->isEmployed())->toBeFalse();
 
     EmployAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
-    
+
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
@@ -37,7 +37,7 @@ test('it employs wrestler with specific employment date', function () {
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
-    
+
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
@@ -47,7 +47,7 @@ test('it employs wrestler with specific employment date', function () {
 
 test('it employs suspended wrestler and ends suspension', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
-    
+
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isEmployed())->toBeFalse();
 
@@ -56,13 +56,13 @@ test('it employs suspended wrestler and ends suspension', function () {
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
-    
+
     // Suspension should be ended
     $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
-    
+
     // Employment should be created
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,
@@ -73,7 +73,7 @@ test('it employs suspended wrestler and ends suspension', function () {
 
 test('it employs injured wrestler and ends injury', function () {
     $wrestler = Wrestler::factory()->injured()->create();
-    
+
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeFalse();
 
@@ -82,13 +82,13 @@ test('it employs injured wrestler and ends injury', function () {
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
-    
+
     // Injury should be ended
     $this->assertDatabaseHas('wrestler_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
-    
+
     // Employment should be created
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,
@@ -101,11 +101,11 @@ test('it employs wrestler and also employs unemployed managers', function () {
     $wrestler = Wrestler::factory()->create();
     $manager1 = Manager::factory()->create(); // unemployed
     $manager2 = Manager::factory()->employed()->create(); // already employed
-    
+
     // Assign managers to wrestler
     $wrestler->managers()->attach($manager1->id, ['hired_at' => now()->subDays(10)]);
     $wrestler->managers()->attach($manager2->id, ['hired_at' => now()->subDays(5)]);
-    
+
     expect($wrestler->isEmployed())->toBeFalse();
     expect($manager1->isEmployed())->toBeFalse();
     expect($manager2->isEmployed())->toBeTrue();
@@ -115,17 +115,17 @@ test('it employs wrestler and also employs unemployed managers', function () {
     $wrestler->refresh();
     $manager1->refresh();
     $manager2->refresh();
-    
+
     expect($wrestler->isEmployed())->toBeTrue();
     expect($manager1->isEmployed())->toBeTrue(); // Should now be employed
     expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
-    
+
     // Both wrestler and manager1 should have new employment records
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => null,
     ]);
-    
+
     $this->assertDatabaseHas('managers_employments', [
         'manager_id' => $manager1->id,
         'ended_at' => null,
@@ -134,9 +134,9 @@ test('it employs wrestler and also employs unemployed managers', function () {
 
 test('it prevents employing already employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
-    
+
     expect($wrestler->isEmployed())->toBeTrue();
 
-    expect(fn() => EmployAction::run($wrestler))
+    expect(fn () => EmployAction::run($wrestler))
         ->toThrow(Exception::class);
 });

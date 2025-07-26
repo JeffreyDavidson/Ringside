@@ -85,7 +85,7 @@ class DeleteAction
             $manager->wrestlers()->wherePivotNull('fired_at')->updateExistingPivot($manager->wrestlers()->wherePivotNull('fired_at')->pluck('wrestler_id'), [
                 'fired_at' => $deletionDate,
             ]);
-            
+
             $manager->tagTeams()->wherePivotNull('fired_at')->updateExistingPivot($manager->tagTeams()->wherePivotNull('fired_at')->pluck('tag_team_id'), [
                 'fired_at' => $deletionDate,
             ]);
