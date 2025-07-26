@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DisbandAction extends BaseStableAction
+class DisbandAction
 {
     use AsAction;
 
@@ -38,11 +38,18 @@ class DisbandAction extends BaseStableAction
     {
         $stable->ensureCanBeDisbanded();
 
-        $disbandDate ??= now();
+        $disbandDate = $disbandDate ?? now();
 
         DB::transaction(function () use ($stable, $disbandDate): void {
-            $this->stableRepository->endActivity($stable, $disbandDate);
-            $this->stableRepository->disbandMembers($stable, $disbandDate);
+            // End current activity period
+            $currentActivityPeriod = $stable->currentActivityPeriod()->first();
+            if ($currentActivityPeriod) {
+                $currentActivityPeriod->update(['ended_at' => $disbandDate]);
+            }
+
+            // End all current member tenures
+            $stable->currentWrestlerTenures()->update(['left_at' => $disbandDate]);
+            $stable->currentTagTeamTenures()->update(['left_at' => $disbandDate]);
         });
     }
 }
