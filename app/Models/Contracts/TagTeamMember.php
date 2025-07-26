@@ -15,14 +15,8 @@ interface TagTeamMember
      */
     public function tagTeams(): BelongsToMany;
 
-    /**
-     * @return BelongsToOne<TagTeam, static>
-     */
     public function currentTagTeam(): BelongsToOne;
 
-    /**
-     * @return BelongsToOne<TagTeam, static>
-     */
     public function previousTagTeam(): BelongsToOne;
 
     /**

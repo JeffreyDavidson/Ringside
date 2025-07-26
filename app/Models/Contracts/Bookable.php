@@ -16,12 +16,12 @@ interface Bookable
     /**
      * Retrieve the matches this entity is involved in.
      *
-     * @return Relation<EventMatch>
+     * @return Relation<EventMatch, static, mixed>
      */
     public function matches(): Relation;
 
     /**
-     * @return Relation<EventMatch>
+     * @return Relation<EventMatch, static, mixed>
      */
     public function previousMatches(): Relation;
 
