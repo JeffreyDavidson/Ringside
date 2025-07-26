@@ -48,8 +48,12 @@ class DisbandAction
             }
 
             // End all current member tenures
-            $stable->currentWrestlerTenures()->update(['left_at' => $disbandDate]);
-            $stable->currentTagTeamTenures()->update(['left_at' => $disbandDate]);
+            $stable->currentWrestlers()->updateExistingPivot($stable->currentWrestlers()->pluck('wrestler_id'), [
+                'left_at' => $disbandDate,
+            ]);
+            $stable->currentTagTeams()->updateExistingPivot($stable->currentTagTeams()->pluck('tag_team_id'), [
+                'left_at' => $disbandDate,
+            ]);
         });
     }
 }

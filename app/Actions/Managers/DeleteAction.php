@@ -82,7 +82,13 @@ class DeleteAction
             }
 
             // End current management relationships
-            // Note: Management relationships are handled automatically by the repository
+            $manager->wrestlers()->wherePivotNull('fired_at')->updateExistingPivot($manager->wrestlers()->wherePivotNull('fired_at')->pluck('wrestler_id'), [
+                'fired_at' => $deletionDate,
+            ]);
+            
+            $manager->tagTeams()->wherePivotNull('fired_at')->updateExistingPivot($manager->tagTeams()->wherePivotNull('fired_at')->pluck('tag_team_id'), [
+                'fired_at' => $deletionDate,
+            ]);
 
             // Soft delete the manager record
             $manager->delete();

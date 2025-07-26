@@ -78,7 +78,8 @@ class AddWrestlersToMatchAction
             // Add each eligible wrestler to the specified side
             $eligibleWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $sideNumber) {
                 $eventMatch->competitors()->create([
-                    'wrestler_id' => $wrestler->id,
+                    'competitor_id' => $wrestler->id,
+                    'competitor_type' => Wrestler::class,
                     'side_number' => $sideNumber,
                 ]);
             });

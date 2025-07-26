@@ -43,7 +43,7 @@ class ReuniteAction
         $reuniteDate ??= now();
 
         DB::transaction(function () use ($stable, $reuniteDate): void {
-            $stable->activities()->create([
+            $stable->activityPeriods()->create([
                 'started_at' => $reuniteDate,
                 'ended_at' => null,
             ]);

@@ -68,7 +68,7 @@ class RetireAction
         DB::transaction(function () use ($stable, $retirementDate): void {
             // End activity if currently active
             if ($stable->isCurrentlyActive()) {
-                $stable->activities()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
+                $stable->activityPeriods()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
             }
 
             // Retire current members who are available

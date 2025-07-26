@@ -72,13 +72,22 @@ class RetireAction
             }
 
             // End current tag team partnerships
-            $wrestler->currentTagTeamTenure()->update(['ended_at' => $retirementDate]);
+            $wrestler->tagTeams()->wherePivotNull('left_at')->updateExistingPivot(
+                $wrestler->tagTeams()->wherePivotNull('left_at')->pluck('tag_team_id'),
+                ['left_at' => $retirementDate]
+            );
 
             // End current stable membership
-            $wrestler->currentStableTenure()->update(['ended_at' => $retirementDate]);
+            $wrestler->stables()->wherePivotNull('left_at')->updateExistingPivot(
+                $wrestler->stables()->wherePivotNull('left_at')->pluck('stable_id'),
+                ['left_at' => $retirementDate]
+            );
 
             // End current manager relationships
-            $wrestler->currentManagerTenures()->update(['ended_at' => $retirementDate]);
+            $wrestler->managers()->wherePivotNull('fired_at')->updateExistingPivot(
+                $wrestler->managers()->wherePivotNull('fired_at')->pluck('manager_id'),
+                ['fired_at' => $retirementDate]
+            );
 
             // End current championships
             $wrestler->currentChampionships()->update(['lost_at' => $retirementDate]);
