@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
-use App\Data\Stables\StableData;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
