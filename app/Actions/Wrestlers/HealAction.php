@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class HealAction extends BaseWrestlerAction
+class HealAction
 {
     use AsAction;
 
@@ -27,7 +27,7 @@ class HealAction extends BaseWrestlerAction
     {
         $wrestler->ensureCanBeHealed();
 
-        $recoveryDate = $this->getEffectiveDate($recoveryDate);
+        $recoveryDate = $recoveryDate ?? now();
 
         DB::transaction(function () use ($wrestler, $recoveryDate): void {
             $currentInjury = $wrestler->currentInjury()->first();

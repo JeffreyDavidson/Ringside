@@ -16,7 +16,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseTagTeamAction
+class CreateAction
 {
     use AsAction;
 
@@ -71,7 +71,7 @@ class CreateAction extends BaseTagTeamAction
                 'signature_move' => $tagTeamData->signature_move,
             ]);
 
-            $datetime = $this->getEffectiveDate();
+            $datetime = now();
 
             // Prepare member collections
             $wrestlers = collect([$tagTeamData->wrestlerA, $tagTeamData->wrestlerB])->filter();

@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseTagTeamAction
+class RetireAction
 {
     use AsAction;
 
