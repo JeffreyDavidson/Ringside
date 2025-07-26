@@ -36,15 +36,15 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * @method static TitleChampionshipBuilder|TitleChampionship current()
+ * @method static TitleChampionshipBuilder<static>|static current()
  * @method static \Database\Factories\Titles\TitleChampionshipFactory factory($count = null, $state = [])
- * @method static TitleChampionshipBuilder|TitleChampionship latestLost()
- * @method static TitleChampionshipBuilder|TitleChampionship latestWon()
- * @method static TitleChampionshipBuilder|TitleChampionship newModelQuery()
- * @method static TitleChampionshipBuilder|TitleChampionship newQuery()
- * @method static TitleChampionshipBuilder|TitleChampionship previous()
- * @method static TitleChampionshipBuilder|TitleChampionship query()
- * @method static TitleChampionshipBuilder|TitleChampionship withReignLength()
+ * @method static TitleChampionshipBuilder<static>|static latestLost()
+ * @method static TitleChampionshipBuilder<static>|static latestWon()
+ * @method static TitleChampionshipBuilder<static>|static newModelQuery()
+ * @method static TitleChampionshipBuilder<static>|static newQuery()
+ * @method static TitleChampionshipBuilder<static>|static previous()
+ * @method static TitleChampionshipBuilder<static>|static query()
+ * @method static TitleChampionshipBuilder<static>|static withReignLength()
  *
  * @mixin \Eloquent
  */

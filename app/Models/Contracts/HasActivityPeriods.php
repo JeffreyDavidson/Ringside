@@ -63,15 +63,11 @@ interface HasActivityPeriods
 
     /**
      * Get all activity periods for this model.
-     *
-     * @return HasMany<Model, static>
      */
     public function activityPeriods(): HasMany;
 
     /**
      * Get the current activity period.
-     *
-     * @return HasOne<Model, static>
      */
     public function currentActivityPeriod(): HasOne;
 }

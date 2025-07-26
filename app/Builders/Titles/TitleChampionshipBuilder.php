@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\DB;
  * Provides specialized query methods for working with title championships,
  * including filtering by current/previous status and ordering by dates.
  *
- * @extends Builder<TitleChampionship>
+ * @template TModel of TitleChampionship
+ *
+ * @extends Builder<TModel>
  *
  * @example
  * ```php
