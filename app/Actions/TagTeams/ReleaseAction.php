@@ -10,12 +10,11 @@ use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseTagTeamAction
+class ReleaseAction
 {
     use AsAction;
 
@@ -23,12 +22,9 @@ class ReleaseAction extends BaseTagTeamAction
      * Create a new release action instance.
      */
     public function __construct(
-        protected TagTeamRepository $tagTeamRepository,
         protected WrestlersReleaseAction $wrestlersReleaseAction,
         protected ManagersReleaseAction $managersReleaseAction
-    ) {
-        parent::__construct($tagTeamRepository);
-    }
+    ) {}
 
     /**
      * Release a tag team from employment and end all current relationships.
@@ -60,22 +56,30 @@ class ReleaseAction extends BaseTagTeamAction
     {
         $tagTeam->ensureCanBeReleased();
 
-        $releaseDate = $this->getEffectiveDate($releaseDate);
+        $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $releaseDate): void {
             // End suspension if active
             if ($tagTeam->isSuspended()) {
-                $this->tagTeamRepository->endSuspension($tagTeam, $releaseDate);
+                $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $releaseDate]);
             }
 
             // End current wrestler partnerships (wrestlers become free agents)
-            $this->tagTeamRepository->removeWrestlers($tagTeam, $tagTeam->currentWrestlers, $releaseDate);
+            $tagTeam->currentWrestlers->each(function (Wrestler $wrestler) use ($tagTeam, $releaseDate) {
+                $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $releaseDate,
+                ]);
+            });
 
             // End current manager relationships
-            $this->tagTeamRepository->removeManagers($tagTeam, $tagTeam->currentManagers, $releaseDate);
+            $tagTeam->currentManagers->each(function (Manager $manager) use ($tagTeam, $releaseDate) {
+                $tagTeam->managers()->updateExistingPivot($manager->id, [
+                    'fired_at' => $releaseDate,
+                ]);
+            });
 
             // End tag team employment
-            $this->tagTeamRepository->endEmployment($tagTeam, $releaseDate);
+            $tagTeam->employments()->where('ended_at', null)->update(['ended_at' => $releaseDate]);
         });
     }
 }

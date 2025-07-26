@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseTitleAction
+class DeleteAction
 {
     use AsAction;
 
@@ -49,21 +49,21 @@ class DeleteAction extends BaseTitleAction
      */
     public function handle(Title $title, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($title, $deletionDate): void {
             // Handle title status cleanup based on current state
             if ($title->hasDebuted() && $title->isCurrentlyActive()) {
                 // End active status (pull the title from active competition)
-                $this->titleRepository->pull($title, $deletionDate);
+                $title->activities()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             } elseif ($title->isRetired()) {
                 // End retirement period (retired titles are not active)
-                $this->titleRepository->endRetirement($title, $deletionDate);
+                $title->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             }
             // Note: Inactive (pulled) titles that have debuted require no status cleanup
 
             // Soft delete the title record
-            $this->titleRepository->delete($title);
+            $title->delete();
         });
     }
 }
