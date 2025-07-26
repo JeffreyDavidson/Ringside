@@ -16,10 +16,11 @@ beforeEach(function () {
 test('it creates a wrestler with basic information', function () {
     $data = new WrestlerData(
         name: 'John Cena',
-        height: Height::fromFeetAndInches(6, 1),
-        hometown: 'West Newbury, Massachusetts',
+        height: 73, // 6'1" = 73 inches
         weight: 251,
-        signature_move: 'Attitude Adjustment'
+        hometown: 'West Newbury, Massachusetts',
+        signature_move: 'Attitude Adjustment',
+        employment_date: null
     );
 
     $result = CreateAction::run($data);
@@ -50,9 +51,9 @@ test('it creates a wrestler with employment when employment date is provided', f
 
     $data = new WrestlerData(
         name: 'The Rock',
-        height: Height::fromFeetAndInches(6, 5),
-        hometown: 'Miami, Florida',
+        height: 77, // 6'5" = 77 inches
         weight: 260,
+        hometown: 'Miami, Florida',
         signature_move: 'Rock Bottom',
         employment_date: $employmentDate
     );
@@ -82,9 +83,9 @@ test('it creates wrestler with all optional fields', function () {
 
     $data = new WrestlerData(
         name: 'Stone Cold Steve Austin',
-        height: Height::fromFeetAndInches(6, 2),
-        hometown: 'Austin, Texas',
+        height: 74, // 6'2" = 74 inches
         weight: 252,
+        hometown: 'Austin, Texas',
         signature_move: 'Stone Cold Stunner',
         employment_date: $employmentDate
     );
@@ -118,10 +119,11 @@ test('it creates wrestler with all optional fields', function () {
 test('it handles height conversion correctly', function () {
     $data = new WrestlerData(
         name: 'Test Wrestler',
-        height: Height::fromFeetAndInches(5, 11),
-        hometown: 'Test City',
+        height: 71, // 5'11" = 71 inches
         weight: 200,
-        signature_move: 'Test Move'
+        hometown: 'Test City',
+        signature_move: 'Test Move',
+        employment_date: null
     );
 
     $result = CreateAction::run($data);
@@ -129,5 +131,5 @@ test('it handles height conversion correctly', function () {
     expect($result->height)->toBeInstanceOf(Height::class);
     expect($result->height->feet)->toBe(5);
     expect($result->height->inches)->toBe(11);
-    expect($result->height->totalInches())->toBe(71); // 5*12 + 11
+    expect($result->height->toInches())->toBe(71); // 5'11" = 71 inches
 });
