@@ -24,7 +24,8 @@ trait IsBookableCompetitor
      */
     public function matches(): MorphToMany
     {
-        return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors');
+        return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors')
+            ->using(MatchCompetitor::class);
     }
 
     /**
