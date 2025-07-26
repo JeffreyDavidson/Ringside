@@ -64,7 +64,7 @@ class SplitStableAction
             if (isset($membersForNewStable['wrestlers'])) {
                 foreach ($membersForNewStable['wrestlers'] as $wrestler) {
                     // Only transfer wrestlers who are employed/available
-                    if (method_exists($wrestler, 'isEmployed') && $wrestler->isEmployed()) {
+                    if ($wrestler->isEmployed()) {
                         // Remove from original stable
                         $originalStable->wrestlers()->updateExistingPivot($wrestler->id, [
                             'left_at' => $date,
@@ -83,7 +83,7 @@ class SplitStableAction
             if (isset($membersForNewStable['tagTeams'])) {
                 foreach ($membersForNewStable['tagTeams'] as $tagTeam) {
                     // Only transfer tag teams who are employed/available
-                    if (method_exists($tagTeam, 'isEmployed') && $tagTeam->isEmployed()) {
+                    if ($tagTeam->isEmployed()) {
                         // Remove from original stable
                         $originalStable->tagTeams()->updateExistingPivot($tagTeam->id, [
                             'left_at' => $date,
