@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseTagTeamAction
+class DeleteAction
 {
     use AsAction;
 
@@ -54,47 +53,39 @@ class DeleteAction extends BaseTagTeamAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
             // Handle tag team status - employed tag teams can be suspended, retired tag teams are not employed
             if ($tagTeam->isEmployed()) {
                 // End suspension if active
                 if ($tagTeam->isSuspended()) {
-                    $currentSuspension = $tagTeam->currentSuspension()->first();
-
-                    if ($currentSuspension) {
-                        $currentSuspension->update([
-                            'ended_at' => $deletionDate,
-                        ]);
-                    }
+                    $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
                 }
 
                 // End employment
-                $currentEmployment = $tagTeam->currentEmployment()->first();
-
-                if ($currentEmployment) {
-                    // End the employment relationship
-                    $currentEmployment->update([
-                        'ended_at' => $deletionDate,
-                    ]);
-
-                    // Update the status field to reflect released state
-                    $tagTeam->update(['status' => EmploymentStatus::Released]); // @phpstan-ignore-line method.notFound
-                }
+                $tagTeam->employments()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             } elseif ($tagTeam->isRetired()) {
                 // End retirement if active (retired tag teams are not employed)
-                $this->tagTeamRepository->endRetirement($tagTeam, $deletionDate);
+                $tagTeam->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             }
 
             // End current wrestler partnerships (wrestlers continue as singles)
-            $this->tagTeamRepository->removeWrestlers($tagTeam, $tagTeam->currentWrestlers, $deletionDate);
+            $tagTeam->currentWrestlers->each(function ($wrestler) use ($tagTeam, $deletionDate) {
+                $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $deletionDate,
+                ]);
+            });
 
             // End current manager relationships
-            $this->tagTeamRepository->removeManagers($tagTeam, $tagTeam->currentManagers, $deletionDate);
+            $tagTeam->currentManagers->each(function ($manager) use ($tagTeam, $deletionDate) {
+                $tagTeam->managers()->updateExistingPivot($manager->id, [
+                    'fired_at' => $deletionDate,
+                ]);
+            });
 
             // Soft delete the tag team record
-            $this->tagTeamRepository->delete($tagTeam);
+            $tagTeam->delete();
         });
     }
 }
