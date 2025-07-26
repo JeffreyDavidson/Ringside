@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SplitStableAction extends BaseStableAction
+class SplitStableAction
 {
     use AsAction;
 
@@ -50,25 +48,30 @@ class SplitStableAction extends BaseStableAction
 
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
             // Create the new stable
-            $newStable = $this->stableRepository->create(
-                new StableData(
-                    name: $newStableName,
-                    start_date: null,
-                    tagTeams: new Collection(),
-                    wrestlers: new Collection(),
-                )
-            );
+            $newStable = Stable::create([
+                'name' => $newStableName,
+            ]);
 
             // Create activity period to make the stable active
-            $this->stableRepository->createDebut($newStable, $date);
+            $newStable->activities()->create([
+                'started_at' => $date,
+                'ended_at' => null,
+            ]);
 
             // Transfer wrestlers (only if they are employed/available)
             if (isset($membersForNewStable['wrestlers'])) {
                 foreach ($membersForNewStable['wrestlers'] as $wrestler) {
                     // Only transfer wrestlers who are employed/available
                     if (method_exists($wrestler, 'isEmployed') && $wrestler->isEmployed()) {
-                        $this->stableRepository->removeWrestler($originalStable, $wrestler, $date);
-                        $this->stableRepository->addWrestler($newStable, $wrestler, $date);
+                        // Remove from original stable
+                        $originalStable->wrestlers()->updateExistingPivot($wrestler->id, [
+                            'left_at' => $date,
+                        ]);
+                        // Add to new stable
+                        $newStable->wrestlers()->attach($wrestler->id, [
+                            'joined_at' => $date,
+                            'left_at' => null,
+                        ]);
                     }
                     // Skip unemployed wrestlers without throwing an exception
                 }
@@ -79,8 +82,15 @@ class SplitStableAction extends BaseStableAction
                 foreach ($membersForNewStable['tagTeams'] as $tagTeam) {
                     // Only transfer tag teams who are employed/available
                     if (method_exists($tagTeam, 'isEmployed') && $tagTeam->isEmployed()) {
-                        $this->stableRepository->removeTagTeam($originalStable, $tagTeam, $date);
-                        $this->stableRepository->addTagTeam($newStable, $tagTeam, $date);
+                        // Remove from original stable
+                        $originalStable->tagTeams()->updateExistingPivot($tagTeam->id, [
+                            'left_at' => $date,
+                        ]);
+                        // Add to new stable
+                        $newStable->tagTeams()->attach($tagTeam->id, [
+                            'joined_at' => $date,
+                            'left_at' => null,
+                        ]);
                     }
                     // Skip unemployed tag teams without throwing an exception
                 }
