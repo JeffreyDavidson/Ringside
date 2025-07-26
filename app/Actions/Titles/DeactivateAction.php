@@ -14,15 +14,13 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * This is an alias for PullAction to maintain backward compatibility with tests.
  * Use PullAction for new code.
  */
-class DeactivateAction extends BaseTitleAction
+class DeactivateAction
 {
     use AsAction;
 
     public function __construct(
         private PullAction $pullAction
-    ) {
-        parent::__construct($this->pullAction->titleRepository);
-    }
+    ) {}
 
     /**
      * Deactivate a title.
