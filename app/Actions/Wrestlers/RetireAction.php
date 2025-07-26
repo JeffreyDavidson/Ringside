@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseWrestlerAction
+class RetireAction
 {
     use AsAction;
 
@@ -40,41 +41,50 @@ class RetireAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void
     {
-        // Validate business rules before proceeding
         $wrestler->ensureCanBeRetired();
 
-        $retirementDate = $this->getEffectiveDate($retirementDate);
+        $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($wrestler, $retirementDate): void {
             // End current employment if active
             if ($wrestler->isEmployed()) {
-                $this->wrestlerRepository->endEmployment($wrestler, $retirementDate);
+                $currentEmployment = $wrestler->currentEmployment()->first();
+                if ($currentEmployment) {
+                    $currentEmployment->update(['ended_at' => $retirementDate]);
+                    $wrestler->update(['status' => EmploymentStatus::Retired]);
+                }
             }
 
             // End current suspension if active
             if ($wrestler->isSuspended()) {
-                $this->wrestlerRepository->endSuspension($wrestler, $retirementDate);
+                $currentSuspension = $wrestler->currentSuspension()->first();
+                if ($currentSuspension) {
+                    $currentSuspension->update(['ended_at' => $retirementDate]);
+                }
             }
 
             // End current injury if active
             if ($wrestler->isInjured()) {
-                $this->wrestlerRepository->endInjury($wrestler, $retirementDate);
+                $currentInjury = $wrestler->currentInjury()->first();
+                if ($currentInjury) {
+                    $currentInjury->update(['ended_at' => $retirementDate->toDateTimeString()]);
+                }
             }
 
             // End current tag team partnerships
-            $this->wrestlerRepository->removeFromCurrentTagTeam($wrestler, $retirementDate);
+            $wrestler->currentTagTeamTenure()->update(['ended_at' => $retirementDate]);
 
             // End current stable membership
-            $this->wrestlerRepository->removeFromCurrentStable($wrestler, $retirementDate);
+            $wrestler->currentStableTenure()->update(['ended_at' => $retirementDate]);
 
             // End current manager relationships
-            $this->removeCurrentManagers($wrestler, $retirementDate);
+            $wrestler->currentManagerTenures()->update(['ended_at' => $retirementDate]);
 
             // End current championships
-            $this->endCurrentChampionships($wrestler, $retirementDate);
+            $wrestler->currentChampionships()->update(['lost_at' => $retirementDate]);
 
             // Create retirement record
-            $this->wrestlerRepository->createRetirement($wrestler, $retirementDate);
+            $wrestler->retirements()->create(['started_at' => $retirementDate]);
         });
     }
 }
