@@ -71,7 +71,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for invalid side distribution in multi-competitor match.
      *
-     * @param array<int, int> $sides
+     * @param  array<int, int>  $sides
      */
     public static function invalidSideDistribution(array $sides, string $matchType): self
     {
@@ -135,7 +135,7 @@ class InvalidMatchConfigurationException extends BaseBusinessException
     /**
      * Exception for conflicting competitor types in match.
      *
-     * @param array<int, string> $types
+     * @param  array<int, string>  $types
      */
     public static function conflictingCompetitorTypes(array $types): self
     {
