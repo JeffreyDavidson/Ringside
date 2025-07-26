@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\CreateAction;
 use App\Data\Titles\TitleData;
+use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -12,112 +13,91 @@ beforeEach(function () {
     testTime()->freeze();
 });
 
-test('it creates a title with basic information', function () {
+test('it creates a title with basic information', function (TitleType $titleType, string $expectedName) {
     $data = new TitleData(
-        name: 'WWE Championship',
-        introduction_date: now()->subYears(5)
+        name: $expectedName,
+        type: $titleType,
+        debut_date: null
     );
 
     $result = CreateAction::run($data);
 
     expect($result)->toBeInstanceOf(Title::class);
-    expect($result->name)->toBe('WWE Championship');
-    expect($result->introduction_date->equalTo(now()->subYears(5)))->toBeTrue();
+    expect($result->name)->toBe($expectedName);
+    expect($result->type)->toBe($titleType);
 
     $this->assertDatabaseHas('titles', [
-        'name' => 'WWE Championship',
-        'introduction_date' => now()->subYears(5)->toDateString(),
+        'name' => $expectedName,
+        'type' => $titleType->value,
     ]);
-});
+})->with([
+    [TitleType::Singles, 'WWE Championship'],
+    [TitleType::TagTeam, 'Tag Team Championship'],
+]);
 
-test('it creates title with activation date', function () {
-    $activationDate = now();
+test('it creates title with debut date', function (TitleType $titleType) {
+    $debutDate = now()->subYears(3);
+    $titleName = $titleType === TitleType::Singles ? 'Intercontinental Championship' : 'Women\'s Tag Team Championship';
 
     $data = new TitleData(
-        name: 'Intercontinental Championship',
-        introduction_date: now()->subYears(3),
-        activation_date: $activationDate
+        name: $titleName,
+        type: $titleType,
+        debut_date: $debutDate
     );
 
     $result = CreateAction::run($data);
 
-    expect($result->name)->toBe('Intercontinental Championship');
-    expect($result->isActive())->toBeTrue();
+    expect($result->name)->toBe($titleName);
+    expect($result->type)->toBe($titleType);
 
     $this->assertDatabaseHas('titles', [
-        'name' => 'Intercontinental Championship',
-        'introduction_date' => now()->subYears(3)->toDateString(),
+        'name' => $titleName,
+        'type' => $titleType->value,
     ]);
+})->with([
+    TitleType::Singles,
+    TitleType::TagTeam,
+]);
 
-    $this->assertDatabaseHas('titles_activations', [
-        'title_id' => $result->id,
-        'activated_at' => $activationDate->toDateTimeString(),
-        'deactivated_at' => null,
-    ]);
-});
+test('it creates title without debut date by default', function () {
+    $titleType = fake()->randomElement(TitleType::cases());
+    $titleName = $titleType === TitleType::Singles ? 'United States Championship' : 'SmackDown Tag Team Championship';
 
-test('it creates title without activation by default', function () {
     $data = new TitleData(
-        name: 'United States Championship',
-        introduction_date: now()->subYears(2)
+        name: $titleName,
+        type: $titleType,
+        debut_date: null
     );
 
     $result = CreateAction::run($data);
 
-    expect($result->isActive())->toBeFalse();
+    expect($result->name)->toBe($titleName);
+    expect($result->type)->toBe($titleType);
 
     $this->assertDatabaseHas('titles', [
-        'name' => 'United States Championship',
-    ]);
-
-    // Should not create activation record
-    $this->assertDatabaseMissing('titles_activations', [
-        'title_id' => $result->id,
+        'name' => $titleName,
+        'type' => $titleType->value,
     ]);
 });
 
-test('it handles future introduction dates', function () {
+test('it handles future debut dates', function () {
     $futureDate = now()->addDays(30);
+    $titleType = fake()->randomElement(TitleType::cases());
+    $titleName = $titleType === TitleType::Singles ? 'Future Championship' : 'Future Tag Championship';
 
     $data = new TitleData(
-        name: 'Future Championship',
-        introduction_date: $futureDate
+        name: $titleName,
+        type: $titleType,
+        debut_date: $futureDate
     );
 
     $result = CreateAction::run($data);
 
-    expect($result->name)->toBe('Future Championship');
-    expect($result->introduction_date->equalTo($futureDate))->toBeTrue();
+    expect($result->name)->toBe($titleName);
+    expect($result->type)->toBe($titleType);
 
     $this->assertDatabaseHas('titles', [
-        'name' => 'Future Championship',
-        'introduction_date' => $futureDate->toDateString(),
-    ]);
-});
-
-test('it creates title with same introduction and activation date', function () {
-    $date = now();
-
-    $data = new TitleData(
-        name: 'World Heavyweight Championship',
-        introduction_date: $date,
-        activation_date: $date
-    );
-
-    $result = CreateAction::run($data);
-
-    expect($result->name)->toBe('World Heavyweight Championship');
-    expect($result->isActive())->toBeTrue();
-    expect($result->introduction_date->equalTo($date))->toBeTrue();
-
-    $this->assertDatabaseHas('titles', [
-        'name' => 'World Heavyweight Championship',
-        'introduction_date' => $date->toDateString(),
-    ]);
-
-    $this->assertDatabaseHas('titles_activations', [
-        'title_id' => $result->id,
-        'activated_at' => $date->toDateTimeString(),
-        'deactivated_at' => null,
+        'name' => $titleName,
+        'type' => $titleType->value,
     ]);
 });

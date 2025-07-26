@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Titles\UpdateAction;
 use App\Data\Titles\TitleData;
+use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -15,12 +16,13 @@ beforeEach(function () {
 test('it updates title with new information', function () {
     $title = Title::factory()->create([
         'name' => 'Original Championship',
-        'introduction_date' => now()->subYears(5),
+        'type' => TitleType::Singles,
     ]);
 
     $updateData = new TitleData(
         name: 'Updated Championship',
-        introduction_date: now()->subYears(3)
+        type: TitleType::TagTeam,
+        debut_date: null
     );
 
     $result = UpdateAction::run($title, $updateData);
@@ -28,97 +30,67 @@ test('it updates title with new information', function () {
     expect($result)->toBeInstanceOf(Title::class);
     expect($result->id)->toBe($title->id);
     expect($result->name)->toBe('Updated Championship');
-    expect($result->introduction_date->equalTo(now()->subYears(3)))->toBeTrue();
+    expect($result->type)->toBe(TitleType::TagTeam);
 
     $this->assertDatabaseHas('titles', [
         'id' => $title->id,
         'name' => 'Updated Championship',
-        'introduction_date' => now()->subYears(3)->toDateString(),
+        'type' => TitleType::TagTeam->value,
     ]);
 });
 
-test('it updates title and creates activation when activation date provided', function () {
+test('it updates title name without changing type', function () {
     $title = Title::factory()->create([
-        'name' => 'Inactive Title',
+        'name' => 'WWE Championship',
+        'type' => TitleType::Singles,
     ]);
 
-    expect($title->isActive())->toBeFalse();
-
-    $activationDate = now();
     $updateData = new TitleData(
-        name: 'Now Active Title',
-        introduction_date: $title->introduction_date,
-        activation_date: $activationDate
+        name: 'World Heavyweight Championship',
+        type: TitleType::Singles,
+        debut_date: null
     );
 
     $result = UpdateAction::run($title, $updateData);
 
-    expect($result->name)->toBe('Now Active Title');
-    expect($result->isActive())->toBeTrue();
+    expect($result->name)->toBe('World Heavyweight Championship');
+    expect($result->type)->toBe(TitleType::Singles);
 
     $this->assertDatabaseHas('titles', [
         'id' => $title->id,
-        'name' => 'Now Active Title',
-    ]);
-
-    $this->assertDatabaseHas('titles_activations', [
-        'title_id' => $title->id,
-        'activated_at' => $activationDate->toDateTimeString(),
-        'deactivated_at' => null,
+        'name' => 'World Heavyweight Championship',
+        'type' => TitleType::Singles->value,
     ]);
 });
 
-test('it updates title without affecting existing activation', function () {
-    $title = Title::factory()->active()->create([
-        'name' => 'Active Title',
-    ]);
-
-    expect($title->isActive())->toBeTrue();
-
-    $updateData = new TitleData(
-        name: 'Still Active Title',
-        introduction_date: $title->introduction_date
-    );
-
-    $result = UpdateAction::run($title, $updateData);
-
-    expect($result->name)->toBe('Still Active Title');
-    expect($result->isActive())->toBeTrue(); // Should remain active
-
-    $this->assertDatabaseHas('titles', [
-        'id' => $title->id,
-        'name' => 'Still Active Title',
-    ]);
-});
-
-test('it updates introduction date correctly', function () {
-    $originalDate = now()->subYears(10);
-    $newDate = now()->subYears(8);
-
+test('it updates title type without changing name', function () {
     $title = Title::factory()->create([
-        'name' => 'Championship',
-        'introduction_date' => $originalDate,
+        'name' => 'Championship Title',
+        'type' => TitleType::Singles,
     ]);
 
     $updateData = new TitleData(
-        name: 'Championship',
-        introduction_date: $newDate
+        name: 'Championship Title',
+        type: TitleType::TagTeam,
+        debut_date: null
     );
 
     $result = UpdateAction::run($title, $updateData);
 
-    expect($result->introduction_date->equalTo($newDate))->toBeTrue();
+    expect($result->name)->toBe('Championship Title');
+    expect($result->type)->toBe(TitleType::TagTeam);
 
     $this->assertDatabaseHas('titles', [
         'id' => $title->id,
-        'introduction_date' => $newDate->toDateString(),
+        'name' => 'Championship Title',
+        'type' => TitleType::TagTeam->value,
     ]);
 });
 
 test('it preserves other title properties during update', function () {
-    $title = Title::factory()->active()->create([
+    $title = Title::factory()->create([
         'name' => 'Test Championship',
-        'introduction_date' => now()->subYears(5),
+        'type' => TitleType::Singles,
     ]);
 
     $originalId = $title->id;
@@ -126,7 +98,8 @@ test('it preserves other title properties during update', function () {
 
     $updateData = new TitleData(
         name: 'Updated Test Championship',
-        introduction_date: $title->introduction_date
+        type: TitleType::Singles,
+        debut_date: null
     );
 
     $result = UpdateAction::run($title, $updateData);
