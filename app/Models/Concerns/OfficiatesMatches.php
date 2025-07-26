@@ -18,6 +18,8 @@ trait OfficiatesMatches
 {
     /**
      * Get all matches this official has officiated.
+     *
+     * @return BelongsToMany<EventMatch, static>
      */
     public function matches(): BelongsToMany
     {
@@ -26,6 +28,8 @@ trait OfficiatesMatches
 
     /**
      * Get previous matches this official has officiated.
+     *
+     * @return BelongsToMany<EventMatch, static>
      */
     public function previousMatches(): BelongsToMany
     {

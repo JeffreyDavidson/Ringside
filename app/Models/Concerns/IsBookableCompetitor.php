@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
@@ -18,6 +19,8 @@ trait IsBookableCompetitor
 {
     /**
      * Get all matches this competitor has participated in.
+     *
+     * @return MorphToMany<EventMatch, static, MatchCompetitor>
      */
     public function matches(): MorphToMany
     {
@@ -26,6 +29,8 @@ trait IsBookableCompetitor
 
     /**
      * Get previous matches this competitor has participated in.
+     *
+     * @return MorphToMany<EventMatch, static, MatchCompetitor>
      */
     public function previousMatches(): MorphToMany
     {
