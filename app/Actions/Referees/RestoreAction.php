@@ -8,7 +8,7 @@ use App\Models\Referees\Referee;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseRefereeAction
+class RestoreAction
 {
     use AsAction;
 
@@ -33,7 +33,7 @@ class RestoreAction extends BaseRefereeAction
     public function handle(Referee $referee): void
     {
         DB::transaction(function () use ($referee): void {
-            $this->refereeRepository->restore($referee);
+            $referee->restore();
 
             // Note: No automatic relationship restoration to avoid conflicts.
             // All employment relationships must be re-established explicitly using separate actions.

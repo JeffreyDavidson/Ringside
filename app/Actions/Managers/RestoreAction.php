@@ -8,7 +8,7 @@ use App\Models\Managers\Manager;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseManagerAction
+class RestoreAction
 {
     use AsAction;
 
@@ -33,7 +33,7 @@ class RestoreAction extends BaseManagerAction
     public function handle(Manager $manager): void
     {
         DB::transaction(function () use ($manager): void {
-            $this->managerRepository->restore($manager);
+            $manager->restore();
 
             // Note: No automatic relationship restoration to avoid conflicts.
             // All employment and management relationships must be re-established explicitly using separate actions.
