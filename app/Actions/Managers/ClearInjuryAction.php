@@ -9,7 +9,7 @@ use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ClearInjuryAction extends BaseManagerAction
+class ClearInjuryAction
 {
     use AsAction;
 
@@ -24,7 +24,11 @@ class ClearInjuryAction extends BaseManagerAction
 
         $recoveryDate ??= now();
 
-        $this->managerRepository->clearInjury($manager, $recoveryDate);
+        // Clear injury by ending current injury
+        $currentInjury = $manager->currentInjury()->first();
+        if ($currentInjury) {
+            $currentInjury->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+        }
     }
 
     /**

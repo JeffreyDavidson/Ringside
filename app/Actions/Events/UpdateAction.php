@@ -6,19 +6,12 @@ namespace App\Actions\Events;
 
 use App\Data\Events\EventData;
 use App\Models\Events\Event;
-use App\Repositories\EventRepository;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseEventAction
+class UpdateAction
 {
     use AsAction;
-
-    public function __construct(
-        EventRepository $eventRepository
-    ) {
-        parent::__construct($eventRepository);
-    }
 
     /**
      * Update an event.
@@ -55,7 +48,12 @@ class UpdateAction extends BaseEventAction
     {
         return DB::transaction(function () use ($event, $eventData): Event {
             // Update the event's information
-            $this->eventRepository->update($event, $eventData);
+            $event->update([
+                'name' => $eventData->name,
+                'date' => $eventData->date,
+                'venue_id' => $eventData->venue->id ?? null,
+                'preview' => $eventData->preview,
+            ]);
 
             return $event;
         });

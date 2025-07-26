@@ -6,9 +6,8 @@ namespace App\Actions\Wrestlers;
 
 use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Data\Wrestlers\WrestlerData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\Concerns\ManagesEmployment;
-use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -22,14 +21,10 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * The action follows these business rules:
  * - Always updates the wrestler's basic information first
  * - Creates employment only if an employment_date is provided and the wrestler is not currently employed
- * - Uses the repository pattern for data persistence
- * - Maintains employment history through the ManagesEmployment trait
- *
- * @see ManagesEmployment For employment management operations
- * @see Wrestler For the wrestler model
- * @see WrestlerData For the data transfer object structure
+ * - Uses direct Eloquent operations for data persistence
+ * - Maintains employment history through employment relationships
  */
-class UpdateAction extends BaseWrestlerAction
+class UpdateAction
 {
     use AsAction;
 
@@ -37,11 +32,8 @@ class UpdateAction extends BaseWrestlerAction
      * Create a new update action instance.
      */
     public function __construct(
-        WrestlerRepository $wrestlerRepository,
         protected ManagersEmployAction $managersEmployAction
-    ) {
-        parent::__construct($wrestlerRepository);
-    }
+    ) {}
 
     /**
      * Update a wrestler's information and handle employment status.
@@ -55,19 +47,25 @@ class UpdateAction extends BaseWrestlerAction
     {
         return DB::transaction(function () use ($wrestler, $wrestlerData): Wrestler {
             // Update the wrestler's basic information
-            $this->wrestlerRepository->update($wrestler, $wrestlerData);
+            $wrestler->update($wrestlerData->toArray());
 
             // Track if wrestler was just employed
             $wasEmployed = $wrestler->isEmployed();
 
             // Create employment record if employment_date is provided and wrestler is eligible
             if (! is_null($wrestlerData->employment_date) && ! $wrestler->isEmployed()) {
-                $this->wrestlerRepository->createEmployment($wrestler, $wrestlerData->employment_date);
+                $wrestler->employments()->create([
+                    'started_at' => $wrestlerData->employment_date,
+                    'ended_at' => null,
+                    'status' => EmploymentStatus::Employed,
+                ]);
             }
 
             // If wrestler just got employed, employ their managers too
             if (! $wasEmployed && $wrestler->isEmployed() && $wrestlerData->employment_date) {
-                $this->employCurrentManagers($wrestler, $wrestlerData->employment_date, $this->managersEmployAction);
+                $wrestler->currentManagers
+                    ->filter(fn ($manager) => ! $manager->isEmployed())
+                    ->each(fn ($manager) => $this->managersEmployAction->handle($manager, $wrestlerData->employment_date));
             }
 
             return $wrestler;

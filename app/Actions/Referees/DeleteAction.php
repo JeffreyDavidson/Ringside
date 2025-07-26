@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseRefereeAction
+class DeleteAction
 {
     use AsAction;
 
@@ -44,27 +45,40 @@ class DeleteAction extends BaseRefereeAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($referee, $deletionDate): void {
             // Handle referee status - employed referees can be suspended/injured, retired referees are not employed
             if ($referee->isEmployed()) {
                 // End suspension or injury if active (employed referee cannot be both)
                 if ($referee->isSuspended()) {
-                    $this->refereeRepository->endSuspension($referee, $deletionDate);
+                    $currentSuspension = $referee->currentSuspension()->first();
+                    if ($currentSuspension) {
+                        $currentSuspension->update(['ended_at' => $deletionDate]);
+                    }
                 } elseif ($referee->isInjured()) {
-                    $this->refereeRepository->endInjury($referee, $deletionDate);
+                    $currentInjury = $referee->currentInjury()->first();
+                    if ($currentInjury) {
+                        $currentInjury->update(['ended_at' => $deletionDate->toDateTimeString()]);
+                    }
                 }
 
                 // End employment
-                $this->refereeRepository->endEmployment($referee, $deletionDate);
+                $currentEmployment = $referee->currentEmployment()->first();
+                if ($currentEmployment) {
+                    $currentEmployment->update(['ended_at' => $deletionDate]);
+                    $referee->update(['status' => EmploymentStatus::Released]);
+                }
             } elseif ($referee->isRetired()) {
                 // End retirement if active (retired referees are not employed)
-                $this->refereeRepository->endRetirement($referee, $deletionDate);
+                $currentRetirement = $referee->currentRetirement()->first();
+                if ($currentRetirement) {
+                    $currentRetirement->update(['ended_at' => $deletionDate]);
+                }
             }
 
             // Soft delete the referee record
-            $this->refereeRepository->delete($referee);
+            $referee->delete();
         });
     }
 }

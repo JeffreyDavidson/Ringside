@@ -8,7 +8,7 @@ use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseTitleAction
+class RestoreAction
 {
     use AsAction;
 
@@ -33,10 +33,7 @@ class RestoreAction extends BaseTitleAction
     public function handle(Title $title): void
     {
         DB::transaction(function () use ($title): void {
-            $this->titleRepository->restore($title);
-
-            // Note: No automatic status restoration to avoid conflicts.
-            // All status relationships must be re-established explicitly using separate actions.
+            $title->restore();
         });
     }
 }

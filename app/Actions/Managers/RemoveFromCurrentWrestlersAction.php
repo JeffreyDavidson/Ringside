@@ -8,13 +8,13 @@ use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RemoveFromCurrentWrestlersAction extends BaseManagerAction
+class RemoveFromCurrentWrestlersAction
 {
     use AsAction;
 
     public function handle(Manager $manager, ?Carbon $removalDate = null): void
     {
         $removalDate = $removalDate ?? now();
-        $this->managerRepository->removeFromCurrentWrestlers($manager, $removalDate);
+        $manager->currentWrestlerTenures()->update(['ended_at' => $removalDate]);
     }
 }

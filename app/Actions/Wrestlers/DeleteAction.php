@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseWrestlerAction
+class DeleteAction
 {
     use AsAction;
 
@@ -41,39 +41,45 @@ class DeleteAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($wrestler, $deletionDate): void {
             // Handle wrestler status - employed wrestlers can be suspended/injured, retired wrestlers are not employed
             if ($wrestler->isEmployed()) {
                 // End suspension or injury if active (employed wrestler cannot be both)
                 if ($wrestler->isSuspended()) {
-                    $this->wrestlerRepository->endSuspension($wrestler, $deletionDate);
+                    $wrestler->suspensions()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
                 } elseif ($wrestler->isInjured()) {
-                    $this->wrestlerRepository->endInjury($wrestler, $deletionDate);
+                    $wrestler->injuries()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
                 }
 
                 // End employment
-                $this->wrestlerRepository->endEmployment($wrestler, $deletionDate);
+                $wrestler->employments()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             } elseif ($wrestler->isRetired()) {
                 // End retirement if active (retired wrestlers are not employed)
-                $this->wrestlerRepository->endRetirement($wrestler, $deletionDate);
+                $wrestler->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             }
 
             // Handle tag team impact if wrestler is in a current tag team
             if ($wrestler->currentTagTeam !== null) {
                 // Remove the wrestler from the tag team
-                $this->wrestlerRepository->removeFromCurrentTagTeam($wrestler, $deletionDate);
+                $wrestler->currentTagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $deletionDate,
+                ]);
 
                 // Note: Tag team bookability is handled automatically by the isBookable() method
                 // which checks if the team has sufficient active members
             }
 
             // Handle manager relationships - end management relationships
-            $this->removeCurrentManagers($wrestler, $deletionDate);
+            $wrestler->currentManagers->each(function ($manager) use ($wrestler, $deletionDate) {
+                $wrestler->managers()->updateExistingPivot($manager->id, [
+                    'fired_at' => $deletionDate,
+                ]);
+            });
 
             // Soft delete the wrestler record
-            $this->wrestlerRepository->delete($wrestler);
+            $wrestler->delete();
         });
     }
 }

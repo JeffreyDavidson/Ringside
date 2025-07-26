@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseRefereeAction
+class RetireAction
 {
     use AsAction;
 
@@ -42,23 +43,33 @@ class RetireAction extends BaseRefereeAction
     {
         $referee->ensureCanBeRetired();
 
-        $retirementDate = $this->getEffectiveDate($retirementDate);
+        $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($referee, $retirementDate): void {
             // Handle referee status - only employed referees can have suspension/injury to end
             if ($referee->isEmployed()) {
                 // End suspension or injury if active (employed referee cannot be both)
                 if ($referee->isSuspended()) {
-                    $this->refereeRepository->endSuspension($referee, $retirementDate);
+                    $currentSuspension = $referee->currentSuspension()->first();
+                    if ($currentSuspension) {
+                        $currentSuspension->update(['ended_at' => $retirementDate]);
+                    }
                 } elseif ($referee->isInjured()) {
-                    $this->refereeRepository->endInjury($referee, $retirementDate);
+                    $currentInjury = $referee->currentInjury()->first();
+                    if ($currentInjury) {
+                        $currentInjury->update(['ended_at' => $retirementDate->toDateTimeString()]);
+                    }
                 }
 
                 // End employment
-                $this->refereeRepository->endEmployment($referee, $retirementDate);
+                $currentEmployment = $referee->currentEmployment()->first();
+                if ($currentEmployment) {
+                    $currentEmployment->update(['ended_at' => $retirementDate]);
+                    $referee->update(['status' => EmploymentStatus::Retired]);
+                }
             }
 
-            $this->refereeRepository->createRetirement($referee, $retirementDate);
+            $referee->retirements()->create(['started_at' => $retirementDate]);
         });
     }
 }

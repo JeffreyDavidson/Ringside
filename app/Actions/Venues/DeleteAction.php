@@ -7,7 +7,7 @@ namespace App\Actions\Venues;
 use App\Models\Events\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseVenueAction
+class DeleteAction
 {
     use AsAction;
 
@@ -30,6 +30,6 @@ class DeleteAction extends BaseVenueAction
      */
     public function handle(Venue $venue): void
     {
-        $this->venueRepository->delete($venue);
+        $venue->delete();
     }
 }

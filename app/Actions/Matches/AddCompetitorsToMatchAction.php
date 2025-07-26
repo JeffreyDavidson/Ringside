@@ -7,22 +7,15 @@ namespace App\Actions\Matches;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\MatchRepository;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddCompetitorsToMatchAction extends BaseMatchAction
+class AddCompetitorsToMatchAction
 {
     use AsAction;
-
-    public function __construct(
-        MatchRepository $matchRepository
-    ) {
-        parent::__construct($matchRepository);
-    }
 
     /**
      * Add competitors to an event match.
@@ -111,5 +104,28 @@ class AddCompetitorsToMatchAction extends BaseMatchAction
                 $sideNumber
             );
         }
+    }
+
+    /**
+     * Validate match competitors for proper side distribution.
+     *
+     * @param  array<int, array<string, mixed>>  $competitors  Competitors organized by side
+     * @return bool True if competitor distribution is valid for the match type
+     */
+    private function validateCompetitorDistribution(array $competitors): bool
+    {
+        // Ensure we have at least 2 sides with competitors
+        $sidesWithCompetitors = 0;
+
+        foreach ($competitors as $sideCompetitors) {
+            $hasWrestlers = ! empty($sideCompetitors['wrestlers'] ?? []);
+            $hasTagTeams = ! empty($sideCompetitors['tag_teams'] ?? []);
+
+            if ($hasWrestlers || $hasTagTeams) {
+                $sidesWithCompetitors++;
+            }
+        }
+
+        return $sidesWithCompetitors >= 2;
     }
 }

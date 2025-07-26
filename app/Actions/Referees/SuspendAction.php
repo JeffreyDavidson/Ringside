@@ -7,10 +7,9 @@ namespace App\Actions\Referees;
 use App\Exceptions\Status\CannotBeSuspendedException;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SuspendAction extends BaseRefereeAction
+class SuspendAction
 {
     use AsAction;
 
@@ -40,10 +39,8 @@ class SuspendAction extends BaseRefereeAction
     {
         $referee->ensureCanBeSuspended();
 
-        $suspensionDate = $this->getEffectiveDate($suspensionDate);
+        $suspensionDate = $suspensionDate ?? now();
 
-        DB::transaction(function () use ($referee, $suspensionDate): void {
-            $this->refereeRepository->createSuspension($referee, $suspensionDate);
-        });
+        $referee->suspensions()->create(['started_at' => $suspensionDate]);
     }
 }

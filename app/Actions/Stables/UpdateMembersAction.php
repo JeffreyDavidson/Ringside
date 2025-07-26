@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateMembersAction extends BaseStableAction
+class UpdateMembersAction
 {
     use AsAction;
 
@@ -40,14 +40,31 @@ class UpdateMembersAction extends BaseStableAction
     private function updateWrestlers(Stable $stable, Collection $wrestlers, Carbon $now): void
     {
         if ($stable->currentWrestlers->isEmpty()) {
-            $this->stableRepository->addWrestlers($stable, $wrestlers, $now);
+            foreach ($wrestlers as $wrestler) {
+                $stable->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $now,
+                    'left_at' => null,
+                ]);
+            }
         } else {
             $currentWrestlers = $stable->currentWrestlers;
             $formerWrestlers = $currentWrestlers->diff($wrestlers);
             $newWrestlers = $wrestlers->diff($currentWrestlers);
 
-            $this->stableRepository->removeWrestlers($stable, $formerWrestlers, $now);
-            $this->stableRepository->addWrestlers($stable, $newWrestlers, $now);
+            // Remove former wrestlers
+            $formerWrestlers->each(function (Wrestler $wrestler) use ($stable, $now) {
+                $stable->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $now,
+                ]);
+            });
+
+            // Add new wrestlers
+            foreach ($newWrestlers as $wrestler) {
+                $stable->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $now,
+                    'left_at' => null,
+                ]);
+            }
         }
     }
 
@@ -59,14 +76,31 @@ class UpdateMembersAction extends BaseStableAction
     private function updateTagTeams(Stable $stable, Collection $tagTeams, Carbon $now): void
     {
         if ($stable->currentTagTeams->isEmpty()) {
-            $this->stableRepository->addTagTeams($stable, $tagTeams, $now);
+            foreach ($tagTeams as $tagTeam) {
+                $stable->tagTeams()->attach($tagTeam->id, [
+                    'joined_at' => $now,
+                    'left_at' => null,
+                ]);
+            }
         } else {
             $currentTagTeams = $stable->currentTagTeams;
             $formerTagTeams = $currentTagTeams->diff($tagTeams);
             $newTagTeams = $tagTeams->diff($currentTagTeams);
 
-            $this->stableRepository->removeTagTeams($stable, $formerTagTeams, $now);
-            $this->stableRepository->addTagTeams($stable, $newTagTeams, $now);
+            // Remove former tag teams
+            $formerTagTeams->each(function (TagTeam $tagTeam) use ($stable, $now) {
+                $stable->tagTeams()->updateExistingPivot($tagTeam->id, [
+                    'left_at' => $now,
+                ]);
+            });
+
+            // Add new tag teams
+            foreach ($newTagTeams as $tagTeam) {
+                $stable->tagTeams()->attach($tagTeam->id, [
+                    'joined_at' => $now,
+                    'left_at' => null,
+                ]);
+            }
         }
     }
 }

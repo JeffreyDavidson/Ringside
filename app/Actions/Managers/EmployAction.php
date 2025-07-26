@@ -6,20 +6,13 @@ namespace App\Actions\Managers;
 
 use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\Managers\Manager;
-use App\Repositories\ManagerRepository;
 use Exception;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EmployAction extends BaseManagerAction
+class EmployAction
 {
     use AsAction;
-
-    public function __construct(
-        ManagerRepository $managerRepository
-    ) {
-        parent::__construct($managerRepository);
-    }
 
     /**
      * Employ a manager.

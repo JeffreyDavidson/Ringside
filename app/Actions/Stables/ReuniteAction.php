@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReuniteAction extends BaseStableAction
+class ReuniteAction
 {
     use AsAction;
 
@@ -43,7 +43,10 @@ class ReuniteAction extends BaseStableAction
         $reuniteDate ??= now();
 
         DB::transaction(function () use ($stable, $reuniteDate): void {
-            $this->stableRepository->createDebut($stable, $reuniteDate);
+            $stable->activityPeriods()->create([
+                'started_at' => $reuniteDate,
+                'ended_at' => null,
+            ]);
         });
     }
 }

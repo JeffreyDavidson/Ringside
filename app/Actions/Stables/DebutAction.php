@@ -6,23 +6,13 @@ namespace App\Actions\Stables;
 
 use App\Exceptions\Status\CannotBeDebutedException;
 use App\Models\Stables\Stable;
-use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DebutAction extends BaseStableAction
+class DebutAction
 {
     use AsAction;
-
-    /**
-     * Create a new debut action instance.
-     */
-    public function __construct(
-        protected StableRepository $stableRepository
-    ) {
-        parent::__construct($stableRepository);
-    }
 
     /**
      * Debut a stable.
@@ -55,15 +45,13 @@ class DebutAction extends BaseStableAction
     {
         $stable->ensureCanBeDebuted();
 
-        $debutDate = $this->getEffectiveDate($debutDate);
+        $debutDate = $debutDate ?? now();
 
         DB::transaction(function () use ($stable, $debutDate): void {
-            // Create the debut record for the stable
-            $this->stableRepository->createDebut($stable, $debutDate);
-
-            // Note: Individual members (wrestlers, managers, tag teams) do not have debut functionality.
-            // Only Stables and Titles can be debuted according to business rules.
-            // Members are managed through employment, not debut status.
+            $stable->activityPeriods()->updateOrCreate(
+                ['ended_at' => null],
+                ['started_at' => $debutDate->toDateTimeString()]
+            );
         });
     }
 }

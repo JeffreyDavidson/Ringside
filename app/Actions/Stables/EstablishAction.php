@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EstablishAction extends BaseStableAction
+class EstablishAction
 {
     use AsAction;
 
@@ -41,11 +41,13 @@ class EstablishAction extends BaseStableAction
     {
         $stable->ensureCanBeActivated();
 
-        $activationDate = $this->getEffectiveDate($activationDate);
+        $activationDate = $activationDate ?? now();
 
         DB::transaction(function () use ($stable, $activationDate): void {
-            // Create establishment record
-            $this->stableRepository->createActivity($stable, $activationDate);
+            $stable->activityPeriods()->updateOrCreate(
+                ['ended_at' => null],
+                ['started_at' => $activationDate->toDateTimeString()]
+            );
         });
     }
 }

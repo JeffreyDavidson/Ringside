@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseManagerAction
+class DeleteAction
 {
     use AsAction;
 
@@ -48,30 +49,49 @@ class DeleteAction extends BaseManagerAction
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($manager, $deletionDate): void {
             // Handle manager status - employed managers can be suspended/injured, retired managers are not employed
             if ($manager->isEmployed()) {
                 // End suspension or injury if active (employed manager cannot be both)
                 if ($manager->isSuspended()) {
-                    $this->managerRepository->endSuspension($manager, $deletionDate);
+                    $currentSuspension = $manager->currentSuspension()->first();
+                    if ($currentSuspension) {
+                        $currentSuspension->update(['ended_at' => $deletionDate]);
+                    }
                 } elseif ($manager->isInjured()) {
-                    $this->managerRepository->endInjury($manager, $deletionDate);
+                    $currentInjury = $manager->currentInjury()->first();
+                    if ($currentInjury) {
+                        $currentInjury->update(['ended_at' => $deletionDate->toDateTimeString()]);
+                    }
                 }
 
                 // End employment
-                $this->managerRepository->endEmployment($manager, $deletionDate);
+                $currentEmployment = $manager->currentEmployment()->first();
+                if ($currentEmployment) {
+                    $currentEmployment->update(['ended_at' => $deletionDate]);
+                    $manager->update(['status' => EmploymentStatus::Released]);
+                }
             } elseif ($manager->isRetired()) {
                 // End retirement if active (retired managers are not employed)
-                $this->managerRepository->endRetirement($manager, $deletionDate);
+                $currentRetirement = $manager->currentRetirement()->first();
+                if ($currentRetirement) {
+                    $currentRetirement->update(['ended_at' => $deletionDate]);
+                }
             }
 
             // End current management relationships
-            // Note: Management relationships are handled automatically by the repository
+            $manager->wrestlers()->wherePivotNull('fired_at')->updateExistingPivot($manager->wrestlers()->wherePivotNull('fired_at')->pluck('wrestler_id'), [
+                'fired_at' => $deletionDate,
+            ]);
+
+            $manager->tagTeams()->wherePivotNull('fired_at')->updateExistingPivot($manager->tagTeams()->wherePivotNull('fired_at')->pluck('tag_team_id'), [
+                'fired_at' => $deletionDate,
+            ]);
 
             // Soft delete the manager record
-            $this->managerRepository->delete($manager);
+            $manager->delete();
         });
     }
 }

@@ -10,12 +10,11 @@ use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseTagTeamAction
+class ReinstateAction
 {
     use AsAction;
 
@@ -23,12 +22,9 @@ class ReinstateAction extends BaseTagTeamAction
      * Create a new reinstate action instance.
      */
     public function __construct(
-        protected TagTeamRepository $tagTeamRepository,
         protected WrestlersReinstateAction $wrestlersReinstateAction,
         protected ManagersReinstateAction $managersReinstateAction
-    ) {
-        parent::__construct($tagTeamRepository);
-    }
+    ) {}
 
     /**
      * Reinstate a suspended tag team.
@@ -58,10 +54,10 @@ class ReinstateAction extends BaseTagTeamAction
     {
         $tagTeam->ensureCanBeReinstated();
 
-        $reinstatementDate = $this->getEffectiveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
-            $this->tagTeamRepository->endSuspension($tagTeam, $reinstatementDate);
+            $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $reinstatementDate]);
 
             // Reinstate suspended wrestlers and managers who were suspended with this team
             $wrestlersToReinstate = $tagTeam->currentWrestlers
@@ -69,7 +65,11 @@ class ReinstateAction extends BaseTagTeamAction
             $managersToReinstate = $tagTeam->currentManagers
                 ->filter(fn (Manager $manager) => $manager->isSuspended());
 
-            $this->reinstateMembers($wrestlersToReinstate, $managersToReinstate, $reinstatementDate, $this->wrestlersReinstateAction, $this->managersReinstateAction);
+            // Reinstate the provided wrestlers
+            $wrestlersToReinstate->each(fn (Wrestler $wrestler) => $this->wrestlersReinstateAction->handle($wrestler, $reinstatementDate));
+
+            // Reinstate the provided managers
+            $managersToReinstate->each(fn (Manager $manager) => $this->managersReinstateAction->handle($manager, $reinstatementDate));
         });
     }
 }

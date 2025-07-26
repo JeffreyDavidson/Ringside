@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseRefereeAction
+class ReleaseAction
 {
     use AsAction;
 
@@ -40,17 +41,27 @@ class ReleaseAction extends BaseRefereeAction
     {
         $referee->ensureCanBeReleased();
 
-        $releaseDate = $this->getEffectiveDate($releaseDate);
+        $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($referee, $releaseDate): void {
             // End suspension or injury if active (referee cannot be both suspended and injured)
             if ($referee->isSuspended()) {
-                $this->refereeRepository->endSuspension($referee, $releaseDate);
+                $currentSuspension = $referee->currentSuspension()->first();
+                if ($currentSuspension) {
+                    $currentSuspension->update(['ended_at' => $releaseDate]);
+                }
             } elseif ($referee->isInjured()) {
-                $this->refereeRepository->endInjury($referee, $releaseDate);
+                $currentInjury = $referee->currentInjury()->first();
+                if ($currentInjury) {
+                    $currentInjury->update(['ended_at' => $releaseDate->toDateTimeString()]);
+                }
             }
 
-            $this->refereeRepository->endEmployment($referee, $releaseDate);
+            $currentEmployment = $referee->currentEmployment()->first();
+            if ($currentEmployment) {
+                $currentEmployment->update(['ended_at' => $releaseDate]);
+                $referee->update(['status' => EmploymentStatus::Released]);
+            }
         });
     }
 }

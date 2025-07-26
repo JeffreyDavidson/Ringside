@@ -228,22 +228,19 @@ class StatusTransitionPipeline
      */
     protected function executeCoreTransition(): void
     {
-        $repository = $this->getRepository();
-        $method = $this->getRepositoryMethod();
-
         // Handle transitions that require ending existing status
         $this->handleStatusEnding();
 
-        // Execute the main transition
-        if (method_exists($repository, $method)) {
-            if ($this->notes) {
-                $repository->{$method}($this->entity, $this->effectiveDate, $this->notes);
-            } else {
-                $repository->{$method}($this->entity, $this->effectiveDate);
-            }
-        } else {
-            throw new InvalidArgumentException("Repository method {$method} not found");
-        }
+        // Execute the main transition using direct Eloquent operations
+        match ($this->transition) {
+            'employ' => $this->createEmployment(),
+            'suspend' => $this->createSuspension(),
+            'release' => $this->createRelease(),
+            'retire' => $this->createRetirement(),
+            'injure' => $this->createInjury(),
+            'reinstate' => $this->createReinstatement(),
+            default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
+        };
     }
 
     /**
@@ -251,50 +248,117 @@ class StatusTransitionPipeline
      */
     protected function handleStatusEnding(): void
     {
-        $repository = $this->getRepository();
-
         // Employment requires ending retirement
         if ($this->transition === 'employ' && method_exists($this->entity, 'isRetired') && $this->entity->isRetired()) {
-            $repository->endRetirement($this->entity, $this->effectiveDate);
+            $this->endRetirement();
         }
 
         // Add other status ending logic as needed
     }
 
     /**
-     * Get the repository method name for the transition.
+     * Create employment record using direct Eloquent operations.
      */
-    protected function getRepositoryMethod(): string
+    protected function createEmployment(): void
     {
-        return match ($this->transition) {
-            'employ' => 'createEmployment',
-            'suspend' => 'createSuspension',
-            'release' => 'createRelease',
-            'retire' => 'createRetirement',
-            'injure' => 'createInjury',
-            'reinstate' => 'createReinstatement',
-            default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
-        };
+        $table = $this->getTableName('employments');
+        $this->entity->{$table}()->create([
+            'started_at' => $this->effectiveDate,
+            'ended_at' => null,
+        ]);
     }
 
     /**
-     * Get the repository instance for the entity.
+     * Create suspension record using direct Eloquent operations.
      */
-    protected function getRepository(): mixed
+    protected function createSuspension(): void
     {
-        $entityClass = get_class($this->entity);
-        $baseName = class_basename($entityClass);
+        $table = $this->getTableName('suspensions');
+        $data = [
+            'started_at' => $this->effectiveDate,
+            'ended_at' => null,
+        ];
 
-        // Handle the case where models are in subdirectories but repositories are not
-        // App\Models\Wrestlers\Wrestler -> App\Repositories\WrestlerRepository
-        $namespace = 'App\\Repositories\\';
-        $repositoryClass = $namespace.$baseName.'Repository';
-
-        if (! class_exists($repositoryClass)) {
-            throw new InvalidArgumentException("Repository {$repositoryClass} not found");
+        if ($this->notes) {
+            $data['notes'] = $this->notes;
         }
 
-        return app($repositoryClass);
+        $this->entity->{$table}()->create($data);
+    }
+
+    /**
+     * Create release record using direct Eloquent operations.
+     */
+    protected function createRelease(): void
+    {
+        // End current employment
+        $employmentTable = $this->getTableName('employments');
+        $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
+            'ended_at' => $this->effectiveDate,
+        ]);
+    }
+
+    /**
+     * Create retirement record using direct Eloquent operations.
+     */
+    protected function createRetirement(): void
+    {
+        $table = $this->getTableName('retirements');
+        $this->entity->{$table}()->create([
+            'started_at' => $this->effectiveDate,
+            'ended_at' => null,
+        ]);
+    }
+
+    /**
+     * Create injury record using direct Eloquent operations.
+     */
+    protected function createInjury(): void
+    {
+        $table = $this->getTableName('injuries');
+        $this->entity->{$table}()->create([
+            'started_at' => $this->effectiveDate,
+            'ended_at' => null,
+        ]);
+    }
+
+    /**
+     * Create reinstatement record using direct Eloquent operations.
+     */
+    protected function createReinstatement(): void
+    {
+        // End current suspension/injury
+        $suspensionTable = $this->getTableName('suspensions');
+        $injuryTable = $this->getTableName('injuries');
+
+        $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
+            'ended_at' => $this->effectiveDate,
+        ]);
+
+        $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
+            'ended_at' => $this->effectiveDate,
+        ]);
+    }
+
+    /**
+     * End retirement using direct Eloquent operations.
+     */
+    protected function endRetirement(): void
+    {
+        $table = $this->getTableName('retirements');
+        $this->entity->{$table}()->whereNull('ended_at')->update([
+            'ended_at' => $this->effectiveDate,
+        ]);
+    }
+
+    /**
+     * Get the relationship name for the entity type.
+     */
+    protected function getTableName(string $type): string
+    {
+        // Return just the type (e.g., 'employments', 'suspensions', etc.)
+        // Models define their own relationships
+        return $type;
     }
 
     /**

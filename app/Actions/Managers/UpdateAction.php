@@ -5,20 +5,14 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Data\Managers\ManagerData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
-use App\Repositories\ManagerRepository;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseManagerAction
+class UpdateAction
 {
     use AsAction;
-
-    public function __construct(
-        ManagerRepository $managerRepository
-    ) {
-        parent::__construct($managerRepository);
-    }
 
     /**
      * Update a manager.
@@ -53,11 +47,21 @@ class UpdateAction extends BaseManagerAction
     {
         return DB::transaction(function () use ($manager, $managerData): Manager {
             // Update the manager's basic information
-            $this->managerRepository->update($manager, $managerData);
+            $manager->update([
+                'first_name' => $managerData->first_name,
+                'last_name' => $managerData->last_name,
+            ]);
 
             // Create employment record if employment_date is provided and manager is eligible
             if (! is_null($managerData->employment_date) && ! $manager->isEmployed()) {
-                $this->managerRepository->createEmployment($manager, $managerData->employment_date);
+                // Create employment record
+                $manager->employments()->updateOrCreate(
+                    ['ended_at' => null],
+                    ['started_at' => $managerData->employment_date->toDateTimeString()]
+                );
+
+                // Update the status field to reflect employment
+                $manager->update(['status' => EmploymentStatus::Employed]);
             }
 
             return $manager;

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseWrestlerAction
+class ReleaseAction
 {
     use AsAction;
 
@@ -41,36 +42,45 @@ class ReleaseAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
-        // Validate business rules before proceeding
         $wrestler->ensureCanBeReleased();
 
-        $releaseDate = $this->getEffectiveDate($releaseDate);
+        $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($wrestler, $releaseDate): void {
             // End current tag team partnerships
-            $this->wrestlerRepository->removeFromCurrentTagTeam($wrestler, $releaseDate);
+            $wrestler->currentTagTeamTenure()->update(['ended_at' => $releaseDate]);
 
             // End current stable membership
-            $this->wrestlerRepository->removeFromCurrentStable($wrestler, $releaseDate);
+            $wrestler->currentStableTenure()->update(['ended_at' => $releaseDate]);
 
             // End current manager relationships
-            $this->removeCurrentManagers($wrestler, $releaseDate);
+            $wrestler->currentManagerTenures()->update(['ended_at' => $releaseDate]);
 
             // End current championships
-            $this->endCurrentChampionships($wrestler, $releaseDate);
+            $wrestler->currentChampionships()->update(['lost_at' => $releaseDate]);
 
             // End current suspension if active
             if ($wrestler->isSuspended()) {
-                $this->wrestlerRepository->endSuspension($wrestler, $releaseDate);
+                $currentSuspension = $wrestler->currentSuspension()->first();
+                if ($currentSuspension) {
+                    $currentSuspension->update(['ended_at' => $releaseDate]);
+                }
             }
 
             // End current injury if active
             if ($wrestler->isInjured()) {
-                $this->wrestlerRepository->endInjury($wrestler, $releaseDate);
+                $currentInjury = $wrestler->currentInjury()->first();
+                if ($currentInjury) {
+                    $currentInjury->update(['ended_at' => $releaseDate->toDateTimeString()]);
+                }
             }
 
             // End current employment
-            $this->wrestlerRepository->endEmployment($wrestler, $releaseDate);
+            $currentEmployment = $wrestler->currentEmployment()->first();
+            if ($currentEmployment) {
+                $currentEmployment->update(['ended_at' => $releaseDate]);
+                $wrestler->update(['status' => EmploymentStatus::Released]);
+            }
         });
     }
 }
