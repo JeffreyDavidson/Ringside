@@ -7,7 +7,7 @@ namespace App\Actions\Venues;
 use App\Models\Events\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseVenueAction
+class RestoreAction
 {
     use AsAction;
 
@@ -30,6 +30,6 @@ class RestoreAction extends BaseVenueAction
      */
     public function handle(Venue $venue): void
     {
-        $this->venueRepository->restore($venue);
+        $venue->restore();
     }
 }

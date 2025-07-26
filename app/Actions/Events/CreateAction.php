@@ -6,19 +6,12 @@ namespace App\Actions\Events;
 
 use App\Data\Events\EventData;
 use App\Models\Events\Event;
-use App\Repositories\EventRepository;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseEventAction
+class CreateAction
 {
     use AsAction;
-
-    public function __construct(
-        EventRepository $eventRepository
-    ) {
-        parent::__construct($eventRepository);
-    }
 
     /**
      * Create an event.
@@ -54,7 +47,12 @@ class CreateAction extends BaseEventAction
     {
         return DB::transaction(function () use ($eventData): Event {
             // Create the base event record
-            $event = $this->eventRepository->create($eventData);
+            $event = Event::query()->create([
+                'name' => $eventData->name,
+                'date' => $eventData->date,
+                'venue_id' => $eventData->venue->id ?? null,
+                'preview' => $eventData->preview,
+            ]);
 
             return $event;
         });

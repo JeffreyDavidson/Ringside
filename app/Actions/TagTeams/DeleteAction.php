@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseTagTeamAction
+class DeleteAction
 {
     use AsAction;
 
@@ -53,31 +53,39 @@ class DeleteAction extends BaseTagTeamAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
             // Handle tag team status - employed tag teams can be suspended, retired tag teams are not employed
             if ($tagTeam->isEmployed()) {
                 // End suspension if active
                 if ($tagTeam->isSuspended()) {
-                    $this->tagTeamRepository->endSuspension($tagTeam, $deletionDate);
+                    $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
                 }
 
                 // End employment
-                $this->tagTeamRepository->endEmployment($tagTeam, $deletionDate);
+                $tagTeam->employments()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             } elseif ($tagTeam->isRetired()) {
                 // End retirement if active (retired tag teams are not employed)
-                $this->tagTeamRepository->endRetirement($tagTeam, $deletionDate);
+                $tagTeam->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             }
 
             // End current wrestler partnerships (wrestlers continue as singles)
-            $this->tagTeamRepository->removeWrestlers($tagTeam, $tagTeam->currentWrestlers, $deletionDate);
+            $tagTeam->currentWrestlers->each(function ($wrestler) use ($tagTeam, $deletionDate) {
+                $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $deletionDate,
+                ]);
+            });
 
             // End current manager relationships
-            $this->tagTeamRepository->removeManagers($tagTeam, $tagTeam->currentManagers, $deletionDate);
+            $tagTeam->currentManagers->each(function ($manager) use ($tagTeam, $deletionDate) {
+                $tagTeam->managers()->updateExistingPivot($manager->id, [
+                    'fired_at' => $deletionDate,
+                ]);
+            });
 
             // Soft delete the tag team record
-            $this->tagTeamRepository->delete($tagTeam);
+            $tagTeam->delete();
         });
     }
 }

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseManagerAction
+class ReleaseAction
 {
     use AsAction;
 
@@ -41,21 +42,31 @@ class ReleaseAction extends BaseManagerAction
     {
         $manager->ensureCanBeReleased();
 
-        $releaseDate = $this->getEffectiveDate($releaseDate);
+        $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($manager, $releaseDate): void {
             // End suspension or injury if active (manager cannot be both suspended and injured)
             if ($manager->isSuspended()) {
-                $this->managerRepository->endSuspension($manager, $releaseDate);
+                $currentSuspension = $manager->currentSuspension()->first();
+                if ($currentSuspension) {
+                    $currentSuspension->update(['ended_at' => $releaseDate]);
+                }
             } elseif ($manager->isInjured()) {
-                $this->managerRepository->endInjury($manager, $releaseDate);
+                $currentInjury = $manager->currentInjury()->first();
+                if ($currentInjury) {
+                    $currentInjury->update(['ended_at' => $releaseDate->toDateTimeString()]);
+                }
             }
 
             // End current management relationships
             // Note: Management relationships are handled automatically by the repository
 
             // End employment
-            $this->managerRepository->endEmployment($manager, $releaseDate);
+            $currentEmployment = $manager->currentEmployment()->first();
+            if ($currentEmployment) {
+                $currentEmployment->update(['ended_at' => $releaseDate]);
+                $manager->update(['status' => EmploymentStatus::Released]);
+            }
         });
     }
 }

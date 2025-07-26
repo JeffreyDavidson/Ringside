@@ -12,12 +12,11 @@ use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseStableAction
+class UnretireAction
 {
     use AsAction;
 
@@ -25,13 +24,10 @@ class UnretireAction extends BaseStableAction
      * Create a new unretire action instance.
      */
     public function __construct(
-        protected StableRepository $stableRepository,
         protected WrestlersUnretireAction $wrestlersUnretireAction,
         protected TagTeamsUnretireAction $tagTeamsUnretireAction,
         protected ManagersUnretireAction $managersUnretireAction
-    ) {
-        parent::__construct($stableRepository);
-    }
+    ) {}
 
     /**
      * Unretire a retired stable and make it active again.
@@ -66,11 +62,11 @@ class UnretireAction extends BaseStableAction
     {
         $stable->ensureCanBeUnretired();
 
-        $unretiredDate = $this->getEffectiveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($stable, $unretiredDate): void {
             // End the current retirement record
-            $this->stableRepository->endRetirement($stable, $unretiredDate);
+            $stable->retirements()->where('ended_at', null)->update(['ended_at' => $unretiredDate]);
 
             // Attempt to unretire former members who retired with the stable
             // Note: Managers are not direct stable members and are not unretired with the stable
@@ -79,15 +75,11 @@ class UnretireAction extends BaseStableAction
             $tagTeamsToUnretire = $stable->currentTagTeams
                 ->filter(fn (TagTeam $tagTeam) => $tagTeam->isRetired());
 
-            $this->unretireMembers(
-                $wrestlersToUnretire,
-                $tagTeamsToUnretire,
-                collect(), // Empty collection for managers since they're not direct members
-                $unretiredDate,
-                $this->wrestlersUnretireAction,
-                $this->tagTeamsUnretireAction,
-                $this->managersUnretireAction
-            );
+            // Unretire wrestlers
+            $wrestlersToUnretire->each(fn (Wrestler $wrestler) => $this->wrestlersUnretireAction->handle($wrestler, $unretiredDate));
+
+            // Unretire tag teams
+            $tagTeamsToUnretire->each(fn (TagTeam $tagTeam) => $this->tagTeamsUnretireAction->handle($tagTeam, $unretiredDate));
 
             // Update status to inactive (no longer retired, but not active)
             $stable->update(['status' => StableStatus::Inactive]);

@@ -9,7 +9,7 @@ use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseTitleAction
+class CreateAction
 {
     use AsAction;
 
@@ -38,11 +38,18 @@ class CreateAction extends BaseTitleAction
     {
         return DB::transaction(function () use ($titleData): Title {
             // Create the base title record
-            $title = $this->titleRepository->create($titleData);
+            $title = Title::query()->create([
+                'name' => $titleData->name,
+                'type' => $titleData->type,
+            ]);
 
             // Create active status if debut_date is provided
             if (isset($titleData->debut_date)) {
-                $this->titleRepository->createDebut($title, $titleData->debut_date);
+                // Create activity period for title debut
+                $title->activityPeriods()->updateOrCreate(
+                    ['ended_at' => null],
+                    ['started_at' => $titleData->debut_date->toDateTimeString()]
+                );
             }
 
             return $title;

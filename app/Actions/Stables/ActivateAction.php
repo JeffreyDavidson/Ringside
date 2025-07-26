@@ -13,7 +13,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ActivateAction extends BaseStableAction
+class ActivateAction
 {
     use AsAction;
 
@@ -40,7 +40,10 @@ class ActivateAction extends BaseStableAction
             );
         }
 
-        $this->stableRepository->createActivity($stable, $startDate);
+        $stable->activityPeriods()->create([
+            'started_at' => $startDate,
+            'ended_at' => null,
+        ]);
     }
 
     /**

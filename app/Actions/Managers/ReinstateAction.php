@@ -6,20 +6,13 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
-use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class ReinstateAction extends BaseManagerAction
+final class ReinstateAction
 {
     use AsAction;
-
-    public function __construct(
-        ManagerRepository $managerRepository
-    ) {
-        parent::__construct($managerRepository);
-    }
 
     /**
      * Reinstate a suspended manager.
@@ -47,10 +40,14 @@ final class ReinstateAction extends BaseManagerAction
     {
         $manager->ensureCanBeReinstated();
 
-        $reinstatementDate = $this->getEffectiveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
         DB::transaction(function () use ($manager, $reinstatementDate): void {
-            $this->managerRepository->endSuspension($manager, $reinstatementDate);
+            // End current suspension
+            $currentSuspension = $manager->currentSuspension()->first();
+            if ($currentSuspension) {
+                $currentSuspension->update(['ended_at' => $reinstatementDate]);
+            }
         });
     }
 }

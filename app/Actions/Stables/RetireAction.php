@@ -11,12 +11,11 @@ use App\Exceptions\Status\CannotBeRetiredException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\StableRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseStableAction
+class RetireAction
 {
     use AsAction;
 
@@ -24,13 +23,10 @@ class RetireAction extends BaseStableAction
      * Create a new retire action instance.
      */
     public function __construct(
-        protected StableRepository $stableRepository,
         protected WrestlersRetireAction $wrestlersRetireAction,
         protected TagTeamsRetireAction $tagTeamsRetireAction,
         protected ManagersRetireAction $managersRetireAction
-    ) {
-        parent::__construct($stableRepository);
-    }
+    ) {}
 
     /**
      * Retire a stable and end its operations.
@@ -67,12 +63,12 @@ class RetireAction extends BaseStableAction
     {
         $stable->ensureCanBeRetired();
 
-        $retirementDate = $this->getEffectiveDate($retirementDate);
+        $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($stable, $retirementDate): void {
             // End activity if currently active
             if ($stable->isCurrentlyActive()) {
-                $this->stableRepository->endActivity($stable, $retirementDate);
+                $stable->activityPeriods()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
             }
 
             // Retire current members who are available
@@ -82,23 +78,31 @@ class RetireAction extends BaseStableAction
             $tagTeamsToRetire = $stable->currentTagTeams
                 ->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isRetired());
 
-            $this->retireMembers(
-                $wrestlersToRetire,
-                $tagTeamsToRetire,
-                collect(), // Empty collection for managers since they're not direct members
-                $retirementDate,
-                $this->wrestlersRetireAction,
-                $this->tagTeamsRetireAction,
-                $this->managersRetireAction
-            );
+            // Retire wrestlers
+            $wrestlersToRetire->each(fn (Wrestler $wrestler) => $this->wrestlersRetireAction->handle($wrestler, $retirementDate));
+
+            // Retire tag teams
+            $tagTeamsToRetire->each(fn (TagTeam $tagTeam) => $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate));
 
             // End current memberships
             // Note: Managers are not direct stable members, so we don't remove them
-            $this->stableRepository->removeWrestlers($stable, $stable->currentWrestlers, $retirementDate);
-            $this->stableRepository->removeTagTeams($stable, $stable->currentTagTeams, $retirementDate);
+            $stable->currentWrestlers->each(function (Wrestler $wrestler) use ($stable, $retirementDate) {
+                $stable->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $retirementDate,
+                ]);
+            });
+
+            $stable->currentTagTeams->each(function (TagTeam $tagTeam) use ($stable, $retirementDate) {
+                $stable->tagTeams()->updateExistingPivot($tagTeam->id, [
+                    'left_at' => $retirementDate,
+                ]);
+            });
 
             // Create retirement record for the stable
-            $this->stableRepository->createRetirement($stable, $retirementDate);
+            $stable->retirements()->create([
+                'started_at' => $retirementDate,
+                'ended_at' => null,
+            ]);
         });
     }
 }

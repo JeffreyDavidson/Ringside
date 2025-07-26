@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class PullAction extends BaseTitleAction
+class PullAction
 {
     use AsAction;
 
@@ -45,11 +45,13 @@ class PullAction extends BaseTitleAction
     {
         $this->ensureCanBePulled($title);
 
-        $pullDate = $this->getEffectiveDate($pullDate);
+        $pullDate = $pullDate ?? now();
 
-        DB::transaction(function () use ($title, $pullDate, $notes): void {
-            // Pull the title from active competition (creates inactive period)
-            $this->titleRepository->pull($title, $pullDate, $notes);
+        DB::transaction(function () use ($title, $pullDate): void {
+            $currentActivityPeriod = $title->currentActivityPeriod()->first();
+            if ($currentActivityPeriod) {
+                $currentActivityPeriod->update(['ended_at' => $pullDate]);
+            }
         });
     }
 

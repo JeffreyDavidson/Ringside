@@ -7,16 +7,16 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
 use App\Data\TagTeams\TagTeamData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseTagTeamAction
+class CreateAction
 {
     use AsAction;
 
@@ -24,12 +24,9 @@ class CreateAction extends BaseTagTeamAction
      * Create a new create action instance.
      */
     public function __construct(
-        protected TagTeamRepository $tagTeamRepository,
         protected WrestlersEmployAction $wrestlersEmployAction,
         protected ManagersEmployAction $managersEmployAction
-    ) {
-        parent::__construct($tagTeamRepository);
-    }
+    ) {}
 
     /**
      * Create a tag team.
@@ -69,8 +66,12 @@ class CreateAction extends BaseTagTeamAction
     {
         return DB::transaction(function () use ($tagTeamData): TagTeam {
             // Create the base tag team record
-            $tagTeam = $this->tagTeamRepository->create($tagTeamData);
-            $datetime = $this->getEffectiveDate();
+            $tagTeam = TagTeam::query()->create([
+                'name' => $tagTeamData->name,
+                'signature_move' => $tagTeamData->signature_move,
+            ]);
+
+            $datetime = now();
 
             // Prepare member collections
             $wrestlers = collect([$tagTeamData->wrestlerA, $tagTeamData->wrestlerB])->filter();
@@ -101,7 +102,11 @@ class CreateAction extends BaseTagTeamAction
         if ($wrestlersCollection->isNotEmpty()) {
             // Convert to Eloquent Collection if needed
             $eloquentCollection = new \Illuminate\Database\Eloquent\Collection($wrestlersCollection->all());
-            $this->tagTeamRepository->addWrestlers($tagTeam, $eloquentCollection, $datetime);
+            $eloquentCollection->each(function (Wrestler $wrestler) use ($tagTeam, $datetime): void {
+                $tagTeam->wrestlers()->attach($wrestler->getKey(), [
+                    'joined_at' => $datetime->toDateTimeString(),
+                ]);
+            });
         }
     }
 
@@ -116,7 +121,13 @@ class CreateAction extends BaseTagTeamAction
             ->ensure(Manager::class)
             ->values(); // Reset keys to be sequential integers
 
-        $managersCollection->whenNotEmpty(fn (Collection $managers) => $this->tagTeamRepository->addManagers($tagTeam, $managers, $datetime));
+        $managersCollection->whenNotEmpty(function (Collection $managers) use ($tagTeam, $datetime) {
+            $managers->each(function (Manager $manager) use ($tagTeam, $datetime): void {
+                $tagTeam->managers()->attach($manager->getKey(), [
+                    'hired_at' => $datetime->toDateTimeString(),
+                ]);
+            });
+        });
     }
 
     /**
@@ -131,7 +142,14 @@ class CreateAction extends BaseTagTeamAction
             return;
         }
 
-        $this->tagTeamRepository->createEmployment($tagTeam, $employmentDate);
+        // Create or update the employment relationship
+        $tagTeam->employments()->updateOrCreate(
+            ['ended_at' => null],
+            ['started_at' => $employmentDate->toDateTimeString()]
+        );
+
+        // Update the status field to reflect employment
+        $tagTeam->update(['status' => EmploymentStatus::Employed]); // @phpstan-ignore-line method.notFound
 
         // Employ wrestlers if they're not already employed
         $wrestlers

@@ -8,9 +8,10 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseWrestlerAction
+class ReinstateAction
 {
     use AsAction;
 
@@ -37,20 +38,27 @@ class ReinstateAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
-        // Validate business rules before proceeding
         $this->validateCanBeReinstated($wrestler);
 
-        $reinstatementDate = $this->getEffectiveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
-        // End current suspension if active
-        if ($wrestler->isSuspended()) {
-            $this->wrestlerRepository->endSuspension($wrestler, $reinstatementDate);
-        }
+        DB::transaction(function () use ($wrestler, $reinstatementDate): void {
+            // End current suspension if active
+            if ($wrestler->isSuspended()) {
+                $currentSuspension = $wrestler->currentSuspension()->first();
+                if ($currentSuspension) {
+                    $currentSuspension->update(['ended_at' => $reinstatementDate]);
+                }
+            }
 
-        // End current injury if active
-        if ($wrestler->isInjured()) {
-            $this->wrestlerRepository->endInjury($wrestler, $reinstatementDate);
-        }
+            // End current injury if active
+            if ($wrestler->isInjured()) {
+                $currentInjury = $wrestler->currentInjury()->first();
+                if ($currentInjury) {
+                    $currentInjury->update(['ended_at' => $reinstatementDate->toDateTimeString()]);
+                }
+            }
+        });
     }
 
     /**

@@ -6,19 +6,12 @@ namespace App\Actions\Titles;
 
 use App\Data\Titles\TitleData;
 use App\Models\Titles\Title;
-use App\Repositories\TitleRepository;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseTitleAction
+class UpdateAction
 {
     use AsAction;
-
-    public function __construct(
-        TitleRepository $titleRepository
-    ) {
-        parent::__construct($titleRepository);
-    }
 
     /**
      * Update a title.
@@ -54,12 +47,18 @@ class UpdateAction extends BaseTitleAction
     {
         return DB::transaction(function () use ($title, $titleData): Title {
             // Update the title's basic information
-            $this->titleRepository->update($title, $titleData);
+            $title->update([
+                'name' => $titleData->name,
+                'type' => $titleData->type,
+            ]);
 
             // Handle conditional debut creation - only debut titles that have never debuted before
             // Note: This will not reactivate pulled titles - use ReinstateAction for that
             if (! is_null($titleData->debut_date) && ! $title->hasDebuted()) {
-                $this->titleRepository->createDebut($title, $titleData->debut_date);
+                $title->activityPeriods()->create([
+                    'started_at' => $titleData->debut_date,
+                    'ended_at' => null,
+                ]);
             }
 
             return $title;

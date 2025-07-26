@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SuspendAction extends BaseManagerAction
+class SuspendAction
 {
     use AsAction;
 
@@ -40,10 +40,13 @@ class SuspendAction extends BaseManagerAction
     {
         $manager->ensureCanBeSuspended();
 
-        $suspensionDate = $this->getEffectiveDate($suspensionDate);
+        $suspensionDate = $suspensionDate ?? now();
 
         DB::transaction(function () use ($manager, $suspensionDate): void {
-            $this->managerRepository->createSuspension($manager, $suspensionDate);
+            // Create suspension record
+            $manager->suspensions()->create([
+                'started_at' => $suspensionDate,
+            ]);
         });
     }
 }

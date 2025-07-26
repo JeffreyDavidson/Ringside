@@ -6,10 +6,9 @@ namespace App\Actions\Events;
 
 use App\Models\Events\Event;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseEventAction
+class DeleteAction
 {
     use AsAction;
 
@@ -49,19 +48,6 @@ class DeleteAction extends BaseEventAction
      */
     public function handle(Event $event, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
-
-        DB::transaction(function () use ($event): void {
-            // Handle associated matches and bookings
-            // Note: Match cleanup is handled automatically by the repository
-            // through proper foreign key constraints and cascade rules
-
-            // Record deletion for audit trail
-            // Note: Deletion tracking is handled by Laravel's soft delete timestamps
-            // The $deletionDate is available for any future audit trail needs
-
-            // Soft delete the event record
-            $this->eventRepository->delete($event);
-        });
+        $event->delete();
     }
 }

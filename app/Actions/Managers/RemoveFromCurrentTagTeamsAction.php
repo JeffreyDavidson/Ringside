@@ -8,13 +8,13 @@ use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RemoveFromCurrentTagTeamsAction extends BaseManagerAction
+class RemoveFromCurrentTagTeamsAction
 {
     use AsAction;
 
     public function handle(Manager $manager, ?Carbon $removalDate = null): void
     {
         $removalDate = $removalDate ?? now();
-        $this->managerRepository->removeFromCurrentTagTeams($manager, $removalDate);
+        $manager->currentTagTeamTenures()->update(['ended_at' => $removalDate]);
     }
 }

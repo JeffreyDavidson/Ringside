@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeleteAction extends BaseStableAction
+class DeleteAction
 {
     use AsAction;
 
@@ -54,25 +54,33 @@ class DeleteAction extends BaseStableAction
      */
     public function handle(Stable $stable, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $this->getEffectiveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($stable, $deletionDate): void {
             // Handle stable status - debuted stables need debut period ended
             if ($stable->hasDebuted()) {
-                $this->stableRepository->endActivity($stable, $deletionDate);
+                $stable->activityPeriods()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             }
 
             // End current wrestler memberships (wrestlers continue as singles)
-            $this->stableRepository->removeWrestlers($stable, $stable->currentWrestlers, $deletionDate);
+            $stable->currentWrestlers->each(function ($wrestler) use ($stable, $deletionDate) {
+                $stable->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $deletionDate,
+                ]);
+            });
 
             // End current tag team memberships (tag teams continue independently)
-            $this->stableRepository->removeTagTeams($stable, $stable->currentTagTeams, $deletionDate);
+            $stable->currentTagTeams->each(function ($tagTeam) use ($stable, $deletionDate) {
+                $stable->tagTeams()->updateExistingPivot($tagTeam->id, [
+                    'left_at' => $deletionDate,
+                ]);
+            });
 
             // Manager associations automatically end when wrestler/tag team memberships end
             // No direct manager removal needed since managers are associated through wrestlers/tag teams
 
             // Soft delete the stable record
-            $this->stableRepository->delete($stable);
+            $stable->delete();
         });
     }
 }

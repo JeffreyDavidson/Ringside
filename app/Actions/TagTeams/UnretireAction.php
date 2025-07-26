@@ -6,16 +6,16 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\UnretireAction as ManagersUnretireAction;
 use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\TagTeamRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseTagTeamAction
+class UnretireAction
 {
     use AsAction;
 
@@ -23,12 +23,9 @@ class UnretireAction extends BaseTagTeamAction
      * Create a new unretire action instance.
      */
     public function __construct(
-        protected TagTeamRepository $tagTeamRepository,
         protected WrestlersUnretireAction $wrestlersUnretireAction,
         protected ManagersUnretireAction $managersUnretireAction
-    ) {
-        parent::__construct($tagTeamRepository);
-    }
+    ) {}
 
     /**
      * Unretire a retired tag team and return them to active competition.
@@ -60,11 +57,11 @@ class UnretireAction extends BaseTagTeamAction
     {
         $tagTeam->ensureCanBeUnretired();
 
-        $unretiredDate = $this->getEffectiveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $unretiredDate): void {
             // End the current retirement record
-            $this->tagTeamRepository->endRetirement($tagTeam, $unretiredDate);
+            $tagTeam->employments()->where('ended_at', null)->update(['ended_at' => $unretiredDate]);
 
             // Unretire current wrestlers and managers who were retired with the team
             $wrestlersToUnretire = $tagTeam->currentWrestlers
@@ -72,10 +69,18 @@ class UnretireAction extends BaseTagTeamAction
             $managersToUnretire = $tagTeam->currentManagers
                 ->filter(fn (Manager $manager) => $manager->isRetired());
 
-            $this->unretireMembers($wrestlersToUnretire, $managersToUnretire, $unretiredDate, $this->wrestlersUnretireAction, $this->managersUnretireAction);
+            // Unretire the provided wrestlers
+            $wrestlersToUnretire->each(fn (Wrestler $wrestler) => $this->wrestlersUnretireAction->handle($wrestler, $unretiredDate));
+
+            // Unretire the provided managers
+            $managersToUnretire->each(fn (Manager $manager) => $this->managersUnretireAction->handle($manager, $unretiredDate));
 
             // Create a new employment record starting from the unretirement date
-            $this->tagTeamRepository->createEmployment($tagTeam, $unretiredDate);
+            $tagTeam->employments()->create([
+                'started_at' => $unretiredDate,
+                'ended_at' => null,
+                'status' => EmploymentStatus::Employed,
+            ]);
         });
     }
 }

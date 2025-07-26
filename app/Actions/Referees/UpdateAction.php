@@ -5,20 +5,14 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Data\Referees\RefereeData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
-use App\Repositories\RefereeRepository;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseRefereeAction
+class UpdateAction
 {
     use AsAction;
-
-    public function __construct(
-        RefereeRepository $refereeRepository
-    ) {
-        parent::__construct($refereeRepository);
-    }
 
     /**
      * Update a referee.
@@ -45,14 +39,21 @@ class UpdateAction extends BaseRefereeAction
     {
         return DB::transaction(function () use ($referee, $refereeData): Referee {
             // Update the referee's basic information
-            $this->refereeRepository->update($referee, $refereeData);
-
-            // Track if referee was just employed
-            $wasEmployed = $referee->isEmployed();
+            $referee->update([
+                'first_name' => $refereeData->first_name,
+                'last_name' => $refereeData->last_name,
+            ]);
 
             // Create employment record if employment_date is provided and referee is eligible
             if (! is_null($refereeData->employment_date) && ! $referee->isEmployed()) {
-                $this->refereeRepository->createEmployment($referee, $refereeData->employment_date);
+                // Create employment record
+                $referee->employments()->updateOrCreate(
+                    ['ended_at' => null],
+                    ['started_at' => $refereeData->employment_date->toDateTimeString()]
+                );
+
+                // Update the status field to reflect employment
+                $referee->update(['status' => EmploymentStatus::Employed]);
             }
 
             return $referee;

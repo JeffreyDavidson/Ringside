@@ -9,7 +9,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class InjureAction extends BaseWrestlerAction
+class InjureAction
 {
     use AsAction;
 
@@ -37,11 +37,10 @@ class InjureAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $injuryDate = null): void
     {
-        // Validate business rules before proceeding
         $wrestler->ensureCanBeInjured();
 
-        $injuryDate = $this->getEffectiveDate($injuryDate);
+        $injuryDate = $injuryDate ?? now();
 
-        $this->wrestlerRepository->createInjury($wrestler, $injuryDate);
+        $wrestler->injuries()->create(['started_at' => $injuryDate]);
     }
 }

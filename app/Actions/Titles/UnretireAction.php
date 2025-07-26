@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseTitleAction
+class UnretireAction
 {
     use AsAction;
 
@@ -42,14 +42,13 @@ class UnretireAction extends BaseTitleAction
     {
         $title->ensureCanBeUnretired();
 
-        $unretiredDate = $this->getEffectiveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($title, $unretiredDate): void {
-            // End the current retirement record
-            $this->titleRepository->endRetirement($title, $unretiredDate);
-
-            // Note: Title is now available for competition but requires separate debut/reinstate action
-            // to become active. This preserves the distinction between retired->available and available->active.
+            $currentRetirement = $title->currentRetirement()->first();
+            if ($currentRetirement) {
+                $currentRetirement->update(['ended_at' => $unretiredDate]);
+            }
         });
     }
 }

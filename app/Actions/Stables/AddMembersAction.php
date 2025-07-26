@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class AddMembersAction extends BaseStableAction
+class AddMembersAction
 {
     use AsAction;
 
@@ -27,14 +27,24 @@ class AddMembersAction extends BaseStableAction
         Collection $tagTeams,
         ?Carbon $joinedDate = null
     ): void {
-        $joinedDate ??= now();
+        $joinedDate = $joinedDate ?? now();
 
         if ($wrestlers->isNotEmpty()) {
-            $this->stableRepository->addWrestlers($stable, $wrestlers, $joinedDate);
+            foreach ($wrestlers as $wrestler) {
+                $stable->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $joinedDate,
+                    'left_at' => null,
+                ]);
+            }
         }
 
         if ($tagTeams->isNotEmpty()) {
-            $this->stableRepository->addTagTeams($stable, $tagTeams, $joinedDate);
+            foreach ($tagTeams as $tagTeam) {
+                $stable->tagTeams()->attach($tagTeam->id, [
+                    'joined_at' => $joinedDate,
+                    'left_at' => null,
+                ]);
+            }
         }
     }
 }

@@ -45,7 +45,8 @@
       "Bash(app/Livewire/TagTeams/Forms/CreateEditForm.php.bak)",
       "Bash(for:*)",
       "Bash(./vendor/bin/phpstan:*)",
-      "Bash(vendor/bin/pint:*)"
+      "Bash(vendor/bin/pint:*)",
+      "Bash(composer test:*)"
     ],
     "deny": [],
     "defaultMode": "plan"

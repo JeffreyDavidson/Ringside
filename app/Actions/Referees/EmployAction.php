@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class EmployAction extends BaseRefereeAction
+class EmployAction
 {
     use AsAction;
 

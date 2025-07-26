@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateTagTeamPartnersAction extends BaseTagTeamAction
+class UpdateTagTeamPartnersAction
 {
     use AsAction;
 
@@ -25,7 +25,12 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
 
         if ($tagTeam->currentWrestlers->isEmpty()) {
             if ($wrestlers->isNotEmpty()) {
-                $this->tagTeamRepository->addWrestlers($tagTeam, $wrestlers, $joinDate);
+                foreach ($wrestlers as $wrestler) {
+                    $tagTeam->wrestlers()->attach($wrestler->id, [
+                        'joined_at' => $joinDate,
+                        'left_at' => null,
+                    ]);
+                }
             }
         } else {
             /** @var Collection<int, Wrestler> $formerTagTeamPartners */
@@ -36,7 +41,20 @@ class UpdateTagTeamPartnersAction extends BaseTagTeamAction
 
             $newTagTeamPartners = $wrestlers->except($formerTagTeamPartners->modelKeys());
 
-            $this->tagTeamRepository->syncWrestlers($tagTeam, $formerTagTeamPartners, $newTagTeamPartners, $joinDate);
+            // End partnerships for former partners
+            $formerTagTeamPartners->each(function (Wrestler $wrestler) use ($tagTeam, $joinDate) {
+                $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $joinDate,
+                ]);
+            });
+
+            // Add new partners
+            foreach ($newTagTeamPartners as $wrestler) {
+                $tagTeam->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $joinDate,
+                    'left_at' => null,
+                ]);
+            }
         }
     }
 }

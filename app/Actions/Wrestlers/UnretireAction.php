@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
@@ -40,19 +39,9 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * UnretireAction::run($wrestler, Carbon::parse('2024-06-01'));
  * ```
  */
-class UnretireAction extends BaseWrestlerAction
+class UnretireAction
 {
     use AsAction;
-
-    /**
-     * Create a new unretire action instance.
-     */
-    public function __construct(
-        WrestlerRepository $wrestlerRepository,
-        protected ManagersEmployAction $managersEmployAction
-    ) {
-        parent::__construct($wrestlerRepository);
-    }
 
     /**
      * Unretire a wrestler and make them available for employment.
@@ -77,11 +66,15 @@ class UnretireAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null): void
     {
-        // Validate business rules before proceeding
         $wrestler->ensureCanBeUnretired();
 
-        $unretirementDate = $this->getEffectiveDate($unretirementDate);
+        $unretirementDate = $unretirementDate ?? now();
 
-        $this->wrestlerRepository->endRetirement($wrestler, $unretirementDate);
+        DB::transaction(function () use ($wrestler, $unretirementDate): void {
+            $currentRetirement = $wrestler->currentRetirement()->first();
+            if ($currentRetirement) {
+                $currentRetirement->update(['ended_at' => $unretirementDate]);
+            }
+        });
     }
 }

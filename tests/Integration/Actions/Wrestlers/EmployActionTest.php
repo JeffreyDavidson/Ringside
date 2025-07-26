@@ -3,122 +3,140 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
-use App\Exceptions\Status\CannotBeEmployedException;
+use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerEmployment;
-use App\Repositories\WrestlerRepository;
 
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
-
-    $this->wrestlerRepository = $this->mock(WrestlerRepository::class);
 });
 
-test('it employs an employable wrestler at the current datetime by default', function ($factoryState) {
-    $wrestler = Wrestler::factory()->{$factoryState}()->create();
-    $wrestler = $wrestler->fresh();
-    $datetime = now();
+test('it employs an unemployed wrestler', function () {
+    $wrestler = Wrestler::factory()->create();
 
-    $this->wrestlerRepository
-        ->shouldReceive('createEmployment')
-        ->once()
-        ->with(
-            Mockery::on(fn ($w) => $w->id === $wrestler->id),
-            Mockery::on(fn ($d) => $d->eq($datetime))
-        )
-        ->andReturn($wrestler);
+    expect($wrestler->isEmployed())->toBeFalse();
 
-    resolve(EmployAction::class)->handle($wrestler);
-})->with([
-    'unemployed',
-    'released',
-]);
+    EmployAction::run($wrestler);
 
-test('it employs an employable wrestler at a specific datetime', function ($factoryState) {
-    $wrestler = Wrestler::factory()->{$factoryState}()->create();
-    $wrestler = $wrestler->fresh();
-    $datetime = now()->addDays(2);
+    $wrestler->refresh();
+    expect($wrestler->isEmployed())->toBeTrue();
 
-    $this->wrestlerRepository
-        ->shouldReceive('createEmployment')
-        ->once()
-        ->with(
-            Mockery::on(fn ($w) => $w->id === $wrestler->id),
-            Mockery::on(fn ($d) => $d->eq($datetime))
-        )
-        ->andReturn($wrestler);
-
-    resolve(EmployAction::class)->handle($wrestler, $datetime);
-})->with([
-    'unemployed',
-    'released',
-]);
-
-test('it employs a retired wrestler at the current datetime by default', function () {
-    $wrestler = Wrestler::factory()->retired()->create();
-    $datetime = now();
-
-    $this->wrestlerRepository
-        ->shouldReceive('endRetirement')
-        ->once()
-        ->with(
-            Mockery::on(fn ($w) => $w->id === $wrestler->id),
-            Mockery::on(fn ($d) => $d->eq($datetime))
-        )
-        ->andReturn($wrestler);
-
-    $this->wrestlerRepository
-        ->shouldReceive('createEmployment')
-        ->once()
-        ->with(
-            Mockery::on(fn ($w) => $w->id === $wrestler->id),
-            Mockery::on(fn ($d) => $d->eq($datetime))
-        )
-        ->andReturn($wrestler);
-
-    resolve(EmployAction::class)->handle($wrestler);
+    $this->assertDatabaseHas('wrestlers_employments', [
+        'wrestler_id' => $wrestler->id,
+        'started_at' => now()->toDateTimeString(),
+        'ended_at' => null,
+    ]);
 });
 
-test('it employs a retired wrestler at a specific datetime', function () {
-    $wrestler = Wrestler::factory()->retired()->create();
-    $datetime = now()->addDays(2);
+test('it employs wrestler with specific employment date', function () {
+    $wrestler = Wrestler::factory()->create();
+    $employmentDate = now()->subDays(30);
 
-    $this->wrestlerRepository
-        ->shouldReceive('endRetirement')
-        ->once()
-        ->with(
-            Mockery::on(fn ($w) => $w->id === $wrestler->id),
-            Mockery::on(fn ($d) => $d->eq($datetime))
-        )
-        ->andReturn($wrestler);
+    EmployAction::run($wrestler, $employmentDate);
 
-    $this->wrestlerRepository
-        ->shouldReceive('createEmployment')
-        ->once()
-        ->with(
-            Mockery::on(fn ($w) => $w->id === $wrestler->id),
-            Mockery::on(fn ($d) => $d->eq($datetime))
-        )
-        ->andReturn($wrestler);
+    $wrestler->refresh();
+    expect($wrestler->isEmployed())->toBeTrue();
 
-    resolve(EmployAction::class)->handle($wrestler, $datetime);
+    $this->assertDatabaseHas('wrestlers_employments', [
+        'wrestler_id' => $wrestler->id,
+        'started_at' => $employmentDate->toDateTimeString(),
+        'ended_at' => null,
+    ]);
 });
 
-test('it throws exception for employing a non employable wrestler', function ($factoryState) {
-    $wrestler = Wrestler::factory()->{$factoryState}()->create();
-    $wrestler = $wrestler->fresh();
-    if ($factoryState === 'employed') {
-        WrestlerEmployment::factory()->for($wrestler)->create(['ended_at' => null]);
-        $wrestler = Wrestler::with('employments')->find($wrestler->id);
-    }
+test('it employs suspended wrestler and ends suspension', function () {
+    $wrestler = Wrestler::factory()->suspended()->create();
 
-    $this->wrestlerRepository
-        ->shouldReceive('createEmployment')
-        ->zeroOrMoreTimes();
+    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->isEmployed())->toBeFalse();
 
-    resolve(EmployAction::class)->handle($wrestler);
-})->throws(CannotBeEmployedException::class)->with([
-    'withFutureEmployment',
-]);
+    EmployAction::run($wrestler);
+
+    $wrestler->refresh();
+    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->isSuspended())->toBeFalse();
+
+    // Suspension should be ended
+    $this->assertDatabaseHas('wrestlers_suspensions', [
+        'wrestler_id' => $wrestler->id,
+        'ended_at' => now()->toDateTimeString(),
+    ]);
+
+    // Employment should be created
+    $this->assertDatabaseHas('wrestlers_employments', [
+        'wrestler_id' => $wrestler->id,
+        'started_at' => now()->toDateTimeString(),
+        'ended_at' => null,
+    ]);
+});
+
+test('it employs injured wrestler and ends injury', function () {
+    $wrestler = Wrestler::factory()->injured()->create();
+
+    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->isEmployed())->toBeFalse();
+
+    EmployAction::run($wrestler);
+
+    $wrestler->refresh();
+    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->isInjured())->toBeFalse();
+
+    // Injury should be ended
+    $this->assertDatabaseHas('wrestler_injuries', [
+        'wrestler_id' => $wrestler->id,
+        'ended_at' => now()->toDateTimeString(),
+    ]);
+
+    // Employment should be created
+    $this->assertDatabaseHas('wrestlers_employments', [
+        'wrestler_id' => $wrestler->id,
+        'started_at' => now()->toDateTimeString(),
+        'ended_at' => null,
+    ]);
+});
+
+test('it employs wrestler and also employs unemployed managers', function () {
+    $wrestler = Wrestler::factory()->create();
+    $manager1 = Manager::factory()->create(); // unemployed
+    $manager2 = Manager::factory()->employed()->create(); // already employed
+
+    // Assign managers to wrestler
+    $wrestler->managers()->attach($manager1->id, ['hired_at' => now()->subDays(10)]);
+    $wrestler->managers()->attach($manager2->id, ['hired_at' => now()->subDays(5)]);
+
+    expect($wrestler->isEmployed())->toBeFalse();
+    expect($manager1->isEmployed())->toBeFalse();
+    expect($manager2->isEmployed())->toBeTrue();
+
+    EmployAction::run($wrestler);
+
+    $wrestler->refresh();
+    $manager1->refresh();
+    $manager2->refresh();
+
+    expect($wrestler->isEmployed())->toBeTrue();
+    expect($manager1->isEmployed())->toBeTrue(); // Should now be employed
+    expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
+
+    // Both wrestler and manager1 should have new employment records
+    $this->assertDatabaseHas('wrestlers_employments', [
+        'wrestler_id' => $wrestler->id,
+        'ended_at' => null,
+    ]);
+
+    $this->assertDatabaseHas('managers_employments', [
+        'manager_id' => $manager1->id,
+        'ended_at' => null,
+    ]);
+});
+
+test('it prevents employing already employed wrestler', function () {
+    $wrestler = Wrestler::factory()->employed()->create();
+
+    expect($wrestler->isEmployed())->toBeTrue();
+
+    expect(fn () => EmployAction::run($wrestler))
+        ->toThrow(Exception::class);
+});

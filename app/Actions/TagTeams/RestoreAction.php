@@ -8,7 +8,7 @@ use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseTagTeamAction
+class RestoreAction
 {
     use AsAction;
 
@@ -38,11 +38,20 @@ class RestoreAction extends BaseTagTeamAction
     public function handle(TagTeam $tagTeam, bool $forceReunite = false): void
     {
         DB::transaction(function () use ($tagTeam, $forceReunite): void {
-            $this->tagTeamRepository->restore($tagTeam);
-            $restorationDate = $this->getEffectiveDate();
+            $tagTeam->restore();
+            $restorationDate = now();
 
             // Attempt to restore former members if available and not in other teams
-            $this->restoreFormerMembers($tagTeam, $restorationDate, $forceReunite, $this->tagTeamRepository);
+            if ($forceReunite) {
+                // Force former members out of current teams if requested
+                $tagTeam->wrestlers()->withTrashed()->get()->each(function ($wrestler) use ($restorationDate) {
+                    // End current team memberships
+                    $wrestler->tagTeams()->wherePivot('left_at', null)->updateExistingPivot(
+                        '*',
+                        ['left_at' => $restorationDate]
+                    );
+                });
+            }
 
             // Note: No automatic employment restoration to avoid conflicts.
             // All employment relationships must be re-established explicitly using separate actions.

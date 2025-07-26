@@ -7,9 +7,10 @@ namespace App\Actions\Stables;
 use App\Exceptions\CannotBeDeactivatedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DeactivateAction extends BaseStableAction
+class DeactivateAction
 {
     use AsAction;
 
@@ -22,10 +23,19 @@ class DeactivateAction extends BaseStableAction
     {
         $this->ensureCanBeDeactivated($stable);
 
-        $deactivationDate ??= now();
+        $deactivationDate = $deactivationDate ?? now();
 
-        $this->stableRepository->endActivity($stable, $deactivationDate);
-        $this->stableRepository->disassembleAllMembers($stable, $deactivationDate);
+        DB::transaction(function () use ($stable, $deactivationDate): void {
+            // End current activity period
+            $currentActivityPeriod = $stable->currentActivityPeriod()->first();
+            if ($currentActivityPeriod) {
+                $currentActivityPeriod->update(['ended_at' => $deactivationDate]);
+            }
+
+            // End all current member tenures
+            $stable->currentWrestlerTenures()->update(['left_at' => $deactivationDate]);
+            $stable->currentTagTeamTenures()->update(['left_at' => $deactivationDate]);
+        });
     }
 
     /**

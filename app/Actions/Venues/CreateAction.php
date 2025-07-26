@@ -8,7 +8,7 @@ use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseVenueAction
+class CreateAction
 {
     use AsAction;
 
@@ -37,6 +37,12 @@ class CreateAction extends BaseVenueAction
      */
     public function handle(VenueData $venueData): Venue
     {
-        return $this->venueRepository->create($venueData);
+        return Venue::query()->create([
+            'name' => $venueData->name,
+            'street_address' => $venueData->street_address,
+            'city' => $venueData->city,
+            'state' => $venueData->state,
+            'zipcode' => $venueData->zipcode,
+        ]);
     }
 }

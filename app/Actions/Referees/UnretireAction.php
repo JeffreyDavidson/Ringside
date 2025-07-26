@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UnretireAction extends BaseRefereeAction
+class UnretireAction
 {
     use AsAction;
 
@@ -41,14 +42,22 @@ class UnretireAction extends BaseRefereeAction
     {
         $referee->ensureCanBeUnretired();
 
-        $unretiredDate = $this->getEffectiveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
             // End the current retirement record
-            $this->refereeRepository->endRetirement($referee, $unretiredDate);
+            $currentRetirement = $referee->currentRetirement()->first();
+            if ($currentRetirement) {
+                $currentRetirement->update(['ended_at' => $unretiredDate]);
+            }
 
             // Create a new employment record starting from the unretirement date
-            $this->refereeRepository->createEmployment($referee, $unretiredDate);
+            $referee->employments()->updateOrCreate(
+                ['ended_at' => null],
+                ['started_at' => $unretiredDate->toDateTimeString()]
+            );
+
+            $referee->update(['status' => EmploymentStatus::Employed]);
         });
     }
 }

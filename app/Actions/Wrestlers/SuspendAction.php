@@ -9,7 +9,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SuspendAction extends BaseWrestlerAction
+class SuspendAction
 {
     use AsAction;
 
@@ -37,11 +37,10 @@ class SuspendAction extends BaseWrestlerAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void
     {
-        // Validate business rules before proceeding
         $wrestler->ensureCanBeSuspended();
 
-        $suspensionDate = $this->getEffectiveDate($suspensionDate);
+        $suspensionDate = $suspensionDate ?? now();
 
-        $this->wrestlerRepository->createSuspension($wrestler, $suspensionDate);
+        $wrestler->suspensions()->create(['started_at' => $suspensionDate]);
     }
 }

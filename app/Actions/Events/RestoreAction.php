@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Models\Events\Event;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RestoreAction extends BaseEventAction
+class RestoreAction
 {
     use AsAction;
 
@@ -33,12 +32,6 @@ class RestoreAction extends BaseEventAction
      */
     public function handle(Event $event): void
     {
-        DB::transaction(function () use ($event): void {
-            $this->eventRepository->restore($event);
-
-            // Note: No automatic match restoration to avoid conflicts.
-            // All match relationships must be re-established explicitly using separate actions.
-            // Venue booking and promotional data are preserved automatically.
-        });
+        $event->restore();
     }
 }

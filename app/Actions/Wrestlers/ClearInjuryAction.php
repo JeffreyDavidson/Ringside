@@ -14,15 +14,13 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * This is an alias for HealAction to maintain backward compatibility with tests.
  * Use HealAction for new code.
  */
-class ClearInjuryAction extends BaseWrestlerAction
+class ClearInjuryAction
 {
     use AsAction;
 
     public function __construct(
         private HealAction $healAction
-    ) {
-        parent::__construct($this->healAction->wrestlerRepository);
-    }
+    ) {}
 
     /**
      * Clear injury from a wrestler.

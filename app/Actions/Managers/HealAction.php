@@ -6,20 +6,13 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Status\CannotBeClearedFromInjuryException;
 use App\Models\Managers\Manager;
-use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class HealAction extends BaseManagerAction
+class HealAction
 {
     use AsAction;
-
-    public function __construct(
-        ManagerRepository $managerRepository
-    ) {
-        parent::__construct($managerRepository);
-    }
 
     /**
      * Heal a manager from injury and return them to active management.
@@ -48,10 +41,14 @@ class HealAction extends BaseManagerAction
     {
         $manager->ensureCanBeHealed();
 
-        $recoveryDate = $this->getEffectiveDate($recoveryDate);
+        $recoveryDate = $recoveryDate ?? now();
 
         DB::transaction(function () use ($manager, $recoveryDate): void {
-            $this->managerRepository->endInjury($manager, $recoveryDate);
+            // End current injury to heal the manager
+            $currentInjury = $manager->currentInjury()->first();
+            if ($currentInjury) {
+                $currentInjury->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+            }
         });
     }
 }

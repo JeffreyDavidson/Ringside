@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class DebutAction extends BaseTitleAction
+class DebutAction
 {
     use AsAction;
 
@@ -42,11 +42,13 @@ class DebutAction extends BaseTitleAction
     {
         $title->ensureCanBeDebuted();
 
-        $debutDate = $this->getEffectiveDate($debutDate);
+        $debutDate = $debutDate ?? now();
 
-        DB::transaction(function () use ($title, $debutDate, $notes): void {
-            // Create the debut record and activate the title for competition
-            $this->titleRepository->createDebut($title, $debutDate, $notes);
+        DB::transaction(function () use ($title, $debutDate): void {
+            $title->activityPeriods()->updateOrCreate(
+                ['ended_at' => null],
+                ['started_at' => $debutDate->toDateTimeString()]
+            );
         });
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class HealAction extends BaseWrestlerAction
+class HealAction
 {
     use AsAction;
 
@@ -27,10 +27,14 @@ class HealAction extends BaseWrestlerAction
     {
         $wrestler->ensureCanBeHealed();
 
-        $recoveryDate = $this->getEffectiveDate($recoveryDate);
+        $recoveryDate = $recoveryDate ?? now();
 
         DB::transaction(function () use ($wrestler, $recoveryDate): void {
-            $this->wrestlerRepository->endInjury($wrestler, $recoveryDate);
+            $currentInjury = $wrestler->currentInjury()->first();
+
+            if ($currentInjury) {
+                $currentInjury->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+            }
 
             // Note: Tag team bookability is handled automatically by the isBookable() method
             // which checks if all current wrestlers are available for competition

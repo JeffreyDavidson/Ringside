@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseTitleAction
+class RetireAction
 {
     use AsAction;
 
@@ -42,24 +42,25 @@ class RetireAction extends BaseTitleAction
     {
         $title->ensureCanBeRetired();
 
-        $retirementDate = $this->getEffectiveDate($retirementDate);
+        $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($title, $retirementDate): void {
             // Handle title status - active titles need to be pulled before retirement
             if ($title->hasActivityPeriods() && $title->isCurrentlyActive()) {
-                // Pull the title from active competition before retiring
-                $this->titleRepository->pull($title, $retirementDate);
+                $currentActivityPeriod = $title->currentActivityPeriod()->first();
+                if ($currentActivityPeriod) {
+                    $currentActivityPeriod->update(['ended_at' => $retirementDate]);
+                }
             }
 
             // End current championship if title has an active champion
             $currentChampionship = $title->currentChampionship;
             if ($currentChampionship) {
-                // End the championship when title is retired
                 $currentChampionship->update(['lost_at' => $retirementDate]);
             }
 
             // Create the retirement record to permanently end the title's lineage
-            $this->titleRepository->createRetirement($title, $retirementDate);
+            $title->retirements()->create(['started_at' => $retirementDate]);
         });
     }
 }

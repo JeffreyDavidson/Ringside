@@ -9,7 +9,7 @@ use App\Models\Stables\Stable;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseStableAction
+class CreateAction
 {
     use AsAction;
 
@@ -49,15 +49,31 @@ class CreateAction extends BaseStableAction
     public function handle(StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stableData): Stable {
-            $stable = $this->stableRepository->create($stableData);
+            $stable = Stable::create($stableData->toArray());
 
             $joinDate = $stableData->start_date ?? now();
 
-            $this->stableRepository->addWrestlers($stable, $stableData->wrestlers, $joinDate);
-            $this->stableRepository->addTagTeams($stable, $stableData->tagTeams, $joinDate);
+            // Add wrestlers
+            foreach ($stableData->wrestlers as $wrestler) {
+                $stable->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $joinDate,
+                    'left_at' => null,
+                ]);
+            }
+
+            // Add tag teams
+            foreach ($stableData->tagTeams as $tagTeam) {
+                $stable->tagTeams()->attach($tagTeam->id, [
+                    'joined_at' => $joinDate,
+                    'left_at' => null,
+                ]);
+            }
 
             if (isset($stableData->start_date)) {
-                $this->stableRepository->createActivity($stable, $stableData->start_date);
+                $stable->activityPeriods()->create([
+                    'started_at' => $stableData->start_date,
+                    'ended_at' => null,
+                ]);
             }
 
             return $stable;

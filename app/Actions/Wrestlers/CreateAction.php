@@ -6,12 +6,12 @@ namespace App\Actions\Wrestlers;
 
 use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Data\Wrestlers\WrestlerData;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
-use App\Repositories\WrestlerRepository;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class CreateAction extends BaseWrestlerAction
+class CreateAction
 {
     use AsAction;
 
@@ -19,11 +19,8 @@ class CreateAction extends BaseWrestlerAction
      * Create a new wrestler create action instance.
      */
     public function __construct(
-        WrestlerRepository $wrestlerRepository,
         protected ManagersEmployAction $managersEmployAction
-    ) {
-        parent::__construct($wrestlerRepository);
-    }
+    ) {}
 
     /**
      * Create a new wrestler and establish their career.
@@ -55,20 +52,33 @@ class CreateAction extends BaseWrestlerAction
     public function handle(WrestlerData $wrestlerData): Wrestler
     {
         return DB::transaction(function () use ($wrestlerData): Wrestler {
-            $wrestler = $this->wrestlerRepository->create($wrestlerData);
+            $wrestler = Wrestler::query()->create([
+                'name' => $wrestlerData->name,
+                'height' => $wrestlerData->height,
+                'weight' => $wrestlerData->weight,
+                'hometown' => $wrestlerData->hometown,
+                'signature_move' => $wrestlerData->signature_move,
+            ]);
 
             // Handle wrestler employment
             if (isset($wrestlerData->employment_date)) {
-                $this->wrestlerRepository->createEmployment($wrestler, $wrestlerData->employment_date);
+                $wrestler->employments()->create([
+                    'started_at' => $wrestlerData->employment_date,
+                    'ended_at' => null,
+                    'status' => EmploymentStatus::Employed,
+                ]);
             }
 
             // Handle manager assignment and employment
             if (isset($wrestlerData->managers) && ! empty($wrestlerData->managers)) {
-                $datetime = $this->getEffectiveDate($wrestlerData->employment_date);
+                $datetime = $wrestlerData->employment_date ?? now();
 
                 // Assign managers to wrestler and employ them if needed
                 foreach ($wrestlerData->managers as $manager) {
-                    $this->wrestlerRepository->addManager($wrestler, $manager, $datetime);
+                    $wrestler->managers()->attach($manager->id, [
+                        'hired_at' => $datetime,
+                        'fired_at' => null,
+                    ]);
 
                     if (! $manager->isEmployed()) {
                         $this->managersEmployAction->handle($manager, $datetime);

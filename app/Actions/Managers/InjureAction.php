@@ -6,20 +6,13 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Status\CannotBeInjuredException;
 use App\Models\Managers\Manager;
-use App\Repositories\ManagerRepository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class InjureAction extends BaseManagerAction
+class InjureAction
 {
     use AsAction;
-
-    public function __construct(
-        ManagerRepository $managerRepository
-    ) {
-        parent::__construct($managerRepository);
-    }
 
     /**
      * Record a manager injury.
@@ -47,10 +40,11 @@ class InjureAction extends BaseManagerAction
     {
         $manager->ensureCanBeInjured();
 
-        $injureDate = $this->getEffectiveDate($injureDate);
+        $injureDate = $injureDate ?? now();
 
         DB::transaction(function () use ($manager, $injureDate): void {
-            $this->managerRepository->createInjury($manager, $injureDate);
+            // Create injury record
+            $manager->injuries()->create(['started_at' => $injureDate->toDateTimeString()]);
         });
     }
 }

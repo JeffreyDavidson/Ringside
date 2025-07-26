@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class MergeStablesAction extends BaseStableAction
+class MergeStablesAction
 {
     use AsAction;
 
@@ -31,14 +31,28 @@ class MergeStablesAction extends BaseStableAction
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
             // Transfer all wrestlers
             foreach ($secondaryStable->currentWrestlers as $wrestler) {
-                $this->stableRepository->removeWrestler($secondaryStable, $wrestler, $date);
-                $this->stableRepository->addWrestler($primaryStable, $wrestler, $date);
+                // Remove from secondary stable
+                $secondaryStable->wrestlers()->updateExistingPivot($wrestler->id, [
+                    'left_at' => $date,
+                ]);
+
+                // Add to primary stable
+                $primaryStable->wrestlers()->attach($wrestler->id, [
+                    'joined_at' => $date,
+                ]);
             }
 
             // Transfer all tag teams
             foreach ($secondaryStable->currentTagTeams as $tagTeam) {
-                $this->stableRepository->removeTagTeam($secondaryStable, $tagTeam, $date);
-                $this->stableRepository->addTagTeam($primaryStable, $tagTeam, $date);
+                // Remove from secondary stable
+                $secondaryStable->tagTeams()->updateExistingPivot($tagTeam->id, [
+                    'left_at' => $date,
+                ]);
+
+                // Add to primary stable
+                $primaryStable->tagTeams()->attach($tagTeam->id, [
+                    'joined_at' => $date,
+                ]);
             }
 
             // Note: Managers are not direct stable members and are automatically

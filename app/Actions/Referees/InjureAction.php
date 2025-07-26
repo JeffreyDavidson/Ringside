@@ -7,10 +7,9 @@ namespace App\Actions\Referees;
 use App\Exceptions\Status\CannotBeInjuredException;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class InjureAction extends BaseRefereeAction
+class InjureAction
 {
     use AsAction;
 
@@ -40,10 +39,8 @@ class InjureAction extends BaseRefereeAction
     {
         $referee->ensureCanBeInjured();
 
-        $injureDate = $this->getEffectiveDate($injureDate);
+        $injureDate = $injureDate ?? now();
 
-        DB::transaction(function () use ($referee, $injureDate): void {
-            $this->refereeRepository->createInjury($referee, $injureDate);
-        });
+        $referee->injuries()->create(['started_at' => $injureDate]);
     }
 }

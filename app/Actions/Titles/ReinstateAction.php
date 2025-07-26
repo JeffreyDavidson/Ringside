@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReinstateAction extends BaseTitleAction
+class ReinstateAction
 {
     use AsAction;
 
@@ -42,11 +42,13 @@ class ReinstateAction extends BaseTitleAction
     {
         $title->ensureCanBeReinstated();
 
-        $reinstateDate = $this->getEffectiveDate($reinstateDate);
+        $reinstateDate = $reinstateDate ?? now();
 
-        DB::transaction(function () use ($title, $reinstateDate, $notes): void {
-            // Create reinstatement record to reactivate the title for competition
-            $this->titleRepository->createReinstatement($title, $reinstateDate, $notes);
+        DB::transaction(function () use ($title, $reinstateDate): void {
+            $title->activityPeriods()->updateOrCreate(
+                ['ended_at' => null],
+                ['started_at' => $reinstateDate->toDateTimeString()]
+            );
         });
     }
 }

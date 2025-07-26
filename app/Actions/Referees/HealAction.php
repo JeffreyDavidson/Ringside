@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class HealAction extends BaseRefereeAction
+class HealAction
 {
     use AsAction;
 
@@ -41,10 +41,13 @@ class HealAction extends BaseRefereeAction
     {
         $referee->ensureCanBeHealed();
 
-        $recoveryDate = $this->getEffectiveDate($recoveryDate);
+        $recoveryDate = $recoveryDate ?? now();
 
         DB::transaction(function () use ($referee, $recoveryDate): void {
-            $this->refereeRepository->endInjury($referee, $recoveryDate);
+            $currentInjury = $referee->currentInjury()->first();
+            if ($currentInjury) {
+                $currentInjury->update(['ended_at' => $recoveryDate->toDateTimeString()]);
+            }
         });
     }
 }
