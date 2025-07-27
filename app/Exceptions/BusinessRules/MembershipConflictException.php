@@ -42,113 +42,145 @@ use Illuminate\Support\Carbon;
 final class MembershipConflictException extends BaseBusinessException
 {
     /**
-     * Exception for wrestler already being in a stable.
+     * Wrestler is already a member of a stable and cannot join another.
+     *
+     * @param  Model  $wrestler  The wrestler with existing stable membership
+     * @param  Model  $currentStable  The stable the wrestler currently belongs to
+     * @param  Model  $newStable  The stable the wrestler cannot join
      */
     public static function alreadyInStable(Model $wrestler, Model $currentStable, Model $newStable): static
     {
-        $wrestlerName = $wrestler->getAttribute('name') ?? "ID: {$wrestler->getKey()}";
-        $currentStableName = $currentStable->getAttribute('name') ?? "ID: {$currentStable->getKey()}";
-        $newStableName = $newStable->getAttribute('name') ?? "ID: {$newStable->getKey()}";
+        $wrestlerContext = self::formatModelContext($wrestler);
+        $currentStableContext = self::formatModelContext($currentStable);
+        $newStableContext = self::formatModelContext($newStable);
 
         return new self(
-            "Wrestler '{$wrestlerName}' is already a member of stable '{$currentStableName}' and cannot join '{$newStableName}'. Remove from current stable first or choose different wrestler."
+            "{$wrestlerContext} is already a member of {$currentStableContext} and cannot join {$newStableContext}. Remove from current stable first or choose different wrestler."
         );
     }
 
     /**
-     * Exception for wrestler already being in a tag team.
+     * Wrestler is already a member of a tag team and cannot join another.
+     *
+     * @param  Model  $wrestler  The wrestler with existing tag team membership
+     * @param  Model  $currentTeam  The tag team the wrestler currently belongs to
+     * @param  Model  $newTeam  The tag team the wrestler cannot join
      */
     public static function alreadyInTagTeam(Model $wrestler, Model $currentTeam, Model $newTeam): static
     {
-        $wrestlerName = $wrestler->getAttribute('name') ?? "ID: {$wrestler->getKey()}";
-        $currentTeamName = $currentTeam->getAttribute('name') ?? "ID: {$currentTeam->getKey()}";
-        $newTeamName = $newTeam->getAttribute('name') ?? "ID: {$newTeam->getKey()}";
+        $wrestlerContext = self::formatModelContext($wrestler);
+        $currentTeamContext = self::formatModelContext($currentTeam);
+        $newTeamContext = self::formatModelContext($newTeam);
 
         return new static(
-            "Wrestler '{$wrestlerName}' is already a member of tag team '{$currentTeamName}' and cannot join '{$newTeamName}'. Remove from current team first or choose different wrestler."
+            "{$wrestlerContext} is already a member of {$currentTeamContext} and cannot join {$newTeamContext}. Remove from current team first or choose different wrestler."
         );
     }
 
     /**
-     * Exception for tag team already being in a stable.
+     * Tag team is already a member of a stable and cannot join another.
+     *
+     * @param  Model  $tagTeam  The tag team with existing stable membership
+     * @param  Model  $currentStable  The stable the tag team currently belongs to
+     * @param  Model  $newStable  The stable the tag team cannot join
      */
     public static function tagTeamAlreadyInStable(Model $tagTeam, Model $currentStable, Model $newStable): static
     {
-        $teamName = $tagTeam->getAttribute('name') ?? "ID: {$tagTeam->getKey()}";
-        $currentStableName = $currentStable->getAttribute('name') ?? "ID: {$currentStable->getKey()}";
-        $newStableName = $newStable->getAttribute('name') ?? "ID: {$newStable->getKey()}";
+        $tagTeamContext = self::formatModelContext($tagTeam);
+        $currentStableContext = self::formatModelContext($currentStable);
+        $newStableContext = self::formatModelContext($newStable);
 
         return new static(
-            "Tag team '{$teamName}' is already a member of stable '{$currentStableName}' and cannot join '{$newStableName}'. Remove from current stable first or choose different team."
+            "{$tagTeamContext} is already a member of {$currentStableContext} and cannot join {$newStableContext}. Remove from current stable first or choose different team."
         );
     }
 
     /**
-     * Exception for manager having too many clients.
+     * Manager has reached maximum client capacity and cannot take additional clients.
+     *
+     * @param  Model  $manager  The manager at maximum capacity
+     * @param  int  $maxClients  Maximum number of clients allowed
+     * @param  int  $currentClients  Current number of clients
      */
     public static function managerOverload(Model $manager, int $maxClients, int $currentClients): static
     {
-        $managerName = $manager->getAttribute('name') ?? "ID: {$manager->getKey()}";
+        $managerContext = self::formatModelContext($manager);
 
         return new static(
-            "Manager '{$managerName}' already manages {$currentClients} clients (maximum: {$maxClients}) and cannot take additional clients. Remove existing clients or choose different manager."
+            "{$managerContext} already manages {$currentClients} clients (maximum: {$maxClients}) and cannot take additional clients. Remove existing clients or choose different manager."
         );
     }
 
     /**
-     * Exception for entity already having a manager.
+     * Entity already has a manager and cannot be assigned to another.
      *
      * NOTE: Multiple managers are generally allowed in the system. This exception
      * should only be used in specific contexts where single manager restriction applies.
+     *
+     * @param  Model  $entity  The entity with existing manager
+     * @param  Model  $currentManager  The entity's current manager
+     * @param  Model  $newManager  The manager that cannot be assigned
      */
     public static function alreadyHasManager(Model $entity, Model $currentManager, Model $newManager): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $currentManagerName = $currentManager->getAttribute('name') ?? "ID: {$currentManager->getKey()}";
-        $newManagerName = $newManager->getAttribute('name') ?? "ID: {$newManager->getKey()}";
+        $entityContext = self::formatModelContext($entity);
+        $currentManagerContext = self::formatModelContext($currentManager);
+        $newManagerContext = self::formatModelContext($newManager);
 
         return new static(
-            "{$entityType} '{$entityName}' already has manager '{$currentManagerName}' and cannot be assigned to '{$newManagerName}'. Remove current manager first or choose different entity."
+            "{$entityContext} already has manager {$currentManagerContext} and cannot be assigned to {$newManagerContext}. Remove current manager first or choose different entity."
         );
     }
 
     /**
-     * Exception for conflicting membership dates.
+     * Entity has conflicting membership dates with overlapping periods.
+     *
+     * @param  Model  $entity  The entity with overlapping membership
+     * @param  Model  $group1  First group in the membership conflict
+     * @param  Model  $group2  Second group in the membership conflict
+     * @param  Carbon  $startDate  Start date of the overlapping period
+     * @param  Carbon  $endDate  End date of the overlapping period
      */
     public static function overlappingMembership(Model $entity, Model $group1, Model $group2, Carbon $startDate, Carbon $endDate): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $group1Name = $group1->getAttribute('name') ?? "ID: {$group1->getKey()}";
-        $group2Name = $group2->getAttribute('name') ?? "ID: {$group2->getKey()}";
+        $entityContext = self::formatModelContext($entity);
+        $group1Context = self::formatModelContext($group1);
+        $group2Context = self::formatModelContext($group2);
 
         return new static(
-            "{$entityType} '{$entityName}' has overlapping membership in '{$group1Name}' and '{$group2Name}' during period {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}. Memberships cannot overlap."
+            "{$entityContext} has overlapping membership in {$group1Context} and {$group2Context} during period {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}. Memberships cannot overlap."
         );
     }
 
     /**
-     * Exception for stable having insufficient members.
+     * Stable has insufficient members to meet operational requirements.
+     *
+     * @param  Model  $stable  The stable with insufficient membership
+     * @param  int  $currentMembers  Current number of active members
+     * @param  int  $requiredMinimum  Minimum required members for operation
      */
     public static function insufficientStableMembers(Model $stable, int $currentMembers, int $requiredMinimum): static
     {
-        $stableName = $stable->getAttribute('name') ?? "ID: {$stable->getKey()}";
+        $stableContext = self::formatModelContext($stable);
 
         return new static(
-            "Stable '{$stableName}' has {$currentMembers} members but requires minimum of {$requiredMinimum}. Add more members or modify stable requirements."
+            "{$stableContext} has {$currentMembers} members but requires minimum of {$requiredMinimum}. Add more members or modify stable requirements."
         );
     }
 
     /**
-     * Exception for tag team having wrong number of members.
+     * Tag team has incorrect number of members for operational requirements.
+     *
+     * @param  Model  $tagTeam  The tag team with invalid member count
+     * @param  int  $currentMembers  Current number of team members
+     * @param  int  $requiredMembers  Required number of team members
      */
     public static function invalidTagTeamSize(Model $tagTeam, int $currentMembers, int $requiredMembers): static
     {
-        $teamName = $tagTeam->getAttribute('name') ?? "ID: {$tagTeam->getKey()}";
+        $tagTeamContext = self::formatModelContext($tagTeam);
 
         return new static(
-            "Tag team '{$teamName}' has {$currentMembers} members but requires exactly {$requiredMembers}. Adjust membership to meet requirements."
+            "{$tagTeamContext} has {$currentMembers} members but requires exactly {$requiredMembers}. Adjust membership to meet requirements."
         );
     }
 
@@ -169,120 +201,137 @@ final class MembershipConflictException extends BaseBusinessException
     }
 
     /**
-     * Exception for entity trying to manage itself.
+     * Entity cannot establish management relationship with itself.
+     *
+     * @param  Model  $entity  The entity attempting self-management
      */
     public static function selfManagement(Model $entity): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
+        $entityContext = self::formatModelContext($entity);
 
         return new static(
-            "{$entityType} '{$entityName}' cannot manage itself. Choose different manager or entity."
+            "{$entityContext} cannot manage itself. Choose different manager or entity."
         );
     }
 
     /**
-     * Exception for retired entity membership.
+     * Retired entity cannot establish new group memberships.
+     *
+     * @param  Model  $entity  The retired entity attempting membership
+     * @param  Model  $group  The group the entity cannot join
      */
     public static function retiredEntityMembership(Model $entity, Model $group): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
-        $groupType = class_basename($group);
+        $entityContext = self::formatModelContext($entity);
+        $groupContext = self::formatModelContext($group);
 
         return new static(
-            "Retired {$entityType} '{$entityName}' cannot join {$groupType} '{$groupName}'. Only active entities can have new memberships."
+            "Retired {$entityContext} cannot join {$groupContext}. Only active entities can have new memberships."
         );
     }
 
     /**
-     * Exception for suspended entity membership.
+     * Suspended entity cannot establish new group memberships.
+     *
+     * @param  Model  $entity  The suspended entity attempting membership
+     * @param  Model  $group  The group the entity cannot join
      */
     public static function suspendedEntityMembership(Model $entity, Model $group): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
-        $groupType = class_basename($group);
+        $entityContext = self::formatModelContext($entity);
+        $groupContext = self::formatModelContext($group);
 
         return new static(
-            "Suspended {$entityType} '{$entityName}' cannot join {$groupType} '{$groupName}'. Resolve suspension before adding new memberships."
+            "Suspended {$entityContext} cannot join {$groupContext}. Resolve suspension before adding new memberships."
         );
     }
 
     /**
-     * Exception for exclusive membership violation.
+     * Entity has exclusive membership that prevents joining additional groups.
+     *
+     * @param  Model  $entity  The entity with exclusive membership
+     * @param  Model  $exclusiveGroup  The group with exclusive membership
+     * @param  Model  $newGroup  The group the entity cannot join
      */
     public static function exclusiveMembershipViolation(Model $entity, Model $exclusiveGroup, Model $newGroup): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $exclusiveGroupName = $exclusiveGroup->getAttribute('name') ?? "ID: {$exclusiveGroup->getKey()}";
-        $newGroupName = $newGroup->getAttribute('name') ?? "ID: {$newGroup->getKey()}";
+        $entityContext = self::formatModelContext($entity);
+        $exclusiveGroupContext = self::formatModelContext($exclusiveGroup);
+        $newGroupContext = self::formatModelContext($newGroup);
 
         return new static(
-            "{$entityType} '{$entityName}' has exclusive membership in '{$exclusiveGroupName}' and cannot join '{$newGroupName}'. End exclusive membership first."
+            "{$entityContext} has exclusive membership in {$exclusiveGroupContext} and cannot join {$newGroupContext}. End exclusive membership first."
         );
     }
 
     /**
-     * Exception for gender-specific membership violations.
+     * Entity cannot join group due to gender-specific membership restrictions.
+     *
+     * @param  Model  $entity  The entity with incompatible gender
+     * @param  Model  $group  The group with gender restrictions
+     * @param  string  $requiredGender  Required gender for group membership
+     * @param  string  $entityGender  Entity's gender
      */
     public static function genderRestriction(Model $entity, Model $group, string $requiredGender, string $entityGender): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
-        $groupType = class_basename($group);
+        $entityContext = self::formatModelContext($entity);
+        $groupContext = self::formatModelContext($group);
 
         return new static(
-            "{$entityType} '{$entityName}' (gender: {$entityGender}) cannot join {$groupType} '{$groupName}' which requires {$requiredGender} members only."
+            "{$entityContext} (gender: {$entityGender}) cannot join {$groupContext} which requires {$requiredGender} members only."
         );
     }
 
     /**
-     * Exception for age-based membership restrictions.
+     * Entity cannot join group due to age-based membership restrictions.
+     *
+     * @param  Model  $entity  The entity with insufficient age
+     * @param  Model  $group  The group with age restrictions
+     * @param  int  $entityAge  Entity's current age
+     * @param  int  $minimumAge  Minimum age required for membership
      */
     public static function ageRestriction(Model $entity, Model $group, int $entityAge, int $minimumAge): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
-        $groupType = class_basename($group);
+        $entityContext = self::formatModelContext($entity);
+        $groupContext = self::formatModelContext($group);
 
         return new static(
-            "{$entityType} '{$entityName}' (age: {$entityAge}) cannot join {$groupType} '{$groupName}' which requires minimum age of {$minimumAge}."
+            "{$entityContext} (age: {$entityAge}) cannot join {$groupContext} which requires minimum age of {$minimumAge}."
         );
     }
 
     /**
-     * Exception for experience level restrictions.
+     * Entity cannot join group due to experience level restrictions.
+     *
+     * @param  Model  $entity  The entity with insufficient experience
+     * @param  Model  $group  The group with experience requirements
+     * @param  string  $entityLevel  Entity's current experience level
+     * @param  string  $requiredLevel  Required experience level for membership
      */
     public static function experienceRestriction(Model $entity, Model $group, string $entityLevel, string $requiredLevel): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
-        $groupType = class_basename($group);
+        $entityContext = self::formatModelContext($entity);
+        $groupContext = self::formatModelContext($group);
 
         return new static(
-            "{$entityType} '{$entityName}' (experience: {$entityLevel}) cannot join {$groupType} '{$groupName}' which requires {$requiredLevel} experience level."
+            "{$entityContext} (experience: {$entityLevel}) cannot join {$groupContext} which requires {$requiredLevel} experience level."
         );
     }
 
     /**
-     * Exception for conflicting contractual obligations.
+     * Entity cannot join group due to conflicting contractual obligations.
+     *
+     * @param  Model  $entity  The entity with contractual conflicts
+     * @param  Model  $group  The group with conflicting requirements
+     * @param  string  $conflictDetails  Description of the contractual conflict
      */
     public static function contractualConflict(Model $entity, Model $group, string $conflictDetails): static
     {
-        $entityName = $entity->getAttribute('name') ?? "ID: {$entity->getKey()}";
-        $entityType = class_basename($entity);
-        $groupName = $group->getAttribute('name') ?? "ID: {$group->getKey()}";
-        $groupType = class_basename($group);
+        $entityContext = self::formatModelContext($entity);
+        $groupContext = self::formatModelContext($group);
 
         return new static(
-            "{$entityType} '{$entityName}' cannot join {$groupType} '{$groupName}' due to contractual conflict: {$conflictDetails}"
+            "{$entityContext} cannot join {$groupContext} due to contractual conflict: {$conflictDetails}"
         );
     }
 }

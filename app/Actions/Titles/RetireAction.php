@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use App\Exceptions\Status\CannotBeEmployedException;
+use App\Exceptions\Roster\CannotBeEmployedException;
 use Illuminate\Database\Eloquent\Model;
 
 /**

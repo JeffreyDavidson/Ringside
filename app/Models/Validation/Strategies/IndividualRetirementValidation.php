@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Contracts\RetirementValidationStrategy;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,20 +41,20 @@ class IndividualRetirementValidation implements RetirementValidationStrategy
     public function validate(Model $entity): void
     {
         if ($this->isUnemployed($entity)) {
-            throw CannotBeRetiredException::unemployed();
+            throw CannotBeRetiredException::unemployed($entity);
         }
 
         // Note: Released entities CAN be retired - removing this restriction
         // if ($this->isReleased($entity)) {
-        //     throw CannotBeRetiredException::released();
+        //     throw CannotBeRetiredException::released($entity);
         // }
 
         if (method_exists($entity, 'hasFutureEmployment') && $entity->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment();
+            throw CannotBeRetiredException::hasFutureEmployment($entity);
         }
 
         if (method_exists($entity, 'isRetired') && $entity->isRetired()) {
-            throw CannotBeRetiredException::retired();
+            throw CannotBeRetiredException::alreadyRetired($entity);
         }
     }
 

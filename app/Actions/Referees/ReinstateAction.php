@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

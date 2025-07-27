@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\Status\CannotBeInjuredException;
+use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

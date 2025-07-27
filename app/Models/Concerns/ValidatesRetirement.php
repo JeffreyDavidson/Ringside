@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Enums\Shared\RosterMemberType;
-use App\Exceptions\Status\CannotBeRetiredException;
-use App\Exceptions\Status\CannotBeUnretiredException;
+use App\Exceptions\Roster\CannotBeUnretiredException as RosterCannotBeUnretiredException;
+use App\Exceptions\Titles\CannotBeUnretiredException as TitlesCannotBeUnretiredException;
 use App\Models\Contracts\RetirementValidationStrategy;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
 use App\Models\Validation\Strategies\IndividualRetirementValidation;
 use App\Models\Validation\Strategies\TagTeamRetirementValidation;
 use Exception;
@@ -127,7 +128,12 @@ trait ValidatesRetirement
     public function ensureCanBeUnretired(): void
     {
         if (! $this->isRetired()) {
-            throw CannotBeUnretiredException::notRetired();
+            // Determine if this is a Title or Roster member and use appropriate exception
+            if ($this instanceof Title) {
+                throw TitlesCannotBeUnretiredException::notRetired($this);
+            }
+            // All roster members can use the generic notRetired method
+            throw RosterCannotBeUnretiredException::notRetired($this);
         }
     }
 

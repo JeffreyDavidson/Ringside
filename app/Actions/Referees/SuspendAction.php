@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\Status\CannotBeSuspendedException;
+use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;

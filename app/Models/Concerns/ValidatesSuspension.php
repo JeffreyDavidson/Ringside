@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Enums\Shared\RosterMemberType;
-use App\Exceptions\Status\CannotBeReinstatedException;
-use App\Exceptions\Status\CannotBeSuspendedException;
+use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Suspendable;

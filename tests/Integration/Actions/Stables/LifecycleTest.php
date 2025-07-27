@@ -8,10 +8,10 @@ use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
+use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Exceptions\Status\CannotBeActivatedException;
 use App\Exceptions\Status\CannotBeDebutedException;
 use App\Exceptions\Status\CannotBeDisbandedException;
-use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 

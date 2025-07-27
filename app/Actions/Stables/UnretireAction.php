@@ -8,7 +8,7 @@ use App\Actions\Managers\UnretireAction as ManagersUnretireAction;
 use App\Actions\TagTeams\UnretireAction as TagTeamsUnretireAction;
 use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
 use App\Enums\Stables\StableStatus;
-use App\Exceptions\Status\CannotBeUnretiredException;
+use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;

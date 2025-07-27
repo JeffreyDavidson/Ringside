@@ -6,6 +6,7 @@ namespace App\Exceptions\BusinessRules;
 
 use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Exception thrown when an entity does not have sufficient members to perform an operation.
@@ -33,86 +34,66 @@ use App\Models\TagTeams\TagTeam;
 final class NotEnoughMembersException extends BaseBusinessException
 {
     /**
-     * Tag team does not have the required number of wrestlers.
+     * Tag team does not have the required number of wrestlers for operation.
      *
-     * @param  string|null  $tagTeamName  Optional tag team name for specific error messaging
-     * @param  int|null  $currentCount  Optional current wrestler count for detailed messaging
+     * @param  TagTeam  $tagTeam  The tag team with insufficient wrestlers
+     * @param  int  $currentCount  Current number of wrestlers in the team
      */
-    public static function forTagTeam(?string $tagTeamName = null, ?int $currentCount = null): static
+    public static function forTagTeam(TagTeam $tagTeam, int $currentCount): static
     {
-        $context = $tagTeamName ? " '{$tagTeamName}'" : '';
+        $context = self::formatModelContext($tagTeam);
         $requiredCount = TagTeam::NUMBER_OF_WRESTLERS_ON_TEAM;
 
-        if ($currentCount !== null) {
-            return new self(sprintf(
-                'Tag team%s has %d wrestlers but requires exactly %d wrestlers to operate.',
-                $context,
-                $currentCount,
-                $requiredCount
-            ));
-        }
-
-        return new self(sprintf(
-            'Tag team%s must contain exactly %d wrestlers to operate.',
-            $context,
-            $requiredCount
-        ));
+        return new self(
+            "{$context} has {$currentCount} wrestlers but requires exactly {$requiredCount} wrestlers to operate."
+        );
     }
 
     /**
-     * Stable does not have the minimum required number of members.
+     * Stable does not have the minimum required number of members for operation.
      *
+     * @param  Model  $stable  The stable with insufficient members
      * @param  int  $minimumRequired  Minimum number of members required
      * @param  int  $currentCount  Current number of active members
-     * @param  string|null  $stableName  Optional stable name for specific error messaging
      */
-    public static function forStable(int $minimumRequired, int $currentCount, ?string $stableName = null): static
+    public static function forStable(Model $stable, int $minimumRequired, int $currentCount): static
     {
-        $context = $stableName ? " '{$stableName}'" : '';
+        $context = self::formatModelContext($stable);
 
-        return new static(sprintf(
-            'Stable%s has %d members but requires at least %d members to operate.',
-            $context,
-            $currentCount,
-            $minimumRequired
-        ));
+        return new static(
+            "{$context} has {$currentCount} members but requires at least {$minimumRequired} members to operate."
+        );
     }
 
     /**
      * Match does not have sufficient competitors for the match type.
      *
+     * @param  Model  $match  The match with insufficient competitors
      * @param  int  $minimumRequired  Minimum number of competitors required
      * @param  int  $currentCount  Current number of competitors assigned
-     * @param  string|null  $matchType  Optional match type for specific error messaging
      */
-    public static function forMatch(int $minimumRequired, int $currentCount, ?string $matchType = null): static
+    public static function forMatch(Model $match, int $minimumRequired, int $currentCount): static
     {
-        $context = $matchType ? " {$matchType}" : '';
+        $context = self::formatModelContext($match);
 
-        return new static(sprintf(
-            'Match%s has %d competitors but requires at least %d competitors.',
-            $context,
-            $currentCount,
-            $minimumRequired
-        ));
+        return new static(
+            "{$context} has {$currentCount} competitors but requires at least {$minimumRequired} competitors."
+        );
     }
 
     /**
      * Championship match does not have sufficient challengers.
      *
+     * @param  Model  $championship  The championship with insufficient challengers
      * @param  int  $minimumChallengerCount  Minimum number of challengers required
      * @param  int  $currentChallengerCount  Current number of challengers
-     * @param  string|null  $championshipName  Optional championship name for context
      */
-    public static function forChampionshipMatch(int $minimumChallengerCount, int $currentChallengerCount, ?string $championshipName = null): static
+    public static function forChampionshipMatch(Model $championship, int $minimumChallengerCount, int $currentChallengerCount): static
     {
-        $context = $championshipName ? " for {$championshipName}" : '';
+        $context = self::formatModelContext($championship);
 
-        return new static(sprintf(
-            'Championship match%s has %d challengers but requires at least %d challengers.',
-            $context,
-            $currentChallengerCount,
-            $minimumChallengerCount
-        ));
+        return new static(
+            "Championship match for {$context} has {$currentChallengerCount} challengers but requires at least {$minimumChallengerCount} challengers."
+        );
     }
 }

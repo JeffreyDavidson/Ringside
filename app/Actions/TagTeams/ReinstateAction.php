@@ -6,7 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\ReinstateAction as ManagersReinstateAction;
 use App\Actions\Wrestlers\ReinstateAction as WrestlersReinstateAction;
-use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;

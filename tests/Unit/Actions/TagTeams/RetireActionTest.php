@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;

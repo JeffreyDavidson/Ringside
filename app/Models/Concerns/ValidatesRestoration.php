@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\Status\CannotBeRestoredException;
+use App\Exceptions\Data\CannotBeRestoredException;
 use App\Models\Wrestlers\Wrestler;
 
 trait ValidatesRestoration

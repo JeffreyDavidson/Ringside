@@ -9,8 +9,8 @@ use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
-use App\Models\Concerns\ValidatesActivation;
 use App\Models\Concerns\ValidatesRetirement;
+use App\Models\Concerns\ValidatesStableLifecycle;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -68,7 +68,7 @@ describe('Stable Model Unit Tests', function () {
             expect(Stable::class)->usesTrait(HasStatusScopes::class);
             expect(Stable::class)->usesTrait(IsRetirable::class);
             expect(Stable::class)->usesTrait(SoftDeletes::class);
-            expect(Stable::class)->usesTrait(ValidatesActivation::class);
+            expect(Stable::class)->usesTrait(ValidatesStableLifecycle::class);
             expect(Stable::class)->usesTrait(ValidatesRetirement::class);
         });
     });

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Status\CannotBeReleasedException;
+use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

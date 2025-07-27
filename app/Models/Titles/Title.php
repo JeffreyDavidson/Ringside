@@ -13,8 +13,8 @@ use App\Models\Concerns\HasChampionships;
 use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ProvidesDisplayName;
-use App\Models\Concerns\ValidatesActivation;
 use App\Models\Concerns\ValidatesRetirement;
+use App\Models\Concerns\ValidatesTitleLifecycle;
 use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\HasDisplayName;
@@ -123,8 +123,8 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
 
     use ProvidesDisplayName;
     use SoftDeletes;
-    use ValidatesActivation;
     use ValidatesRetirement;
+    use ValidatesTitleLifecycle;
 
     /**
      * The attributes that are mass assignable.

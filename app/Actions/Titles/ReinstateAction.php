@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\Status\CannotBeActivatedException;
+use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +27,7 @@ class ReinstateAction
      * @param  Title  $title  The title to reinstate
      * @param  Carbon|null  $reinstateDate  The reinstatement date (defaults to now)
      * @param  string|null  $notes  Optional notes about the reinstatement
-     * @throws CannotBeActivatedException When title cannot be reinstated due to business rules
+     * @throws CannotBeReinstatedException When title cannot be reinstated due to business rules
      *
      * @example
      * ```php

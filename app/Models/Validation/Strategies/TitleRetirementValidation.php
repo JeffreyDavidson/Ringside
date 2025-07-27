@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Validation\Strategies;
 
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Models\Contracts\RetirementValidationStrategy;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Model;
@@ -42,15 +42,15 @@ class TitleRetirementValidation implements RetirementValidationStrategy
         }
 
         if ($entity->isRetired()) {
-            throw CannotBeRetiredException::retired();
+            throw CannotBeRetiredException::alreadyRetired($entity);
         }
 
         if (! $entity->hasActivityPeriods()) {
-            throw CannotBeRetiredException::unactivated('title', (string) $entity->name);
+            throw CannotBeRetiredException::unactivated($entity);
         }
 
-        if ($entity->hasFutureActivity()) {
-            throw CannotBeRetiredException::hasFutureActivation('title', (string) $entity->name);
+        if ($entity->hasFutureDebut()) {
+            throw CannotBeRetiredException::hasFutureDebut($entity);
         }
     }
 }

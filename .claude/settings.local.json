@@ -53,7 +53,11 @@
       "Bash(LANG=C vendor/bin/phpstan analyse --no-progress --error-format=raw)",
       "Bash(LANG=C vendor/bin/phpstan analyse --no-progress --error-format=raw --memory-limit=256M)",
       "Bash(LANG=C vendor/bin/phpstan analyse --no-progress --error-format=raw --memory-limit=512M)",
-      "Bash(LANG=C vendor/bin/phpstan:*)"
+      "Bash(LANG=C vendor/bin/phpstan:*)",
+      "mcp__filesystem-ringside__directory_tree",
+      "mcp__filesystem-ringside__read_file",
+      "mcp__filesystem-ringside__read_multiple_files",
+      "Bash(composer:*)"
     ],
     "deny": [],
     "defaultMode": "plan"

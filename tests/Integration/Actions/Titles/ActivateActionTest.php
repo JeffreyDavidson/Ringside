@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\ActivateAction;
-use App\Exceptions\Status\CannotBeActivatedException;
-use App\Exceptions\Status\CannotBeDebutedException;
+use App\Exceptions\Titles\CannotBeDebutedException;
+use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -171,7 +171,7 @@ test('it throws exception for activating a non activatable title', function ($fa
 
     // Execute the activation and expect it to throw an exception
     resolve(ActivateAction::class)->handle($title);
-})->throws(CannotBeActivatedException::class)->with([
+})->throws(CannotBeReinstatedException::class)->with([
     'active',
 ]);
 
@@ -226,5 +226,5 @@ test('title reinstatement validation throws correct exceptions', function () {
 
     expect(fn () => $inactiveTitle->ensureCanBeReinstated())->not()->toThrow(Exception::class);
     expect(fn () => $activeTitle->ensureCanBeReinstated())
-        ->toThrow(CannotBeActivatedException::class);
+        ->toThrow(CannotBeReinstatedException::class);
 });

@@ -20,21 +20,174 @@ use Illuminate\Support\Carbon;
  * - Type-safe helper methods for standardized exception creation
  * - Extensible foundation for future shared exception functionality
  *
- * USAGE PATTERN:
- * All business exceptions should extend this class and use the provided utilities
- * for building contextual error messages and extracting model information.
+ * ========================================
+ * EXCEPTION CREATION GUIDE
+ * ========================================
  *
- * @example
+ * This section provides a comprehensive guide for creating business exceptions
+ * using the established CannotBePulledException pattern as the standard reference.
+ *
+ * STEP 1: CLASS STRUCTURE AND IMPORTS
  * ```php
- * class CannotBeEmployedException extends BaseBusinessException
+ * <?php
+ * declare(strict_types=1);
+ *
+ * namespace App\Exceptions\[Domain];  // e.g., Titles, Roster, Matches
+ *
+ * use App\Exceptions\BaseBusinessException;
+ * use App\Models\[ModelType]\[ModelClass];  // e.g., App\Models\Titles\Title
+ *
+ * final class Cannot[Action]Exception extends BaseBusinessException
  * {
- *     public static function employed(?string $entityType = null, ?string $entityName = null): self
+ *     // Methods go here
+ * }
+ * ```
+ *
+ * STEP 2: COMPREHENSIVE DOCBLOCK
+ * Every exception class must include comprehensive business documentation:
+ * ```php
+ * /**
+ *  * Exception thrown when [entity] cannot [action] due to business rule violations.
+ *  *
+ *  * This exception handles scenarios where [action] is prevented by current state
+ *  * or business logic constraints in wrestling promotion [domain] management.
+ *  *
+ *  * BUSINESS CONTEXT:
+ *  * [Detailed explanation of the business operation, its importance, and relationship
+ *  * to other business processes. Include domain-specific terminology and concepts.]
+ *  *
+ *  * COMMON SCENARIOS:
+ *  * - [Specific business scenario 1 with context]
+ *  * - [Specific business scenario 2 with context]
+ *  * - [Specific business scenario 3 with context]
+ *  * - [Additional scenarios as needed]
+ *  *
+ *  * BUSINESS IMPACT:
+ *  * - [How this exception protects business integrity]
+ *  * - [What operations or data consistency is maintained]
+ *  * - [Regulatory or contractual compliance protected]
+ *  * - [User experience or operational impact prevented]
+ *  *\/
+ * ```
+ *
+ * STEP 3: STATIC FACTORY METHODS
+ * Use model-aware parameters with proper type hints:
+ * ```php
+ * /**
+ *  * [Entity] [specific condition] and cannot [action].
+ *  *
+ *  * @param  ModelClass  $entity  The [entity] that cannot [action]
+ *  * @param  string|null  $additionalContext  Optional additional context
+ *  *\/
+ * public static function specificCondition(ModelClass $entity, ?string $additionalContext = null): static
+ * {
+ *     $context = self::formatModelContext($entity);
+ *     $extra = $additionalContext ? " ({$additionalContext})" : '';
+ *
+ *     return new self("{$context} [specific condition description]{$extra} and cannot [action].");
+ * }
+ * ```
+ *
+ * STEP 4: COMPLETE REFERENCE IMPLEMENTATION
+ * The CannotBePulledException class demonstrates the complete pattern:
+ * ```php
+ * <?php
+ * namespace App\Exceptions\Titles;
+ *
+ * use App\Exceptions\BaseBusinessException;
+ * use App\Models\Titles\Title;
+ *
+ * final class CannotBePulledException extends BaseBusinessException
+ * {
+ *     // Basic state violation - simple condition check
+ *     public static function notActive(Title $title): static
  *     {
- *         $context = self::buildContext($entityType, $entityName);
- *         return new self("This{$context} is already employed and cannot be re-employed.");
+ *         $context = self::formatModelContext($title);
+ *         return new self("{$context} is not currently active and cannot be pulled from competition.");
+ *     }
+ *
+ *     // Business rule violation with additional context
+ *     public static function activeChampionshipReign(Title $title, string $championName): static
+ *     {
+ *         $context = self::formatModelContext($title);
+ *         return new static("{$context} is currently held by {$championName} and cannot be pulled during an active championship reign.");
+ *     }
+ *
+ *     // Authorization violation
+ *     public static function unauthorizedPull(Title $title, string $authorizationLevel): static
+ *     {
+ *         $context = self::formatModelContext($title);
+ *         return new static("{$context} cannot be pulled without {$authorizationLevel} authorization.");
+ *     }
+ *
+ *     // Complex business scenario with detailed context
+ *     public static function tournamentInvolvement(Title $title, string $eventDetails): static
+ *     {
+ *         $context = self::formatModelContext($title);
+ *         return new static("{$context} is involved in {$eventDetails} and cannot be pulled until the event concludes.");
  *     }
  * }
  * ```
+ *
+ * METHOD PATTERN TEMPLATES
+ * ========================
+ *
+ * Basic State Violation:
+ * ```php
+ * public static function invalidState(ModelClass $entity): static
+ * {
+ *     $context = self::formatModelContext($entity);
+ *     return new self("{$context} is in [state] and cannot [action].");
+ * }
+ * ```
+ *
+ * Business Rule Violation:
+ * ```php
+ * public static function businessRule(ModelClass $entity, string $ruleDetails): static
+ * {
+ *     $context = self::formatModelContext($entity);
+ *     return new self("{$context} violates business rule ({$ruleDetails}) and cannot [action].");
+ * }
+ * ```
+ *
+ * Authorization Violation:
+ * ```php
+ * public static function unauthorized(ModelClass $entity, string $requiredLevel): static
+ * {
+ *     $context = self::formatModelContext($entity);
+ *     return new self("{$context} cannot [action] without {$requiredLevel} authorization.");
+ * }
+ * ```
+ *
+ * Relationship Conflict:
+ * ```php
+ * public static function relationshipConflict(ModelClass $entity, ModelClass $conflictingEntity): static
+ * {
+ *     $entityContext = self::formatModelContext($entity);
+ *     $conflictContext = self::formatModelContext($conflictingEntity);
+ *     return new self("{$entityContext} has conflict with {$conflictContext} and cannot [action].");
+ * }
+ * ```
+ *
+ * BEST PRACTICES
+ * ==============
+ * 1. Always use `self::formatModelContext($model)` for consistent entity formatting
+ * 2. Use model-first parameters for type safety and IDE support
+ * 3. Write clear, business-focused error messages that explain the "why"
+ * 4. Include comprehensive @param documentation for all method parameters
+ * 5. Use `static` return type for static factory methods
+ * 6. Group related methods logically (basic violations, business rules, authorization, etc.)
+ * 7. Provide additional context parameters when business scenarios require detail
+ * 8. Use domain-specific terminology that matches business language
+ * 9. Make error messages actionable - suggest what should be done instead
+ * 10. Test exception messages for clarity with non-technical stakeholders
+ *
+ * NAMING CONVENTIONS
+ * ==================
+ * - Exception Class: Cannot[Action]Exception (e.g., CannotBePulledException)
+ * - Static Methods: [specificCondition] (e.g., notActive, businessRule, unauthorized)
+ * - Parameters: Use full model types, not generic strings
+ * - Namespaces: App\Exceptions\[Domain] where Domain matches the business area
  */
 abstract class BaseBusinessException extends Exception
 {

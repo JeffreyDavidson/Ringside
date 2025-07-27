@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Status\CannotBeSuspendedException;
+use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Contracts\SuspensionValidationStrategy;
 use Illuminate\Database\Eloquent\Model;
 

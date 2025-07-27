@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Exceptions\Status\CannotBeUnretiredException;
+use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
