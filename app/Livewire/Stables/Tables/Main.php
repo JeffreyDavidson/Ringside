@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Actions\Stables\ActivateAction;
 use App\Actions\Stables\DisbandAction;
+use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
@@ -174,7 +174,7 @@ class Main extends BaseTable
 
         try {
             match ($action) {
-                'debut' => resolve(ActivateAction::class)->handle($stable),
+                'debut' => resolve(EstablishAction::class)->handle($stable),
                 'disband' => resolve(DisbandAction::class)->handle($stable),
                 'retire' => resolve(RetireAction::class)->handle($stable),
                 'unretire' => resolve(UnretireAction::class)->handle($stable),
