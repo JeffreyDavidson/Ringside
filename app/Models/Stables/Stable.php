@@ -11,8 +11,8 @@ use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
-use App\Models\Concerns\ValidatesActivation;
 use App\Models\Concerns\ValidatesRetirement;
+use App\Models\Concerns\ValidatesStableLifecycle;
 use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
@@ -127,8 +127,8 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
     use IsRetirable;
 
     use SoftDeletes;
-    use ValidatesActivation;
     use ValidatesRetirement;
+    use ValidatesStableLifecycle;
 
     /**
      * The minimum number of members allowed on a tag team.
@@ -209,6 +209,14 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
     public function isDisbanded(): bool
     {
         return $this->status === StableStatus::Inactive;
+    }
+
+    /**
+     * Determine if the stable has a future establishment scheduled.
+     */
+    public function hasFutureEstablishment(): bool
+    {
+        return $this->hasFutureActivity();
     }
 
     /**
