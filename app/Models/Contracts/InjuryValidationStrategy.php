@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use App\Exceptions\Status\CannotBeInjuredException;
+use App\Exceptions\Roster\CannotBeInjuredException;
 use Illuminate\Database\Eloquent\Model;
 
 /**

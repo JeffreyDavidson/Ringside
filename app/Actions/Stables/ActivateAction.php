@@ -6,7 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Actions\TagTeams\EmployAction as TagTeamEmployAction;
 use App\Actions\Wrestlers\EmployAction as WrestlerEmployAction;
-use App\Exceptions\CannotBeActivatedException;
+use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -20,7 +20,7 @@ class ActivateAction
     /**
      * Activate a stable.
      *
-     * @throws CannotBeActivatedException
+     * @throws CannotBeEstablishedException
      */
     public function handle(Stable $stable, ?Carbon $startDate = null): void
     {
@@ -49,7 +49,7 @@ class ActivateAction
     /**
      * Ensure a stable can be activated.
      *
-     * @throws CannotBeActivatedException
+     * @throws CannotBeEstablishedException
      */
     private function ensureCanBeActivated(Stable $stable): void
     {

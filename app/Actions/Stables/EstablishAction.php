@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Exceptions\Status\CannotBeActivatedException;
+use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +25,7 @@ class EstablishAction
      *
      * @param  Stable  $stable  The stable to establish
      * @param  Carbon|null  $activationDate  The establishment date (defaults to now)
-     * @throws CannotBeActivatedException When stable cannot be established due to business rules
+     * @throws CannotBeEstablishedException When stable cannot be established due to business rules
      *
      * @example
      * ```php
@@ -39,7 +39,7 @@ class EstablishAction
      */
     public function handle(Stable $stable, ?Carbon $activationDate = null): void
     {
-        $stable->ensureCanBeActivated();
+        $stable->ensureCanBeEstablished();
 
         $activationDate = $activationDate ?? now();
 

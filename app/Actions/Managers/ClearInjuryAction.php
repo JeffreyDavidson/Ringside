@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;

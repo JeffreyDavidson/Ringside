@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\Status\CannotBeDeactivatedException;
-use App\Exceptions\Status\CannotBePulledException;
+use App\Exceptions\Titles\CannotBePulledException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -65,12 +64,12 @@ class PullAction
     {
         // A title can only be pulled if it's currently active
         if (! $title->isCurrentlyActive()) {
-            throw new CannotBePulledException('Title must be currently active to be pulled from competition.');
+            throw CannotBePulledException::notActive($title);
         }
 
         // Cannot pull a retired title
         if ($title->isRetired()) {
-            throw new CannotBePulledException('Cannot pull a retired title.');
+            throw CannotBePulledException::retired($title);
         }
     }
 }

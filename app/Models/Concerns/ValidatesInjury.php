@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\Status\CannotBeClearedFromInjuryException;
-use App\Exceptions\Status\CannotBeInjuredException;
+use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\CannotBeInjuredException;
 
 /**
  * Provides injury validation functionality for models.

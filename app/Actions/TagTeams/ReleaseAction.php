@@ -6,7 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\ReleaseAction as ManagersReleaseAction;
 use App\Actions\Wrestlers\ReleaseAction as WrestlersReleaseAction;
-use App\Exceptions\Status\CannotBeReleasedException;
+use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;

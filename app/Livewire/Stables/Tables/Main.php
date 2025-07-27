@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
-use App\Actions\Stables\DebutAction;
 use App\Actions\Stables\DisbandAction;
+use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
+use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Exceptions\Status\CannotBeDisbandedException;
-use App\Exceptions\Status\CannotBeRetiredException;
-use App\Exceptions\Status\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
@@ -174,7 +174,7 @@ class Main extends BaseTable
 
         try {
             match ($action) {
-                'debut' => resolve(DebutAction::class)->handle($stable),
+                'debut' => resolve(EstablishAction::class)->handle($stable),
                 'disband' => resolve(DisbandAction::class)->handle($stable),
                 'retire' => resolve(RetireAction::class)->handle($stable),
                 'unretire' => resolve(UnretireAction::class)->handle($stable),
