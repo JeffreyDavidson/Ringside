@@ -23,7 +23,7 @@ use Illuminate\Support\Carbon;
  * ========================================
  * EXCEPTION CREATION GUIDE
  * ========================================
- * 
+ *
  * This section provides a comprehensive guide for creating business exceptions
  * using the established CannotBePulledException pattern as the standard reference.
  *
@@ -31,12 +31,12 @@ use Illuminate\Support\Carbon;
  * ```php
  * <?php
  * declare(strict_types=1);
- * 
+ *
  * namespace App\Exceptions\[Domain];  // e.g., Titles, Roster, Matches
- * 
+ *
  * use App\Exceptions\BaseBusinessException;
  * use App\Models\[ModelType]\[ModelClass];  // e.g., App\Models\Titles\Title
- * 
+ *
  * final class Cannot[Action]Exception extends BaseBusinessException
  * {
  *     // Methods go here
@@ -83,7 +83,7 @@ use Illuminate\Support\Carbon;
  * {
  *     $context = self::formatModelContext($entity);
  *     $extra = $additionalContext ? " ({$additionalContext})" : '';
- *     
+ *
  *     return new self("{$context} [specific condition description]{$extra} and cannot [action].");
  * }
  * ```
@@ -93,10 +93,10 @@ use Illuminate\Support\Carbon;
  * ```php
  * <?php
  * namespace App\Exceptions\Titles;
- * 
+ *
  * use App\Exceptions\BaseBusinessException;
  * use App\Models\Titles\Title;
- * 
+ *
  * final class CannotBePulledException extends BaseBusinessException
  * {
  *     // Basic state violation - simple condition check
