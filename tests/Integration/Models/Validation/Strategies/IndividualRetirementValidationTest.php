@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Validation\Strategies\IndividualRetirementValidation;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
