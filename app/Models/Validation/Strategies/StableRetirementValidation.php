@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Validation\Strategies;
 
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Contracts\RetirementValidationStrategy;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,15 +30,15 @@ class StableRetirementValidation implements RetirementValidationStrategy
     public function validate(Model $stable): void
     {
         if ($this->isUnactivated($stable)) {
-            throw CannotBeRetiredException::unemployed(); // Reuse unemployed exception for unactivated
+            throw CannotBeRetiredException::unactivated($stable);
         }
 
-        if (method_exists($stable, 'hasFutureActivity') && $stable->hasFutureActivity()) {
-            throw CannotBeRetiredException::hasFutureEmployment(); // Reuse for future activation
+        if (method_exists($stable, 'hasFutureEstablishment') && $stable->hasFutureEstablishment()) {
+            throw CannotBeRetiredException::hasFutureEstablishment($stable);
         }
 
         if (method_exists($stable, 'isRetired') && $stable->isRetired()) {
-            throw CannotBeRetiredException::retired();
+            throw CannotBeRetiredException::alreadyRetired($stable);
         }
     }
 

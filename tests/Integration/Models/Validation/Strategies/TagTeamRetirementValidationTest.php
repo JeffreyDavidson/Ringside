@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Validation\Strategies\TagTeamRetirementValidation;
 

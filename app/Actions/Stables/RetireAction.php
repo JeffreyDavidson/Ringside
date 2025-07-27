@@ -7,7 +7,7 @@ namespace App\Actions\Stables;
 use App\Actions\Managers\RetireAction as ManagersRetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;

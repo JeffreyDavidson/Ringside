@@ -5,42 +5,49 @@ declare(strict_types=1);
 namespace App\Exceptions\BusinessRules;
 
 use App\Exceptions\BaseBusinessException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Exception thrown when date range validation fails.
+ * Exception thrown when date range validation fails in wrestling promotion management.
  *
- * This exception handles various date range validation scenarios in wrestling
- * promotion management, including logical date ordering, business rule
- * compliance, and temporal constraint violations.
+ * This exception handles comprehensive date range validation scenarios that occur
+ * across all time-sensitive business operations, providing contextual feedback
+ * for temporal constraint violations and business rule compliance.
  *
  * BUSINESS CONTEXT:
- * Wrestling promotions deal with many time-based entities including employment
- * periods, injury durations, suspension terms, championship reigns, and event
- * scheduling. Proper date range validation is critical for data integrity.
+ * Wrestling promotions operate on complex temporal frameworks involving employment
+ * contracts, injury recovery periods, suspension terms, championship reigns, event
+ * scheduling, and career lifecycle management. Date range validation ensures
+ * operational integrity, regulatory compliance, and logical consistency across
+ * all time-based business processes.
  *
  * COMMON SCENARIOS:
- * - End date before start date
- * - Date ranges outside allowed periods
- * - Overlapping restricted periods
- * - Invalid future/past date constraints
+ * - Employment period conflicts with existing contracts or retirement status
+ * - Injury durations that overlap with scheduled performances or championship defenses
+ * - Suspension periods that conflict with contractual obligations or tournament participation
+ * - Championship reign dates that violate title lineage continuity
+ * - Event scheduling that conflicts with venue availability or regulatory restrictions
+ * - Career milestone dates that don't align with documented wrestling history
+ * - Contract renewal periods that exceed industry standards or promotional budgets
+ * - Age-based eligibility violations for specific divisions or championship categories
  *
- * @example
- * ```php
- * // Invalid date order
- * throw InvalidDateRangeException::endBeforeStart($startDate, $endDate);
- *
- * // Business rule violation
- * throw InvalidDateRangeException::violatesBusinessRule($start, $end, 'Employment periods cannot exceed 5 years');
- *
- * // Overlapping periods
- * throw InvalidDateRangeException::overlapsExisting($newPeriod, $existingPeriod, 'injury');
- * ```
+ * BUSINESS IMPACT:
+ * - Maintains data integrity and operational consistency across all time-sensitive processes
+ * - Protects championship lineages, career records, and historical accuracy
+ * - Ensures regulatory compliance with athletic commissions and industry standards
+ * - Prevents scheduling conflicts that could result in financial losses or legal disputes
+ * - Safeguards against fraudulent backdating or timeline manipulation
+ * - Supports accurate reporting, analytics, and business intelligence initiatives
  */
 final class InvalidDateRangeException extends BaseBusinessException
 {
     /**
-     * Exception for end date being before start date.
+     * End date occurs before start date, violating logical date ordering.
+     *
+     * @param  Carbon  $startDate  The start date that occurs after the end date
+     * @param  Carbon  $endDate  The end date that occurs before the start date
+     * @param  string|null  $context  Optional context for the date range validation
      */
     public static function endBeforeStart(Carbon $startDate, Carbon $endDate, ?string $context = null): static
     {
@@ -52,7 +59,11 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date range violating business rules.
+     * Date range violates established business rules for the operation.
+     *
+     * @param  Carbon  $startDate  Start date of the invalid range
+     * @param  Carbon  $endDate  End date of the invalid range
+     * @param  string  $rule  The specific business rule that was violated
      */
     public static function violatesBusinessRule(Carbon $startDate, Carbon $endDate, string $rule): static
     {
@@ -64,7 +75,12 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date range being too short.
+     * Date range duration is shorter than the required minimum.
+     *
+     * @param  Carbon  $startDate  Start date of the short range
+     * @param  Carbon  $endDate  End date of the short range
+     * @param  int  $minimumDays  Minimum required duration in days
+     * @param  string  $context  Context describing what requires the minimum duration
      */
     public static function tooShort(Carbon $startDate, Carbon $endDate, int $minimumDays, string $context): static
     {
@@ -76,7 +92,12 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date range being too long.
+     * Date range duration exceeds the allowed maximum.
+     *
+     * @param  Carbon  $startDate  Start date of the long range
+     * @param  Carbon  $endDate  End date of the long range
+     * @param  int  $maximumDays  Maximum allowed duration in days
+     * @param  string  $context  Context describing what limits the maximum duration
      */
     public static function tooLong(Carbon $startDate, Carbon $endDate, int $maximumDays, string $context): static
     {
@@ -88,11 +109,11 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date range overlapping with existing period.
-     */
-    /**
-     * @param  array{start: Carbon, end: Carbon}  $newPeriod
-     * @param  array{start: Carbon, end: Carbon}  $existingPeriod
+     * Date range overlaps with an existing period, creating a conflict.
+     *
+     * @param  array{start: Carbon, end: Carbon}  $newPeriod  The new period causing the overlap
+     * @param  array{start: Carbon, end: Carbon}  $existingPeriod  The existing period being overlapped
+     * @param  string  $type  Type of period that cannot overlap
      */
     public static function overlapsExisting(array $newPeriod, array $existingPeriod, string $type): static
     {
@@ -107,7 +128,10 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date being in the future when past/present required.
+     * Date is in the future when past or present date is required.
+     *
+     * @param  Carbon  $date  The future date that is not allowed
+     * @param  string  $context  Context describing why future dates are not allowed
      */
     public static function futureNotAllowed(Carbon $date, string $context): static
     {
@@ -117,7 +141,10 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date being in the past when future required.
+     * Date is in the past when present or future date is required.
+     *
+     * @param  Carbon  $date  The past date that is not allowed
+     * @param  string  $context  Context describing why past dates are not allowed
      */
     public static function pastNotAllowed(Carbon $date, string $context): static
     {
@@ -127,7 +154,11 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date range not aligning with business calendar.
+     * Date range does not align with business calendar requirements.
+     *
+     * @param  Carbon  $startDate  Start date of the misaligned range
+     * @param  Carbon  $endDate  End date of the misaligned range
+     * @param  string  $requirement  The specific calendar requirement that was not met
      */
     public static function notAlignedWithBusinessCalendar(Carbon $startDate, Carbon $endDate, string $requirement): static
     {
@@ -137,57 +168,95 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for employment period validation.
+     * Employment period validation fails for wrestler or staff member.
+     *
+     * @param  Model  $entity  The wrestler or staff member with invalid employment period
+     * @param  Carbon  $startDate  Employment start date
+     * @param  Carbon  $endDate  Employment end date
+     * @param  string  $reason  Specific reason for validation failure
      */
-    public static function invalidEmploymentPeriod(Carbon $startDate, Carbon $endDate, string $reason): static
+    public static function invalidEmploymentPeriod(Model $entity, Carbon $startDate, Carbon $endDate, string $reason): static
     {
+        $context = self::formatModelContext($entity);
+
         return new static(
-            "Invalid employment period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
+            "{$context} has invalid employment period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}."
         );
     }
 
     /**
-     * Exception for injury period validation.
+     * Injury period validation fails for wrestler or referee.
+     *
+     * @param  Model  $entity  The wrestler or referee with invalid injury period
+     * @param  Carbon  $startDate  Injury start date
+     * @param  Carbon  $endDate  Injury end date
+     * @param  string  $reason  Specific reason for validation failure
      */
-    public static function invalidInjuryPeriod(Carbon $startDate, Carbon $endDate, string $reason): static
+    public static function invalidInjuryPeriod(Model $entity, Carbon $startDate, Carbon $endDate, string $reason): static
     {
+        $context = self::formatModelContext($entity);
+
         return new static(
-            "Invalid injury period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
+            "{$context} has invalid injury period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}."
         );
     }
 
     /**
-     * Exception for suspension period validation.
+     * Suspension period validation fails for wrestler, referee, or manager.
+     *
+     * @param  Model  $entity  The entity with invalid suspension period
+     * @param  Carbon  $startDate  Suspension start date
+     * @param  Carbon  $endDate  Suspension end date
+     * @param  string  $reason  Specific reason for validation failure
      */
-    public static function invalidSuspensionPeriod(Carbon $startDate, Carbon $endDate, string $reason): static
+    public static function invalidSuspensionPeriod(Model $entity, Carbon $startDate, Carbon $endDate, string $reason): static
     {
+        $context = self::formatModelContext($entity);
+
         return new static(
-            "Invalid suspension period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
+            "{$context} has invalid suspension period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}."
         );
     }
 
     /**
-     * Exception for championship reign validation.
+     * Championship reign period validation fails for title holder.
+     *
+     * @param  Model  $title  The championship title with invalid reign period
+     * @param  Carbon  $startDate  Championship reign start date
+     * @param  Carbon  $endDate  Championship reign end date
+     * @param  string  $reason  Specific reason for validation failure
      */
-    public static function invalidChampionshipReign(Carbon $startDate, Carbon $endDate, string $reason): static
+    public static function invalidChampionshipReign(Model $title, Carbon $startDate, Carbon $endDate, string $reason): static
     {
+        $context = self::formatModelContext($title);
+
         return new static(
-            "Invalid championship reign from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}"
+            "{$context} has invalid championship reign period from {$startDate->format('Y-m-d')} to {$endDate->format('Y-m-d')}: {$reason}."
         );
     }
 
     /**
-     * Exception for event date validation.
+     * Event date validation fails for scheduled event.
+     *
+     * @param  Model  $event  The event with invalid date
+     * @param  Carbon  $eventDate  The invalid event date
+     * @param  string  $reason  Specific reason for validation failure
      */
-    public static function invalidEventDate(Carbon $eventDate, string $reason): static
+    public static function invalidEventDate(Model $event, Carbon $eventDate, string $reason): static
     {
+        $context = self::formatModelContext($event);
+
         return new static(
-            "Invalid event date ({$eventDate->format('Y-m-d')}): {$reason}"
+            "{$context} has invalid event date ({$eventDate->format('Y-m-d')}): {$reason}."
         );
     }
 
     /**
-     * Exception for contract period validation.
+     * Contract period fails validation requirements for the contract type.
+     *
+     * @param  Carbon  $startDate  Start date of the invalid contract period
+     * @param  Carbon  $endDate  End date of the invalid contract period
+     * @param  string  $contractType  Type of contract with invalid period
      */
     public static function invalidContractPeriod(Carbon $startDate, Carbon $endDate, string $contractType): static
     {
@@ -199,19 +268,28 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for age-related date restrictions.
+     * Age restriction violation for wrestler or staff member.
+     *
+     * @param  Model  $entity  The entity with age restriction violation
+     * @param  Carbon  $birthDate  Entity's birth date
+     * @param  Carbon  $eventDate  Date of the restricted event
+     * @param  int  $minimumAge  Required minimum age
      */
-    public static function ageRestrictionViolation(Carbon $birthDate, Carbon $eventDate, int $minimumAge): static
+    public static function ageRestrictionViolation(Model $entity, Carbon $birthDate, Carbon $eventDate, int $minimumAge): static
     {
+        $context = self::formatModelContext($entity);
         $ageAtEvent = $birthDate->diffInYears($eventDate);
 
         return new static(
-            "Age restriction violation: person born on {$birthDate->format('Y-m-d')} would be {$ageAtEvent} years old on {$eventDate->format('Y-m-d')}, but minimum age is {$minimumAge}."
+            "{$context} has age restriction violation: born on {$birthDate->format('Y-m-d')}, would be {$ageAtEvent} years old on {$eventDate->format('Y-m-d')}, but minimum age is {$minimumAge}."
         );
     }
 
     /**
-     * Exception for seasonal or holiday restrictions.
+     * Date violates seasonal or holiday restrictions for the operation.
+     *
+     * @param  Carbon  $date  The date that violates seasonal restrictions
+     * @param  string  $restriction  The specific seasonal restriction that was violated
      */
     public static function seasonalRestriction(Carbon $date, string $restriction): static
     {
@@ -221,7 +299,12 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for date gap validation.
+     * Gap between date periods does not meet minimum requirements.
+     *
+     * @param  Carbon  $endDate1  End date of the first period
+     * @param  Carbon  $startDate2  Start date of the second period
+     * @param  int  $requiredGapDays  Required number of days between periods
+     * @param  string  $context  Context describing what requires the gap
      */
     public static function invalidGap(Carbon $endDate1, Carbon $startDate2, int $requiredGapDays, string $context): static
     {
@@ -233,7 +316,11 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for retroactive date restrictions.
+     * Date is too far in the past, exceeding retroactive date limits.
+     *
+     * @param  Carbon  $date  The retroactive date that exceeds limits
+     * @param  string  $context  Context describing the retroactive operation
+     * @param  int  $maxRetroactiveDays  Maximum number of retroactive days allowed
      */
     public static function retroactiveNotAllowed(Carbon $date, string $context, int $maxRetroactiveDays): static
     {
@@ -245,7 +332,10 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for weekend/business day restrictions.
+     * Date falls on weekend when business day is required.
+     *
+     * @param  Carbon  $date  The weekend date that is not allowed
+     * @param  string  $context  Context describing why business days are required
      */
     public static function businessDayRequired(Carbon $date, string $context): static
     {
@@ -257,7 +347,11 @@ final class InvalidDateRangeException extends BaseBusinessException
     }
 
     /**
-     * Exception for fiscal year boundary violations.
+     * Date range crosses fiscal year boundaries when periods must stay within fiscal years.
+     *
+     * @param  Carbon  $startDate  Start date of the range crossing fiscal years
+     * @param  Carbon  $endDate  End date of the range crossing fiscal years
+     * @param  string  $fiscalYearEnd  The fiscal year end date that was crossed
      */
     public static function crossesFiscalYear(Carbon $startDate, Carbon $endDate, string $fiscalYearEnd): static
     {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Exceptions\Status\CannotBeInjuredException;
+use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;

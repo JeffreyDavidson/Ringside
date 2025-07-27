@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Contracts\RetirementValidationStrategy;
 use Illuminate\Database\Eloquent\Model;
 
@@ -53,15 +53,15 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
     private function validateTagTeamStatus(Model $tagTeam): void
     {
         if ($this->isUnemployed($tagTeam)) {
-            throw CannotBeRetiredException::unemployed();
+            throw CannotBeRetiredException::unemployed($tagTeam);
         }
 
         if (method_exists($tagTeam, 'hasFutureEmployment') && $tagTeam->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment();
+            throw CannotBeRetiredException::hasFutureEmployment($tagTeam);
         }
 
         if (method_exists($tagTeam, 'isRetired') && $tagTeam->isRetired()) {
-            throw CannotBeRetiredException::retired();
+            throw CannotBeRetiredException::alreadyRetired($tagTeam);
         }
     }
 
@@ -79,26 +79,23 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
         $currentWrestlers = method_exists($tagTeam, 'currentWrestlers') ? $tagTeam->currentWrestlers()->get() : collect();
 
         if ($currentWrestlers->isEmpty()) {
-            throw CannotBeRetiredException::noActiveWrestlers();
+            throw CannotBeRetiredException::noActiveWrestlers($tagTeam);
         }
 
         foreach ($currentWrestlers as $wrestler) {
             // Check if wrestler is in a state that prevents retirement
             if (method_exists($wrestler, 'isInjured') && $wrestler->isInjured()) {
-                $name = method_exists($wrestler, 'getAttribute') ? $wrestler->getAttribute('name') ?? 'Unknown wrestler' : 'Unknown wrestler';
-                throw CannotBeRetiredException::wrestlerInjured($name);
+                throw CannotBeRetiredException::wrestlerInjured($tagTeam, $wrestler);
             }
 
             if (method_exists($wrestler, 'isSuspended') && $wrestler->isSuspended()) {
-                $name = method_exists($wrestler, 'getAttribute') ? $wrestler->getAttribute('name') ?? 'Unknown wrestler' : 'Unknown wrestler';
-                throw CannotBeRetiredException::wrestlerSuspended($name);
+                throw CannotBeRetiredException::wrestlerSuspended($tagTeam, $wrestler);
             }
 
             // Ensure the wrestler themselves can be retired
             // This prevents cascading retirement issues
             if (method_exists($wrestler, 'canBeRetired') && ! $wrestler->canBeRetired()) {
-                $name = method_exists($wrestler, 'getAttribute') ? $wrestler->getAttribute('name') ?? 'Unknown wrestler' : 'Unknown wrestler';
-                throw CannotBeRetiredException::wrestlerCannotBeRetired($name);
+                throw CannotBeRetiredException::wrestlerCannotBeRetired($tagTeam, $wrestler);
             }
         }
     }

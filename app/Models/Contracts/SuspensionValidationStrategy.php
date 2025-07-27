@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use App\Exceptions\Status\CannotBeSuspendedException;
+use App\Exceptions\Roster\CannotBeSuspendedException;
 use Illuminate\Database\Eloquent\Model;
 
 /**

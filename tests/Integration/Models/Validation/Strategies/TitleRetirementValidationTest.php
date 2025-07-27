@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\Status\CannotBeRetiredException;
+use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Models\Titles\Title;
 use App\Models\Validation\Strategies\TitleRetirementValidation;
 
