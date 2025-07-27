@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Exceptions\CannotBeDeactivatedException;
+use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ class DeactivateAction
     /**
      * Deactivate a stable.
      *
-     * @throws CannotBeDeactivatedException
+     * @throws CannotBeDisbandedException
      */
     public function handle(Stable $stable, ?Carbon $deactivationDate = null): void
     {
@@ -47,24 +47,24 @@ class DeactivateAction
     /**
      * Ensure a stable can be deactivated.
      *
-     * @throws CannotBeDeactivatedException
+     * @throws CannotBeDisbandedException
      */
     private function ensureCanBeDeactivated(Stable $stable): void
     {
         if ($stable->isUnactivated()) {
-            throw CannotBeDeactivatedException::unactivated();
+            throw CannotBeDisbandedException::unactivated($stable);
         }
 
         if (! $stable->isCurrentlyActive()) {
-            throw CannotBeDeactivatedException::deactivated();
+            throw CannotBeDisbandedException::disbanded($stable);
         }
 
         if ($stable->hasFutureActivation()) {
-            throw CannotBeDeactivatedException::hasFutureActivation();
+            throw CannotBeDisbandedException::hasFutureActivation($stable);
         }
 
         if ($stable->isRetired()) {
-            throw CannotBeDeactivatedException::retired();
+            throw CannotBeDisbandedException::retired($stable);
         }
     }
 }
