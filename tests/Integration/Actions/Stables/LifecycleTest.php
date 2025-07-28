@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\DisbandAction;
+use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeActivatedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Status\CannotBeActivatedException;
 use App\Exceptions\Status\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
