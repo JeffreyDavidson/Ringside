@@ -57,7 +57,8 @@
       "mcp__filesystem-ringside__directory_tree",
       "mcp__filesystem-ringside__read_file",
       "mcp__filesystem-ringside__read_multiple_files",
-      "Bash(composer:*)"
+      "Bash(composer:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": [],
     "defaultMode": "plan"
