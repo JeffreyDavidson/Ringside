@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Stables\DebutAction;
 use App\Actions\Stables\DisbandAction;
-use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
+use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\CannotBeUnretiredException;

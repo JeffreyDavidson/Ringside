@@ -21,7 +21,7 @@ class ReuniteAction
      * - Validates the stable can be reunited (currently inactive, not retired)
      * - Creates a new activity record to make the stable active
      * - Makes the stable available for new members and storylines
-     * - Different from unretirement - this is for inactive stables, not retired ones
+     * - Different from establishment - this is for comeback storylines
      *
      * @param  Stable  $stable  The stable to reunite
      * @param  Carbon|null  $reuniteDate  The reunite date (defaults to now)
@@ -38,7 +38,7 @@ class ReuniteAction
      */
     public function handle(Stable $stable, ?Carbon $reuniteDate = null): void
     {
-        $stable->ensureCanBeActivated();
+        $stable->ensureCanBeReunited();
 
         $reuniteDate ??= now();
 
