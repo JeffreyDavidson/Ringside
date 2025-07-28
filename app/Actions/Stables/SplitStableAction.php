@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -52,16 +53,7 @@ class SplitStableAction
         }
 
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
-            // Create the new stable
-            $newStable = Stable::create([
-                'name' => $newStableName,
-            ]);
-
-            // Create activity period to make the stable active
-            $newStable->activityPeriods()->create([
-                'started_at' => $date,
-                'ended_at' => null,
-            ]);
+            // We'll create the stable with CreateAction after filtering members
 
             // Filter members to only include employed/available ones and create Eloquent Collections
             $availableWrestlers = null;
@@ -70,7 +62,7 @@ class SplitStableAction
             if (isset($membersForNewStable['wrestlers'])) {
                 $filteredWrestlers = collect($membersForNewStable['wrestlers'])
                     ->filter(fn ($wrestler) => $wrestler->isEmployed());
-                
+
                 if ($filteredWrestlers->isNotEmpty()) {
                     $availableWrestlers = new Collection($filteredWrestlers->all());
                 }
@@ -79,13 +71,26 @@ class SplitStableAction
             if (isset($membersForNewStable['tagTeams'])) {
                 $filteredTagTeams = collect($membersForNewStable['tagTeams'])
                     ->filter(fn ($tagTeam) => $tagTeam->isEmployed());
-                
+
                 if ($filteredTagTeams->isNotEmpty()) {
                     $availableTagTeams = new Collection($filteredTagTeams->all());
                 }
             }
 
-            // Use service to transfer available members
+            // Create StableData with members and start date for CreateAction
+            $stableData = new StableData(
+                name: $newStableName,
+                start_date: $date,
+                members: new StableMembershipData(
+                    wrestlers: $availableWrestlers,
+                    tagTeams: $availableTagTeams
+                )
+            );
+
+            // Use CreateAction to create and establish the new stable with members
+            $newStable = CreateAction::run($stableData);
+
+            // Remove transferred members from original stable
             if ($availableWrestlers !== null || $availableTagTeams !== null) {
                 $membershipData = new StableMembershipData(
                     wrestlers: $availableWrestlers,
@@ -93,7 +98,7 @@ class SplitStableAction
                 );
 
                 $membershipService = app(StableMembershipService::class);
-                $membershipService->transferMembers($originalStable, $newStable, $membershipData, $date);
+                $membershipService->removeMembers($originalStable, $membershipData, $date);
             }
 
             return $newStable;
