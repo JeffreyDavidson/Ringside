@@ -39,6 +39,7 @@ describe('StablePolicy Unit Tests', function () {
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
             expect($this->policy->before($this->admin, 'delete'))->toBeTrue();
             expect($this->policy->before($this->admin, 'restore'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'establish'))->toBeTrue();
             expect($this->policy->before($this->admin, 'disband'))->toBeTrue();
             expect($this->policy->before($this->admin, 'retire'))->toBeTrue();
             expect($this->policy->before($this->admin, 'unretire'))->toBeTrue();
@@ -51,6 +52,7 @@ describe('StablePolicy Unit Tests', function () {
             expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'delete'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'restore'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'establish'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'disband'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'retire'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'unretire'))->toBeNull();
@@ -102,6 +104,11 @@ describe('StablePolicy Unit Tests', function () {
     });
 
     describe('stable business action authorization', function () {
+        test('basic users cannot establish stables', function () {
+            $inactiveStable = Stable::factory()->inactive()->create();
+            expect($this->policy->establish($this->basicUser, $inactiveStable))->toBeFalse();
+        });
+
         test('basic users cannot disband stables', function () {
             $activeStable = Stable::factory()->active()->create();
             expect($this->policy->disband($this->basicUser, $activeStable))->toBeFalse();
@@ -126,6 +133,7 @@ describe('StablePolicy Unit Tests', function () {
             $stables = [$activeStable, $retiredStable, $disbandedStable, $inactiveStable];
 
             foreach ($stables as $stable) {
+                expect($this->policy->establish($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->disband($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->retire($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->unretire($this->basicUser, $stable))->toBeFalse();
@@ -204,6 +212,7 @@ describe('StablePolicy Unit Tests', function () {
                 expect($this->policy->view($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->update($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->delete($this->basicUser, $stable))->toBeFalse();
+                expect($this->policy->establish($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->disband($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->retire($this->basicUser, $stable))->toBeFalse();
                 expect($this->policy->unretire($this->basicUser, $stable))->toBeFalse();
@@ -221,6 +230,7 @@ describe('StablePolicy Unit Tests', function () {
                 'update',
                 'delete',
                 'restore',
+                'establish',
                 'disband',
                 'retire',
                 'unretire',
@@ -259,6 +269,7 @@ describe('StablePolicy Unit Tests', function () {
                 ['update', [$this->stable]],
                 ['delete', [$this->stable]],
                 ['restore', [$this->stable]],
+                ['establish', [$this->stable]],
                 ['disband', [$this->stable]],
                 ['retire', [$this->stable]],
                 ['unretire', [$this->stable]],
@@ -276,7 +287,7 @@ describe('StablePolicy Unit Tests', function () {
         });
 
         test('before hook returns boolean true for admin or null for others', function () {
-            $abilities = ['viewList', 'view', 'create', 'update', 'delete', 'restore', 'disband', 'retire', 'unretire'];
+            $abilities = ['viewList', 'view', 'create', 'update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire'];
 
             foreach ($abilities as $ability) {
                 expect($this->policy->before($this->admin, $ability))->toBeTrue();

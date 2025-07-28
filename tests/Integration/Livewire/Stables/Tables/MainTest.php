@@ -198,6 +198,20 @@ describe('StablesTable Component', function () {
             expect($retiredStable->fresh()->isInactive())->toBeTrue();
         });
 
+        test('establish action integration works correctly', function () {
+            $inactiveStable = Stable::factory()->inactive()->create(['name' => 'Inactive Stable']);
+
+            $component = Livewire::actingAs($this->admin)
+                ->test(Main::class);
+
+            $component->call('establish', $inactiveStable)
+                ->assertHasNoErrors()
+                ->assertRedirect();
+
+            // Verify stable is established
+            expect($inactiveStable->fresh()->isCurrentlyActive())->toBeTrue();
+        });
+
         test('restore action integration works correctly', function () {
             $deletedStable = Stable::factory()->trashed()->create(['name' => 'Deleted Stable']);
 
@@ -229,6 +243,19 @@ describe('StablesTable Component', function () {
     });
 
     describe('business rule enforcement', function () {
+        test('establish action fails for inappropriate stable status', function () {
+            $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
+
+            $component = Livewire::actingAs($this->admin)
+                ->test(Main::class);
+
+            $component->call('establish', $activeStable)
+                ->assertRedirect();
+
+            // Verify stable status unchanged
+            expect($activeStable->fresh()->isActive())->toBeTrue();
+        });
+
         test('disband action fails for inappropriate stable status', function () {
             $inactiveStable = Stable::factory()->inactive()->create(['name' => 'Inactive Stable']);
 
@@ -285,6 +312,7 @@ describe('StablesTable Component', function () {
 
         test('admin can perform all stable actions', function () {
             $activeStable = Stable::factory()->active()->create();
+            $inactiveStable = Stable::factory()->inactive()->create();
             $retiredStable = Stable::factory()->retired()->create();
             $deletedStable = Stable::factory()->trashed()->create();
 
@@ -292,6 +320,7 @@ describe('StablesTable Component', function () {
                 ->test(Main::class);
 
             // All actions should be available to admin
+            $component->call('establish', $inactiveStable)->assertHasNoErrors();
             $component->call('disband', $activeStable)->assertHasNoErrors();
             $component->call('retire', $activeStable)->assertHasNoErrors();
             $component->call('unretire', $retiredStable)->assertHasNoErrors();

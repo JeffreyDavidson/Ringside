@@ -82,6 +82,14 @@ class StablePolicy
     }
 
     /**
+     * Only administrators can establish stables (handled by before hook).
+     */
+    public function establish(User $user, ?Stable $stable = null): bool
+    {
+        return false; // Will be bypassed by before hook for administrators
+    }
+
+    /**
      * Only administrators can disband stables (handled by before hook).
      */
     public function disband(User $user, ?Stable $stable = null): bool
