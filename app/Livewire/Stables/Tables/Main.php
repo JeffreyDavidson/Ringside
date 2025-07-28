@@ -12,7 +12,8 @@ use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeDisbandedException;
+use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
+use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
@@ -100,6 +101,22 @@ class Main extends BaseTable
     }
 
     /**
+     * Establish a stable.
+     */
+    public function establish(Stable $stable): void
+    {
+        Gate::authorize('establish', $stable);
+
+        try {
+            resolve(EstablishAction::class)->handle($stable);
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        } catch (CannotBeEstablishedException $e) {
+            session()->flash('error', $e->getMessage());
+            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        }
+    }
+
+    /**
      * Disband a stable.
      */
     public function disband(Stable $stable): void
@@ -174,7 +191,7 @@ class Main extends BaseTable
 
         try {
             match ($action) {
-                'debut' => resolve(EstablishAction::class)->handle($stable),
+                'establish' => resolve(EstablishAction::class)->handle($stable),
                 'disband' => resolve(DisbandAction::class)->handle($stable),
                 'retire' => resolve(RetireAction::class)->handle($stable),
                 'unretire' => resolve(UnretireAction::class)->handle($stable),

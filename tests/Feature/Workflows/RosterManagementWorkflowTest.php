@@ -122,10 +122,10 @@ describe('Stable Formation and Management Workflow', function () {
         $admin = administrator();
         $stable = Stable::factory()->create(['name' => 'The Shield']);
 
-        // When: Debuting the stable
+        // When: Establishing the stable
         Livewire::actingAs($admin)
             ->test(StablesTable::class)
-            ->call('handleStableAction', 'debut', $stable->id)
+            ->call('handleStableAction', 'establish', $stable->id)
             ->assertHasNoErrors();
 
         // Then: Stable should be active
