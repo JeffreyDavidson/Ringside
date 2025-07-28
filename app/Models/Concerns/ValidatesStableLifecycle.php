@@ -6,6 +6,7 @@ namespace App\Models\Concerns;
 
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use Illuminate\Support\Collection;
 
 /**
  * Provides stable lifecycle validation functionality for Stable models.
@@ -177,12 +178,12 @@ trait ValidatesStableLifecycle
      * Returns wrestlers and tag teams who were previously in this stable
      * and are currently available (employed and not injured/suspended).
      *
-     * @return \Illuminate\Support\Collection Collection of available former members
+     * @return Collection Collection of available former members
      */
-    public function getAvailableFormerMembers(): \Illuminate\Support\Collection
+    public function getAvailableFormerMembers(): Collection
     {
         $availableFormerWrestlers = $this->previousWrestlers()
-            ->whereHas('employmentHistory', function ($query) {
+            ->whereHas('employments', function ($query) {
                 $query->whereNull('ended_at'); // Currently employed
             })
             ->whereDoesntHave('injuries', function ($query) {
@@ -194,7 +195,7 @@ trait ValidatesStableLifecycle
             ->get();
 
         $availableFormerTagTeams = $this->previousTagTeams()
-            ->whereHas('employmentHistory', function ($query) {
+            ->whereHas('employments', function ($query) {
                 $query->whereNull('ended_at'); // Currently employed
             })
             ->whereDoesntHave('suspensions', function ($query) {
@@ -212,28 +213,28 @@ trait ValidatesStableLifecycle
      * but are currently unavailable due to retirement, injury, suspension, or
      * employment with other stables.
      *
-     * @return \Illuminate\Support\Collection Collection of unavailable key members
+     * @return Collection Collection of unavailable key members
      */
-    public function getUnavailableKeyFormerMembers(): \Illuminate\Support\Collection
+    public function getUnavailableKeyFormerMembers(): Collection
     {
         // For now, consider all former members as "key" members
         // This could be enhanced to identify specific key members based on:
         // - Leadership roles, championship history, or storyline importance
-        
+
         $unavailableFormerWrestlers = $this->previousWrestlers()
             ->where(function ($query) {
                 $query->whereHas('retirements', function ($retirementQuery) {
                     $retirementQuery->whereNull('ended_at'); // Currently retired
                 })
-                ->orWhereHas('injuries', function ($injuryQuery) {
-                    $injuryQuery->whereNull('ended_at'); // Currently injured
-                })
-                ->orWhereHas('suspensions', function ($suspensionQuery) {
-                    $suspensionQuery->whereNull('ended_at'); // Currently suspended
-                })
-                ->orWhereHas('currentStables', function ($stableQuery) {
-                    $stableQuery->where('stable_id', '!=', $this->id); // In another stable
-                });
+                    ->orWhereHas('injuries', function ($injuryQuery) {
+                        $injuryQuery->whereNull('ended_at'); // Currently injured
+                    })
+                    ->orWhereHas('suspensions', function ($suspensionQuery) {
+                        $suspensionQuery->whereNull('ended_at'); // Currently suspended
+                    })
+                    ->orWhereHas('currentStables', function ($stableQuery) {
+                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    });
             })
             ->get();
 
@@ -242,12 +243,12 @@ trait ValidatesStableLifecycle
                 $query->whereHas('retirements', function ($retirementQuery) {
                     $retirementQuery->whereNull('ended_at'); // Currently retired
                 })
-                ->orWhereHas('suspensions', function ($suspensionQuery) {
-                    $suspensionQuery->whereNull('ended_at'); // Currently suspended
-                })
-                ->orWhereHas('currentStables', function ($stableQuery) {
-                    $stableQuery->where('stable_id', '!=', $this->id); // In another stable
-                });
+                    ->orWhereHas('suspensions', function ($suspensionQuery) {
+                        $suspensionQuery->whereNull('ended_at'); // Currently suspended
+                    })
+                    ->orWhereHas('currentStables', function ($stableQuery) {
+                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    });
             })
             ->get();
 
