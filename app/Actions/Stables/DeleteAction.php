@@ -62,6 +62,8 @@ class DeleteAction
      */
     public function handle(Stable $stable, ?Carbon $deletionDate = null): void
     {
+        $stable->ensureCanBeDeleted();
+
         $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($stable, $deletionDate): void {

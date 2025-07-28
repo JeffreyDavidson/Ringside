@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use Illuminate\Support\Collection;
@@ -27,7 +28,9 @@ use Illuminate\Support\Collection;
  * $stable = Stable::find(1);
  * $stable->ensureCanBeEstablished();  // For first-time activation
  * $stable->ensureCanBeDisbanded();    // For disbandment
+ * $stable->ensureCanBeDeleted();      // For soft deletion
  * $stable->canBeEstablished();        // Returns boolean for establishment
+ * $stable->canBeDeleted();            // Returns boolean for deletion
  * $stable->isDisbanded();             // Returns boolean if disbanded
  * ```
  */
@@ -158,6 +161,50 @@ trait ValidatesStableLifecycle
             $memberNames = $unavailableKeyMembers->pluck('name')->join(', ');
             throw CannotBeEstablishedException::keyFormerMembersUnavailable($this, $memberNames);
         }
+    }
+
+    /**
+     * Determine if the stable can be soft deleted.
+     *
+     * Checks business rules for soft deletion (operational constraints):
+     * - Should not be currently active (use disband first for proper workflow)
+     * - Should not have current members (remove members first for clean operation)
+     *
+     * Note: Soft deletion preserves all historical data and can be restored.
+     * This validation focuses on current operational state rather than data preservation.
+     *
+     * @return bool True if the stable can be soft deleted, false otherwise
+     */
+    public function canBeDeleted(): bool
+    {
+        return ! $this->isCurrentlyActive() && ! $this->hasCurrentMembers();
+    }
+
+    /**
+     * Ensure the stable can be soft deleted, throwing an exception if not.
+     *
+     * Validates operational constraints for soft deletion. Since soft deletion
+     * is recoverable and preserves all data, validation focuses on current
+     * operational state to ensure proper stable management workflows.
+     *
+     * @throws CannotBeDeletedException When soft deletion is not allowed
+     */
+    public function ensureCanBeDeleted(): void
+    {
+        if ($this->isCurrentlyActive()) {
+            throw CannotBeDeletedException::currentlyActive($this);
+        }
+
+        if ($this->hasCurrentMembers()) {
+            $memberCount = $this->getCurrentMembersData()->getTotalMemberCount();
+            throw CannotBeDeletedException::hasCurrentMembers($this, $memberCount);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Active championship reigns by members
+        // - Ongoing storylines or feuds
+        // - Scheduled upcoming events
+        // - Administrative authorization requirements
     }
 
     /**
