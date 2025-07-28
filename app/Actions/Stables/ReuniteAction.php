@@ -7,7 +7,6 @@ namespace App\Actions\Stables;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReuniteAction
@@ -42,11 +41,6 @@ class ReuniteAction
 
         $reuniteDate ??= now();
 
-        DB::transaction(function () use ($stable, $reuniteDate): void {
-            $stable->activityPeriods()->create([
-                'started_at' => $reuniteDate,
-                'ended_at' => null,
-            ]);
-        });
+        EstablishAction::run($stable, $reuniteDate);
     }
 }
