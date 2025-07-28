@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
+use App\Services\StableValidationService;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -55,17 +56,24 @@ class CreateAction
     public function handle(StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stableData): Stable {
+            // Validate business rules before creation
+            $validationService = app(StableValidationService::class);
+            $validationService->validateUniqueName($stableData->getTrimmedName());
+            $validationService->validateMembersAvailable($stableData->members);
+
             $stable = Stable::create([
-                'name' => $stableData->name,
+                'name' => $stableData->getTrimmedName(),
             ]);
 
-            $joinDate = $stableData->start_date ?? now();
+            // Use enhanced DTO methods
+            $joinDate = $stableData->getJoinDate();
 
             // Add members using service
             $membershipService = app(StableMembershipService::class);
             $membershipService->addMembers($stable, $stableData->members, $joinDate);
 
-            if (isset($stableData->start_date)) {
+            // Use enhanced DTO method instead of isset check
+            if ($stableData->shouldEstablish()) {
                 EstablishAction::run($stable, $stableData->start_date);
             }
 

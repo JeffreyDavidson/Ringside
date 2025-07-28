@@ -7,12 +7,9 @@ namespace App\Actions\Stables;
 use App\Actions\Managers\RetireAction as ManagersRetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
-use App\Data\Stables\StableMembershipData;
+use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
-use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -68,41 +65,43 @@ class RetireAction
         $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($stable, $retirementDate): void {
-            // End activity if currently active
+            // End activity if currently active using discrete Action
             if ($stable->isCurrentlyActive()) {
-                $stable->activityPeriods()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
+                EndActivityPeriodAction::run($stable, $retirementDate);
             }
+
+            // Get current members using enhanced model method
+            $currentMembers = $stable->getCurrentMembersData();
 
             // Retire current members who are available
-            // Note: Managers are not direct stable members and are not retired with the stable
-            $wrestlersToRetire = $stable->currentWrestlers
-                ->filter(fn (Wrestler $wrestler) => ! $wrestler->isRetired());
-            $tagTeamsToRetire = $stable->currentTagTeams
-                ->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isRetired());
+            $membersToRetire = $stable->getMembersToRetire();
 
-            // Retire wrestlers
-            $wrestlersToRetire->each(fn (Wrestler $wrestler) => $this->wrestlersRetireAction->handle($wrestler, $retirementDate));
-
-            // Retire tag teams
-            $tagTeamsToRetire->each(fn (TagTeam $tagTeam) => $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate));
-
-            // End current memberships using service
-            // Note: Managers are not direct stable members, so we don't remove them
-            if ($stable->currentWrestlers->isNotEmpty() || $stable->currentTagTeams->isNotEmpty()) {
-                $currentMembers = new StableMembershipData(
-                    wrestlers: $stable->currentWrestlers,
-                    tagTeams: $stable->currentTagTeams
-                );
-
-                $membershipService = app(StableMembershipService::class);
-                $membershipService->removeMembers($stable, $currentMembers, $retirementDate);
+            if ($membersToRetire->wrestlers) {
+                foreach ($membersToRetire->wrestlers as $wrestler) {
+                    if ($wrestler->canBeRetired()) {
+                        $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
+                    }
+                }
             }
 
-            // Create retirement record for the stable
+            if ($membersToRetire->tagTeams) {
+                foreach ($membersToRetire->tagTeams as $tagTeam) {
+                    if ($tagTeam->canBeRetired()) {
+                        $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate);
+                    }
+                }
+            }
+
+            // Remove all current members using discrete Action
+            RemoveStableMembersAction::run($stable, $currentMembers, $retirementDate);
+
+            // Create retirement record directly
             $stable->retirements()->create([
-                'started_at' => $retirementDate,
-                'ended_at' => null,
+                'retired_at' => $retirementDate,
             ]);
+
+            // Update status to retired
+            $stable->update(['status' => StableStatus::Retired]);
         });
     }
 }

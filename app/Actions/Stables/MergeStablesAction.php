@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
+use App\Services\StableValidationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -30,6 +31,10 @@ class MergeStablesAction
         Carbon $date
     ): void {
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
+            // Validate merge compatibility before proceeding
+            $validationService = app(StableValidationService::class);
+            $validationService->validateCanMerge($primaryStable, $secondaryStable);
+
             // Use service to transfer all members from secondary to primary stable
             $membershipService = app(StableMembershipService::class);
             $membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);

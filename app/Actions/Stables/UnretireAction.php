@@ -10,8 +10,7 @@ use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -65,21 +64,42 @@ class UnretireAction
         $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($stable, $unretiredDate): void {
-            // End the current retirement record
-            $stable->retirements()->where('ended_at', null)->update(['ended_at' => $unretiredDate]);
+            // End the current retirement record directly
+            $currentRetirement = $stable->retirements()
+                ->whereNull('unretired_at')
+                ->first();
+
+            if ($currentRetirement) {
+                $currentRetirement->update(['unretired_at' => $unretiredDate]);
+            }
+
+            // Get former members who retired with the stable
+            $formerMembers = $stable->getCurrentMembersData();
 
             // Attempt to unretire former members who retired with the stable
-            // Note: Managers are not direct stable members and are not unretired with the stable
-            $wrestlersToUnretire = $stable->currentWrestlers
-                ->filter(fn (Wrestler $wrestler) => $wrestler->isRetired());
-            $tagTeamsToUnretire = $stable->currentTagTeams
-                ->filter(fn (TagTeam $tagTeam) => $tagTeam->isRetired());
+            if ($formerMembers->wrestlers) {
+                foreach ($formerMembers->wrestlers as $wrestler) {
+                    if ($wrestler->isRetired()) {
+                        try {
+                            $this->wrestlersUnretireAction->handle($wrestler, $unretiredDate);
+                        } catch (Exception) {
+                            // Continue if wrestler cannot be unretired
+                        }
+                    }
+                }
+            }
 
-            // Unretire wrestlers
-            $wrestlersToUnretire->each(fn (Wrestler $wrestler) => $this->wrestlersUnretireAction->handle($wrestler, $unretiredDate));
-
-            // Unretire tag teams
-            $tagTeamsToUnretire->each(fn (TagTeam $tagTeam) => $this->tagTeamsUnretireAction->handle($tagTeam, $unretiredDate));
+            if ($formerMembers->tagTeams) {
+                foreach ($formerMembers->tagTeams as $tagTeam) {
+                    if ($tagTeam->isRetired()) {
+                        try {
+                            $this->tagTeamsUnretireAction->handle($tagTeam, $unretiredDate);
+                        } catch (Exception) {
+                            // Continue if tag team cannot be unretired
+                        }
+                    }
+                }
+            }
 
             // Update status to inactive (no longer retired, but not active)
             $stable->update(['status' => StableStatus::Inactive]);
