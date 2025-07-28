@@ -8,6 +8,7 @@ use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
+use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use Illuminate\Support\Collection;
 
@@ -33,9 +34,11 @@ use Illuminate\Support\Collection;
  * $stable->ensureCanBeDeleted();      // For soft deletion
  * $stable->ensureCanBeSplit();        // For splitting into two stables
  * $stable->ensureCanBeMerged($other); // For merging with another stable
+ * $stable->ensureCanBeRestored();     // For restoration from soft deletion
  * $stable->canBeEstablished();        // Returns boolean for establishment
  * $stable->canBeDeleted();            // Returns boolean for deletion
  * $stable->canBeSplit();              // Returns boolean for splitting
+ * $stable->canBeRestored();           // Returns boolean for restoration
  * $stable->isDisbanded();             // Returns boolean if disbanded
  * ```
  */
@@ -320,6 +323,92 @@ trait ValidatesStableLifecycle
         // - Conflicting championship reigns
         // - Active feuds between stables
         // - Upcoming major events
+    }
+
+    /**
+     * Determine if the stable can be restored from soft deletion.
+     *
+     * Checks business rules for stable restoration:
+     * - Must be soft deleted (trashed)
+     * - Name must not conflict with existing active stables
+     * - Should have available former members for viable restoration
+     *
+     * @return bool True if the stable can be restored, false otherwise
+     */
+    public function canBeRestored(): bool
+    {
+        if (! $this->trashed()) {
+            return false;
+        }
+
+        // Check for name conflicts with existing active stables
+        $nameConflict = static::where('name', $this->name)
+            ->whereNull('deleted_at')
+            ->exists();
+
+        if ($nameConflict) {
+            return false;
+        }
+
+        // Basic restoration is possible if no conflicts
+        return true;
+    }
+
+    /**
+     * Ensure the stable can be restored from soft deletion, throwing an exception if not.
+     *
+     * Validates that the stable is in a valid state for restoration while checking
+     * for business rule violations and member availability for reunion storylines.
+     *
+     * @param  bool  $requireFormerMembers  Whether to require available former members
+     * @throws CannotBeRestoredException When restoration is not allowed
+     */
+    public function ensureCanBeRestored(bool $requireFormerMembers = true): void
+    {
+        if (! $this->trashed()) {
+            throw CannotBeRestoredException::notDeleted($this);
+        }
+
+        // Check for name conflicts with existing active stables
+        $conflictingStable = static::where('name', $this->name)
+            ->whereNull('deleted_at')
+            ->first();
+
+        if ($conflictingStable) {
+            throw CannotBeRestoredException::nameConflict($this, $conflictingStable->name);
+        }
+
+        if ($requireFormerMembers) {
+            // Check if former members are available for restoration
+            $availableFormerMembers = $this->getAvailableFormerMembers();
+
+            if ($availableFormerMembers->isEmpty()) {
+                throw CannotBeRestoredException::noAvailableFormerMembers($this);
+            }
+
+            // Check minimum member count for viable restoration
+            $minimumMembers = static::MIN_MEMBERS_COUNT ?? 2;
+            if ($availableFormerMembers->count() < $minimumMembers) {
+                throw CannotBeRestoredException::insufficientFormerMembers(
+                    $this,
+                    $availableFormerMembers->count(),
+                    $minimumMembers
+                );
+            }
+
+            // Check if key former members are available
+            $unavailableKeyMembers = $this->getUnavailableKeyFormerMembers();
+            if ($unavailableKeyMembers->isNotEmpty()) {
+                $memberNames = $unavailableKeyMembers->pluck('name')->join(', ');
+                throw CannotBeRestoredException::keyMembersUnavailable($this, $memberNames);
+            }
+        }
+
+        // Additional business rule validations could be added here:
+        // - Storyline conflicts with current active stables
+        // - Administrative authorization requirements
+        // - Event timing conflicts
+        // - Member commitment conflicts
     }
 
     /**
