@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Data\Stables\StableMembershipData;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\StableMembershipService;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -327,33 +330,8 @@ class StableMembershipOrchestrator
      */
     protected function transferAllMembers(Stable $from, Stable $to, Carbon $date): void
     {
-        // Transfer wrestlers
-        foreach ($from->currentWrestlers as $wrestler) {
-            // End membership in source stable
-            $from->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
-                $wrestler->id,
-                ['left_at' => $date]
-            );
-            // Add to target stable
-            $to->wrestlers()->attach($wrestler->id, [
-                'joined_at' => $date,
-                'left_at' => null,
-            ]);
-        }
-
-        // Transfer tag teams
-        foreach ($from->currentTagTeams as $tagTeam) {
-            // End membership in source stable
-            $from->tagTeams()->wherePivotNull('left_at')->updateExistingPivot(
-                $tagTeam->id,
-                ['left_at' => $date]
-            );
-            // Add to target stable
-            $to->tagTeams()->attach($tagTeam->id, [
-                'joined_at' => $date,
-                'left_at' => null,
-            ]);
-        }
+        $membershipService = app(StableMembershipService::class);
+        $membershipService->transferAllMembers($from, $to, $date);
 
         // Note: Managers are not directly transferred between stables
         // Managers are associated with individual wrestlers/tag teams, not stables directly
@@ -366,19 +344,14 @@ class StableMembershipOrchestrator
      */
     protected function executeWrestlerTransfer(Collection $wrestlers, Carbon $date): ?Stable
     {
-        foreach ($wrestlers as $wrestler) {
-            if ($this->sourceStable) {
-                $this->sourceStable->wrestlers()->wherePivotNull('left_at')->updateExistingPivot(
-                    $wrestler->id,
-                    ['left_at' => $date]
-                );
-            }
-            if ($this->targetStable) {
-                $this->targetStable->wrestlers()->attach($wrestler->id, [
-                    'joined_at' => $date,
-                    'left_at' => null,
-                ]);
-            }
+        if ($this->sourceStable && $this->targetStable && $wrestlers->isNotEmpty()) {
+            $membershipData = new StableMembershipData(
+                wrestlers: new EloquentCollection($wrestlers->all()),
+                tagTeams: null
+            );
+
+            $membershipService = app(StableMembershipService::class);
+            $membershipService->transferMembers($this->sourceStable, $this->targetStable, $membershipData, $date);
         }
 
         return $this->targetStable;
@@ -391,19 +364,14 @@ class StableMembershipOrchestrator
      */
     protected function executeTagTeamTransfer(Collection $tagTeams, Carbon $date): ?Stable
     {
-        foreach ($tagTeams as $tagTeam) {
-            if ($this->sourceStable) {
-                $this->sourceStable->tagTeams()->wherePivotNull('left_at')->updateExistingPivot(
-                    $tagTeam->id,
-                    ['left_at' => $date]
-                );
-            }
-            if ($this->targetStable) {
-                $this->targetStable->tagTeams()->attach($tagTeam->id, [
-                    'joined_at' => $date,
-                    'left_at' => null,
-                ]);
-            }
+        if ($this->sourceStable && $this->targetStable && $tagTeams->isNotEmpty()) {
+            $membershipData = new StableMembershipData(
+                wrestlers: null,
+                tagTeams: new EloquentCollection($tagTeams->all())
+            );
+
+            $membershipService = app(StableMembershipService::class);
+            $membershipService->transferMembers($this->sourceStable, $this->targetStable, $membershipData, $date);
         }
 
         return $this->targetStable;

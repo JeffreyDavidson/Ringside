@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\StableMembershipService;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -60,42 +63,37 @@ class SplitStableAction
                 'ended_at' => null,
             ]);
 
-            // Transfer wrestlers (only if they are employed/available)
+            // Filter members to only include employed/available ones and create Eloquent Collections
+            $availableWrestlers = null;
+            $availableTagTeams = null;
+
             if (isset($membersForNewStable['wrestlers'])) {
-                foreach ($membersForNewStable['wrestlers'] as $wrestler) {
-                    // Only transfer wrestlers who are employed/available
-                    if ($wrestler->isEmployed()) {
-                        // Remove from original stable
-                        $originalStable->wrestlers()->updateExistingPivot($wrestler->id, [
-                            'left_at' => $date,
-                        ]);
-                        // Add to new stable
-                        $newStable->wrestlers()->attach($wrestler->id, [
-                            'joined_at' => $date,
-                            'left_at' => null,
-                        ]);
-                    }
-                    // Skip unemployed wrestlers without throwing an exception
+                $filteredWrestlers = collect($membersForNewStable['wrestlers'])
+                    ->filter(fn ($wrestler) => $wrestler->isEmployed());
+                
+                if ($filteredWrestlers->isNotEmpty()) {
+                    $availableWrestlers = new Collection($filteredWrestlers->all());
                 }
             }
 
-            // Transfer tag teams (only if they are employed/available)
             if (isset($membersForNewStable['tagTeams'])) {
-                foreach ($membersForNewStable['tagTeams'] as $tagTeam) {
-                    // Only transfer tag teams who are employed/available
-                    if ($tagTeam->isEmployed()) {
-                        // Remove from original stable
-                        $originalStable->tagTeams()->updateExistingPivot($tagTeam->id, [
-                            'left_at' => $date,
-                        ]);
-                        // Add to new stable
-                        $newStable->tagTeams()->attach($tagTeam->id, [
-                            'joined_at' => $date,
-                            'left_at' => null,
-                        ]);
-                    }
-                    // Skip unemployed tag teams without throwing an exception
+                $filteredTagTeams = collect($membersForNewStable['tagTeams'])
+                    ->filter(fn ($tagTeam) => $tagTeam->isEmployed());
+                
+                if ($filteredTagTeams->isNotEmpty()) {
+                    $availableTagTeams = new Collection($filteredTagTeams->all());
                 }
+            }
+
+            // Use service to transfer available members
+            if ($availableWrestlers !== null || $availableTagTeams !== null) {
+                $membershipData = new StableMembershipData(
+                    wrestlers: $availableWrestlers,
+                    tagTeams: $availableTagTeams
+                );
+
+                $membershipService = app(StableMembershipService::class);
+                $membershipService->transferMembers($originalStable, $newStable, $membershipData, $date);
             }
 
             return $newStable;

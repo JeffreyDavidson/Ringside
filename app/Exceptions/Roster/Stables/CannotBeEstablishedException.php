@@ -205,4 +205,31 @@ final class CannotBeEstablishedException extends BaseBusinessException
 
         return new static("{$context} cannot be established during active event period: {$eventDetails}.");
     }
+
+    /**
+     * Stable cannot be reunited due to insufficient available former members.
+     *
+     * @param  Stable  $stable  The stable that cannot be reunited
+     * @param  int  $required  Number of members required for reunion
+     * @param  int  $available  Number of former members currently available
+     */
+    public static function insufficientFormerMembers(Stable $stable, int $required, int $available): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new static("{$context} cannot be reunited: requires {$required} members but only {$available} former members are available.");
+    }
+
+    /**
+     * Stable cannot be reunited because key former members are unavailable.
+     *
+     * @param  Stable  $stable  The stable that cannot be reunited
+     * @param  string  $unavailableMembers  Description of unavailable key members
+     */
+    public static function keyFormerMembersUnavailable(Stable $stable, string $unavailableMembers): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new static("{$context} cannot be reunited because key former members are unavailable: {$unavailableMembers}.");
+    }
 }

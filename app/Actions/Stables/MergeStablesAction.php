@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Models\Stables\Stable;
+use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -29,31 +30,9 @@ class MergeStablesAction
         Carbon $date
     ): void {
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
-            // Transfer all wrestlers
-            foreach ($secondaryStable->currentWrestlers as $wrestler) {
-                // Remove from secondary stable
-                $secondaryStable->wrestlers()->updateExistingPivot($wrestler->id, [
-                    'left_at' => $date,
-                ]);
-
-                // Add to primary stable
-                $primaryStable->wrestlers()->attach($wrestler->id, [
-                    'joined_at' => $date,
-                ]);
-            }
-
-            // Transfer all tag teams
-            foreach ($secondaryStable->currentTagTeams as $tagTeam) {
-                // Remove from secondary stable
-                $secondaryStable->tagTeams()->updateExistingPivot($tagTeam->id, [
-                    'left_at' => $date,
-                ]);
-
-                // Add to primary stable
-                $primaryStable->tagTeams()->attach($tagTeam->id, [
-                    'joined_at' => $date,
-                ]);
-            }
+            // Use service to transfer all members from secondary to primary stable
+            $membershipService = app(StableMembershipService::class);
+            $membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);
 
             // Note: Managers are not direct stable members and are automatically
             // transferred through their wrestlers/tag teams associations

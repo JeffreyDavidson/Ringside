@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Stables\DebutAction;
+use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
@@ -10,7 +10,7 @@ use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Exceptions\Status\CannotBeActivatedException;
-use App\Exceptions\Status\CannotBeDebutedException;
+use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Status\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -32,7 +32,7 @@ describe('Stable Activation Action Integration', function () {
         test('debut action creates activity period and updates status', function () {
             $debutDate = Carbon::now();
 
-            DebutAction::run($this->stable, $debutDate);
+            EstablishAction::run($this->stable, $debutDate);
 
             $refreshedStable = $this->stable->fresh();
             expect($refreshedStable->isCurrentlyActive())->toBeTrue();
@@ -48,7 +48,7 @@ describe('Stable Activation Action Integration', function () {
         test('debut action handles date parameter correctly', function () {
             $pastDate = Carbon::now()->subMonths(3);
 
-            DebutAction::run($this->stable, $pastDate);
+            EstablishAction::run($this->stable, $pastDate);
 
             $refreshedStable = $this->stable->fresh();
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->first();
@@ -58,7 +58,7 @@ describe('Stable Activation Action Integration', function () {
         test('debut action from unformed status creates proper status change', function () {
             expect($this->stable->status)->toBe(StableStatus::Unformed);
 
-            DebutAction::run($this->stable, Carbon::now());
+            EstablishAction::run($this->stable, Carbon::now());
 
             $refreshedStable = $this->stable->fresh();
             expect($refreshedStable->isCurrentlyActive())->toBeTrue();
@@ -209,7 +209,7 @@ describe('Stable Activation Action Integration', function () {
 
             // Debut
             $debutDate = Carbon::now()->subYear();
-            DebutAction::run($stable, $debutDate);
+            EstablishAction::run($stable, $debutDate);
             expect($stable->fresh()->isCurrentlyActive())->toBeTrue();
 
             // Disband
@@ -257,7 +257,7 @@ describe('Stable Activation Action Integration', function () {
             $reuniteDate = Carbon::now();
 
             // Sequential actions with proper dates
-            DebutAction::run($stable, $debutDate);
+            EstablishAction::run($stable, $debutDate);
             DisbandAction::run($stable, $disbandDate);
             ReuniteAction::run($stable, $reuniteDate);
 
@@ -276,8 +276,8 @@ describe('Stable Activation Action Integration', function () {
         test('debut action requires inactive status', function () {
             $activeStable = Stable::factory()->active()->create();
 
-            expect(fn () => DebutAction::run($activeStable, Carbon::now()))
-                ->toThrow(CannotBeDebutedException::class);
+            expect(fn () => EstablishAction::run($activeStable, Carbon::now()))
+                ->toThrow(CannotBeEstablishedException::class);
         });
 
         test('disband action requires active status', function () {
