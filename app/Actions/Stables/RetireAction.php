@@ -7,10 +7,12 @@ namespace App\Actions\Stables;
 use App\Actions\Managers\RetireAction as ManagersRetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
+use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -84,19 +86,17 @@ class RetireAction
             // Retire tag teams
             $tagTeamsToRetire->each(fn (TagTeam $tagTeam) => $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate));
 
-            // End current memberships
+            // End current memberships using service
             // Note: Managers are not direct stable members, so we don't remove them
-            $stable->currentWrestlers->each(function (Wrestler $wrestler) use ($stable, $retirementDate) {
-                $stable->wrestlers()->updateExistingPivot($wrestler->id, [
-                    'left_at' => $retirementDate,
-                ]);
-            });
+            if ($stable->currentWrestlers->isNotEmpty() || $stable->currentTagTeams->isNotEmpty()) {
+                $currentMembers = new StableMembershipData(
+                    wrestlers: $stable->currentWrestlers,
+                    tagTeams: $stable->currentTagTeams
+                );
 
-            $stable->currentTagTeams->each(function (TagTeam $tagTeam) use ($stable, $retirementDate) {
-                $stable->tagTeams()->updateExistingPivot($tagTeam->id, [
-                    'left_at' => $retirementDate,
-                ]);
-            });
+                $membershipService = app(StableMembershipService::class);
+                $membershipService->removeMembers($stable, $currentMembers, $retirementDate);
+            }
 
             // Create retirement record for the stable
             $stable->retirements()->create([

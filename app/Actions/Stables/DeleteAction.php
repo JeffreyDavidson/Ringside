@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
+use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -62,19 +64,16 @@ class DeleteAction
                 $stable->activityPeriods()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             }
 
-            // End current wrestler memberships (wrestlers continue as singles)
-            $stable->currentWrestlers->each(function ($wrestler) use ($stable, $deletionDate) {
-                $stable->wrestlers()->updateExistingPivot($wrestler->id, [
-                    'left_at' => $deletionDate,
-                ]);
-            });
+            // End all current memberships using service
+            if ($stable->currentWrestlers->isNotEmpty() || $stable->currentTagTeams->isNotEmpty()) {
+                $currentMembers = new StableMembershipData(
+                    wrestlers: $stable->currentWrestlers,
+                    tagTeams: $stable->currentTagTeams
+                );
 
-            // End current tag team memberships (tag teams continue independently)
-            $stable->currentTagTeams->each(function ($tagTeam) use ($stable, $deletionDate) {
-                $stable->tagTeams()->updateExistingPivot($tagTeam->id, [
-                    'left_at' => $deletionDate,
-                ]);
-            });
+                $membershipService = app(StableMembershipService::class);
+                $membershipService->removeMembers($stable, $currentMembers, $deletionDate);
+            }
 
             // Manager associations automatically end when wrestler/tag team memberships end
             // No direct manager removal needed since managers are associated through wrestlers/tag teams
