@@ -6,12 +6,10 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
+use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
 use App\Services\StableMembershipService;
 use App\Services\StableValidationService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -36,38 +34,29 @@ class SplitStableAction
      *
      * @param  Stable  $originalStable  The stable to split
      * @param  string  $newStableName  Name for the new stable
-     * @param  array{wrestlers?: array<int, Wrestler>, tagTeams?: array<int, TagTeam>}  $membersForNewStable  Array of members to move to new stable, grouped by type
+     * @param  StableMembershipData  $membersForNewStable  Members to move to new stable
      * @param  Carbon  $date  The date when the split operation occurs
      * @return Stable The newly created stable
      */
     public function handle(
         Stable $originalStable,
         string $newStableName,
-        array $membersForNewStable,
+        StableMembershipData $membersForNewStable,
         Carbon $date
     ): Stable {
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
-            // Validate all business rules using centralized validation service
+            // Validate stable can be split using model validation
+            $originalStable->ensureCanBeSplit();
+
+            // Validate split member distribution
+            $this->validateSplitMembers($originalStable, $membersForNewStable);
+
+            // Validate name uniqueness using service
             $validationService = app(StableValidationService::class);
-            $validationService->validateCanSplit($originalStable);
             $validationService->validateUniqueName(mb_trim($newStableName));
-            $validationService->validateSplitMembers($originalStable, $membersForNewStable);
-
-            // Convert array to StableMembershipData for filtering
-            $wrestlers = isset($membersForNewStable['wrestlers'])
-                ? new Collection($membersForNewStable['wrestlers'])
-                : null;
-            $tagTeams = isset($membersForNewStable['tagTeams'])
-                ? new Collection($membersForNewStable['tagTeams'])
-                : null;
-
-            $membershipData = new StableMembershipData(
-                wrestlers: $wrestlers,
-                tagTeams: $tagTeams
-            );
 
             // Use enhanced DTO method to filter employed members
-            $employedMembers = $membershipData->filterEmployedMembers();
+            $employedMembers = $membersForNewStable->filterEmployedMembers();
 
             // Validate the filtered members are still viable
             if ($employedMembers->isEmpty()) {
@@ -90,5 +79,27 @@ class SplitStableAction
 
             return $newStable;
         });
+    }
+
+    /**
+     * Validate that split members are feasible.
+     *
+     * @param  Stable  $originalStable  The stable being split
+     * @param  StableMembershipData  $membersForNewStable  The members being moved
+     * @throws CannotBeSplitException When split is not feasible
+     */
+    private function validateSplitMembers(Stable $originalStable, StableMembershipData $membersForNewStable): void
+    {
+        if ($membersForNewStable->isEmpty()) {
+            throw CannotBeSplitException::noMembersToMove();
+        }
+
+        $totalMembersBeingSplit = $membersForNewStable->getTotalMemberCount();
+        $totalCurrentMembers = $originalStable->currentWrestlers->count() + $originalStable->currentTagTeams->count();
+        $remainingMembers = $totalCurrentMembers - $totalMembersBeingSplit;
+
+        if ($remainingMembers === 0) {
+            throw CannotBeSplitException::allMembersMoving();
+        }
     }
 }

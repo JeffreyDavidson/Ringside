@@ -7,6 +7,8 @@ namespace App\Models\Concerns;
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Roster\Stables\CannotBeMergedException;
+use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use Illuminate\Support\Collection;
 
 /**
@@ -29,8 +31,11 @@ use Illuminate\Support\Collection;
  * $stable->ensureCanBeEstablished();  // For first-time activation
  * $stable->ensureCanBeDisbanded();    // For disbandment
  * $stable->ensureCanBeDeleted();      // For soft deletion
+ * $stable->ensureCanBeSplit();        // For splitting into two stables
+ * $stable->ensureCanBeMerged($other); // For merging with another stable
  * $stable->canBeEstablished();        // Returns boolean for establishment
  * $stable->canBeDeleted();            // Returns boolean for deletion
+ * $stable->canBeSplit();              // Returns boolean for splitting
  * $stable->isDisbanded();             // Returns boolean if disbanded
  * ```
  */
@@ -205,6 +210,116 @@ trait ValidatesStableLifecycle
         // - Ongoing storylines or feuds
         // - Scheduled upcoming events
         // - Administrative authorization requirements
+    }
+
+    /**
+     * Determine if the stable can be split into two stables.
+     *
+     * Checks business rules for stable splitting:
+     * - Must not be retired
+     * - Must be currently active
+     * - Must have at least 2 members for viable split
+     *
+     * @return bool True if the stable can be split, false otherwise
+     */
+    public function canBeSplit(): bool
+    {
+        if ($this->isRetired() || ! $this->isCurrentlyActive()) {
+            return false;
+        }
+
+        $currentMemberCount = $this->currentWrestlers->count() + $this->currentTagTeams->count();
+
+        return $currentMemberCount >= 2;
+    }
+
+    /**
+     * Ensure the stable can be split, throwing an exception if not.
+     *
+     * Validates that the stable is in a valid state for splitting into two
+     * separate viable stables while maintaining competitive integrity.
+     *
+     * @throws CannotBeSplitException When splitting is not allowed
+     */
+    public function ensureCanBeSplit(): void
+    {
+        if ($this->isRetired()) {
+            throw CannotBeSplitException::retired($this);
+        }
+
+        if (! $this->isCurrentlyActive()) {
+            throw CannotBeSplitException::notActive($this);
+        }
+
+        $currentMemberCount = $this->currentWrestlers->count() + $this->currentTagTeams->count();
+        if ($currentMemberCount < 2) {
+            throw CannotBeSplitException::insufficientMembers($this, $currentMemberCount, 2);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Active championship reigns by members
+        // - Ongoing storylines or feuds
+        // - Upcoming major events
+        // - Member compatibility checks
+    }
+
+    /**
+     * Determine if this stable can be merged with another stable.
+     *
+     * Checks business rules for stable merging:
+     * - Stables must not be the same
+     * - Both stables must not be retired
+     * - Both stables must be currently active
+     *
+     * @param  Stable  $otherStable  The stable to potentially merge with
+     * @return bool True if stables can be merged, false otherwise
+     */
+    public function canBeMergedWith(Stable $otherStable): bool
+    {
+        return $this->id !== $otherStable->id
+            && ! $this->isRetired()
+            && ! $otherStable->isRetired()
+            && $this->isCurrentlyActive()
+            && $otherStable->isCurrentlyActive();
+    }
+
+    /**
+     * Ensure this stable can be merged with another, throwing an exception if not.
+     *
+     * Validates that both stables are in compatible states for merging while
+     * maintaining storyline continuity and competitive integrity.
+     *
+     * @param  Stable  $otherStable  The stable to merge with
+     * @throws CannotBeMergedException When merging is not allowed
+     */
+    public function ensureCanBeMergedWith(Stable $otherStable): void
+    {
+        if ($this->id === $otherStable->id) {
+            throw CannotBeMergedException::selfMerge($this);
+        }
+
+        if ($this->isRetired()) {
+            throw CannotBeMergedException::primaryRetired($this);
+        }
+
+        if ($otherStable->isRetired()) {
+            throw CannotBeMergedException::secondaryRetired($otherStable);
+        }
+
+        if (! $this->isCurrentlyActive()) {
+            throw CannotBeMergedException::primaryNotActive($this);
+        }
+
+        if (! $otherStable->isCurrentlyActive()) {
+            throw CannotBeMergedException::secondaryNotActive($otherStable);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Conflicting storylines between stables
+        // - Incompatible member relationships
+        // - Conflicting championship reigns
+        // - Active feuds between stables
+        // - Upcoming major events
     }
 
     /**
