@@ -109,6 +109,37 @@ When managing todos:
 3. **Resource-specific evaluation** - Before proceeding, evaluate if todos pertain to specific resources and should be organized differently
 4. **Clean separation** - Don't mix unrelated changes in the same branch/PR
 
+**CRITICAL: Phased Work Requires Separate Branches**
+
+When todos are organized into phases:
+1. **Each phase gets its own feature branch** - Never mix phases in the same branch
+2. **Complete entire phase before moving to next** - Finish all Phase 1 tasks before starting Phase 2
+3. **Create PR per phase** - Each phase should have focused, reviewable changes
+4. **Sequential phase execution** - Phase 2 branch should be based on merged Phase 1 changes
+
+**Examples:**
+```bash
+# Phase 1: Cleanup and consolidation
+git checkout -b refactor/stables-actions-phase1-cleanup
+# Complete all Phase 1 tasks, commit, create PR, merge
+
+# Phase 2: Integration and orchestration  
+git checkout development  # Start from latest
+git checkout -b refactor/stables-actions-phase2-integration
+# Complete all Phase 2 tasks, commit, create PR, merge
+
+# Phase 3: Standardization
+git checkout development  # Start from latest
+git checkout -b refactor/stables-actions-phase3-standards
+# Complete all Phase 3 tasks, commit, create PR, merge
+```
+
+**Benefits:**
+- **Focused reviews** - Each PR represents one logical improvement phase
+- **Rollback safety** - Can revert individual phases without affecting others
+- **Parallel work** - Different team members can work on different phases
+- **Clear progression** - Easy to track which phases are complete vs pending
+
 **Branch Protection Compliance:**
 - All changes MUST be on feature branches (branch protection enforces this)
 - PRs are the ONLY way to merge to `development`/`master` 
