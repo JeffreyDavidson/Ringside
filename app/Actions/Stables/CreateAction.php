@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Actions\Stables\EstablishAction;
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
@@ -66,10 +67,7 @@ class CreateAction
             $membershipService->addMembers($stable, $stableData->members, $joinDate);
 
             if (isset($stableData->start_date)) {
-                $stable->activityPeriods()->create([
-                    'started_at' => $stableData->start_date,
-                    'ended_at' => null,
-                ]);
+                EstablishAction::run($stable, $stableData->start_date);
             }
 
             return $stable;
