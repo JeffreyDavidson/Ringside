@@ -16,6 +16,13 @@ class CreateAction
     use AsAction;
 
     /**
+     * Create a new create action instance.
+     */
+    public function __construct(
+        protected EstablishAction $establishAction
+    ) {}
+
+    /**
      * Create a stable.
      *
      * This handles the complete stable creation workflow:
@@ -74,7 +81,7 @@ class CreateAction
 
             // Use enhanced DTO method instead of isset check
             if ($stableData->shouldEstablish()) {
-                EstablishAction::run($stable, $stableData->start_date);
+                $this->establishAction->handle($stable, $stableData->start_date);
             }
 
             return $stable;

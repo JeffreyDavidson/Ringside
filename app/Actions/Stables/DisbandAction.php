@@ -15,6 +15,14 @@ class DisbandAction
     use AsAction;
 
     /**
+     * Create a new disband action instance.
+     */
+    public function __construct(
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RemoveStableMembersAction $removeStableMembersAction
+    ) {}
+
+    /**
      * Disband a stable.
      *
      * This handles the complete stable disbandment workflow:
@@ -41,12 +49,12 @@ class DisbandAction
         $disbandDate = $disbandDate ?? now();
 
         DB::transaction(function () use ($stable, $disbandDate): void {
-            // End current activity period using discrete Action
-            EndActivityPeriodAction::run($stable, $disbandDate);
+            // End current activity period using injected action
+            $this->endActivityPeriodAction->handle($stable, $disbandDate);
 
-            // End all current member tenures using enhanced model method and discrete Action
+            // End all current member tenures using enhanced model method and injected action
             if ($stable->hasCurrentMembers()) {
-                RemoveStableMembersAction::run($stable, $stable->getCurrentMembersData(), $disbandDate);
+                $this->removeStableMembersAction->handle($stable, $stable->getCurrentMembersData(), $disbandDate);
             }
         });
     }

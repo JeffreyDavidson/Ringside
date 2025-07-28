@@ -14,6 +14,14 @@ class DeleteAction
     use AsAction;
 
     /**
+     * Create a new delete action instance.
+     */
+    public function __construct(
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RemoveStableMembersAction $removeStableMembersAction
+    ) {}
+
+    /**
      * Delete a stable.
      *
      * This handles the complete deletion workflow with business impact:
@@ -57,16 +65,16 @@ class DeleteAction
         $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($stable, $deletionDate): void {
-            // Handle stable status - debuted stables need debut period ended using discrete Action
+            // Handle stable status - debuted stables need debut period ended using injected action
             if ($stable->hasDebuted()) {
-                EndActivityPeriodAction::run($stable, $deletionDate);
+                $this->endActivityPeriodAction->handle($stable, $deletionDate);
             }
 
-            // End all current memberships using enhanced model method and discrete Action
+            // End all current memberships using enhanced model method and injected action
             $currentMembers = $stable->getCurrentMembersData();
 
             if ($currentMembers->isNotEmpty()) {
-                RemoveStableMembersAction::run($stable, $currentMembers, $deletionDate);
+                $this->removeStableMembersAction->handle($stable, $currentMembers, $deletionDate);
             }
 
             // Manager associations automatically end when wrestler/tag team memberships end

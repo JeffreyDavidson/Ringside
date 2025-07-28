@@ -22,6 +22,13 @@ class SplitStableAction
     use AsAction;
 
     /**
+     * Create a new split stable action instance.
+     */
+    public function __construct(
+        protected CreateAction $createAction
+    ) {}
+
+    /**
      * Split a stable into two based on member selection.
      *
      * Creates a new stable and transfers specified members from the original
@@ -74,8 +81,8 @@ class SplitStableAction
                 members: $employedMembers
             );
 
-            // Use CreateAction to create and establish the new stable with members
-            $newStable = CreateAction::run($stableData);
+            // Use injected CreateAction to create and establish the new stable with members
+            $newStable = $this->createAction->handle($stableData);
 
             // Remove transferred members from original stable using service
             $membershipService = app(StableMembershipService::class);

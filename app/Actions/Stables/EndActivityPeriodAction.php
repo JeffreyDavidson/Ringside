@@ -27,6 +27,7 @@ class EndActivityPeriodAction
     public function handle(Stable $stable, Carbon $endDate): void
     {
         $currentActivityPeriod = $stable->currentActivityPeriod()->first();
+
         if ($currentActivityPeriod) {
             $currentActivityPeriod->update(['ended_at' => $endDate]);
         }

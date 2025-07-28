@@ -16,6 +16,13 @@ class UpdateAction
     use AsAction;
 
     /**
+     * Create a new update action instance.
+     */
+    public function __construct(
+        protected EstablishAction $establishAction
+    ) {}
+
+    /**
      * Update a stable.
      *
      * This handles the complete stable update workflow:
@@ -56,7 +63,7 @@ class UpdateAction
             // Use enhanced DTO method and centralized validation
             if ($stableData->hasStartDate()) {
                 $validationService->validateEstablishmentDateChange($stable);
-                EstablishAction::run($stable, $stableData->start_date);
+                $this->establishAction->handle($stable, $stableData->start_date);
             }
 
             // Update stable membership using service
