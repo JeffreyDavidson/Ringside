@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\EmploymentCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Actions\Managers\EmployAction as ManagersEmployAction;
+use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction
@@ -16,20 +18,28 @@ class EmployAction
     use AsAction;
 
     /**
+     * Create a new employ action instance.
+     */
+    public function __construct(
+        protected WrestlersEmployAction $wrestlersEmployAction,
+        protected ManagersEmployAction $managersEmployAction
+    ) {}
+
+    /**
      * Employ a tag team.
      *
-     * This handles the complete tag team employment workflow using the StatusTransitionPipeline:
-     * - Validates the tag team can be employed (not retired, not already employed)
+     * This handles the complete tag team employment workflow:
+     * - Validates the tag team can be employed (business rule compliance)
      * - Ends retirement if currently retired
      * - Creates an employment record for the tag team
-     * - Ensures all current wrestlers are also employed through cascading
-     * - Ensures all current managers are also employed through cascading
+     * - Employs all current wrestlers who aren't already employed
+     * - Employs all current managers who aren't already employed
      * - Makes the tag team available for match bookings and championships
      * - Maintains employment consistency across all team members
      *
      * @param  TagTeam  $tagTeam  The tag team to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     * @throws Exception When tag team cannot be employed due to business rules
+     * @throws CannotBeEmployedException When tag team cannot be employed due to business rules
      *
      * @example
      * ```php
@@ -43,9 +53,40 @@ class EmployAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
-        StatusTransitionPipeline::employ($tagTeam, $employmentDate)
-            ->withCascade(EmploymentCascadeStrategy::wrestlers())
-            ->withCascade(EmploymentCascadeStrategy::managers())
-            ->execute();
+        $tagTeam->ensureCanBeEmployed();
+
+        $employmentDate = $employmentDate ?? now();
+
+        DB::transaction(function () use ($tagTeam, $employmentDate): void {
+            // End retirement if currently retired
+            if ($tagTeam->isRetired()) {
+                $tagTeam->retirements()->where('ended_at', null)->update(['ended_at' => $employmentDate]);
+            }
+
+            // Create employment record
+            $tagTeam->employments()->create([
+                'started_at' => $employmentDate,
+                'ended_at' => null,
+            ]);
+
+            // Update status to employed
+            $tagTeam->update(['status' => EmploymentStatus::Employed]);
+
+            // Employ current wrestlers if they're not already employed
+            $currentWrestlers = $tagTeam->currentWrestlers
+                ->filter(fn ($wrestler) => ! $wrestler->isEmployed());
+
+            foreach ($currentWrestlers as $wrestler) {
+                $this->wrestlersEmployAction->handle($wrestler, $employmentDate);
+            }
+
+            // Employ current managers if they're not already employed
+            $currentManagers = $tagTeam->currentManagers
+                ->filter(fn ($manager) => ! $manager->isEmployed());
+
+            foreach ($currentManagers as $manager) {
+                $this->managersEmployAction->handle($manager, $employmentDate);
+            }
+        });
     }
 }

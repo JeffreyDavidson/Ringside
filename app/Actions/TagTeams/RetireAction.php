@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\UnifiedRetireAction;
+use App\Actions\Managers\RetireAction as ManagersRetireAction;
+use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
@@ -15,22 +18,29 @@ class RetireAction
     use AsAction;
 
     /**
+     * Create a new retire action instance.
+     */
+    public function __construct(
+        protected WrestlersRetireAction $wrestlersRetireAction,
+        protected ManagersRetireAction $managersRetireAction
+    ) {}
+
+    /**
      * Retire a tag team and end their partnership.
      *
-     * This handles the complete tag team retirement workflow using the UnifiedRetireAction:
-     * - Validates the tag team can be retired (currently employed/active)
-     * - Ends current wrestler partnerships (wrestlers may continue as singles)
-     * - Ends current manager relationships
-     * - Ends suspension if active
-     * - Ends employment period if currently employed
-     * - Creates retirement record to formally end the tag team partnership
+     * This handles the complete tag team retirement workflow with flexible options:
+     * - Validates the tag team can be retired (business rule compliance)
+     * - Ends current employment and suspension if active
+     * - Optionally retires available partners and managers
+     * - Creates retirement record to formally end the partnership
      * - Makes the tag team permanently unavailable for competition
      * - Preserves all historical records and championship lineage
      * - Individual members may continue their careers independently
      *
      * @param  TagTeam  $tagTeam  The tag team to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     * @throws Exception When tag team cannot be retired due to business rules
+     * @param  bool  $retirePartners  Whether to retire available partners (default: true)
+     * @throws CannotBeRetiredException When tag team cannot be retired due to business rules
      *
      * @example
      * ```php
@@ -40,10 +50,53 @@ class RetireAction
      *
      * // Retire with specific date
      * RetireAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     *
+     * // Retire without retiring partners (partners continue independently)
+     * RetireAction::run($tagTeam, retirePartners: false);
      * ```
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void
+    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retirePartners = true): void
     {
-        UnifiedRetireAction::run($tagTeam, $retirementDate);
+        $tagTeam->ensureCanBeRetired();
+
+        $retirementDate = $retirementDate ?? now();
+
+        DB::transaction(function () use ($tagTeam, $retirementDate, $retirePartners): void {
+            // End current employment if employed
+            if ($tagTeam->isEmployed()) {
+                $tagTeam->employments()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
+            }
+
+            // End current suspension if suspended
+            if ($tagTeam->isSuspended()) {
+                $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
+            }
+
+            // Retire current partners if requested
+            if ($retirePartners) {
+                $partnersToRetire = $tagTeam->currentWrestlers
+                    ->filter(fn ($wrestler) => $wrestler->canBeRetired());
+
+                foreach ($partnersToRetire as $wrestler) {
+                    $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
+                }
+
+                // Retire current managers
+                $managersToRetire = $tagTeam->currentManagers
+                    ->filter(fn ($manager) => $manager->canBeRetired());
+
+                foreach ($managersToRetire as $manager) {
+                    $this->managersRetireAction->handle($manager, $retirementDate);
+                }
+            }
+
+            // Create retirement record
+            $tagTeam->retirements()->create([
+                'retired_at' => $retirementDate,
+            ]);
+
+            // Update status to retired
+            $tagTeam->update(['status' => EmploymentStatus::Retired]);
+        });
     }
 }
