@@ -154,4 +154,73 @@ class StableMembershipService
             }
         }
     }
+
+    /**
+     * End the current activity period for a stable.
+     *
+     * This is commonly used across multiple actions (disband, delete, retire)
+     * to properly close an active stable's activity period.
+     *
+     * @param  Stable  $stable  The stable to end activity for
+     * @param  Carbon  $endDate  The date to end the activity period
+     */
+    public function endActivityPeriod(Stable $stable, Carbon $endDate): void
+    {
+        $currentActivityPeriod = $stable->currentActivityPeriod()->first();
+        if ($currentActivityPeriod) {
+            $currentActivityPeriod->update(['ended_at' => $endDate]);
+        }
+    }
+
+    /**
+     * Retire all members of a stable who are not already retired.
+     *
+     * Used specifically by RetireAction to cascade retirement to stable members.
+     *
+     * @param  StableMembershipData  $members  The members to potentially retire
+     * @param  Carbon  $retirementDate  The retirement date
+     * @param  callable  $wrestlerRetireAction  Callback to retire wrestlers
+     * @param  callable  $tagTeamRetireAction  Callback to retire tag teams
+     */
+    public function retireStableMembers(
+        StableMembershipData $members,
+        Carbon $retirementDate,
+        callable $wrestlerRetireAction,
+        callable $tagTeamRetireAction
+    ): void {
+        $wrestlersToRetire = $members->getWrestlersToRetire();
+        $tagTeamsToRetire = $members->getTagTeamsToRetire();
+
+        // Retire wrestlers who are not already retired
+        $wrestlersToRetire?->each(fn ($wrestler) => $wrestlerRetireAction($wrestler, $retirementDate));
+
+        // Retire tag teams who are not already retired
+        $tagTeamsToRetire?->each(fn ($tagTeam) => $tagTeamRetireAction($tagTeam, $retirementDate));
+    }
+
+    /**
+     * Unretire all members of a stable who are currently retired.
+     *
+     * Used specifically by UnretireAction to cascade unretirement to stable members.
+     *
+     * @param  StableMembershipData  $members  The members to potentially unretire
+     * @param  Carbon  $unretirementDate  The unretirement date
+     * @param  callable  $wrestlerUnretireAction  Callback to unretire wrestlers
+     * @param  callable  $tagTeamUnretireAction  Callback to unretire tag teams
+     */
+    public function unretireStableMembers(
+        StableMembershipData $members,
+        Carbon $unretirementDate,
+        callable $wrestlerUnretireAction,
+        callable $tagTeamUnretireAction
+    ): void {
+        $wrestlersToUnretire = $members->getWrestlersToUnretire();
+        $tagTeamsToUnretire = $members->getTagTeamsToUnretire();
+
+        // Unretire wrestlers who are currently retired
+        $wrestlersToUnretire?->each(fn ($wrestler) => $wrestlerUnretireAction($wrestler, $unretirementDate));
+
+        // Unretire tag teams who are currently retired
+        $tagTeamsToUnretire?->each(fn ($tagTeam) => $tagTeamUnretireAction($tagTeam, $unretirementDate));
+    }
 }
