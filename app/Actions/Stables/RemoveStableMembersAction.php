@@ -27,9 +27,15 @@ class RemoveStableMembersAction
      * @param  Stable  $stable  The stable to remove members from
      * @param  StableMembershipData  $members  The members to remove
      * @param  Carbon  $removalDate  The date they left
+     * @throws \InvalidArgumentException When parameters are invalid
      */
     public function handle(Stable $stable, StableMembershipData $members, Carbon $removalDate): void
     {
+        // Validate parameters
+        if ($removalDate->isFuture()) {
+            throw new \InvalidArgumentException('Cannot remove members with future date.');
+        }
+
         if ($members->isNotEmpty()) {
             $membershipService = app(StableMembershipService::class);
             $membershipService->removeMembers($stable, $members, $removalDate);

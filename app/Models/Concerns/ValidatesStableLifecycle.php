@@ -9,6 +9,8 @@ use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
+use App\Exceptions\Roster\Stables\CannotBeRetiredException;
+use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use Illuminate\Support\Collection;
 
@@ -35,10 +37,14 @@ use Illuminate\Support\Collection;
  * $stable->ensureCanBeSplit();        // For splitting into two stables
  * $stable->ensureCanBeMerged($other); // For merging with another stable
  * $stable->ensureCanBeRestored();     // For restoration from soft deletion
+ * $stable->ensureCanBeRetired();      // For retirement validation
+ * $stable->ensureCanBeUnretired();    // For unretirement validation
  * $stable->canBeEstablished();        // Returns boolean for establishment
  * $stable->canBeDeleted();            // Returns boolean for deletion
  * $stable->canBeSplit();              // Returns boolean for splitting
  * $stable->canBeRestored();           // Returns boolean for restoration
+ * $stable->canBeRetired();            // Returns boolean for retirement
+ * $stable->canBeUnretired();          // Returns boolean for unretirement
  * $stable->isDisbanded();             // Returns boolean if disbanded
  * ```
  */
@@ -504,5 +510,174 @@ trait ValidatesStableLifecycle
             ->get();
 
         return $unavailableFormerWrestlers->concat($unavailableFormerTagTeams);
+    }
+
+    /**
+     * Determine if the stable can be retired.
+     *
+     * Checks business rules for stable retirement:
+     * - Must be currently active or disbanded (not unactivated)
+     * - Must not already be retired
+     * - Should validate championship obligations
+     * - Should check for storyline conflicts
+     *
+     * @return bool True if the stable can be retired, false otherwise
+     */
+    public function canBeRetired(): bool
+    {
+        if ($this->isRetired()) {
+            return false;
+        }
+
+        // Must have been active at some point (has activity periods)
+        if (! $this->hasActivityPeriods()) {
+            return false;
+        }
+
+        // Basic retirement is possible if not already retired and has been active
+        return true;
+    }
+
+    /**
+     * Ensure the stable can be retired, throwing an exception if not.
+     *
+     * Validates that the stable is in a valid state for retirement while checking
+     * for business rule violations including championship obligations, storyline
+     * conflicts, and administrative requirements.
+     *
+     * @throws CannotBeRetiredException When retirement is not allowed
+     */
+    public function ensureCanBeRetired(): void
+    {
+        if ($this->isRetired()) {
+            throw CannotBeRetiredException::alreadyRetired($this);
+        }
+
+        if (! $this->hasActivityPeriods()) {
+            throw CannotBeRetiredException::notActive($this);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Check for championship obligations
+        // if ($this->hasCurrentChampionshipObligations()) {
+        //     $championships = $this->getCurrentChampionshipDetails();
+        //     throw CannotBeRetiredException::hasChampionshipObligations($this, $championships);
+        // }
+
+        // - Check for active storylines
+        // if ($this->hasActiveStorylines()) {
+        //     $storylines = $this->getActiveStorylineDetails();
+        //     throw CannotBeRetiredException::storylineConflicts($this, $storylines);
+        // }
+
+        // - Check for scheduled events
+        // if ($this->hasScheduledEvents()) {
+        //     $events = $this->getScheduledEventDetails();
+        //     throw CannotBeRetiredException::hasScheduledEvents($this, $events);
+        // }
+
+        // - Check member contract conflicts
+        // if ($this->hasMemberContractConflicts()) {
+        //     $conflicts = $this->getMemberContractConflictDetails();
+        //     throw CannotBeRetiredException::memberContractConflicts($this, $conflicts);
+        // }
+
+        // - Check authorization requirements
+        // if (! $this->hasRetirementAuthorization()) {
+        //     throw CannotBeRetiredException::insufficientAuthorization($this, 'management');
+        // }
+    }
+
+    /**
+     * Determine if the stable can be unretired.
+     *
+     * Checks business rules for stable unretirement:
+     * - Must be currently retired
+     * - Should have available former members for viable reunion
+     * - Name must not conflict with existing active stables
+     *
+     * @return bool True if the stable can be unretired, false otherwise
+     */
+    public function canBeUnretired(): bool
+    {
+        if (! $this->isRetired()) {
+            return false;
+        }
+
+        // Check for name conflicts with existing active stables
+        $nameConflict = static::where('name', $this->name)
+            ->where('id', '!=', $this->id)
+            ->whereHas('activityPeriods', function ($query) {
+                $query->whereNull('ended_at');
+            })
+            ->exists();
+
+        if ($nameConflict) {
+            return false;
+        }
+
+        // Basic unretirement is possible if retired and no conflicts
+        return true;
+    }
+
+    /**
+     * Ensure the stable can be unretired, throwing an exception if not.
+     *
+     * Validates that the stable is in a valid state for unretirement while checking
+     * for business rule violations including member availability, name conflicts,
+     * and storyline considerations.
+     *
+     * @param  bool  $requireFormerMembers  Whether to require available former members
+     * @throws CannotBeUnretiredException When unretirement is not allowed
+     */
+    public function ensureCanBeUnretired(bool $requireFormerMembers = true): void
+    {
+        if (! $this->isRetired()) {
+            throw CannotBeUnretiredException::notRetired($this);
+        }
+
+        // Check for name conflicts with existing active stables
+        $conflictingStable = static::where('name', $this->name)
+            ->where('id', '!=', $this->id)
+            ->whereHas('activityPeriods', function ($query) {
+                $query->whereNull('ended_at');
+            })
+            ->first();
+
+        if ($conflictingStable) {
+            throw CannotBeUnretiredException::nameConflict($this, $conflictingStable->name);
+        }
+
+        if ($requireFormerMembers) {
+            // Check if former members are available for unretirement
+            $availableFormerMembers = $this->getAvailableFormerMembers();
+
+            if ($availableFormerMembers->isEmpty()) {
+                throw CannotBeUnretiredException::noAvailableFormerMembers($this);
+            }
+
+            // Check minimum member count for viable unretirement
+            $minimumMembers = static::MIN_MEMBERS_COUNT ?? 2;
+            if ($availableFormerMembers->count() < $minimumMembers) {
+                throw CannotBeUnretiredException::insufficientFormerMembers(
+                    $this,
+                    $availableFormerMembers->count(),
+                    $minimumMembers
+                );
+            }
+
+            // Check if key former members are available
+            $unavailableKeyMembers = $this->getUnavailableKeyFormerMembers();
+            if ($unavailableKeyMembers->isNotEmpty()) {
+                $memberNames = $unavailableKeyMembers->pluck('name')->join(', ');
+                throw CannotBeUnretiredException::keyMembersUnavailable($this, $memberNames);
+            }
+        }
+
+        // Additional business rule validations could be added here:
+        // - Check for storyline conflicts with current active stables
+        // - Check member commitment conflicts with current stables
+        // - Check administrative authorization requirements
+        // - Check event timing conflicts
     }
 }

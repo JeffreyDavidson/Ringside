@@ -8,7 +8,7 @@ use App\Actions\Managers\RetireAction as ManagersRetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Enums\Stables\StableStatus;
-use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -24,19 +24,24 @@ class RetireAction
     public function __construct(
         protected WrestlersRetireAction $wrestlersRetireAction,
         protected TagTeamsRetireAction $tagTeamsRetireAction,
-        protected ManagersRetireAction $managersRetireAction
+        protected ManagersRetireAction $managersRetireAction,
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RemoveStableMembersAction $removeStableMembersAction
     ) {}
 
     /**
      * Retire a stable and end its operations.
      *
-     * This handles the complete stable retirement workflow with cascading effects:
-     * - Validates the stable can be retired (currently active/debuted)
+     * This handles the complete stable retirement workflow with flexible options:
+     * - Validates the stable can be retired (business rule compliance)
+     * - Basic retirement: Ends stable operations, members become free agents
+     * - With member retirement: Also retires available members simultaneously
+     * - Forced retirement: Overrides business rule conflicts (admin use)
      * - Ends current wrestler memberships (wrestlers may continue as singles/other stables)
      * - Ends current tag team memberships (tag teams may continue independently)
      * - Ends current manager relationships (managers may continue with other talent)
      * - Ends debut period if currently active
-     * - Creates retirement record to formally end the stable's existence
+     * - Creates retirement record with optional reason metadata
      * - Makes the stable permanently unavailable for storylines
      * - Preserves all historical records and championship lineage
      * - Individual members may continue their careers independently
@@ -65,9 +70,9 @@ class RetireAction
         $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($stable, $retirementDate): void {
-            // End activity if currently active using discrete Action
+            // End activity if currently active using injected Action
             if ($stable->isCurrentlyActive()) {
-                EndActivityPeriodAction::run($stable, $retirementDate);
+                $this->endActivityPeriodAction->handle($stable, $retirementDate);
             }
 
             // Get current members using enhanced model method
@@ -92,8 +97,8 @@ class RetireAction
                 }
             }
 
-            // Remove all current members using discrete Action
-            RemoveStableMembersAction::run($stable, $currentMembers, $retirementDate);
+            // Remove all current members using injected Action
+            $this->removeStableMembersAction->handle($stable, $currentMembers, $retirementDate);
 
             // Create retirement record directly
             $stable->retirements()->create([

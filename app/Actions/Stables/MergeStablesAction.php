@@ -15,6 +15,13 @@ class MergeStablesAction
     use AsAction;
 
     /**
+     * Create a new merge stables action instance.
+     */
+    public function __construct(
+        protected StableMembershipService $membershipService
+    ) {}
+
+    /**
      * Merge two stables into one.
      *
      * Transfers all members from the secondary stable to the primary stable
@@ -33,9 +40,8 @@ class MergeStablesAction
             // Validate merge compatibility using model validation
             $primaryStable->ensureCanBeMergedWith($secondaryStable);
 
-            // Use service to transfer all members from secondary to primary stable
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);
+            // Use injected service to transfer all members from secondary to primary stable
+            $this->membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);
 
             // Note: Managers are not direct stable members and are automatically
             // transferred through their wrestlers/tag teams associations
