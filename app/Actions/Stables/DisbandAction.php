@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Data\Stables\StableMembershipData;
-use App\Exceptions\Status\CannotBeDisbandedException;
+use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
-use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -15,6 +13,14 @@ use Lorisleiva\Actions\Concerns\AsAction;
 class DisbandAction
 {
     use AsAction;
+
+    /**
+     * Create a new disband action instance.
+     */
+    public function __construct(
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RemoveStableMembersAction $removeStableMembersAction
+    ) {}
 
     /**
      * Disband a stable.
@@ -43,21 +49,12 @@ class DisbandAction
         $disbandDate = $disbandDate ?? now();
 
         DB::transaction(function () use ($stable, $disbandDate): void {
-            // End current activity period
-            $currentActivityPeriod = $stable->currentActivityPeriod()->first();
-            if ($currentActivityPeriod) {
-                $currentActivityPeriod->update(['ended_at' => $disbandDate]);
-            }
+            // End current activity period using injected action
+            $this->endActivityPeriodAction->handle($stable, $disbandDate);
 
-            // End all current member tenures using service
-            if ($stable->currentWrestlers->isNotEmpty() || $stable->currentTagTeams->isNotEmpty()) {
-                $currentMembers = new StableMembershipData(
-                    wrestlers: $stable->currentWrestlers,
-                    tagTeams: $stable->currentTagTeams
-                );
-
-                $membershipService = app(StableMembershipService::class);
-                $membershipService->removeMembers($stable, $currentMembers, $disbandDate);
+            // End all current member tenures using enhanced model method and injected action
+            if ($stable->hasCurrentMembers()) {
+                $this->removeStableMembersAction->handle($stable, $stable->getCurrentMembersData(), $disbandDate);
             }
         });
     }

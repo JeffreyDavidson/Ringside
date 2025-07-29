@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -12,6 +12,13 @@ use Lorisleiva\Actions\Concerns\AsAction;
 class ReuniteAction
 {
     use AsAction;
+
+    /**
+     * Create a new reunite action instance.
+     */
+    public function __construct(
+        protected EstablishAction $establishAction
+    ) {}
 
     /**
      * Reunite an inactive stable and make it active again.
@@ -24,7 +31,7 @@ class ReuniteAction
      *
      * @param  Stable  $stable  The stable to reunite
      * @param  Carbon|null  $reuniteDate  The reunite date (defaults to now)
-     * @throws CannotBeEstablishedException When stable cannot be reunited due to business rules
+     * @throws CannotBeReunitedException When stable cannot be reunited due to business rules
      *
      * @example
      * ```php
@@ -41,6 +48,6 @@ class ReuniteAction
 
         $reuniteDate ??= now();
 
-        EstablishAction::run($stable, $reuniteDate);
+        $this->establishAction->handle($stable, $reuniteDate);
     }
 }

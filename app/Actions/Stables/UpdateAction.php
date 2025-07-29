@@ -7,13 +7,20 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
+use App\Services\StableValidationService;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
     use AsAction;
+
+    /**
+     * Create a new update action instance.
+     */
+    public function __construct(
+        protected EstablishAction $establishAction
+    ) {}
 
     /**
      * Update a stable.
@@ -44,13 +51,19 @@ class UpdateAction
     public function handle(Stable $stable, StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stable, $stableData): Stable {
+            // Validate business rules before updating
+            $validationService = app(StableValidationService::class);
+            $validationService->validateUniqueName($stableData->getTrimmedName(), $stable);
+            $validationService->validateMembersAvailable($stableData->members);
+
             $stable->update([
-                'name' => $stableData->name,
+                'name' => $stableData->getTrimmedName(),
             ]);
 
-            if (isset($stableData->start_date)) {
-                $this->validateEstablishmentDateChange($stable);
-                EstablishAction::run($stable, $stableData->start_date);
+            // Use enhanced DTO method and centralized validation
+            if ($stableData->hasStartDate()) {
+                $validationService->validateEstablishmentDateChange($stable);
+                $this->establishAction->handle($stable, $stableData->start_date);
             }
 
             // Update stable membership using service
@@ -59,17 +72,5 @@ class UpdateAction
 
             return $stable;
         });
-    }
-
-    /**
-     * Validate that the stable's establishment date can be changed.
-     *
-     * @throws InvalidArgumentException When establishment date change is not allowed
-     */
-    private function validateEstablishmentDateChange(Stable $stable): void
-    {
-        if ($stable->isCurrentlyActive() && ! $stable->hasFutureActivity()) {
-            throw new InvalidArgumentException("Establishment date cannot be changed for stable '{$stable->name}' that is currently active.");
-        }
     }
 }

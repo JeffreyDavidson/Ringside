@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
-use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -14,6 +12,14 @@ use Lorisleiva\Actions\Concerns\AsAction;
 class DeleteAction
 {
     use AsAction;
+
+    /**
+     * Create a new delete action instance.
+     */
+    public function __construct(
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RemoveStableMembersAction $removeStableMembersAction
+    ) {}
 
     /**
      * Delete a stable.
@@ -56,23 +62,21 @@ class DeleteAction
      */
     public function handle(Stable $stable, ?Carbon $deletionDate = null): void
     {
+        $stable->ensureCanBeDeleted();
+
         $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($stable, $deletionDate): void {
-            // Handle stable status - debuted stables need debut period ended
+            // Handle stable status - debuted stables need debut period ended using injected action
             if ($stable->hasDebuted()) {
-                $stable->activityPeriods()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
+                $this->endActivityPeriodAction->handle($stable, $deletionDate);
             }
 
-            // End all current memberships using service
-            if ($stable->currentWrestlers->isNotEmpty() || $stable->currentTagTeams->isNotEmpty()) {
-                $currentMembers = new StableMembershipData(
-                    wrestlers: $stable->currentWrestlers,
-                    tagTeams: $stable->currentTagTeams
-                );
+            // End all current memberships using enhanced model method and injected action
+            $currentMembers = $stable->getCurrentMembersData();
 
-                $membershipService = app(StableMembershipService::class);
-                $membershipService->removeMembers($stable, $currentMembers, $deletionDate);
+            if ($currentMembers->isNotEmpty()) {
+                $this->removeStableMembersAction->handle($stable, $currentMembers, $deletionDate);
             }
 
             // Manager associations automatically end when wrestler/tag team memberships end

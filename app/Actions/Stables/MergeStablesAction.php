@@ -15,6 +15,13 @@ class MergeStablesAction
     use AsAction;
 
     /**
+     * Create a new merge stables action instance.
+     */
+    public function __construct(
+        protected StableMembershipService $membershipService
+    ) {}
+
+    /**
      * Merge two stables into one.
      *
      * Transfers all members from the secondary stable to the primary stable
@@ -30,9 +37,11 @@ class MergeStablesAction
         Carbon $date
     ): void {
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
-            // Use service to transfer all members from secondary to primary stable
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);
+            // Validate merge compatibility using model validation
+            $primaryStable->ensureCanBeMergedWith($secondaryStable);
+
+            // Use injected service to transfer all members from secondary to primary stable
+            $this->membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);
 
             // Note: Managers are not direct stable members and are automatically
             // transferred through their wrestlers/tag teams associations
