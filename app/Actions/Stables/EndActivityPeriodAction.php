@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
+use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
@@ -23,13 +24,13 @@ class EndActivityPeriodAction
      *
      * @param  Stable  $stable  The stable to end activity for
      * @param  Carbon  $endDate  The date to end the activity period
-     * @throws \InvalidArgumentException When parameters are invalid
+     * @throws InvalidArgumentException When parameters are invalid
      */
     public function handle(Stable $stable, Carbon $endDate): void
     {
         // Validate parameters
         if ($endDate->isFuture()) {
-            throw new \InvalidArgumentException('Cannot end activity period with future date.');
+            throw new InvalidArgumentException('Cannot end activity period with future date.');
         }
 
         $currentActivityPeriod = $stable->currentActivityPeriod()->first();

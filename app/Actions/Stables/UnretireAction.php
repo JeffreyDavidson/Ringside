@@ -7,15 +7,14 @@ namespace App\Actions\Stables;
 use App\Actions\Managers\UnretireAction as ManagersUnretireAction;
 use App\Actions\TagTeams\UnretireAction as TagTeamsUnretireAction;
 use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
-use App\Data\Stables\MemberUnretirementResult;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
 use Exception;
-use InvalidArgumentException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
@@ -49,7 +48,6 @@ class UnretireAction
      * @param  bool  $unretireMembers  Whether to unretire available former members (default: true)
      * @param  bool  $establishImmediately  Whether to establish the stable immediately (default: true)
      * @param  bool  $requireFormerMembers  Whether to require available former members (default: true)
-     * @return MemberUnretirementResult Detailed results of member unretirement attempts
      * @throws CannotBeUnretiredException When stable cannot be unretired due to business rules
      *
      * @example
@@ -77,14 +75,14 @@ class UnretireAction
         bool $unretireMembers = true,
         bool $establishImmediately = true,
         bool $requireFormerMembers = true
-    ): MemberUnretirementResult
-    {
+    ): void {
         $stable->ensureCanBeUnretired($requireFormerMembers);
 
         $unretiredDate = $unretiredDate ?? now();
-        $memberResult = MemberUnretirementResult::empty();
+        $successCount = 0;
+        $failureCount = 0;
 
-        DB::transaction(function () use ($stable, $unretiredDate, $unretireMembers, $establishImmediately, $memberResult): void {
+        DB::transaction(function () use ($stable, $unretiredDate, $unretireMembers, $establishImmediately, &$successCount, &$failureCount): void {
             // End the current retirement record directly
             $currentRetirement = $stable->retirements()
                 ->whereNull('unretired_at')
@@ -94,41 +92,39 @@ class UnretireAction
                 $currentRetirement->update(['unretired_at' => $unretiredDate]);
             }
 
-            // Attempt to unretire available former members with detailed tracking
+            // Attempt to unretire available former members
             if ($unretireMembers) {
                 $availableFormerMembers = $stable->getAvailableFormerMembers();
 
                 foreach ($availableFormerMembers as $member) {
-                    $memberType = $this->getMemberType($member);
-                    
                     if (! $member->isRetired()) {
-                        $memberResult->addSkipped($member, $memberType, 'Not currently retired');
-                        continue;
+                        continue; // Skip members who are not retired
                     }
 
                     try {
-                        if ($memberType === 'wrestler') {
-                            $this->wrestlersUnretireAction->handle($member, $unretiredDate);
-                            $memberResult->addSuccess($member, $memberType);
-                        } elseif ($memberType === 'tag_team') {
-                            $this->tagTeamsUnretireAction->handle($member, $unretiredDate);
-                            $memberResult->addSuccess($member, $memberType);
-                        } else {
-                            throw new InvalidArgumentException("Cannot unretire member: unsupported member type '{$memberType}' for {$member->name}.");
+                        if (method_exists($member, 'getMorphClass')) {
+                            $morphClass = $member->getMorphClass();
+                            if ($morphClass === 'wrestler') {
+                                $this->wrestlersUnretireAction->handle($member, $unretiredDate);
+                                $successCount++;
+                            } elseif ($morphClass === 'tag_team') {
+                                $this->tagTeamsUnretireAction->handle($member, $unretiredDate);
+                                $successCount++;
+                            } else {
+                                throw new InvalidArgumentException("Cannot unretire member: unsupported member type '{$morphClass}' for {$member->name}.");
+                            }
                         }
                     } catch (InvalidArgumentException $e) {
                         // Re-throw programming errors - these indicate system issues
                         throw $e;
                     } catch (Exception $e) {
-                        $memberResult->addFailure($member, $memberType, $e->getMessage());
-                        
-                        // Log detailed failure for administrative review
+                        $failureCount++;
+                        // Log failure for administrative review
                         Log::warning('Member unretirement failed during stable unretirement', [
                             'stable_id' => $stable->id,
                             'stable_name' => $stable->name,
                             'member_id' => $member->id,
                             'member_name' => $member->name,
-                            'member_type' => $memberType,
                             'error' => $e->getMessage(),
                             'unretirement_date' => $unretiredDate->toDateTimeString(),
                         ]);
@@ -146,32 +142,15 @@ class UnretireAction
         });
 
         // Log summary of member unretirement results
-        if ($unretireMembers && $memberResult->getTotalProcessed() > 0) {
-            Log::info('Stable unretirement member results', [
+        if ($unretireMembers && ($successCount > 0 || $failureCount > 0)) {
+            Log::info('Stable unretirement completed', [
                 'stable_id' => $stable->id,
                 'stable_name' => $stable->name,
-                'summary' => $memberResult->getSummary(),
-                'successful_count' => $memberResult->successfulUnretirements->count(),
-                'failed_count' => $memberResult->failedUnretirements->count(),
-                'skipped_count' => $memberResult->skippedMembers->count(),
+                'members_unretired' => $successCount,
+                'members_failed' => $failureCount,
                 'unretirement_date' => $unretiredDate->toDateTimeString(),
             ]);
         }
-
-        return $memberResult;
     }
 
-    /**
-     * Determine the member type for unretirement tracking.
-     */
-    private function getMemberType(mixed $member): string
-    {
-        if (method_exists($member, 'getMorphClass')) {
-            return $member->getMorphClass();
-        }
-
-        // Fallback to class name analysis
-        $className = class_basename($member);
-        return strtolower(str_replace('\\', '_', $className));
-    }
 }
