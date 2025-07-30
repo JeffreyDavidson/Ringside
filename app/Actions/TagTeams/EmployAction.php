@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
+use App\Actions\Concerns\EmploymentCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\TagTeams\TagTeam;
-use App\Services\TagTeamLifecycleService;
-use App\Support\DateHelper;
+use Exception;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction
@@ -17,23 +16,19 @@ class EmployAction
     use AsAction;
 
     /**
-     * Create a new employ action instance.
-     */
-    public function __construct(
-        protected TagTeamLifecycleService $lifecycleService
-    ) {}
-
-    /**
-     * Employ a tag team using the lifecycle service.
+     * Employ a tag team using the StatusTransitionPipeline.
      *
-     * This action serves as a focused interface for employment while delegating
-     * all complex business logic, validation, and lifecycle management to the
-     * centralized TagTeamLifecycleService. This ensures consistency across all
-     * lifecycle operations and eliminates code duplication.
+     * This handles the complete tag team employment workflow using the StatusTransitionPipeline:
+     * - Validates the tag team can be employed (not retired, not already employed)
+     * - Ends retirement if currently retired
+     * - Creates an employment record for the tag team
+     * - Employs all current wrestlers through cascading
+     * - Employs all current managers through cascading
+     * - Makes the tag team available for match bookings and championships
      *
      * @param  TagTeam  $tagTeam  The tag team to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     * @throws CannotBeEmployedException When tag team cannot be employed due to business rules
+     * @throws Exception When tag team cannot be employed due to business rules
      *
      * @example
      * ```php
@@ -49,10 +44,9 @@ class EmployAction
     {
         $tagTeam->ensureCanBeEmployed();
 
-        $employmentDate = DateHelper::resolveDate($employmentDate);
-
-        DB::transaction(function () use ($tagTeam, $employmentDate): void {
-            $this->lifecycleService->employ($tagTeam, $employmentDate, true);
-        });
+        StatusTransitionPipeline::employ($tagTeam, $employmentDate)
+            ->withCascade(EmploymentCascadeStrategy::wrestlers())
+            ->withCascade(EmploymentCascadeStrategy::managers())
+            ->execute();
     }
 }
