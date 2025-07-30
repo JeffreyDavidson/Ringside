@@ -70,15 +70,14 @@ class CreateAction
                 'signature_move' => $tagTeamData->signature_move,
             ]);
 
-            // Prepare member collections
-            $wrestlers = collect([$tagTeamData->wrestlerA, $tagTeamData->wrestlerB])->filter();
-            $managers = $tagTeamData->managers ?? collect();
+            // Get membership data
+            $membershipData = $tagTeamData->getMembershipData();
 
             // Add founding members through membership service
             $this->membershipService->addFoundingMembers(
                 $tagTeam,
-                $wrestlers,
-                $managers,
+                $membershipData->getWrestlers(),
+                $membershipData->getManagers(),
                 $tagTeamData->getJoinDate(),
                 false // Don't employ through membership service - handle separately if needed
             );
