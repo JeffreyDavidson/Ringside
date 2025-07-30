@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Concerns\EmploymentCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
-use App\Services\TagTeamLifecycleService;
 use App\Services\TagTeamMembershipService;
 use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
@@ -21,8 +22,7 @@ class UpdateAction
      */
     public function __construct(
         protected TagTeamValidationService $validationService,
-        protected TagTeamMembershipService $membershipService,
-        protected TagTeamLifecycleService $lifecycleService
+        protected TagTeamMembershipService $membershipService
     ) {}
 
     /**
@@ -102,11 +102,10 @@ class UpdateAction
 
                 // Handle tag team employment if not already employed
                 if (! $tagTeam->isEmployed()) {
-                    $this->lifecycleService->employ(
-                        $tagTeam,
-                        $tagTeamData->employment_date,
-                        true // Employ all members (will skip already employed ones)
-                    );
+                    StatusTransitionPipeline::employ($tagTeam, $tagTeamData->employment_date)
+                        ->withCascade(EmploymentCascadeStrategy::wrestlers())
+                        ->withCascade(EmploymentCascadeStrategy::managers())
+                        ->execute();
                 }
             }
 
