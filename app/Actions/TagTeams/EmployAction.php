@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Models\TagTeams\TagTeam;
 use App\Services\TagTeamLifecycleService;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -48,7 +49,7 @@ class EmployAction
     {
         $tagTeam->ensureCanBeEmployed();
 
-        $employmentDate = $employmentDate ?? now();
+        $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
             $this->lifecycleService->handleEmployment($tagTeam, $employmentDate, true);
