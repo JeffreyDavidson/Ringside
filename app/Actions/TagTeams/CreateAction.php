@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Managers\EmployAction as ManagersEmployAction;
-use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
 use App\Data\TagTeams\TagTeamData;
-use App\Enums\Shared\EmploymentStatus;
-use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
+use App\Services\TagTeamLifecycleService;
+use App\Services\TagTeamMembershipService;
+use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -24,22 +20,23 @@ class CreateAction
      * Create a new create action instance.
      */
     public function __construct(
-        protected WrestlersEmployAction $wrestlersEmployAction,
-        protected ManagersEmployAction $managersEmployAction
+        protected TagTeamValidationService $validationService,
+        protected TagTeamMembershipService $membershipService,
+        protected TagTeamLifecycleService $lifecycleService
     ) {}
 
     /**
-     * Create a tag team.
+     * Create a tag team with comprehensive business rule validation and service integration.
      *
-     * This handles the complete tag team creation workflow:
-     * - Creates the tag team record with name and signature moves
-     * - Adds two wrestlers (wrestlerA and wrestlerB) as founding partners
-     * - Assigns managers if provided
-     * - Creates employment records if employment_date is specified
-     * - Ensures all members are properly employed
+     * This handles the complete tag team creation workflow using dedicated services:
+     * - Validates all business rules and data integrity constraints
+     * - Creates the tag team record with validated information
+     * - Adds founding partners and managers through membership service
+     * - Handles employment workflows through lifecycle service
+     * - Ensures consistent data integrity and business rule compliance
      *
      * @param  TagTeamData  $tagTeamData  The data transfer object containing tag team information
-     * @return TagTeam The newly created tag team with all members
+     * @return TagTeam The newly created tag team with all members and relationships
      *
      * @example
      * ```php
@@ -64,101 +61,41 @@ class CreateAction
      */
     public function handle(TagTeamData $tagTeamData): TagTeam
     {
+        // Validate all business rules for creation
+        $this->validationService->validateForCreation($tagTeamData);
+
         return DB::transaction(function () use ($tagTeamData): TagTeam {
             // Create the base tag team record
             $tagTeam = TagTeam::query()->create([
-                'name' => $tagTeamData->name,
+                'name' => mb_trim($tagTeamData->name),
                 'signature_move' => $tagTeamData->signature_move,
             ]);
 
-            $datetime = now();
+            $creationDate = now();
 
             // Prepare member collections
             $wrestlers = collect([$tagTeamData->wrestlerA, $tagTeamData->wrestlerB])->filter();
             $managers = $tagTeamData->managers ?? collect();
 
-            // Add founding members to the tag team
-            $this->addWrestlersToTeam($tagTeam, $wrestlers, $datetime);
-            $this->addManagersToTeam($tagTeam, $managers, $datetime);
+            // Add founding members through membership service
+            $this->membershipService->addFoundingMembers(
+                $tagTeam,
+                $wrestlers,
+                $managers,
+                $creationDate,
+                false // Don't employ through membership service - handle separately if needed
+            );
 
-            // Handle employment for tag team and all members if employment_date provided
-            $this->handleEmployment($tagTeam, $wrestlers->filter(), $managers, $tagTeamData->employment_date);
+            // Handle employment through lifecycle service if requested
+            if ($tagTeamData->employment_date) {
+                $this->lifecycleService->handleEmployment(
+                    $tagTeam,
+                    $tagTeamData->employment_date,
+                    true // Employ all members
+                );
+            }
 
             return $tagTeam;
         });
-    }
-
-    /**
-     * Add wrestlers to the tag team.
-     *
-     * @param  Collection<int, Wrestler>  $wrestlers
-     */
-    private function addWrestlersToTeam(TagTeam $tagTeam, Collection $wrestlers, Carbon $datetime): void
-    {
-        $wrestlersCollection = $wrestlers
-            ->ensure(Wrestler::class)
-            ->values(); // Reset keys to be sequential integers
-
-        if ($wrestlersCollection->isNotEmpty()) {
-            // Convert to Eloquent Collection if needed
-            $eloquentCollection = new \Illuminate\Database\Eloquent\Collection($wrestlersCollection->all());
-            $eloquentCollection->each(function (Wrestler $wrestler) use ($tagTeam, $datetime): void {
-                $tagTeam->wrestlers()->attach($wrestler->getKey(), [
-                    'joined_at' => $datetime->toDateTimeString(),
-                ]);
-            });
-        }
-    }
-
-    /**
-     * Add managers to the tag team.
-     *
-     * @param  Collection<int, Manager>|null  $managers
-     */
-    private function addManagersToTeam(TagTeam $tagTeam, ?Collection $managers, Carbon $datetime): void
-    {
-        $managersCollection = collect($managers)
-            ->ensure(Manager::class)
-            ->values(); // Reset keys to be sequential integers
-
-        $managersCollection->whenNotEmpty(function (Collection $managers) use ($tagTeam, $datetime) {
-            $managers->each(function (Manager $manager) use ($tagTeam, $datetime): void {
-                $tagTeam->managers()->attach($manager->getKey(), [
-                    'hired_at' => $datetime->toDateTimeString(),
-                ]);
-            });
-        });
-    }
-
-    /**
-     * Handle employment for the tag team and its members.
-     *
-     * @param  Collection<int, Wrestler>  $wrestlers
-     * @param  Collection<int, Manager>  $managers
-     */
-    private function handleEmployment(TagTeam $tagTeam, Collection $wrestlers, Collection $managers, ?Carbon $employmentDate): void
-    {
-        if (! isset($employmentDate)) {
-            return;
-        }
-
-        // Create or update the employment relationship
-        $tagTeam->employments()->updateOrCreate(
-            ['ended_at' => null],
-            ['started_at' => $employmentDate->toDateTimeString()]
-        );
-
-        // Update the status field to reflect employment
-        $tagTeam->update(['status' => EmploymentStatus::Employed]);
-
-        // Employ wrestlers if they're not already employed
-        $wrestlers
-            ->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed())
-            ->each(fn (Wrestler $wrestler) => $this->wrestlersEmployAction->handle($wrestler, $employmentDate));
-
-        // Employ managers if they're not already employed
-        $managers
-            ->filter(fn (Manager $manager) => ! $manager->isEmployed())
-            ->each(fn (Manager $manager) => $this->managersEmployAction->handle($manager, $employmentDate));
     }
 }

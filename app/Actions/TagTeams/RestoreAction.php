@@ -16,6 +16,7 @@ class RestoreAction
      * Restore a soft-deleted tag team.
      *
      * This handles the complete tag team restoration workflow:
+     * - Validates the tag team can be restored (soft-deleted, no name conflicts)
      * - Restores the soft-deleted tag team record
      * - Makes the tag team available for future employment and competition
      * - Preserves all historical partnerships, employment, and championship records
@@ -37,6 +38,8 @@ class RestoreAction
      */
     public function handle(TagTeam $tagTeam, bool $forceReunite = false): void
     {
+        $tagTeam->ensureCanBeRestored();
+
         DB::transaction(function () use ($tagTeam, $forceReunite): void {
             $tagTeam->restore();
             $restorationDate = now();

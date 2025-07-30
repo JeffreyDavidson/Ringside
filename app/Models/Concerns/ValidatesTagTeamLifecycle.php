@@ -4,8 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
+use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
+use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 
 /**
@@ -193,6 +198,299 @@ trait ValidatesTagTeamLifecycle
         // - Check authorization requirements
         // if (! $this->hasRetirementAuthorization()) {
         //     throw CannotBeRetiredException::insufficientAuthorization($this, 'management');
+        // }
+    }
+
+    /**
+     * Determine if the tag team can be suspended.
+     *
+     * Checks business rules for tag team suspension:
+     * - Must be currently employed
+     * - Must not already be suspended
+     * - Should validate disciplinary requirements
+     *
+     * @return bool True if the tag team can be suspended, false otherwise
+     */
+    public function canBeSuspended(): bool
+    {
+        if (! $this->isEmployed()) {
+            return false;
+        }
+
+        if ($this->isSuspended()) {
+            return false;
+        }
+
+        // Basic suspension is possible if employed and not already suspended
+        return true;
+    }
+
+    /**
+     * Ensure the tag team can be suspended, throwing an exception if not.
+     *
+     * Validates that the tag team is in a valid state for suspension while checking
+     * for business rule violations including employment status, existing suspensions,
+     * and administrative requirements.
+     *
+     * @throws CannotBeSuspendedException When suspension is not allowed
+     */
+    public function ensureCanBeSuspended(): void
+    {
+        if (! $this->isEmployed()) {
+            throw CannotBeSuspendedException::notEmployed($this);
+        }
+
+        if ($this->isSuspended()) {
+            throw CannotBeSuspendedException::alreadySuspended($this);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Check for disciplinary authorization requirements
+        // - Check for active championship obligations
+        // - Check for scheduled match conflicts
+        // - Check for storyline impact considerations
+    }
+
+    /**
+     * Determine if the tag team can be reinstated.
+     *
+     * Checks business rules for tag team reinstatement:
+     * - Must be currently suspended
+     * - Must still be employed
+     * - Should validate reinstatement authorization
+     *
+     * @return bool True if the tag team can be reinstated, false otherwise
+     */
+    public function canBeReinstated(): bool
+    {
+        if (! $this->isSuspended()) {
+            return false;
+        }
+
+        if (! $this->isEmployed()) {
+            return false;
+        }
+
+        // Basic reinstatement is possible if suspended and employed
+        return true;
+    }
+
+    /**
+     * Ensure the tag team can be reinstated, throwing an exception if not.
+     *
+     * Validates that the tag team is in a valid state for reinstatement while checking
+     * for business rule violations including suspension status, employment status,
+     * and authorization requirements.
+     *
+     * @throws CannotBeReinstatedException When reinstatement is not allowed
+     */
+    public function ensureCanBeReinstated(): void
+    {
+        if (! $this->isSuspended()) {
+            throw CannotBeReinstatedException::notSuspended($this);
+        }
+
+        if (! $this->isEmployed()) {
+            throw CannotBeReinstatedException::notEmployed($this);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Check for reinstatement authorization requirements
+        // - Check for disciplinary clearance
+        // - Check for administrative approval
+        // - Check for partner availability after suspension period
+    }
+
+    /**
+     * Determine if the tag team can be released.
+     *
+     * Checks business rules for tag team release:
+     * - Must be currently employed
+     * - Should validate contractual obligations
+     * - Should check for championship commitments
+     *
+     * @return bool True if the tag team can be released, false otherwise
+     */
+    public function canBeReleased(): bool
+    {
+        if (! $this->isEmployed()) {
+            return false;
+        }
+
+        // Basic release is possible if employed
+        return true;
+    }
+
+    /**
+     * Ensure the tag team can be released, throwing an exception if not.
+     *
+     * Validates that the tag team is in a valid state for release while checking
+     * for business rule violations including employment status, contractual obligations,
+     * and championship commitments.
+     *
+     * @throws CannotBeReleasedException When release is not allowed
+     */
+    public function ensureCanBeReleased(): void
+    {
+        if (! $this->isEmployed()) {
+            throw CannotBeReleasedException::notEmployed($this);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Check for championship obligations
+        // if ($this->hasCurrentChampionshipObligations()) {
+        //     $championships = $this->getCurrentChampionshipDetails();
+        //     throw CannotBeReleasedException::hasChampionshipObligations($this, $championships);
+        // }
+
+        // - Check for contractual obligations
+        // if ($this->hasUnfulfilledContractualObligations()) {
+        //     $obligations = $this->getContractualObligationDetails();
+        //     throw CannotBeReleasedException::contractualObligations($this, $obligations);
+        // }
+
+        // - Check for scheduled match commitments
+        // if ($this->hasScheduledMatches()) {
+        //     $matches = $this->getScheduledMatchDetails();
+        //     throw CannotBeReleasedException::hasScheduledMatches($this, $matches);
+        // }
+    }
+
+    /**
+     * Determine if the tag team can be deleted (soft deleted).
+     *
+     * Checks business rules for tag team deletion:
+     * - Must not be currently active (employed or suspended)
+     * - Should validate data integrity requirements
+     * - Should check for historical preservation needs
+     *
+     * @return bool True if the tag team can be deleted, false otherwise
+     */
+    public function canBeDeleted(): bool
+    {
+        if ($this->isEmployed()) {
+            return false;
+        }
+
+        if ($this->isSuspended()) {
+            return false;
+        }
+
+        // Basic deletion is possible if not active
+        return true;
+    }
+
+    /**
+     * Ensure the tag team can be deleted (soft deleted), throwing an exception if not.
+     *
+     * Validates that the tag team is in a valid state for soft deletion while checking
+     * for business rule violations including active status, data integrity requirements,
+     * and historical preservation needs.
+     *
+     * @throws CannotBeDeletedException When deletion is not allowed
+     */
+    public function ensureCanBeDeleted(): void
+    {
+        if ($this->isEmployed()) {
+            throw CannotBeDeletedException::stillEmployed($this);
+        }
+
+        if ($this->isSuspended()) {
+            throw CannotBeDeletedException::stillSuspended($this);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Check for historical significance requirements
+        // if ($this->hasHistoricalSignificance()) {
+        //     throw CannotBeDeletedException::historicalSignificance($this);
+        // }
+
+        // - Check for championship lineage requirements
+        // if ($this->hasChampionshipHistory()) {
+        //     throw CannotBeDeletedException::championshipHistory($this);
+        // }
+
+        // - Check for administrative authorization
+        // if (! $this->hasDeletionAuthorization()) {
+        //     throw CannotBeDeletedException::insufficientAuthorization($this);
+        // }
+    }
+
+    /**
+     * Determine if the tag team can be restored from soft deletion.
+     *
+     * Checks business rules for tag team restoration:
+     * - Must be currently soft deleted
+     * - Name must not conflict with existing active tag teams
+     * - Should validate restoration authorization
+     *
+     * @return bool True if the tag team can be restored, false otherwise
+     */
+    public function canBeRestored(): bool
+    {
+        if (! $this->trashed()) {
+            return false;
+        }
+
+        // Check for name conflicts with existing active tag teams
+        $nameConflict = static::where('name', $this->name)
+            ->where('id', '!=', $this->id)
+            ->where(function ($query) {
+                $query->whereHas('employments', function ($subQuery) {
+                    $subQuery->whereNull('ended_at');
+                });
+            })
+            ->exists();
+
+        if ($nameConflict) {
+            return false;
+        }
+
+        // Basic restoration is possible if soft deleted and no conflicts
+        return true;
+    }
+
+    /**
+     * Ensure the tag team can be restored from soft deletion, throwing an exception if not.
+     *
+     * Validates that the tag team is in a valid state for restoration while checking
+     * for business rule violations including deletion status, name conflicts,
+     * and authorization requirements.
+     *
+     * @throws CannotBeRestoredException When restoration is not allowed
+     */
+    public function ensureCanBeRestored(): void
+    {
+        if (! $this->trashed()) {
+            throw CannotBeRestoredException::notDeleted($this);
+        }
+
+        // Check for name conflicts with existing active tag teams
+        $conflictingTeam = static::where('name', $this->name)
+            ->where('id', '!=', $this->id)
+            ->whereHas('employments', function ($query) {
+                $query->whereNull('ended_at');
+            })
+            ->first();
+
+        if ($conflictingTeam) {
+            throw CannotBeRestoredException::nameConflict($this, $conflictingTeam->name);
+        }
+
+        // Additional business rule validations could be added here:
+        // - Check for restoration authorization requirements
+        // if (! $this->hasRestorationAuthorization()) {
+        //     throw CannotBeRestoredException::insufficientAuthorization($this);
+        // }
+
+        // - Check for data integrity requirements
+        // if ($this->hasDataIntegrityIssues()) {
+        //     throw CannotBeRestoredException::dataIntegrityIssues($this);
+        // }
+
+        // - Check for administrative approval
+        // if (! $this->hasAdministrativeApproval()) {
+        //     throw CannotBeRestoredException::requiresAdministrativeApproval($this);
         // }
     }
 

@@ -38,6 +38,10 @@ class DeleteAction
      * - Allows for future restoration if needed
      * - Maintains referential integrity with historical data
      *
+     * NOTE ON DELETION TYPE:
+     * This performs soft deletion only - the tag team record is marked as deleted
+     * but preserved for historical reporting, championship lineage, and administrative purposes.
+     *
      * @param  TagTeam  $tagTeam  The tag team to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
      *
@@ -53,6 +57,8 @@ class DeleteAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void
     {
+        $tagTeam->ensureCanBeDeleted();
+
         $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Managers\EmployAction as ManagersEmployAction;
-use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
-use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Models\TagTeams\TagTeam;
+use App\Services\TagTeamLifecycleService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -21,21 +19,16 @@ class EmployAction
      * Create a new employ action instance.
      */
     public function __construct(
-        protected WrestlersEmployAction $wrestlersEmployAction,
-        protected ManagersEmployAction $managersEmployAction
+        protected TagTeamLifecycleService $lifecycleService
     ) {}
 
     /**
-     * Employ a tag team.
+     * Employ a tag team using the lifecycle service.
      *
-     * This handles the complete tag team employment workflow:
-     * - Validates the tag team can be employed (business rule compliance)
-     * - Ends retirement if currently retired
-     * - Creates an employment record for the tag team
-     * - Employs all current wrestlers who aren't already employed
-     * - Employs all current managers who aren't already employed
-     * - Makes the tag team available for match bookings and championships
-     * - Maintains employment consistency across all team members
+     * This action serves as a focused interface for employment while delegating
+     * all complex business logic, validation, and lifecycle management to the
+     * centralized TagTeamLifecycleService. This ensures consistency across all
+     * lifecycle operations and eliminates code duplication.
      *
      * @param  TagTeam  $tagTeam  The tag team to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
@@ -58,35 +51,7 @@ class EmployAction
         $employmentDate = $employmentDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
-            // End retirement if currently retired
-            if ($tagTeam->isRetired()) {
-                $tagTeam->retirements()->where('ended_at', null)->update(['ended_at' => $employmentDate]);
-            }
-
-            // Create employment record
-            $tagTeam->employments()->create([
-                'started_at' => $employmentDate,
-                'ended_at' => null,
-            ]);
-
-            // Update status to employed
-            $tagTeam->update(['status' => EmploymentStatus::Employed]);
-
-            // Employ current wrestlers if they're not already employed
-            $currentWrestlers = $tagTeam->currentWrestlers
-                ->filter(fn ($wrestler) => ! $wrestler->isEmployed());
-
-            foreach ($currentWrestlers as $wrestler) {
-                $this->wrestlersEmployAction->handle($wrestler, $employmentDate);
-            }
-
-            // Employ current managers if they're not already employed
-            $currentManagers = $tagTeam->currentManagers
-                ->filter(fn ($manager) => ! $manager->isEmployed());
-
-            foreach ($currentManagers as $manager) {
-                $this->managersEmployAction->handle($manager, $employmentDate);
-            }
+            $this->lifecycleService->handleEmployment($tagTeam, $employmentDate, true);
         });
     }
 }
