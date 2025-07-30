@@ -19,12 +19,13 @@ This Laravel project has been configured with Claude Code and the following MCP 
 1. Open Claude Code in this project directory
 2. All MCP servers are automatically configured
 3. Use natural language to interact with your codebase
-4. Ask Claude to help with Laravel, Livewire, Filament, and Tailwind tasks
+4. Ask Claude to help with Laravel, Livewire, and Tailwind tasks
 
 ## Environment
 - Laravel Framework
 - Livewire for dynamic components
-- Filament for admin interface
+- Laravel Breeze for authentication
+- Livewire Tables for data tables
 - Alpine.js for frontend interactivity
 - Tailwind CSS for styling
 
