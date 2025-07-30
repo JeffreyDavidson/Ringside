@@ -41,23 +41,6 @@ readonly class TagTeamMembershipData
     }
 
     /**
-     * Check if there are no members at all.
-     */
-    public function isEmpty(): bool
-    {
-        return ($this->wrestlers === null || $this->wrestlers->isEmpty()) &&
-               ($this->managers === null || $this->managers->isEmpty());
-    }
-
-    /**
-     * Check if there are any members.
-     */
-    public function isNotEmpty(): bool
-    {
-        return ! $this->isEmpty();
-    }
-
-    /**
      * Get the wrestlers collection, defaulting to empty Eloquent collection.
      */
     public function getWrestlers(): Collection
