@@ -41,7 +41,7 @@ use Illuminate\Support\Carbon;
  * $service = app(TagTeamLifecycleService::class);
  *
  * // Handle employment with member cascading
- * $service->handleEmployment($tagTeam, $employmentDate, true);
+ * $service->employ($tagTeam, $employmentDate, true);
  *
  * // Handle retirement workflow
  * $service->handleRetirement($tagTeam, $retirementDate);
@@ -75,13 +75,13 @@ class TagTeamLifecycleService
      * @example
      * ```php
      * // Employ tag team and all unemployed members
-     * $service->handleEmployment($tagTeam, now(), true);
+     * $service->employ($tagTeam, now(), true);
      *
      * // Employ only the tag team entity
-     * $service->handleEmployment($tagTeam, now(), false);
+     * $service->employ($tagTeam, now(), false);
      * ```
      */
-    public function handleEmployment(TagTeam $tagTeam, Carbon $employmentDate, bool $employMembers = true): void
+    public function employ(TagTeam $tagTeam, Carbon $employmentDate, bool $employMembers = true): void
     {
         // End retirement if currently retired
         if ($tagTeam->isRetired()) {
@@ -169,7 +169,7 @@ class TagTeamLifecycleService
 
         // Handle immediate employment if requested
         if ($employImmediately) {
-            $this->handleEmployment($tagTeam, $unretiredDate, true);
+            $this->employ($tagTeam, $unretiredDate, true);
         }
     }
 

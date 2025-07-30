@@ -102,7 +102,7 @@ class UpdateAction
 
                 // Handle tag team employment if not already employed
                 if (! $tagTeam->isEmployed()) {
-                    $this->lifecycleService->handleEmployment(
+                    $this->lifecycleService->employ(
                         $tagTeam,
                         $tagTeamData->employment_date,
                         true // Employ all members (will skip already employed ones)

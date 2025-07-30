@@ -52,7 +52,7 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
-            $this->lifecycleService->handleEmployment($tagTeam, $employmentDate, true);
+            $this->lifecycleService->employ($tagTeam, $employmentDate, true);
         });
     }
 }
