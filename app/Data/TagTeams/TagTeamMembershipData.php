@@ -88,15 +88,4 @@ readonly class TagTeamMembershipData
     {
         return $this->managers !== null && $this->managers->isNotEmpty();
     }
-
-    /**
-     * Get total count of all members.
-     */
-    public function getTotalMemberCount(): int
-    {
-        $wrestlerCount = $this->wrestlers?->count() ?? 0;
-        $managerCount = $this->managers?->count() ?? 0;
-
-        return $wrestlerCount + $managerCount;
-    }
 }
