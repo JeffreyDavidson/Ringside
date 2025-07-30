@@ -6,7 +6,6 @@ namespace App\Actions\TagTeams;
 
 use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
-use App\Services\TagTeamLifecycleService;
 use App\Services\TagTeamMembershipService;
 use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +21,7 @@ class CreateAction
     public function __construct(
         protected TagTeamValidationService $validationService,
         protected TagTeamMembershipService $membershipService,
-        protected TagTeamLifecycleService $lifecycleService
+        protected EmployAction $employAction
     ) {}
 
     /**
@@ -32,7 +31,7 @@ class CreateAction
      * - Validates all business rules and data integrity constraints
      * - Creates the tag team record with validated information
      * - Adds founding partners and managers through membership service
-     * - Handles employment workflows through lifecycle service
+     * - Handles employment workflows through EmployAction
      * - Ensures consistent data integrity and business rule compliance
      *
      * @param  TagTeamData  $tagTeamData  The data transfer object containing tag team information
@@ -86,13 +85,9 @@ class CreateAction
                 false // Don't employ through membership service - handle separately if needed
             );
 
-            // Handle employment through lifecycle service if requested
+            // Handle employment through EmployAction if requested
             if ($tagTeamData->employment_date) {
-                $this->lifecycleService->handleEmployment(
-                    $tagTeam,
-                    $tagTeamData->employment_date,
-                    true // Employ all members
-                );
+                $this->employAction->handle($tagTeam, $tagTeamData->employment_date);
             }
 
             return $tagTeam;
