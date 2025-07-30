@@ -32,7 +32,7 @@ readonly class TagTeamMembershipData
      */
     public static function fromWrestlers(?Wrestler $wrestlerA, ?Wrestler $wrestlerB, ?Collection $managers = null): self
     {
-        $wrestlers = collect([$wrestlerA, $wrestlerB])->filter();
+        $wrestlers = new Collection(array_filter([$wrestlerA, $wrestlerB]));
 
         return new self(
             wrestlers: $wrestlers->isNotEmpty() ? $wrestlers : null,
@@ -58,19 +58,19 @@ readonly class TagTeamMembershipData
     }
 
     /**
-     * Get the wrestlers collection, defaulting to empty collection.
+     * Get the wrestlers collection, defaulting to empty Eloquent collection.
      */
     public function getWrestlers(): Collection
     {
-        return $this->wrestlers ?? collect();
+        return $this->wrestlers ?? new Collection();
     }
 
     /**
-     * Get the managers collection, defaulting to empty collection.
+     * Get the managers collection, defaulting to empty Eloquent collection.
      */
     public function getManagers(): Collection
     {
-        return $this->managers ?? collect();
+        return $this->managers ?? new Collection();
     }
 
     /**
