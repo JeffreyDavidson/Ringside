@@ -29,6 +29,7 @@ class DeleteAction
      * EMPLOYMENT IMPACT:
      * - Uses StatusTransitionPipeline to properly release employed tag teams
      * - Automatically handles suspension ending through pipeline
+     * - Retired tag teams remain retired (no artificial status changes)
      * - Does not affect individual member employment (they continue careers)
      * - Preserves tag team employment history for administrative records
      *
@@ -69,10 +70,9 @@ class DeleteAction
             if ($tagTeam->isEmployed()) {
                 // Use pipeline to properly handle release (ends employment and suspension)
                 StatusTransitionPipeline::release($tagTeam, $deletionDate)->execute();
-            } elseif ($tagTeam->isRetired()) {
-                // End retirement manually (no pipeline method for this specific case)
-                $tagTeam->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             }
+            // Note: Retired tag teams remain retired - no status change needed
+            // Retirement is their natural end state, no artificial reactivation required
 
             // End current wrestler partnerships (wrestlers continue as singles)
             $tagTeam->currentWrestlers->each(function ($wrestler) use ($tagTeam, $deletionDate) {
