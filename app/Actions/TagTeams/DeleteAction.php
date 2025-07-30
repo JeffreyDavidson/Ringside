@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Models\TagTeams\TagTeam;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -59,7 +60,7 @@ class DeleteAction
     {
         $tagTeam->ensureCanBeDeleted();
 
-        $deletionDate = $deletionDate ?? now();
+        $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
             // Handle tag team status - employed tag teams can be suspended, retired tag teams are not employed
