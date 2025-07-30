@@ -70,8 +70,6 @@ class CreateAction
                 'signature_move' => $tagTeamData->signature_move,
             ]);
 
-            $creationDate = now();
-
             // Prepare member collections
             $wrestlers = collect([$tagTeamData->wrestlerA, $tagTeamData->wrestlerB])->filter();
             $managers = $tagTeamData->managers ?? collect();
@@ -81,7 +79,7 @@ class CreateAction
                 $tagTeam,
                 $wrestlers,
                 $managers,
-                $creationDate,
+                $tagTeamData->getJoinDate(),
                 false // Don't employ through membership service - handle separately if needed
             );
 

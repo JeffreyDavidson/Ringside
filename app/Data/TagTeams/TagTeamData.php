@@ -24,4 +24,12 @@ readonly class TagTeamData
         public ?Wrestler $wrestlerB,
         public ?Collection $managers = null,
     ) {}
+
+    /**
+     * Get the join date for founding members, defaulting to now.
+     */
+    public function getJoinDate(): Carbon
+    {
+        return now();
+    }
 }
