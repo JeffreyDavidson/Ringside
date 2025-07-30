@@ -58,7 +58,12 @@
       "mcp__filesystem-ringside__read_file",
       "mcp__filesystem-ringside__read_multiple_files",
       "Bash(composer:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(claude doctor)",
+      "Bash(cp:*)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(head:*)"
     ],
     "deny": [],
     "defaultMode": "plan"
