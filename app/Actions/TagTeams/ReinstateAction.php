@@ -10,6 +10,7 @@ use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -54,7 +55,7 @@ class ReinstateAction
     {
         $tagTeam->ensureCanBeReinstated();
 
-        $reinstatementDate = $reinstatementDate ?? now();
+        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
             $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $reinstatementDate]);

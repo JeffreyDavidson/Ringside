@@ -9,6 +9,7 @@ use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -59,7 +60,7 @@ class RetireAction
     {
         $tagTeam->ensureCanBeRetired();
 
-        $retirementDate = $retirementDate ?? now();
+        $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($tagTeam, $retirementDate, $retirePartners): void {
             // End current employment if employed

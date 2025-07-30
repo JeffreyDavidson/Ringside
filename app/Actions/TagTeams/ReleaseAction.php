@@ -10,6 +10,7 @@ use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -56,7 +57,7 @@ class ReleaseAction
     {
         $tagTeam->ensureCanBeReleased();
 
-        $releaseDate = $releaseDate ?? now();
+        $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($tagTeam, $releaseDate): void {
             // End suspension if active

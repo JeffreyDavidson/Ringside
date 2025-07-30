@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\TagTeamMembershipService;
+use App\Support\DateHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,7 @@ class UpdateTagTeamPartnersAction
         ?Carbon $updateDate = null,
         bool $employIfNeeded = false
     ): Collection {
-        $updateDate = $updateDate ?? now();
+        $updateDate = DateHelper::resolveDate($updateDate);
 
         return DB::transaction(function () use ($tagTeam, $wrestlers, $updateDate, $employIfNeeded): Collection {
             return $this->membershipService->updatePartnerships(

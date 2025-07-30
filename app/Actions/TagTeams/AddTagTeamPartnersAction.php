@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\TagTeamMembershipService;
+use App\Support\DateHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,7 @@ class AddTagTeamPartnersAction
         ?Carbon $joinDate = null,
         bool $employIfNeeded = false
     ): Collection {
-        $joinDate = $joinDate ?? now();
+        $joinDate = DateHelper::resolveDate($joinDate);
 
         return DB::transaction(function () use ($tagTeam, $wrestlers, $joinDate, $employIfNeeded): Collection {
             return $this->membershipService->addPartners(
