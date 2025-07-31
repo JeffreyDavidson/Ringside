@@ -74,20 +74,19 @@ class UpdateAction
 
             $updateDate = now();
 
-            // Handle partnership changes through membership service
-            $wrestlers = collect([$tagTeamData->wrestlerA, $tagTeamData->wrestlerB])->filter();
-            $managers = $tagTeamData->managers ?? collect();
+            // Handle partnership changes through membership service using membership data
+            $membershipData = $tagTeamData->getMembershipData();
 
             $newWrestlers = $this->membershipService->updatePartnerships(
                 $tagTeam,
-                $wrestlers,
+                $membershipData->wrestlers ?? collect(),
                 $updateDate,
                 false // Don't employ through membership service - handle separately if needed
             );
 
             $newManagers = $this->membershipService->updateManagerRelationships(
                 $tagTeam,
-                $managers,
+                $membershipData->managers ?? collect(),
                 $updateDate,
                 false // Don't employ through membership service - handle separately if needed
             );

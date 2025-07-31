@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Managers\ReinstateAction as ManagersReinstateAction;
-use App\Actions\Wrestlers\ReinstateAction as WrestlersReinstateAction;
+use App\Actions\Concerns\ReinstatementCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeReinstatedException;
-use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction
@@ -20,22 +17,18 @@ class ReinstateAction
     use AsAction;
 
     /**
-     * Create a new reinstate action instance.
-     */
-    public function __construct(
-        protected WrestlersReinstateAction $wrestlersReinstateAction,
-        protected ManagersReinstateAction $managersReinstateAction
-    ) {}
-
-    /**
      * Reinstate a suspended tag team.
      *
-     * This handles the complete tag team reinstatement workflow:
+     * This handles the complete tag team reinstatement workflow using StatusTransitionPipeline:
      * - Validates the tag team can be reinstated (currently suspended)
-     * - Ends the current suspension period with the specified date
-     * - Restores the tag team to active competition status
+     * - Uses StatusTransitionPipeline to properly end suspension and restore active status
+     * - Automatically cascades reinstatement to suspended wrestlers and managers
      * - Makes the team available for match bookings and championships again
-     * - Individual members who were suspended separately need separate reinstatement
+     * - Maintains transaction boundaries and error handling through pipeline
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline with ReinstatementCascadeStrategy for consistency
+     * with other entity status transitions (wrestlers, managers, etc.)
      *
      * @param  TagTeam  $tagTeam  The tag team to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
@@ -53,24 +46,11 @@ class ReinstateAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {
-        $tagTeam->ensureCanBeReinstated();
-
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
-            $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $reinstatementDate]);
-
-            // Reinstate suspended wrestlers and managers who were suspended with this team
-            $wrestlersToReinstate = $tagTeam->currentWrestlers
-                ->filter(fn (Wrestler $wrestler) => $wrestler->isSuspended());
-            $managersToReinstate = $tagTeam->currentManagers
-                ->filter(fn (Manager $manager) => $manager->isSuspended());
-
-            // Reinstate the provided wrestlers
-            $wrestlersToReinstate->each(fn (Wrestler $wrestler) => $this->wrestlersReinstateAction->handle($wrestler, $reinstatementDate));
-
-            // Reinstate the provided managers
-            $managersToReinstate->each(fn (Manager $manager) => $this->managersReinstateAction->handle($manager, $reinstatementDate));
-        });
+        StatusTransitionPipeline::reinstate($tagTeam, $reinstatementDate)
+            ->withCascade(ReinstatementCascadeStrategy::wrestlers())
+            ->withCascade(ReinstatementCascadeStrategy::managers())
+            ->execute();
     }
 }

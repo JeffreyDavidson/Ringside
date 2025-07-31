@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Managers\RetireAction as ManagersRetireAction;
-use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\RetirementCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
@@ -19,24 +17,21 @@ class RetireAction
     use AsAction;
 
     /**
-     * Create a new retire action instance.
-     */
-    public function __construct(
-        protected WrestlersRetireAction $wrestlersRetireAction,
-        protected ManagersRetireAction $managersRetireAction
-    ) {}
-
-    /**
      * Retire a tag team and end their partnership.
      *
-     * This handles the complete tag team retirement workflow with flexible options:
+     * This handles the complete tag team retirement workflow using StatusTransitionPipeline:
      * - Validates the tag team can be retired (business rule compliance)
-     * - Ends current employment and suspension if active
-     * - Optionally retires available partners and managers
-     * - Creates retirement record to formally end the partnership
+     * - Uses StatusTransitionPipeline to properly handle retirement status transition
+     * - Automatically ends employment and suspension through pipeline
+     * - Optionally cascades retirement to available partners and managers
+     * - Creates retirement record and updates status through pipeline
      * - Makes the tag team permanently unavailable for competition
      * - Preserves all historical records and championship lineage
      * - Individual members may continue their careers independently
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline with RetirementCascadeStrategy for consistency
+     * with other entity status transitions and flexible cascade behavior.
      *
      * @param  TagTeam  $tagTeam  The tag team to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
@@ -45,7 +40,7 @@ class RetireAction
      *
      * @example
      * ```php
-     * // Retire tag team immediately
+     * // Retire tag team immediately with member retirement
      * $tagTeam = TagTeam::where('name', 'The Undertakers')->first();
      * RetireAction::run($tagTeam);
      *
@@ -58,46 +53,10 @@ class RetireAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retirePartners = true): void
     {
-        $tagTeam->ensureCanBeRetired();
-
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
-        DB::transaction(function () use ($tagTeam, $retirementDate, $retirePartners): void {
-            // End current employment if employed
-            if ($tagTeam->isEmployed()) {
-                $tagTeam->employments()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
-            }
-
-            // End current suspension if suspended
-            if ($tagTeam->isSuspended()) {
-                $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $retirementDate]);
-            }
-
-            // Retire current partners if requested
-            if ($retirePartners) {
-                $partnersToRetire = $tagTeam->currentWrestlers
-                    ->filter(fn ($wrestler) => $wrestler->canBeRetired());
-
-                foreach ($partnersToRetire as $wrestler) {
-                    $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
-                }
-
-                // Retire current managers
-                $managersToRetire = $tagTeam->currentManagers
-                    ->filter(fn ($manager) => $manager->canBeRetired());
-
-                foreach ($managersToRetire as $manager) {
-                    $this->managersRetireAction->handle($manager, $retirementDate);
-                }
-            }
-
-            // Create retirement record
-            $tagTeam->retirements()->create([
-                'retired_at' => $retirementDate,
-            ]);
-
-            // Update status to retired
-            $tagTeam->update(['status' => EmploymentStatus::Retired]);
-        });
+        StatusTransitionPipeline::retire($tagTeam, $retirementDate)
+            ->withCascade(RetirementCascadeStrategy::conditionalMembers($retirePartners))
+            ->execute();
     }
 }

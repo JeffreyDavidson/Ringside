@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\TagTeamMembershipService;
@@ -60,12 +61,24 @@ class UpdateTagTeamPartnersAction
         $updateDate = DateHelper::resolveDate($updateDate);
 
         return DB::transaction(function () use ($tagTeam, $wrestlers, $updateDate, $employIfNeeded): Collection {
-            return $this->membershipService->updatePartnerships(
+            $newPartners = $this->membershipService->updatePartnerships(
                 $tagTeam,
                 $wrestlers,
                 $updateDate,
-                $employIfNeeded
+                false // Don't employ through membership service - handle consistently if needed
             );
+
+            // Handle employment using StatusTransitionPipeline for consistency if requested
+            if ($employIfNeeded && $newPartners->isNotEmpty()) {
+                // Employ each new partner individually using StatusTransitionPipeline
+                foreach ($newPartners as $wrestler) {
+                    if (! $wrestler->isEmployed()) {
+                        StatusTransitionPipeline::employ($wrestler, $updateDate)->execute();
+                    }
+                }
+            }
+
+            return $newPartners;
         });
     }
 }

@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Concerns\EmploymentCascadeStrategy;
 use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\TagTeams\TagTeam;
+use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -42,7 +43,7 @@ class EmployAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
-        $tagTeam->ensureCanBeEmployed();
+        $employmentDate = DateHelper::resolveDate($employmentDate);
 
         StatusTransitionPipeline::employ($tagTeam, $employmentDate)
             ->withCascade(EmploymentCascadeStrategy::wrestlers())

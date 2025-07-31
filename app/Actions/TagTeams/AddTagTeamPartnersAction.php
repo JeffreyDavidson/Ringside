@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\TagTeamMembershipService;
@@ -60,12 +61,24 @@ class AddTagTeamPartnersAction
         $joinDate = DateHelper::resolveDate($joinDate);
 
         return DB::transaction(function () use ($tagTeam, $wrestlers, $joinDate, $employIfNeeded): Collection {
-            return $this->membershipService->addPartners(
+            $addedPartners = $this->membershipService->addPartners(
                 $tagTeam,
                 $wrestlers,
                 $joinDate,
-                $employIfNeeded
+                false // Don't employ through membership service - handle consistently if needed
             );
+
+            // Handle employment using StatusTransitionPipeline for consistency if requested
+            if ($employIfNeeded && $addedPartners->isNotEmpty()) {
+                // Employ each new partner individually using StatusTransitionPipeline
+                foreach ($addedPartners as $wrestler) {
+                    if (! $wrestler->isEmployed()) {
+                        StatusTransitionPipeline::employ($wrestler, $joinDate)->execute();
+                    }
+                }
+            }
+
+            return $addedPartners;
         });
     }
 }
