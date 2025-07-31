@@ -6,7 +6,6 @@ namespace App\Actions\Wrestlers;
 
 use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Data\Wrestlers\WrestlerData;
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -19,6 +18,7 @@ class CreateAction
      * Create a new wrestler create action instance.
      */
     public function __construct(
+        protected EmployAction $employAction,
         protected ManagersEmployAction $managersEmployAction
     ) {}
 
@@ -27,10 +27,14 @@ class CreateAction
      *
      * This handles the complete wrestler creation workflow:
      * - Creates the wrestler record with personal and professional details
-     * - Creates employment record if employment_date is provided
+     * - Uses EmployAction for consistent employment handling if employment_date provided
      * - Assigns managers if provided and ensures they are employed
      * - Establishes the wrestler as available for match bookings and storylines
      * - Handles all relationship dependencies and employment cascades
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses EmployAction for consistent employment handling instead of manual database operations.
+     * This ensures proper StatusTransitionPipeline usage and cascade behavior.
      *
      * @param  WrestlerData  $wrestlerData  The data transfer object containing wrestler information
      * @return Wrestler The newly created wrestler instance
@@ -60,16 +64,7 @@ class CreateAction
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
-            // Handle wrestler employment
-            if (isset($wrestlerData->employment_date)) {
-                $wrestler->employments()->create([
-                    'started_at' => $wrestlerData->employment_date,
-                    'ended_at' => null,
-                    'status' => EmploymentStatus::Employed,
-                ]);
-            }
-
-            // Handle manager assignment and employment
+            // Handle manager assignment first
             if (isset($wrestlerData->managers) && ! empty($wrestlerData->managers)) {
                 $datetime = $wrestlerData->employment_date ?? now();
 
@@ -84,6 +79,11 @@ class CreateAction
                         $this->managersEmployAction->handle($manager, $datetime);
                     }
                 }
+            }
+
+            // Handle wrestler employment using EmployAction for consistency
+            if (isset($wrestlerData->employment_date)) {
+                $this->employAction->handle($wrestler, $wrestlerData->employment_date);
             }
 
             return $wrestler;
