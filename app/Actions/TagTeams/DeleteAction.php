@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\TagTeams\TagTeam;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -25,7 +27,9 @@ class DeleteAction
      * - No impact on individual wrestler/manager employment status
      *
      * EMPLOYMENT IMPACT:
-     * - Ends tag team employment and suspension if active
+     * - Uses StatusTransitionPipeline to properly release employed tag teams
+     * - Automatically handles suspension ending through pipeline
+     * - Retired tag teams remain retired (no artificial status changes)
      * - Does not affect individual member employment (they continue careers)
      * - Preserves tag team employment history for administrative records
      *
@@ -37,6 +41,10 @@ class DeleteAction
      * - Soft deletes the tag team record
      * - Allows for future restoration if needed
      * - Maintains referential integrity with historical data
+     *
+     * NOTE ON DELETION TYPE:
+     * This performs soft deletion only - the tag team record is marked as deleted
+     * but preserved for historical reporting, championship lineage, and administrative purposes.
      *
      * @param  TagTeam  $tagTeam  The tag team to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
@@ -53,22 +61,18 @@ class DeleteAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
+        $tagTeam->ensureCanBeDeleted();
+
+        $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
-            // Handle tag team status - employed tag teams can be suspended, retired tag teams are not employed
+            // Handle tag team status using StatusTransitionPipeline
             if ($tagTeam->isEmployed()) {
-                // End suspension if active
-                if ($tagTeam->isSuspended()) {
-                    $tagTeam->suspensions()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
-                }
-
-                // End employment
-                $tagTeam->employments()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
-            } elseif ($tagTeam->isRetired()) {
-                // End retirement if active (retired tag teams are not employed)
-                $tagTeam->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
+                // Use pipeline to properly handle release (ends employment and suspension)
+                StatusTransitionPipeline::release($tagTeam, $deletionDate)->execute();
             }
+            // Note: Retired tag teams remain retired - no status change needed
+            // Retirement is their natural end state, no artificial reactivation required
 
             // End current wrestler partnerships (wrestlers continue as singles)
             $tagTeam->currentWrestlers->each(function ($wrestler) use ($tagTeam, $deletionDate) {
