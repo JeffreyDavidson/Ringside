@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\TagTeamMembershipService;
+use App\Support\DateHelper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateTagTeamPartnersAction
@@ -15,46 +19,66 @@ class UpdateTagTeamPartnersAction
     use AsAction;
 
     /**
-     * Update a given tag team with given wrestlers.
-     *
-     * @param  Collection<int, Wrestler>  $wrestlers
+     * Create a new update tag team partners action instance.
      */
-    public function handle(TagTeam $tagTeam, Collection $wrestlers, ?Carbon $joinDate = null): void
-    {
-        $joinDate ??= now();
+    public function __construct(
+        protected TagTeamMembershipService $membershipService
+    ) {}
 
-        if ($tagTeam->currentWrestlers->isEmpty()) {
-            if ($wrestlers->isNotEmpty()) {
-                foreach ($wrestlers as $wrestler) {
-                    $tagTeam->wrestlers()->attach($wrestler->id, [
-                        'joined_at' => $joinDate,
-                        'left_at' => null,
-                    ]);
+    /**
+     * Update tag team partnership composition using the membership service.
+     *
+     * This action serves as a focused interface for updating partnerships while
+     * delegating all complex business logic, validation, and data management to
+     * the centralized TagTeamMembershipService. This ensures consistency across
+     * all partnership operations and eliminates code duplication.
+     *
+     * @param  TagTeam  $tagTeam  The tag team to update partnerships for
+     * @param  Collection<int, Wrestler>  $wrestlers  Collection of wrestlers for the updated partnership
+     * @param  Carbon|null  $updateDate  The partnership change date (defaults to now)
+     * @param  bool  $employIfNeeded  Whether to employ unemployed new wrestlers (default: false)
+     * @return Collection<int, Wrestler> Collection of newly added partners
+     *
+     * @example
+     * ```php
+     * // Update partners without employment
+     * $newPartners = collect([$wrestler1, $wrestler2]);
+     * UpdateTagTeamPartnersAction::run($tagTeam, $newPartners);
+     *
+     * // Update partners with automatic employment
+     * $addedPartners = UpdateTagTeamPartnersAction::run($tagTeam, $newPartners, now(), true);
+     *
+     * // Update with specific change date
+     * UpdateTagTeamPartnersAction::run($tagTeam, $newPartners, Carbon::parse('2024-01-01'));
+     * ```
+     */
+    public function handle(
+        TagTeam $tagTeam,
+        Collection $wrestlers,
+        ?Carbon $updateDate = null,
+        bool $employIfNeeded = false
+    ): Collection {
+        $updateDate = DateHelper::resolveDate($updateDate);
+
+        return DB::transaction(function () use ($tagTeam, $wrestlers, $updateDate, $employIfNeeded): Collection {
+            $newPartners = $this->membershipService->updatePartnerships(
+                $tagTeam,
+                $wrestlers,
+                $updateDate,
+                false // Don't employ through membership service - handle consistently if needed
+            );
+
+            // Handle employment using StatusTransitionPipeline for consistency if requested
+            if ($employIfNeeded && $newPartners->isNotEmpty()) {
+                // Employ each new partner individually using StatusTransitionPipeline
+                foreach ($newPartners as $wrestler) {
+                    if (! $wrestler->isEmployed()) {
+                        StatusTransitionPipeline::employ($wrestler, $updateDate)->execute();
+                    }
                 }
             }
-        } else {
-            /** @var Collection<int, Wrestler> $formerTagTeamPartners */
-            $formerTagTeamPartners = $tagTeam->currentWrestlers()->wherePivotNotIn(
-                'wrestler_id',
-                $wrestlers->modelKeys()
-            )->get();
 
-            $newTagTeamPartners = $wrestlers->except($formerTagTeamPartners->modelKeys());
-
-            // End partnerships for former partners
-            $formerTagTeamPartners->each(function (Wrestler $wrestler) use ($tagTeam, $joinDate) {
-                $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
-                    'left_at' => $joinDate,
-                ]);
-            });
-
-            // Add new partners
-            foreach ($newTagTeamPartners as $wrestler) {
-                $tagTeam->wrestlers()->attach($wrestler->id, [
-                    'joined_at' => $joinDate,
-                    'left_at' => null,
-                ]);
-            }
-        }
+            return $newPartners;
+        });
     }
 }

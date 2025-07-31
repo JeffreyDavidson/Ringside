@@ -24,4 +24,24 @@ readonly class TagTeamData
         public ?Wrestler $wrestlerB,
         public ?Collection $managers = null,
     ) {}
+
+    /**
+     * Get membership data for this tag team.
+     */
+    public function getMembershipData(): TagTeamMembershipData
+    {
+        return TagTeamMembershipData::fromWrestlers(
+            $this->wrestlerA,
+            $this->wrestlerB,
+            $this->managers
+        );
+    }
+
+    /**
+     * Get the join date for founding members, defaulting to now.
+     */
+    public function getJoinDate(): Carbon
+    {
+        return now();
+    }
 }

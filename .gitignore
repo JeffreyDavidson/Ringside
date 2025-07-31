@@ -8,6 +8,9 @@
 /storage/*.key
 /storage/pail
 /vendor
+
+# Claude Code personal todos (not tracked in git)
+.claude/todos.md
 /report
 .env
 .phpunit.result.cache

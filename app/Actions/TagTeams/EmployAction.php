@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Concerns\EmploymentCascadeStrategy;
 use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\TagTeams\TagTeam;
+use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -16,16 +17,15 @@ class EmployAction
     use AsAction;
 
     /**
-     * Employ a tag team.
+     * Employ a tag team using the StatusTransitionPipeline.
      *
      * This handles the complete tag team employment workflow using the StatusTransitionPipeline:
      * - Validates the tag team can be employed (not retired, not already employed)
      * - Ends retirement if currently retired
      * - Creates an employment record for the tag team
-     * - Ensures all current wrestlers are also employed through cascading
-     * - Ensures all current managers are also employed through cascading
+     * - Employs all current wrestlers through cascading
+     * - Employs all current managers through cascading
      * - Makes the tag team available for match bookings and championships
-     * - Maintains employment consistency across all team members
      *
      * @param  TagTeam  $tagTeam  The tag team to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
@@ -43,6 +43,8 @@ class EmployAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
+        $employmentDate = DateHelper::resolveDate($employmentDate);
+
         StatusTransitionPipeline::employ($tagTeam, $employmentDate)
             ->withCascade(EmploymentCascadeStrategy::wrestlers())
             ->withCascade(EmploymentCascadeStrategy::managers())

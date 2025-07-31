@@ -17,6 +17,7 @@ use App\Models\Concerns\ProvidesTagTeamWrestlers;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesRetirement;
 use App\Models\Concerns\ValidatesSuspension;
+use App\Models\Concerns\ValidatesTagTeamLifecycle;
 use App\Models\Contracts\BookableCompetitor;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
@@ -152,6 +153,7 @@ class TagTeam extends Model implements BookableCompetitor, CanBeAStableMember, C
     use ValidatesEmployment;
     use ValidatesRetirement;
     use ValidatesSuspension;
+    use ValidatesTagTeamLifecycle;
 
     /**
      * The number of the wrestlers allowed on a tag team.
