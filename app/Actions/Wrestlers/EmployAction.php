@@ -41,6 +41,8 @@ class EmployAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void
     {
+        $wrestler->ensureCanBeEmployed();
+
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         StatusTransitionPipeline::employ($wrestler, $employmentDate)

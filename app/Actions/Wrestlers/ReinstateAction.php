@@ -43,6 +43,8 @@ class ReinstateAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
+        $wrestler->ensureCanBeReinstated();
+
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         StatusTransitionPipeline::reinstate($wrestler, $reinstatementDate)->execute();

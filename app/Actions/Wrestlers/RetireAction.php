@@ -47,6 +47,8 @@ class RetireAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void
     {
+        $wrestler->ensureCanBeRetired();
+
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         StatusTransitionPipeline::retire($wrestler, $retirementDate)

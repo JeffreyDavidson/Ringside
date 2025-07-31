@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Actions\Concerns\WrestlerUnretirementCascadeStrategy;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
@@ -17,18 +17,11 @@ class UnretireAction
     use AsAction;
 
     /**
-     * Create a new unretire action instance.
-     */
-    public function __construct(
-        protected EmployAction $employAction
-    ) {}
-
-    /**
      * Unretire a wrestler and return them to active competition.
      *
      * This handles the complete wrestler comeback workflow with flexible employment options:
      * - Validates the wrestler can come out of retirement (business rule compliance)
-     * - Ends the current retirement period with the specified date
+     * - Uses StatusTransitionPipeline to end the current retirement period
      * - Updates status to unemployed (no longer retired, but not employed)
      * - Optionally employs the wrestler immediately or leaves unemployed for manual employment
      * - Restores the wrestler to available status for match bookings
@@ -36,9 +29,8 @@ class UnretireAction
      * - Preserves all historical retirement records
      *
      * ARCHITECTURAL PATTERN:
-     * Uses EmployAction for consistent employment handling when requested.
-     * Note: This doesn't use StatusTransitionPipeline as unretirement involves ending
-     * retirement rather than starting a new status transition.
+     * Uses StatusTransitionPipeline for consistent status transition handling and
+     * EmployAction for employment when requested.
      *
      * @param  Wrestler  $wrestler  The wrestler to unretire
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)
@@ -63,17 +55,12 @@ class UnretireAction
 
         $unretirementDate = DateHelper::resolveDate($unretirementDate);
 
-        DB::transaction(function () use ($wrestler, $unretirementDate, $employImmediately): void {
-            // End the current retirement record
-            $wrestler->retirements()->whereNull('ended_at')->update(['ended_at' => $unretirementDate]);
+        $cascade = $employImmediately
+            ? WrestlerUnretirementCascadeStrategy::withEmployment()
+            : WrestlerUnretirementCascadeStrategy::withoutEmployment();
 
-            // Update status to unemployed (no longer retired, but not employed)
-            $wrestler->update(['status' => EmploymentStatus::Unemployed]);
-
-            // Employ immediately if requested
-            if ($employImmediately) {
-                $this->employAction->handle($wrestler, $unretirementDate);
-            }
-        });
+        StatusTransitionPipeline::unretire($wrestler, $unretirementDate)
+            ->withCascade($cascade)
+            ->execute();
     }
 }

@@ -44,6 +44,8 @@ class SuspendAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void
     {
+        $wrestler->ensureCanBeSuspended();
+
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         StatusTransitionPipeline::suspend($wrestler, $suspensionDate)->execute();

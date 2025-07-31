@@ -44,6 +44,8 @@ class InjureAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $injuryDate = null): void
     {
+        $wrestler->ensureCanBeInjured();
+
         $injuryDate = DateHelper::resolveDate($injuryDate);
 
         StatusTransitionPipeline::injure($wrestler, $injuryDate)->execute();

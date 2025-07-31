@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Data\Wrestlers\WrestlerData;
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
+use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -20,9 +19,10 @@ use Lorisleiva\Actions\Concerns\AsAction;
  *
  * The action follows these business rules:
  * - Always updates the wrestler's basic information first
- * - Creates employment only if an employment_date is provided and the wrestler is not currently employed
- * - Uses direct Eloquent operations for data persistence
- * - Maintains employment history through employment relationships
+ * - Uses EmployAction for consistent employment handling when employment_date is provided
+ * - Automatically employs managers through EmployAction cascade strategies
+ * - Uses DateHelper for consistent date handling
+ * - Maintains employment history through proper action coordination
  */
 class UpdateAction
 {
@@ -32,16 +32,17 @@ class UpdateAction
      * Create a new update action instance.
      */
     public function __construct(
-        protected ManagersEmployAction $managersEmployAction
+        protected EmployAction $employAction
     ) {}
 
     /**
      * Update a wrestler's information and handle employment status.
      *
      * This handles the complete update workflow:
-     * - Updates wrestler's basic information
-     * - Creates employment if employment_date provided and eligible
-     * - Employs any current managers who are not yet employed
+     * - Updates wrestler's basic information using DateHelper for consistent date handling
+     * - Uses EmployAction for consistent employment creation when employment_date provided
+     * - Automatically employs managers through EmployAction cascade strategies
+     * - Maintains transaction boundaries for data consistency
      */
     public function handle(Wrestler $wrestler, WrestlerData $wrestlerData): Wrestler
     {
@@ -55,23 +56,10 @@ class UpdateAction
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
-            // Track if wrestler was just employed
-            $wasEmployed = $wrestler->isEmployed();
-
-            // Create employment record if employment_date is provided and wrestler is eligible
+            // Employ wrestler if employment_date is provided and they're not already employed
             if (! is_null($wrestlerData->employment_date) && ! $wrestler->isEmployed()) {
-                $wrestler->employments()->create([
-                    'started_at' => $wrestlerData->employment_date,
-                    'ended_at' => null,
-                    'status' => EmploymentStatus::Employed,
-                ]);
-            }
-
-            // If wrestler just got employed, employ their managers too
-            if (! $wasEmployed && $wrestler->isEmployed() && $wrestlerData->employment_date) {
-                $wrestler->currentManagers
-                    ->filter(fn ($manager) => ! $manager->isEmployed())
-                    ->each(fn ($manager) => $this->managersEmployAction->handle($manager, $wrestlerData->employment_date));
+                $employmentDate = DateHelper::resolveDate($wrestlerData->employment_date);
+                $this->employAction->handle($wrestler, $employmentDate);
             }
 
             return $wrestler;

@@ -47,6 +47,8 @@ class ReleaseAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
+        $wrestler->ensureCanBeReleased();
+
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         StatusTransitionPipeline::release($wrestler, $releaseDate)
