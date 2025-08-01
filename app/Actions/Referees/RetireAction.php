@@ -6,6 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class RetireAction
     {
         $referee->ensureCanBeRetired();
 
-        $retirementDate = $retirementDate ?? now();
+        $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($referee, $retirementDate): void {
             // Handle referee status - only employed referees can have suspension/injury to end

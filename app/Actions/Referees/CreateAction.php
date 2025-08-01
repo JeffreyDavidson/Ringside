@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Data\Referees\RefereeData;
-use App\Enums\Shared\EmploymentStatus;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -14,13 +14,21 @@ class CreateAction
 {
     use AsAction;
 
+    public function __construct(
+        private EmployAction $employAction
+    ) {}
+
     /**
      * Create a referee.
      *
      * This handles the complete referee creation workflow:
      * - Creates the referee record with personal and professional details
-     * - Creates employment record if employment_date is provided
+     * - Uses EmployAction for consistent employment handling if employment_date is provided
      * - Establishes the referee as available for match officiating
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses EmployAction for employment handling, following the same pattern as other
+     * referee actions for consistency.
      *
      * @param  RefereeData  $refereeData  The data transfer object containing referee information
      * @return Referee The newly created referee instance
@@ -45,16 +53,10 @@ class CreateAction
                 'last_name' => $refereeData->last_name,
             ]);
 
-            // Create employment record if employment_date is provided
-            if (isset($refereeData->employment_date)) {
-                // Create employment record
-                $referee->employments()->updateOrCreate(
-                    ['ended_at' => null],
-                    ['started_at' => $refereeData->employment_date->toDateTimeString()]
-                );
-
-                // Update the status field to reflect employment
-                $referee->update(['status' => EmploymentStatus::Employed]);
+            // Handle employment using EmployAction for consistency
+            if (! is_null($refereeData->employment_date)) {
+                $employmentDate = DateHelper::resolveDate($refereeData->employment_date);
+                $this->employAction->handle($referee, $employmentDate);
             }
 
             return $referee;

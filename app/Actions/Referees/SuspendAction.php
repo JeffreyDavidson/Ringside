@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -39,7 +40,7 @@ class SuspendAction
     {
         $referee->ensureCanBeSuspended();
 
-        $suspensionDate = $suspensionDate ?? now();
+        $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         $referee->suspensions()->create(['started_at' => $suspensionDate]);
     }

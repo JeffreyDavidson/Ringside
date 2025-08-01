@@ -32,6 +32,8 @@ class RestoreAction
      */
     public function handle(Referee $referee): void
     {
+        $referee->ensureCanBeRestored();
+
         DB::transaction(function () use ($referee): void {
             $referee->restore();
 
