@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Models\Wrestlers\Wrestler;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -28,7 +29,9 @@ class RestoreAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $restoreDate = null): void
     {
-        $restoreDate = $restoreDate ?? now();
+        $wrestler->ensureCanBeRestored();
+
+        $restoreDate = DateHelper::resolveDate($restoreDate);
 
         DB::transaction(function () use ($wrestler): void {
             $wrestler->restore();

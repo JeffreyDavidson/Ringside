@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Data\Wrestlers\WrestlerData;
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\WrestlerManagerAssignmentService;
+use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -19,7 +19,8 @@ class CreateAction
      * Create a new wrestler create action instance.
      */
     public function __construct(
-        protected ManagersEmployAction $managersEmployAction
+        protected EmployAction $employAction,
+        protected WrestlerManagerAssignmentService $managerAssignmentService
     ) {}
 
     /**
@@ -27,10 +28,15 @@ class CreateAction
      *
      * This handles the complete wrestler creation workflow:
      * - Creates the wrestler record with personal and professional details
-     * - Creates employment record if employment_date is provided
-     * - Assigns managers if provided and ensures they are employed
+     * - Uses EmployAction for consistent employment handling if employment_date provided
+     * - Uses WrestlerManagerAssignmentService for consistent manager assignment
      * - Establishes the wrestler as available for match bookings and storylines
      * - Handles all relationship dependencies and employment cascades
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses dedicated services (EmployAction, WrestlerManagerAssignmentService) for consistent
+     * handling instead of manual database operations. This ensures proper StatusTransitionPipeline
+     * usage and cascade behavior.
      *
      * @param  WrestlerData  $wrestlerData  The data transfer object containing wrestler information
      * @return Wrestler The newly created wrestler instance
@@ -60,30 +66,20 @@ class CreateAction
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
-            // Handle wrestler employment
-            if (isset($wrestlerData->employment_date)) {
-                $wrestler->employments()->create([
-                    'started_at' => $wrestlerData->employment_date,
-                    'ended_at' => null,
-                    'status' => EmploymentStatus::Employed,
-                ]);
+            // Handle manager assignment using dedicated service
+            if ($wrestlerData->hasManagers()) {
+                $datetime = DateHelper::resolveDate($wrestlerData->employment_date);
+
+                $this->managerAssignmentService->assignManagersToWrestler(
+                    $wrestler,
+                    $wrestlerData->managers,
+                    $datetime
+                );
             }
 
-            // Handle manager assignment and employment
-            if (isset($wrestlerData->managers) && ! empty($wrestlerData->managers)) {
-                $datetime = $wrestlerData->employment_date ?? now();
-
-                // Assign managers to wrestler and employ them if needed
-                foreach ($wrestlerData->managers as $manager) {
-                    $wrestler->managers()->attach($manager->id, [
-                        'hired_at' => $datetime,
-                        'fired_at' => null,
-                    ]);
-
-                    if (! $manager->isEmployed()) {
-                        $this->managersEmployAction->handle($manager, $datetime);
-                    }
-                }
+            // Handle wrestler employment using EmployAction for consistency
+            if (isset($wrestlerData->employment_date)) {
+                $this->employAction->handle($wrestler, $wrestlerData->employment_date);
             }
 
             return $wrestler;
