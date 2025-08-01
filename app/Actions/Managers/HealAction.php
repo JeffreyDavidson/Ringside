@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
+use App\Helpers\DateHelper;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class HealAction
     {
         $manager->ensureCanBeHealed();
 
-        $recoveryDate = $recoveryDate ?? now();
+        $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
         DB::transaction(function () use ($manager, $recoveryDate): void {
             // End current injury to heal the manager

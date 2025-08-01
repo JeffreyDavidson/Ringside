@@ -6,6 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -40,7 +41,7 @@ final class ReinstateAction
     {
         $manager->ensureCanBeReinstated();
 
-        $reinstatementDate = $reinstatementDate ?? now();
+        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($manager, $reinstatementDate): void {
             // End current suspension

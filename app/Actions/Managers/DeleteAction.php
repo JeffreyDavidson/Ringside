@@ -6,6 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -49,7 +50,7 @@ class DeleteAction
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
+        $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($manager, $deletionDate): void {
             // Handle manager status - employed managers can be suspended/injured, retired managers are not employed

@@ -6,6 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -40,7 +41,7 @@ class InjureAction
     {
         $manager->ensureCanBeInjured();
 
-        $injureDate = $injureDate ?? now();
+        $injureDate = DateHelper::resolveDate($injureDate);
 
         DB::transaction(function () use ($manager, $injureDate): void {
             // Create injury record

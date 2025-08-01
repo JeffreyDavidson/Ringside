@@ -7,6 +7,7 @@ namespace App\Actions\Managers;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -42,7 +43,7 @@ class UnretireAction
     {
         $manager->ensureCanBeUnretired();
 
-        $unretiredDate = $unretiredDate ?? now();
+        $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($manager, $unretiredDate): void {
             // End the current retirement record

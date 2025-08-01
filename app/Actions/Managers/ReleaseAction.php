@@ -7,6 +7,7 @@ namespace App\Actions\Managers;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -42,7 +43,7 @@ class ReleaseAction
     {
         $manager->ensureCanBeReleased();
 
-        $releaseDate = $releaseDate ?? now();
+        $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($manager, $releaseDate): void {
             // End suspension or injury if active (manager cannot be both suspended and injured)

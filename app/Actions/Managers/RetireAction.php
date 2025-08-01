@@ -7,6 +7,7 @@ namespace App\Actions\Managers;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -44,7 +45,7 @@ class RetireAction
     {
         $manager->ensureCanBeRetired();
 
-        $retirementDate = $retirementDate ?? now();
+        $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($manager, $retirementDate): void {
             // Handle manager status - only employed managers can have suspension/injury to end

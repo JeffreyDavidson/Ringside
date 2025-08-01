@@ -6,6 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -40,7 +41,7 @@ class SuspendAction
     {
         $manager->ensureCanBeSuspended();
 
-        $suspensionDate = $suspensionDate ?? now();
+        $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         DB::transaction(function () use ($manager, $suspensionDate): void {
             // Create suspension record
