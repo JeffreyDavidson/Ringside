@@ -49,6 +49,30 @@ class ErrorMessageMappingService
     }
 
     /**
+     * Map a referee-related exception to a user-friendly error message key.
+     *
+     * @param  Throwable  $exception  The exception to map
+     * @return string Language file key for user-friendly error message
+     */
+    public static function mapRefereeException(Throwable $exception): string
+    {
+        $exceptionMessage = $exception->getMessage();
+
+        return match (get_class($exception)) {
+            CannotBeEmployedException::class => self::mapRefereeEmploymentException($exceptionMessage),
+            CannotBeReleasedException::class => self::mapRefereeReleaseException($exceptionMessage),
+            CannotBeRetiredException::class => self::mapRefereeRetirementException($exceptionMessage),
+            CannotBeUnretiredException::class => self::mapRefereeUnretirementException($exceptionMessage),
+            CannotBeSuspendedException::class => self::mapRefereeSuspensionException($exceptionMessage),
+            CannotBeReinstatedException::class => self::mapRefereeReinstatementException($exceptionMessage),
+            CannotBeInjuredException::class => self::mapRefereeInjuryException($exceptionMessage),
+            CannotBeClearedFromInjuryException::class => self::mapRefereeHealingException($exceptionMessage),
+            CannotBeRestoredException::class => self::mapRefereeRestorationException($exceptionMessage),
+            default => 'referees.errors.general_error',
+        };
+    }
+
+    /**
      * Map employment-specific exception messages to user-friendly keys.
      */
     private static function mapEmploymentException(string $message): string
@@ -166,5 +190,133 @@ class ErrorMessageMappingService
         }
 
         return 'wrestlers.errors.cannot_restore';
+    }
+
+    /**
+     * Map referee employment-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeEmploymentException(string $message): string
+    {
+        if (str_contains($message, 'already employed')) {
+            return 'referees.errors.already_employed';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'referees.errors.cannot_employ_suspended';
+        }
+
+        if (str_contains($message, 'retired')) {
+            return 'referees.errors.cannot_employ_retired';
+        }
+
+        return 'referees.errors.cannot_employ';
+    }
+
+    /**
+     * Map referee release-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeReleaseException(string $message): string
+    {
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'referees.errors.not_employed';
+        }
+
+        return 'referees.errors.cannot_release';
+    }
+
+    /**
+     * Map referee retirement-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeRetirementException(string $message): string
+    {
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'referees.errors.cannot_retire_unemployed';
+        }
+
+        if (str_contains($message, 'already retired')) {
+            return 'referees.errors.already_retired';
+        }
+
+        return 'referees.errors.cannot_retire';
+    }
+
+    /**
+     * Map referee unretirement-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeUnretirementException(string $message): string
+    {
+        if (str_contains($message, 'not retired')) {
+            return 'referees.errors.not_retired';
+        }
+
+        return 'referees.errors.cannot_unretire';
+    }
+
+    /**
+     * Map referee suspension-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeSuspensionException(string $message): string
+    {
+        if (str_contains($message, 'already suspended')) {
+            return 'referees.errors.already_suspended';
+        }
+
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'referees.errors.cannot_suspend_unemployed';
+        }
+
+        return 'referees.errors.cannot_suspend';
+    }
+
+    /**
+     * Map referee reinstatement-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeReinstatementException(string $message): string
+    {
+        if (str_contains($message, 'not suspended')) {
+            return 'referees.errors.not_suspended';
+        }
+
+        return 'referees.errors.cannot_reinstate';
+    }
+
+    /**
+     * Map referee injury-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeInjuryException(string $message): string
+    {
+        if (str_contains($message, 'already injured')) {
+            return 'referees.errors.already_injured';
+        }
+
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'referees.errors.cannot_injure_unemployed';
+        }
+
+        return 'referees.errors.cannot_injure';
+    }
+
+    /**
+     * Map referee healing-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeHealingException(string $message): string
+    {
+        if (str_contains($message, 'not injured')) {
+            return 'referees.errors.not_injured';
+        }
+
+        return 'referees.errors.cannot_heal';
+    }
+
+    /**
+     * Map referee restoration-specific exception messages to user-friendly keys.
+     */
+    private static function mapRefereeRestorationException(string $message): string
+    {
+        if (str_contains($message, 'not deleted')) {
+            return 'referees.errors.not_deleted';
+        }
+
+        return 'referees.errors.cannot_restore';
     }
 }

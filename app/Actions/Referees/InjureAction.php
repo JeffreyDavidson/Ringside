@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -39,7 +40,7 @@ class InjureAction
     {
         $referee->ensureCanBeInjured();
 
-        $injureDate = $injureDate ?? now();
+        $injureDate = DateHelper::resolveDate($injureDate);
 
         $referee->injuries()->create(['started_at' => $injureDate]);
     }
