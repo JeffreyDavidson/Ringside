@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -41,13 +42,10 @@ class HealAction
     {
         $referee->ensureCanBeHealed();
 
-        $recoveryDate = $recoveryDate ?? now();
+        $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
         DB::transaction(function () use ($referee, $recoveryDate): void {
-            $currentInjury = $referee->currentInjury()->first();
-            if ($currentInjury) {
-                $currentInjury->update(['ended_at' => $recoveryDate->toDateTimeString()]);
-            }
+            $referee->currentInjury()->first()?->update(['ended_at' => $recoveryDate->toDateTimeString()]);
         });
     }
 }

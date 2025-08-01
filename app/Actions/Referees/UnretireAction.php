@@ -6,6 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeUnretiredException;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +43,7 @@ class UnretireAction
     {
         $referee->ensureCanBeUnretired();
 
-        $unretiredDate = $unretiredDate ?? now();
+        $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
             // End the current retirement record

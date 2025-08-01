@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Enums\Shared\EmploymentStatus;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,7 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
+        $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($referee, $deletionDate): void {
             // Handle referee status - employed referees can be suspended/injured, retired referees are not employed

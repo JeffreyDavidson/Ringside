@@ -6,6 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeReleasedException;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class ReleaseAction
     {
         $referee->ensureCanBeReleased();
 
-        $releaseDate = $releaseDate ?? now();
+        $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($referee, $releaseDate): void {
             // End suspension or injury if active (referee cannot be both suspended and injured)

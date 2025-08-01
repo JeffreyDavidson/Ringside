@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -40,13 +41,10 @@ class ReinstateAction
     {
         $referee->ensureCanBeReinstated();
 
-        $reinstatementDate = $reinstatementDate ?? now();
+        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($referee, $reinstatementDate): void {
-            $currentSuspension = $referee->currentSuspension()->first();
-            if ($currentSuspension) {
-                $currentSuspension->update(['ended_at' => $reinstatementDate]);
-            }
+            $referee->currentSuspension()->first()?->update(['ended_at' => $reinstatementDate]);
         });
     }
 }
