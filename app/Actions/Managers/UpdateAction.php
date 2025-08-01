@@ -54,6 +54,8 @@ class UpdateAction
 
             // Create employment record if employment_date is provided and manager is eligible
             if (! is_null($managerData->employment_date) && ! $manager->isEmployed()) {
+                $manager->ensureCanBeEmployed();
+
                 // Create employment record
                 $manager->employments()->updateOrCreate(
                     ['ended_at' => null],
