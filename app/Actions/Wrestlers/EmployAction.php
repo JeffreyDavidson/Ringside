@@ -7,6 +7,7 @@ namespace App\Actions\Wrestlers;
 use App\Actions\Concerns\EmploymentCascadeStrategy;
 use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\Wrestlers\Wrestler;
+use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -40,8 +41,9 @@ class EmployAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void
     {
-        // Validate business rules before proceeding
         $wrestler->ensureCanBeEmployed();
+
+        $employmentDate = DateHelper::resolveDate($employmentDate);
 
         StatusTransitionPipeline::employ($wrestler, $employmentDate)
             ->withCascade(EmploymentCascadeStrategy::managers())

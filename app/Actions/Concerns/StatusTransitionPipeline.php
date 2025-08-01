@@ -125,6 +125,38 @@ class StatusTransitionPipeline
     }
 
     /**
+     * Create a deletion transition pipeline.
+     *
+     * This handles status cleanup before entity deletion, ending any active
+     * statuses (employment, retirement, suspension, injury) as appropriate.
+     */
+    public static function delete(Model $entity, ?Carbon $date = null): self
+    {
+        return new self($entity, 'delete', $date);
+    }
+
+    /**
+     * Create a heal transition pipeline.
+     *
+     * This handles recovery from injury by ending the current injury record.
+     */
+    public static function heal(Model $entity, ?Carbon $date = null): self
+    {
+        return new self($entity, 'heal', $date);
+    }
+
+    /**
+     * Create an unretire transition pipeline.
+     *
+     * This handles coming out of retirement by ending the current retirement
+     * record and updating status to unemployed.
+     */
+    public static function unretire(Model $entity, ?Carbon $date = null): self
+    {
+        return new self($entity, 'unretire', $date);
+    }
+
+    /**
      * Add a cascade strategy to execute after the main transition.
      *
      * @param  callable  $strategy  Function that receives (entity, date, transition)
@@ -219,6 +251,9 @@ class StatusTransitionPipeline
             'retire' => 'ensureCanBeRetired',
             'injure' => 'ensureCanBeInjured',
             'reinstate' => 'ensureCanBeReinstated',
+            'delete' => 'ensureCanBeDeleted',
+            'heal' => 'ensureCanBeHealed',
+            'unretire' => 'ensureCanBeUnretired',
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
     }
@@ -239,6 +274,9 @@ class StatusTransitionPipeline
             'retire' => $this->createRetirement(),
             'injure' => $this->createInjury(),
             'reinstate' => $this->createReinstatement(),
+            'delete' => $this->createDeletion(),
+            'heal' => $this->createHeal(),
+            'unretire' => $this->endRetirement(),
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
     }
@@ -338,6 +376,61 @@ class StatusTransitionPipeline
         $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
             'ended_at' => $this->effectiveDate,
         ]);
+    }
+
+    /**
+     * Handle deletion transition by ending all active statuses.
+     *
+     * This prepares the entity for deletion by ending any active employment,
+     * retirement, suspension, or injury records.
+     */
+    protected function createDeletion(): void
+    {
+        // End employment if active
+        if (method_exists($this->entity, 'isEmployed') && $this->entity->isEmployed()) {
+            $employmentTable = $this->getTableName('employments');
+            $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
+        // End retirement if active
+        if (method_exists($this->entity, 'isRetired') && $this->entity->isRetired()) {
+            $this->endRetirement();
+        }
+
+        // End suspension if active
+        if (method_exists($this->entity, 'isSuspended') && $this->entity->isSuspended()) {
+            $suspensionTable = $this->getTableName('suspensions');
+            $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
+        // End injury if active
+        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
+            $injuryTable = $this->getTableName('injuries');
+            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+    }
+
+    /**
+     * Handle heal transition by ending the current injury.
+     *
+     * This ends the active injury record, allowing the entity to return to
+     * active competition or duties.
+     */
+    protected function createHeal(): void
+    {
+        // End current injury if active
+        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
+            $injuryTable = $this->getTableName('injuries');
+            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
     }
 
     /**
