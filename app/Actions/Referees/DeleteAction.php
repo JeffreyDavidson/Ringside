@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
@@ -21,14 +21,18 @@ class DeleteAction
      * This handles the complete deletion workflow with business impact:
      *
      * EMPLOYMENT IMPACT:
-     * - Ends employment, suspension, and injury if active
-     * - Ends retirement if currently retired
-     * - Preserves employment history for reporting
+     * - Uses StatusTransitionPipeline.delete() to end all active statuses
+     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Preserves referee employment history for administrative records
      *
      * MATCH OFFICIATING IMPACT:
      * - Removes referee from active match assignments
      * - Preserves historical match officiating records
      * - No impact on past match results or statistics
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline for consistent status handling, following the same
+     * pattern as other referee actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the referee record
@@ -46,37 +50,13 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
+        $referee->ensureCanBeDeleted();
+
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($referee, $deletionDate): void {
-            // Handle referee status - employed referees can be suspended/injured, retired referees are not employed
-            if ($referee->isEmployed()) {
-                // End suspension or injury if active (employed referee cannot be both)
-                if ($referee->isSuspended()) {
-                    $currentSuspension = $referee->currentSuspension()->first();
-                    if ($currentSuspension) {
-                        $currentSuspension->update(['ended_at' => $deletionDate]);
-                    }
-                } elseif ($referee->isInjured()) {
-                    $currentInjury = $referee->currentInjury()->first();
-                    if ($currentInjury) {
-                        $currentInjury->update(['ended_at' => $deletionDate->toDateTimeString()]);
-                    }
-                }
-
-                // End employment
-                $currentEmployment = $referee->currentEmployment()->first();
-                if ($currentEmployment) {
-                    $currentEmployment->update(['ended_at' => $deletionDate]);
-                    $referee->update(['status' => EmploymentStatus::Released]);
-                }
-            } elseif ($referee->isRetired()) {
-                // End retirement if active (retired referees are not employed)
-                $currentRetirement = $referee->currentRetirement()->first();
-                if ($currentRetirement) {
-                    $currentRetirement->update(['ended_at' => $deletionDate]);
-                }
-            }
+            // Handle referee status cleanup using StatusTransitionPipeline
+            StatusTransitionPipeline::delete($referee, $deletionDate)->execute();
 
             // Soft delete the referee record
             $referee->delete();

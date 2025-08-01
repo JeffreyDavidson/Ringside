@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Helpers\DateHelper;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
@@ -20,11 +19,16 @@ class UnretireAction
      * Unretire a retired referee and return them to active officiating.
      *
      * This handles the complete referee unretirement workflow:
+     * - Uses StatusTransitionPipeline for consistent unretirement handling
      * - Validates the referee can be unretired (currently retired)
      * - Ends the current retirement period with the specified date
      * - Creates a new employment record starting from the unretirement date
      * - Restores the referee to available status for match assignments
      * - Preserves all historical retirement and employment records
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline for consistent status handling, following the same
+     * pattern as other referee actions.
      *
      * @param  Referee  $referee  The referee to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
@@ -45,20 +49,7 @@ class UnretireAction
 
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
-        DB::transaction(function () use ($referee, $unretiredDate): void {
-            // End the current retirement record
-            $currentRetirement = $referee->currentRetirement()->first();
-            if ($currentRetirement) {
-                $currentRetirement->update(['ended_at' => $unretiredDate]);
-            }
-
-            // Create a new employment record starting from the unretirement date
-            $referee->employments()->updateOrCreate(
-                ['ended_at' => null],
-                ['started_at' => $unretiredDate->toDateTimeString()]
-            );
-
-            $referee->update(['status' => EmploymentStatus::Employed]);
-        });
+        // Use StatusTransitionPipeline for consistent unretirement handling
+        StatusTransitionPipeline::unretire($referee, $unretiredDate)->execute();
     }
 }
