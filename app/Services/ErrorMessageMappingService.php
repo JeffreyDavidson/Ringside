@@ -73,6 +73,30 @@ class ErrorMessageMappingService
     }
 
     /**
+     * Map a manager-related exception to a user-friendly error message key.
+     *
+     * @param  Throwable  $exception  The exception to map
+     * @return string Language file key for user-friendly error message
+     */
+    public static function mapManagerException(Throwable $exception): string
+    {
+        $exceptionMessage = $exception->getMessage();
+
+        return match (get_class($exception)) {
+            CannotBeEmployedException::class => self::mapManagerEmploymentException($exceptionMessage),
+            CannotBeReleasedException::class => self::mapManagerReleaseException($exceptionMessage),
+            CannotBeRetiredException::class => self::mapManagerRetirementException($exceptionMessage),
+            CannotBeUnretiredException::class => self::mapManagerUnretirementException($exceptionMessage),
+            CannotBeSuspendedException::class => self::mapManagerSuspensionException($exceptionMessage),
+            CannotBeReinstatedException::class => self::mapManagerReinstatementException($exceptionMessage),
+            CannotBeInjuredException::class => self::mapManagerInjuryException($exceptionMessage),
+            CannotBeClearedFromInjuryException::class => self::mapManagerHealingException($exceptionMessage),
+            CannotBeRestoredException::class => self::mapManagerRestorationException($exceptionMessage),
+            default => 'managers.errors.general_error',
+        };
+    }
+
+    /**
      * Map employment-specific exception messages to user-friendly keys.
      */
     private static function mapEmploymentException(string $message): string
@@ -318,5 +342,157 @@ class ErrorMessageMappingService
         }
 
         return 'referees.errors.cannot_restore';
+    }
+
+    /**
+     * Map manager employment-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerEmploymentException(string $message): string
+    {
+        if (str_contains($message, 'already employed')) {
+            return 'managers.errors.already_employed';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'managers.errors.cannot_employ_suspended';
+        }
+
+        if (str_contains($message, 'retired')) {
+            return 'managers.errors.cannot_employ_retired';
+        }
+
+        if (str_contains($message, 'injured')) {
+            return 'managers.errors.cannot_employ_injured';
+        }
+
+        return 'managers.errors.cannot_employ';
+    }
+
+    /**
+     * Map manager release-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerReleaseException(string $message): string
+    {
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'managers.errors.not_employed';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'managers.errors.cannot_release_suspended';
+        }
+
+        return 'managers.errors.cannot_release';
+    }
+
+    /**
+     * Map manager retirement-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerRetirementException(string $message): string
+    {
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'managers.errors.cannot_retire_unemployed';
+        }
+
+        if (str_contains($message, 'already retired')) {
+            return 'managers.errors.already_retired';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'managers.errors.cannot_retire_suspended';
+        }
+
+        return 'managers.errors.cannot_retire';
+    }
+
+    /**
+     * Map manager unretirement-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerUnretirementException(string $message): string
+    {
+        if (str_contains($message, 'not retired')) {
+            return 'managers.errors.not_retired';
+        }
+
+        return 'managers.errors.cannot_unretire';
+    }
+
+    /**
+     * Map manager suspension-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerSuspensionException(string $message): string
+    {
+        if (str_contains($message, 'already suspended')) {
+            return 'managers.errors.already_suspended';
+        }
+
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'managers.errors.not_employed_suspend';
+        }
+
+        if (str_contains($message, 'injured')) {
+            return 'managers.errors.cannot_suspend_injured';
+        }
+
+        return 'managers.errors.cannot_suspend';
+    }
+
+    /**
+     * Map manager reinstatement-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerReinstatementException(string $message): string
+    {
+        if (str_contains($message, 'not suspended')) {
+            return 'managers.errors.not_suspended';
+        }
+
+        if (str_contains($message, 'injured')) {
+            return 'managers.errors.cannot_reinstate_injured';
+        }
+
+        return 'managers.errors.cannot_reinstate';
+    }
+
+    /**
+     * Map manager injury-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerInjuryException(string $message): string
+    {
+        if (str_contains($message, 'already injured')) {
+            return 'managers.errors.already_injured';
+        }
+
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'managers.errors.not_employed_injure';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'managers.errors.cannot_injure_suspended';
+        }
+
+        return 'managers.errors.cannot_injure';
+    }
+
+    /**
+     * Map manager healing-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerHealingException(string $message): string
+    {
+        if (str_contains($message, 'not injured')) {
+            return 'managers.errors.not_injured';
+        }
+
+        return 'managers.errors.cannot_heal';
+    }
+
+    /**
+     * Map manager restoration-specific exception messages to user-friendly keys.
+     */
+    private static function mapManagerRestorationException(string $message): string
+    {
+        if (str_contains($message, 'not deleted')) {
+            return 'managers.errors.not_deleted';
+        }
+
+        return 'managers.errors.cannot_restore';
     }
 }

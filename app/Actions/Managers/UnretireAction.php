@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
@@ -19,11 +19,16 @@ class UnretireAction
      * Unretire a retired manager and return them to active talent management.
      *
      * This handles the complete manager unretirement workflow:
+     * - Uses StatusTransitionPipeline for consistent unretirement handling
      * - Validates the manager can be unretired (currently retired)
      * - Ends the current retirement period with the specified date
      * - Creates a new employment record starting from the unretirement date
      * - Restores the manager to available status for wrestler and tag team assignments
      * - Preserves all historical retirement and employment records
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline for consistent status handling, following the same
+     * pattern as other manager actions.
      *
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
@@ -42,23 +47,9 @@ class UnretireAction
     {
         $manager->ensureCanBeUnretired();
 
-        $unretiredDate = $unretiredDate ?? now();
+        $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
-        DB::transaction(function () use ($manager, $unretiredDate): void {
-            // End the current retirement record
-            $currentRetirement = $manager->currentRetirement()->first();
-            if ($currentRetirement) {
-                $currentRetirement->update(['ended_at' => $unretiredDate]);
-            }
-
-            // Create a new employment record starting from the unretirement date
-            $manager->employments()->updateOrCreate(
-                ['ended_at' => null],
-                ['started_at' => $unretiredDate->toDateTimeString()]
-            );
-
-            // Update the status field to reflect employment
-            $manager->update(['status' => EmploymentStatus::Employed]);
-        });
+        // Use StatusTransitionPipeline for consistent unretirement handling
+        StatusTransitionPipeline::unretire($manager, $unretiredDate)->execute();
     }
 }

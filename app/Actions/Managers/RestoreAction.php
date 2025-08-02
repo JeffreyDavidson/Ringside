@@ -32,6 +32,8 @@ class RestoreAction
      */
     public function handle(Manager $manager): void
     {
+        $manager->ensureCanBeRestored();
+
         DB::transaction(function () use ($manager): void {
             $manager->restore();
 

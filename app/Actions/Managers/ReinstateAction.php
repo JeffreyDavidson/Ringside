@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 final class ReinstateAction
@@ -18,10 +19,15 @@ final class ReinstateAction
      * Reinstate a suspended manager.
      *
      * This handles the complete manager reinstatement workflow:
+     * - Uses StatusTransitionPipeline for consistent reinstatement handling
      * - Validates the manager can be reinstated (currently suspended)
      * - Ends the current suspension period with the specified date
      * - Restores the manager to active management duties
      * - Makes the manager available for wrestler/tag team assignments
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline for consistent status handling, following the same
+     * pattern as other manager actions.
      *
      * @param  Manager  $manager  The manager to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
@@ -40,14 +46,9 @@ final class ReinstateAction
     {
         $manager->ensureCanBeReinstated();
 
-        $reinstatementDate = $reinstatementDate ?? now();
+        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        DB::transaction(function () use ($manager, $reinstatementDate): void {
-            // End current suspension
-            $currentSuspension = $manager->currentSuspension()->first();
-            if ($currentSuspension) {
-                $currentSuspension->update(['ended_at' => $reinstatementDate]);
-            }
-        });
+        // Use StatusTransitionPipeline for consistent reinstatement handling
+        StatusTransitionPipeline::reinstate($manager, $reinstatementDate)->execute();
     }
 }

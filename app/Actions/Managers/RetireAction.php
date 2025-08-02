@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\Cascades\ManagerRetirementCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
@@ -19,13 +20,17 @@ class RetireAction
      * Retire a manager and end their management career.
      *
      * This handles the complete manager retirement workflow with cascading effects:
+     * - Uses StatusTransitionPipeline for consistent retirement handling
      * - Validates the manager can be retired (currently employed/active)
-     * - Ends current wrestler and tag team management relationships
-     * - Ends suspension and injury if active
-     * - Ends employment period if currently employed
+     * - Uses ManagerRetirementCascadeStrategy to end management relationships
+     * - Ends suspension, injury, and employment through pipeline
      * - Creates retirement record to formally end their management career
      * - Makes the manager unavailable for future talent management
      * - Preserves all historical records and relationships
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline with cascade strategies for comprehensive
+     * retirement handling, following the same pattern as other entity types.
      *
      * @param  Manager  $manager  The manager to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
@@ -44,43 +49,11 @@ class RetireAction
     {
         $manager->ensureCanBeRetired();
 
-        $retirementDate = $retirementDate ?? now();
+        $retirementDate = DateHelper::resolveDate($retirementDate);
 
-        DB::transaction(function () use ($manager, $retirementDate): void {
-            // Handle manager status - only employed managers can have suspension/injury to end
-            if ($manager->isEmployed()) {
-                // End suspension or injury if active (employed manager cannot be both)
-                if ($manager->isSuspended()) {
-                    $currentSuspension = $manager->currentSuspension()->first();
-                    if ($currentSuspension) {
-                        $currentSuspension->update(['ended_at' => $retirementDate]);
-                    }
-                } elseif ($manager->isInjured()) {
-                    $currentInjury = $manager->currentInjury()->first();
-                    if ($currentInjury) {
-                        $currentInjury->update(['ended_at' => $retirementDate->toDateTimeString()]);
-                    }
-                }
-
-                // End employment
-                $currentEmployment = $manager->currentEmployment()->first();
-                if ($currentEmployment) {
-                    $currentEmployment->update(['ended_at' => $retirementDate]);
-                    $manager->update(['status' => EmploymentStatus::Released]);
-                }
-            }
-
-            // End current management relationships
-            // Note: Management relationships are handled automatically by the repository
-
-            // Create the retirement record to formally end their management career
-            if ($manager->currentEmployment) {
-                $manager->currentEmployment->update(['ended_at' => $retirementDate]);
-            }
-
-            $manager->retirements()->create([
-                'started_at' => $retirementDate,
-            ]);
-        });
+        // Use StatusTransitionPipeline with cascade strategy for comprehensive retirement handling
+        StatusTransitionPipeline::retire($manager, $retirementDate)
+            ->withCascade(ManagerRetirementCascadeStrategy::comprehensive())
+            ->execute();
     }
 }

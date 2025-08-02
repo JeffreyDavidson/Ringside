@@ -38,6 +38,8 @@ class EmployAction
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
+        $manager->ensureCanBeEmployed();
+
         StatusTransitionPipeline::employ($manager, $startDate)->execute();
     }
 }

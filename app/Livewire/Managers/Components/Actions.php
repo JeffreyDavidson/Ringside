@@ -13,14 +13,7 @@ use App\Actions\Managers\RestoreAction;
 use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
-use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
-use App\Exceptions\Roster\CannotBeEmployedException;
-use App\Exceptions\Roster\CannotBeInjuredException;
-use App\Exceptions\Roster\CannotBeReleasedException;
-use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Exceptions\Roster\CannotBeSuspendedException;
-use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Livewire\Concerns\ExecutesActionsWithContext;
 use App\Models\Managers\Manager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -37,6 +30,8 @@ use Livewire\Component;
  */
 class Actions extends Component
 {
+    use ExecutesActionsWithContext;
+
     public Manager $manager;
 
     public function mount(Manager $manager): void
@@ -51,13 +46,19 @@ class Actions extends Component
     {
         Gate::authorize('employ', $this->manager);
 
-        try {
-            resolve(EmployAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager successfully employed.');
-        } catch (CannotBeEmployedException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'employed',
+            EmployAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_employed' => $this->manager->isEmployed(),
+                'manager_is_suspended' => $this->manager->isSuspended(),
+                'manager_is_retired' => $this->manager->isRetired(),
+                'manager_is_injured' => $this->manager->isInjured(),
+            ]
+        );
     }
 
     /**
@@ -67,13 +68,17 @@ class Actions extends Component
     {
         Gate::authorize('release', $this->manager);
 
-        try {
-            resolve(ReleaseAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager successfully released.');
-        } catch (CannotBeReleasedException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'released',
+            ReleaseAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_employed' => $this->manager->isEmployed(),
+                'manager_is_suspended' => $this->manager->isSuspended(),
+            ]
+        );
     }
 
     /**
@@ -83,13 +88,17 @@ class Actions extends Component
     {
         Gate::authorize('retire', $this->manager);
 
-        try {
-            resolve(RetireAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager successfully retired.');
-        } catch (CannotBeRetiredException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'retired',
+            RetireAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_employed' => $this->manager->isEmployed(),
+                'manager_is_suspended' => $this->manager->isSuspended(),
+            ]
+        );
     }
 
     /**
@@ -99,13 +108,16 @@ class Actions extends Component
     {
         Gate::authorize('unretire', $this->manager);
 
-        try {
-            resolve(UnretireAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager successfully unretired.');
-        } catch (CannotBeUnretiredException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'unretired',
+            UnretireAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_retired' => $this->manager->isRetired(),
+            ]
+        );
     }
 
     /**
@@ -115,13 +127,17 @@ class Actions extends Component
     {
         Gate::authorize('suspend', $this->manager);
 
-        try {
-            resolve(SuspendAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager successfully suspended.');
-        } catch (CannotBeSuspendedException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'suspended',
+            SuspendAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_employed' => $this->manager->isEmployed(),
+                'manager_is_injured' => $this->manager->isInjured(),
+            ]
+        );
     }
 
     /**
@@ -131,13 +147,17 @@ class Actions extends Component
     {
         Gate::authorize('reinstate', $this->manager);
 
-        try {
-            resolve(ReinstateAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager successfully reinstated.');
-        } catch (CannotBeReinstatedException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'reinstated',
+            ReinstateAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_suspended' => $this->manager->isSuspended(),
+                'manager_is_injured' => $this->manager->isInjured(),
+            ]
+        );
     }
 
     /**
@@ -147,13 +167,17 @@ class Actions extends Component
     {
         Gate::authorize('injure', $this->manager);
 
-        try {
-            resolve(InjureAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager injury recorded.');
-        } catch (CannotBeInjuredException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'injured',
+            InjureAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_employed' => $this->manager->isEmployed(),
+                'manager_is_suspended' => $this->manager->isSuspended(),
+            ]
+        );
     }
 
     /**
@@ -163,13 +187,16 @@ class Actions extends Component
     {
         Gate::authorize('clearFromInjury', $this->manager);
 
-        try {
-            resolve(HealAction::class)->handle($this->manager);
-            $this->dispatch('manager-updated');
-            session()->flash('status', 'Manager cleared from injury.');
-        } catch (CannotBeClearedFromInjuryException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeActionWithContext(
+            'healed',
+            HealAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_current_status' => $this->manager->status,
+                'manager_is_injured' => $this->manager->isInjured(),
+            ]
+        );
     }
 
     /**
@@ -179,9 +206,15 @@ class Actions extends Component
     {
         Gate::authorize('restore', $this->manager);
 
-        resolve(RestoreAction::class)->handle($this->manager);
-        $this->dispatch('manager-updated');
-        session()->flash('status', 'Manager successfully restored.');
+        $this->executeActionWithContext(
+            'restored',
+            RestoreAction::class,
+            $this->manager,
+            'manager',
+            fn () => [
+                'manager_is_deleted' => ! is_null($this->manager->deleted_at),
+            ]
+        );
     }
 
     public function render(): View
