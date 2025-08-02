@@ -25,6 +25,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Support\DateHelper;
 use Database\Factories\Managers\ManagerFactory;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Tests\Unit\Models\Managers\ManagerTest;
 
 /**
@@ -198,5 +200,41 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
         return [
             'status' => EmploymentStatus::class,
         ];
+    }
+
+    /**
+     * Remove manager from all current wrestler relationships.
+     *
+     * Terminates all active wrestler management relationships by setting
+     * the 'fired_at' timestamp. This preserves historical records while
+     * making wrestlers available for new management assignments.
+     *
+     * @param  Carbon|null  $removalDate  The removal date (defaults to now)
+     */
+    public function removeFromCurrentWrestlers(?Carbon $removalDate = null): void
+    {
+        $removalDate = DateHelper::resolveDate($removalDate);
+
+        DB::transaction(function () use ($removalDate): void {
+            $this->wrestlers()->terminateActive($removalDate);
+        });
+    }
+
+    /**
+     * Remove manager from all current tag team relationships.
+     *
+     * Terminates all active tag team management relationships by setting
+     * the 'fired_at' timestamp. This preserves historical records while
+     * making tag teams available for new management assignments.
+     *
+     * @param  Carbon|null  $removalDate  The removal date (defaults to now)
+     */
+    public function removeFromCurrentTagTeams(?Carbon $removalDate = null): void
+    {
+        $removalDate = DateHelper::resolveDate($removalDate);
+
+        DB::transaction(function () use ($removalDate): void {
+            $this->tagTeams()->terminateActive($removalDate);
+        });
     }
 }
