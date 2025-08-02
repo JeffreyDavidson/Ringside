@@ -70,6 +70,7 @@ composer rector
 ## Documentation Structure
 
 ### Development Guidelines
+- **[Conventional Commits](guidelines/conventional-commits.md)** - Commit message and PR title standards
 - **[Code Style Guide](guidelines/code-style.md)** - Comprehensive coding standards
 - **[PHP Standards](guidelines/php.md)** - PHP-specific conventions
 - **[Laravel Conventions](guidelines/laravel.md)** - Laravel framework patterns
@@ -145,9 +146,10 @@ git branch --show-current  # Must NOT show 'master' or 'development'
 1. **⚠️ VERIFY BRANCH SAFETY** - Always check you're NOT on `master`/`development` before committing
 2. **Create Feature Branch** - Branch from development for new features
 3. **Follow Standards** - Adhere to all coding and documentation standards
-4. **Write Tests** - Include comprehensive test coverage
-5. **Update Documentation** - Keep documentation current with changes
-6. **Submit Pull Request** - Include detailed description and testing notes
+4. **Use Conventional Commits** - Follow [conventional commits format](guidelines/conventional-commits.md) for all commits and PR titles
+5. **Write Tests** - Include comprehensive test coverage
+6. **Update Documentation** - Keep documentation current with changes
+7. **Submit Pull Request** - Include detailed description and testing notes
 
 ### Branch Safety Workflow
 ```bash

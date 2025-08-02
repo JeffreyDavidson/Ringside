@@ -120,6 +120,13 @@ trait ExecutesActionsWithContext
                 'is_retired' => $entity->isRetired(),
                 'is_injured' => $entity->isInjured(),
             ]),
+            'tag-team' => array_merge($baseData, [
+                'name' => $entity->name,
+                'signature_move' => $entity->signature_move,
+                'is_employed' => $entity->isEmployed(),
+                'is_suspended' => $entity->isSuspended(),
+                'is_retired' => $entity->isRetired(),
+            ]),
             default => $baseData,
         };
     }
@@ -136,6 +143,7 @@ trait ExecutesActionsWithContext
             'wrestler' => ErrorMessageMappingService::mapWrestlerException($exception),
             'manager' => ErrorMessageMappingService::mapManagerException($exception),
             'referee' => ErrorMessageMappingService::mapRefereeException($exception),
+            'tag-team' => ErrorMessageMappingService::mapTagTeamException($exception),
             default => "{$entityType}s.errors.general_error",
         };
     }

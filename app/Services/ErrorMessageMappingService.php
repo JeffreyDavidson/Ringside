@@ -97,6 +97,28 @@ class ErrorMessageMappingService
     }
 
     /**
+     * Map a tag team-related exception to a user-friendly error message key.
+     *
+     * @param  Throwable  $exception  The exception to map
+     * @return string Language file key for user-friendly error message
+     */
+    public static function mapTagTeamException(Throwable $exception): string
+    {
+        $exceptionMessage = $exception->getMessage();
+
+        return match (get_class($exception)) {
+            CannotBeEmployedException::class => self::mapTagTeamEmploymentException($exceptionMessage),
+            CannotBeReleasedException::class => self::mapTagTeamReleaseException($exceptionMessage),
+            CannotBeRetiredException::class => self::mapTagTeamRetirementException($exceptionMessage),
+            CannotBeUnretiredException::class => self::mapTagTeamUnretirementException($exceptionMessage),
+            CannotBeSuspendedException::class => self::mapTagTeamSuspensionException($exceptionMessage),
+            CannotBeReinstatedException::class => self::mapTagTeamReinstatementException($exceptionMessage),
+            CannotBeRestoredException::class => self::mapTagTeamRestorationException($exceptionMessage),
+            default => 'tag-teams.errors.general_error',
+        };
+    }
+
+    /**
      * Map employment-specific exception messages to user-friendly keys.
      */
     private static function mapEmploymentException(string $message): string
@@ -494,5 +516,113 @@ class ErrorMessageMappingService
         }
 
         return 'managers.errors.cannot_restore';
+    }
+
+    /**
+     * Map tag team employment-specific exception messages to user-friendly keys.
+     */
+    private static function mapTagTeamEmploymentException(string $message): string
+    {
+        if (str_contains($message, 'already employed')) {
+            return 'tag-teams.errors.already_employed';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'tag-teams.errors.cannot_employ_suspended';
+        }
+
+        if (str_contains($message, 'retired')) {
+            return 'tag-teams.errors.cannot_employ_retired';
+        }
+
+        return 'tag-teams.errors.cannot_employ';
+    }
+
+    /**
+     * Map tag team release-specific exception messages to user-friendly keys.
+     */
+    private static function mapTagTeamReleaseException(string $message): string
+    {
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'tag-teams.errors.not_employed';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'tag-teams.errors.cannot_release_suspended';
+        }
+
+        return 'tag-teams.errors.cannot_release';
+    }
+
+    /**
+     * Map tag team retirement-specific exception messages to user-friendly keys.
+     */
+    private static function mapTagTeamRetirementException(string $message): string
+    {
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'tag-teams.errors.cannot_retire_unemployed';
+        }
+
+        if (str_contains($message, 'already retired')) {
+            return 'tag-teams.errors.already_retired';
+        }
+
+        if (str_contains($message, 'suspended')) {
+            return 'tag-teams.errors.cannot_retire_suspended';
+        }
+
+        return 'tag-teams.errors.cannot_retire';
+    }
+
+    /**
+     * Map tag team unretirement-specific exception messages to user-friendly keys.
+     */
+    private static function mapTagTeamUnretirementException(string $message): string
+    {
+        if (str_contains($message, 'not retired')) {
+            return 'tag-teams.errors.not_retired';
+        }
+
+        return 'tag-teams.errors.cannot_unretire';
+    }
+
+    /**
+     * Map tag team suspension-specific exception messages to user-friendly keys.
+     */
+    private static function mapTagTeamSuspensionException(string $message): string
+    {
+        if (str_contains($message, 'already suspended')) {
+            return 'tag-teams.errors.already_suspended';
+        }
+
+        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
+            return 'tag-teams.errors.not_employed_suspend';
+        }
+
+        return 'tag-teams.errors.cannot_suspend';
+    }
+
+    /**
+     * Map tag team reinstatement-specific exception messages to user-friendly keys.
+     */
+    private static function mapTagTeamReinstatementException(string $message): string
+    {
+        if (str_contains($message, 'not suspended')) {
+            return 'tag-teams.errors.not_suspended';
+        }
+
+        return 'tag-teams.errors.cannot_reinstate';
+    }
+
+    /**
+     * Map tag team restoration-specific exception messages to user-friendly keys.
+     */
+    private static function mapTagTeamRestorationException(string $message): string
+    {
+        if (str_contains($message, 'not deleted')) {
+            return 'tag-teams.errors.not_deleted';
+        }
+
+        return 'tag-teams.errors.cannot_restore';
     }
 }
