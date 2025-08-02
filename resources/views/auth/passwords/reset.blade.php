@@ -1,65 +1,51 @@
-@extends('layouts.app')
+<x-layouts.auth>
+    <div class="w-full">
+        <h1 class="text-lg font-semibold text-gray-900 mb-6 text-center">{{ __('Reset Password') }}</h1>
+        
+        <form method="POST" action="{{ route('password.update') }}" class="space-y-4">
+            @csrf
+            <input type="hidden" name="token" value="{{ $token }}">
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
-
-                <div class="card-body">
-                    <form method="POST" action="{{ route('password.update') }}">
-                        @csrf
-
-                        <input type="hidden" name="token" value="{{ $token }}">
-
-                        <div class="form-group row">
-                            <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ $email ?? old('email') }}" required autofocus>
-
-                                @if ($errors->has('email'))
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required>
-
-                                @if ($errors->has('password'))
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-right">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Reset Password') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+            <div>
+                <x-form.form-label name="email" label="{{ __('E-Mail Address') }}" />
+                <input type="email" 
+                       name="email" 
+                       id="email"
+                       value="{{ $email ?? old('email') }}" 
+                       required 
+                       autofocus
+                       class="form-input-base form-input-default form-input-states @error('email') border-red-600 @enderror">
+                @error('email')
+                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                @enderror
             </div>
-        </div>
+
+            <div>
+                <x-form.form-label name="password" label="{{ __('Password') }}" />
+                <input type="password" 
+                       name="password" 
+                       id="password"
+                       required
+                       class="form-input-base form-input-default form-input-states @error('password') border-red-600 @enderror">
+                @error('password')
+                    <div class="text-red-600 text-sm mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div>
+                <x-form.form-label name="password-confirm" label="{{ __('Confirm Password') }}" />
+                <input type="password" 
+                       name="password_confirmation" 
+                       id="password-confirm"
+                       required
+                       class="form-input-base form-input-default form-input-states">
+            </div>
+
+            <div class="pt-2">
+                <x-buttons.primary type="submit" class="w-full">
+                    {{ __('Reset Password') }}
+                </x-buttons.primary>
+            </div>
+        </form>
     </div>
-</div>
-@endsection
+</x-layouts.auth>
