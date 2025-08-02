@@ -21,8 +21,8 @@ class ManagerReleaseCascadeStrategy
     public static function endManagementContracts(): callable
     {
         return function (Manager $manager, Carbon $effectiveDate): void {
-            $manager->wrestlers()->terminateActive($effectiveDate);
-            $manager->tagTeams()->terminateActive($effectiveDate);
+            $manager->removeFromCurrentWrestlers($effectiveDate);
+            $manager->removeFromCurrentTagTeams($effectiveDate);
         };
     }
 
