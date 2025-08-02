@@ -22,29 +22,8 @@ class ManagerRetirementCascadeStrategy
     public static function endManagementCareer(): callable
     {
         return function (Manager $manager, Carbon $effectiveDate): void {
-            // End current wrestler management relationships
-            $currentWrestlerIds = $manager->wrestlers()
-                ->wherePivotNull('fired_at')
-                ->pluck('wrestler_id')
-                ->toArray();
-
-            if (! empty($currentWrestlerIds)) {
-                $manager->wrestlers()->updateExistingPivot($currentWrestlerIds, [
-                    'fired_at' => $effectiveDate,
-                ]);
-            }
-
-            // End current tag team management relationships
-            $currentTagTeamIds = $manager->tagTeams()
-                ->wherePivotNull('fired_at')
-                ->pluck('tag_team_id')
-                ->toArray();
-
-            if (! empty($currentTagTeamIds)) {
-                $manager->tagTeams()->updateExistingPivot($currentTagTeamIds, [
-                    'fired_at' => $effectiveDate,
-                ]);
-            }
+            $manager->wrestlers()->terminateActive($effectiveDate);
+            $manager->tagTeams()->terminateActive($effectiveDate);
         };
     }
 

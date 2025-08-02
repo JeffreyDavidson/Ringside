@@ -15,9 +15,11 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Vite;
@@ -79,6 +81,28 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/images/{$asset}"));
+
+        // Add macro to BelongsToMany for terminating active pivot relationships
+        BelongsToMany::macro('terminateActive', function (Carbon $terminationDate, string $terminationColumn = 'fired_at') {
+            /** @var BelongsToMany $this */
+            $relation = $this;
+
+            // Determine the primary key column name from the pivot table
+            $relatedPivotKey = $relation->getRelatedPivotKeyName();
+
+            // Get current active relationship IDs
+            $currentIds = $relation
+                ->wherePivotNull($terminationColumn)
+                ->pluck($relatedPivotKey)
+                ->toArray();
+
+            // Terminate relationships if any exist
+            if (! empty($currentIds)) {
+                $relation->updateExistingPivot($currentIds, [
+                    $terminationColumn => $terminationDate,
+                ]);
+            }
+        });
 
         $this->bootRoute();
     }

@@ -46,17 +46,7 @@ class RemoveFromCurrentTagTeamsAction
         $removalDate = DateHelper::resolveDate($removalDate);
 
         DB::transaction(function () use ($manager, $removalDate): void {
-            // More efficient: get IDs first, then update in one operation
-            $currentTagTeamIds = $manager->tagTeams()
-                ->wherePivotNull('fired_at')
-                ->pluck('tag_team_id')
-                ->toArray();
-
-            if (! empty($currentTagTeamIds)) {
-                $manager->tagTeams()->updateExistingPivot($currentTagTeamIds, [
-                    'fired_at' => $removalDate,
-                ]);
-            }
+            $manager->tagTeams()->terminateActive($removalDate);
         });
     }
 }

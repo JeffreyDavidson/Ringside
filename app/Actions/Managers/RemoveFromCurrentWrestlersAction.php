@@ -46,17 +46,7 @@ class RemoveFromCurrentWrestlersAction
         $removalDate = DateHelper::resolveDate($removalDate);
 
         DB::transaction(function () use ($manager, $removalDate): void {
-            // More efficient: get IDs first, then update in one operation
-            $currentWrestlerIds = $manager->wrestlers()
-                ->wherePivotNull('fired_at')
-                ->pluck('wrestler_id')
-                ->toArray();
-
-            if (! empty($currentWrestlerIds)) {
-                $manager->wrestlers()->updateExistingPivot($currentWrestlerIds, [
-                    'fired_at' => $removalDate,
-                ]);
-            }
+            $manager->wrestlers()->terminateActive($removalDate);
         });
     }
 }
