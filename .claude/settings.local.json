@@ -63,7 +63,12 @@
       "Bash(claude doctor)",
       "Bash(cp:*)",
       "Bash(do echo \"=== $file ===\")",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "mcp__filesystem-ringside__list_directory",
+      "Bash(node:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "defaultMode": "plan"
