@@ -10,10 +10,10 @@
     {{ $attributes->merge([
             'id' => $name,
             'name' => $name,
+            'placeholder' => $placeholder,
         ])->class([
-            'block w-full appearance-none shadow-none outline-none font-medium text-2sm bg-light-active rounded-md py-[.55rem] px-3 border border-solid border-gray-300 text-gray-700 h-[100px] hover:border-gray-400 focus:border-primary focus:shadow-form-input-focus-box-shadow focus:text-gray-700',
+            'form-input-base form-input-textarea form-input-states',
         ]) }}>
-    {{ $placeholder }}
 </textarea>
 
 @error($name)
