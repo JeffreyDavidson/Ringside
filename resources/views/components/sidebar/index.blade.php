@@ -1,5 +1,6 @@
-<div x-data
+<nav x-data
     :class="$store.sidebar.expanded ? 'w-[--sidebar-default-width]' : 'w-[--sidebar-collapsed-width] lg:hover:w-[--sidebar-default-width]'"
+    :aria-label="$store.sidebar.expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
     class="bg-light border-e border-e-gray-200 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0 h-full transition-all duration-300">
     <div class="h-[--header-height] hidden items-center relative justify-between px-3 shrink-0 lg:flex lg:px-6">
         <a href="{{ route('dashboard') }}">
@@ -9,7 +10,10 @@
                 :class="$store.sidebar.expanded ? 'hidden' : 'lg:block'" />
         </a>
         <button @click="$store.sidebar.toggle()"
-            class="inline-flex items-center cursor-pointer leading-none ps-1 pe-1 font-medium text-2sm outline-none justify-center p-0 gap-0 size-[30px] rounded-lg border border-gray-200 bg-light text-gray-500 hover:text-gray-700 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4">
+            @keydown.escape="$store.sidebar.expanded = false"
+            :aria-expanded="$store.sidebar.expanded"
+            aria-label="Toggle sidebar navigation"
+            class="inline-flex items-center cursor-pointer leading-none ps-1 pe-1 font-medium text-2sm outline-none justify-center p-0 gap-0 size-[30px] rounded-lg border border-gray-200 bg-light text-gray-500 hover:text-gray-700 focus:ring-2 focus:ring-primary focus:ring-offset-2 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4">
             <i :class="$store.sidebar.expanded ? '' : 'rotate-180'"
                 class="ki-filled ki-black-left-line text-[.9375rem] toggle-active:rotate-180 transition-all duration-300"></i>
         </button>
@@ -108,4 +112,4 @@
             <!-- End of Sidebar Menu -->
         </div>
     </div>
-</div>
+</nav>
