@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Actions\Concerns\Cascades\ManagerDeletionCascadeStrategy;
 use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Helpers\DateHelper;
 use App\Models\Managers\Manager;
@@ -57,17 +58,10 @@ class DeleteAction
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($manager, $deletionDate): void {
-            // Handle manager status cleanup using StatusTransitionPipeline
-            StatusTransitionPipeline::delete($manager, $deletionDate)->execute();
-
-            // End current management relationships
-            $manager->wrestlers()->wherePivotNull('fired_at')->updateExistingPivot($manager->wrestlers()->wherePivotNull('fired_at')->pluck('wrestler_id'), [
-                'fired_at' => $deletionDate,
-            ]);
-
-            $manager->tagTeams()->wherePivotNull('fired_at')->updateExistingPivot($manager->tagTeams()->wherePivotNull('fired_at')->pluck('tag_team_id'), [
-                'fired_at' => $deletionDate,
-            ]);
+            // Handle manager status cleanup using StatusTransitionPipeline with cascade strategy
+            StatusTransitionPipeline::delete($manager, $deletionDate)
+                ->withCascade(ManagerDeletionCascadeStrategy::comprehensive())
+                ->execute();
 
             // Soft delete the manager record
             $manager->delete();
