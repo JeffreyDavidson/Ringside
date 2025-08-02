@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\Cascades\ManagerReleaseCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction
@@ -19,11 +20,15 @@ class ReleaseAction
      * Release a manager from employment and end all current relationships.
      *
      * This handles the complete manager release workflow with cascading effects:
+     * - Uses StatusTransitionPipeline for consistent release handling
      * - Validates the manager can be released (currently employed)
-     * - Ends current wrestler and tag team management relationships
-     * - Ends suspension and injury if active
-     * - Ends employment period with the specified date
+     * - Uses ManagerReleaseCascadeStrategy to end management relationships
+     * - Ends suspension, injury, and employment through pipeline
      * - Maintains all historical records for tracking purposes
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline with cascade strategies for comprehensive
+     * release handling, following the same pattern as other entity types.
      *
      * @param  Manager  $manager  The manager to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
@@ -42,31 +47,11 @@ class ReleaseAction
     {
         $manager->ensureCanBeReleased();
 
-        $releaseDate = $releaseDate ?? now();
+        $releaseDate = DateHelper::resolveDate($releaseDate);
 
-        DB::transaction(function () use ($manager, $releaseDate): void {
-            // End suspension or injury if active (manager cannot be both suspended and injured)
-            if ($manager->isSuspended()) {
-                $currentSuspension = $manager->currentSuspension()->first();
-                if ($currentSuspension) {
-                    $currentSuspension->update(['ended_at' => $releaseDate]);
-                }
-            } elseif ($manager->isInjured()) {
-                $currentInjury = $manager->currentInjury()->first();
-                if ($currentInjury) {
-                    $currentInjury->update(['ended_at' => $releaseDate->toDateTimeString()]);
-                }
-            }
-
-            // End current management relationships
-            // Note: Management relationships are handled automatically by the repository
-
-            // End employment
-            $currentEmployment = $manager->currentEmployment()->first();
-            if ($currentEmployment) {
-                $currentEmployment->update(['ended_at' => $releaseDate]);
-                $manager->update(['status' => EmploymentStatus::Released]);
-            }
-        });
+        // Use StatusTransitionPipeline with cascade strategy for comprehensive release handling
+        StatusTransitionPipeline::release($manager, $releaseDate)
+            ->withCascade(ManagerReleaseCascadeStrategy::comprehensive())
+            ->execute();
     }
 }

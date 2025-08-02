@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Shared\EmploymentStatus;
+use App\Actions\Concerns\Cascades\ManagerDeletionCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -25,9 +27,13 @@ class DeleteAction
      * - No impact on past management records or statistics
      *
      * EMPLOYMENT IMPACT:
-     * - Ends employment, suspension, and injury if active
-     * - Ends retirement if currently retired
-     * - Preserves employment history for administrative records
+     * - Uses StatusTransitionPipeline.delete() to end all active statuses
+     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Preserves manager employment history for administrative records
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline for consistent status handling, following the same
+     * pattern as other manager actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the manager record
@@ -49,46 +55,13 @@ class DeleteAction
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
+        $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($manager, $deletionDate): void {
-            // Handle manager status - employed managers can be suspended/injured, retired managers are not employed
-            if ($manager->isEmployed()) {
-                // End suspension or injury if active (employed manager cannot be both)
-                if ($manager->isSuspended()) {
-                    $currentSuspension = $manager->currentSuspension()->first();
-                    if ($currentSuspension) {
-                        $currentSuspension->update(['ended_at' => $deletionDate]);
-                    }
-                } elseif ($manager->isInjured()) {
-                    $currentInjury = $manager->currentInjury()->first();
-                    if ($currentInjury) {
-                        $currentInjury->update(['ended_at' => $deletionDate->toDateTimeString()]);
-                    }
-                }
-
-                // End employment
-                $currentEmployment = $manager->currentEmployment()->first();
-                if ($currentEmployment) {
-                    $currentEmployment->update(['ended_at' => $deletionDate]);
-                    $manager->update(['status' => EmploymentStatus::Released]);
-                }
-            } elseif ($manager->isRetired()) {
-                // End retirement if active (retired managers are not employed)
-                $currentRetirement = $manager->currentRetirement()->first();
-                if ($currentRetirement) {
-                    $currentRetirement->update(['ended_at' => $deletionDate]);
-                }
-            }
-
-            // End current management relationships
-            $manager->wrestlers()->wherePivotNull('fired_at')->updateExistingPivot($manager->wrestlers()->wherePivotNull('fired_at')->pluck('wrestler_id'), [
-                'fired_at' => $deletionDate,
-            ]);
-
-            $manager->tagTeams()->wherePivotNull('fired_at')->updateExistingPivot($manager->tagTeams()->wherePivotNull('fired_at')->pluck('tag_team_id'), [
-                'fired_at' => $deletionDate,
-            ]);
+            // Handle manager status cleanup using StatusTransitionPipeline with cascade strategy
+            StatusTransitionPipeline::delete($manager, $deletionDate)
+                ->withCascade(ManagerDeletionCascadeStrategy::comprehensive())
+                ->execute();
 
             // Soft delete the manager record
             $manager->delete();

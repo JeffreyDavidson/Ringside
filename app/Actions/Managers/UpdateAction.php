@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Data\Managers\ManagerData;
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
@@ -14,13 +14,21 @@ class UpdateAction
 {
     use AsAction;
 
+    public function __construct(
+        private EmployAction $employAction
+    ) {}
+
     /**
      * Update a manager.
      *
      * This handles the complete manager update workflow:
      * - Updates manager personal and professional information
-     * - Handles conditional employment if employment_date is modified
+     * - Uses EmployAction for consistent employment handling if employment_date is modified
      * - Maintains data integrity throughout the update process
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses EmployAction for employment handling, following the same pattern as other
+     * manager actions for consistency.
      *
      * @param  Manager  $manager  The manager to update
      * @param  ManagerData  $managerData  The updated manager information
@@ -52,16 +60,10 @@ class UpdateAction
                 'last_name' => $managerData->last_name,
             ]);
 
-            // Create employment record if employment_date is provided and manager is eligible
+            // Handle employment using EmployAction for consistency
             if (! is_null($managerData->employment_date) && ! $manager->isEmployed()) {
-                // Create employment record
-                $manager->employments()->updateOrCreate(
-                    ['ended_at' => null],
-                    ['started_at' => $managerData->employment_date->toDateTimeString()]
-                );
-
-                // Update the status field to reflect employment
-                $manager->update(['status' => EmploymentStatus::Employed]);
+                $employmentDate = DateHelper::resolveDate($managerData->employment_date);
+                $this->employAction->handle($manager, $employmentDate);
             }
 
             return $manager;
