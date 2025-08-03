@@ -1,25 +1,51 @@
 {
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build"
-    },
-    "devDependencies": {
-        "@tailwindcss/aspect-ratio": "^0.4.2",
-        "@tailwindcss/forms": "^0.5.7",
-        "@tailwindcss/typography": "^0.5.15",
-        "alpinejs": "^2.7.3",
-        "autoprefixer": "^10.4.16",
-        "axios": "^0.25",
-        "laravel-vite-plugin": "^1.0.1",
-        "postcss": "^8.4.33",
-        "tailwindcss": "^3.4.1",
-        "vite": "^5.0.10",
-        "concurrently": "^9.0.1"
-    },
-    "dependencies": {
-        "@alpinejs/ui": "^3.14.8",
-        "@ryangjchandler/alpine-clipboard": "^2.3.0"
-    }
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:analyze": "ANALYZE=true vite build",
+    "lint": "eslint resources/js/**/*.js",
+    "lint:fix": "eslint resources/js/**/*.js --fix",
+    "format": "prettier --write resources/js/**/*.js resources/views/**/*.blade.php",
+    "format:check": "prettier --check resources/js/**/*.js resources/views/**/*.blade.php",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "resources/js/**/*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "resources/views/**/*.blade.php": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.15",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "alpinejs": "^2.7.3",
+    "autoprefixer": "^10.4.16",
+    "axios": "^0.25",
+    "concurrently": "^9.0.1",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "husky": "^9.1.7",
+    "laravel-vite-plugin": "^1.0.1",
+    "lint-staged": "^16.1.2",
+    "postcss": "^8.4.33",
+    "prettier": "^3.6.2",
+    "rollup-plugin-visualizer": "^6.0.3",
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.0.10",
+    "vite-bundle-analyzer": "^1.1.0"
+  },
+  "dependencies": {
+    "@alpinejs/ui": "^3.14.8",
+    "@ryangjchandler/alpine-clipboard": "^2.3.0",
+    "glob": "^11.0.3"
+  }
 }
