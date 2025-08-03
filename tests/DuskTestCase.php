@@ -19,6 +19,17 @@ use function function_exists;
 abstract class DuskTestCase extends BaseTestCase
 {
     /**
+     * The base URL to test the application.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Force the correct APP_URL for Dusk tests
+        config(['app.url' => 'http://ringside.test']);
+    }
+
+    /**
      * Prepare for Dusk test execution.
      */
     #[BeforeClass]

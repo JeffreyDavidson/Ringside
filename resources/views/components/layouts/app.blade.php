@@ -25,7 +25,8 @@
         <!-- End of Sidebar -->
         <!-- Wrapper -->
         <div class="pt-[--header-height] flex grow flex-col lg:pt-[--header-height] transition-all duration-300"
-             :class="$store.sidebar.expanded ? 'lg:ps-[--sidebar-default-width]' : 'lg:ps-[--sidebar-collapsed-width]'">
+             x-data
+             :class="($store.sidebar && $store.sidebar.expanded) ? 'lg:ps-[--sidebar-default-width]' : 'lg:ps-[--sidebar-collapsed-width]'">
             <!-- Header -->
             <x-layouts.partials.header />
             <!-- End of Header -->
