@@ -29,3 +29,8 @@ package-lock.json
 yarn.lock
 /.nova
 build
+
+# Laravel Dusk artifacts
+tests/Browser/screenshots/
+tests/Browser/console/
+tests/Browser/source/
