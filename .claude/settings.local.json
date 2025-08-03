@@ -69,7 +69,12 @@
       "Bash(npm run build:*)",
       "Bash(npx tailwindcss:*)",
       "Bash(git restore:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(curl:*)",
+      "Bash(herd link:*)",
+      "Bash(pkill:*)",
+      "Bash(touch:*)",
+      "Bash(sqlite3:*)"
     ],
     "deny": [],
     "defaultMode": "plan"
