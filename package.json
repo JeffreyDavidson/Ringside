@@ -26,7 +26,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
-    "alpinejs": "^2.7.3",
+    "alpinejs": "^3.14.9",
     "autoprefixer": "^10.4.16",
     "axios": "^0.25",
     "concurrently": "^9.0.1",
