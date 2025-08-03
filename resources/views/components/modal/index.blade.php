@@ -8,7 +8,7 @@
     'max-w-[800px]' => $size === null || $size === '',
     'max-w-[1100px]' => $size === 'lg',
 ]) }}
-    style="z-index: 90; display: block;">
+    style="z-index: 90;">
     <x-modal.header />
     <x-modal.body>
         {{ $slot }}

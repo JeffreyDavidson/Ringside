@@ -11,15 +11,13 @@
         </x-card.general-info.links>
     @endif
     @if ($wrestler->currentManagers->isNotEmpty())
-        <x-card.general-info.links label="Current Manager(s)">
+        <x-card.general-info.link-list label="Current Manager(s)">
             @foreach ($wrestler->currentManagers as $manager)
-                <x-route-link :route="route('managers.show', $manager)" label="{{ $manager->full_name }}" />
-
-                @if (!$loop->last)
-                    @php echo "<br>" @endphp
-                @endif
+                <x-card.general-info.link-item>
+                    <x-route-link :route="route('managers.show', $manager)" label="{{ $manager->full_name }}" />
+                </x-card.general-info.link-item>
             @endforeach
-        </x-card.general-info.links>
+        </x-card.general-info.link-list>
     @endif
     @if ($wrestler->currentStable)
         <x-card.general-info.links label="Current Stable">
@@ -27,15 +25,13 @@
         </x-card.general-info.links>
     @endif
     {{-- @if ($wrestler->currentChampionships->isNotEmpty())
-        <x-card.general-info.links label="Current Title Championship(s)">
+        <x-card.general-info.link-list label="Current Title Championship(s)">
             @foreach ($wrestler->currentChampionships as $currentChampionship)
-                <x-route-link :route="route('titles.show', $currentChampionship->title)" label="{{ $currentChampionship->title->name }}" />
-
-                @if (!$loop->last)
-                    @php echo "<br>" @endphp
-                @endif
+                <x-card.general-info.link-item>
+                    <x-route-link :route="route('titles.show', $currentChampionship->title)" label="{{ $currentChampionship->title->name }}" />
+                </x-card.general-info.link-item>
             @endforeach
-        </x-card.general-info.links>
+        </x-card.general-info.link-list>
     @endif --}}
     <x-card.general-info.stat label="Start Date" :value="$wrestler->firstEmployment?->started_at->toDateString() ?? 'No Start Date Set'" />
 </x-card.general-info>

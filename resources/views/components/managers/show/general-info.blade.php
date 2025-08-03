@@ -1,25 +1,21 @@
 <x-card.general-info>
     @if ($manager->currentWrestlers->isNotEmpty())
-        <x-card.general-info.links label="Current Wrestler(s)">
+        <x-card.general-info.link-list label="Current Wrestler(s)">
             @foreach ($manager->currentWrestlers as $wrestler)
-                <x-route-link :route="route('wrestlers.show', $wrestler)" label="{{ $wrestler->name }}" />
-
-                @if (!$loop->last)
-                    @php echo "<br>" @endphp
-                @endif
+                <x-card.general-info.link-item>
+                    <x-route-link :route="route('wrestlers.show', $wrestler)" label="{{ $wrestler->name }}" />
+                </x-card.general-info.link-item>
             @endforeach
-        </x-card.general-info.links>
+        </x-card.general-info.link-list>
     @endif
     @if ($manager->currentTagTeams->isNotEmpty())
-        <x-card.general-info.links label="Current Tag Team(s)">
+        <x-card.general-info.link-list label="Current Tag Team(s)">
             @foreach ($manager->currentTagTeams as $tagTeam)
-                <x-route-link :route="route('tag-teams.show', $tagTeam)" label="{{ $tagTeam->name }}" />
-
-                @if (!$loop->last)
-                    @php echo "<br>" @endphp
-                @endif
+                <x-card.general-info.link-item>
+                    <x-route-link :route="route('tag-teams.show', $tagTeam)" label="{{ $tagTeam->name }}" />
+                </x-card.general-info.link-item>
             @endforeach
-        </x-card.general-info.links>
+        </x-card.general-info.link-list>
     @endif
     @if ($manager->currentStable)
         <x-card.general-info.links label="Current Stable">

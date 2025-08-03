@@ -45,6 +45,27 @@
 
 ## Quick Reference
 
+### Frontend Architecture (Recently Completed)
+**Complete modernization from Metronic template to Alpine.js + Livewire stack:**
+- **Alpine.js Store**: Global sidebar state management (`Alpine.store('sidebar')`)
+- **Component Architecture**: Show pages, table headers, form grids as reusable components
+- **Zero Legacy Dependencies**: 100% elimination of Metronic JavaScript and Bootstrap classes
+- **Performance**: Reduced from 39 to 24 menu components (38% reduction)
+- **Critical Fix**: Sidebar content shifting bug resolved with reactive CSS classes
+- **Documentation**: Frontend tools organized in `docs/frontend/` directory
+
+**Key Frontend Patterns:**
+- Use `<x-layouts.show-page>` for entity detail pages with sidebar slot
+- Use `<x-layouts.table-header>` for index pages with title/actions
+- Use `<x-layouts.form-grid>` for responsive form layouts
+- Alpine.js store for global state, local `x-data` for component state
+- Static utility classes in CSS, avoid dynamic class generation (Vite compatibility)
+
+**Important Conversion Rule:**
+- **ANY Metronic template JavaScript/jQuery MUST be converted to Alpine.js + Livewire**
+- **NO data-* attributes** from paid templates - convert to Alpine.js patterns
+- Maintain 100% visual design accuracy while modernizing interaction code
+
 ### Current Focus
 Working on TagTeams Actions architectural refinements using service layer patterns with:
 - `TagTeamMembershipService` for partnership management
@@ -52,8 +73,10 @@ Working on TagTeams Actions architectural refinements using service layer patter
 - `TagTeamLifecycleService` for employment workflows
 
 ### Recent Architectural Decisions
+- **Frontend Modernization**: Complete conversion to Alpine.js + Livewire stack
 - Service layer pattern implementation for TagTeams Actions
-- Elimination of duplicate code across actions
+- Component-based architecture with reusable layout components
+- Elimination of duplicate code across actions and components
 - Enhanced validation and business rule enforcement
 - Optimized transaction boundaries with centralized error handling
 

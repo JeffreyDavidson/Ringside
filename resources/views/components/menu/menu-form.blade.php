@@ -3,13 +3,13 @@
     'rowId' => '',
 ])
 
-<form action="{{ route($path . '.destroy', $rowId) }}" class="d-inline" method="POST" x-data
+<form action="{{ route($path . '.destroy', $rowId) }}" class="inline" method="POST" x-data
     @submit.prevent="if (confirm('Are you sure you want to delete this user?')) $el.submit()">
     @method('DELETE')
     @csrf
 
-    <button type="submit" class="btn btn-link">
-        <i class="fa-solid fa-trash"></i>
+    <x-buttons.link type="submit">
+        <i class="ki-filled ki-trash"></i>
         Remove
-    </button>
+    </x-buttons.link>
 </form>

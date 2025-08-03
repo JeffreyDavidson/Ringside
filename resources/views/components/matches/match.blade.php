@@ -1,6 +1,6 @@
 @props(['match', 'loop'])
 
-<div class="mb-12 d-flex flex-column align-items-center">
+<div class="mb-12 flex flex-col items-center">
     @if ($loop->last)
         <h3>Main Event</h3>
     @else
