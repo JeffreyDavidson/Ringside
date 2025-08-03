@@ -9,8 +9,9 @@
 /storage/pail
 /vendor
 
-# Claude Code personal todos (not tracked in git)
+# Claude Code personal settings (not tracked in git)
 .claude/todos.md
+.claude/settings.local.json
 /report
 .env
 .phpunit.result.cache
