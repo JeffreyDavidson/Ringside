@@ -1,3 +1,3 @@
-<div class="d-flex justify-content-end">
+<div class="flex justify-end">
     {{ $slot }}
 </div>

@@ -10,6 +10,14 @@ import.meta.glob([
     '../images/**',
 ])
 
+// Global sidebar state store
+Alpine.store('sidebar', {
+    expanded: true,
+    toggle() {
+        this.expanded = !this.expanded;
+    }
+});
+
 Alpine.plugin(Clipboard);
 Alpine.plugin(AlpineUI);
 Livewire.start();

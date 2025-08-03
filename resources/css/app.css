@@ -18,6 +18,176 @@
 	}
 };
 
+@layer components {
+    /* Button State Utilities - Static classes for Vite/Tailwind compatibility */
+    
+    /* Primary Button States */
+    .btn-primary-default {
+        @apply bg-primary text-white border border-solid border-primary-clarity;
+    }
+    .btn-primary-states {
+        @apply hover:bg-primary-active hover:shadow hover:shadow-primary 
+               active:bg-primary-active active:shadow active:shadow-primary 
+               focus:bg-primary-active focus:shadow focus:shadow-primary;
+    }
+    .btn-primary-outline {
+        @apply bg-primary-light text-primary border border-solid border-primary-clarity;
+    }
+    .btn-primary-outline-states {
+        @apply hover:bg-primary hover:shadow-none hover:text-primary-inverse hover:border-primary 
+               active:text-primary-inverse active:bg-primary active:border-primary active:shadow-none 
+               focus:text-primary-inverse focus:bg-primary focus:border-primary focus:shadow-none;
+    }
+
+    /* Success Button States */
+    .btn-success-default {
+        @apply bg-success text-white border border-solid border-success-clarity;
+    }
+    .btn-success-states {
+        @apply hover:bg-success-active hover:shadow hover:shadow-success 
+               active:bg-success-active active:shadow active:shadow-success 
+               focus:bg-success-active focus:shadow focus:shadow-success;
+    }
+    .btn-success-outline {
+        @apply bg-success-light text-success border border-solid border-success-clarity;
+    }
+    .btn-success-outline-states {
+        @apply hover:bg-success hover:shadow-none hover:text-success-inverse hover:border-success 
+               active:text-success-inverse active:bg-success active:border-success active:shadow-none 
+               focus:text-success-inverse focus:bg-success focus:border-success focus:shadow-none;
+    }
+
+    /* Danger Button States */
+    .btn-danger-default {
+        @apply bg-danger text-white border border-solid border-danger-clarity;
+    }
+    .btn-danger-states {
+        @apply hover:bg-danger-active hover:shadow hover:shadow-danger 
+               active:bg-danger-active active:shadow active:shadow-danger 
+               focus:bg-danger-active focus:shadow focus:shadow-danger;
+    }
+    .btn-danger-outline {
+        @apply bg-danger-light text-danger border border-solid border-danger-clarity;
+    }
+    .btn-danger-outline-states {
+        @apply hover:bg-danger hover:shadow-none hover:text-danger-inverse hover:border-danger 
+               active:text-danger-inverse active:bg-danger active:border-danger active:shadow-none 
+               focus:text-danger-inverse focus:bg-danger focus:border-danger focus:shadow-none;
+    }
+
+    /* Warning Button States */
+    .btn-warning-default {
+        @apply bg-warning text-white border border-solid border-warning-clarity;
+    }
+    .btn-warning-states {
+        @apply hover:bg-warning-active hover:shadow hover:shadow-warning 
+               active:bg-warning-active active:shadow active:shadow-warning 
+               focus:bg-warning-active focus:shadow focus:shadow-warning;
+    }
+    .btn-warning-outline {
+        @apply bg-warning-light text-warning border border-solid border-warning-clarity;
+    }
+    .btn-warning-outline-states {
+        @apply hover:bg-warning hover:shadow-none hover:text-warning-inverse hover:border-warning 
+               active:text-warning-inverse active:bg-warning active:border-warning active:shadow-none 
+               focus:text-warning-inverse focus:bg-warning focus:border-warning focus:shadow-none;
+    }
+
+    /* Info Button States */
+    .btn-info-default {
+        @apply bg-info text-white border border-solid border-info-clarity;
+    }
+    .btn-info-states {
+        @apply hover:bg-info-active hover:shadow hover:shadow-info 
+               active:bg-info-active active:shadow active:shadow-info 
+               focus:bg-info-active focus:shadow focus:shadow-info;
+    }
+    .btn-info-outline {
+        @apply bg-info-light text-info border border-solid border-info-clarity;
+    }
+    .btn-info-outline-states {
+        @apply hover:bg-info hover:shadow-none hover:text-info-inverse hover:border-info 
+               active:text-info-inverse active:bg-info active:border-info active:shadow-none 
+               focus:text-info-inverse focus:bg-info focus:border-info focus:shadow-none;
+    }
+
+    /* Dark Button States */
+    .btn-dark-default {
+        @apply bg-dark text-white border border-solid border-dark-clarity;
+    }
+    .btn-dark-states {
+        @apply hover:bg-dark-active hover:shadow hover:shadow-dark 
+               active:bg-dark-active active:shadow active:shadow-dark 
+               focus:bg-dark-active focus:shadow focus:shadow-dark;
+    }
+    .btn-dark-outline {
+        @apply bg-dark-light text-dark border border-solid border-dark-clarity;
+    }
+    .btn-dark-outline-states {
+        @apply hover:bg-dark hover:shadow-none hover:text-dark-inverse hover:border-dark 
+               active:text-dark-inverse active:bg-dark active:border-dark active:shadow-none 
+               focus:text-dark-inverse focus:bg-dark focus:border-dark focus:shadow-none;
+    }
+
+    /* Light Button States */
+    .btn-light-default {
+        @apply bg-light text-dark border border-solid border-gray-200;
+    }
+    .btn-light-states {
+        @apply hover:bg-light-active hover:shadow hover:shadow-light 
+               active:bg-light-active active:shadow active:shadow-light 
+               focus:bg-light-active focus:shadow focus:shadow-light;
+    }
+
+    /* Secondary Button States */
+    .btn-secondary-default {
+        @apply bg-secondary text-gray-700 border border-solid border-gray-200;
+    }
+    .btn-secondary-states {
+        @apply hover:bg-light-active hover:text-gray-800 hover:border-gray-300 hover:shadow hover:shadow-default 
+               active:bg-light-active active:text-gray-800 active:border-gray-300 active:shadow active:shadow-default 
+               focus:bg-light-active focus:text-gray-800 focus:border-gray-300 focus:shadow focus:shadow-default;
+    }
+
+    /* Form Input Utilities - Static classes for consistent form styling */
+    
+    /* Base Input Styling */
+    .form-input-base {
+        @apply appearance-none shadow-none outline-none font-medium text-2sm leading-none 
+               bg-light-active rounded-md border border-solid border-gray-300 
+               text-gray-600 w-full;
+    }
+    
+    /* Input States */
+    .form-input-states {
+        @apply hover:border-gray-400 focus:border-primary focus:text-gray-700;
+    }
+    
+    /* Input Sizes */
+    .form-input-default {
+        @apply h-10 ps-3 pe-3;
+    }
+    
+    .form-input-textarea {
+        @apply py-[.55rem] px-3 h-[100px];
+    }
+    
+    /* Input Container for complex inputs */
+    .form-input-container {
+        @apply flex gap-1.5 items-center appearance-none shadow-none outline-none 
+               text-gray-600 w-full font-medium text-2sm leading-none 
+               bg-light-active rounded-md h-10 ps-3 pe-3 border border-solid 
+               border-gray-300 hover:border-gray-400 has-[:focus]:border-primary 
+               has-[:focus]:text-gray-700 has-[:invalid]:border-red-600;
+    }
+    
+    /* Input Elements inside container */
+    .form-input-element {
+        @apply grow bg-transparent border-transparent text-inherit outline-none 
+               m-0 p-0 text-2sm focus:ring-0 focus:border-none;
+    }
+}
+
 @layer base {
     :root {
         --page-bg: #fefefe;
