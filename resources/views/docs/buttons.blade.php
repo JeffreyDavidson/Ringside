@@ -273,49 +273,49 @@
                                 <div class="flex items-center flex-wrap justify-center py-6 gap-4">
                                     <x-buttons.primary>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Primary
                                     </x-buttons.primary>
                                     <x-buttons.success>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Success
                                     </x-buttons.success>
                                     <x-buttons.info>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Info
                                     </x-buttons.info>
                                     <x-buttons.danger>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Danger
                                     </x-buttons.danger>
                                     <x-buttons.warning>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Warning
                                     </x-buttons.warning>
                                     <x-buttons.dark>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Dark
                                     </x-buttons.dark>
                                     <x-buttons.secondary>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Secondary
                                     </x-buttons.secondary>
                                     <x-buttons.light>
                                         <x-slot:icon>
-                                            <i class="ki-outline ki-plus-squared"></i>
+                                            <x-heroicon-o-plus-circle class="size-5" />
                                         </x-slot:icon>
                                         Light
                                     </x-buttons.light>
@@ -391,23 +391,23 @@
                                 <div class="flex items-center flex-wrap justify-center py-6 gap-4">
                                     <x-buttons.primary variant="outline">
                                         Primary
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.primary>
                                     <x-buttons.success variant="outline">
                                         Success
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.success>
                                     <x-buttons.info variant="outline">
                                         Info
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.info>
                                     <x-buttons.danger variant="outline">
                                         Danger
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.danger>
                                     <x-buttons.warning variant="outline">
                                         Warning
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.warning>
                                 </div>
                             </div>
@@ -480,27 +480,27 @@
                             <div class="grow ps-[1.875rem] pe-[1.875rem] p-7">
                                 <div class="flex items-center flex-wrap justify-center py-6 gap-4">
                                     <x-buttons.light variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                         Light
                                     </x-buttons.light>
                                     <x-buttons.primary variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                         Primary
                                     </x-buttons.primary>
                                     <x-buttons.success variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                         Success
                                     </x-buttons.success>
                                     <x-buttons.info variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                         Info
                                     </x-buttons.info>
                                     <x-buttons.danger variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                         Danger
                                     </x-buttons.danger>
                                     <x-buttons.warning variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                         Warning
                                     </x-buttons.warning>
                                 </div>
@@ -574,28 +574,28 @@
                             <div class="grow ps-[1.875rem] pe-[1.875rem] p-7">
                                 <div class="flex items-center flex-wrap justify-center py-6 gap-4">
                                     <x-buttons.primary>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.primary>
                                     <x-buttons.success>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.success>
                                     <x-buttons.info>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.info>
                                     <x-buttons.danger>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.danger>
                                     <x-buttons.warning>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.warning>
                                     <x-buttons.dark>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.dark>
                                     <x-buttons.secondary>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.secondary>
                                     <x-buttons.light>
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.light>
                                 </div>
                             </div>
@@ -668,19 +668,19 @@
                             <div class="grow ps-[1.875rem] pe-[1.875rem] p-7">
                                 <div class="flex items-center flex-wrap justify-center py-6 gap-4">
                                     <x-buttons.primary variant="outline">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.primary>
                                     <x-buttons.success variant="outline">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.success>
                                     <x-buttons.info variant="outline">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.info>
                                     <x-buttons.danger variant="outline">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.danger>
                                     <x-buttons.warning variant="outline">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.warning>
                                 </div>
                             </div>
@@ -753,22 +753,22 @@
                             <div class="grow ps-[1.875rem] pe-[1.875rem] p-7">
                                 <div class="flex items-center flex-wrap justify-center py-6 gap-4">
                                     <x-buttons.light variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.light>
                                     <x-buttons.primary variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.primary>
                                     <x-buttons.success variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.success>
                                     <x-buttons.info variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.info>
                                     <x-buttons.danger variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.danger>
                                     <x-buttons.warning variant="clear">
-                                        <i class="ki-outline ki-plus-squared"></i>
+                                        <x-heroicon-o-plus-circle class="size-5" />
                                     </x-buttons.warning>
                                 </div>
                             </div>
@@ -1068,28 +1068,28 @@
                                 <div class="flex flex-col items-center justify-center py-6 gap-8">
                                     <x-button-tabs size="sm">
                                         <x-buttons.icon isActive>
-                                            <i class="ki-outline ki-element-11"></i>
+                                            <x-heroicon-o-squares-2x2 class="size-5" />
                                         </x-buttons.icon>
                                         <x-buttons.icon>
-                                            <i class="ki-outline ki-row-horizontal"></i>
+                                            <x-heroicon-o-bars-3-bottom-left class="size-5" />
                                         </x-buttons.icon>
                                     </x-button-tabs>
 
                                     <x-button-tabs>
                                         <x-buttons.icon isActive>
-                                            <i class="ki-outline ki-element-11"></i>
+                                            <x-heroicon-o-squares-2x2 class="size-5" />
                                         </x-buttons.icon>
                                         <x-buttons.icon>
-                                            <i class="ki-outline ki-row-horizontal"></i>
+                                            <x-heroicon-o-bars-3-bottom-left class="size-5" />
                                         </x-buttons.icon>
                                     </x-button-tabs>
 
                                     <x-button-tabs size="lg">
                                         <x-buttons.icon isActive>
-                                            <i class="ki-outline ki-element-11"></i>
+                                            <x-heroicon-o-squares-2x2 class="size-5" />
                                         </x-buttons.icon>
                                         <x-buttons.icon>
-                                            <i class="ki-outline ki-row-horizontal"></i>
+                                            <x-heroicon-o-bars-3-bottom-left class="size-5" />
                                         </x-buttons.icon>
                                     </x-button-tabs>
                                 </div>

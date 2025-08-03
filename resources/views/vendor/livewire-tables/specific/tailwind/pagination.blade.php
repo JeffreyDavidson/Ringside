@@ -28,11 +28,11 @@
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())
                 <button class="inline-flex items-center cursor-pointer rounded-md ps-px pe-px gap-1.5 border border-solid border-transparent font-medium outline-none shrink-0 justify-center size-[1.875rem] text-2sm p-0 leading-[0] text-gray-600 disabled" aria-hidden="true">
-                    <i class="ki-outline ki-black-left text-gray-700 text-base"></i>
+                    <x-heroicon-o-chevron-left class="text-gray-700 text-base" />
                 </button>
             @else
                 <button class="inline-flex items-center cursor-pointer rounded-md ps-px pe-px gap-1.5 border border-solid border-transparent font-medium outline-none shrink-0 justify-center size-[1.875rem] text-2sm p-0 leading-[0] text-gray-600" type="button" wire:click="previousPage('{{ $paginator->getPageName() }}')" dusk="previousPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}.after" rel="prev" aria-label="{{ __('pagination.previous') }}">
-                    <i class="ki-outline ki-black-left text-gray-700 text-base"></i>
+                    <x-heroicon-o-chevron-left class="text-gray-700 text-base" />
                 </button>
             @endif
 
@@ -64,11 +64,11 @@
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())
                 <button class="inline-flex items-center cursor-pointer rounded-md ps-px pe-px gap-1.5 border border-solid border-transparent font-medium outline-none shrink-0 justify-center size-[1.875rem] text-2sm p-0 leading-[0] text-gray-600" type="button" wire:click="nextPage('{{ $paginator->getPageName() }}')" dusk="nextPage{{ $paginator->getPageName() == 'page' ? '' : '.' . $paginator->getPageName() }}.after" rel="next" aria-label="{{ __('pagination.next') }}">
-                    <i class="ki-outline ki-black-right text-gray-700 text-base"></i>
+                    <x-heroicon-o-chevron-right class="text-gray-700 text-base" />
                 </button>
             @else
                 <button class="inline-flex items-center cursor-pointer rounded-md ps-px pe-px gap-1.5 border border-solid border-transparent font-medium outline-none shrink-0 justify-center size-[1.875rem] text-2sm p-0 leading-[0] text-gray-600 disabled" aria-disabled="true" aria-label="{{ __('pagination.next') }}">
-                    <i class="ki-outline ki-black-right text-gray-700 text-base"></i>
+                    <x-heroicon-o-chevron-right class="text-gray-700 text-base" />
                 </button>
             @endif
         @endif

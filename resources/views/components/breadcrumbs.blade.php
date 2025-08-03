@@ -5,7 +5,7 @@
         </span>
 
         @if ($loop->remaining !== 0)
-            <i class="ki-filled ki-right text-gray-500 text-3xs"></i>
+            <x-heroicon-s-chevron-right class="text-gray-500 text-3xs" />
         @endif
     @endforeach
 </div>

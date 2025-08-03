@@ -14,8 +14,7 @@
             :aria-expanded="$store.sidebar.expanded"
             aria-label="Toggle sidebar navigation"
             class="inline-flex items-center cursor-pointer leading-none ps-1 pe-1 font-medium text-2sm outline-none justify-center p-0 gap-0 size-[30px] rounded-lg border border-gray-200 bg-light text-gray-500 hover:text-gray-700 focus:ring-2 focus:ring-primary focus:ring-offset-2 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4">
-            <i :class="$store.sidebar.expanded ? '' : 'rotate-180'"
-                class="ki-filled ki-black-left-line text-[.9375rem] toggle-active:rotate-180 transition-all duration-300"></i>
+            <x-heroicon-s-chevron-left :class="$store.sidebar.expanded ? 'size-5' : 'size-5 rotate-180'" />
         </button>
     </div>
 
@@ -25,7 +24,7 @@
             <x-menu class="flex flex-col grow gap-0.5">
                 <x-menu.menu-item variant="sidebar">
                     <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-home" />
+                        <x-sidebar.menu-icon icon="home" />
                         <x-sidebar.menu-link ::class="$store.sidebar.expanded ? 'lg:block' : 'hidden'" href="{{ route('dashboard') }}"
                             :isCurrent="request()->routeIs('dashboard')">Dashboard</x-sidebar.menu-link>
                     </x-sidebar.menu-label>
@@ -40,7 +39,7 @@
                     }
                 }">
                     <x-sidebar.menu-label @click="toggle">
-                        <x-sidebar.menu-icon icon="ki-people" />
+                        <x-sidebar.menu-icon icon="users" />
                         <x-sidebar.menu-title ::class="$store.sidebar.expanded ? 'lg:block' : 'hidden'">Roster</x-sidebar.menu-title>
                         <x-sidebar.menu-accordian-icons ::class="$store.sidebar.expanded ? '' : 'hidden'" />
                     </x-sidebar.menu-label>
@@ -60,21 +59,21 @@
                 </div>
                 <x-menu.menu-item variant="sidebar">
                     <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-cup" />
+                        <x-sidebar.menu-icon icon="trophy" />
                         <x-sidebar.menu-link ::class="$store.sidebar.expanded ? 'lg:block' : 'hidden'" :href="route('titles.index')"
                             :isCurrent="request()->routeIs('titles.*')">Titles</x-sidebar.menu-link>
                     </x-sidebar.menu-label>
                 </x-menu.menu-item>
                 <x-menu.menu-item variant="sidebar">
                     <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-home-3" />
+                        <x-sidebar.menu-icon icon="building-office" />
                         <x-sidebar.menu-link ::class="$store.sidebar.expanded ? 'lg:block' : 'hidden'" :href="route('venues.index')"
                             :isCurrent="request()->routeIs('venues.*')">Venues</x-sidebar.menu-link>
                     </x-sidebar.menu-label>
                 </x-menu.menu-item>
                 <x-menu.menu-item variant="sidebar">
                     <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-calendar" />
+                        <x-sidebar.menu-icon icon="calendar-days" />
                         <x-sidebar.menu-link ::class="$store.sidebar.expanded ? 'lg:block' : 'hidden'" :href="route('events.index')"
                             :isCurrent="request()->routeIs('events.*')">Events</x-sidebar.menu-link>
                     </x-sidebar.menu-label>
@@ -89,7 +88,7 @@
                     }
                 }">
                     <x-sidebar.menu-label @click="toggle">
-                        <x-sidebar.menu-icon icon="ki-people" />
+                        <x-sidebar.menu-icon icon="users" />
                         <x-sidebar.menu-title ::class="$store.sidebar.expanded ? 'lg:block' : 'hidden'">User Management</x-sidebar.menu-title>
                         <x-sidebar.menu-accordian-icons ::class="$store.sidebar.expanded ? '' : 'hidden'" />
                     </x-sidebar.menu-label>
@@ -103,7 +102,7 @@
                     '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">Docs</x-sidebar.menu-heading>
                 <x-menu.menu-item variant="sidebar">
                     <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-cup" />
+                        <x-sidebar.menu-icon icon="trophy" />
                         <x-sidebar.menu-link ::class="$store.sidebar.expanded ? 'lg:block' : 'hidden'" :href="route('docs.buttons')"
                             :isCurrent="request()->routeIs('docs.buttons')">Buttons</x-sidebar.menu-link>
                     </x-sidebar.menu-label>

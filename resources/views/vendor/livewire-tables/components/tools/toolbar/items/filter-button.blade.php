@@ -24,7 +24,7 @@
                 x-bind:aria-expanded="filterPopoverOpen"
                 aria-expanded="true" @endif
             @if ($this->isFilterLayoutSlideDown()) x-on:click="filtersOpen = !filtersOpen" @endif>
-            <i class="ki-filled ki-setting-4"></i>
+            <x-heroicon-s-cog-6-tooth class="size-5" />
             @lang('Filters')
 
             @if ($count = $this->getFilterBadgeCount())

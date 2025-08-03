@@ -1,3 +1,3 @@
 @props(['searchIcon', 'searchIconClasses', 'searchIconOtherAttributes'])
 
-<i class="ki-filled ki-magnifier"></i>
+<x-heroicon-s-magnifying-glass class="size-5" />
