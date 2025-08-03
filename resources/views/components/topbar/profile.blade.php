@@ -30,7 +30,7 @@
         <div class="flex flex-col p-0 m-0">
             <div class="group flex items-center grow ms-2.5 me-2.5 p-2.5 rounded-md cursor-pointer hover:bg-gray-100">
                 <span class="flex items-center shrink-0 me-2.5">
-                    <i class="ki-filled ki-icon text-lg text-gray-500 group-hover:text-primary"></i>
+                    <x-heroicon-s-photo class="text-lg text-gray-500 group-hover:text-primary" />
                 </span>
                 <span class="flex items-center grow leading-4.25 font-medium text-2sm font-gray-800">
                     Language
