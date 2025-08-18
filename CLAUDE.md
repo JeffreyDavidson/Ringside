@@ -41,54 +41,6 @@ Successfully upgraded from Tailwind CSS 3.4.1 to 4.1.0 with architectural improv
 - Enhanced performance with built-in plugins
 - Consistent with Tailwind's new direction
 
-### Icon System Migration (2025-08-03)
-
-Successfully migrated from KeenIcons to Heroicons with massive performance improvement:
-
-**Before:**
-- 14MB KeenIcons bundle (1,219 total icons across 4 variants)
-- Only 25 icons actually used (98% waste)
-- CSS bundle: ~113KB including unused icon fonts
-
-**After:**
-- Tree-shakeable Heroicons via blade-heroicons package
-- Only loads icons that are actually used
-- 99.3% size reduction (~13.9MB saved)
-- CSS bundle: 112KB (minimal increase due to heroicons being tree-shakeable)
-
-**Technical Implementation:**
-- Installed `blade-ui-kit/blade-heroicons` package
-- Created automated conversion script (`scripts/convert-icons.js`)
-- Updated 15 Blade template files with new Heroicon components
-- Converted icon components to use dynamic heroicon components
-- Removed KeenIcons CSS imports and assets
-
-**Icon Mappings Applied:**
-```
-ki-home → home
-ki-people → users  
-ki-cup → trophy
-ki-calendar → calendar-days
-ki-pencil → pencil
-ki-trash → trash
-ki-dots-vertical → ellipsis-vertical
-ki-cross → x-mark
-ki-menu → bars-3
-[+ 16 more mappings]
-```
-
-**Component Updates:**
-- `menu/menu-icon.blade.php`: Now uses dynamic heroicon components
-- `menu/menu-dropdown-icon.blade.php`: Added icon mapping logic
-- `sidebar/index.blade.php`: Updated all icon prop references
-
-**Benefits:**
-- Massive bundle size reduction
-- Better performance (tree-shakeable)
-- Consistent with Tailwind ecosystem
-- Built-in accessibility features
-- Actively maintained by Tailwind team
-
 ### Code Quality & Linting Setup (2025-08-03)
 
 Successfully implemented comprehensive frontend linting and formatting:
@@ -119,28 +71,27 @@ npm run format:check  # Check formatting without changes
 
 Implemented Vite bundle analyzer for performance monitoring:
 
-**Current Bundle Metrics:**
-- JavaScript: 297.65 KB (91.60 KB gzipped)
-- CSS: 113.35 KB (16.78 KB gzipped)
-- Total assets: ~475 KB uncompressed
-- Performance: Excellent after KeenIcons removal
+**Performance Monitoring:**
+- Bundle analysis available via build tools
+- Performance optimized through dependency management
 
 **Analysis Tools:**
 - `npm run build:analyze` generates interactive HTML report
 - Located at `public/build/bundle-analysis.html`  
 - Shows module sizes, dependencies, and optimization opportunities
 
-**Key Optimizations Achieved:**
-- 13.9MB reduction from KeenIcons removal (99.3% smaller)
-- Tree-shakeable dependencies preferred
-- No unused code detected in current bundle
+**Optimization Principles:**
+- Tree-shakeable dependencies preferred for performance
+- Regular bundle analysis to detect optimization opportunities
+- Minimal dependencies for optimal load times
 
 ## Development Patterns
 
 ### Icon Usage
-- Use Heroicons via `<x-heroicon-s-iconname />` (solid) or `<x-heroicon-o-iconname />` (outline)
-- Icon components support dynamic icon names via `<x-dynamic-component :component="'heroicon-s-' . $iconName" />`
-- Default size: `class="size-5"` for most use cases
+- Use KeenIcons via `<i class="ki-icon-name text-lg"></i>` for direct icon usage
+- Use `<x-menu-icon icon="ki-icon-name" />` component for reusable menu icons
+- Common icons: `ki-cross`, `ki-dots-vertical`, `ki-search-list`, `ki-pencil`, `ki-trash`
+- Default size: `text-lg` class for consistent sizing
 
 ### Component Architecture
 - Prefer component-based architecture over utility classes
