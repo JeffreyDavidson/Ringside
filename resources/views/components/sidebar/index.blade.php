@@ -102,14 +102,6 @@
                             x-show="open || expanded">Users</x-sidebar.accordian-link>
                     </x-sidebar.menu-accordian>
                 </div>
-                <x-sidebar.menu-heading x-bind:class="expanded ? 'lg:block' : 'hidden'">Docs</x-sidebar.menu-heading>
-                <x-menu.menu-item variant="sidebar">
-                    <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="trophy" />
-                        <x-sidebar.menu-link x-bind:class="expanded ? 'lg:block' : 'hidden'" :href="route('docs.buttons')"
-                            :isCurrent="request()->routeIs('docs.buttons')">Buttons</x-sidebar.menu-link>
-                    </x-sidebar.menu-label>
-                </x-menu.menu-item>
             </x-menu>
             <!-- End of Sidebar Menu -->
         </div>
