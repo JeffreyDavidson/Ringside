@@ -23,7 +23,7 @@
             x-bind:aria-expanded="expanded"
             aria-label="Toggle sidebar navigation"
             class="inline-flex items-center cursor-pointer leading-none ps-1 pe-1 font-medium text-2sm outline-none justify-center p-0 gap-0 size-[30px] rounded-lg border border-gray-200 bg-light text-gray-500 hover:text-gray-700 focus:ring-2 focus:ring-primary focus:ring-offset-2 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4">
-            <x-heroicon-s-chevron-left x-bindx-bind:class="expanded ? 'size-5' : 'size-5 rotate-180'" />
+            <i class="ki-arrow-left text-lg" x-bind:class="expanded ? '' : 'rotate-180'"></i>
         </button>
     </div>
 

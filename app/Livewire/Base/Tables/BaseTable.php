@@ -8,7 +8,7 @@ use App\Livewire\Concerns\BaseTableTrait;
 use App\Livewire\Concerns\Columns\HasActionColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Livewire\Component;
 
 /**
  * Base class for all table components.
@@ -32,7 +32,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
  *
  * @since 1.0.0
  */
-abstract class BaseTable extends DataTableComponent
+abstract class BaseTable extends Component
 {
     use BaseTableTrait;
     use HasActionColumn;
