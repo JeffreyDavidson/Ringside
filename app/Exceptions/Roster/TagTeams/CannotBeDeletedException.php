@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
-use App\Exceptions\Concerns\ProvidesRosterExceptionContext;
+use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 
 /**
  * Exception thrown when a tag team cannot be deleted due to business rule violations.
@@ -45,10 +44,8 @@ use Exception;
  * }
  * ```
  */
-class CannotBeDeletedException extends Exception
+class CannotBeDeletedException extends BaseBusinessException
 {
-    use ProvidesRosterExceptionContext;
-
     /**
      * Create exception for attempting to delete an employed tag team.
      *
@@ -154,15 +151,5 @@ class CannotBeDeletedException extends Exception
         $context = self::formatModelContext($tagTeam);
 
         return new self("{$context} cannot be deleted due to ongoing investigations: {$investigationDetails}. Complete all investigations before deletion.");
-    }
-
-    /**
-     * Get tag team context for logging and debugging.
-     *
-     * @return array<string, mixed> Tag team details for context
-     */
-    public function getTagTeamContext(): array
-    {
-        return $this->getRosterMemberContext();
     }
 }
