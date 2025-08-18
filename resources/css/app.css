@@ -1,20 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Variables */
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+/* Layout Variables */
 .layout1 {
     --sidebar-transition-duration: 0.3s;
 	--sidebar-transition-timing: ease;
-	--sidebar-default-width: theme('custom.layouts.layout1.sidebar.width.desktop');
-	--header-height: theme('custom.layouts.layout1.header.height.desktop');
-    --sidebar-collapsed-width: theme('custom.layouts.layout1.sidebar.width.desktopCollapse');
+	--sidebar-default-width: 280px;
+	--header-height: 70px;
+    --sidebar-collapsed-width: 80px;
 }
 
-@media (max-width: theme('screens.lg')) {
+@media (max-width: 1024px) {
 	.layout1 {
-        --sidebar-width: theme('custom.layouts.layout1.sidebar.width.mobile');
-		--header-height: theme('custom.layouts.layout1.header.height.mobile');
+        --sidebar-width: 280px;
+		--header-height: 60px;
 	}
 };
 
@@ -144,9 +145,9 @@
         @apply bg-secondary text-gray-700 border border-solid border-gray-200;
     }
     .btn-secondary-states {
-        @apply hover:bg-light-active hover:text-gray-800 hover:border-gray-300 hover:shadow hover:shadow-default 
-               active:bg-light-active active:text-gray-800 active:border-gray-300 active:shadow active:shadow-default 
-               focus:bg-light-active focus:text-gray-800 focus:border-gray-300 focus:shadow focus:shadow-default;
+        @apply hover:bg-light-active hover:text-gray-800 hover:border-gray-300 hover:shadow-default 
+               active:bg-light-active active:text-gray-800 active:border-gray-300 active:shadow-default 
+               focus:bg-light-active focus:text-gray-800 focus:border-gray-300 focus:shadow-default;
     }
 
     /* Form Input Utilities - Static classes for consistent form styling */
@@ -191,5 +192,16 @@
 @layer base {
     :root {
         --page-bg: #fefefe;
+        
+        /* Custom box shadows */
+        --tw-card-box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.09);
+        --tw-default-box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.09);
+        --tw-light-box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, 0.03);
+        --tw-primary-box-shadow: 0px 4px 12px 0px rgba(40, 132, 239, 0.35);
+        --tw-success-box-shadow: 0px 4px 12px 0px rgba(53, 189, 100, 0.35);
+        --tw-danger-box-shadow: 0px 4px 12px 0px rgba(241, 65, 108, 0.35);
+        --tw-info-box-shadow: 0px 4px 12px 0px rgba(114, 57, 234, 0.35);
+        --tw-warning-box-shadow: 0px 4px 12px 0px rgba(246, 192, 0, 0.35);
+        --tw-dark-box-shadow: 0px 4px 12px 0px rgba(37, 47, 74, 0.35);
     }
 }
