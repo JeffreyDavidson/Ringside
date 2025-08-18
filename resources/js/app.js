@@ -1,7 +1,6 @@
 import './bootstrap';
 import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import AlpineUI from '@alpinejs/ui';
-import '../../vendor/rappasoft/laravel-livewire-tables/resources/imports/laravel-livewire-tables-all.js';
 import '../css/app.css';
 
 import.meta.glob(['../media/**']);
