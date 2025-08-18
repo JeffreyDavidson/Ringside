@@ -22,14 +22,22 @@ use App\Http\Controllers\Venues\IndexController as VenuesIndexController;
 use App\Http\Controllers\Venues\ShowController as VenuesShowController;
 use App\Http\Controllers\Wrestlers\IndexController as WrestlersIndexController;
 use App\Http\Controllers\Wrestlers\ShowController as WrestlersShowController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
 Route::redirect('/', 'login');
 
+Auth::loginUsingId(1);
+
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::view('design-system', 'design-system.index')->name('design-system');
+    Route::prefix('design-system')->name('design-system.')->group(function () {
+        Route::view('buttons', 'design-system.buttons')->name('buttons');
+        Route::view('icons', 'design-system.icons')->name('icons');
+    });
 
     Route::prefix('roster')->group(function () {
         Route::get('stables', StablesIndexController::class)->name('stables.index');
