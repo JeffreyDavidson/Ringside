@@ -1,5 +1,9 @@
 # Documentation Conventions
 
+## Related Documentation
+- [Documentation Standards](../documentation.md) - Comprehensive PHPDoc requirements and standards
+- [PHP Standards](../php.md) - PHP coding standards including documentation requirements
+
 ## Code Documentation
 
 ### PHPDoc Standards

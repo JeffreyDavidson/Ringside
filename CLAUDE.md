@@ -105,6 +105,55 @@ Implemented Vite bundle analyzer for performance monitoring:
 - Pre-commit hooks prevent committing poorly formatted code
 - Bundle analysis monitors performance impact of changes
 
+## Development Commands
+
+### Testing & Quality
+- `composer test` - Run all tests and quality checks
+- `composer test:unit` - Run PHPUnit/Pest tests with coverage  
+- `composer test:types` - Run PHPStan static analysis
+- `composer lint` - Fix code formatting with Laravel Pint
+- `composer rector` - Apply code modernization
+
+### Development Server
+- `composer dev` - Start all services (server, queue, logs, vite)
+
+### Custom Test Generator
+- `php artisan ringside:make:test --unit --model="ModelName"` - Generate standardized tests
+
+## Wrestling Business Logic
+
+### Employment Patterns
+- **Employment relationships**: Managers ↔ Wrestlers/TagTeams via pivot tables with `hired_at`/`fired_at`
+- **Business Rule**: Both entities must be employed, but managed entity doesn't need to be bookable
+- **Stable membership**: Uses `joined_at`/`left_at` patterns
+
+### Status Computation
+- **Status fields are computed, not stored** - eliminates data inconsistency  
+- **Priority order**: Retired > Employed > FutureEmployment > Released > Unemployed
+- **Factory patterns**: `employed()`, `unemployed()`, `retired()`, `bookable()` methods
+
+### Bookable Interface
+- **Competitors** (Wrestlers, TagTeams): Use `IsBookableCompetitor` trait
+- **Officials** (Referees): Use `OfficiatesMatches` trait  
+- **Managers**: NOT bookable - only employment relationships
+
+## Exception Patterns
+
+### Business Exception Structure
+- **Extend**: `BaseBusinessException`
+- **Domain organization**: `App\Exceptions\{Domain}\`
+- **Naming**: `Cannot{Action}Exception` pattern
+- **Documentation**: Include business context and scenarios
+- **Factory methods**: Accept model objects for type safety
+
+## Architecture Documentation
+
+For detailed information, see:
+- **[Match Generation](docs/architecture/match-generation.md)**: Match creation patterns
+- **[Business Rules](docs/architecture/business-rules.md)**: Wrestling logic constraints  
+- **[Employment Status](docs/architecture/employment-status.md)**: Status management
+- **[Core Patterns](.claude/architecture/core-patterns.md)**: Key implementation patterns
+
 ===
 
 <laravel-boost-guidelines>
@@ -215,6 +264,11 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 ## PHPDoc Blocks
 - Add useful array shape type definitions for arrays when appropriate.
+
+### PHPDoc Standards
+- **Required**: `@param`, `@return`, `@throws`, `@var` for complex variables
+- **Forbidden**: `@author`, `@since`, `@version` - Remove these
+- **Optional**: `@see` for references, `@example` for code examples
 
 ## Enums
 - Typically, keys in an Enum should be TitleCase. For example: `FavoritePerson`, `BestLake`, `Monthly`.
