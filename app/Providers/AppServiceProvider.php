@@ -80,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
             'stable' => Stable::class,
         ]);
 
-        Vite::macro('image', fn (string $asset) => Vite::asset("resources/images/{$asset}"));
+        Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));
 
         // Add macro to BelongsToMany for terminating active pivot relationships
         BelongsToMany::macro('terminateActive', function (Carbon $terminationDate, string $terminationColumn = 'fired_at') {

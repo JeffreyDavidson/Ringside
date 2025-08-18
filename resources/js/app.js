@@ -4,7 +4,7 @@ import AlpineUI from '@alpinejs/ui';
 import '../../vendor/rappasoft/laravel-livewire-tables/resources/imports/laravel-livewire-tables-all.js';
 import '../css/app.css';
 
-import.meta.glob(['../images/**']);
+import.meta.glob(['../media/**']);
 
 // Start Livewire (which includes Alpine.js)
 Livewire.start();
