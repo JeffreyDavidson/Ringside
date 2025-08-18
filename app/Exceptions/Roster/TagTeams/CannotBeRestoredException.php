@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
-use App\Exceptions\Concerns\ProvidesRosterExceptionContext;
+use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 
 /**
  * Exception thrown when a tag team cannot be restored due to business rule violations.
@@ -41,10 +40,8 @@ use Exception;
  * }
  * ```
  */
-class CannotBeRestoredException extends Exception
+class CannotBeRestoredException extends BaseBusinessException
 {
-    use ProvidesRosterExceptionContext;
-
     /**
      * Create exception for attempting to restore a non-deleted tag team.
      *
@@ -151,15 +148,5 @@ class CannotBeRestoredException extends Exception
         $context = self::formatModelContext($tagTeam);
 
         return new self("{$context} cannot be restored due to legal or contractual conflicts: {$legalDetails}. Resolve all legal issues before restoration.");
-    }
-
-    /**
-     * Get tag team context for logging and debugging.
-     *
-     * @return array<string, mixed> Tag team details for context
-     */
-    public function getTagTeamContext(): array
-    {
-        return $this->getRosterMemberContext();
     }
 }

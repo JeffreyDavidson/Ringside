@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
-use App\Exceptions\Concerns\ProvidesRosterExceptionContext;
+use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 
 /**
  * Exception thrown when a tag team cannot be reinstated due to business rule violations.
@@ -41,10 +40,8 @@ use Exception;
  * }
  * ```
  */
-class CannotBeReinstatedException extends Exception
+class CannotBeReinstatedException extends BaseBusinessException
 {
-    use ProvidesRosterExceptionContext;
-
     /**
      * Create exception for attempting to reinstate a non-suspended tag team.
      *
@@ -125,15 +122,5 @@ class CannotBeReinstatedException extends Exception
         $context = self::formatModelContext($tagTeam);
 
         return new self("{$context} reinstatement conflicts with existing schedules: {$conflictDetails}. Coordinate timing with event planning and storyline development.");
-    }
-
-    /**
-     * Get tag team context for logging and debugging.
-     *
-     * @return array<string, mixed> Tag team details for context
-     */
-    public function getTagTeamContext(): array
-    {
-        return $this->getRosterMemberContext();
     }
 }

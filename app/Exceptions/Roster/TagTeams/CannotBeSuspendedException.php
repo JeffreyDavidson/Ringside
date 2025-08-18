@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
-use App\Exceptions\Concerns\ProvidesRosterExceptionContext;
+use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 
 /**
  * Exception thrown when a tag team cannot be suspended due to business rule violations.
@@ -41,10 +40,8 @@ use Exception;
  * }
  * ```
  */
-class CannotBeSuspendedException extends Exception
+class CannotBeSuspendedException extends BaseBusinessException
 {
-    use ProvidesRosterExceptionContext;
-
     /**
      * Create exception for attempting to suspend an unemployed tag team.
      *
@@ -125,15 +122,5 @@ class CannotBeSuspendedException extends Exception
         $context = self::formatModelContext($tagTeam);
 
         return new self("{$context} suspension conflicts with active storylines: {$storylineDetails}. Coordinate with creative team before disciplinary actions.");
-    }
-
-    /**
-     * Get tag team context for logging and debugging.
-     *
-     * @return array<string, mixed> Tag team details for context
-     */
-    public function getTagTeamContext(): array
-    {
-        return $this->getRosterMemberContext();
     }
 }
