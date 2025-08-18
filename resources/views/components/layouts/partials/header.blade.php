@@ -11,7 +11,7 @@
             <div class="flex items-center">
                 <button
                     class="inline-flex items-center cursor-pointer leading-none rounded-md border border-solid border-transparent outline-none justify-center shrink-0 p-0 gap-0 size-8 bg-transparent text-gray-700 ps-3 pe-3 font-medium text-xs">
-                    <x-heroicon-s-bars-3 class="text-lg text-gray-600 leading-none" />
+                    <i class="ki-menu text-lg text-gray-600 leading-none"></i>
                 </button>
             </div>
         </div>
