@@ -26,7 +26,6 @@
     "@tailwindcss/typography": "^0.5.15",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
-    "alpinejs": "^3.14.9",
     "autoprefixer": "^10.4.16",
     "axios": "^0.25",
     "concurrently": "^9.0.1",
@@ -45,7 +44,6 @@
   },
   "dependencies": {
     "@alpinejs/ui": "^3.14.8",
-    "@ryangjchandler/alpine-clipboard": "^2.3.0",
     "glob": "^11.0.3"
   }
 }
