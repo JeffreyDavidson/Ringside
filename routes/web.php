@@ -59,7 +59,6 @@ Route::middleware('auth')->group(function () {
         Route::get('users/{user}', UsersShowController::class)->name('users.show');
     });
 
-    Route::prefix('docs')->group(function () {
-        Route::view('buttons', 'docs.buttons')->name('docs.buttons');
-    });
 });
+
+Route::view('dashboard2', 'dashboard')->name('dashboaard.new');
