@@ -15,10 +15,6 @@
                 </button>
             </div>
         </div>
-        <!-- End of Mobile Logo -->
-        <!-- Breadcrumbs -->
-        <x-breadcrumbs class="hidden lg:flex" />
-        <!-- End of Breadcrumbs -->
         <!-- Topbar -->
         <x-topbar />
         <!-- End of Topbar -->
