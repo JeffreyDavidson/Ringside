@@ -26,9 +26,9 @@
             </div>
 
             <div class="pt-2">
-                <x-buttons.primary type="submit" class="w-full">
+                <x-ui.button variant="primary" type="submit" class="w-full">
                     {{ __('Send Password Reset Link') }}
-                </x-buttons.primary>
+                </x-ui.button>
             </div>
         </form>
     </div>
