@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
-use App\Exceptions\Concerns\ProvidesRosterExceptionContext;
+use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 
 /**
  * Exception thrown when a tag team cannot be released due to business rule violations.
@@ -41,10 +40,8 @@ use Exception;
  * }
  * ```
  */
-class CannotBeReleasedException extends Exception
+class CannotBeReleasedException extends BaseBusinessException
 {
-    use ProvidesRosterExceptionContext;
-
     /**
      * Create exception for attempting to release an unemployed tag team.
      *
@@ -140,15 +137,5 @@ class CannotBeReleasedException extends Exception
         $context = self::formatModelContext($tagTeam);
 
         return new self("{$context} cannot be released during probationary period: {$probationDetails}. Complete probationary requirements before release consideration.");
-    }
-
-    /**
-     * Get tag team context for logging and debugging.
-     *
-     * @return array<string, mixed> Tag team details for context
-     */
-    public function getTagTeamContext(): array
-    {
-        return $this->getRosterMemberContext();
     }
 }
