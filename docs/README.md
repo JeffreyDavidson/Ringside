@@ -78,4 +78,3 @@ This Laravel project is configured with Claude Code and MCP servers for enhanced
 
 ### Getting Started
 Run `source .claude/shortcuts.sh` to load helpful development aliases.
-EOF < /dev/null
