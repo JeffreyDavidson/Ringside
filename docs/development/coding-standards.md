@@ -21,13 +21,6 @@
 - Leverage Tailwind's color palette
 - Use component classes for repeated patterns
 
-## Livewire Tables Conventions
-- Use rappasoft/laravel-livewire-tables for data tables
-- Implement proper column definitions
-- Use appropriate search and filter methods
-- Follow Livewire component patterns
-- Implement proper authorization for table actions
-
 ## File and Directory Management
 - **Always clean up empty directories** - When removing files from directories, always check if the directory becomes empty and remove it if it contains no files or only empty subdirectories
 - **Maintain clean project structure** - Don't leave orphaned empty directories in the codebase

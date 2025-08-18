@@ -2,6 +2,11 @@
 
 PHPDoc requirements and documentation conventions for Ringside development.
 
+## Related Documentation
+- [Documentation Conventions](conventions/documentation.md) - Specific PHPDoc examples and patterns
+- [PHP Standards](php.md) - PHP-specific coding standards including documentation
+- [Code Style Guide](code-style.md) - General code formatting and style requirements
+
 ## Overview
 
 Comprehensive documentation standards ensure code clarity, maintainability, and developer productivity.
