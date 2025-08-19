@@ -2,6 +2,7 @@ import './bootstrap';
 import { Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import AlpineUI from '@alpinejs/ui';
 import '../css/app.css';
+import '../css/keenicons.css';
 
 import.meta.glob(['../media/**']);
 

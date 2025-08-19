@@ -46,7 +46,6 @@
     <!-- End of Main -->
     <!-- End of Page -->
     @livewireScriptConfig
-    @livewire('wire-elements-modal')
 </body>
 
 </html>

@@ -1,7 +1,96 @@
 @import "tailwindcss";
 
-@plugin "@tailwindcss/forms";
-@plugin "@tailwindcss/typography";
+@theme {
+  --primary: oklch(62.3% 0.214 259.815);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(96.7% 0.003 264.542);
+  --secondary-foreground: oklch(44.6% 0.03 256.802);
+  --muted: oklch(96.7% 0.003 264.542);
+  --muted-foreground: oklch(70.5% 0.015 286.067);
+  --accent: oklch(96.7% 0.003 264.542);
+  --accent-foreground: oklch(21% 0.006 285.885);
+  --destructive: oklch(57.7% 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+  --mono: oklch(14.1% 0.005 285.823);
+  --mono-foreground: oklch(1 0 0);
+  --border: oklch(94% 0.004 286.32);
+  --input: oklch(92% 0.004 286.32);
+  --ring: oklch(87.1% 0.006 286.286);
+  --radius: 0.5rem;
+  
+  --color-primary: #1B84FF;
+  --color-primary-active: #056EE9;
+  --color-primary-light: #EFF6FF;
+  --color-primary-clarity: rgba(27, 132, 255, 0.20);
+  --color-primary-inverse: #ffffff;
+  
+  --color-success: #17C653;
+  --color-success-active: #04B440;
+  --color-success-light: #EAFFF1;
+  --color-success-clarity: rgba(23, 198, 83, 0.20);
+  --color-success-inverse: #ffffff;
+  
+  --color-danger: #F8285A;
+  --color-danger-active: #D81A48;
+  --color-danger-light: #FFEEF3;
+  --color-danger-clarity: rgba(248, 40, 90, 0.20);
+  --color-danger-inverse: #ffffff;
+  
+  --color-warning: #F6B100;
+  --color-warning-active: #DFA000;
+  --color-warning-light: #FFF8DD;
+  --color-warning-clarity: rgba(246, 177, 0, 0.20);
+  --color-warning-inverse: #ffffff;
+  
+  --color-info: #7239EA;
+  --color-info-active: #5014D0;
+  --color-info-light: #F8F5FF;
+  --color-info-clarity: rgba(114, 57, 234, 0.20);
+  --color-info-inverse: #ffffff;
+  
+  --color-dark: #1E2129;
+  --color-dark-active: #111318;
+  --color-dark-light: #F9F9F9;
+  --color-dark-clarity: rgba(30, 33, 41, 0.20);
+  --color-dark-inverse: #ffffff;
+  
+  --color-light: #ffffff;
+  --color-light-active: #FCFCFC;
+  --color-light-light: #ffffff;
+  --color-light-clarity: rgba(255, 255, 255, 0.20);
+  --color-light-inverse: #4B5675;
+  
+  --color-secondary: #F9F9F9;
+  --color-secondary-active: #f9f9f9;
+  --color-secondary-light: #F9F9F9;
+  --color-secondary-clarity: rgba(249, 249, 249, 0.20);
+  --color-secondary-inverse: #4B5675;
+  
+  --color-gray-100: #F9F9F9;
+  --color-gray-200: #F1F1F4;
+  --color-gray-300: #DBDFE9;
+  --color-gray-400: #C4CADA;
+  --color-gray-500: #99A1B7;
+  --color-gray-600: #78829D;
+  --color-gray-700: #4B5675;
+  --color-gray-800: #252F4A;
+  --color-gray-900: #071437;
+  
+  --font-size-3xs: 0.625rem;
+  --font-size-2xs: 0.6875rem;
+  --font-size-2sm: 0.8125rem;
+  --font-size-md: 0.9375rem;
+  
+  --box-shadow-card: 0px 4px 12px 0px rgba(0, 0, 0, 0.09);
+  --box-shadow-default: 0px 4px 12px 0px rgba(0, 0, 0, 0.09);
+  --box-shadow-light: 0px 3px 4px 0px rgba(0, 0, 0, 0.03);
+  --box-shadow-primary: 0px 4px 12px 0px rgba(40, 132, 239, 0.35);
+  --box-shadow-success: 0px 4px 12px 0px rgba(53, 189, 100, 0.35);
+  --box-shadow-danger: 0px 4px 12px 0px rgba(241, 65, 108, 0.35);
+  --box-shadow-info: 0px 4px 12px 0px rgba(114, 57, 234, 0.35);
+  --box-shadow-warning: 0px 4px 12px 0px rgba(246, 192, 0, 0.35);
+  --box-shadow-dark: 0px 4px 12px 0px rgba(37, 47, 74, 0.35);
+}
 
 /* Layout Variables */
 .layout1 {
@@ -145,16 +234,16 @@
         @apply bg-secondary text-gray-700 border border-solid border-gray-200;
     }
     .btn-secondary-states {
-        @apply hover:bg-light-active hover:text-gray-800 hover:border-gray-300 hover:shadow-default 
-               active:bg-light-active active:text-gray-800 active:border-gray-300 active:shadow-default 
-               focus:bg-light-active focus:text-gray-800 focus:border-gray-300 focus:shadow-default;
+        @apply hover:bg-light-active hover:text-gray-800 hover:border-gray-300 hover:shadow-sm 
+               active:bg-light-active active:text-gray-800 active:border-gray-300 active:shadow-sm 
+               focus:bg-light-active focus:text-gray-800 focus:border-gray-300 focus:shadow-sm;
     }
 
     /* Form Input Utilities - Static classes for consistent form styling */
     
     /* Base Input Styling */
     .form-input-base {
-        @apply appearance-none shadow-none outline-none font-medium text-2sm leading-none 
+        @apply appearance-none shadow-none outline-none font-medium text-sm leading-none 
                bg-light-active rounded-md border border-solid border-gray-300 
                text-gray-600 w-full;
     }
@@ -176,7 +265,7 @@
     /* Input Container for complex inputs */
     .form-input-container {
         @apply flex gap-1.5 items-center appearance-none shadow-none outline-none 
-               text-gray-600 w-full font-medium text-2sm leading-none 
+               text-gray-600 w-full font-medium text-sm leading-none 
                bg-light-active rounded-md h-10 ps-3 pe-3 border border-solid 
                border-gray-300 hover:border-gray-400 has-[:focus]:border-primary 
                has-[:focus]:text-gray-700 has-[:invalid]:border-red-600;
@@ -185,7 +274,7 @@
     /* Input Elements inside container */
     .form-input-element {
         @apply grow bg-transparent border-transparent text-inherit outline-none 
-               m-0 p-0 text-2sm focus:ring-0 focus:border-none;
+               m-0 p-0 text-sm focus:ring-0 focus:border-none;
     }
 }
 
