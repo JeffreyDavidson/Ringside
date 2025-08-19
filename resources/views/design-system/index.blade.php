@@ -19,7 +19,8 @@
                     </div>
                     <p class="text-gray-600 mb-4">Interactive button components with multiple variants, sizes, and icon support.</p>
                     <div class="flex flex-wrap gap-2">
-                        <span class="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">11 Variants</span>
+                        <span class="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">3 Styles</span>
+                        <span class="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">4 Variants</span>
                         <span class="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">3 Sizes</span>
                         <span class="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">Icon Support</span>
                     </div>

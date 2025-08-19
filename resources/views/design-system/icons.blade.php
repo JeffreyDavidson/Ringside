@@ -14,7 +14,7 @@
         <!-- Icon Styles -->
         <section class="mb-16">
             <h2 class="text-2xl font-semibold text-gray-900 mb-8">Styles</h2>
-            
+
             <div class="mb-12">
                 <h3 class="text-xl font-medium text-gray-800 mb-6">Icon Styles</h3>
                 <div class="flex flex-wrap gap-8 items-center mb-4">
@@ -49,7 +49,7 @@
         <!-- Icon Variants -->
         <section class="mb-16">
             <h2 class="text-2xl font-semibold text-gray-900 mb-8">Color Variants</h2>
-            
+
             <div class="mb-12">
                 <h3 class="text-xl font-medium text-gray-800 mb-6">Color Options</h3>
                 <div class="flex flex-wrap gap-8 items-center mb-4">
@@ -89,7 +89,7 @@
         <!-- Icon Sizes -->
         <section class="mb-16">
             <h2 class="text-2xl font-semibold text-gray-900 mb-8">Sizes</h2>
-            
+
             <div class="mb-12">
                 <h3 class="text-xl font-medium text-gray-800 mb-6">Size Options</h3>
                 <div class="flex flex-wrap gap-8 items-center mb-4">
@@ -134,7 +134,7 @@
         <!-- Common Icons -->
         <section class="mb-16">
             <h2 class="text-2xl font-semibold text-gray-900 mb-8">Common Icons</h2>
-            
+
             <div class="mb-12">
                 <h3 class="text-xl font-medium text-gray-800 mb-6">Frequently Used Icons</h3>
                 <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-6 mb-6">
@@ -155,7 +155,7 @@
                         <span class="text-xs text-gray-600">eye</span>
                     </div>
                     <div class="flex flex-col items-center gap-2">
-                        <x-ui.icon name="gear" style="outline" size="xl" />
+                        <x-ui.icon name="setting-2" style="outline" size="xl" />
                         <span class="text-xs text-gray-600">gear</span>
                     </div>
                     <div class="flex flex-col items-center gap-2">
@@ -183,7 +183,7 @@
                         <span class="text-xs text-gray-600">home</span>
                     </div>
                     <div class="flex flex-col items-center gap-2">
-                        <x-ui.icon name="search" style="outline" size="xl" />
+                        <x-ui.icon name="magnifier" style="outline" size="xl" />
                         <span class="text-xs text-gray-600">search</span>
                     </div>
                 </div>
@@ -211,7 +211,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Navigation -->
                         <div>
                             <h4 class="font-medium text-gray-700 mb-4">Navigation</h4>
@@ -225,12 +225,12 @@
                                     <span class="text-sm">Home / Dashboard</span>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <x-ui.icon name="search" style="outline" size="lg" />
+                                    <x-ui.icon name="magnifier" style="outline" size="lg" />
                                     <span class="text-sm">Search / Find</span>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Status -->
                         <div>
                             <h4 class="font-medium text-gray-700 mb-4">Status</h4>
@@ -249,7 +249,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Interface -->
                         <div>
                             <h4 class="font-medium text-gray-700 mb-4">Interface</h4>
@@ -259,7 +259,7 @@
                                     <span class="text-sm">View / Show</span>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <x-ui.icon name="gear" style="outline" size="lg" />
+                                    <x-ui.icon name="setting-2" style="outline" size="lg" />
                                     <span class="text-sm">Settings / Config</span>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -296,7 +296,7 @@
                         <span class="text-blue-700">sm | md | lg | xl | 2xl | 3xl (default: md)</span>
                     </div>
                 </div>
-                
+
                 <div class="mt-6">
                     <h4 class="font-medium text-blue-900 mb-2">Best Practices:</h4>
                     <ul class="list-disc list-inside space-y-1 text-blue-800">
