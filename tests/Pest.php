@@ -7,7 +7,6 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Collection;
-use Tests\DuskTestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +20,7 @@ use Tests\DuskTestCase;
 */
 
 uses(
-    DuskTestCase::class,
+    TestCase::class,
     DatabaseMigrations::class,
 )->in('Browser');
 

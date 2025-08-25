@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@alpinejs/ui": "^3.14.8",
-    "glob": "^11.0.3"
+    "glob": "^11.0.3",
+    "playwright": "^1.55.0"
   }
 }
