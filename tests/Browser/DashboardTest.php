@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Models\Users\User;
-use Laravel\Dusk\Browser;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+
+uses(DatabaseMigrations::class);
 
 test('authenticated user can access dashboard', function () {
     $user = User::factory()->create([
@@ -11,44 +13,20 @@ test('authenticated user can access dashboard', function () {
         'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->loginAs($user)
-            ->visit('http://ringside.test/dashboard')
-            ->screenshot('dashboard-authenticated-access');
+    $this->actingAs($user);
 
-        // Verify we can access some page content
-        $browser->assertPresent('body');
+    $page = visit('/dashboard');
 
-        // Check if dashboard content is present
-        $pageText = $browser->text('body');
-        if (str_contains($pageText, 'Dashboard') || str_contains($pageText, 'Central Hub')) {
-            // Dashboard loaded successfully
-            expect(true)->toBeTrue();
-        } else {
-            // Even if specific text isn't found, authenticated access should work
-            // This test primarily verifies no authentication errors occur
-            expect(true)->toBeTrue();
-        }
-    });
+    $page->assertSee('Dashboard')
+        ->assertNoJavascriptErrors();
 });
 
 test('unauthenticated users are redirected from dashboard', function () {
-    $this->browse(function (Browser $browser) {
-        $browser->visit('http://ringside.test/dashboard')
-            ->screenshot('dashboard-unauthenticated-redirect');
+    $page = visit('/dashboard');
 
-        // Should be redirected to login or see authentication prompt
-        $currentUrl = $browser->driver->getCurrentURL();
-        $pageText = $browser->text('body');
-
-        // Verify authentication is required
-        $isProtected = str_contains($currentUrl, 'login') ||
-                      str_contains($pageText, 'Sign in') ||
-                      str_contains($pageText, 'Login') ||
-                      str_contains($pageText, 'authentication');
-
-        expect($isProtected)->toBeTrue();
-    });
+    // Should be redirected to login or see authentication prompt
+    $page->assertSee('Sign in')
+        ->assertNoJavascriptErrors();
 });
 
 test('dashboard page loads without errors', function () {
@@ -57,22 +35,15 @@ test('dashboard page loads without errors', function () {
         'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->loginAs($user)
-            ->visit('http://ringside.test/dashboard')
-            ->screenshot('dashboard-load-test');
+    $this->actingAs($user);
 
-        // Verify page loads (no 404, 500, or other errors)
-        $title = $browser->driver->getTitle();
+    $page = visit('/dashboard');
 
-        // Should not be error pages
-        $isErrorPage = str_contains($title, '404') ||
-                      str_contains($title, '500') ||
-                      str_contains($title, 'Error') ||
-                      str_contains($title, 'Site not found');
-
-        expect($isErrorPage)->toBeFalse();
-    });
+    // Verify page loads without errors
+    $page->assertDontSee('404')
+        ->assertDontSee('500')
+        ->assertDontSee('Error')
+        ->assertNoJavascriptErrors();
 });
 
 test('dashboard has basic navigation structure', function () {
@@ -81,27 +52,12 @@ test('dashboard has basic navigation structure', function () {
         'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->loginAs($user)
-            ->visit('http://ringside.test/dashboard')
-            ->screenshot('dashboard-navigation-test');
+    $this->actingAs($user);
 
-        // Check for basic page structure elements
-        $hasStructure = false;
-        $structureSelectors = ['nav', '.nav', 'header', 'main', '.container', '.content'];
+    $page = visit('/dashboard');
 
-        foreach ($structureSelectors as $selector) {
-            try {
-                if ($browser->element($selector)) {
-                    $hasStructure = true;
-                    break;
-                }
-            } catch (Exception $e) {
-                // Continue checking other selectors
-            }
-        }
-
-        // Dashboard should have some basic page structure
-        expect($hasStructure)->toBeTrue();
-    });
+    // Check for basic page structure elements
+    $page->assertElementPresent('nav')
+        ->assertElementPresent('main')
+        ->assertNoJavascriptErrors();
 });
