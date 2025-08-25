@@ -3,111 +3,94 @@
 declare(strict_types=1);
 
 use App\Models\Users\User;
-use Laravel\Dusk\Browser;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+
+uses(DatabaseMigrations::class);
 
 test('login screen displays correctly', function () {
-    $this->browse(function (Browser $browser) {
-        $browser->visit(route('login'))
-            ->assertTitle('Laravel')
-            ->assertSee('Sign in')
-            ->assertVisible('input[name="email"]')
-            ->assertVisible('input[name="password"]')
-            ->assertVisible('button')
-            ->assertSee('Email')
-            ->assertSee('Password')
-            ->assertAttribute('input[name="email"]', 'placeholder', 'email@email.com')
-            ->assertAttribute('input[name="password"]', 'placeholder', 'Enter Password')
-            ->screenshot('login-screen');
-    });
+    $page = visit(route('login'));
+
+    $page->assertSee('Sign in')
+        ->assertElementPresent('input[name="email"]')
+        ->assertElementPresent('input[name="password"]')
+        ->assertElementPresent('button')
+        ->assertSee('Email')
+        ->assertSee('Password')
+        ->assertAttribute('input[name="email"]', 'placeholder', 'email@email.com')
+        ->assertAttribute('input[name="password"]', 'placeholder', 'Enter Password')
+        ->assertNoJavascriptErrors();
 });
 
 test('user can authenticate successfully', function () {
     $user = User::factory()->create([
         'email' => 'test@ringside.test',
-        'password' => 'password123', // Raw password - let mutator handle hashing
+        'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->visit(route('login'))
-            ->type('email', $user->email)
-            ->type('password', 'password123')
-            ->screenshot('login-form-filled')
-            ->press('Sign In')
-            ->pause(3000) // Allow time for redirect
-            ->screenshot('after-login-attempt');
+    $page = visit(route('login'));
 
-        // Check if we reached dashboard
-        $currentUrl = $browser->driver->getCurrentURL();
-        if (str_contains($currentUrl, 'dashboard')) {
-            $browser->assertSee('Dashboard');
-        } else {
-            // If still on login, there might be an authentication issue
-            // This is expected during development/debugging
-            $browser->assertPathIs('/login');
-        }
-    });
+    $page->type('email', $user->email)
+        ->type('password', 'password123')
+        ->press('Sign In')
+        ->waitForRoute('dashboard')
+        ->assertSee('Dashboard')
+        ->assertNoJavascriptErrors();
 });
 
 test('authentication fails with invalid credentials', function () {
-    $this->browse(function (Browser $browser) {
-        $browser->visit(route('login'))
-            ->type('email', 'nonexistent@example.com')
-            ->type('password', 'wrongpassword')
-            ->screenshot('login-invalid-credentials')
-            ->press('Sign In')
-            ->waitForText('These credentials do not match our records')
-            ->assertSee('These credentials do not match our records')
-            ->assertPathIs('/login')
-            ->screenshot('login-error-displayed');
-    });
+    $page = visit(route('login'));
+
+    $page->type('email', 'nonexistent@example.com')
+        ->type('password', 'wrongpassword')
+        ->press('Sign In')
+        ->waitForText('These credentials do not match our records')
+        ->assertSee('These credentials do not match our records')
+        ->assertRouteIs('login')
+        ->assertNoJavascriptErrors();
 });
 
 test('login form validates required fields', function () {
-    $this->browse(function (Browser $browser) {
-        $browser->visit(route('login'))
-            ->press('Sign In')
-            ->waitForText('The email field is required')
-            ->assertSee('The email field is required')
-            ->assertSee('The password field is required')
-            ->assertPathIs('/login')
-            ->screenshot('login-validation-errors');
-    });
+    $page = visit(route('login'));
+
+    $page->press('Sign In')
+        ->waitForText('The email field is required')
+        ->assertSee('The email field is required')
+        ->assertSee('The password field is required')
+        ->assertRouteIs('login')
+        ->assertNoJavascriptErrors();
 });
 
 test('login form validates email format', function () {
-    $this->browse(function (Browser $browser) {
-        $browser->visit(route('login'))
-            ->type('email', 'invalid-email-format')
-            ->type('password', 'somepassword')
-            ->press('Sign In')
-            ->waitForText('The email field must be a valid email address')
-            ->assertSee('The email field must be a valid email address')
-            ->assertPathIs('/login')
-            ->screenshot('login-email-validation-error');
-    });
+    $page = visit(route('login'));
+
+    $page->type('email', 'invalid-email-format')
+        ->type('password', 'somepassword')
+        ->press('Sign In')
+        ->waitForText('The email field must be a valid email address')
+        ->assertSee('The email field must be a valid email address')
+        ->assertRouteIs('login')
+        ->assertNoJavascriptErrors();
 });
 
 test('login form has proper accessibility', function () {
-    $this->browse(function (Browser $browser) {
-        $browser->visit(route('login'))
-            ->assertAttribute('input[name="email"]', 'type', 'text') // Based on the actual HTML
-            ->assertAttribute('input[name="password"]', 'type', 'password')
-            ->assertVisible('label') // Check labels are present
-            ->screenshot('login-form-accessibility-check');
-    });
+    $page = visit(route('login'));
+
+    $page->assertAttribute('input[name="email"]', 'type', 'text')
+        ->assertAttribute('input[name="password"]', 'type', 'password')
+        ->assertElementPresent('label')
+        ->assertNoJavascriptErrors();
 });
 
 test('login form keyboard navigation works', function () {
-    $this->browse(function (Browser $browser) {
-        $browser->visit(route('login'))
-            ->click('input[name="email"]')
-            ->assertFocused('input[name="email"]')
-            ->keys('input[name="email"]', '{tab}')
-            ->assertFocused('input[name="password"]')
-            ->keys('input[name="password"]', '{tab}')
-            ->assertFocused('button')
-            ->screenshot('login-keyboard-navigation');
-    });
+    $page = visit(route('login'));
+
+    $page->click('input[name="email"]')
+        ->assertFocused('input[name="email"]')
+        ->key('Tab')
+        ->assertFocused('input[name="password"]')
+        ->key('Tab')
+        ->assertFocused('button')
+        ->assertNoJavascriptErrors();
 });
 
 test('remember me functionality works if present', function () {
@@ -116,22 +99,20 @@ test('remember me functionality works if present', function () {
         'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->visit(route('login'))
-            ->type('email', $user->email)
-            ->type('password', 'password123');
+    $page = visit(route('login'));
 
-        // Check if remember me checkbox exists
-        if ($browser->element('input[name="remember"]')) {
-            $browser->check('remember')
-                ->screenshot('login-with-remember-me');
-        }
+    $page->type('email', $user->email)
+        ->type('password', 'password123');
 
-        $browser->press('Sign In')
-            ->waitForLocation(route('dashboard', [], false))
-            ->assertSee('Dashboard')
-            ->screenshot('dashboard-with-remember-session');
-    });
+    // Check if remember me checkbox exists
+    if ($page->hasElement('input[name="remember"]')) {
+        $page->check('remember');
+    }
+
+    $page->press('Sign In')
+        ->waitForRoute('dashboard')
+        ->assertSee('Dashboard')
+        ->assertNoJavascriptErrors();
 });
 
 test('login form works on mobile viewports', function () {
@@ -140,20 +121,17 @@ test('login form works on mobile viewports', function () {
         'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->resize(375, 667) // iPhone SE dimensions
-            ->visit(route('login'))
-            ->assertVisible('input[name="email"]')
-            ->assertVisible('input[name="password"]')
-            ->assertVisible('button')
-            ->type('email', $user->email)
-            ->type('password', 'password123')
-            ->screenshot('login-mobile-view')
-            ->press('Sign In')
-            ->waitForLocation(route('dashboard', [], false))
-            ->assertSee('Dashboard')
-            ->screenshot('dashboard-mobile-view');
-    });
+    $page = visit(route('login'))->mobile(); // Pest 4.0 mobile viewport
+
+    $page->assertElementPresent('input[name="email"]')
+        ->assertElementPresent('input[name="password"]')
+        ->assertElementPresent('button')
+        ->type('email', $user->email)
+        ->type('password', 'password123')
+        ->press('Sign In')
+        ->waitForRoute('dashboard')
+        ->assertSee('Dashboard')
+        ->assertNoJavascriptErrors();
 });
 
 test('user can logout successfully', function () {
@@ -162,37 +140,37 @@ test('user can logout successfully', function () {
         'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        // First login
-        $browser->visit(route('login'))
-            ->type('email', $user->email)
-            ->type('password', 'password123')
-            ->press('Sign In')
-            ->waitForLocation(route('dashboard', [], false))
-            ->assertSee('Dashboard');
+    // First login
+    $page = visit(route('login'));
 
-        // Then logout via the profile dropdown
-        $browser->press('Log out')
-            ->waitForLocation('/')
-            ->screenshot('after-logout')
-            // Verify we can't access protected pages
-            ->visit(route('dashboard'))
-            ->waitForLocation(route('login', [], false))
-            ->assertSee('Sign in')
-            ->screenshot('redirected-to-login-after-logout');
-    });
+    $page->type('email', $user->email)
+        ->type('password', 'password123')
+        ->press('Sign In')
+        ->waitForRoute('dashboard')
+        ->assertSee('Dashboard')
+        ->press('Log out')
+        ->waitForText('Sign in')
+        ->assertSee('Sign in')
+        ->assertNoJavascriptErrors();
+
+    // Verify we can't access protected pages
+    $page = visit(route('dashboard'));
+
+    $page->waitForRoute('login')
+        ->assertSee('Sign in')
+        ->assertNoJavascriptErrors();
 });
 
 test('authenticated users are redirected away from login page', function () {
     $user = User::factory()->create();
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->loginAs($user)
-            ->visit(route('login'))
-            ->waitForLocation(route('dashboard', [], false))
-            ->assertSee('Dashboard')
-            ->screenshot('authenticated-user-redirected');
-    });
+    $this->actingAs($user);
+
+    $page = visit(route('login'));
+
+    $page->waitForRoute('dashboard')
+        ->assertSee('Dashboard')
+        ->assertNoJavascriptErrors();
 });
 
 test('login form handles longer processing times', function () {
@@ -201,13 +179,12 @@ test('login form handles longer processing times', function () {
         'password' => 'password123',
     ]);
 
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->visit(route('login'))
-            ->type('email', $user->email)
-            ->type('password', 'password123')
-            ->press('Sign In')
-            ->waitForLocation('/dashboard', 10) // Allow more time for processing
-            ->assertSee('Dashboard')
-            ->screenshot('login-with-processing-time');
-    });
+    $page = visit(route('login'));
+
+    $page->type('email', $user->email)
+        ->type('password', 'password123')
+        ->press('Sign In')
+        ->waitForRoute('dashboard', 10) // Allow more time for processing
+        ->assertSee('Dashboard')
+        ->assertNoJavascriptErrors();
 });
