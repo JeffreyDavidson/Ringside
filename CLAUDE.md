@@ -120,6 +120,11 @@ Implemented Vite bundle analyzer for performance monitoring:
 ### Custom Test Generator
 - `php artisan ringside:make:test --unit --model="ModelName"` - Generate standardized tests
 
+### Pull Request Creation
+- When pushing a new feature branch, automatically create a comprehensive pull request using `gh pr create`
+- Include detailed summary of changes, test plan, and breaking changes if any
+- Share the PR link immediately after creation for review
+
 ## Wrestling Business Logic
 
 ### Employment Patterns
