@@ -29,7 +29,7 @@ require __DIR__.'/auth.php';
 
 Route::redirect('/', 'login');
 
-Auth::loginUsingId(1);
+Auth::logout();
 
 Route::middleware('auth')->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
