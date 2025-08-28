@@ -74,14 +74,15 @@
       "Bash(herd link:*)",
       "Bash(pkill:*)",
       "Bash(touch:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "defaultMode": "plan"
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "laravel-boost",
     "herd"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }
