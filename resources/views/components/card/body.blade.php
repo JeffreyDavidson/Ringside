@@ -1,9 +1,21 @@
-@aware(['inGrid' => false])
+@props([
+    'variant' => 'default',
+    'class' => '',
+])
 
-<div
-    {{ $attributes->class(['grow'])->class([
-        'py-5 ps-7.5 pe-7.5' => !$inGrid,
-        'p-0' => $inGrid,
-    ]) }}>
+@php
+$classes = collect([
+    'card-body',
+    
+    // Padding variants
+    match($variant) {
+        'compact' => 'p-4',
+        'spacious' => 'p-8',
+        default => 'p-6'
+    }
+])->implode(' ');
+@endphp
+
+<div {{ $attributes->merge(['class' => $classes . ' ' . $class]) }}>
     {{ $slot }}
 </div>

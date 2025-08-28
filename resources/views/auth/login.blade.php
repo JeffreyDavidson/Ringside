@@ -26,42 +26,32 @@
         <!-- Divider -->
         <x-auth.form-divider />
 
-        <!-- Email Field -->
-        <div class="flex flex-col gap-1">
-            <label class="text-2sm font-normal text-gray-900">Email</label>
-            <input 
-                class="block w-full appearance-none shadow-none outline-none font-medium text-2sm leading-4 bg-gray-50 rounded-md h-10 px-3 border border-solid border-gray-300 text-gray-700 focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary transition-colors" 
-                placeholder="email@email.com" 
-                type="email" 
-                value="{{ old('email') }}" 
-                name="email"
-                id="email">
-            @error('email')
-                <span class="font-medium text-xs leading-4 text-red-500">
-                    {{ $message }}
-                </span>
-            @enderror
-        </div>
+        <!-- Email Field - Shorthand Usage (Flux pattern) -->
+        <x-form.input 
+            type="email"
+            name="email" 
+            label="Email"
+            placeholder="email@email.com"
+            value="{{ old('email') }}" />
 
-        <!-- Password Field -->
-        <div class="flex flex-col gap-1">
+        <!-- Password Field - Verbose mode for custom layout -->
+        <x-form.field>
             <div class="flex items-center justify-between gap-1">
-                <label class="text-2sm font-normal text-gray-900">Password</label>
+                <x-form.label for="password">Password</x-form.label>
                 <a class="text-sm text-primary hover:text-primary-active font-medium shrink-0" href="{{ route('password.request') }}">
                     Forgot Password?
                 </a>
             </div>
-            <input 
-                name="password" 
-                placeholder="Enter Password" 
-                type="password" 
-                class="block w-full appearance-none shadow-none outline-none font-medium text-2sm leading-4 bg-gray-50 rounded-md h-10 px-3 border border-solid border-gray-300 text-gray-700 focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary transition-colors">
-            @error('password')
-                <span class="font-medium text-xs leading-4 text-red-500">
-                    {{ $message }}
-                </span>
-            @enderror
-        </div>
+            
+            <div data-form-control>
+                <x-form.input 
+                    type="password"
+                    name="password"
+                    placeholder="Enter Password" />
+            </div>
+            
+            <x-form.error name="password" data-form-error />
+        </x-form.field>
 
         <!-- Remember Me -->
         <label class="flex items-center">

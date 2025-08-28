@@ -1,51 +1,32 @@
 @props([
-    'name' => null,
-    'description' => null, 
     'label' => null,
+    'description' => null,
     'variant' => 'block',
+    'name' => null,
 ])
 
 @php
-// Extract name from wire:model if not provided (Flux pattern)
-$fieldName = $name ?? $attributes->whereStartsWith('wire:model')->first();
-if ($fieldName && str_contains($fieldName, '=')) {
-    $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
-}
-
-// Forward attributes excluding field-specific ones
-$fieldAttributes = $attributes->only(['variant', 'class']);
-$slotAttributes = $attributes->except(['name', 'description', 'label', 'variant']);
+// Temporary minimal implementation for testing
+$classes = collect()
+    ->add('min-w-0')
+    ->when($variant === 'block', fn($classes) => $classes->add('flex flex-col gap-1'))
+    ->implode(' ');
 @endphp
 
-@if($label || $description)
-    <x-form.field :variant="$variant" {{ $fieldAttributes }}>
-        @if($label)
-            <x-form.label :for="$fieldName" data-form-label>
-                {{ $label }}
-            </x-form.label>
-        @endif
-        
-        @if($description && $variant === 'block')
-            <x-form.description data-form-description>
-                {{ $description }}
-            </x-form.description>
-        @endif
-        
-        <div data-form-control>
-            {{ $slot->withAttributes($slotAttributes->merge(['name' => $fieldName])) }}
-        </div>
-        
-        <x-form.error :name="$fieldName" data-form-error />
-        
-        @if($description && $variant === 'inline')
-            <x-form.description data-form-description>
-                {{ $description }}
-            </x-form.description>
-        @endif
-    </x-form.field>
-@else
-    {{ $slot->withAttributes($slotAttributes->merge(['name' => $fieldName])) }}
-    @if($fieldName)
-        <x-form.error :name="$fieldName" />
+<x-form.field :variant="$variant" {{ $attributes->except(['label', 'description', 'name']) }}>
+    @if($label)
+        <x-form.label>{{ $label }}</x-form.label>
     @endif
-@endif
+    
+    <div data-form-control>
+        {{ $slot }}
+    </div>
+    
+    @if($description)
+        <x-form.description>{{ $description }}</x-form.description>
+    @endif
+    
+    @if($name)
+        <x-form.error :name="$name" />
+    @endif
+</x-form.field>
