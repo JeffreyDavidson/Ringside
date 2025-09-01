@@ -34,6 +34,7 @@
                 type="email"
                 name="email"
                 id="email"
+                data-test="email"
                 placeholder="email@email.com"
                 value="{{ old('email') }}" />
 
@@ -52,16 +53,18 @@
             <x-form.input
                 type="password"
                 name="password"
+                id="password"
+                data-test="password"
                 placeholder="Enter Password" />
 
             <x-form.error name="password" />
         </div>
 
         <!-- Remember Me -->
-        <x-form.inputs.checkbox name="remember" label="Remember me" value="1" size="sm"/>
+        <x-form.inputs.checkbox name="remember" label="Remember me" value="1" size="sm" data-test="remember"/>
 
         <!-- Submit Button -->
-        <x-ui.button variant="primary" class="w-full flex justify-center">
+        <x-ui.button type="submit" variant="primary" class="w-full flex justify-center" data-test="sign-in">
             Sign In
         </x-ui.button>
     </form>
