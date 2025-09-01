@@ -122,7 +122,10 @@ export default {
       spacing: {
         '1.25': '.275rem',
         '2.25': '.563rem', 
+        '4.5': '1.125rem',  // For Metronic small checkbox (18px)
+        '5.5': '1.375rem',  // For Metronic large checkbox (22px)
         '7.5': '1.875rem',
+        '8.5': '2.125rem',  // For Metronic medium button height
       },
       lineHeight: {
         '4.25': '1.125rem'
