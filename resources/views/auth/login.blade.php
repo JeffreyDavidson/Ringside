@@ -1,17 +1,17 @@
 <x-layouts.auth>
     <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('login') }}">
         @csrf
-        
+
         <!-- Header -->
         <div class="text-center mb-2.5">
-            <h3 class="text-lg font-medium text-gray-900 leading-none mb-2.5">
+            <h3 class="text-lg font-medium text-foreground leading-none mb-2.5">
                 Sign in
             </h3>
             <div class="flex items-center justify-center font-medium">
-                <span class="text-sm text-gray-600 me-1.5">
+                <span class="text-sm text-secondary-foreground me-1.5">
                     Need an account?
                 </span>
-                <a class="text-sm text-primary hover:text-primary-active font-medium" href="{{ route('register') }}">
+                <a class="text-sm font-medium" href="{{ route('register') }}">
                     Sign up
                 </a>
             </div>
@@ -26,41 +26,42 @@
         <!-- Divider -->
         <x-auth.form-divider />
 
-        <!-- Email Field - Shorthand Usage (Flux pattern) -->
-        <x-form.input 
-            type="email"
-            name="email" 
-            label="Email"
-            placeholder="email@email.com"
-            value="{{ old('email') }}" />
+        <!-- Email Field - Explicit structure for custom label classes -->
+        <div class="flex flex-col gap-1">
+            <x-form.label for="email" class="font-normal text-[var(--mono)]">Email</x-form.label>
 
-        <!-- Password Field - Verbose mode for custom layout -->
-        <x-form.field>
+            <x-form.input
+                type="email"
+                name="email"
+                id="email"
+                placeholder="email@email.com"
+                value="{{ old('email') }}" />
+
+            <x-form.error name="email" />
+        </div>
+
+        <!-- Password Field - Simplified structure -->
+        <div class="flex flex-col gap-1">
             <div class="flex items-center justify-between gap-1">
-                <x-form.label for="password">Password</x-form.label>
+                <x-form.label for="password" class="font-normal text-[var(--mono)]">Password</x-form.label>
                 <a class="text-sm text-primary hover:text-primary-active font-medium shrink-0" href="{{ route('password.request') }}">
                     Forgot Password?
                 </a>
             </div>
-            
-            <div data-form-control>
-                <x-form.input 
-                    type="password"
-                    name="password"
-                    placeholder="Enter Password" />
-            </div>
-            
-            <x-form.error name="password" data-form-error />
-        </x-form.field>
+
+            <x-form.input
+                type="password"
+                name="password"
+                placeholder="Enter Password" />
+
+            <x-form.error name="password" />
+        </div>
 
         <!-- Remember Me -->
-        <label class="flex items-center">
-            <input class="rounded border-gray-300 text-primary shadow-sm focus:ring-primary" name="remember" type="checkbox" value="1">
-            <span class="ms-2 text-sm text-gray-600">Remember me</span>
-        </label>
+        <x-form.inputs.checkbox name="remember" label="Remember me" value="1" size="sm"/>
 
         <!-- Submit Button -->
-        <x-ui.button variant="primary" class="flex justify-center grow">
+        <x-ui.button variant="primary" class="w-full flex justify-center">
             Sign In
         </x-ui.button>
     </form>
