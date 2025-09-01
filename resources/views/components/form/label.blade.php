@@ -4,20 +4,20 @@
     'badge' => null,
 ])
 
-<label 
+<label
     {{ $attributes->merge([
         'for' => $for,
-        'class' => 'text-2sm font-normal text-gray-900'
+        'class' => 'flex gap-2 items-center w-full text-sm leading-none font-medium text-foreground'
     ]) }}>
     {{ $slot }}
-    
+
     @if($badge)
-        <span class="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+        <span class="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground">
             {{ $badge }}
         </span>
     @endif
-    
+
     @if($required)
-        <span class="text-red-500 ml-1">*</span>
+        <span class="text-destructive ml-1">*</span>
     @endif
 </label>

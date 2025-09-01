@@ -4,7 +4,7 @@
     'description' => null,
     'variant' => 'block',
     'type' => 'text',
-    'size' => null,
+    'size' => 'md',               // 'sm', 'md' (default), 'lg'
 ])
 
 @php
@@ -17,19 +17,18 @@ if ($fieldName && str_contains($fieldName, '=')) {
 // Generate ID
 $inputId = $attributes->get('id', $fieldName);
 
-// Build input classes with Metronic styling
+// Build input classes matching .kt-input specifications
 $inputClasses = collect([
-    // Base classes
-    'block w-full appearance-none shadow-none outline-none',
-    'font-medium text-2sm leading-4',
-    'rounded-md h-10 px-3',
-    'border border-solid transition-colors',
-    // Metronic color scheme
-    'bg-gray-50 border-gray-300 text-gray-700',
-    'focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary',
-    // Size variants
-    $size === 'sm' ? 'h-8 px-2 text-xs' : null,
-    $size === 'lg' ? 'h-12 px-4 text-base' : null,
+    // Base classes - matching .kt-input
+    'block w-full appearance-none outline-none',
+    'border border-solid border-[var(--input)] bg-background text-foreground',
+    'rounded-[calc(var(--radius)-2px)] shadow-[var(--tw-input-box-shadow)] transition-[color,box-shadow]',
+    'placeholder-[var(--muted-foreground)]',
+    'focus-visible:outline-none focus-visible:border-[var(--ring)] focus-visible:ring-2 focus-visible:ring-[color-mix(in_oklab,var(--ring)_30%,transparent)]',
+    // Size variants using CSS variables (Metronic specifications) - add extra right padding for password fields
+    $size === 'sm' ? ($type === 'password' ? 'h-[calc(var(--spacing)*7)] pl-[calc(var(--spacing)*2.5)] pr-[calc(var(--spacing)*8)] text-xs' : 'h-[calc(var(--spacing)*7)] px-[calc(var(--spacing)*2.5)] text-xs') : null,
+    $size === 'md' ? ($type === 'password' ? 'h-[calc(var(--spacing)*8.5)] pl-[calc(var(--spacing)*3)] pr-[calc(var(--spacing)*10)] text-2sm' : 'h-[calc(var(--spacing)*8.5)] px-[calc(var(--spacing)*3)] text-2sm') : null,
+    $size === 'lg' ? ($type === 'password' ? 'h-[calc(var(--spacing)*10)] pl-[calc(var(--spacing)*4)] pr-[calc(var(--spacing)*12)] text-sm' : 'h-[calc(var(--spacing)*10)] px-[calc(var(--spacing)*4)] text-sm') : null,
 ])->filter()->implode(' ');
 
 // Forward all attributes except field-specific ones
@@ -38,26 +37,72 @@ $inputAttributes = $attributes->except(['label', 'description', 'variant', 'name
 
 @if($label || $description)
     {{-- Shorthand mode: auto-wrap in field (Flux pattern) --}}
-    <x-form.with-field 
-        :label="$label" 
-        :description="$description" 
-        :variant="$variant" 
+    <x-form.with-field
+        :label="$label"
+        :description="$description"
+        :variant="$variant"
         :name="$fieldName">
-        <input 
+        @if($type === 'password')
+            <div class="relative" x-data="{ showPassword: false }">
+                <input
+                    {{ $inputAttributes->merge([
+                        'name' => $fieldName,
+                        'id' => $inputId,
+                        'class' => $inputClasses
+                    ]) }}
+                    :type="showPassword ? 'text' : 'password'" />
+                <button
+                    type="button"
+                    class="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground focus:outline-none"
+                    @click="showPassword = !showPassword">
+                    <span x-show="!showPassword">
+                        <x-ui.icon name="eye" style="filled" size="md" />
+                    </span>
+                    <span x-show="showPassword">
+                        <x-ui.icon name="eye-slash" style="filled" size="md" />
+                    </span>
+                </button>
+            </div>
+        @else
+            <input
+                {{ $inputAttributes->merge([
+                    'type' => $type,
+                    'name' => $fieldName,
+                    'id' => $inputId,
+                    'class' => $inputClasses
+                ]) }} />
+        @endif
+    </x-form.with-field>
+@else
+    {{-- Verbose mode: just the input --}}
+    @if($type === 'password')
+        <div class="relative" x-data="{ showPassword: false }">
+            <input
+                {{ $inputAttributes->merge([
+                    'name' => $fieldName,
+                    'id' => $inputId,
+                    'class' => $inputClasses
+                ]) }}
+                :type="showPassword ? 'text' : 'password'" />
+            <button
+                type="button"
+                class="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground focus:outline-none"
+                @click="showPassword = !showPassword">
+                <span x-show="!showPassword">
+                    <x-ui.icon name="eye" style="filled" size="md" />
+                </span>
+                <span x-show="showPassword">
+                    <x-ui.icon name="eye-slash" style="filled" size="md" />
+                </span>
+            </button>
+        </div>
+    @else
+        <input
             {{ $inputAttributes->merge([
                 'type' => $type,
                 'name' => $fieldName,
                 'id' => $inputId,
                 'class' => $inputClasses
             ]) }} />
-    </x-form.with-field>
-@else
-    {{-- Verbose mode: just the input --}}
-    <input 
-        {{ $inputAttributes->merge([
-            'type' => $type,
-            'name' => $fieldName,
-            'id' => $inputId,
-            'class' => $inputClasses
-        ]) }} />
+    @endif
 @endif

@@ -5,7 +5,7 @@
 <div 
     {{ $attributes->merge([
         'id' => $id,
-        'class' => 'text-xs text-gray-600'
+        'class' => 'text-xs text-muted-foreground'
     ]) }}>
     {{ $slot }}
 </div>
