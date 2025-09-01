@@ -19,9 +19,10 @@ describe('Card Components', function () {
             $component = Blade::render('<x-card />');
 
             expect($component)
-                ->toContain('bg-white')
-                ->toContain('rounded-lg')
-                ->toContain('shadow-sm')
+                ->toContain('bg-card')
+                ->toContain('text-card-foreground')
+                ->toContain('border-border')
+                ->toContain('flex flex-col')
                 ->toContain('border');
         });
 
@@ -99,7 +100,7 @@ describe('Card Components', function () {
 
             expect($component)
                 ->toContain('custom-card')
-                ->toContain('bg-white');
+                ->toContain('bg-card');
         });
 
         it('renders complete card with all slots', function () {

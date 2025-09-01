@@ -75,7 +75,8 @@
       "Bash(pkill:*)",
       "Bash(touch:*)",
       "Bash(sqlite3:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "mcp__laravel-boost__browser-logs"
     ],
     "deny": [],
     "defaultMode": "plan"
