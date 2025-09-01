@@ -1,5 +1,5 @@
 @props([
-    'size' => null,               // null (default), 'sm', 'lg'
+    'size' => 'md',               // 'sm', 'md' (default), 'lg'
     'style' => 'filled',          // filled (default), outline, ghost
     'variant' => 'primary',       // primary, secondary, destructive, mono
     'iconLeft' => null,
@@ -12,31 +12,29 @@
         // Base classes
         'inline-flex items-center justify-center cursor-pointer font-medium whitespace-nowrap transition-colors duration-200 rounded-md',
 
-        // Size classes for text buttons
-        'h-8 px-3 text-sm gap-1' => $size === 'sm' && !$iconOnly,
-        'h-10 px-4 text-sm gap-1.5' => !$size && !$iconOnly,          // Default size
-        'h-12 px-5 text-base gap-2' => $size === 'lg' && !$iconOnly,
+        // Size classes for text buttons (Metronic specifications)
+        'h-7 px-2.5 text-xs gap-1.5' => $size === 'sm' && !$iconOnly,
+        'h-8.5 px-3 text-2sm gap-1.5' => $size === 'md' && !$iconOnly,        // Default size
+        'h-10 px-4 text-sm gap-1.5' => $size === 'lg' && !$iconOnly,
 
-        // Icon-only sizes (square)
-        'w-8 h-8' => $size === 'sm' && $iconOnly,
-        'w-10 h-10' => !$size && $iconOnly,                           // Default size
-        'w-12 h-12' => $size === 'lg' && $iconOnly,
+        // Icon-only size (consistent across all sizes) - Metronic .kt-btn-icon
+        'w-8.5 h-8.5 p-0' => $iconOnly,
 
         // Filled style combinations
-        'bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90 hover:text-[var(--primary-foreground)]' => $style === 'filled' && $variant === 'primary',
-        'bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--secondary)]/90 hover:text-[var(--foreground)]' => $style === 'filled' && $variant === 'secondary',
-        'bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:bg-[var(--destructive)]/90' => $style === 'filled' && $variant === 'destructive',
-        'bg-[var(--mono)] text-[var(--mono-foreground)] hover:bg-[var(--mono)]/90 hover:text-[var(--mono-foreground)]' => $style === 'filled' && $variant === 'mono',
+        'bg-primary text-white hover:bg-primary/90' => $style === 'filled' && $variant === 'primary',
+        'bg-secondary text-foreground hover:bg-secondary/90' => $style === 'filled' && $variant === 'secondary',
+        'bg-destructive text-white hover:bg-destructive/90' => $style === 'filled' && $variant === 'destructive',
+        'bg-foreground text-background hover:bg-foreground/90' => $style === 'filled' && $variant === 'mono',
 
         // Outline style combinations
-        'border border-[var(--primary)] text-[var(--primary)] bg-transparent hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]' => $style === 'outline' && $variant === 'primary',
-        'border border-[var(--input)] text-[var(--secondary-foreground)] bg-transparent hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]' => $style === 'outline' && $variant === 'default',
-        'border border-[var(--destructive)] text-[var(--destructive)] bg-transparent hover:bg-[var(--destructive)] hover:text-[var(--destructive-foreground)]' => $style === 'outline' && $variant === 'destructive',
+        'border border-primary text-primary bg-transparent hover:bg-primary hover:text-white' => $style === 'outline' && $variant === 'primary',
+        'border border-input text-muted-foreground bg-transparent hover:bg-muted hover:text-foreground' => $style === 'outline' && $variant === 'default',
+        'border border-destructive text-destructive bg-transparent hover:bg-destructive hover:text-white' => $style === 'outline' && $variant === 'destructive',
 
         // Ghost style combinations
-        'text-[var(--primary)] hover:text-[var(--primary-foreground)] hover:bg-[var(--primary)]' => $style === 'ghost' && $variant === 'primary',
-        'text-[var(--accent-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]' => $style === 'ghost' && $variant === 'default',
-        'text-[var(--destructive)] hover:text-[var(--destructive-foreground)] hover:bg-[var(--destructive)]' => $style === 'ghost' && $variant === 'destructive',
+        'text-primary hover:text-white hover:bg-primary' => $style === 'ghost' && $variant === 'primary',
+        'text-muted-foreground hover:bg-muted hover:text-foreground' => $style === 'ghost' && $variant === 'default',
+        'text-destructive hover:text-white hover:bg-destructive' => $style === 'ghost' && $variant === 'destructive',
     ]) }}>
 
     @if($iconLeft && !$iconOnly)
