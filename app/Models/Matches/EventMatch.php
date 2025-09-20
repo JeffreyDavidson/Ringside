@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Matches;
 
 use App\Collections\MatchCompetitorsCollection;
+use App\Enums\MatchType;
 use App\Models\Events\Event;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
@@ -27,7 +28,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $event_id
  * @property int $match_number
- * @property int $match_type_id
+ * @property MatchType $match_type
  * @property int|null $match_stipulation_id
  * @property string|null $preview
  * @property Carbon|null $created_at
@@ -36,7 +37,6 @@ use Illuminate\Support\Carbon;
  * @property-read MatchCompetitor|null $pivot
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
- * @property-read MatchType|null $matchType
  * @property-read MatchStipulation|null $matchStipulation
  * @property-read MatchResult|null $result
  * @property-read Collection<int, Referee> $referees
@@ -74,10 +74,22 @@ class EventMatch extends Model
     protected $fillable = [
         'event_id',
         'match_number',
-        'match_type_id',
+        'match_type',
         'match_stipulation_id',
         'preview',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'match_type' => MatchType::class,
+        ];
+    }
 
     /**
      * Get the event the match belongs to.
@@ -87,16 +99,6 @@ class EventMatch extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
-    }
-
-    /**
-     * Get the match type of the match.
-     *
-     * @return BelongsTo<MatchType, $this>
-     */
-    public function matchType(): BelongsTo
-    {
-        return $this->belongsTo(MatchType::class, 'match_type_id');
     }
 
     /**

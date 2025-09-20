@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories\Matches;
 
+use App\Enums\MatchDecision;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchDecision;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,7 +33,7 @@ class MatchResultFactory extends Factory
 
         return [
             'match_id' => EventMatch::factory(),
-            'match_decision_id' => MatchDecision::factory(),
+            'match_decision' => fake()->randomElement(MatchDecision::cases()),
             'winner_type' => $winnerType,
             'winner_id' => $winner->id,
         ];

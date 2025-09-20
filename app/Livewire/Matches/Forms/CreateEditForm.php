@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Forms;
 
+use App\Enums\MatchType;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchType;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
@@ -39,7 +39,7 @@ use Illuminate\Database\Eloquent\Model;
  * @see EventMatch For the underlying event match model
  *
  * @property string $preview Match promotional preview content
- * @property int $matchTypeId Match type identifier
+ * @property MatchType $matchType Match type enum
  * @property array<int> $competitors Array of competitor IDs (wrestlers/tag teams)
  * @property array<int> $referees Array of referee IDs for match officials
  * @property array<int> $titles Array of title IDs at stake in the match
@@ -79,14 +79,14 @@ class CreateEditForm extends BaseForm
     public ?string $preview = '';
 
     /**
-     * Match type identifier for match style specification.
+     * Match type for match style specification.
      *
      * Determines the rules, structure, and requirements for the wrestling
      * match (singles, tag team, ladder match, cage match, etc.).
      *
-     * @var int|null Match type database ID
+     * @var MatchType|null Match type enum
      */
-    public ?int $matchTypeId = null;
+    public ?MatchType $matchType = null;
 
     /**
      * Array of competitors organized by sides in the match.
@@ -156,8 +156,8 @@ class CreateEditForm extends BaseForm
             return;
         }
 
-        // Load match type from relationship
-        $this->matchTypeId = $this->formModel->matchType?->getKey() ?? 0;
+        // Load match type from enum property
+        $this->matchType = $this->formModel->match_type;
 
         // Load competitor IDs from relationships
         $this->referees = $this->formModel->referees->pluck('id')->toArray();
@@ -242,7 +242,7 @@ class CreateEditForm extends BaseForm
             'event_id' => $this->eventId,
             'match_number' => $this->getNextMatchNumber(),
             'preview' => $this->preview,
-            'match_type_id' => $this->matchTypeId,
+            'match_type' => $this->matchType,
         ];
         // Note: relationships (competitors, referees, titles) are handled
         // separately through the relationship synchronization system
@@ -296,7 +296,7 @@ class CreateEditForm extends BaseForm
     {
         $baseRules = [
             // eventId removed - it's context from route model binding, not user input
-            'matchTypeId' => ['required', 'integer', 'min:1', 'exists:match_types,id'],
+            'matchType' => ['required', 'enum:'.MatchType::class],
             'preview' => ['sometimes', 'string'],
             'referees' => ['sometimes', 'array'],
             'referees.*' => ['integer', 'exists:referees,id'],
@@ -327,7 +327,7 @@ class CreateEditForm extends BaseForm
     private function getCompetitorValidationRules(): array
     {
         // If no match type is selected yet, use basic validation
-        if (! $this->matchTypeId) {
+        if (! $this->matchType) {
             return [
                 'competitors' => ['sometimes', 'array'],
                 'competitors.*.wrestlers' => ['sometimes', 'array'],
@@ -337,16 +337,7 @@ class CreateEditForm extends BaseForm
             ];
         }
 
-        // Get the match type from database to determine validation rules
-        $matchType = MatchType::find($this->matchTypeId);
-
-        if (! $matchType) {
-            return [
-                'competitors' => ['sometimes', 'array'],
-            ];
-        }
-
-        return $this->getValidationForMatchType($matchType);
+        return $this->getValidationForMatchType($this->matchType);
     }
 
     /**
@@ -356,10 +347,10 @@ class CreateEditForm extends BaseForm
      */
     private function getValidationForMatchType(MatchType $matchType): array
     {
-        $matchTypeName = mb_strtolower($matchType->name);
+        $matchTypeValue = $matchType->value;
 
         // Singles Match: 2 sides, 1 wrestler each
-        if (str_contains($matchTypeName, 'singles')) {
+        if ($matchType === MatchType::Singles) {
             return [
                 'competitors' => ['required', 'array', 'size:2'],
                 'competitors.0.wrestlers' => ['required', 'array', 'size:1'],
@@ -370,7 +361,7 @@ class CreateEditForm extends BaseForm
         }
 
         // Tag Team Match: 2 sides, 2+ wrestlers or tag teams
-        if (str_contains($matchTypeName, 'tag') || str_contains($matchTypeName, 'team')) {
+        if (in_array($matchType, [MatchType::TagTeam, MatchType::SixManTagTeam, MatchType::EightManTagTeam, MatchType::TenManTagTeam, MatchType::TornadoTagTeam], true)) {
             return [
                 'competitors' => ['required', 'array', 'size:2'],
                 'competitors.0' => ['required', 'array'],
@@ -387,7 +378,7 @@ class CreateEditForm extends BaseForm
         }
 
         // Triple Threat: 3 sides, 1 wrestler each
-        if (str_contains($matchTypeName, 'triple') || str_contains($matchTypeName, 'three')) {
+        if (in_array($matchType, [MatchType::TripleThreat, MatchType::Triangle], true)) {
             return [
                 'competitors' => ['required', 'array', 'size:3'],
                 'competitors.0.wrestlers' => ['required', 'array', 'size:1'],
@@ -400,7 +391,7 @@ class CreateEditForm extends BaseForm
         }
 
         // Fatal Four Way: 4 sides, 1 wrestler each
-        if (str_contains($matchTypeName, 'fatal') || str_contains($matchTypeName, 'four')) {
+        if ($matchType === MatchType::Fatal4Way) {
             return [
                 'competitors' => ['required', 'array', 'size:4'],
                 'competitors.0.wrestlers' => ['required', 'array', 'size:1'],
@@ -415,7 +406,7 @@ class CreateEditForm extends BaseForm
         }
 
         // Battle Royal / Rumble: Multiple sides, 1 wrestler each
-        if (str_contains($matchTypeName, 'battle') || str_contains($matchTypeName, 'rumble') || str_contains($matchTypeName, 'royal')) {
+        if (in_array($matchType, [MatchType::BattleRoyal, MatchType::RoyalRumble], true)) {
             return [
                 'competitors' => ['required', 'array', 'min:6'], // Minimum 6 for battle royal
                 'competitors.*.wrestlers' => ['required', 'array', 'size:1'],
@@ -446,7 +437,7 @@ class CreateEditForm extends BaseForm
     {
         return [
             'preview' => 'match preview',
-            'matchTypeId' => 'match type',
+            'matchType' => 'match type',
             'competitors' => 'competitors',
             'referees' => 'referees',
             'titles' => 'championship titles',
@@ -466,7 +457,7 @@ class CreateEditForm extends BaseForm
     {
         return [
             'preview' => fn () => fake()->paragraph(2).' This epic showdown promises to deliver non-stop action!',
-            'matchTypeId' => fn () => fake()->numberBetween(1, 10), // Assuming match types 1-10 exist
+            'matchType' => fn () => fake()->randomElement(MatchType::cases()),
             'competitors' => fn () => fake()->randomElements(range(1, 50), fake()->numberBetween(2, 6)), // 2-6 wrestlers
             'referees' => fn () => [fake()->numberBetween(1, 20)], // Single referee
             'titles' => fn () => fake()->boolean(0.3) ? fake()->randomElements(range(1, 15), fake()->numberBetween(1, 2)) : [], // 30% chance of title match
