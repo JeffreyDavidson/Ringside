@@ -12,6 +12,7 @@ use App\Models\Matches\MatchType;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
+use Closure;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -303,7 +304,7 @@ class CreateEditForm extends BaseForm
             'titles.*' => [
                 'integer',
                 'exists:titles,id',
-                function ($attribute, $value, $fail) {
+                function (string $attribute, mixed $value, Closure $fail) {
                     $title = Title::find($value);
                     if ($title && $title->status->value !== 'active') {
                         $fail('The selected title must be active.');
@@ -351,10 +352,9 @@ class CreateEditForm extends BaseForm
     /**
      * Get specific validation rules for a match type.
      *
-     * @param  MatchType  $matchType
      * @return array<string, array<string>>
      */
-    private function getValidationForMatchType($matchType): array
+    private function getValidationForMatchType(MatchType $matchType): array
     {
         $matchTypeName = mb_strtolower($matchType->name);
 

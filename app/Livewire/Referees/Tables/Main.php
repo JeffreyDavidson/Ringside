@@ -29,6 +29,7 @@ use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Referees\Components\Actions;
 use App\Models\Referees\Referee;
 use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -69,7 +70,7 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('referees.name'), 'full_name')
-                ->searchable(function ($builder, $searchTerm) {
+                ->searchable(function (Builder $builder, string $searchTerm) {
                     $builder->orWhere('first_name', 'like', '%'.$searchTerm.'%')
                         ->orWhere('last_name', 'like', '%'.$searchTerm.'%');
                 }),

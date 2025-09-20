@@ -48,7 +48,7 @@ class FormModal extends BaseFormModal
         ];
     }
 
-    public function mount($modelId = null): void
+    public function mount(mixed $modelId = null): void
     {
         parent::mount($modelId);
 

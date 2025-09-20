@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
 use InvalidArgumentException;
 
 /**
@@ -108,7 +109,7 @@ class StableValidationService
 
         // Validate wrestlers are employed
         if ($members->hasWrestlers()) {
-            $unemployedWrestlers = $members->wrestlers->filter(fn ($wrestler) => ! $wrestler->isEmployed());
+            $unemployedWrestlers = $members->wrestlers->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed());
             if ($unemployedWrestlers->isNotEmpty()) {
                 $names = $unemployedWrestlers->pluck('name')->join(', ');
                 throw new InvalidArgumentException("Cannot add wrestlers to stable: the following wrestlers are not employed: {$names}");
@@ -117,7 +118,7 @@ class StableValidationService
 
         // Validate tag teams are employed
         if ($members->hasTagTeams()) {
-            $unemployedTagTeams = $members->tagTeams->filter(fn ($tagTeam) => ! $tagTeam->isEmployed());
+            $unemployedTagTeams = $members->tagTeams->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isEmployed());
             if ($unemployedTagTeams->isNotEmpty()) {
                 $names = $unemployedTagTeams->pluck('name')->join(', ');
                 throw new InvalidArgumentException("Cannot add tag teams to stable: the following tag teams are not employed: {$names}");

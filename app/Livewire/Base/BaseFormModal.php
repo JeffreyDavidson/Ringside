@@ -6,6 +6,7 @@ namespace App\Livewire\Base;
 
 use App\Livewire\Concerns\GeneratesDummyData;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Form;
 
 /**
  * Base class for all form modals with essential functionality.
@@ -222,7 +223,7 @@ abstract class BaseFormModal extends BaseModal
      *
      * @var TForm|null
      */
-    public $form;
+    public Form $form;
 
     /**
      * Indicates if the modal is currently open.

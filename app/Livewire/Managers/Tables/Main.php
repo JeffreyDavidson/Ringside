@@ -29,6 +29,7 @@ use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Managers\Components\Actions;
 use App\Models\Managers\Manager;
 use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filter;
@@ -68,7 +69,7 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('managers.name'), 'full_name')
-                ->searchable(function ($builder, $searchTerm) {
+                ->searchable(function (Builder $builder, string $searchTerm) {
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')

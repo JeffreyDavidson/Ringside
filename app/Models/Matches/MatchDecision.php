@@ -38,13 +38,13 @@ class MatchDecision extends Model
     {
         parent::boot();
 
-        static::creating(function ($matchDecision) {
+        static::creating(function (self $matchDecision) {
             if (empty($matchDecision->slug) && ! empty($matchDecision->name)) {
                 $matchDecision->slug = Str::slug($matchDecision->name);
             }
         });
 
-        static::updating(function ($matchDecision) {
+        static::updating(function (self $matchDecision) {
             if ($matchDecision->isDirty('name') && ! $matchDecision->isDirty('slug')) {
                 $matchDecision->slug = Str::slug($matchDecision->name);
             }
@@ -61,12 +61,7 @@ class MatchDecision extends Model
         'slug',
     ];
 
-    /**
-     * Decisions that result in no winners or losers.
-     *
-     * @var array<int, string>
-     */
-    protected const NO_OUTCOME_DECISIONS = [
+    protected const NO_OUTCOME_DECISIONS = [ // @pest-ignore-type
         'time-limit-draw', // Time Limit Draw
         'no-decision',     // No Decision
         'reverse-decision', // Reverse Decision

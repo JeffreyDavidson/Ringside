@@ -136,7 +136,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
         $partnerRecord = TagTeamWrestler::where('tag_team_id', $row->tag_team_id)
             ->where('wrestler_id', '!=', $row->wrestler_id)
             ->where('joined_at', '<=', $row->left_at ?? now())
-            ->where(function ($query) use ($row) {
+            ->where(function (Builder $query) use ($row) {
                 $query->whereNull('left_at')
                     ->orWhere('left_at', '>=', $row->joined_at);
             })

@@ -71,7 +71,7 @@ class MatchCompetitorsCollection extends Collection
     {
         // @phpstan-ignore-next-line return.type
         return $this->groupBy('side_number')
-            ->map(fn ($group) => $group->count())
+            ->map(fn (MatchCompetitorsCollection $group) => $group->count())
             ->mapWithKeys(function (int $count, mixed $side): array {
                 return [(int) $side => $count];
             });
@@ -279,7 +279,7 @@ class MatchCompetitorsCollection extends Collection
     public function pluckCompetitorsBySide(): BaseCollection
     {
         return $this->groupBy('side_number')
-            ->map(function ($competitorsOnSide) {
+            ->map(function (MatchCompetitorsCollection $competitorsOnSide) {
                 return collect($competitorsOnSide)
                     ->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor())
                     ->values(); // Reset keys to sequential integers
