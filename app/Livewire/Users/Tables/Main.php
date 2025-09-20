@@ -35,7 +35,7 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('users.name'), 'full_name')
-                ->searchable(function ($builder, $searchTerm) {
+                ->searchable(function (Builder $builder, string $searchTerm) {
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('users.role'), 'role')

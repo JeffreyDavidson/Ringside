@@ -26,7 +26,7 @@ class FormModal extends BaseFormModal
     /**
      * @return Collection<int, Wrestler>
      */
-    public function getWrestlersListProperty()
+    public function getWrestlersListProperty(): Collection
     {
         return Wrestler::all();
     }
@@ -38,7 +38,7 @@ class FormModal extends BaseFormModal
     {
         return Manager::select('id', 'first_name', 'last_name')
             ->get()
-            ->mapWithKeys(function ($manager) {
+            ->mapWithKeys(function (Manager $manager) {
                 return [$manager->id => $manager->first_name.' '.$manager->last_name];
             })
             ->toArray();

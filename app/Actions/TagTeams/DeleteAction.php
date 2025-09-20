@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -75,14 +77,14 @@ class DeleteAction
             // Retirement is their natural end state, no artificial reactivation required
 
             // End current wrestler partnerships (wrestlers continue as singles)
-            $tagTeam->currentWrestlers->each(function ($wrestler) use ($tagTeam, $deletionDate) {
+            $tagTeam->currentWrestlers->each(function (Wrestler $wrestler) use ($tagTeam, $deletionDate) {
                 $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
                     'left_at' => $deletionDate,
                 ]);
             });
 
             // End current manager relationships
-            $tagTeam->currentManagers->each(function ($manager) use ($tagTeam, $deletionDate) {
+            $tagTeam->currentManagers->each(function (Manager $manager) use ($tagTeam, $deletionDate) {
                 $tagTeam->managers()->updateExistingPivot($manager->id, [
                     'fired_at' => $deletionDate,
                 ]);
