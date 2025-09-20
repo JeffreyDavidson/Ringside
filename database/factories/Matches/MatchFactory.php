@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Factories\Matches;
 
+use App\Enums\MatchDecision;
+use App\Enums\MatchType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use App\Models\Matches\MatchDecision;
 use App\Models\Matches\MatchLoser;
 use App\Models\Matches\MatchResult;
-use App\Models\Matches\MatchType;
 use App\Models\Matches\MatchWinner;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
@@ -49,7 +49,7 @@ class MatchFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'match_number' => fake()->randomDigitNotZero(),
-            'match_type_id' => MatchType::factory()->singles(),
+            'match_type' => MatchType::Singles,
             'preview' => null,
         ];
     }
@@ -105,7 +105,7 @@ class MatchFactory extends Factory
      */
     public function singles(): static
     {
-        return $this->createMatchType('singles');
+        return $this->createMatchType(MatchType::Singles);
     }
 
     /**
@@ -113,7 +113,7 @@ class MatchFactory extends Factory
      */
     public function tagTeam(): static
     {
-        return $this->createMatchType('tagTeam');
+        return $this->createMatchType(MatchType::TagTeam);
     }
 
     /**
@@ -121,7 +121,7 @@ class MatchFactory extends Factory
      */
     public function tripleThreat(): static
     {
-        return $this->createMatchType('tripleThreat');
+        return $this->createMatchType(MatchType::TripleThreat);
     }
 
     /**
@@ -129,7 +129,7 @@ class MatchFactory extends Factory
      */
     public function fatalFourWay(): static
     {
-        return $this->createMatchType('fatalFourWay');
+        return $this->createMatchType(MatchType::Fatal4Way);
     }
 
     /**
@@ -138,7 +138,7 @@ class MatchFactory extends Factory
     public function battleRoyal(int $competitorCount = 10): static
     {
         return $this->state([
-            'match_type_id' => MatchType::factory()->battleRoyal()->create()->id,
+            'match_type' => MatchType::BattleRoyal,
         ])->afterCreating(function (EventMatch $eventMatch) use ($competitorCount) {
             $this->addCompetitors($eventMatch, null, $competitorCount);
             $this->addResult($eventMatch);
@@ -189,7 +189,7 @@ class MatchFactory extends Factory
     public function withMatchType(MatchType $matchType): static
     {
         return $this->state([
-            'match_type_id' => $matchType->id,
+            'match_type' => $matchType,
         ]);
     }
 
@@ -214,12 +214,12 @@ class MatchFactory extends Factory
     }
 
     /**
-     * Create a match type with the given factory method.
+     * Create a match type with the given enum.
      */
-    private function createMatchType(string $factoryMethod): static
+    private function createMatchType(MatchType $matchType): static
     {
         return $this->state([
-            'match_type_id' => MatchType::factory()->{$factoryMethod}()->create()->id,
+            'match_type' => $matchType,
         ])->afterCreating(function (EventMatch $eventMatch) {
             $this->addCompetitors($eventMatch);
             $this->addResult($eventMatch);
@@ -265,7 +265,7 @@ class MatchFactory extends Factory
      */
     private function addCompetitors(EventMatch $eventMatch, ?Model $existingChampion = null, ?int $competitorCount = null): void
     {
-        $matchType = $eventMatch->matchType;
+        $matchType = $eventMatch->match_type;
         $competitorCount ??= $matchType->getMinimumCompetitors();
 
         $competitors = $this->generateCompetitors($matchType, $existingChampion, $competitorCount);
@@ -363,7 +363,7 @@ class MatchFactory extends Factory
 
         return MatchResult::factory()->create([
             'match_id' => $eventMatch->id,
-            'match_decision_id' => MatchDecision::factory()->create()->id,
+            'match_decision' => fake()->randomElement(MatchDecision::cases()),
             'winner_type' => $winner->competitor_type,
             'winner_id' => $winner->competitor_id,
         ]);
@@ -383,7 +383,7 @@ class MatchFactory extends Factory
         $matchType = $this->resolveMatchType($config['match_type'] ?? 'singles');
 
         return $this->state([
-            'match_type_id' => $matchType->id,
+            'match_type' => $matchType,
         ])->afterCreating(function (EventMatch $eventMatch) {
             $this->configureFullMatch($eventMatch, $this->matchConfig);
         });
@@ -421,13 +421,13 @@ class MatchFactory extends Factory
     private function resolveMatchType(string $matchType): MatchType
     {
         return match ($matchType) {
-            'singles' => MatchType::factory()->singles()->create(),
-            'tagteam', 'tag-team' => MatchType::factory()->tagTeam()->create(),
-            'triple', 'triple-threat' => MatchType::factory()->tripleThreat()->create(),
-            'fatal4way', 'fatal-4-way' => MatchType::factory()->fatalFourWay()->create(),
-            'battleroyal', 'battle-royal' => MatchType::factory()->battleRoyal()->create(),
-            'royalrumble', 'royal-rumble' => MatchType::factory()->royalRumble()->create(),
-            default => MatchType::factory()->singles()->create(),
+            'singles' => MatchType::Singles,
+            'tagteam', 'tag-team' => MatchType::TagTeam,
+            'triple', 'triple-threat' => MatchType::TripleThreat,
+            'fatal4way', 'fatal-4-way' => MatchType::Fatal4Way,
+            'battleroyal', 'battle-royal' => MatchType::BattleRoyal,
+            'royalrumble', 'royal-rumble' => MatchType::RoyalRumble,
+            default => MatchType::Singles,
         };
     }
 
@@ -444,8 +444,8 @@ class MatchFactory extends Factory
             $competitors = $this->processSpecificCompetitors($config['competitors'], $sideNumber);
         } else {
             // Generate competitors based on count and match type
-            $competitorCount = $config['competitor_count'] ?? $eventMatch->matchType->getMinimumCompetitors();
-            $competitors = $this->generateCompetitorsByCount($eventMatch->matchType, $competitorCount, $config, $sideNumber);
+            $competitorCount = $config['competitor_count'] ?? $eventMatch->match_type->getMinimumCompetitors();
+            $competitors = $this->generateCompetitorsByCount($eventMatch->match_type, $competitorCount, $config, $sideNumber);
         }
 
         return $competitors;
@@ -568,10 +568,10 @@ class MatchFactory extends Factory
         $decision = $this->resolveMatchDecision($config['decision_type'] ?? 'pinfall');
 
         // Handle no-outcome scenarios
-        if (in_array($decision->slug, ['draw', 'nodecision'])) {
+        if ($decision->hasNoOutcome()) {
             MatchResult::factory()->create([
                 'match_id' => $eventMatch->id,
-                'match_decision_id' => $decision->id,
+                'match_decision' => $decision,
                 'winner_type' => null,
                 'winner_id' => null,
             ]);
@@ -587,7 +587,7 @@ class MatchFactory extends Factory
         $primaryWinner = $winners->first();
         $matchResult = MatchResult::factory()->create([
             'match_id' => $eventMatch->id,
-            'match_decision_id' => $decision->id,
+            'match_decision' => $decision,
             'winner_type' => $primaryWinner->competitor_type,
             'winner_id' => $primaryWinner->competitor_id,
         ]);
@@ -614,18 +614,15 @@ class MatchFactory extends Factory
      */
     private function resolveMatchDecision(string $decisionType): MatchDecision
     {
-        // Try to find existing decision first
-        $decision = MatchDecision::where('slug', $decisionType)->first();
-
-        if ($decision) {
-            return $decision;
+        // Try to find matching enum case
+        foreach (MatchDecision::cases() as $case) {
+            if ($case->value === $decisionType) {
+                return $case;
+            }
         }
 
-        // Create new decision if it doesn't exist
-        return MatchDecision::factory()->create([
-            'name' => str($decisionType)->title()->value(),
-            'slug' => $decisionType,
-        ]);
+        // Default to pinfall if no match found
+        return MatchDecision::Pinfall;
     }
 
     /**
@@ -671,7 +668,7 @@ class MatchFactory extends Factory
     private function createCompetitorWithMatchTypeRestrictions(MatchType $matchType): Model
     {
         // Royal Rumble and Singles only allow wrestlers
-        if (in_array($matchType->slug, ['royal-rumble', 'singles'])) {
+        if (in_array($matchType, [MatchType::RoyalRumble, MatchType::Singles], true)) {
             return Wrestler::factory()->create();
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Enums\MatchDecision;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchResultFactory;
@@ -19,13 +20,12 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $match_id
- * @property int $match_decision_id
+ * @property MatchDecision $match_decision
  * @property string $winner_type
  * @property int $winner_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * @property-read MatchDecision $decision
  * @property-read EventMatch $match
  * @property-read Collection<int, MatchWinner> $winners
  * @property-read Collection<int, MatchLoser> $losers
@@ -57,10 +57,22 @@ class MatchResult extends Model
      */
     protected $fillable = [
         'match_id',
-        'match_decision_id',
+        'match_decision',
         'winner_type',
         'winner_id',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'match_decision' => MatchDecision::class,
+        ];
+    }
 
     /**
      * Get the event match this result belongs to.
@@ -70,16 +82,6 @@ class MatchResult extends Model
     public function match(): BelongsTo
     {
         return $this->belongsTo(EventMatch::class);
-    }
-
-    /**
-     * Get the decision of the end of the event match.
-     *
-     * @return BelongsTo<MatchDecision, $this>
-     */
-    public function decision(): BelongsTo
-    {
-        return $this->belongsTo(MatchDecision::class, 'match_decision_id');
     }
 
     /**

@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Data;
 
-use App\Models\Matches\MatchType;
+use App\Enums\MatchType;
 use Livewire\Attributes\Computed;
 
 trait PresentsMatchTypesList
 {
     /**
-     * @return array<int|string,string|null>
+     * @return array<string,string>
      */
     #[Computed(cache: true, key: 'match-types-list', seconds: 180)]
     public function getMatchTypes(): array
     {
-        return MatchType::select('id', 'name')->pluck('name', 'id')->toArray();
+        return MatchType::options();
     }
 }
