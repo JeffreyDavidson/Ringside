@@ -7,7 +7,9 @@ namespace App\Services;
 use App\Actions\Managers\EmployAction as ManagersEmployAction;
 use App\Actions\Wrestlers\EmployAction as WrestlersEmployAction;
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
@@ -282,7 +284,7 @@ class TagTeamLifecycleService
     {
         // Employ current wrestlers if they're not already employed
         $unemployedWrestlers = $tagTeam->currentWrestlers
-            ->filter(fn ($wrestler) => ! $wrestler->isEmployed());
+            ->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed());
 
         foreach ($unemployedWrestlers as $wrestler) {
             $this->wrestlersEmployAction->handle($wrestler, $employmentDate);
@@ -290,7 +292,7 @@ class TagTeamLifecycleService
 
         // Employ current managers if they're not already employed
         $unemployedManagers = $tagTeam->currentManagers
-            ->filter(fn ($manager) => ! $manager->isEmployed());
+            ->filter(fn (Manager $manager) => ! $manager->isEmployed());
 
         foreach ($unemployedManagers as $manager) {
             $this->managersEmployAction->handle($manager, $employmentDate);
