@@ -6,6 +6,8 @@ namespace App\Services;
 
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
@@ -192,10 +194,10 @@ class StableMembershipService
         $tagTeamsToRetire = $members->getTagTeamsToRetire();
 
         // Retire wrestlers who are not already retired
-        $wrestlersToRetire?->each(fn ($wrestler) => $wrestlerRetireAction($wrestler, $retirementDate));
+        $wrestlersToRetire?->each(fn (Wrestler $wrestler) => $wrestlerRetireAction($wrestler, $retirementDate));
 
         // Retire tag teams who are not already retired
-        $tagTeamsToRetire?->each(fn ($tagTeam) => $tagTeamRetireAction($tagTeam, $retirementDate));
+        $tagTeamsToRetire?->each(fn (TagTeam $tagTeam) => $tagTeamRetireAction($tagTeam, $retirementDate));
     }
 
     /**
@@ -218,9 +220,9 @@ class StableMembershipService
         $tagTeamsToUnretire = $members->getTagTeamsToUnretire();
 
         // Unretire wrestlers who are currently retired
-        $wrestlersToUnretire?->each(fn ($wrestler) => $wrestlerUnretireAction($wrestler, $unretirementDate));
+        $wrestlersToUnretire?->each(fn (Wrestler $wrestler) => $wrestlerUnretireAction($wrestler, $unretirementDate));
 
         // Unretire tag teams who are currently retired
-        $tagTeamsToUnretire?->each(fn ($tagTeam) => $tagTeamUnretireAction($tagTeam, $unretirementDate));
+        $tagTeamsToUnretire?->each(fn (TagTeam $tagTeam) => $tagTeamUnretireAction($tagTeam, $unretirementDate));
     }
 }

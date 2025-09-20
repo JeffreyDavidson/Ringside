@@ -55,7 +55,7 @@ class Main extends BaseTable
             Column::make(__('event-matches.match_type'), 'matchType.name')
                 ->searchable(),
             Column::make(__('event-matches.competitors'))
-                ->label(fn (EventMatch $row) => $row->competitors->map(fn ($competitor) => $competitor->getCompetitor()->name)->join(' vs ')),
+                ->label(fn (EventMatch $row) => $row->competitors->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor()->name)->join(' vs ')),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
                     $winner = $row->result?->winner;
