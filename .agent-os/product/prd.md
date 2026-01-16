@@ -2,7 +2,7 @@
 
 > Version: 1.0
 > Last Updated: 2026-01-15
-> Status: Phase 0 Complete, Phase 1 In Planning
+> Status: Phase 0 Complete, Phase 1 In Progress
 
 ---
 
@@ -300,9 +300,10 @@ public function status(): EmploymentStatus
 - Complete historical reconstruction possible
 
 ### Data Model Overview
-- **Core Entities**: Wrestler, TagTeam, Manager, Referee, Stable, Event, EventMatch, Title
+- **Core Entities**: Promotion, User, Wrestler, TagTeam, Manager, Referee, Stable, Event, EventMatch, Title
 - **Pivot Tables**: Employments, memberships, match competitors, championships
 - **Soft Deletes**: All entities support soft deletion for data integrity
+- **Multi-Tenant**: All roster/event entities belong to a Promotion
 
 ---
 
@@ -316,7 +317,10 @@ public function status(): EmploymentStatus
 - Complete business rule enforcement
 - 100% test coverage
 
-### Phase 1: User Experience (Current Priority)
+### Phase 1: Design System, Multi-Tenant & User Experience (Current Priority)
+- [ ] Design system (component library, design tokens, layouts)
+- [ ] Promotion management (multi-tenant architecture)
+- [ ] User system updates (roles, promotion ownership)
 - [ ] Executive dashboard with metrics
 - [ ] Mobile responsiveness
 - [ ] UI/UX polish
@@ -333,10 +337,11 @@ public function status(): EmploymentStatus
 - [ ] Financial/payroll tracking
 - [ ] Contract management
 
-### Phase 4: Multi-Promotion
-- [ ] Multiple promotion support
+### Phase 4: Cross-Promotion & Enterprise
 - [ ] Cross-promotion events
 - [ ] Talent sharing/loans
+- [ ] Working agreements between promotions
+- [ ] Team collaboration features
 
 ### Phase 5: Community
 - [ ] Fan portal
