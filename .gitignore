@@ -36,3 +36,7 @@ tests/Browser/screenshots/
 tests/Browser/console/
 tests/Browser/source/
 .envrc
+logs/
+.phpstorm.meta.php
+_ide_helper.php
+_ide_helper_models.php
