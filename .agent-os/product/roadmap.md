@@ -39,7 +39,21 @@ The following comprehensive feature set has been successfully implemented and is
 - [x] **Laravel 12 Architecture** - Latest Laravel framework with streamlined structure
 - [x] **Quality Tools Integration** - PHPStan, Pint, Rector, ESLint with automated enforcement
 
-## Phase 1: User Experience Enhancement
+## Phase 1: Design System, Multi-Tenant & User Experience
+
+### Design System (Priority 1)
+- [ ] **Component Library** - Standardized UI components with consistent styling
+- [ ] **Design Tokens** - Colors, typography, spacing, and other design primitives
+- [ ] **Layout System** - Page layouts, navigation patterns, and responsive grids
+- [ ] **Form Components** - Input fields, buttons, validation, and feedback patterns
+- [ ] **Data Display** - Tables, cards, lists, and detail views
+
+### Promotion Management (Multi-Tenant Architecture)
+- [ ] **Promotion Entity** - Create promotion model with name, slug, settings
+- [ ] **User-Promotion Relationship** - Users own/manage promotions
+- [ ] **Entity Ownership** - All entities (wrestlers, events, titles, etc.) belong to a promotion
+- [ ] **Data Isolation** - Global scopes ensure promotion-specific data access
+- [ ] **User System Updates** - Role/status enums, remove direct wrestler relationship
 
 ### Frontend Improvements
 - [ ] **Dashboard Development** - Executive dashboard with key metrics and quick actions
@@ -81,13 +95,13 @@ The following comprehensive feature set has been successfully implemented and is
 - [ ] **Budget Planning** - Event budgeting and financial forecasting
 - [ ] **Contract Management** - Talent contracts with terms and renewals
 
-## Phase 4: Multi-Promotion Support
+## Phase 4: Cross-Promotion & Enterprise
 
-### Promotion Management
-- [ ] **Multi-Promotion Architecture** - Support for multiple wrestling promotions
+### Cross-Promotion Features
 - [ ] **Cross-Promotion Events** - Inter-promotional event management
 - [ ] **Talent Sharing** - Wrestler loan/trade system between promotions
 - [ ] **Promotion Analytics** - Comparative analytics across promotions
+- [ ] **Working Agreements** - Formal partnership tracking between promotions
 
 ### Enterprise Features
 - [ ] **Team Collaboration** - Multi-user promotion management with role-based access

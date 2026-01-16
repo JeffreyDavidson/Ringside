@@ -1,5 +1,21 @@
 # Key Features
 
+## Foundation (Phase 1)
+
+### Design System
+- **Component Library**: Standardized UI components with consistent styling
+- **Design Tokens**: Colors, typography, spacing, and other design primitives
+- **Layout System**: Page layouts, navigation patterns, and responsive grids
+- **Form Components**: Input fields, buttons, validation, and feedback patterns
+- **Data Display**: Tables, cards, lists, and detail views
+
+### Promotion Management (Multi-Tenant)
+- **Promotion Entity**: Wrestling company with name, slug, and settings
+- **User Ownership**: Users own and manage promotions
+- **Entity Scoping**: All roster, events, and titles belong to a promotion
+- **Data Isolation**: Global scopes ensure promotion-specific data access
+- **BelongsToPromotion Trait**: Automatic promotion assignment and scoping
+
 ## Core Management Domains
 
 ### 1. Wrestler Management
@@ -101,8 +117,9 @@
 ### 15. User System
 - **User Profiles**: First name, last name, email, phone, role management
 - **Authentication**: Laravel Breeze-based authentication system
-- **Role Management**: User roles with appropriate access levels
-- **Wrestler Integration**: Optional wrestler-user account linking
+- **Role Management**: User roles (Admin, Promoter) with Role enum
+- **Status Management**: User status (Active, Suspended, Pending) with UserStatus enum
+- **Promotion Ownership**: Users own and manage promotions (not direct wrestler relationship)
 
 ### 16. Audit & History
 - **Complete Audit Trail**: All changes tracked with timestamps
