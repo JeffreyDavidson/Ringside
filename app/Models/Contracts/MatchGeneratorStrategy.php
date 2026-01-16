@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use App\Enums\MatchType;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchType;
 
 /**
  * Interface for match generation strategies.
