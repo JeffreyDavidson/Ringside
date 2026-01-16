@@ -10,7 +10,9 @@ A **wrestling promotion management system** for professional wrestling promoters
 
 | Entity | Purpose | Key Rules |
 |--------|---------|-----------|
-| **Wrestler** | Individual performer | Employable, bookable, can join teams/stables |
+| **Promotion** | Wrestling company | Owns all roster, events, and titles |
+| **User** | System user | Owns/manages promotions (Promoter role) |
+| **Wrestler** | Individual performer | Employable, bookable, belongs to promotion |
 | **Tag Team** | 2-wrestler team | Bookable when both members are bookable |
 | **Manager** | Manages wrestlers/teams | NOT bookable, both parties must be employed |
 | **Referee** | Officiates matches | Bookable when employed + healthy |
@@ -40,9 +42,10 @@ Singles, Tag Team, Triple Threat, Fatal 4 Way, 6/8/10-Man Tag, Handicap (2v1, 3v
 
 ## Current Status
 - **Phase 0**: Complete (core platform)
-- **Phase 1**: In planning (dashboard, mobile, analytics)
+- **Phase 1**: In progress (design system, multi-tenant, dashboard, mobile, analytics)
 
 ## Key Patterns
+- Multi-tenant (all entities scoped to a Promotion)
 - Computed status (no stored status fields)
 - Polymorphic relationships (wrestlers OR tag teams as champions/competitors)
 - Temporal data (all employment/membership has date ranges)
