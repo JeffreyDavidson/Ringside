@@ -1,6 +1,6 @@
-# Spec Tasks
+# Design System Tasks
 
-These are the tasks to be completed for the spec detailed in @.agent-os/specs/2025-08-28-metronic-component-library/spec.md
+> Reference: @.agent-os/specs/2025-08-28-design-system/spec.md
 
 > Created: 2025-08-28
 > Status: Ready for Implementation
