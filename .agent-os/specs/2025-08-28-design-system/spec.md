@@ -1,12 +1,12 @@
 # Spec Requirements Document
 
-> Spec: Metronic Component Library
+> Spec: Design System
 > Created: 2025-08-28
 > Status: Planning
 
 ## Overview
 
-Create a comprehensive anonymous Blade component library based on the Metronic Tailwind template, following FluxUI architectural patterns and design principles. This component library will provide reusable, domain-agnostic UI components that maintain Metronic's professional design while integrating seamlessly with any Laravel application and the existing Livewire + Tailwind 4.1 setup.
+Create a comprehensive design system with anonymous Blade components based on the Metronic Tailwind template, following FluxUI architectural patterns and design principles. This design system provides reusable, domain-agnostic UI components that maintain Metronic's professional design while integrating seamlessly with any Laravel application and the existing Livewire + Tailwind 4.1 setup.
 
 ## User Stories
 
@@ -52,5 +52,8 @@ As a development team, I want to maintain styling and behavior changes in a sing
 
 ## Spec Documentation
 
-- Tasks: @.agent-os/specs/2025-08-28-metronic-component-library/tasks.md
-- Technical Specification: @.agent-os/specs/2025-08-28-metronic-component-library/sub-specs/technical-spec.md
+- Tasks: @.agent-os/specs/2025-08-28-design-system/tasks.md
+- Technical Specification: @.agent-os/specs/2025-08-28-design-system/sub-specs/technical-spec.md
+- Design Tokens: @.agent-os/specs/2025-08-28-design-system/sub-specs/design-tokens.md
+- Component Inventory: @.agent-os/specs/2025-08-28-design-system/sub-specs/component-inventory.md
+- Page Patterns: @.agent-os/specs/2025-08-28-design-system/sub-specs/page-patterns.md

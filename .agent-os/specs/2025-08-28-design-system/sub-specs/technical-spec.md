@@ -1,6 +1,7 @@
 # Technical Specification
 
-This is the technical specification for the spec detailed in @.agent-os/specs/2025-08-28-metronic-component-library/spec.md
+> Design System
+> Reference: @.agent-os/specs/2025-08-28-design-system/spec.md
 
 > Created: 2025-08-28
 > Version: 1.0.0
