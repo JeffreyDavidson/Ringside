@@ -1,10 +1,14 @@
 # Login Page Completion Specification
 
-> Created: 2025-08-28  
-> Status: **COMPLETED** ✅  
-> Completed: 2025-09-01  
-> Priority: High  
+> Created: 2025-08-28
+> Status: **SUPERSEDED**
+> Completed: 2025-09-01
+> Priority: High
 > Actual Effort: 1 day
+>
+> **Note:** This spec has been superseded by the Design System spec (`2025-08-28-design-system`).
+> The login page will be redesigned as part of the comprehensive UI rethink using the new design system.
+> This spec is retained for historical reference of what was originally delivered.
 
 ## Overview
 
