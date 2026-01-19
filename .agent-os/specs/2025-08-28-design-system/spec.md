@@ -8,6 +8,22 @@
 
 Create a comprehensive design system with anonymous Blade components based on the Metronic Tailwind template, following FluxUI architectural patterns and design principles. This design system provides reusable, domain-agnostic UI components that maintain Metronic's professional design while integrating seamlessly with any Laravel application and the existing Livewire + Tailwind 4.1 setup.
 
+## Architectural Decisions
+
+### Single Design System Source
+
+**Decision**: Metronic is the sole source of truth for UI components and styling.
+
+**Rationale**:
+- Metronic provides complete HTML/CSS that we convert to Blade components
+- Adding Tailwind UI, FlexUI, Flowbite, or similar libraries would create conflicting patterns
+- Livewire + Alpine.js handles all interactivity - Metronic's JavaScript is not used
+
+**Implications**:
+- All components derive their styling/structure from Metronic templates
+- FluxUI patterns (slots, attribute forwarding) are adopted, not the package itself
+- No additional UI component libraries should be added
+
 ## User Stories
 
 ### Component Developer Story
