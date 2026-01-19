@@ -76,7 +76,8 @@
       "Bash(touch:*)",
       "Bash(sqlite3:*)",
       "WebFetch(domain:github.com)",
-      "mcp__laravel-boost__browser-logs"
+      "mcp__laravel-boost__browser-logs",
+      "Bash(\"/Users/jeffreydavidson/Library/Application Support/Herd/bin/php84\" artisan test tests/Unit/Livewire/Base/Tables/)"
     ],
     "deny": [],
     "defaultMode": "plan"
