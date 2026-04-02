@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Matches\Tables;
 
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\LinkColumn;
 use App\Models\Matches\EventMatch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class Main extends BaseTable
 {

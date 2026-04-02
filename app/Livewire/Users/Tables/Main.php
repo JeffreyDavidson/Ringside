@@ -7,8 +7,8 @@ namespace App\Livewire\Users\Tables;
 use App\Builders\Users\UserBuilder;
 use App\Enums\Users\Role;
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Table\Column;
 use App\Models\Users\User;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class Main extends BaseTable
 {

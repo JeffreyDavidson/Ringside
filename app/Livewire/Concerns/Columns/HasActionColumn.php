@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Columns;
 
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Livewire\Table\Column;
 
 /**
  * Provides action column functionality for Livewire table components.

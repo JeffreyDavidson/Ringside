@@ -4,21 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Components\Tables\Filters;
 
+use App\Livewire\Table\Filters\DateRangeFilter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
-use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HandlesDates;
-use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasConfig;
-use Rappasoft\LaravelLivewireTables\Views\Filters\Traits\HasOptions;
-use Rappasoft\LaravelLivewireTables\Views\Traits\Core\HasWireables;
 
 class FirstActivityPeriodFilter extends DateRangeFilter
 {
-    use HandlesDates,
-        HasConfig,
-        HasOptions,
-        HasWireables;
-
     public string $filterRelationshipName = '';
 
     public string $filterStartField = '';
@@ -40,9 +31,7 @@ class FirstActivityPeriodFilter extends DateRangeFilter
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
             ->filter(function (Builder $query, array $dateRange): void {
                 $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange): void {
-                    /**
-                     * @var array{'minDate': string, 'maxDate': string} $dateRange
-                     */
+                    /** @var array{'minDate': string, 'maxDate': string} $dateRange */
                     $query
                         ->where(function (Builder $query) use ($dateRange): void {
                             $query->whereBetween(

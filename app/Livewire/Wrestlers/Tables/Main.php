@@ -10,13 +10,13 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Filter;
+use App\Livewire\Table\Filters\SelectFilter;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class Main extends BaseTable
 {

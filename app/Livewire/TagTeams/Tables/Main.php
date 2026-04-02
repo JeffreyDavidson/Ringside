@@ -22,13 +22,13 @@ use App\Exceptions\Status\CannotBeReinstatedException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Filter;
+use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\TagTeams\TagTeam;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class Main extends BaseTable
 {

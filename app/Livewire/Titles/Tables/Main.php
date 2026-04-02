@@ -13,15 +13,15 @@ use App\Builders\Titles\TitleBuilder;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Filter;
+use App\Livewire\Table\Filters\SelectFilter;
 use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 /**
  * Livewire table component for managing championship titles.

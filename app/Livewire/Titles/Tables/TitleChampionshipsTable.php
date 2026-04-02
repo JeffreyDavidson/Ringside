@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Titles\Tables;
 
+use App\Livewire\Table\Column;
+use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\Title;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class TitleChampionshipsTable extends DataTableComponent
 {

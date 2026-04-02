@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Livewire\Stables\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
+use App\Livewire\Table\Column;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class PreviousManagers extends BasePreviousManagersTable
 {

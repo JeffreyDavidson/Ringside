@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire\Base\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\DateColumn;
+use App\Livewire\Table\DataTableComponent;
 
 abstract class BasePreviousWrestlersTable extends DataTableComponent
 {

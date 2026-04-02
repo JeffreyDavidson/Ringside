@@ -7,18 +7,18 @@ namespace App\Livewire\Events\Tables;
 use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\DateColumn;
+use App\Livewire\Table\Columns\LinkColumn;
+use App\Livewire\Table\Filter;
+use App\Livewire\Table\Filters\DateRangeFilter;
+use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
-use Rappasoft\LaravelLivewireTables\Views\Filter;
-use Rappasoft\LaravelLivewireTables\Views\Filters\DateRangeFilter;
-use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class Main extends BaseTable
 {

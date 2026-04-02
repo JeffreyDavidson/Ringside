@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
+use App\Livewire\Table\Column;
 use App\Models\Stables\Stable;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class PreviousStables extends BasePreviousStablesTable
 {
