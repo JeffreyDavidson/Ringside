@@ -44,8 +44,8 @@
                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
                    cursor-pointer transition-colors"
         >
-            <i class="ki-filled ki-black-left-line text-base text-muted-foreground transition-all duration-300"
-               :class="expanded ? '' : 'rotate-180'"></i>
+            <x-heroicon-s-chevron-left class="size-4 text-muted-foreground transition-all duration-300"
+               x-bind:class="expanded ? '' : 'rotate-180'" />
         </button>
     </div>
 
@@ -103,7 +103,7 @@
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
                        cursor-pointer transition-colors"
             >
-                <i class="ki-outline ki-cross text-lg"></i>
+                <x-heroicon-o-x-mark class="size-5" />
             </button>
         </div>
 
