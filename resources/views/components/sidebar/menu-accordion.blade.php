@@ -13,8 +13,8 @@
         class="flex items-center grow cursor-pointer border border-transparent gap-[10px] ps-[10px] pe-[10px] py-[6px]"
     >
         @if($icon)
-            <span class="flex items-center text-gray-500 w-[20px]">
-                <i class="ki-filled ki-{{ $icon }} text-lg"></i>
+            <span class="flex items-center text-gray-500 w-[20px] shrink-0">
+                {{ $icon }}
             </span>
         @endif
 
@@ -25,12 +25,10 @@
 
         <span class="flex text-muted-foreground w-[20px] shrink-0 justify-end ms-auto me-[-10px]
                      group-data-[collapsed=true]:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <span class="inline-flex" x-show="!open">
-                <i class="ki-filled ki-plus text-[11px]"></i>
-            </span>
-            <span class="inline-flex" x-show="open" x-cloak>
-                <i class="ki-filled ki-minus text-[11px]"></i>
-            </span>
+            <x-heroicon-s-chevron-down
+                class="size-3 transition-transform duration-200"
+                x-bind:class="open ? 'rotate-180' : ''"
+            />
         </span>
     </div>
 

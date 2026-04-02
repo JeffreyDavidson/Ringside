@@ -25,12 +25,10 @@
 
         {{-- Expand/Collapse Arrow --}}
         <span class="flex text-muted-foreground w-[20px] shrink-0 justify-end ms-auto me-[-10px]">
-            <span class="inline-flex" x-show="!open">
-                <i class="ki-filled ki-plus text-[11px]"></i>
-            </span>
-            <span class="inline-flex" x-show="open" x-cloak>
-                <i class="ki-filled ki-minus text-[11px]"></i>
-            </span>
+            <x-heroicon-s-chevron-down
+                class="size-3 transition-transform duration-200"
+                x-bind:class="open ? 'rotate-180' : ''"
+            />
         </span>
     </div>
 

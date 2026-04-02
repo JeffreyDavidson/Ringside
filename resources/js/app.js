@@ -17,8 +17,16 @@ document.addEventListener('livewire:init', () => {
     // Global sidebar state store
     Alpine.store('sidebar', {
         expanded: true,
+        hovered: false,
+        mobileOpen: false,
         toggle() {
             this.expanded = !this.expanded;
+        },
+        openMobile() {
+            this.mobileOpen = true;
+        },
+        closeMobile() {
+            this.mobileOpen = false;
         },
     });
 

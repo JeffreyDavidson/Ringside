@@ -28,8 +28,8 @@
         tabindex="0"
     >
         @if($icon)
-            <span class="flex items-center text-gray-500 w-[20px]">
-                <i class="ki-filled ki-{{ $icon }} text-lg"></i>
+            <span class="flex items-center text-gray-500 w-[20px] shrink-0">
+                {{ $icon }}
             </span>
         @endif
 
