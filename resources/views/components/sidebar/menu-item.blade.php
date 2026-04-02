@@ -43,11 +43,8 @@
             class="flex items-center grow cursor-pointer border border-transparent gap-[10px] ps-[10px] pe-[10px] py-[6px]"
         >
             @if($icon)
-                <span class="flex items-center text-gray-500 w-[20px]">
-                    <i @class([
-                        "ki-filled ki-{$icon} text-lg",
-                        'text-primary' => $active,
-                    ])></i>
+                <span class="flex items-center text-gray-500 w-[20px] shrink-0">
+                    {{ $icon }}
                 </span>
             @endif
 

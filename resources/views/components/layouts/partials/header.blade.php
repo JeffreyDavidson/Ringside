@@ -3,21 +3,21 @@
     :class="(atTop === false) ? 'shadow-sm' : ''">
     <!-- Container -->
     <x-container-fixed class="flex justify-between items-stretch lg:gap-4">
-        <!-- Mobile Logo -->
+        <!-- Mobile Logo & Menu Toggle -->
         <div class="flex gap-1 lg:hidden items-center -ms-1">
             <a class="shrink-0" href="{{ route('dashboard') }}">
-                <img class="max-h-[25px] w-full" src="{{ Vite::image('app/mini-logo.svg') }}" />
+                <span class="text-lg font-bold text-gray-900">Ringside</span>
             </a>
             <div class="flex items-center">
                 <button
-                    class="inline-flex items-center cursor-pointer leading-none rounded-md border border-solid border-transparent outline-none justify-center shrink-0 p-0 gap-0 size-8 bg-transparent text-gray-700 ps-3 pe-3 font-medium text-xs">
-                    <i class="ki-menu text-lg text-gray-600 leading-none"></i>
+                    @click="$store.sidebar && $store.sidebar.openMobile()"
+                    class="inline-flex items-center cursor-pointer leading-none rounded-md border border-transparent justify-center shrink-0 size-8 text-gray-700"
+                >
+                    <x-heroicon-o-bars-3 class="size-5 text-gray-600" />
                 </button>
             </div>
         </div>
         <!-- Topbar -->
         <x-topbar />
-        <!-- End of Topbar -->
     </x-container-fixed>
-    <!-- End of Container -->
 </header>
