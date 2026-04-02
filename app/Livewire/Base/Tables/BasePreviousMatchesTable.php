@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Livewire\Base\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\ArrayColumn;
+use App\Livewire\Table\Columns\DateColumn;
+use App\Livewire\Table\Columns\LinkColumn;
+use App\Livewire\Table\DataTableComponent;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 abstract class BasePreviousMatchesTable extends DataTableComponent
 {

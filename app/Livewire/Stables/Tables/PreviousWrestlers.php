@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\LinkColumn;
+use App\Livewire\Table\DataTableComponent;
 use App\Models\Stables\StableWrestler;
 use App\Models\Wrestlers\Wrestler;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 class PreviousWrestlers extends DataTableComponent
 {
