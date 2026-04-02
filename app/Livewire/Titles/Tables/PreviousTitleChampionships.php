@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Livewire\Titles\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class PreviousTitleChampionships extends DataTableComponent
 {

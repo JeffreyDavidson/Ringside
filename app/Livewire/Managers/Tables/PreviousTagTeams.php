@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire\Managers\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\DateColumn;
+use App\Livewire\Table\DataTableComponent;
 use App\Models\TagTeams\TagTeamManager;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
 
 class PreviousTagTeams extends DataTableComponent
 {
