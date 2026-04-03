@@ -34,8 +34,8 @@
     >
         <span class="text-nowrap">{{ $title }}</span>
         <span class="flex lg:hidden text-muted-foreground">
-            <i class="ki-filled ki-plus text-xs" x-show="!open"></i>
-            <i class="ki-filled ki-minus text-xs" x-show="open" x-cloak></i>
+            <x-heroicon-m-plus class="size-3" x-show="!open" />
+            <x-heroicon-m-minus class="size-3" x-show="open" x-cloak />
         </span>
     </button>
 
