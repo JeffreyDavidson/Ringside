@@ -42,9 +42,9 @@
             </div>
 
             <div class="pt-2">
-                <x-ui.button variant="primary" type="submit" class="w-full">
+                <x-button variant="primary" type="submit" class="w-full">
                     {{ __('Reset Password') }}
-                </x-ui.button>
+                </x-button>
             </div>
         </form>
     </div>

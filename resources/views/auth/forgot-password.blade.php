@@ -38,9 +38,9 @@
         </div>
 
         <!-- Submit Button -->
-        <x-ui.button variant="primary" class="flex justify-center grow">
+        <x-button variant="primary" class="flex justify-center grow">
             Email Password Reset Link
-        </x-ui.button>
+        </x-button>
 
         <!-- Back to Login -->
         <div class="text-center">

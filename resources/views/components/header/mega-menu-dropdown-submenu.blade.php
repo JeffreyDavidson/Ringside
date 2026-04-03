@@ -14,14 +14,14 @@
     >
         @if($icon)
             <span class="w-5 flex items-center justify-center text-muted-foreground">
-                <i class="ki-filled ki-{{ $icon }} text-base"></i>
+                <x-dynamic-component :component="$icon" class="size-4" />
             </span>
         @endif
         <span class="grow text-sm text-nowrap">
             {{ $title }}
         </span>
         <span class="text-muted-foreground">
-            <i class="ki-filled ki-right text-xs"></i>
+            <x-heroicon-m-chevron-right class="size-3" />
         </span>
     </div>
 

@@ -20,7 +20,7 @@
     >
         @if($icon)
             <span class="w-5 flex items-center justify-center text-muted-foreground">
-                <i class="ki-filled ki-{{ $icon }} text-base"></i>
+                <x-dynamic-component :component="$icon" class="size-4" />
             </span>
         @endif
         <span class="grow text-sm text-nowrap">
@@ -28,12 +28,12 @@
         </span>
         @if($iconRight)
             <span class="text-muted-foreground">
-                <i class="ki-filled ki-{{ $iconRight }} text-base"></i>
+                <x-dynamic-component :component="$iconRight" class="size-4" />
             </span>
         @endif
         @if($badge)
             <span class="flex items-center ms-2.5">
-                <x-ui.badge size="sm">{{ $badge }}</x-ui.badge>
+                <x-badge size="sm">{{ $badge }}</x-badge>
             </span>
         @endif
     </a>
