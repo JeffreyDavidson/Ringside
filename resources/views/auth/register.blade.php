@@ -90,8 +90,8 @@
         </div>
 
         <!-- Submit Button -->
-        <x-ui.button variant="primary" class="flex justify-center grow">
+        <x-button variant="primary" class="flex justify-center grow">
             Sign Up
-        </x-ui.button>
+        </x-button>
     </form>
 </x-layouts.auth>
