@@ -56,10 +56,10 @@ $inputAttributes = $attributes->except(['label', 'description', 'variant', 'name
                     class="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground focus:outline-none"
                     @click="showPassword = !showPassword">
                     <span x-show="!showPassword">
-                        <x-ui.icon name="eye" style="filled" size="md" />
+                        <x-heroicon-s-eye class="size-4" />
                     </span>
                     <span x-show="showPassword">
-                        <x-ui.icon name="eye-slash" style="filled" size="md" />
+                        <x-heroicon-s-eye-slash class="size-4" />
                     </span>
                 </button>
             </div>
@@ -89,10 +89,10 @@ $inputAttributes = $attributes->except(['label', 'description', 'variant', 'name
                 class="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground focus:outline-none"
                 @click="showPassword = !showPassword">
                 <span x-show="!showPassword">
-                    <x-ui.icon name="eye" style="filled" size="md" />
+                    <x-heroicon-s-eye class="size-4" />
                 </span>
                 <span x-show="showPassword">
-                    <x-ui.icon name="eye-slash" style="filled" size="md" />
+                    <x-heroicon-s-eye-slash class="size-4" />
                 </span>
             </button>
         </div>

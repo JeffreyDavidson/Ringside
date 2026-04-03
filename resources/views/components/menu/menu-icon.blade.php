@@ -1,7 +1,7 @@
 @props([
-    'icon' => 'ki-element-11',
+    'icon' => 'heroicon-m-squares-2x2',
 ])
 
 <span {{ $attributes->merge(['class' => 'flex shrink-0']) }}>
-    <i class="{{ $icon }} text-lg"></i>
+    <x-dynamic-component :component="$icon" class="size-5" />
 </span>

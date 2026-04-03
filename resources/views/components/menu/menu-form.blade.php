@@ -9,7 +9,7 @@
     @csrf
 
     <x-buttons.link type="submit">
-        <i class="ki-trash text-lg"></i>
+        <x-heroicon-m-trash class="size-5" />
         Remove
     </x-buttons.link>
 </form>

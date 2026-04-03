@@ -64,8 +64,8 @@
         <x-form.inputs.checkbox name="remember" label="Remember me" value="1" size="sm" data-test="remember"/>
 
         <!-- Submit Button -->
-        <x-ui.button type="submit" variant="primary" class="w-full flex justify-center" data-test="sign-in">
+        <x-button type="submit" variant="primary" class="w-full flex justify-center" data-test="sign-in">
             Sign In
-        </x-ui.button>
+        </x-button>
     </form>
 </x-layouts.auth>
