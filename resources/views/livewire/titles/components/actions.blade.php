@@ -1,21 +1,25 @@
 <div class="flex flex-wrap gap-2">
-    {{-- Title Actions Component --}}
-    {{-- This component handles various title management actions --}}
-    
-    {{-- Add action buttons here based on title status and available actions --}}
-    {{-- Example structure for future implementation: --}}
-    {{-- 
-    @if($canDebut)
+    @can('debut', $title)
         <x-buttons.success wire:click="debut">{{ __('Debut') }}</x-buttons.success>
-    @endif
-    
-    @if($canRetire) 
+    @endcan
+
+    @can('retire', $title)
         <x-buttons.danger wire:click="retire">{{ __('Retire') }}</x-buttons.danger>
-    @endif
-    --}}
-    
-    {{-- Placeholder content for initial implementation --}}
-    <div class="text-sm text-gray-500">
-        Title Actions Component
-    </div>
+    @endcan
+
+    @can('unretire', $title)
+        <x-buttons.success wire:click="unretire">{{ __('Unretire') }}</x-buttons.success>
+    @endcan
+
+    @can('pull', $title)
+        <x-buttons.warning wire:click="deactivate">{{ __('Deactivate') }}</x-buttons.warning>
+    @endcan
+
+    @can('reinstate', $title)
+        <x-buttons.success wire:click="reinstate">{{ __('Reinstate') }}</x-buttons.success>
+    @endcan
+
+    @can('restore', $title)
+        <x-buttons.success wire:click="restore">{{ __('Restore') }}</x-buttons.success>
+    @endcan
 </div>
