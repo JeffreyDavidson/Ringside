@@ -1,44 +1,47 @@
-# Phase 5: Form Input Components
+# Phase 7: Form Modals + Action Components
 
 ## Plan
 
-### Missing components (referenced but don't exist)
+### 1. Rebuild action component views (5 files)
+All 5 were placeholder stubs — restored proper `@can` gated action buttons matching each Livewire class's methods.
 
-1. **`form/inputs/text.blade.php`** (54 references) — thin wrapper: `<x-form.input type="text">`
-2. **`form/inputs/date.blade.php`** (16 references) — thin wrapper: `<x-form.input type="date">`
-3. **`form/inputs/textarea.blade.php`** (3 references) — proper `<textarea>` with field wrapper, same styling pattern as input
-4. **`form/inputs/select.blade.php`** (51 references) — `<select>` with `:options`, `:selected`, `multiple` support
-5. **`form/form-label.blade.php`** (4 references in auth password pages) — simple label+for wrapper
+### 2. Replace Bootstrap grid classes in entity form components (3 files)
+- `managers/form.blade.php`, `referees/form.blade.php`, `venues/form.blade.php`
 
-### Design approach
-
-- Text and date are thin wrappers that delegate to the existing `form/input.blade.php`
-- Textarea and select need their own implementations, following the same patterns (field wrapper, error handling, Metronic styling)
-- All components support both Livewire (`wire:model`) and traditional (`name`/`:value`) usage
-- Use the same CSS token approach as `form/input.blade.php` for visual consistency
+### 3. Fix tag-team form modal raw select
+- Raw `<select>` for managers → `<x-form.inputs.select>`
 
 ## Tasks
 
-- [x] Create `form/inputs/text.blade.php`
-- [x] Create `form/inputs/date.blade.php`
-- [x] Create `form/inputs/textarea.blade.php`
-- [x] Create `form/inputs/select.blade.php`
-- [x] Create `form/form-label.blade.php`
+- [x] Rebuild wrestlers action view (employ, release, suspend, reinstate, injure, heal, retire, unretire, restore)
+- [x] Rebuild managers action view (same actions as wrestlers)
+- [x] Rebuild referees action view (same actions as wrestlers)
+- [x] Rebuild tag-teams action view (employ, release, suspend, reinstate, retire, unretire, delete, restore)
+- [x] Rebuild titles action view (debut, retire, unretire, deactivate, reinstate, restore)
+- [x] Replace Bootstrap grid in managers/form, referees/form, venues/form
+- [x] Fix tag-team form modal raw select → x-form.inputs.select
 - [x] Run tests — pre-existing migration failure only, no new regressions
 
 ## Review
 
 ### Changes Summary
 
-**New files (5):**
-- `form/inputs/text.blade.php` — thin wrapper delegating to `<x-form.input type="text">` (satisfies 54 references)
-- `form/inputs/date.blade.php` — thin wrapper delegating to `<x-form.input type="date">` (satisfies 16 references)
-- `form/inputs/textarea.blade.php` — proper `<textarea>` with Metronic-styled classes, field wrapper, label/error support, configurable rows (satisfies 3 references)
-- `form/inputs/select.blade.php` — `<select>` with `:options` array rendering, `:selected` state, `multiple` attribute, placeholder support (satisfies 51 references)
-- `form/form-label.blade.php` — thin wrapper delegating to `<x-form.label>` with `name`/`label` props (satisfies 4 references)
+**Modified files (9):**
 
-### Design decisions
-- Textarea and select follow the exact same pattern as `form/input.blade.php`: same CSS tokens, same field wrapper, same Livewire/traditional dual support
-- Text and date are one-line delegators — no duplication of input logic
-- Select handles both associative arrays (`[value => label]`) and `multiple` mode
-- All 124 missing component references are now satisfied
+Action views (5) — replaced placeholder stubs with proper `@can`-gated buttons:
+- `livewire/wrestlers/components/actions.blade.php` — 9 actions
+- `livewire/managers/components/actions.blade.php` — 9 actions
+- `livewire/referees/components/actions.blade.php` — 9 actions
+- `livewire/tag-teams/components/actions.blade.php` — 8 actions (no injure/heal, has delete)
+- `livewire/titles/components/actions.blade.php` — 6 actions (debut/retire/unretire/deactivate/reinstate/restore)
+
+Entity forms (3) — Bootstrap `row gx-10` / `col-lg-*` → Tailwind `grid grid-cols-*`:
+- `components/managers/form.blade.php`
+- `components/referees/form.blade.php`
+- `components/venues/form.blade.php`
+
+Form modal (1) — raw HTML select → component:
+- `livewire/tag-teams/modals/form-modal.blade.php` — managers field now uses `<x-form.inputs.select>`
+
+### Zero Bootstrap grid classes remaining in blade files
+### Zero raw HTML selects remaining where component should be used

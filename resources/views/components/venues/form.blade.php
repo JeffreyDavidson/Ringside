@@ -7,17 +7,9 @@
 </div>
 
 <div class="mb-10">
-    <div class="mb-5 row gx-10">
-        <div class="col-lg-4">
-            <x-form.inputs.text label="City:" name="city" placeholder="Orlando" :value="old('city', $venue->city)"/>
-        </div>
-
-        <div class="col-lg-4">
-            <x-form.inputs.select label="State:" name="state" :options="$states" :selected="old('state', $venue->state)" />
-        </div>
-
-        <div class="col-lg-4">
-            <x-form.inputs.text label="Zip Code:" name="zipcode" placeholder="12345" :value="old('zipcode', $venue->zipcode)"/>
-        </div>
+    <div class="mb-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <x-form.inputs.text label="City:" name="city" placeholder="Orlando" :value="old('city', $venue->city)"/>
+        <x-form.inputs.select label="State:" name="state" :options="$states" :selected="old('state', $venue->state)" />
+        <x-form.inputs.text label="Zip Code:" name="zipcode" placeholder="12345" :value="old('zipcode', $venue->zipcode)"/>
     </div>
 </div>
