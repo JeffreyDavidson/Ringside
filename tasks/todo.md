@@ -1,47 +1,28 @@
-# Phase 7: Form Modals + Action Components
+# Phases 8-10
 
-## Plan
+## Phase 8: Show Pages
+- [x] Reviewed all show page views, general-info components, match components
+- [x] Fixed 2 files: replaced `card-flush mb-xl-9` with `border-0 shadow-none mb-6 lg:mb-9` in events/matches-list and events/matches-table
 
-### 1. Rebuild action component views (5 files)
-All 5 were placeholder stubs — restored proper `@can` gated action buttons matching each Livewire class's methods.
+## Phase 9: Auth + Dashboard
+- [x] Reviewed all auth pages and dashboard — already clean, no changes needed
 
-### 2. Replace Bootstrap grid classes in entity form components (3 files)
-- `managers/form.blade.php`, `referees/form.blade.php`, `venues/form.blade.php`
+## Phase 10: Cleanup
 
-### 3. Fix tag-team form modal raw select
-- Raw `<select>` for managers → `<x-form.inputs.select>`
+### Delete (verified safe — zero external references):
+- [ ] `resources/css/keenicons.css` — remove import from app.js and auth.js first
+- [ ] `resources/css/fonts/` — all KeenIcon font files
+- [ ] `resources/views/components/menu/` (18 files) — unused menu system
+- [ ] `resources/views/components/header/` (4 files) — Metronic mega-menu demo
+- [ ] `resources/views/components/docs/` (3 files) — documentation examples
+- [ ] `resources/views/components/layout/` (6 files) — duplicate of layouts/
+- [ ] `resources/views/blank.blade.php` — empty file
+- [ ] `resources/views/layout-test.blade.php` — 35KB test file
+- [ ] `resources/views/components/button-tabs.blade.php` — unused
+- [ ] `docs/frontend/` — Metronic reference docs
+- [ ] `docs/metronic-reference/` — Metronic reference docs
 
-## Tasks
-
-- [x] Rebuild wrestlers action view (employ, release, suspend, reinstate, injure, heal, retire, unretire, restore)
-- [x] Rebuild managers action view (same actions as wrestlers)
-- [x] Rebuild referees action view (same actions as wrestlers)
-- [x] Rebuild tag-teams action view (employ, release, suspend, reinstate, retire, unretire, delete, restore)
-- [x] Rebuild titles action view (debut, retire, unretire, deactivate, reinstate, restore)
-- [x] Replace Bootstrap grid in managers/form, referees/form, venues/form
-- [x] Fix tag-team form modal raw select → x-form.inputs.select
-- [x] Run tests — pre-existing migration failure only, no new regressions
-
-## Review
-
-### Changes Summary
-
-**Modified files (9):**
-
-Action views (5) — replaced placeholder stubs with proper `@can`-gated buttons:
-- `livewire/wrestlers/components/actions.blade.php` — 9 actions
-- `livewire/managers/components/actions.blade.php` — 9 actions
-- `livewire/referees/components/actions.blade.php` — 9 actions
-- `livewire/tag-teams/components/actions.blade.php` — 8 actions (no injure/heal, has delete)
-- `livewire/titles/components/actions.blade.php` — 6 actions (debut/retire/unretire/deactivate/reinstate/restore)
-
-Entity forms (3) — Bootstrap `row gx-10` / `col-lg-*` → Tailwind `grid grid-cols-*`:
-- `components/managers/form.blade.php`
-- `components/referees/form.blade.php`
-- `components/venues/form.blade.php`
-
-Form modal (1) — raw HTML select → component:
-- `livewire/tag-teams/modals/form-modal.blade.php` — managers field now uses `<x-form.inputs.select>`
-
-### Zero Bootstrap grid classes remaining in blade files
-### Zero raw HTML selects remaining where component should be used
+### Keep (actively used):
+- `resources/js/auth.js` — used by auth layout, just remove keenicons import
+- `resources/js/bootstrap.js` — imported by app.js (axios config)
+- `resources/js/app.js` — just remove keenicons import line

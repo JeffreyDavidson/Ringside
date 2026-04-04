@@ -1,6 +1,6 @@
 @aware(['event'])
 
-<x-card class="card-flush mb-6 mb-xl-9">
+<x-card class="border-0 shadow-none mb-6 lg:mb-9">
     <x-card.header class="pt-6">
         <x-card.title>
             <h2>Matches</h2>
