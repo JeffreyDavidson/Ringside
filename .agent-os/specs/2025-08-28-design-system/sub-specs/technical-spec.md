@@ -2,9 +2,7 @@
 
 > Design System
 > Reference: @.agent-os/specs/2025-08-28-design-system/spec.md
-
-> Created: 2025-08-28
-> Version: 1.0.0
+> Updated: 2026-04-04
 
 ## Component Architecture
 
@@ -13,130 +11,158 @@
 **Directory Organization**:
 ```
 resources/views/components/
-├── layout/
-│   ├── header.blade.php
-│   ├── sidebar.blade.php
-│   ├── main.blade.php
-│   └── grid.blade.php
-├── form/
-│   ├── input.blade.php
-│   ├── select.blade.php
-│   ├── textarea.blade.php
-│   ├── checkbox.blade.php
-│   ├── radio.blade.php
-│   └── validation-error.blade.php
-├── display/
-│   ├── card.blade.php
-│   ├── table.blade.php
-│   ├── list.blade.php
-│   ├── badge.blade.php
-│   └── stats.blade.php
-├── interactive/
-│   ├── button.blade.php
-│   ├── dropdown.blade.php
-│   ├── modal.blade.php
-│   ├── tabs.blade.php
-│   └── tooltip.blade.php
-└── generic/
-    ├── profile-card.blade.php
-    ├── activity-display.blade.php
-    ├── achievement-badge.blade.php
-    └── status-indicator.blade.php
+├── ui/                          # Design system (domain-agnostic)
+│   ├── button/
+│   │   └── index.blade.php      # <x-ui.button>
+│   ├── badge/
+│   │   └── index.blade.php      # <x-ui.badge>
+│   ├── card/
+│   │   ├── index.blade.php      # <x-ui.card>
+│   │   ├── header.blade.php
+│   │   ├── body.blade.php
+│   │   └── footer.blade.php
+│   ├── modal/
+│   │   ├── index.blade.php
+│   │   ├── header.blade.php
+│   │   ├── body.blade.php
+│   │   └── footer.blade.php
+│   ├── form/
+│   │   ├── input.blade.php
+│   │   ├── select.blade.php
+│   │   ├── textarea.blade.php
+│   │   ├── checkbox.blade.php
+│   │   ├── label.blade.php
+│   │   └── error.blade.php
+│   ├── dropdown/
+│   │   └── index.blade.php
+│   ├── tabs/
+│   │   └── index.blade.php
+│   ├── table/
+│   │   └── index.blade.php
+│   ├── page/
+│   │   ├── header.blade.php
+│   │   ├── heading.blade.php
+│   │   └── description.blade.php
+│   ├── stats/
+│   │   └── index.blade.php
+│   ├── tooltip/
+│   │   └── index.blade.php
+│   └── route-link/
+│       └── index.blade.php
+├── layouts/
+├── sidebar/
+├── topbar/
+└── {entity}/                    # Domain components
 ```
 
-### FluxUI-Inspired Patterns
+**Convention**: Every component is a directory with `index.blade.php`, even standalone components. This provides consistency and room for future sub-components.
 
-**Attribute Forwarding**: Components will use `{{ $attributes }}` to forward all additional attributes to the root element, following FluxUI's flexible attribute handling.
+### Component Patterns
 
-**Slot-Based Composition**: Primary content via default slots, with named slots for headers, footers, and actions:
+**Attribute Forwarding**: All components forward additional attributes to the root element:
 ```blade
-<x-display.card>
-    <x-slot:header>Card Title</x-slot:header>
-    Main content here
-    <x-slot:actions>
-        <x-interactive.button>Action</x-interactive.button>
-    </x-slot:actions>
-</x-display.card>
+<div {{ $attributes->merge(['class' => 'base-classes']) }}>
+    {{ $slot }}
+</div>
 ```
 
-**Prop-Based Configuration**: Components accept configuration via props with sensible defaults:
+**Slot-Based Composition**: Named slots for structured content:
 ```blade
-<x-interactive.button 
-    variant="primary" 
-    size="sm" 
-    :disabled="false"
-/>
+<x-ui.card>
+    <x-ui.card.header>
+        <x-ui.card.title>Title</x-ui.card.title>
+    </x-ui.card.header>
+    <x-ui.card.body>
+        Content here
+    </x-ui.card.body>
+</x-ui.card>
+```
+
+**Prop-Based Configuration**: Props with sensible defaults:
+```blade
+<x-ui.button variant="primary" size="sm">
+    Save
+</x-ui.button>
 ```
 
 ## Technical Requirements
 
-### Integration with Existing Stack
+### Stack Integration
 
-**Tailwind 4.1 Compatibility**: All components must use Tailwind classes compatible with the existing 4.1 setup, avoiding deprecated utilities and leveraging CSS custom properties where appropriate.
+**Tailwind CSS 4**: All styling via Tailwind utility classes directly in components. No CSS utility class layer (no `btn-primary-default` type classes). CSS file contains only:
+- `@import "tailwindcss"`
+- `@theme` block for custom tokens
+- `:root` block for semantic CSS variables
+- Layout variables (sidebar width, header height)
 
-**Livewire 3.6.4 Integration**: Components must work seamlessly with Livewire properties and actions, supporting `wire:` directives and maintaining component state properly.
+**Livewire 3**: Components work seamlessly with `wire:model`, `wire:click`, and other Livewire directives via attribute forwarding. Existing Livewire PHP classes are kept as-is — views rebuilt to match their API.
 
-**Alpine.js Integration**: Interactive components will use Alpine.js for client-side behavior, following existing patterns in the codebase like sidebar state management.
+**Alpine.js**: Interactive behavior (sidebar toggle, dropdowns, modals) uses Alpine.js, included with Livewire. Follow existing patterns like `x-data`, `x-show`, `x-transition`.
 
-**KeenIcons Integration**: Components will integrate with the existing KeenIcons usage patterns, using the established `<i class="ki-icon-name text-lg"></i>` syntax.
+**Heroicons**: All icons via `blade-ui-kit/blade-heroicons`:
+```blade
+<x-heroicon-o-user-group class="size-5" />
+```
+
+### CSS Architecture
+
+```css
+@import "tailwindcss";
+
+@theme {
+  /* Only truly custom values that Tailwind doesn't provide */
+  --text-2sm: 0.8125rem;
+  --text-2xs: 0.6875rem;
+}
+
+:root {
+  /* Semantic tokens — shell */
+  --shell-bg: #0a0a0a;
+  --shell-text: #f5f5f5;
+  --shell-border: rgba(230, 34, 34, 0.1);
+
+  /* Semantic tokens — content */
+  --background: var(--color-white);
+  --foreground: var(--color-zinc-950);
+  /* ... etc */
+
+  /* Brand */
+  --primary: #e62222;
+  --accent-brand: #d4a843;
+
+  /* Layout */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --header-height: 70px;
+}
+
+/* No @layer components {} — styling lives in Blade components */
+```
 
 ### Component Behavior Standards
 
-**Responsive Design**: All components must be fully responsive, adapting to mobile, tablet, and desktop viewports using Tailwind's responsive utilities.
+**Responsive Design**: Mobile-first. Sidebar hidden below `lg` breakpoint with mobile drawer. Content stacks to single column.
 
-**Dark Mode Support**: Components will support both light and dark modes using Tailwind's `dark:` variant system, consistent with existing codebase patterns.
+**Accessibility**: ARIA attributes, keyboard navigation, focus management. Interactive components need `tabindex`, `role`, `aria-expanded`, etc.
 
-**Accessibility**: Components must meet WCAG 2.1 AA standards with proper ARIA attributes, keyboard navigation, and screen reader support.
+**Performance**: Minimal DOM. No unnecessary wrapper divs. Leverage Tailwind's utility-first approach.
 
-**Performance**: Components should minimize DOM manipulation and leverage Tailwind's utility-first approach for optimal CSS performance.
+### Rebuild Strategy
 
-### Application Integration
+**Preserve Livewire API Surface**: The existing 95 Livewire PHP classes define what properties and methods the views can use. When rebuilding a view:
 
-**Data-Driven Components**: Components are designed to be data-agnostic, accepting any structured data through props and slots without domain-specific logic embedded in the component itself.
+1. Read the Livewire PHP class
+2. Identify its public properties, computed properties, and methods
+3. Build the view to use those exact bindings
 
-**Validation Integration**: Form components will integrate with Laravel's validation system and display any business rule errors passed through standard Laravel validation patterns.
-
-**Flexible Data Display**: Components will handle any data types with proper formatting through configurable display options and slot-based content injection.
+**No PHP refactoring during view rebuild.** If a Livewire class has an awkward API, note it for future refactoring but build the view to match the current API.
 
 ### Testing Requirements
 
-**Component Testing**: Each component must have comprehensive Pest tests covering all props, slots, and rendering scenarios to maintain 100% coverage requirement.
+**Component Testing**: Blade component rendering tests using Pest.
 
-**Browser Testing**: Interactive components require browser testing with Pest's browser testing capabilities to ensure proper Alpine.js and Livewire integration.
+**Integration Testing**: Verify Livewire components render correctly with new views.
 
-**Accessibility Testing**: Components must pass automated accessibility tests and manual keyboard navigation testing.
+**Accessibility Testing**: Automated checks for ARIA attributes and keyboard navigation.
 
-### Documentation Standards
-
-**Component Documentation**: Each component requires inline documentation with usage examples and prop descriptions following Laravel conventions.
-
-**Usage Examples**: Components will include practical usage examples covering various application scenarios (entity forms, data displays, status indicators, etc.).
-
-**Migration Guide**: Documentation will include migration patterns for replacing existing template code with new components.
-
-## Implementation Strategy
-
-### Phase 1: Core Infrastructure
-- Set up component directory structure and base component architecture
-- Implement foundational layout and form components
-- Establish testing patterns and documentation standards
-
-### Phase 2: Data Display Components  
-- Create table, card, and list components for flexible data presentation
-- Implement badge and status components for any status or category display
-- Add responsive design and dark mode support
-
-### Phase 3: Interactive Components
-- Build modal, dropdown, and tab components with Alpine.js integration
-- Implement tooltip and notification components
-- Add comprehensive keyboard navigation and accessibility features
-
-### Phase 4: Generic Components
-- Create flexible profile and activity display components
-- Implement achievement and status components with configurable data display
-- Add temporal data visualization components for any time-based data
-
-### Quality Assurance
-- Maintain 100% test coverage throughout development
-- Regular accessibility audits and performance testing
-- Integration testing with existing Livewire components and application business logic
+Tests are written as we build, not as a separate phase.

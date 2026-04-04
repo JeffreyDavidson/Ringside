@@ -2,317 +2,202 @@
 
 > Design System
 > Reference: @.agent-os/specs/2025-08-28-design-system/spec.md
-
----
+> Updated: 2026-04-04
 
 ## Overview
 
-This document defines common page layout patterns used throughout the application. Each pattern combines design system components into reusable page structures.
-
----
+Common page layout patterns for the Ringside admin panel. Each pattern combines UI components into reusable page structures. The hybrid theme applies: dark sidebar/header, light content area.
 
 ## Page Types
 
-### 1. List Page
+### 1. Index Page (List)
 
-Displays a collection of entities with filtering and actions.
+Displays a collection of entities with a Livewire table.
 
-**Use Cases:** Wrestlers index, Events list, Titles list
+**Use Cases:** Wrestlers, Events, Titles, etc.
 
-**Structure:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Page Header                                                  │
-│ ┌─────────────────────────────────┐  ┌───────────────────┐  │
-│ │ Title + Breadcrumb              │  │ Primary Action    │  │
-│ └─────────────────────────────────┘  └───────────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│ Filters Bar                                                  │
-│ ┌─────────┐ ┌─────────┐ ┌─────────┐          ┌───────────┐ │
-│ │ Search  │ │ Filter  │ │ Filter  │          │ View Mode │ │
-│ └─────────┘ └─────────┘ └─────────┘          └───────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│ Content Area                                                 │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Table / Card Grid                                       │ │
-│ │                                                         │ │
-│ │ ┌─────┬─────────┬──────────┬──────────┬───────┐       │ │
-│ │ │     │ Name    │ Status   │ Details  │ Actions│       │ │
-│ │ ├─────┼─────────┼──────────┼──────────┼───────┤       │ │
-│ │ │     │         │          │          │       │       │ │
-│ │ └─────┴─────────┴──────────┴──────────┴───────┘       │ │
-│ └─────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│ Pagination                                                   │
-│                    ┌─────────────────┐                      │
-│                    │ < 1 2 3 ... 10 >│                      │
-│                    └─────────────────┘                      │
-└─────────────────────────────────────────────────────────────┘
+│ [Dark Sidebar]  │  [Dark Header]                            │
+│                 ├───────────────────────────────────────────┤
+│  Dashboard      │  Page Header                              │
+│  ─────────      │  ┌─────────────────────┐  ┌───────────┐  │
+│  Roster ▼       │  │ Title + Stats       │  │ Add Button │  │
+│   Wrestlers     │  └─────────────────────┘  └───────────┘  │
+│   Tag Teams     ├───────────────────────────────────────────┤
+│   Managers      │  Livewire DataTable                       │
+│   Referees      │  ┌─────────────────────────────────────┐  │
+│   Stables       │  │ Search │ Filters                    │  │
+│  ─────────      │  ├────┬────────┬────────┬──────┬───────┤  │
+│  Events         │  │    │ Name   │ Status │ Date │ ••• ▼ │  │
+│  Titles         │  ├────┼────────┼────────┼──────┼───────┤  │
+│  Venues         │  │    │        │        │      │       │  │
+│  ─────────      │  └────┴────────┴────────┴──────┴───────┘  │
+│  Users          │  Pagination                                │
+│                 ├───────────────────────────────────────────┤
+│                 │  Footer                                    │
+└─────────────────┴───────────────────────────────────────────┘
 ```
 
 **Components Used:**
-- `layout.page-header`
-- `form.input` (search)
-- `form.select` (filters)
-- `display.table` or `display.card` grid
-- `navigation.pagination`
-- `interactive.button`
-- `interactive.dropdown` (row actions)
+- `<x-layouts.app>` → sidebar + header + content + footer
+- `<x-ui.page.heading>`, `<x-ui.page.description>`
+- `<x-ui.button>` (Add entity)
+- Livewire `DataTableComponent` (renders its own table)
 
----
+### 2. Show Page (Detail)
 
-### 2. Detail Page
-
-Shows comprehensive information about a single entity.
+Comprehensive view of a single entity with sidebar info and tabbed data.
 
 **Use Cases:** Wrestler profile, Event details, Title history
 
-**Structure:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Page Header                                                  │
-│ ┌─────────────────────────────────┐  ┌───────────────────┐  │
-│ │ ← Back   Entity Name            │  │ Edit  │  Actions ▼│  │
-│ └─────────────────────────────────┘  └───────────────────┘  │
-├─────────────────────────────────────────────────────────────┤
-│ ┌──────────────────────┐ ┌────────────────────────────────┐ │
-│ │ Profile Card         │ │ Quick Stats                    │ │
-│ │ ┌────┐               │ │ ┌──────┐ ┌──────┐ ┌──────┐    │ │
-│ │ │    │ Name          │ │ │ Stat │ │ Stat │ │ Stat │    │ │
-│ │ │    │ Status Badge  │ │ └──────┘ └──────┘ └──────┘    │ │
-│ │ └────┘ Key Info      │ │                                │ │
-│ └──────────────────────┘ └────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│ Tabs                                                         │
-│ ┌─────────┬─────────┬─────────┬─────────┐                   │
-│ │ Overview│ History │ Matches │ Related │                   │
-│ └─────────┴─────────┴─────────┴─────────┘                   │
-├─────────────────────────────────────────────────────────────┤
-│ Tab Content                                                  │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Content varies by tab                                   │ │
-│ │ - Overview: Description list, cards                     │ │
-│ │ - History: Timeline                                     │ │
-│ │ - Matches: Table                                        │ │
-│ │ - Related: Card grid                                    │ │
-│ └─────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+│ [Dark Sidebar]  │  [Dark Header]                            │
+│                 ├───────────────────────────────────────────┤
+│                 │  ┌──────────────┐ ┌─────────────────────┐ │
+│                 │  │ General Info │ │ Livewire Tables     │ │
+│                 │  │              │ │                     │ │
+│                 │  │ Name         │ │ Previous Matches    │ │
+│                 │  │ Status ●     │ │ Previous Tag Teams  │ │
+│                 │  │ Height       │ │ Previous Managers   │ │
+│                 │  │ Weight       │ │ Previous Stables    │ │
+│                 │  │ Start Date   │ │                     │ │
+│                 │  │              │ │                     │ │
+│                 │  │ [Actions]    │ │                     │ │
+│                 │  └──────────────┘ └─────────────────────┘ │
+│                 ├───────────────────────────────────────────┤
+│                 │  Footer                                    │
+└─────────────────┴───────────────────────────────────────────┘
 ```
 
 **Components Used:**
-- `layout.page-header`
-- `entity.profile-card`
-- `display.stat-group`
-- `interactive.tabs`
-- `display.description-list`
-- `entity.timeline`
-- `display.table`
+- `<x-layouts.show-page>` (sidebar + content grid)
+- `<x-ui.card>` with general-info sub-components
+- `<x-ui.badge>` (status)
+- `<x-ui.button>` (action buttons)
+- Livewire table components for historical data
 
----
+### 3. Dashboard
 
-### 3. Form Page
+Overview with key metrics and quick access.
 
-Create or edit an entity.
-
-**Use Cases:** Create wrestler, Edit event, Add match
-
-**Structure:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Page Header                                                  │
-│ ┌─────────────────────────────────┐                         │
-│ │ ← Back   Create/Edit Entity     │                         │
-│ └─────────────────────────────────┘                         │
-├─────────────────────────────────────────────────────────────┤
-│ Form                                                         │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Section: Basic Information                              │ │
-│ │ ┌───────────────────────┐ ┌───────────────────────┐    │ │
-│ │ │ Label                 │ │ Label                 │    │ │
-│ │ │ ┌───────────────────┐ │ │ ┌───────────────────┐ │    │ │
-│ │ │ │ Input             │ │ │ │ Input             │ │    │ │
-│ │ │ └───────────────────┘ │ │ └───────────────────┘ │    │ │
-│ │ │ Hint text             │ │ Error message         │    │ │
-│ │ └───────────────────────┘ └───────────────────────┘    │ │
-│ ├─────────────────────────────────────────────────────────┤ │
-│ │ Section: Additional Details                             │ │
-│ │ ...                                                     │ │
-│ └─────────────────────────────────────────────────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│ Actions                                                      │
-│                              ┌──────────┐ ┌──────────────┐  │
-│                              │ Cancel   │ │ Save Entity  │  │
-│                              └──────────┘ └──────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+│ [Dark Sidebar]  │  [Dark Header]                            │
+│                 ├───────────────────────────────────────────┤
+│                 │  Dashboard                                 │
+│                 │                                           │
+│                 │  ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐ │
+│                 │  │ Stat  │ │ Stat  │ │ Stat  │ │ Stat  │ │
+│                 │  │  42   │ │  12   │ │   8   │ │   3   │ │
+│                 │  │Wrestl.│ │Events │ │Titles │ │Venues │ │
+│                 │  └───────┘ └───────┘ └───────┘ └───────┘ │
+│                 │                                           │
+│                 │  ┌─────────────────┐ ┌─────────────────┐  │
+│                 │  │ Upcoming Events │ │ Recent Activity  │  │
+│                 │  │                 │ │                  │  │
+│                 │  │ Event Card      │ │ Activity Item    │  │
+│                 │  │ Event Card      │ │ Activity Item    │  │
+│                 │  │ Event Card      │ │ Activity Item    │  │
+│                 │  └─────────────────┘ └─────────────────┘  │
+│                 ├───────────────────────────────────────────┤
+│                 │  Footer                                    │
+└─────────────────┴───────────────────────────────────────────┘
 ```
 
 **Components Used:**
-- `layout.page-header`
-- `layout.section`
-- `form.group`
-- `form.input`, `form.select`, `form.textarea`, etc.
-- `form.error`
-- `form.hint`
-- `interactive.button`
+- `<x-layouts.app>`
+- `<x-ui.stats>`
+- `<x-ui.card>`
+- `<x-ui.page.heading>`
 
----
+### 4. Auth Page
 
-### 4. Dashboard Page
+Authentication pages with Ringside branding.
 
-Overview with key metrics and recent activity.
-
-**Use Cases:** Main dashboard, Roster overview
-
-**Structure:**
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Page Header                                                  │
-│ ┌─────────────────────────────────┐                         │
-│ │ Dashboard                       │                         │
-│ └─────────────────────────────────┘                         │
-├─────────────────────────────────────────────────────────────┤
-│ Stats Row                                                    │
-│ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐    │
-│ │ Stat Card │ │ Stat Card │ │ Stat Card │ │ Stat Card │    │
-│ │   123     │ │    45     │ │    67     │ │    89     │    │
-│ │  Label    │ │  Label    │ │  Label    │ │  Label    │    │
-│ └───────────┘ └───────────┘ └───────────┘ └───────────┘    │
-├─────────────────────────────────────────────────────────────┤
-│ ┌─────────────────────────────┐ ┌─────────────────────────┐ │
-│ │ Recent Activity             │ │ Upcoming Events         │ │
-│ │ ┌─────────────────────────┐ │ │ ┌─────────────────────┐ │ │
-│ │ │ Activity Item           │ │ │ │ Event Card          │ │ │
-│ │ │ Activity Item           │ │ │ │ Event Card          │ │ │
-│ │ │ Activity Item           │ │ │ │ Event Card          │ │ │
-│ │ └─────────────────────────┘ │ │ └─────────────────────┘ │ │
-│ └─────────────────────────────┘ └─────────────────────────┘ │
-├─────────────────────────────────────────────────────────────┤
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Quick Actions or Alerts                                 │ │
-│ └─────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**Components Used:**
-- `layout.page-header`
-- `display.stat-group`
-- `display.card`
-- `entity.activity-feed`
-- `display.list`
-- `feedback.alert`
-
----
-
-### 5. Auth Page
-
-Authentication pages (login, register, forgot password).
-
-**Use Cases:** Login, Register, Password reset
-
-**Structure:**
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
-│                     ┌───────────────────┐                   │
-│                     │ Logo              │                   │
-│                     └───────────────────┘                   │
-│                                                             │
-│                     ┌───────────────────┐                   │
-│                     │ Auth Card         │                   │
-│                     │                   │                   │
-│                     │ ┌───────────────┐ │                   │
-│                     │ │ Title         │ │                   │
-│                     │ └───────────────┘ │                   │
-│                     │ ┌───────────────┐ │                   │
-│                     │ │ Email Input   │ │                   │
-│                     │ └───────────────┘ │                   │
-│                     │ ┌───────────────┐ │                   │
-│                     │ │ Password      │ │                   │
-│                     │ └───────────────┘ │                   │
-│                     │ ┌───────────────┐ │                   │
-│                     │ │ Submit Button │ │                   │
-│                     │ └───────────────┘ │                   │
-│                     │                   │                   │
-│                     │ Links (register,  │                   │
-│                     │ forgot password)  │                   │
-│                     └───────────────────┘                   │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐  │
+│  │                         │  │ [Dark branded panel]    │  │
+│  │    ┌───────────────┐    │  │                         │  │
+│  │    │  Sign In       │    │  │  Ringside logo         │  │
+│  │    │               │    │  │  (Oswald, red accent)   │  │
+│  │    │  Email        │    │  │                         │  │
+│  │    │  Password     │    │  │  Tagline text           │  │
+│  │    │  [Sign In]    │    │  │                         │  │
+│  │    │               │    │  │                         │  │
+│  │    └───────────────┘    │  │                         │  │
+│  │                         │  │                         │  │
+│  └─────────────────────────┘  └─────────────────────────┘  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 **Components Used:**
-- `display.card`
-- `form.input`
-- `form.checkbox`
-- `form.error`
-- `interactive.button`
+- `<x-layouts.auth>`
+- `<x-ui.card>`
+- `<x-ui.form.input>`
+- `<x-ui.form.checkbox>`
+- `<x-ui.button>`
 
----
+### 5. Form Modal
+
+Create/edit entity via Livewire modal overlay.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    ┌────────────────────┐                    │
+│                    │ Modal Header    ✕  │                    │
+│                    ├────────────────────┤                    │
+│  [dimmed page]     │                    │                    │
+│                    │  Form Fields       │                    │
+│                    │  ┌──────────────┐  │                    │
+│                    │  │ Name         │  │                    │
+│                    │  └──────────────┘  │                    │
+│                    │  ┌──────────────┐  │                    │
+│                    │  │ Start Date   │  │                    │
+│                    │  └──────────────┘  │                    │
+│                    │                    │                    │
+│                    ├────────────────────┤                    │
+│                    │  [Clear] [Save]    │                    │
+│                    └────────────────────┘                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Components Used:**
+- `<x-ui.modal>`
+- `<x-ui.form.*>` components
+- `<x-ui.button>`
 
 ## Layout Grid
 
-### Standard Page Grid
+Standard content area uses Tailwind grid utilities:
 
 ```blade
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    <!-- Full width -->
-    <div class="lg:col-span-12">...</div>
+{{-- Full width --}}
+<div class="grid grid-cols-1 gap-6">
 
-    <!-- Two columns -->
-    <div class="lg:col-span-6">...</div>
-    <div class="lg:col-span-6">...</div>
+{{-- Two columns --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-    <!-- Sidebar + Main -->
-    <div class="lg:col-span-4">...</div>
-    <div class="lg:col-span-8">...</div>
-
-    <!-- Main + Sidebar -->
-    <div class="lg:col-span-8">...</div>
-    <div class="lg:col-span-4">...</div>
+{{-- Sidebar + Main (show pages) --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-7.5">
+    <div class="col-span-1">sidebar</div>
+    <div class="col-span-2">content</div>
 </div>
+
+{{-- Stats row --}}
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
 ```
-
-### Card Grid
-
-```blade
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    <x-display.card>...</x-display.card>
-    <x-display.card>...</x-display.card>
-    <x-display.card>...</x-display.card>
-</div>
-```
-
----
 
 ## Responsive Breakpoints
 
-| Breakpoint | Width | Usage |
-|------------|-------|-------|
-| Default | < 640px | Mobile, single column |
-| `sm` | 640px+ | Large mobile |
-| `md` | 768px+ | Tablet, 2 columns |
-| `lg` | 1024px+ | Desktop, sidebar visible |
-| `xl` | 1280px+ | Wide desktop, more columns |
-| `2xl` | 1536px+ | Ultra-wide |
+Use Tailwind 4 defaults:
 
----
-
-## Page Component Template
-
-```blade
-<x-layout.main>
-    <x-layout.page-header>
-        <x-slot:title>Page Title</x-slot:title>
-        <x-slot:breadcrumb>
-            <x-navigation.breadcrumb :items="$breadcrumbs" />
-        </x-slot:breadcrumb>
-        <x-slot:actions>
-            <x-interactive.button variant="primary">Action</x-interactive.button>
-        </x-slot:actions>
-    </x-layout.page-header>
-
-    <x-layout.section>
-        <!-- Page content -->
-    </x-layout.section>
-</x-layout.main>
-```
+| Breakpoint | Width | Layout Behavior |
+|------------|-------|-----------------|
+| Default | < 1024px | Single column, sidebar hidden (mobile drawer) |
+| `lg` | 1024px+ | Sidebar visible, multi-column layouts |
+| `xl` | 1280px+ | Container max-width applied |
