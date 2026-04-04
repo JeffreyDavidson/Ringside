@@ -1,73 +1,89 @@
 # Design System Tasks
 
 > Reference: @.agent-os/specs/2025-08-28-design-system/spec.md
-
-> Created: 2025-08-28
+> Updated: 2026-04-04
 > Status: Ready for Implementation
 
-## Tasks
+## Pre-work
 
-### 1. Foundation & Layout Components
+- [ ] Create fresh branch from development
+- [ ] Delete all existing blade views (resources/views/)
+- [ ] Rewrite resources/css/app.css with new semantic token system
+- [ ] Remove console.log debug statements from resources/js/app.js and auth.js
+- [ ] Add Oswald font to Google Fonts link
+- [ ] Run npm build to verify clean slate
 
-Build core layout components following Metronic design patterns with responsive grid system and navigation elements.
+## Phase 1: Shell + Auth
 
-- [ ] 1.1 Write comprehensive tests for all layout components (header, sidebar, main, grid)
-- [ ] 1.2 Create anonymous Blade component directory structure under resources/views/components/layout/
-- [ ] 1.3 Implement header component with logo slot, navigation slot, and action buttons area
-- [ ] 1.4 Implement sidebar component with collapsible navigation, user profile area, and menu items
-- [ ] 1.5 Implement main content wrapper with breadcrumb slot, page title, and content area
-- [ ] 1.6 Create responsive grid system components (container, row, column with breakpoint props)
-- [ ] 1.7 Add Alpine.js integration for sidebar collapse/expand functionality
-- [ ] 1.8 Verify all layout component tests pass with 100% coverage
+Build the app chrome and authentication pages so we can see and log into the app.
 
-### 2. Form Components Library
+- [ ] 1.1 Create `layouts/app.blade.php` — HTML shell, dark body, sidebar + wrapper structure
+- [ ] 1.2 Create `sidebar/index.blade.php` — dark sidebar with brand logo (Oswald), collapse toggle, mobile drawer
+- [ ] 1.3 Create `sidebar/menu.blade.php` — Ringside navigation (Dashboard, Roster section, Events, Titles, Venues, Users)
+- [ ] 1.4 Create `sidebar/menu-item.blade.php` — nav link with Heroicon, active state
+- [ ] 1.5 Create `sidebar/menu-accordion.blade.php` — expandable section (Roster)
+- [ ] 1.6 Create `sidebar/menu-heading.blade.php` — section label
+- [ ] 1.7 Create `topbar/index.blade.php` — header bar with mobile hamburger
+- [ ] 1.8 Create `topbar/profile.blade.php` — user profile dropdown with logout
+- [ ] 1.9 Create `layouts/partials/header.blade.php` — fixed header, responds to sidebar state
+- [ ] 1.10 Create `layouts/partials/footer.blade.php` — simple copyright footer
+- [ ] 1.11 Create `layouts/auth.blade.php` — auth page layout with dark branded panel
+- [ ] 1.12 Create auth views — login, register, forgot-password, verify, password reset
+- [ ] 1.13 Create `ui/button/index.blade.php` — button component (needed by auth forms)
+- [ ] 1.14 Create `ui/form/input.blade.php` — text input (needed by auth forms)
+- [ ] 1.15 Create `ui/form/label.blade.php` — form label
+- [ ] 1.16 Create `ui/form/error.blade.php` — validation error display
+- [ ] 1.17 Create `ui/form/checkbox.blade.php` — checkbox (remember me)
+- [ ] 1.18 Create `ui/card/index.blade.php` — card container (used by auth layout)
+- [ ] 1.19 Verify: login flow works end to end
+- [ ] 1.20 Verify: sidebar navigation works, collapse/expand, mobile drawer
 
-Develop comprehensive form input components with validation display and flexible data binding for any application context.
+## Phase 2: Dashboard
 
-- [ ] 2.1 Write tests for all form components covering validation states and data binding
-- [ ] 2.2 Create form component directory under resources/views/components/form/
-- [ ] 2.3 Implement input component with label, error display, help text, and various input types
-- [ ] 2.4 Implement select component with options slot, multiple selection, and search functionality
-- [ ] 2.5 Implement textarea component with character counting and auto-resize capability
-- [ ] 2.6 Create checkbox and radio button components with group handling and custom styling
-- [ ] 2.7 Implement validation-error component for consistent error message display
-- [ ] 2.8 Verify all form component tests pass with full validation scenario coverage
+- [ ] 2.1 Create `ui/page/heading.blade.php` — page title
+- [ ] 2.2 Create `ui/page/description.blade.php` — page subtitle
+- [ ] 2.3 Create `ui/page/header.blade.php` — page header wrapper
+- [ ] 2.4 Create `ui/stats/index.blade.php` — stat card component
+- [ ] 2.5 Create dashboard view with real stats (wrestler count, event count, title count, etc.)
+- [ ] 2.6 Verify: dashboard renders with stats after login
 
-### 3. Data Display Components
+## Phase 3: Wrestlers (Template Entity)
 
-Build components for presenting structured data with tables, cards, lists, and statistical displays suitable for any domain.
+Build the complete wrestler flow as the pattern for all other entities.
 
-- [ ] 3.1 Write tests for display components covering various data structures and edge cases
-- [ ] 3.2 Create display component directory under resources/views/components/display/
-- [ ] 3.3 Implement card component with header slot, body slot, footer slot, and action buttons
-- [ ] 3.4 Create table component with sortable headers, row actions, pagination support, and empty states
-- [ ] 3.5 Implement list component with item slots, dividers, and custom list styling
-- [ ] 3.6 Create badge component with color variants, sizes, and dismiss functionality
-- [ ] 3.7 Implement stats display component for key metrics with trend indicators
-- [ ] 3.8 Verify all display component tests pass with comprehensive data scenarios
+- [ ] 3.1 Create `ui/badge/index.blade.php` — status badges
+- [ ] 3.2 Create `ui/modal/index.blade.php` + sub-components — modal dialog
+- [ ] 3.3 Create `ui/dropdown/index.blade.php` — context menu for table row actions
+- [ ] 3.4 Create `ui/form/select.blade.php` — select dropdown
+- [ ] 3.5 Create `ui/form/textarea.blade.php` — multi-line text
+- [ ] 3.6 Create remaining `ui/card/` sub-components (header, body, footer, title)
+- [ ] 3.7 Create wrestlers index view (table-pre + Livewire table)
+- [ ] 3.8 Create wrestlers show view (general-info sidebar + Livewire history tables)
+- [ ] 3.9 Create wrestlers form modal view
+- [ ] 3.10 Create wrestlers actions view (employ, release, retire, etc.)
+- [ ] 3.11 Create table column components (action-column, status-column, etc.)
+- [ ] 3.12 Verify: full wrestlers CRUD flow works
 
-### 4. Interactive UI Components
+## Phase 4: Remaining Entities
 
-Implement user interaction components with Alpine.js integration for dropdowns, modals, tabs, and tooltips.
+Stamp out the wrestlers pattern for all other entities.
 
-- [ ] 4.1 Write tests for interactive components including JavaScript behavior and accessibility
-- [ ] 4.2 Create interactive component directory under resources/views/components/interactive/
-- [ ] 4.3 Implement button component with variants (primary, secondary, danger), sizes, and loading states
-- [ ] 4.4 Create dropdown component with trigger slot, menu items, and keyboard navigation
-- [ ] 4.5 Implement modal component with backdrop, close handlers, size variants, and focus management
-- [ ] 4.6 Create tabs component with tab navigation, content panels, and active state handling
-- [ ] 4.7 Implement tooltip component with positioning, triggers, and accessibility features
-- [ ] 4.8 Verify all interactive component tests pass including Alpine.js integration
+- [ ] 4.1 Managers — index, show, form modal, actions
+- [ ] 4.2 Referees — index, show, form modal, actions
+- [ ] 4.3 Tag Teams — index, show, form modal, actions
+- [ ] 4.4 Stables — index, show, form modal, actions
+- [ ] 4.5 Titles — index, show, form modal, actions
+- [ ] 4.6 Venues — index, show, form modal
+- [ ] 4.7 Events — index, show, form modal, matches list
+- [ ] 4.8 Matches — form modal (complex dynamic UI)
+- [ ] 4.9 Users — index, show, form modal
+- [ ] 4.10 Verify: all entity CRUD flows work
 
-### 5. Generic Application Components
+## Phase 5: Polish
 
-Create flexible, domain-agnostic components for common application patterns that work with any data structure.
-
-- [ ] 5.1 Write tests for generic components with various data inputs and configuration options
-- [ ] 5.2 Create generic component directory under resources/views/components/generic/
-- [ ] 5.3 Implement profile-card component with avatar slot, info display, and action buttons
-- [ ] 5.4 Create activity-display component for timeline events with icons, timestamps, and descriptions
-- [ ] 5.5 Implement achievement-badge component with progress indicators and unlock states
-- [ ] 5.6 Create status-indicator component with color coding, text labels, and icon support
-- [ ] 5.7 Add comprehensive documentation and usage examples for all generic components
-- [ ] 5.8 Verify all generic component tests pass and integration works across component library
+- [ ] 5.1 Create `ui/tabs/index.blade.php` if needed
+- [ ] 5.2 Create `ui/tooltip/index.blade.php` if needed
+- [ ] 5.3 Responsive audit — verify all pages work on mobile
+- [ ] 5.4 Accessibility audit — ARIA, keyboard navigation, focus management
+- [ ] 5.5 Remove any dead code, empty files
+- [ ] 5.6 Final visual consistency pass

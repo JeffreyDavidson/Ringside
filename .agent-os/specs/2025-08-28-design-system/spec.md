@@ -1,70 +1,223 @@
 # Spec Requirements Document
 
-> Spec: Design System
+> Spec: Ringside Design System
 > Created: 2025-08-28
-> Status: Planning
+> Updated: 2026-04-04
+> Status: In Progress
 
 ## Overview
 
-Create a comprehensive design system with anonymous Blade components based on the Metronic Tailwind template, following FluxUI architectural patterns and design principles. This design system provides reusable, domain-agnostic UI components that maintain Metronic's professional design while integrating seamlessly with any Laravel application and the existing Livewire + Tailwind 4.1 setup.
+Build a custom admin panel design system for Ringside — a wrestling promotion management platform. The design system uses anonymous Blade components organized under a `ui/` namespace, implemented entirely in Tailwind CSS 4 with Heroicons. The visual identity is derived from Ringside's own brand (theringside.app), not from third-party templates.
 
 ## Architectural Decisions
 
-### Single Design System Source
+### Custom Design System (No Template Dependency)
 
-**Decision**: Metronic is the sole source of truth for UI components and styling.
+**Decision**: Ringside has its own visual identity. No Metronic, FluxUI, Tailwind UI, or other template libraries.
 
 **Rationale**:
-- Metronic provides complete HTML/CSS that we convert to Blade components
-- Adding Tailwind UI, FlexUI, Flowbite, or similar libraries would create conflicting patterns
-- Livewire + Alpine.js handles all interactivity - Metronic's JavaScript is not used
+- Ringside's marketing site establishes a bold, wrestling-themed brand identity
+- Third-party templates create conflicting patterns and maintenance overhead
+- Building our own system gives full control over the visual language
+- Tailwind 4's native features (semantic tokens, CSS-first config) make a custom system straightforward
 
 **Implications**:
-- All components derive their styling/structure from Metronic templates
-- FluxUI patterns (slots, attribute forwarding) are adopted, not the package itself
-- No additional UI component libraries should be added
+- All components are built from scratch using Tailwind 4 utility classes
+- Heroicons for all iconography (already installed via blade-heroicons)
+- No `kt-` prefixed classes, no Metronic CSS, no KeenIcons
+- Livewire + Alpine.js handles all interactivity
 
-## User Stories
+### Hybrid Theme: Dark Shell, Light Content
 
-### Component Developer Story
+**Decision**: Dark sidebar and header using Ringside brand colors, light content area for data readability.
 
-As a developer working on any Laravel application, I want to use standardized, reusable UI components based on Metronic's design system, so that I can build consistent interfaces quickly without duplicating template code or wrestling with styling inconsistencies.
+**Rationale**:
+- The sidebar/header is the brand touchpoint — matches theringside.app's dark aesthetic
+- Data-heavy content (tables, forms, cards) needs a light background for daily use
+- This pattern is proven in professional tools (Linear, Stripe Dashboard, GitHub)
 
-**Detailed Workflow**: Developers can import anonymous Blade components using standard Laravel syntax (e.g., `<x-interactive.button>`, `<x-display.card>`), pass props and use slots for content composition, and rely on consistent styling and behavior across all application interfaces.
+### Semantic Token System
 
-### UI Consistency Story
+**Decision**: Use shadcn/ui-style CSS custom properties pointing to Tailwind 4's native color palette.
 
-As an application user, I want all interface elements to follow a consistent, professional design language, so that the application feels polished and trustworthy for managing my business operations.
+**Rationale**:
+- Enables dark mode later by swapping variable values without touching components
+- Keeps the color system simple — no hardcoded hex values in components
+- Aligns with modern Tailwind 4 best practices
 
-**Detailed Workflow**: All forms, tables, cards, navigation elements, and interactive components maintain visual consistency through the shared component library, creating a cohesive user experience across all application features.
+### Incremental Token Discovery
 
-### Maintenance Efficiency Story
+**Decision**: Build design tokens as we build each page element, not upfront.
 
-As a development team, I want to maintain styling and behavior changes in a single location per component type, so that updates, bug fixes, and design improvements can be applied system-wide without hunting through multiple template files.
+**Rationale**:
+- Avoids speculative token definitions that never get used
+- Every token earns its place by being needed in a real component
+- Prevents the "100 unused CSS variables" problem
 
-**Detailed Workflow**: Component updates are made to the anonymous Blade component files, automatically propagating to all usage locations throughout the application, reducing maintenance overhead and ensuring consistency.
+## Brand Identity
 
-## Spec Scope
+### Colors
 
-1. **Layout Components** - Header, sidebar navigation, main content wrapper, and grid system components following Metronic's responsive design patterns
-2. **Form Components** - Input fields, selects, textareas, checkboxes, radio buttons, and form validation display components with flexible data handling
-3. **Data Display Components** - Tables, cards, lists, badges, statistics displays, and data visualization components for any structured data
-4. **Interactive Elements** - Buttons, dropdowns, modals, tabs, tooltips, and notification components with Alpine.js integration
-5. **Generic Components** - Flexible profile cards, activity displays, achievement indicators, and status components that work with any data structure
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--primary` | `#e62222` | Ringside red — primary actions, active states, brand accent |
+| `--primary-foreground` | `white` | Text on primary backgrounds |
+| `--accent` | `#d4a843` | Gold — premium highlights, special indicators |
+| `--shell-bg` | `#0a0a0a` | Near-black — sidebar and header background |
+| `--shell-text` | `#f5f5f5` | Off-white — sidebar and header text |
+| `--shell-border` | `rgba(230, 34, 34, 0.1)` | Subtle red — shell border accent |
+
+### Semantic Colors (Tailwind native)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--success` | `green-500` | Positive states, employ, activate |
+| `--warning` | `amber-500` | Caution states, suspend, retire |
+| `--danger` | `red-600` | Destructive actions, release, delete |
+| `--info` | `blue-500` | Informational states |
+
+### Content Area (Tailwind defaults)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--background` | `white` | Content area background |
+| `--foreground` | `zinc-950` | Primary text |
+| `--muted` | `zinc-100` | Subtle backgrounds |
+| `--muted-foreground` | `zinc-500` | Secondary text |
+| `--border` | `zinc-200` | Borders and dividers |
+| `--card` | `white` | Card backgrounds |
+| `--input` | `zinc-200` | Input borders |
+| `--ring` | `zinc-400` | Focus rings |
+
+### Typography
+
+| Font | Usage |
+|------|-------|
+| **Oswald** | Sidebar brand/logo only |
+| **Inter** | Everything else — headings, body, forms, tables, buttons |
+
+### Icons
+
+Heroicons via `blade-ui-kit/blade-heroicons`. Use `<x-heroicon-o-*>` (outline), `<x-heroicon-s-*>` (solid), `<x-heroicon-m-*>` (mini).
+
+## Component Architecture
+
+### Directory Structure
+
+All design system components live under `ui/` with the `index.blade.php` convention:
+
+```
+resources/views/components/
+├── ui/                              # Design system (domain-agnostic)
+│   ├── button/
+│   │   └── index.blade.php          # <x-ui.button>
+│   ├── badge/
+│   │   └── index.blade.php          # <x-ui.badge>
+│   ├── card/
+│   │   ├── index.blade.php          # <x-ui.card>
+│   │   ├── header.blade.php         # <x-ui.card.header>
+│   │   ├── body.blade.php           # <x-ui.card.body>
+│   │   └── footer.blade.php         # <x-ui.card.footer>
+│   ├── modal/
+│   │   ├── index.blade.php          # <x-ui.modal>
+│   │   ├── header.blade.php
+│   │   ├── body.blade.php
+│   │   └── footer.blade.php
+│   ├── form/
+│   │   ├── input.blade.php          # <x-ui.form.input>
+│   │   ├── select.blade.php
+│   │   ├── textarea.blade.php
+│   │   ├── checkbox.blade.php
+│   │   ├── label.blade.php
+│   │   └── error.blade.php
+│   ├── dropdown/
+│   │   └── index.blade.php          # <x-ui.dropdown>
+│   ├── tabs/
+│   │   └── index.blade.php          # <x-ui.tabs>
+│   ├── table/
+│   │   └── index.blade.php          # <x-ui.table>
+│   ├── page/
+│   │   ├── header.blade.php
+│   │   ├── heading.blade.php
+│   │   └── description.blade.php
+│   ├── stats/
+│   │   └── index.blade.php          # <x-ui.stats>
+│   ├── tooltip/
+│   │   └── index.blade.php          # <x-ui.tooltip>
+│   └── route-link/
+│       └── index.blade.php          # <x-ui.route-link>
+│
+├── layouts/                         # Page shells
+│   ├── app.blade.php                # <x-layouts.app>
+│   ├── auth.blade.php               # <x-layouts.auth>
+│   └── show-page.blade.php          # <x-layouts.show-page>
+│
+├── sidebar/                         # App navigation
+│   ├── index.blade.php
+│   ├── menu.blade.php
+│   ├── menu-item.blade.php
+│   ├── menu-accordion.blade.php
+│   └── menu-heading.blade.php
+│
+├── topbar/                          # Header bar
+│   ├── index.blade.php
+│   └── profile.blade.php
+│
+├── wrestlers/                       # Domain components
+├── managers/
+├── referees/
+├── tag-teams/
+├── stables/
+├── titles/
+├── venues/
+├── events/
+├── matches/
+└── users/
+```
+
+### Component Rules
+
+1. Every component is a directory with `index.blade.php` (even standalone components)
+2. If a component could be used in any Laravel app, it goes in `ui/`
+3. If it's specific to Ringside (entity forms, general-info cards), it stays outside `ui/`
+4. Styling lives directly in components as Tailwind classes — no CSS utility class layer
+5. All components support attribute forwarding via `{{ $attributes }}`
+6. Named slots for composition, props for configuration
+
+## Rebuild Strategy
+
+### Approach
+
+- Fresh branch from development
+- Delete all existing blade views
+- Keep all Livewire PHP classes, models, controllers, actions, policies, tests
+- Rebuild views to match existing Livewire class APIs
+- Build design tokens incrementally as each component is created
+
+### Build Order
+
+1. **Page shell** — `layouts/app.blade.php`, sidebar, header, footer, containers
+2. **Auth pages** — login, register, forgot password (so we can get into the app)
+3. **Dashboard** — real dashboard with stats, not a placeholder
+4. **Wrestlers** — complete entity flow (index table, show page, form modal, actions) as the template
+5. **Remaining entities** — stamp out the wrestlers pattern for all other entities
+
+## Tech Stack
+
+- PHP 8.4 / Laravel 12 / Livewire 3
+- Tailwind CSS 4 (CSS-first configuration)
+- Alpine.js (included with Livewire)
+- Heroicons (blade-heroicons package)
+- Inter + Oswald (Google Fonts)
+- Pest (testing)
 
 ## Out of Scope
 
-- Complete Metronic template installation or direct CSS imports that conflict with existing Tailwind 4.1 setup
-- FluxUI package installation or direct dependency on FluxUI components
-- Modification of existing application business logic or database schemas
-- Third-party JavaScript libraries beyond the existing Alpine.js integration
-- Complex animation or motion design systems beyond basic transitions
-
-## Expected Deliverable
-
-1. A complete set of anonymous Blade components organized in `resources/views/components/` that can be used throughout any Laravel application with consistent `<x-category.component>` syntax
-2. Components pass all existing quality standards with 100% test coverage and integrate seamlessly with Livewire 3.6.4, Alpine.js, and Tailwind 4.1 without conflicts
-3. Documentation and usage examples for each component type, enabling developers to quickly adopt the new component library for any application features
+- Dark mode (deferred — semantic tokens enable easy addition later)
+- Metronic template, KeenIcons, FluxUI, or any third-party UI library
+- Livewire PHP class refactoring (views only — refactor PHP classes later)
+- Mobile app or PWA
+- Animation/motion design system beyond basic transitions
 
 ## Spec Documentation
 
