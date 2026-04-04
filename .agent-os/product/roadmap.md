@@ -39,23 +39,31 @@ The following comprehensive feature set has been successfully implemented and is
 - [x] **Laravel 12 Architecture** - Latest Laravel framework with streamlined structure
 - [x] **Quality Tools Integration** - PHPStan, Pint, Rector, ESLint with automated enforcement
 
-## Phase 1: Design System, Multi-Tenant & User Experience
+## Phase 1: Custom Design System & Frontend Rebuild (In Progress)
 
-### Design System (Priority 1)
-- [ ] **Component Library** - Standardized UI components with consistent styling
-- [ ] **Design Tokens** - Colors, typography, spacing, and other design primitives
-- [ ] **Layout System** - Page layouts, navigation patterns, and responsive grids
-- [ ] **Form Components** - Input fields, buttons, validation, and feedback patterns
-- [ ] **Data Display** - Tables, cards, lists, and detail views
+### Design System — Custom Ringside Admin Panel
+**Approach**: Fresh view rebuild on existing backend. Dark shell (sidebar/header), light content area. No third-party templates — custom design using Tailwind 4 + Heroicons with Ringside brand identity (#e62222 red, #d4a843 gold, #0a0a0a shell).
 
-### Promotion Management (Multi-Tenant Architecture)
+- [ ] **Component Library** — `ui/` namespace with `index.blade.php` convention (button, badge, card, modal, form, dropdown, tabs, table, stats, tooltip)
+- [ ] **Semantic Token System** — shadcn-style CSS variables pointing to Tailwind 4 native colors, built incrementally
+- [ ] **Layout System** — Dark sidebar/header, light content area, responsive grid, mobile drawer
+- [ ] **Form Components** — Input, select, textarea, checkbox, label, error — all under `ui/form/`
+- [ ] **Data Display** — Cards, tables, badges, stats — matching existing Livewire DataTableComponent
+- [ ] **Dashboard** — Real dashboard with roster/event/title stats
+- [ ] **Complete Entity Views** — Index, show, form modal, actions for all 10 entities
+- [ ] **Auth Pages** — Login, register, forgot password with Ringside branding
+- [ ] **Mobile Responsiveness** — Mobile-first, sidebar drawer below lg breakpoint
+
+**Spec**: @.agent-os/specs/2025-08-28-design-system/spec.md
+
+### Promotion Management (Multi-Tenant Architecture) — After Design System
 - [ ] **Promotion Entity** - Create promotion model with name, slug, settings
 - [ ] **User-Promotion Relationship** - Users own/manage promotions
 - [ ] **Entity Ownership** - All entities (wrestlers, events, titles, etc.) belong to a promotion
 - [ ] **Data Isolation** - Global scopes ensure promotion-specific data access
 - [ ] **User System Updates** - Role/status enums, remove direct wrestler relationship
 
-### Frontend Improvements
+### Frontend Polish
 - [ ] **Dashboard Development** - Executive dashboard with key metrics and quick actions
 - [ ] **Mobile Responsiveness** - Complete mobile optimization for all components
 - [ ] **UI/UX Polish** - Enhanced visual design and user experience improvements
