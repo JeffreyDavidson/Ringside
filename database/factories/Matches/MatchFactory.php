@@ -17,6 +17,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -25,19 +26,13 @@ use InvalidArgumentException;
 /**
  * @extends Factory<EventMatch>
  */
+#[UseModel(EventMatch::class)]
 class MatchFactory extends Factory
 {
     // Constants for competitor types
     private const COMPETITOR_TYPE_WRESTLER = 'wrestler';
 
     private const COMPETITOR_TYPE_TAG_TEAM = 'tag_team';
-
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var class-string<Model>
-     */
-    protected $model = EventMatch::class;
 
     /**
      * Define the model's default state.

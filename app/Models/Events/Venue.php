@@ -7,6 +7,7 @@ namespace App\Models\Events;
 use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HoldsEvents;
 use Database\Factories\Events\VenueFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -44,6 +45,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Fillable('name', 'street_address', 'city', 'state', 'zipcode')]
 #[UseFactory(VenueFactory::class)]
 #[UseEloquentBuilder(VenueBuilder::class)]
 class Venue extends Model
@@ -54,16 +56,4 @@ class Venue extends Model
     use HoldsEvents;
     use SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'street_address',
-        'city',
-        'state',
-        'zipcode',
-    ];
 }

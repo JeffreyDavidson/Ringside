@@ -4,40 +4,23 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\text;
 use ReflectionClass;
 use ReflectionEnum;
+
 use ReflectionEnumBackedCase;
 use ReflectionMethod;
 
-use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
-
+#[Signature('ringside:make:test {name? : The name of the test (optional)} {--unit : Create a unit test} {--feature : Create a feature test} {--model= : Generate a model test for the specified model} {--directory= : Specify model directory (e.g., Users for Users/User)} {--action= : Generate an action test for the specified action} {--repository= : Generate a repository test for the specified repository}')]
+#[Description('Generate standardized Ringside tests (models, actions, repositories)')]
 class RingsideMakeTest extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'ringside:make:test
-                           {name? : The name of the test (optional)}
-                           {--unit : Create a unit test}
-                           {--feature : Create a feature test}
-                           {--model= : Generate a model test for the specified model}
-                           {--directory= : Specify model directory (e.g., Users for Users/User)}
-                           {--action= : Generate an action test for the specified action}
-                           {--repository= : Generate a repository test for the specified repository}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Generate standardized Ringside tests (models, actions, repositories)';
-
     /**
      * Execute the console command.
      */

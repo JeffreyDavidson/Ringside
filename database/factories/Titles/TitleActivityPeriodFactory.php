@@ -6,16 +6,16 @@ namespace Database\Factories\Titles;
 
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleActivityPeriod;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /**
  * @extends Factory<TitleActivityPeriod>
  */
+#[UseModel(TitleActivityPeriod::class)]
 class TitleActivityPeriodFactory extends Factory
 {
-    protected $model = TitleActivityPeriod::class;
-
     /**
      * Define the model's default state.
      *

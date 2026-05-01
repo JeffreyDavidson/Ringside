@@ -43,6 +43,8 @@ use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Titles\TitleChampionship;
 use App\ValueObjects\Height;
 use Database\Factories\Wrestlers\WrestlerFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -111,6 +113,8 @@ use Illuminate\Support\Carbon;
  *
  * @method string getNameLabel()
  */
+#[Fillable('name', 'height', 'weight', 'hometown', 'signature_move')]
+#[Appends('status')]
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements BookableCompetitor, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, Suspendable
@@ -156,28 +160,6 @@ class Wrestler extends Model implements BookableCompetitor, CanBeAStableMember, 
     use ValidatesRestoration;
     use ValidatesRetirement;
     use ValidatesSuspension;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'height',
-        'weight',
-        'hometown',
-        'signature_move',
-    ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'status',
-    ];
 
     /**
      * Get the attributes that should be cast.
