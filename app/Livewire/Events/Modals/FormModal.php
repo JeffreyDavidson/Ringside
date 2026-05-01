@@ -20,6 +20,8 @@ class FormModal extends BaseFormModal
 {
     use PresentsVenuesList;
 
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;

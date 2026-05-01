@@ -6,7 +6,6 @@ namespace App\Livewire\Base;
 
 use App\Livewire\Concerns\GeneratesDummyData;
 use Illuminate\Database\Eloquent\Model;
-use Livewire\Form;
 
 /**
  * Base class for all form modals with essential functionality.
@@ -218,12 +217,13 @@ abstract class BaseFormModal extends BaseModal
      */
     abstract protected function getModalPath(): string;
 
-    /**
-     * The form instance for this modal.
-     *
-     * @var TForm|null
+    /*
+     * The concrete form property is declared by each subclass so that PHP
+     * (which enforces invariant property types between parent and child)
+     * and Livewire 4 (which uses the declared type to rehydrate the form
+     * instance between requests) can work with a concrete BaseForm
+     * subclass — e.g. `public WrestlerForm $form;`.
      */
-    public Form $form;
 
     /**
      * Indicates if the modal is currently open.

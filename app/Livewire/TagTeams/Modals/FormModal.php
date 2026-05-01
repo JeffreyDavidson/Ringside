@@ -23,6 +23,8 @@ class FormModal extends BaseFormModal
     use PresentsManagersList;
     use PresentsWrestlersList;
 
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;

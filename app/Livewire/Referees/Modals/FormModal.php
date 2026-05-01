@@ -24,6 +24,8 @@ class FormModal extends BaseFormModal
      */
     public ?array $originalModelData = null;
 
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;

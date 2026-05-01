@@ -8,7 +8,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Livewire\Form;
 use LivewireUI\Modal\ModalComponent;
 
 /**
@@ -47,7 +46,7 @@ abstract class BaseModal extends ModalComponent
     /**
      * @var TModelForm|null
      */
-    protected Form $modelForm;
+    protected BaseForm $modelForm;
 
     /**
      * @var TModelType
