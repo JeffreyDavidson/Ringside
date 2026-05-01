@@ -73,6 +73,8 @@ class FormModal extends BaseFormModal
      *
      * @return class-string<CreateEditForm> The fully qualified class name of CreateEditForm
      */
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
