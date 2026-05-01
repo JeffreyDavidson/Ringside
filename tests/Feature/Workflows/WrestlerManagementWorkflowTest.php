@@ -271,21 +271,21 @@ describe('Wrestler Search and Filtering Journey', function () {
         // When: Filtering by employment status
         Livewire::actingAs($admin)
             ->test(Main::class)
-            ->set('filterComponents.status', 'employed')
+            ->set('filterValues.status', 'employed')
             ->assertSee($bookableWrestler->name)
             ->assertDontSee($releasedWrestler->name);
 
         // When: Filtering by released status
         Livewire::actingAs($admin)
             ->test(Main::class)
-            ->set('filterComponents.status', 'released')
+            ->set('filterValues.status', 'released')
             ->assertSee($releasedWrestler->name)
             ->assertDontSee($bookableWrestler->name);
 
         // When: Clearing filters
         Livewire::actingAs($admin)
             ->test(Main::class)
-            ->set('filterComponents.status', '')
+            ->set('filterValues.status', '')
             ->set('search', '')
             ->assertSee($bookableWrestler->name)
             ->assertSee($releasedWrestler->name)
