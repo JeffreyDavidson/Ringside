@@ -44,8 +44,5 @@ class PreviousStables extends BasePreviousStablesTable
         ];
     }
 
-    public function configure(): void
-    {
-        $this->setAdditionalSelects([]);
-    }
+    public function configure(): void {}
 }

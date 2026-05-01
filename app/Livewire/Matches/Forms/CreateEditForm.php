@@ -14,6 +14,7 @@ use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Enum;
 
 /**
  * Livewire form component for managing event match creation and editing.
@@ -296,7 +297,7 @@ class CreateEditForm extends BaseForm
     {
         $baseRules = [
             // eventId removed - it's context from route model binding, not user input
-            'matchType' => ['required', 'enum:'.MatchType::class],
+            'matchType' => ['required', new Enum(MatchType::class)],
             'preview' => ['sometimes', 'string'],
             'referees' => ['sometimes', 'array'],
             'referees.*' => ['integer', 'exists:referees,id'],
