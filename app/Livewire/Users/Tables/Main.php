@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Users\Tables;
 
 use App\Builders\Users\UserBuilder;
-use App\Enums\Users\Role;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Models\Users\User;
@@ -39,7 +38,7 @@ class Main extends BaseTable
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('users.role'), 'role')
-                ->format(fn (Role $value) => $value->name),
+                ->label(fn (User $row) => $row->role->name),
             Column::make(__('core.status'), 'status')
                 ->label(fn (User $row) => $row->status->label())
                 ->excludeFromColumnSelect(),

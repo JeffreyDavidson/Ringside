@@ -51,8 +51,6 @@ class Main extends BaseTable
     public function configure(): void
     {
         Gate::authorize('viewList', TagTeam::class);
-
-        $this->addExtraWithSum('currentWrestlers', 'weight');
     }
 
     /**

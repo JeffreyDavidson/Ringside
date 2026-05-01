@@ -1,10 +1,10 @@
 <x-form-modal>
     <x-form-modal.modal-input>
-        <x-form.inputs.select label="Match Type" wire:model.live="form.matchTypeId" :options="$this->getMatchTypes" />
+        <x-form.inputs.select label="Match Type" wire:model.live="form.matchType" :options="$this->getMatchTypes" />
     </x-form-modal.modal-input>
 
     {{-- Dynamic Competitor Selection Based on Match Type --}}
-    @if ($form->matchTypeId)
+    @if ($form->matchType)
         <div class="space-y-4">
             @if (str_contains($this->matchTypeName, 'singles'))
                 {{-- Singles Match: 2 sides, 1 wrestler each --}}
