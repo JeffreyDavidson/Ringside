@@ -6,8 +6,6 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchDecision;
-use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -108,22 +106,6 @@ function createEvent(array $attributes = []): Event
 function createMatch(array $attributes = []): EventMatch
 {
     return EventMatch::factory()->create($attributes);
-}
-
-/**
- * Create a match type for testing.
- */
-function createMatchType(array $attributes = []): MatchType
-{
-    return MatchType::factory()->create($attributes);
-}
-
-/**
- * Create a match decision for testing.
- */
-function createMatchDecision(array $attributes = []): MatchDecision
-{
-    return MatchDecision::factory()->create($attributes);
 }
 
 /**
@@ -330,16 +312,12 @@ function createWrestlerWithEmploymentHistory(): Wrestler
 
 /**
  * Seed basic lookup data for testing.
+ *
+ * Note: MatchType and MatchDecision are now PHP enums and don't require seeding.
  */
 function seedBasicLookupData(): void
 {
-    if (MatchType::count() === 0) {
-        Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']);
-    }
-
-    if (MatchDecision::count() === 0) {
-        Artisan::call('db:seed', ['--class' => 'MatchDecisionsTableSeeder']);
-    }
+    // MatchType and MatchDecision are now PHP enums, no seeding needed
 }
 
 /**
