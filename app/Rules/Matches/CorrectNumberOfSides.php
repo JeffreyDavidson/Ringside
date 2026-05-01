@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Matches;
 
-use App\Models\Matches\MatchType;
+use App\Enums\MatchType;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -24,13 +24,15 @@ class CorrectNumberOfSides implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! isset($this->data['match_type_id'])) {
+        if (! isset($this->data['match_type'])) {
             return; // No match type to validate against
         }
 
-        $matchType = MatchType::find($this->data['match_type_id']);
+        $matchType = $this->data['match_type'] instanceof MatchType
+            ? $this->data['match_type']
+            : MatchType::tryFrom($this->data['match_type']);
 
-        if ($matchType && $matchType->number_of_sides !== count((array) $value)) {
+        if ($matchType && $matchType->numberOfSides() !== count((array) $value)) {
             $fail('This match does not have the required number of competitor sides.');
         }
     }

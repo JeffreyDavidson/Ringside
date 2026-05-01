@@ -6,7 +6,6 @@ namespace Database\Seeders;
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchType;
 use Illuminate\Database\Seeder;
 
 class MatchesTableSeeder extends Seeder
@@ -21,9 +20,7 @@ class MatchesTableSeeder extends Seeder
             Event::factory()->count(3)->create();
         }
 
-        if (MatchType::count() === 0) {
-            MatchType::factory()->count(5)->create();
-        }
+        // MatchType is now an enum, no seeding needed
 
         // Create some event matches
         EventMatch::factory()->count(10)->create();

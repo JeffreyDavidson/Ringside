@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchType;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -34,14 +34,13 @@ describe('MatchesTable Rendering', function () {
 
     it('displays matches in table', function () {
         $event = Event::factory()->create();
-        $matchType = MatchType::factory()->create(['name' => 'Singles Match']);
         $match = EventMatch::factory()
             ->for($event)
-            ->for($matchType)
+            ->state(['match_type' => MatchType::Singles])
             ->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSee('Singles Match');
+            ->assertSee('Singles');
     });
 
     it('displays match competitors', function () {
@@ -84,40 +83,33 @@ describe('MatchesTable Rendering', function () {
 describe('MatchesTable Search and Filtering', function () {
     it('can search matches by match type', function () {
         $event = Event::factory()->create();
-        $championshipType = MatchType::factory()->create(['name' => 'Championship Match']);
-        $regularType = MatchType::factory()->create(['name' => 'Regular Match']);
 
-        EventMatch::factory()->for($event)->for($championshipType)->create();
-        EventMatch::factory()->for($event)->for($regularType)->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->set('search', 'Championship')
-            ->assertSee('Championship Match')
-            ->assertDontSee('Regular Match');
+            ->set('search', 'Singles')
+            ->assertSee('Singles')
+            ->assertDontSee('Tag Team');
     });
 
     it('can filter matches by event', function () {
         $event1 = Event::factory()->create(['name' => 'WrestleMania']);
         $event2 = Event::factory()->create(['name' => 'SummerSlam']);
 
-        $event1MatchType = MatchType::factory()->create(['name' => 'Main Event']);
-        $event2MatchType = MatchType::factory()->create(['name' => 'Opening Match']);
-
-        EventMatch::factory()->for($event1)->for($event1MatchType)->create();
-        EventMatch::factory()->for($event2)->for($event2MatchType)->create();
+        EventMatch::factory()->for($event1)->state(['match_type' => MatchType::Singles])->create();
+        EventMatch::factory()->for($event2)->state(['match_type' => MatchType::TagTeam])->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event1->id])
-            ->assertSee('Main Event')
-            ->assertDontSee('Opening Match');
+            ->assertSee('Singles')
+            ->assertDontSee('Tag Team');
     });
 
     it('can filter matches by match type', function () {
         $event = Event::factory()->create();
-        $singlesType = MatchType::factory()->create(['name' => 'Singles']);
-        $tagTeamType = MatchType::factory()->create(['name' => 'Tag Team']);
 
-        EventMatch::factory()->for($event)->for($singlesType)->create();
-        EventMatch::factory()->for($event)->for($tagTeamType)->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles')
@@ -192,11 +184,10 @@ describe('MatchesTable Complex Relationships', function () {
 
     it('handles matches with no competitors gracefully', function () {
         $event = Event::factory()->create();
-        $matchType = MatchType::factory()->create(['name' => 'Special Match']);
-        EventMatch::factory()->for($event)->for($matchType)->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSee('Special Match');
+            ->assertSee('Singles');
     });
 
     it('handles matches with no referees gracefully', function () {
@@ -215,12 +206,11 @@ describe('MatchesTable Complex Relationships', function () {
 describe('MatchesTable Performance', function () {
     it('handles large datasets efficiently', function () {
         $event = Event::factory()->create();
-        $matchType = MatchType::factory()->create();
 
         // Create multiple matches with relationships
         $matches = EventMatch::factory()
             ->for($event)
-            ->for($matchType)
+            ->state(['match_type' => MatchType::Singles])
             ->count(20)
             ->create();
 
@@ -268,43 +258,37 @@ describe('MatchesTable Pagination', function () {
 
     it('maintains search across pagination', function () {
         $event = Event::factory()->create();
-        $championshipType = MatchType::factory()->create(['name' => 'Championship Match']);
-        $regularType = MatchType::factory()->create(['name' => 'Regular Match']);
 
-        EventMatch::factory()->for($event)->for($championshipType)->count(15)->create();
-        EventMatch::factory()->for($event)->for($regularType)->count(15)->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->count(15)->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->count(15)->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->set('search', 'Championship')
-            ->assertSee('Championship Match')
-            ->assertDontSee('Regular Match');
+            ->set('search', 'Singles')
+            ->assertSee('Singles')
+            ->assertDontSee('Tag Team');
     });
 });
 
 describe('MatchesTable Sorting', function () {
     it('can sort matches by different columns', function () {
         $event = Event::factory()->create();
-        $typeA = MatchType::factory()->create(['name' => 'A Type Match']);
-        $typeZ = MatchType::factory()->create(['name' => 'Z Type Match']);
 
-        $matchA = EventMatch::factory()->for($event)->for($typeA)->create();
-        $matchZ = EventMatch::factory()->for($event)->for($typeZ)->create();
+        $matchA = EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
+        $matchZ = EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSeeInOrder(['A Type Match', 'Z Type Match']);
+            ->assertSeeInOrder(['Singles', 'Tag Team']);
     });
 
     it('can sort matches by match number', function () {
         $event = Event::factory()->create();
-        $typeA = MatchType::factory()->create(['name' => 'First Match']);
-        $typeB = MatchType::factory()->create(['name' => 'Second Match']);
 
-        $match1 = EventMatch::factory()->for($event)->for($typeA)->create(['match_number' => 1]);
-        $match2 = EventMatch::factory()->for($event)->for($typeB)->create(['match_number' => 2]);
+        $match1 = EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create(['match_number' => 1]);
+        $match2 = EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create(['match_number' => 2]);
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSee('First Match')
-            ->assertSee('Second Match');
+            ->assertSee('Singles')
+            ->assertSee('Tag Team');
     });
 });
 
@@ -319,12 +303,11 @@ describe('MatchesTable Actions', function () {
 
     it('handles match action integration', function () {
         $event = Event::factory()->create();
-        $matchType = MatchType::factory()->create(['name' => 'Test Match']);
-        $match = EventMatch::factory()->for($event)->for($matchType)->create();
+        $match = EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
 
         $component = Livewire::test(MatchesTable::class, ['eventId' => $event->id]);
         $component->assertOk();
-        $component->assertSee('Test Match');
+        $component->assertSee('Singles');
     });
 });
 
@@ -333,29 +316,23 @@ describe('MatchesTable Event Integration', function () {
         $event1 = Event::factory()->create(['name' => 'Event One']);
         $event2 = Event::factory()->create(['name' => 'Event Two']);
 
-        $type1 = MatchType::factory()->create(['name' => 'Event One Match']);
-        $type2 = MatchType::factory()->create(['name' => 'Event Two Match']);
-
-        EventMatch::factory()->for($event1)->for($type1)->create();
-        EventMatch::factory()->for($event2)->for($type2)->create();
+        EventMatch::factory()->for($event1)->state(['match_type' => MatchType::Singles])->create();
+        EventMatch::factory()->for($event2)->state(['match_type' => MatchType::TagTeam])->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event1->id])
-            ->assertSee('Event One Match')
-            ->assertDontSee('Event Two Match');
+            ->assertSee('Singles')
+            ->assertDontSee('Tag Team');
     });
 
     it('handles event with multiple matches', function () {
         $event = Event::factory()->create();
 
-        $type1 = MatchType::factory()->create(['name' => 'Main Event']);
-        $type2 = MatchType::factory()->create(['name' => 'Opening Match']);
-
-        EventMatch::factory()->for($event)->for($type1)->create();
-        EventMatch::factory()->for($event)->for($type2)->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
+        EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
         Livewire::test(MatchesTable::class, ['eventId' => $event->id])
-            ->assertSee('Main Event')
-            ->assertSee('Opening Match');
+            ->assertSee('Singles')
+            ->assertSee('Tag Team');
     });
 });
 

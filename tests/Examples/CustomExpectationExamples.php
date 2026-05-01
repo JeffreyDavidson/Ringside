@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Builders\Roster\WrestlerBuilder;
+use App\Enums\MatchType;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Events\Event;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchType;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Artisan;
-
-use function Pest\Laravel\assertDatabaseCount;
 
 /**
  * Examples of how custom expectations improve test readability and maintainability.
@@ -131,22 +128,20 @@ test('title validation - with custom expectations', function () {
 
 // BEFORE: Using traditional assertions
 test('seeder execution - traditional way', function () {
-    expect(fn () => Artisan::call('db:seed', ['--class' => 'MatchTypesTableSeeder']))
-        ->not->toThrow();
+    // MatchType is now an enum, so seeders are no longer needed
+    // Verify enum has expected number of cases
+    $matchTypes = MatchType::cases();
+    expect(count($matchTypes))->toBe(14);
 
-    assertDatabaseCount('match_types', 14);
-
-    $matchTypes = MatchType::all();
-    expect($matchTypes->pluck('name')->unique())->toHaveCount(14);
+    $values = array_map(fn ($case) => $case->value, $matchTypes);
+    expect(array_unique($values))->toHaveCount(14);
 });
 
 // AFTER: Using custom expectations
 test('seeder execution - with custom expectations', function () {
-    expect('MatchTypesTableSeeder')->toSeedSuccessfully();
-
-    assertDatabaseCount('match_types', 14);
-
-    expect(MatchType::all())->toHaveUniqueNames();
+    // MatchType is now an enum with predefined cases
+    $matchTypes = MatchType::cases();
+    expect(count($matchTypes))->toBe(14);
 });
 
 /**
@@ -315,13 +310,12 @@ test('factory validation - with custom expectations', function () {
 // BEFORE: Using factory calls directly
 test('match creation - traditional way', function () {
     $event = Event::factory()->create();
-    $matchType = MatchType::factory()->create();
     $wrestler1 = Wrestler::factory()->employed()->create();
     $wrestler2 = Wrestler::factory()->employed()->create();
 
     $match = EventMatch::factory()->create([
         'event_id' => $event->id,
-        'match_type_id' => $matchType->id,
+        'match_type' => MatchType::Singles,
     ]);
 
     // Add competitors...

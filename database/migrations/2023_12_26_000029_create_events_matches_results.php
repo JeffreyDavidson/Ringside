@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchDecision;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +18,8 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(EventMatch::class, 'match_id');
             $table->morphs('winner');
-            $table->foreignIdFor(MatchDecision::class);
+            // MatchDecision was converted to an enum, so we use unsignedBigInteger
+            $table->unsignedBigInteger('match_decision_id');
             $table->timestamps();
         });
     }

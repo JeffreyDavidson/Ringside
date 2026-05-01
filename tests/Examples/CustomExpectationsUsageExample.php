@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\WrestlerBuilder;
+use App\Enums\MatchType;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Managers\Manager;
-use App\Models\Matches\MatchType;
 use App\Models\Stables\Stable;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
@@ -106,13 +106,12 @@ describe('Custom Expectations Usage Examples', function () {
 
         test('seeders populate database correctly', function () {
             // Assert - Seeder validation using custom expectations
-            expect('MatchTypesTableSeeder')->toSeedSuccessfully();
-            expect('MatchDecisionsTableSeeder')->toSeedSuccessfully();
             expect('StatesTableSeeder')->toSeedSuccessfully();
 
-            // Verify seeded data uniqueness
-            $matchTypes = MatchType::all();
-            expect($matchTypes)->toHaveUniqueNames();
+            // MatchType is now an enum, verify cases are unique
+            $matchTypes = MatchType::cases();
+            $values = array_map(fn ($case) => $case->value, $matchTypes);
+            expect(array_unique($values))->toHaveCount(count($matchTypes));
         });
     });
 
