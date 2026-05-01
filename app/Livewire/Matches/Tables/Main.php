@@ -8,6 +8,7 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
@@ -27,7 +28,7 @@ class Main extends BaseTable
     public function builder(): Builder
     {
         return EventMatch::query()
-            ->with(['event', 'matchType', 'competitors', 'result.winner', 'result.decision'])
+            ->with(['event', 'competitors', 'result.winner'])
             ->orderBy('events_matches.created_at', 'desc');
     }
 
@@ -37,7 +38,7 @@ class Main extends BaseTable
 
         $this->addAdditionalSelects([
             'events_matches.event_id',
-            'events_matches.match_type_id',
+            'events_matches.match_type',
         ]);
     }
 
@@ -52,7 +53,8 @@ class Main extends BaseTable
                 ->location(fn (EventMatch $row) => route('events.show', $row->event)),
             Column::make(__('event-matches.match_number'), 'match_number')
                 ->searchable(),
-            Column::make(__('event-matches.match_type'), 'matchType.name')
+            Column::make(__('event-matches.match_type'), 'match_type')
+                ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
             Column::make(__('event-matches.competitors'))
                 ->label(fn (EventMatch $row) => $row->competitors->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor()->name)->join(' vs ')),
@@ -61,7 +63,7 @@ class Main extends BaseTable
                     $winner = $row->result?->winner;
 
                     if ($winner) {
-                        return $winner->name.' by '.$row->result?->decision->name;
+                        return $winner->name.' by '.$row->result?->match_decision->label();
                     }
 
                     return 'N/A';
