@@ -9,6 +9,13 @@ use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
+use App\Models\Validation\Strategies\IndividualRetirementValidation;
+use App\Models\Validation\Strategies\IndividualSuspensionValidation;
+use App\Models\Validation\Strategies\StableRetirementValidation;
+use App\Models\Validation\Strategies\StableSuspensionValidation;
+use App\Models\Validation\Strategies\TagTeamRetirementValidation;
+use App\Models\Validation\Strategies\TagTeamSuspensionValidation;
+use App\Models\Validation\Strategies\TitleRetirementValidation;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
@@ -296,9 +303,9 @@ enum RosterMemberType: string
     public function getSuspensionValidationStrategy(): string
     {
         return match ($this) {
-            self::TAG_TEAM, self::TITLE => \App\Models\Validation\Strategies\TagTeamSuspensionValidation::class,
-            self::STABLE => \App\Models\Validation\Strategies\StableSuspensionValidation::class,
-            self::WRESTLER, self::MANAGER, self::REFEREE => \App\Models\Validation\Strategies\IndividualSuspensionValidation::class,
+            self::TAG_TEAM, self::TITLE => TagTeamSuspensionValidation::class,
+            self::STABLE => StableSuspensionValidation::class,
+            self::WRESTLER, self::MANAGER, self::REFEREE => IndividualSuspensionValidation::class,
         };
     }
 
@@ -322,10 +329,10 @@ enum RosterMemberType: string
     public function getRetirementValidationStrategy(): string
     {
         return match ($this) {
-            self::TAG_TEAM => \App\Models\Validation\Strategies\TagTeamRetirementValidation::class,
-            self::TITLE => \App\Models\Validation\Strategies\TitleRetirementValidation::class,
-            self::STABLE => \App\Models\Validation\Strategies\StableRetirementValidation::class,
-            self::WRESTLER, self::MANAGER, self::REFEREE => \App\Models\Validation\Strategies\IndividualRetirementValidation::class,
+            self::TAG_TEAM => TagTeamRetirementValidation::class,
+            self::TITLE => TitleRetirementValidation::class,
+            self::STABLE => StableRetirementValidation::class,
+            self::WRESTLER, self::MANAGER, self::REFEREE => IndividualRetirementValidation::class,
         };
     }
 

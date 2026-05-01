@@ -11,6 +11,8 @@ use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ValidatesRetirement;
 use App\Models\Concerns\ValidatesStableLifecycle;
+use App\Models\Contracts\Debutable;
+use App\Models\Contracts\Retirable;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -77,9 +79,9 @@ describe('Stable Model Unit Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Stable::class);
 
-            expect($interfaces)->toContain(\App\Models\Contracts\Debutable::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\HasActivityPeriods::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\Retirable::class);
+            expect($interfaces)->toContain(Debutable::class);
+            expect($interfaces)->toContain(App\Models\Contracts\HasActivityPeriods::class);
+            expect($interfaces)->toContain(Retirable::class);
         });
     });
 

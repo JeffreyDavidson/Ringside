@@ -134,7 +134,7 @@ describe('BaseFormModal Unit Tests', function () {
         test('follows base class naming convention', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
             expect($reflection->getShortName())->toBe('BaseFormModal');
-            expect($reflection->getName())->toBe(\App\Livewire\Base\BaseFormModal::class);
+            expect($reflection->getName())->toBe(BaseFormModal::class);
         });
     });
 
@@ -154,7 +154,7 @@ describe('BaseFormModal Unit Tests', function () {
         test('uses traits for specialized functionality', function () {
             $traits = class_uses_recursive(BaseFormModal::class);
 
-            expect($traits)->toContain(\App\Livewire\Concerns\GeneratesDummyData::class);
+            expect($traits)->toContain(GeneratesDummyData::class);
         });
     });
 });

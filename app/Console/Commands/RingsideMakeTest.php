@@ -9,13 +9,13 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
-use function Laravel\Prompts\select;
-use function Laravel\Prompts\text;
 use ReflectionClass;
 use ReflectionEnum;
-
 use ReflectionEnumBackedCase;
 use ReflectionMethod;
+
+use function Laravel\Prompts\select;
+use function Laravel\Prompts\text;
 
 #[Signature('ringside:make:test {name? : The name of the test (optional)} {--unit : Create a unit test} {--feature : Create a feature test} {--model= : Generate a model test for the specified model} {--directory= : Specify model directory (e.g., Users for Users/User)} {--action= : Generate an action test for the specified action} {--repository= : Generate a repository test for the specified repository}')]
 #[Description('Generate standardized Ringside tests (models, actions, repositories)')]

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\MatchType;
 use App\Models\Concerns\IsRetirable;
+use App\Models\Contracts\Retirable;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\Titles\Title;
@@ -136,7 +137,7 @@ describe('Custom Expectations Usage Examples', function () {
 
             // Assert - Title-specific validation
             expect($title)->toHaveCorrectTable('titles');
-            expect($title)->toImplementInterface(\App\Models\Contracts\Retirable::class);
+            expect($title)->toImplementInterface(Retirable::class);
             expect($title)->usesTrait(IsRetirable::class);
 
             // Test with factory data

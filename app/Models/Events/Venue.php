@@ -55,5 +55,4 @@ class Venue extends Model
 
     use HoldsEvents;
     use SoftDeletes;
-
 }

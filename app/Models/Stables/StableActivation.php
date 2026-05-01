@@ -31,7 +31,6 @@ class StableActivation extends Model
     /** @use HasFactory<StableActivationFactory> */
     use HasFactory;
 
-
     protected function casts(): array
     {
         return [

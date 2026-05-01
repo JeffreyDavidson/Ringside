@@ -17,6 +17,16 @@ use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
+use App\Models\Contracts\Bookable;
+use App\Models\Contracts\CanBeAStableMember;
+use App\Models\Contracts\CanBeATagTeamMember;
+use App\Models\Contracts\CanBeChampion;
+use App\Models\Contracts\Employable;
+use App\Models\Contracts\HasDisplayName;
+use App\Models\Contracts\Injurable;
+use App\Models\Contracts\Manageable;
+use App\Models\Contracts\Retirable;
+use App\Models\Contracts\Suspendable;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -98,16 +108,16 @@ describe('Wrestler Model Unit Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Wrestler::class);
 
-            expect($interfaces)->toContain(\App\Models\Contracts\Bookable::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\CanBeAStableMember::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\CanBeATagTeamMember::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\CanBeChampion::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\Employable::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\HasDisplayName::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\Injurable::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\Manageable::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\Retirable::class);
-            expect($interfaces)->toContain(\App\Models\Contracts\Suspendable::class);
+            expect($interfaces)->toContain(Bookable::class);
+            expect($interfaces)->toContain(CanBeAStableMember::class);
+            expect($interfaces)->toContain(CanBeATagTeamMember::class);
+            expect($interfaces)->toContain(CanBeChampion::class);
+            expect($interfaces)->toContain(Employable::class);
+            expect($interfaces)->toContain(HasDisplayName::class);
+            expect($interfaces)->toContain(Injurable::class);
+            expect($interfaces)->toContain(Manageable::class);
+            expect($interfaces)->toContain(Retirable::class);
+            expect($interfaces)->toContain(Suspendable::class);
         });
     });
 
