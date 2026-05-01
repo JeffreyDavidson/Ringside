@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns\Support;
 
 use App\Models\Concerns\CanJoinTagTeams;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 /**
  * Fake model for testing CanJoinTagTeams trait in isolation.
  * This ensures trait tests are not coupled to real business models.
  */
+#[Table('fake_tag_team_members')]
+#[Fillable('name')]
 class FakeTagTeamMemberModel extends Model
 {
     use CanJoinTagTeams;
-
-    protected $table = 'fake_tag_team_members';
-
-    protected $fillable = ['name'];
 
     /**
      * Static method to override tag team pivot model class for testing.

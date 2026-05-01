@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Stables;
 
 use Database\Factories\Stables\StableActivityPeriodFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,29 +30,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Table('stables_activations')]
+#[Fillable('stable_id', 'started_at', 'ended_at')]
 #[UseFactory(StableActivityPeriodFactory::class)]
 class StableActivityPeriod extends Model
 {
     /** @use HasFactory<StableActivityPeriodFactory> */
     use HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'stables_activations';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'stable_id',
-        'started_at',
-        'ended_at',
-    ];
 
     /**
      * Get the attributes that should be cast.

@@ -6,6 +6,8 @@ namespace App\Models\Stables;
 
 use App\Enums\Stables\StableStatus;
 use Database\Factories\Stables\StableStatusChangeFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,29 +33,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Table('stables_status_changes')]
+#[Fillable('stable_id', 'status', 'changed_at')]
 #[UseFactory(StableStatusChangeFactory::class)]
 class StableStatusChange extends Model
 {
     /** @use HasFactory<StableStatusChangeFactory> */
     use HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'stables_status_changes';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'stable_id',
-        'status',
-        'changed_at',
-    ];
 
     /**
      * Get the attributes that should be cast.

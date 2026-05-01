@@ -8,6 +8,8 @@ use App\Enums\MatchDecision;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchResultFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,30 +39,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Table('events_matches_results')]
+#[Fillable('match_id', 'match_decision', 'winner_type', 'winner_id')]
 #[UseFactory(MatchResultFactory::class)]
 class MatchResult extends Model
 {
     /** @use HasFactory<MatchResultFactory> */
     use HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'events_matches_results';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'match_id',
-        'match_decision',
-        'winner_type',
-        'winner_id',
-    ];
 
     /**
      * Get the attributes that should be cast.
