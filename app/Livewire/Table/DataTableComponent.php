@@ -136,7 +136,7 @@ abstract class DataTableComponent extends Component
         $query = $this->builder();
 
         if ($this->additionalSelects) {
-            $query->addSelect($this->additionalSelects);
+            $query->select('*')->addSelect($this->additionalSelects);
         }
 
         $this->applySearch($query);
