@@ -15,6 +15,8 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;

@@ -24,6 +24,8 @@ class FormModal extends BaseFormModal
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
