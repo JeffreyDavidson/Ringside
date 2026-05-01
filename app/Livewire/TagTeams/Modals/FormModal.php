@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Modals;
 
 use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
-use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -21,28 +20,8 @@ use Illuminate\View\View;
 class FormModal extends BaseFormModal
 {
     use GeneratesDummyData;
+    use PresentsManagersList;
     use PresentsWrestlersList;
-
-    /**
-     * @return Collection<int, Wrestler>
-     */
-    public function getWrestlersListProperty(): Collection
-    {
-        return Wrestler::all();
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function getManagersProperty(): array
-    {
-        return Manager::select('id', 'first_name', 'last_name')
-            ->get()
-            ->mapWithKeys(function (Manager $manager) {
-                return [$manager->id => $manager->first_name.' '.$manager->last_name];
-            })
-            ->toArray();
-    }
 
     protected function getFormClass(): string
     {
