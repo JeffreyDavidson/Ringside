@@ -85,11 +85,11 @@ class UnretireAction
         DB::transaction(function () use ($stable, $unretiredDate, $unretireMembers, $establishImmediately, &$successCount, &$failureCount): void {
             // End the current retirement record directly
             $currentRetirement = $stable->retirements()
-                ->whereNull('unretired_at')
+                ->whereNull('ended_at')
                 ->first();
 
             if ($currentRetirement) {
-                $currentRetirement->update(['unretired_at' => $unretiredDate]);
+                $currentRetirement->update(['ended_at' => $unretiredDate]);
             }
 
             // Attempt to unretire available former members
