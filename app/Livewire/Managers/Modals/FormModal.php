@@ -26,6 +26,8 @@ class FormModal extends BaseFormModal
         $this->titleField = 'full_name';
     }
 
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;

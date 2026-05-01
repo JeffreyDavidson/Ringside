@@ -18,6 +18,8 @@ class FormModal extends BaseFormModal
 {
     use GeneratesDummyData;
 
+    public CreateEditForm $form;
+
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
