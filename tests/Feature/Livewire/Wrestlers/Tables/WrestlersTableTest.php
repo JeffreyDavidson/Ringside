@@ -118,10 +118,10 @@ describe('Main Component Feature Workflows', function () {
                 ->test(Main::class)
                 ->assertSee('Active Wrestler')
                 ->assertSee('Released Wrestler')
-                ->set('filterComponents.status', 'employed')
+                ->set('filterValues.status', 'employed')
                 ->assertSee('Active Wrestler')
                 ->assertDontSee('Released Wrestler')
-                ->set('filterComponents.status', 'released')
+                ->set('filterValues.status', 'released')
                 ->assertDontSee('Active Wrestler')
                 ->assertSee('Released Wrestler');
         });
@@ -150,14 +150,14 @@ describe('Main Component Feature Workflows', function () {
             $component = Livewire::actingAs($this->admin)
                 ->test(Main::class)
                 ->set('search', 'Test Search')
-                ->set('filterComponents.status', 'released');
+                ->set('filterValues.status', 'released');
 
             // Perform business operation
             $component->call('handleWrestlerAction', 'employ', $wrestler->id);
 
             // Component state should be maintained
             expect($component->get('search'))->toBe('Test Search');
-            expect($component->get('filterComponents.status'))->toBe('released');
+            expect($component->get('filterValues.status'))->toBe('released');
         });
 
         test('component handles concurrent user interactions', function () {
