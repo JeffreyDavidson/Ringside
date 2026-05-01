@@ -179,19 +179,19 @@ describe('Title Search and Filtering Workflow', function () {
         // When: Filtering by active status
         Livewire::actingAs($admin)
             ->test(Main::class)
-            ->set('filterComponents.status', 'active')
+            ->set('filterValues.status', 'active')
             ->assertSee('WWE Championship Title');
 
         // When: Filtering by retired status
         Livewire::actingAs($admin)
             ->test(Main::class)
-            ->set('filterComponents.status', 'retired')
+            ->set('filterValues.status', 'retired')
             ->assertSee('WCW Championship Title');
 
         // When: Clearing filters
         Livewire::actingAs($admin)
             ->test(Main::class)
-            ->set('filterComponents.status', '')
+            ->set('filterValues.status', '')
             ->set('search', '')
             ->assertSee('WWE Championship Title')
             ->assertSee('WCW Championship Title')
