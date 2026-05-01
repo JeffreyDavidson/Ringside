@@ -13,6 +13,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
+use Database\Factories\Matches\MatchFactory;
 
 /**
  * Unit tests for Match comprehensive generation capabilities.
@@ -28,7 +29,7 @@ use App\Models\Wrestlers\Wrestler;
  * realistic wrestling matches that comply with business rules and support
  * all match generation scenarios across the application.
  *
- * @see \Database\Factories\Matches\MatchFactory::generateFullMatch()
+ * @see MatchFactory::generateFullMatch()
  */
 describe('Match Comprehensive Generation Unit Tests', function () {
     describe('basic match generation scenarios', function () {
