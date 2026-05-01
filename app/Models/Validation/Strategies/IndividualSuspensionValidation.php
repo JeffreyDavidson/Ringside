@@ -26,27 +26,27 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
     public function validate(Model $entity): void
     {
         if ($this->isUnemployed($entity)) {
-            throw CannotBeSuspendedException::unemployed();
+            throw CannotBeSuspendedException::unemployed($entity);
         }
 
         if ($this->isReleased($entity)) {
-            throw CannotBeSuspendedException::released();
+            throw CannotBeSuspendedException::released($entity);
         }
 
         if (method_exists($entity, 'isRetired') && $entity->isRetired()) {
-            throw CannotBeSuspendedException::retired();
+            throw CannotBeSuspendedException::retired($entity);
         }
 
         if (method_exists($entity, 'hasFutureEmployment') && $entity->hasFutureEmployment()) {
-            throw CannotBeSuspendedException::hasFutureEmployment();
+            throw CannotBeSuspendedException::hasFutureEmployment($entity);
         }
 
         if (method_exists($entity, 'isSuspended') && $entity->isSuspended()) {
-            throw CannotBeSuspendedException::suspended();
+            throw CannotBeSuspendedException::suspended($entity);
         }
 
         if (method_exists($entity, 'isInjured') && $entity->isInjured()) {
-            throw CannotBeSuspendedException::injured();
+            throw CannotBeSuspendedException::injured($entity);
         }
     }
 
