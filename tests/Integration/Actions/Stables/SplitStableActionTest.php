@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\SplitStableAction;
+use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -47,10 +49,10 @@ describe('SplitStableAction Integration Tests', function () {
         // Create new stable name
         $this->newStableName = 'New Split Stable';
 
-        $this->membersForNewStable = [
-            'wrestlers' => $this->transferWrestlers,
-            'tagTeams' => $this->transferTagTeams,
-        ];
+        $this->membersForNewStable = new StableMembershipData(
+            wrestlers: $this->transferWrestlers,
+            tagTeams: $this->transferTagTeams,
+        );
     });
 
     describe('complete split workflow', function () {
@@ -180,9 +182,9 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Split with only wrestlers
-            $membersForSplit = [
-                'wrestlers' => $this->transferWrestlers,
-            ];
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->transferWrestlers,
+            );
 
             $newStable = SplitStableAction::run(
                 $this->originalStable,
@@ -204,9 +206,9 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Split with only tag teams
-            $membersForSplit = [
-                'tagTeams' => $this->transferTagTeams,
-            ];
+            $membersForSplit = new StableMembershipData(
+                tagTeams: $this->transferTagTeams,
+            );
 
             $newStable = SplitStableAction::run(
                 $this->originalStable,
@@ -247,24 +249,17 @@ describe('SplitStableAction Integration Tests', function () {
     });
 
     describe('edge cases and error scenarios', function () {
-        test('split handles empty transfer collections gracefully', function () {
+        test('split rejects empty transfer collections', function () {
             $splitDate = Carbon::now();
 
-            // Split with no members to transfer
-            $membersForSplit = [
-                // No members to transfer
-            ];
+            $membersForSplit = new StableMembershipData();
 
-            $newStable = SplitStableAction::run(
+            expect(fn () => SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
                 $splitDate
-            );
-
-            // Verify new stable was created but is empty
-            expect($newStable->currentWrestlers()->count())->toBe(0);
-            expect($newStable->currentTagTeams()->count())->toBe(0);
+            ))->toThrow(CannotBeSplitException::class);
 
             // Verify original stable unchanged
             $refreshedOriginal = $this->originalStable->fresh();
@@ -272,30 +267,25 @@ describe('SplitStableAction Integration Tests', function () {
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
-        test('split handles transfer of all members', function () {
+        test('split rejects transferring all members', function () {
             $splitDate = Carbon::now();
 
-            // Split with all members transferred
-            $membersForSplit = [
-                'wrestlers' => $this->wrestlers, // All wrestlers
-                'tagTeams' => $this->tagTeams,   // All tag teams
-            ];
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->wrestlers,
+                tagTeams: $this->tagTeams,
+            );
 
-            $newStable = SplitStableAction::run(
+            expect(fn () => SplitStableAction::run(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
                 $splitDate
-            );
+            ))->toThrow(CannotBeSplitException::class);
 
-            // Verify new stable has all members
-            expect($newStable->currentWrestlers()->count())->toBe($this->wrestlers->count());
-            expect($newStable->currentTagTeams()->count())->toBe($this->tagTeams->count());
-
-            // Verify original stable is empty
+            // Verify original stable still has all members (transaction rolled back)
             $refreshedOriginal = $this->originalStable->fresh();
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe(0);
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe(0);
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
+            expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
         test('split validates member availability before transfer', function () {
@@ -308,10 +298,10 @@ describe('SplitStableAction Integration Tests', function () {
             $transferWrestlers = $this->transferWrestlers->push($unemployedWrestler);
 
             // Execute split - should handle unemployed members appropriately
-            $membersForSplit = [
-                'wrestlers' => $transferWrestlers,
-                'tagTeams' => $this->transferTagTeams,
-            ];
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $transferWrestlers,
+                tagTeams: $this->transferTagTeams,
+            );
 
             $newStable = SplitStableAction::run(
                 $this->originalStable,

@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use InvalidArgumentException;
 
 /**
