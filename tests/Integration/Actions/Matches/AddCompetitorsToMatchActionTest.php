@@ -8,11 +8,8 @@ use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Seeders\MatchTypesTableSeeder;
 
 beforeEach(function () {
-    $this->seed(MatchTypesTableSeeder::class);
-
     // Mock the sub-actions in the container
     $this->app->instance(AddWrestlersToMatchAction::class, $this->mock(AddWrestlersToMatchAction::class));
     $this->app->instance(AddTagTeamsToMatchAction::class, $this->mock(AddTagTeamsToMatchAction::class));
