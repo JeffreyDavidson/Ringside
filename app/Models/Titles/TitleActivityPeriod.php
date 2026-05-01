@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Titles;
 
 use Database\Factories\Titles\TitleActivityPeriodFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,29 +30,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Table('titles_activations')]
+#[Fillable('title_id', 'started_at', 'ended_at')]
 #[UseFactory(TitleActivityPeriodFactory::class)]
 class TitleActivityPeriod extends Model
 {
     /** @use HasFactory<TitleActivityPeriodFactory> */
     use HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'titles_activations';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'title_id',
-        'started_at',
-        'ended_at',
-    ];
 
     /**
      * Get the attributes that should be cast.

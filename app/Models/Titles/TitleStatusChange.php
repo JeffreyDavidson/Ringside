@@ -6,6 +6,8 @@ namespace App\Models\Titles;
 
 use App\Enums\Shared\ActivationStatus;
 use Database\Factories\Titles\TitleStatusChangeFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,29 +31,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Table('titles_status_changes')]
+#[Fillable('title_id', 'status', 'changed_at')]
 #[UseFactory(TitleStatusChangeFactory::class)]
 class TitleStatusChange extends Model
 {
     /** @use HasFactory<TitleStatusChangeFactory> */
     use HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'titles_status_changes';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'title_id',
-        'status',
-        'changed_at',
-    ];
 
     /**
      * Get the attributes that should be cast.

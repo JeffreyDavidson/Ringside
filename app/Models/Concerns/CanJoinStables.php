@@ -10,6 +10,8 @@ use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
 use App\Models\Stables\StableWrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -63,8 +65,8 @@ trait CanJoinStables
         $morphClass = $this->getMorphClass();
 
         return match ($morphClass) {
-            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'stables_wrestlers',
-            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'stables_tag_teams',
+            'wrestler', Wrestler::class => 'stables_wrestlers',
+            'tag_team', 'tagTeam', TagTeam::class => 'stables_tag_teams',
             default => str_contains($morphClass, '@anonymous') ? 'stables_members' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
     }
@@ -90,14 +92,14 @@ trait CanJoinStables
         $table = $this->getStablePivotTable();
         $morphClass = $this->getMorphClass();
         $foreignKey = match ($morphClass) {
-            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
-            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
+            'wrestler', Wrestler::class => 'wrestler_id',
+            'tag_team', 'tagTeam', TagTeam::class => 'tag_team_id',
             default => str_contains($morphClass, '@anonymous') ? 'member_id' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
         $pivotClass = match ($morphClass) {
-            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
-            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            'wrestler', Wrestler::class => StableWrestler::class,
+            'tag_team', 'tagTeam', TagTeam::class => StableTagTeam::class,
             default => str_contains($morphClass, '@anonymous') ? 'App\Models\StableMembers' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
@@ -139,14 +141,14 @@ trait CanJoinStables
         $table = $this->getStablePivotTable();
         $morphClass = $this->getMorphClass();
         $foreignKey = match ($morphClass) {
-            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
-            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
+            'wrestler', Wrestler::class => 'wrestler_id',
+            'tag_team', 'tagTeam', TagTeam::class => 'tag_team_id',
             default => str_contains($morphClass, '@anonymous') ? 'member_id' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
         $pivotClass = match ($morphClass) {
-            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
-            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            'wrestler', Wrestler::class => StableWrestler::class,
+            'tag_team', 'tagTeam', TagTeam::class => StableTagTeam::class,
             default => str_contains($morphClass, '@anonymous') ? 'App\Models\StableMembers' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
@@ -183,14 +185,14 @@ trait CanJoinStables
         $table = $this->getStablePivotTable();
         $morphClass = $this->getMorphClass();
         $foreignKey = match ($morphClass) {
-            'wrestler', 'App\Models\Wrestlers\Wrestler' => 'wrestler_id',
-            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => 'tag_team_id',
+            'wrestler', Wrestler::class => 'wrestler_id',
+            'tag_team', 'tagTeam', TagTeam::class => 'tag_team_id',
             default => str_contains($morphClass, '@anonymous') ? 'member_id' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 
         $pivotClass = match ($morphClass) {
-            'wrestler', 'App\Models\Wrestlers\Wrestler' => StableWrestler::class,
-            'tag_team', 'tagTeam', 'App\Models\TagTeams\TagTeam' => StableTagTeam::class,
+            'wrestler', Wrestler::class => StableWrestler::class,
+            'tag_team', 'tagTeam', TagTeam::class => StableTagTeam::class,
             default => str_contains($morphClass, '@anonymous') ? 'App\Models\StableMembers' : throw new InvalidArgumentException("Unknown stable member type: {$morphClass}"),
         };
 

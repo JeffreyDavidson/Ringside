@@ -19,6 +19,8 @@ use App\Models\Contracts\Retirable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Stables\StableFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -101,6 +103,8 @@ use Tests\Unit\Models\Stables\StableTest;
  *
  * @see StableTest
  */
+#[Fillable('name')]
+#[Appends('status')]
 #[UseFactory(StableFactory::class)]
 #[UseEloquentBuilder(StableBuilder::class)]
 class Stable extends Model implements Debutable, HasActivityPeriodsContract, Retirable
@@ -133,24 +137,6 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
      * The minimum number of members allowed on a tag team.
      */
     public const int MIN_MEMBERS_COUNT = 3;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-    ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'status',
-    ];
 
     /**
      * Get the computed status attribute.

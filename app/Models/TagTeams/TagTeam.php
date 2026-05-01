@@ -30,6 +30,8 @@ use App\Models\Stables\StableTagTeam;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -116,6 +118,8 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Fillable('name', 'signature_move')]
+#[Appends('status')]
 #[UseFactory(TagTeamFactory::class)]
 #[UseEloquentBuilder(TagTeamBuilder::class)]
 class TagTeam extends Model implements BookableCompetitor, CanBeAStableMember, CanBeChampion, Employable, HasTagTeamWrestlers, Manageable, Retirable, Suspendable
@@ -153,25 +157,6 @@ class TagTeam extends Model implements BookableCompetitor, CanBeAStableMember, C
      * The number of the wrestlers allowed on a tag team.
      */
     public const int NUMBER_OF_WRESTLERS_ON_TEAM = 2;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'signature_move',
-    ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'status',
-    ];
 
     /**
      * Get the computed status attribute.
