@@ -98,16 +98,16 @@ describe('Wrestler Model Unit Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Wrestler::class);
 
-            expect($interfaces)->toContain('App\Models\Contracts\Bookable');
-            expect($interfaces)->toContain('App\Models\Contracts\CanBeAStableMember');
-            expect($interfaces)->toContain('App\Models\Contracts\CanBeATagTeamMember');
-            expect($interfaces)->toContain('App\Models\Contracts\CanBeChampion');
-            expect($interfaces)->toContain('App\Models\Contracts\Employable');
-            expect($interfaces)->toContain('App\Models\Contracts\HasDisplayName');
-            expect($interfaces)->toContain('App\Models\Contracts\Injurable');
-            expect($interfaces)->toContain('App\Models\Contracts\Manageable');
-            expect($interfaces)->toContain('App\Models\Contracts\Retirable');
-            expect($interfaces)->toContain('App\Models\Contracts\Suspendable');
+            expect($interfaces)->toContain(\App\Models\Contracts\Bookable::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\CanBeAStableMember::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\CanBeATagTeamMember::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\CanBeChampion::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\Employable::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\HasDisplayName::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\Injurable::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\Manageable::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\Retirable::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\Suspendable::class);
         });
     });
 

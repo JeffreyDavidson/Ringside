@@ -77,9 +77,9 @@ describe('Stable Model Unit Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Stable::class);
 
-            expect($interfaces)->toContain('App\Models\Contracts\Debutable');
-            expect($interfaces)->toContain('App\Models\Contracts\HasActivityPeriods');
-            expect($interfaces)->toContain('App\Models\Contracts\Retirable');
+            expect($interfaces)->toContain(\App\Models\Contracts\Debutable::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\HasActivityPeriods::class);
+            expect($interfaces)->toContain(\App\Models\Contracts\Retirable::class);
         });
     });
 

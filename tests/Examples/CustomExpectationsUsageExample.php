@@ -136,7 +136,7 @@ describe('Custom Expectations Usage Examples', function () {
 
             // Assert - Title-specific validation
             expect($title)->toHaveCorrectTable('titles');
-            expect($title)->toImplementInterface('App\Models\Contracts\Retirable');
+            expect($title)->toImplementInterface(\App\Models\Contracts\Retirable::class);
             expect($title)->usesTrait(IsRetirable::class);
 
             // Test with factory data

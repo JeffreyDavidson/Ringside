@@ -296,9 +296,9 @@ enum RosterMemberType: string
     public function getSuspensionValidationStrategy(): string
     {
         return match ($this) {
-            self::TAG_TEAM, self::TITLE => 'App\Models\Validation\Strategies\TagTeamSuspensionValidation',
-            self::STABLE => 'App\Models\Validation\Strategies\StableSuspensionValidation',
-            self::WRESTLER, self::MANAGER, self::REFEREE => 'App\Models\Validation\Strategies\IndividualSuspensionValidation',
+            self::TAG_TEAM, self::TITLE => \App\Models\Validation\Strategies\TagTeamSuspensionValidation::class,
+            self::STABLE => \App\Models\Validation\Strategies\StableSuspensionValidation::class,
+            self::WRESTLER, self::MANAGER, self::REFEREE => \App\Models\Validation\Strategies\IndividualSuspensionValidation::class,
         };
     }
 
@@ -322,10 +322,10 @@ enum RosterMemberType: string
     public function getRetirementValidationStrategy(): string
     {
         return match ($this) {
-            self::TAG_TEAM => 'App\Models\Validation\Strategies\TagTeamRetirementValidation',
-            self::TITLE => 'App\Models\Validation\Strategies\TitleRetirementValidation',
-            self::STABLE => 'App\Models\Validation\Strategies\StableRetirementValidation',
-            self::WRESTLER, self::MANAGER, self::REFEREE => 'App\Models\Validation\Strategies\IndividualRetirementValidation',
+            self::TAG_TEAM => \App\Models\Validation\Strategies\TagTeamRetirementValidation::class,
+            self::TITLE => \App\Models\Validation\Strategies\TitleRetirementValidation::class,
+            self::STABLE => \App\Models\Validation\Strategies\StableRetirementValidation::class,
+            self::WRESTLER, self::MANAGER, self::REFEREE => \App\Models\Validation\Strategies\IndividualRetirementValidation::class,
         };
     }
 
