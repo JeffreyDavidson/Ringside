@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\CreateAction;
+use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 
@@ -10,12 +11,13 @@ test('it creates a new tag team', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'The Test Team',
-        'signature_move' => 'Double Suplex',
-        'wrestler_a_id' => $wrestlerA->id,
-        'wrestler_b_id' => $wrestlerB->id,
-    ];
+    $data = new TagTeamData(
+        name: 'The Test Team',
+        signature_move: 'Double Suplex',
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     $tagTeam = CreateAction::run($data);
 
@@ -34,11 +36,13 @@ test('it creates tag team with minimal data', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'Minimal Team',
-        'wrestler_a_id' => $wrestlerA->id,
-        'wrestler_b_id' => $wrestlerB->id,
-    ];
+    $data = new TagTeamData(
+        name: 'Minimal Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     $tagTeam = CreateAction::run($data);
 
@@ -56,11 +60,13 @@ test('it creates partnerships for both wrestlers', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'Partnership Team',
-        'wrestler_a_id' => $wrestlerA->id,
-        'wrestler_b_id' => $wrestlerB->id,
-    ];
+    $data = new TagTeamData(
+        name: 'Partnership Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     $tagTeam = CreateAction::run($data);
 
@@ -68,13 +74,13 @@ test('it creates partnerships for both wrestlers', function () {
     $this->assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestlerA->id,
-        'ended_at' => null,
+        'left_at' => null,
     ]);
 
     $this->assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestlerB->id,
-        'ended_at' => null,
+        'left_at' => null,
     ]);
 
     expect($tagTeam->wrestlers()->count())->toBe(2);
@@ -84,11 +90,13 @@ test('it handles database transactions correctly', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'Transaction Team',
-        'wrestler_a_id' => $wrestlerA->id,
-        'wrestler_b_id' => $wrestlerB->id,
-    ];
+    $data = new TagTeamData(
+        name: 'Transaction Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     $tagTeam = CreateAction::run($data);
 
@@ -104,32 +112,42 @@ test('it handles database transactions correctly', function () {
 test('it prevents creating tag team with same wrestler twice', function () {
     $wrestler = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'Invalid Team',
-        'wrestler_a_id' => $wrestler->id,
-        'wrestler_b_id' => $wrestler->id,
-    ];
+    $data = new TagTeamData(
+        name: 'Invalid Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: $wrestler,
+        wrestlerB: $wrestler,
+    );
 
     expect(fn () => CreateAction::run($data))
         ->toThrow(Exception::class);
 });
 
-test('it prevents creating tag team with invalid wrestlers', function () {
-    $data = [
-        'name' => 'Invalid Team',
-        'wrestler_a_id' => 999,
-        'wrestler_b_id' => 998,
-    ];
+test('it prevents creating tag team with missing wrestlers', function () {
+    $data = new TagTeamData(
+        name: 'Invalid Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: null,
+        wrestlerB: null,
+    );
 
     expect(fn () => CreateAction::run($data))
         ->toThrow(Exception::class);
 });
 
-test('it validates required fields', function () {
-    $data = [
-        'signature_move' => 'Test Move',
-        // Missing name and wrestlers
-    ];
+test('it validates required name', function () {
+    $wrestlerA = Wrestler::factory()->create();
+    $wrestlerB = Wrestler::factory()->create();
+
+    $data = new TagTeamData(
+        name: '',
+        signature_move: 'Test Move',
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     expect(fn () => CreateAction::run($data))
         ->toThrow(Exception::class);
@@ -139,12 +157,13 @@ test('it creates tag team with all optional fields', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'Full Data Team',
-        'signature_move' => 'Ultimate Finisher',
-        'wrestler_a_id' => $wrestlerA->id,
-        'wrestler_b_id' => $wrestlerB->id,
-    ];
+    $data = new TagTeamData(
+        name: 'Full Data Team',
+        signature_move: 'Ultimate Finisher',
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     $tagTeam = CreateAction::run($data);
 
@@ -154,16 +173,18 @@ test('it creates tag team with all optional fields', function () {
 });
 
 test('it handles unique name validation', function () {
-    $existingTeam = TagTeam::factory()->create(['name' => 'Unique Team']);
+    TagTeam::factory()->create(['name' => 'Unique Team']);
 
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'Unique Team',
-        'wrestler_a_id' => $wrestlerA->id,
-        'wrestler_b_id' => $wrestlerB->id,
-    ];
+    $data = new TagTeamData(
+        name: 'Unique Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     expect(fn () => CreateAction::run($data))
         ->toThrow(Exception::class);
@@ -173,18 +194,20 @@ test('it creates partnerships with correct timestamps', function () {
     $wrestlerA = Wrestler::factory()->create();
     $wrestlerB = Wrestler::factory()->create();
 
-    $data = [
-        'name' => 'Timestamp Team',
-        'wrestler_a_id' => $wrestlerA->id,
-        'wrestler_b_id' => $wrestlerB->id,
-    ];
+    $data = new TagTeamData(
+        name: 'Timestamp Team',
+        signature_move: null,
+        employment_date: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+    );
 
     $tagTeam = CreateAction::run($data);
 
     // Check partnerships have current timestamp
     $partnerships = $tagTeam->wrestlers()->get();
     foreach ($partnerships as $wrestler) {
-        expect($wrestler->pivot->started_at)->not()->toBeNull();
-        expect($wrestler->pivot->ended_at)->toBeNull();
+        expect($wrestler->pivot->joined_at)->not()->toBeNull();
+        expect($wrestler->pivot->left_at)->toBeNull();
     }
 });
