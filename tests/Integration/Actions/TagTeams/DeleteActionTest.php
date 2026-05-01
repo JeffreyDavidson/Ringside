@@ -83,13 +83,13 @@ test('it handles cascade deletion of relationships', function () {
     $wrestlerB = Wrestler::factory()->create();
 
     $tagTeam->wrestlers()->attach($wrestlerA->id, [
-        'started_at' => now()->subDays(5),
-        'ended_at' => null,
+        'joined_at' => now()->subDays(5),
+        'left_at' => null,
     ]);
 
     $tagTeam->wrestlers()->attach($wrestlerB->id, [
-        'started_at' => now()->subDays(3),
-        'ended_at' => null,
+        'joined_at' => now()->subDays(3),
+        'left_at' => null,
     ]);
 
     expect($tagTeam->wrestlers()->count())->toBe(2);
@@ -165,8 +165,8 @@ test('it handles tag team with ended relationships', function () {
 
     // Add ended partnership
     $tagTeam->wrestlers()->attach($wrestler->id, [
-        'started_at' => now()->subDays(10),
-        'ended_at' => now()->subDays(5),
+        'joined_at' => now()->subDays(10),
+        'left_at' => now()->subDays(5),
     ]);
 
     DeleteAction::run($tagTeam);
