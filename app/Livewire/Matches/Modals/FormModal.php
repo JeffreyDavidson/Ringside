@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Modals;
 
+use App\Enums\MatchType;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
 use App\Livewire\Concerns\Data\PresentsRefereesList;
@@ -12,7 +13,6 @@ use App\Livewire\Concerns\Data\PresentsTitlesList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchType;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
@@ -109,7 +109,7 @@ class FormModal extends BaseFormModal
     protected function getDummyDataFields(): array
     {
         return [
-            'matchTypeId' => fn () => $this->getRandomMatchTypeId(),
+            'matchType' => fn () => $this->getRandomMatchType(),
             'referees' => fn () => $this->generateRefereeAssignments(),
             'titles' => fn () => $this->generateTitleAssignments(),
             'wrestlers' => fn () => $this->generateWrestlerAssignments(),
@@ -127,7 +127,7 @@ class FormModal extends BaseFormModal
     public function generateRandomData(): void
     {
         $this->form->fill([
-            'matchTypeId' => $this->getRandomMatchTypeId(),
+            'matchType' => $this->getRandomMatchType(),
             'referees' => $this->generateRefereeAssignments(),
             'titles' => $this->generateTitleAssignments(),
             'wrestlers' => $this->generateWrestlerAssignments(),
@@ -136,17 +136,16 @@ class FormModal extends BaseFormModal
     }
 
     /**
-     * Get a random match type ID for testing.
+     * Get a random match type for testing.
      *
-     * Creates match type assignments for various wrestling match styles
+     * Returns a random MatchType enum case for various wrestling match styles
      * including singles, tag team, ladder matches, cage matches, etc.
      *
-     * @return int A random match type ID
+     * @return MatchType A random match type enum
      */
-    protected function getRandomMatchTypeId(): int
+    protected function getRandomMatchType(): MatchType
     {
-        /** @phpstan-ignore-next-line */
-        return MatchType::inRandomOrder()->first()?->id ?? MatchType::factory()->create()->id;
+        return fake()->randomElement(MatchType::cases());
     }
 
     /**
@@ -318,7 +317,7 @@ class FormModal extends BaseFormModal
      * 2. Initialize the correct competitor structure
      * 3. Reset validation state
      */
-    public function updatedFormMatchTypeId(mixed $value): void
+    public function updatedFormMatchType(mixed $value): void
     {
         if (! $value) {
             return;
@@ -328,19 +327,18 @@ class FormModal extends BaseFormModal
         $this->form->competitors = [];
 
         // Initialize competitor structure based on match type
-        $this->initializeCompetitorStructure($value);
+        $matchType = $value instanceof MatchType ? $value : MatchType::tryFrom($value);
+        if ($matchType) {
+            $this->initializeCompetitorStructure($matchType);
+        }
     }
 
     /**
-     * Get the currently selected match type model.
+     * Get the currently selected match type enum.
      */
     public function getSelectedMatchType(): ?MatchType
     {
-        if (! $this->form->matchTypeId) {
-            return null;
-        }
-
-        return MatchType::find($this->form->matchTypeId);
+        return $this->form->matchType;
     }
 
     /**
@@ -386,14 +384,8 @@ class FormModal extends BaseFormModal
     /**
      * Initialize the competitor structure based on match type.
      */
-    private function initializeCompetitorStructure(int $matchTypeId): void
+    private function initializeCompetitorStructure(MatchType $matchType): void
     {
-        $matchType = MatchType::find($matchTypeId);
-
-        if (! $matchType) {
-            return;
-        }
-
         $numberOfSides = $matchType->getMinimumCompetitors();
         $competitors = [];
 
