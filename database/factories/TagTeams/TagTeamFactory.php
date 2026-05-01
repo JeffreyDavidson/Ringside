@@ -110,7 +110,9 @@ class TagTeamFactory extends Factory
 
     public function unemployed(): static
     {
-        return $this->state(fn () => []);
+        $wrestlers = Wrestler::factory()->count(2)->create();
+
+        return $this->withCurrentWrestlers($wrestlers);
     }
 
     public function released(): static
