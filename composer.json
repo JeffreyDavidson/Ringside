@@ -14,8 +14,9 @@
         "calebporzio/sushi": "^2.5",
         "laravel/framework": "^13.7",
         "laravel/tinker": "^3.0",
-        "livewire/livewire": "^3.5",
-        "lorisleiva/laravel-actions": "^2.10"
+        "livewire/livewire": "^4.0",
+        "lorisleiva/laravel-actions": "^2.10",
+        "wire-elements/modal": "^3.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",
