@@ -160,7 +160,7 @@ describe('BaseForm Unit Tests', function () {
         test('follows base class naming convention', function () {
             $reflection = new ReflectionClass(BaseForm::class);
             expect($reflection->getShortName())->toBe('BaseForm');
-            expect($reflection->getName())->toBe('App\\Livewire\\Base\\BaseForm');
+            expect($reflection->getName())->toBe(BaseForm::class);
         });
     });
 

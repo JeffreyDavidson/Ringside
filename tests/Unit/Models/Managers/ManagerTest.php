@@ -10,6 +10,11 @@ use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
+use App\Models\Contracts\Employable;
+use App\Models\Contracts\HasDisplayName;
+use App\Models\Contracts\Injurable;
+use App\Models\Contracts\Retirable;
+use App\Models\Contracts\Suspendable;
 use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -76,11 +81,11 @@ describe('Manager Model Unit Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Manager::class);
 
-            expect($interfaces)->toContain('App\Models\Contracts\Employable');
-            expect($interfaces)->toContain('App\Models\Contracts\HasDisplayName');
-            expect($interfaces)->toContain('App\Models\Contracts\Injurable');
-            expect($interfaces)->toContain('App\Models\Contracts\Retirable');
-            expect($interfaces)->toContain('App\Models\Contracts\Suspendable');
+            expect($interfaces)->toContain(Employable::class);
+            expect($interfaces)->toContain(HasDisplayName::class);
+            expect($interfaces)->toContain(Injurable::class);
+            expect($interfaces)->toContain(Retirable::class);
+            expect($interfaces)->toContain(Suspendable::class);
         });
     });
 

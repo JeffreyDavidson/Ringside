@@ -25,6 +25,8 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Referees\RefereeFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -95,6 +97,8 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Fillable('first_name', 'last_name')]
+#[Appends('status')]
 #[UseFactory(RefereeFactory::class)]
 #[UseEloquentBuilder(RefereeBuilder::class)]
 class Referee extends Model implements BookableOfficial, Employable, HasDisplayName, Injurable, Retirable, Suspendable
@@ -125,25 +129,6 @@ class Referee extends Model implements BookableOfficial, Employable, HasDisplayN
     use ValidatesInjury;
     use ValidatesRetirement;
     use ValidatesSuspension;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'first_name',
-        'last_name',
-    ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'status',
-    ];
 
     /**
      * Get the computed status attribute.

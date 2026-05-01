@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Managers;
 
 use Database\Factories\Managers\ManagerInjuryFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,29 +30,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Table('managers_injuries')]
+#[Fillable('manager_id', 'started_at', 'ended_at')]
 #[UseFactory(ManagerInjuryFactory::class)]
 class ManagerInjury extends Model
 {
     /** @use HasFactory<ManagerInjuryFactory> */
     use HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'managers_injuries';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'manager_id',
-        'started_at',
-        'ended_at',
-    ];
 
     /**
      * Get the attributes that should be cast.

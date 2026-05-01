@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Referees;
 
 use Database\Factories\Referees\RefereeSuspensionFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,29 +30,13 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Table('referees_suspensions')]
+#[Fillable('referee_id', 'started_at', 'ended_at')]
 #[UseFactory(RefereeSuspensionFactory::class)]
 class RefereeSuspension extends Model
 {
     /** @use HasFactory<RefereeSuspensionFactory> */
     use HasFactory;
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'referees_suspensions';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'referee_id',
-        'started_at',
-        'ended_at',
-    ];
 
     /**
      * Get the attributes that should be cast.

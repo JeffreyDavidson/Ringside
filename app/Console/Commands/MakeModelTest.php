@@ -4,24 +4,14 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Signature('make:model-test {model : The name of the model to test} {--directory= : Specify model directory (e.g., Users for Users/User)}')]
+#[Description('Generate a standardized Ringside model unit test')]
 class MakeModelTest extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'make:model-test {model : The name of the model to test} {--directory= : Specify model directory (e.g., Users for Users/User)}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Generate a standardized Ringside model unit test';
-
     /**
      * Execute the console command.
      */

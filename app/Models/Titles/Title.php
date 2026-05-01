@@ -20,6 +20,8 @@ use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
 use Database\Factories\Titles\TitleFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -96,6 +98,8 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Fillable('name', 'type')]
+#[Appends('status')]
 #[UseFactory(TitleFactory::class)]
 #[UseEloquentBuilder(TitleBuilder::class)]
 class Title extends Model implements Debutable, HasActivityPeriodsContract, HasDisplayName, Retirable
@@ -125,25 +129,6 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
     use SoftDeletes;
     use ValidatesRetirement;
     use ValidatesTitleLifecycle;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'name',
-        'type',
-    ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var list<string>
-     */
-    protected $appends = [
-        'status',
-    ];
 
     /**
      * Get the computed status attribute.
