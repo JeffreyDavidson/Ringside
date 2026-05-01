@@ -92,8 +92,8 @@ test('it restores tag team with partnership history', function () {
 
     // Create partnership history
     $tagTeam->wrestlers()->attach($wrestler->id, [
-        'started_at' => now()->subDays(10),
-        'ended_at' => now()->subDays(5),
+        'joined_at' => now()->subDays(10),
+        'left_at' => now()->subDays(5),
     ]);
 
     expect($tagTeam->wrestlers()->count())->toBe(1);

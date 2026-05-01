@@ -102,7 +102,8 @@ class RetireAction
 
             // Create retirement record directly
             $stable->retirements()->create([
-                'retired_at' => $retirementDate,
+                'started_at' => $retirementDate,
+                'ended_at' => null,
             ]);
 
             // Update status to retired
