@@ -8,11 +8,6 @@ use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Database\Seeders\MatchTypesTableSeeder;
-
-beforeEach(function () {
-    $this->seed(MatchTypesTableSeeder::class);
-});
 
 test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
