@@ -140,28 +140,17 @@ test('it prevents releasing retired wrestler', function () {
 });
 
 test('it can release suspended wrestler', function () {
+    // Suspended factory creates an employed-and-suspended wrestler (orthogonal states)
     $wrestler = Wrestler::factory()->suspended()->create();
 
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse(); // Suspended wrestlers are not considered employed
-
-    // However, they may still have an active employment record that needs ending
-    // Let's create the employment record manually for this test
-    $wrestler->employments()->create([
-        'started_at' => now()->subDays(10),
-        'ended_at' => null,
-    ]);
-
-    // Now the wrestler should be considered employed despite being suspended
-    $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeTrue();
 
     ReleaseAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();
-    expect($wrestler->isSuspended())->toBeTrue(); // Suspension remains
+    expect($wrestler->isSuspended())->toBeFalse(); // Release ends suspension too
 
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,
@@ -184,7 +173,7 @@ test('it can release injured wrestler', function () {
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed
-    expect($wrestler->isInjured())->toBeTrue(); // Should remain injured
+    expect($wrestler->isInjured())->toBeFalse(); // Release ends active injury
 
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,

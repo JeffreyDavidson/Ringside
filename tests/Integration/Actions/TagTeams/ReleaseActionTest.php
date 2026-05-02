@@ -81,7 +81,7 @@ test('it uses StatusTransitionPipeline for release', function () {
     $tagTeam->refresh();
 
     // Verify employment ended through pipeline
-    expect($tagTeam->currentEmployment())->toBeNull();
+    expect($tagTeam->currentEmployment)->toBeNull();
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Verify records show proper dates
@@ -165,7 +165,7 @@ test('it preserves employment history during release', function () {
     expect($tagTeam->employments()->whereNull('ended_at')->count())->toBe(0);
 
     // Current employment should be null
-    expect($tagTeam->currentEmployment())->toBeNull();
+    expect($tagTeam->currentEmployment)->toBeNull();
 });
 
 test('it handles tag team with complex employment history', function () {

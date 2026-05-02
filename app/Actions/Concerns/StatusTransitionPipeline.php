@@ -334,6 +334,24 @@ class StatusTransitionPipeline
         $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
             'ended_at' => $this->effectiveDate,
         ]);
+
+        // End any active suspension — released entities can't remain suspended.
+        if (method_exists($this->entity, 'isSuspended') && $this->entity->isSuspended()) {
+            $suspensionTable = $this->getTableName('suspensions');
+            $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
+        // End any active injury — released entities are no longer being treated.
+        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
+            $injuryTable = $this->getTableName('injuries');
+            if (method_exists($this->entity, $injuryTable)) {
+                $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
+                    'ended_at' => $this->effectiveDate,
+                ]);
+            }
+        }
     }
 
     /**

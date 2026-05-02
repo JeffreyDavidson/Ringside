@@ -58,9 +58,13 @@ class ReleaseAction
                 }
             }
 
-            $currentEmployment = $referee->currentEmployment()->first();
-            if ($currentEmployment) {
-                $currentEmployment->update(['ended_at' => $releaseDate]);
+            // End all active employment records (factory states can produce
+            // overlapping active employments; release ends every open one).
+            $endedAny = $referee->employments()->whereNull('ended_at')->update([
+                'ended_at' => $releaseDate,
+            ]) > 0;
+
+            if ($endedAny) {
                 $referee->update(['status' => EmploymentStatus::Released]);
             }
         });
