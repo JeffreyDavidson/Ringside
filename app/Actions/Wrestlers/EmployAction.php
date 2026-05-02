@@ -41,6 +41,11 @@ class EmployAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void
     {
+        // Idempotent: re-employing an already-employed wrestler is a no-op.
+        if ($wrestler->isEmployed()) {
+            return;
+        }
+
         $wrestler->ensureCanBeEmployed();
 
         $employmentDate = DateHelper::resolveDate($employmentDate);

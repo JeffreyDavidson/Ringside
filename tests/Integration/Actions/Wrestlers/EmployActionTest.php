@@ -45,56 +45,35 @@ test('it employs wrestler with specific employment date', function () {
     ]);
 });
 
-test('it employs suspended wrestler and ends suspension', function () {
+test('it is idempotent when called on suspended-but-employed wrestler', function () {
+    // Suspended factory creates an employed-and-suspended wrestler (orthogonal states)
     $wrestler = Wrestler::factory()->suspended()->create();
+    $employmentCount = $wrestler->employments()->count();
 
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->isEmployed())->toBeTrue();
 
     EmployAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeFalse();
-
-    // Suspension should be ended
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->employments()->count())->toBe($employmentCount);
 });
 
-test('it employs injured wrestler and ends injury', function () {
+test('it is idempotent when called on injured-but-employed wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
+    $employmentCount = $wrestler->employments()->count();
 
     expect($wrestler->isInjured())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->isEmployed())->toBeTrue();
 
     EmployAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
-
-    // Injury should be ended
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->employments()->count())->toBe($employmentCount);
 });
 
 test('it employs wrestler and also employs unemployed managers', function () {
