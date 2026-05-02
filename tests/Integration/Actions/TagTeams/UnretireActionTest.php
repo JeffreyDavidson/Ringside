@@ -101,7 +101,7 @@ test('it prevents unretiring unemployed tag team', function () {
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
-    $originalRetirementId = $tagTeam->currentRetirement()->id;
+    $originalRetirementId = $tagTeam->currentRetirement->id;
 
     UnretireAction::run($tagTeam);
 

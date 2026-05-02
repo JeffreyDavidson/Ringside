@@ -102,7 +102,7 @@ test('it prevents unretiring non-retired manager', function () {
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->retired()->create();
-    $originalRetirementId = $manager->currentRetirement()->id;
+    $originalRetirementId = $manager->currentRetirement->id;
 
     UnretireAction::run($manager);
 
