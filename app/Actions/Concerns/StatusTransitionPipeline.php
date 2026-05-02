@@ -365,7 +365,8 @@ class StatusTransitionPipeline
      */
     protected function createReinstatement(): void
     {
-        // End current suspension/injury
+        // End current suspension/injury (injuries only apply to entities that
+        // can be injured — wrestlers, managers, referees — not tag teams).
         $suspensionTable = $this->getTableName('suspensions');
         $injuryTable = $this->getTableName('injuries');
 
@@ -373,9 +374,11 @@ class StatusTransitionPipeline
             'ended_at' => $this->effectiveDate,
         ]);
 
-        $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
-            'ended_at' => $this->effectiveDate,
-        ]);
+        if (method_exists($this->entity, $injuryTable)) {
+            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
     }
 
     /**
