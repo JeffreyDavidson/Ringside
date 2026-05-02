@@ -349,6 +349,24 @@ class StatusTransitionPipeline
             ]);
         }
 
+        // End any active suspension — a retired entity cannot also be suspended.
+        if (method_exists($this->entity, 'isSuspended') && $this->entity->isSuspended()) {
+            $suspensionTable = $this->getTableName('suspensions');
+            $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
+        // End any active injury — a retired entity is no longer being treated.
+        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
+            $injuryTable = $this->getTableName('injuries');
+            if (method_exists($this->entity, $injuryTable)) {
+                $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
+                    'ended_at' => $this->effectiveDate,
+                ]);
+            }
+        }
+
         $table = $this->getTableName('retirements');
         $this->entity->{$table}()->create([
             'started_at' => $this->effectiveDate,

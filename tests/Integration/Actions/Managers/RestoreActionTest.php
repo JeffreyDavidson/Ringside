@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Managers\DeleteAction;
 use App\Actions\Managers\RestoreAction;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
@@ -88,8 +89,9 @@ test('it does not automatically restore employment relationships', function () {
     // Verify manager was employed before deletion
     expect($manager->isEmployed())->toBeTrue();
 
-    // Soft delete the manager
-    $manager->delete();
+    // Delete via the action so employment is properly ended (status cleanup),
+    // not just the soft-delete column flipped.
+    DeleteAction::run($manager);
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->find($managerId);
@@ -118,8 +120,8 @@ test('it does not automatically restore management relationships', function () {
 
     $managerId = $manager->id;
 
-    // Soft delete the manager
-    $manager->delete();
+    // Delete via the action so management relationships are ended
+    DeleteAction::run($manager);
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->find($managerId);
@@ -214,8 +216,8 @@ test('it allows separate employment after restoration', function () {
     $manager = Manager::factory()->employed()->create();
     $managerId = $manager->id;
 
-    // Soft delete the manager
-    $manager->delete();
+    // Delete via the action so employment is properly ended
+    DeleteAction::run($manager);
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->find($managerId);
