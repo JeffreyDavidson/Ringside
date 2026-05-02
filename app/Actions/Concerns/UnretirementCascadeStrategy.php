@@ -188,6 +188,14 @@ class UnretirementCascadeStrategy
                 return;
             }
 
+            // For tag teams: skip auto-employment if no current wrestler partners.
+            // ensureCanBeEmployed enforces partner availability and would throw,
+            // breaking the unretire flow. The team can be employed later once
+            // partners are attached.
+            if (method_exists($entity, 'currentWrestlers') && $entity->currentWrestlers()->count() === 0) {
+                return;
+            }
+
             // Employ the entity using StatusTransitionPipeline
             StatusTransitionPipeline::employ($entity, $date)
                 ->withCascade(EmploymentCascadeStrategy::wrestlers())

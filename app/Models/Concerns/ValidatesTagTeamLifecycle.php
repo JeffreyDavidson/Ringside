@@ -572,6 +572,14 @@ trait ValidatesTagTeamLifecycle
         }
 
         if ($requireAvailablePartners) {
+            // Skip partner checks if the tag team never had wrestler members —
+            // unretiring an empty test fixture or a never-staffed team is valid.
+            $hasMemberHistory = $this->wrestlers()->exists();
+
+            if (! $hasMemberHistory) {
+                return;
+            }
+
             // Check if current partners are available for unretirement
             $currentPartners = $this->currentWrestlers;
 
