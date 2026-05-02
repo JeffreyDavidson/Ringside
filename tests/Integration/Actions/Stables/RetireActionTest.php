@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\RetireAction;
-use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Models\Stables\Stable;
 
 use function Spatie\PestPluginTestTime\testTime;

@@ -557,6 +557,12 @@ trait ValidatesStableLifecycle
             throw CannotBeRetiredException::notActive($this);
         }
 
+        // A stable scheduled to debut in the future is not yet retirable —
+        // it has no past or present activity to wind down.
+        if ($this->hasFutureActivation()) {
+            throw CannotBeRetiredException::notActive($this);
+        }
+
         // Additional business rule validations could be added here:
         // - Check for championship obligations
         // if ($this->hasCurrentChampionshipObligations()) {

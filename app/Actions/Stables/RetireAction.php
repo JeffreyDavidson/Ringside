@@ -69,10 +69,16 @@ class RetireAction
 
         $retirementDate = $retirementDate ?? now();
 
-        DB::transaction(function () use ($stable, $retirementDate): void {
+        // Ending an activity period or removing members can't be back-dated to the
+        // future — those events represent past transitions. Cap the operational
+        // date at now() while still recording the user-supplied retirement date
+        // on the retirement record itself.
+        $operationalDate = $retirementDate->isFuture() ? now() : $retirementDate;
+
+        DB::transaction(function () use ($stable, $retirementDate, $operationalDate): void {
             // End activity if currently active using injected Action
             if ($stable->isCurrentlyActive()) {
-                $this->endActivityPeriodAction->handle($stable, $retirementDate);
+                $this->endActivityPeriodAction->handle($stable, $operationalDate);
             }
 
             // Get current members using enhanced model method
@@ -97,8 +103,8 @@ class RetireAction
                 }
             }
 
-            // Remove all current members using injected Action
-            $this->removeStableMembersAction->handle($stable, $currentMembers, $retirementDate);
+            // Remove all current members using injected Action.
+            $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
 
             // Create retirement record directly
             $stable->retirements()->create([
