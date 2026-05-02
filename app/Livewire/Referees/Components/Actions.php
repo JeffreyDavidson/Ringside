@@ -342,7 +342,7 @@ class Actions extends Component
                     'first_name' => $this->referee->first_name,
                     'last_name' => $this->referee->last_name,
                     'is_injured' => $this->referee->isInjured(),
-                    'current_injury' => $this->referee->currentInjury()?->toArray(),
+                    'current_injury' => $this->referee->currentInjury?->toArray(),
                 ],
             ]);
 

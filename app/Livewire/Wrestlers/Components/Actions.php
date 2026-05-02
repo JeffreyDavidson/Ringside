@@ -264,7 +264,7 @@ class Actions extends Component
                     'is_suspended' => $this->wrestler->isSuspended(),
                     'is_injured' => $this->wrestler->isInjured(),
                     'current_suspension' => $this->wrestler->currentSuspension?->toArray(),
-                    'current_injury' => $this->wrestler->currentInjury()?->toArray(),
+                    'current_injury' => $this->wrestler->currentInjury?->toArray(),
                 ],
             ]);
 
@@ -338,7 +338,7 @@ class Actions extends Component
                     'id' => $this->wrestler->id,
                     'name' => $this->wrestler->name,
                     'is_injured' => $this->wrestler->isInjured(),
-                    'current_injury' => $this->wrestler->currentInjury()?->toArray(),
+                    'current_injury' => $this->wrestler->currentInjury?->toArray(),
                 ],
             ]);
 
