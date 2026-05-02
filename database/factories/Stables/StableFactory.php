@@ -91,7 +91,7 @@ class StableFactory extends Factory
 
         return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
             ->hasAttached(
-                Wrestler::factory()->has(WrestlerEmployment::factory()->started($start), 'employments'),
+                Wrestler::factory()->count(2)->has(WrestlerEmployment::factory()->started($start), 'employments'),
                 ['joined_at' => $start, 'left_at' => $end]
             )
             ->hasAttached(

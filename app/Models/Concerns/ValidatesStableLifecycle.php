@@ -159,6 +159,17 @@ trait ValidatesStableLifecycle
             throw CannotBeEstablishedException::retired($this);
         }
 
+        // Only enforce former-member availability when the stable previously had
+        // members. An empty stable (one that was active and disbanded without ever
+        // gaining members) can be reunited symmetrically without member checks —
+        // the establish path doesn't require members either.
+        $hasMemberHistory = $this->previousWrestlers()->exists()
+            || $this->previousTagTeams()->exists();
+
+        if (! $hasMemberHistory) {
+            return;
+        }
+
         // Check if enough former members are available for reunion
         $availableFormerMembers = $this->getAvailableFormerMembers();
         if ($availableFormerMembers->count() < static::MIN_MEMBERS_COUNT) {
@@ -489,8 +500,8 @@ trait ValidatesStableLifecycle
                     ->orWhereHas('suspensions', function ($suspensionQuery) {
                         $suspensionQuery->whereNull('ended_at'); // Currently suspended
                     })
-                    ->orWhereHas('currentStables', function ($stableQuery) {
-                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    ->orWhereHas('currentStable', function ($stableQuery) {
+                        $stableQuery->where('stables.id', '!=', $this->id); // In another stable
                     });
             })
             ->get();
@@ -503,8 +514,8 @@ trait ValidatesStableLifecycle
                     ->orWhereHas('suspensions', function ($suspensionQuery) {
                         $suspensionQuery->whereNull('ended_at'); // Currently suspended
                     })
-                    ->orWhereHas('currentStables', function ($stableQuery) {
-                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    ->orWhereHas('currentStable', function ($stableQuery) {
+                        $stableQuery->where('stables.id', '!=', $this->id); // In another stable
                     });
             })
             ->get();
@@ -649,6 +660,15 @@ trait ValidatesStableLifecycle
         }
 
         if ($requireFormerMembers) {
+            // Skip member checks if the stable never had members — symmetrical with
+            // establish/reunite, which don't require members for empty stables.
+            $hasMemberHistory = $this->previousWrestlers()->exists()
+                || $this->previousTagTeams()->exists();
+
+            if (! $hasMemberHistory) {
+                return;
+            }
+
             // Check if former members are available for unretirement
             $availableFormerMembers = $this->getAvailableFormerMembers();
 

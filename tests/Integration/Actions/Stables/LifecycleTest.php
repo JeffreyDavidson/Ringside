@@ -8,10 +8,9 @@ use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
+use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeActivatedException;
-use App\Exceptions\Status\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 
@@ -291,7 +290,7 @@ describe('Stable Activation Action Integration', function () {
             $activeStable = Stable::factory()->active()->create();
 
             expect(fn () => ReuniteAction::run($activeStable, Carbon::now()))
-                ->toThrow(CannotBeActivatedException::class);
+                ->toThrow(CannotBeEstablishedException::class);
         });
 
         test('retire action works from active or disbanded status', function () {
