@@ -45,9 +45,8 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
             throw CannotBeSuspendedException::suspended($entity);
         }
 
-        if (method_exists($entity, 'isInjured') && $entity->isInjured()) {
-            throw CannotBeSuspendedException::injured($entity);
-        }
+        // Injury and suspension are orthogonal — an injured roster member can still
+        // be suspended for disciplinary reasons; both states coexist.
     }
 
     /**

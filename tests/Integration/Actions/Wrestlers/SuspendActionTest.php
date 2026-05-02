@@ -21,7 +21,7 @@ test('it suspends an employed wrestler', function () {
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed when suspended
+    expect($wrestler->isEmployed())->toBeTrue(); // Suspension preserves employment, only restricts availability
 
     $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
@@ -46,11 +46,10 @@ test('it suspends wrestler with specific suspension date', function () {
     ]);
 });
 
-test('it suspends wrestler with notes', function () {
+test('it suspends wrestler with current timestamp by default', function () {
     $wrestler = Wrestler::factory()->employed()->create();
-    $notes = 'Suspended for violating wellness policy';
 
-    SuspendAction::run($wrestler, null, $notes);
+    SuspendAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
@@ -59,21 +58,20 @@ test('it suspends wrestler with notes', function () {
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
-        'notes' => $notes,
     ]);
 });
 
 test('it uses StatusTransitionPipeline for suspension', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->currentSuspension())->toBeNull();
+    expect($wrestler->currentSuspension)->toBeNull();
 
     SuspendAction::run($wrestler);
 
     $wrestler->refresh();
 
     // Verify suspension created through pipeline
-    expect($wrestler->currentSuspension())->not()->toBeNull();
+    expect($wrestler->currentSuspension)->not()->toBeNull();
     expect($wrestler->isSuspended())->toBeTrue();
 
     $this->assertDatabaseHas('wrestlers_suspensions', [
@@ -105,7 +103,6 @@ test('it handles multiple suspension scenarios', function () {
     $wrestler->suspensions()->create([
         'started_at' => now()->subDays(30),
         'ended_at' => now()->subDays(20),
-        'notes' => 'Previous suspension',
     ]);
 
     // Employ the wrestler
@@ -117,7 +114,7 @@ test('it handles multiple suspension scenarios', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
 
-    SuspendAction::run($wrestler, null, 'Current suspension');
+    SuspendAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
@@ -127,7 +124,6 @@ test('it handles multiple suspension scenarios', function () {
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
-        'notes' => 'Current suspension',
     ]);
 
     // Old suspension should remain unchanged
@@ -135,7 +131,6 @@ test('it handles multiple suspension scenarios', function () {
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(30)->toDateTimeString(),
         'ended_at' => now()->subDays(20)->toDateTimeString(),
-        'notes' => 'Previous suspension',
     ]);
 });
 
@@ -177,15 +172,16 @@ test('it can suspend injured employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    SuspendAction::run($wrestler, null, 'Suspended while injured');
+    SuspendAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue(); // Should remain injured
-    expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed
+    expect($wrestler->isEmployed())->toBeTrue(); // Suspension preserves employment
 
     $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
-        'notes' => 'Suspended while injured',
+        'started_at' => now()->toDateTimeString(),
+        'ended_at' => null,
     ]);
 });

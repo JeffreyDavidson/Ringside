@@ -57,8 +57,7 @@ trait ValidatesInjury
         return ! $this->isNotInEmployment()
             && ! $this->isRetired()
             && ! $this->hasFutureEmployment()
-            && ! $this->isInjured()
-            && ! $this->isSuspended();
+            && ! $this->isInjured();
     }
 
     /**
@@ -97,9 +96,7 @@ trait ValidatesInjury
             throw CannotBeInjuredException::injured($this);
         }
 
-        if ($this->isSuspended()) {
-            throw CannotBeInjuredException::suspended($this);
-        }
+        // Injury and suspension are orthogonal — both can apply simultaneously.
     }
 
     /**

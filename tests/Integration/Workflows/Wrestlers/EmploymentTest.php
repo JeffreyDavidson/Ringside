@@ -235,18 +235,18 @@ describe('Wrestler Employment Workflows', function () {
             EmployAction::run($wrestler, Carbon::now());
             $employed = $wrestler->fresh();
 
-            // Test mutually exclusive statuses - injured wrestler cannot be suspended
+            // Injury and suspension are orthogonal — both can apply simultaneously
             InjureAction::run($employed, Carbon::now());
             $injured = $wrestler->fresh();
-            expect($injured->canBeSuspended())->toBeFalse();
+            expect($injured->canBeSuspended())->toBeTrue();
             expect($injured->isEmployed())->toBeTrue();
             expect($injured->isInjured())->toBeTrue();
 
-            // Heal wrestler, then test suspended wrestler cannot be injured
+            // Heal wrestler, then suspend
             HealAction::run($injured, Carbon::now());
             SuspendAction::run($wrestler->fresh(), Carbon::now());
             $suspended = $wrestler->fresh();
-            expect($suspended->canBeInjured())->toBeFalse();
+            expect($suspended->canBeInjured())->toBeTrue();
             expect($suspended->isEmployed())->toBeTrue();
             expect($suspended->isSuspended())->toBeTrue();
 

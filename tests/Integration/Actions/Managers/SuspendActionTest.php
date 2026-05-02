@@ -49,14 +49,14 @@ test('it suspends manager with specific suspension date', function () {
 test('it uses StatusTransitionPipeline for suspension', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->currentSuspension())->toBeNull();
+    expect($manager->currentSuspension)->toBeNull();
 
     SuspendAction::run($manager);
 
     $manager->refresh();
 
     // Verify suspension was created through pipeline
-    expect($manager->currentSuspension())->not()->toBeNull();
+    expect($manager->currentSuspension)->not()->toBeNull();
     expect($manager->isSuspended())->toBeTrue();
 
     // Verify suspension record shows proper start date
@@ -124,14 +124,17 @@ test('it maintains employment status during suspension', function () {
     expect($employment->ended_at)->toBeNull();
 });
 
-test('it prevents suspending injured manager', function () {
+test('it can suspend injured manager (suspension and injury are orthogonal)', function () {
     $manager = Manager::factory()->employed()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
 
-    expect(fn () => SuspendAction::run($manager))
-        ->toThrow(Exception::class);
+    SuspendAction::run($manager);
+
+    $manager->refresh();
+    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->isInjured())->toBeTrue();
 });
 
 test('it uses DateHelper for consistent date handling', function () {
