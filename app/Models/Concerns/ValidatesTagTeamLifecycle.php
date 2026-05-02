@@ -73,7 +73,7 @@ trait ValidatesTagTeamLifecycle
 
         // Check if any partner has conflicting employment
         $conflictedPartners = $currentPartners->filter(function ($wrestler) {
-            return $wrestler->isEmployed() && $wrestler->hasExclusivityConflicts();
+            return $wrestler->isEmployed() && method_exists($wrestler, 'hasExclusivityConflicts') && $wrestler->hasExclusivityConflicts();
         });
 
         if ($conflictedPartners->isNotEmpty()) {
@@ -111,7 +111,7 @@ trait ValidatesTagTeamLifecycle
 
         // Check for partner employment conflicts
         $conflictedPartners = $currentPartners->filter(function ($wrestler) {
-            return $wrestler->isEmployed() && $wrestler->hasExclusivityConflicts();
+            return $wrestler->isEmployed() && method_exists($wrestler, 'hasExclusivityConflicts') && $wrestler->hasExclusivityConflicts();
         });
 
         if ($conflictedPartners->isNotEmpty()) {
@@ -582,7 +582,7 @@ trait ValidatesTagTeamLifecycle
 
             // Check if key partners are available
             $unavailablePartners = $currentPartners->filter(function ($wrestler) {
-                return $wrestler->hasExclusivityConflicts() || $wrestler->isInjured();
+                return (method_exists($wrestler, 'hasExclusivityConflicts') && $wrestler->hasExclusivityConflicts()) || $wrestler->isInjured();
             });
 
             if ($unavailablePartners->isNotEmpty()) {
