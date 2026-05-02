@@ -84,7 +84,7 @@ test('it prevents reinstating unemployed tag team', function () {
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
-    $originalSuspensionId = $tagTeam->currentSuspension()->id;
+    $originalSuspensionId = $tagTeam->currentSuspension->id;
 
     ReinstateAction::run($tagTeam);
 
@@ -203,7 +203,7 @@ test('it maintains employment status during reinstatement', function () {
 
     // Employment record should remain active
     expect($tagTeam->currentEmployment())->not()->toBeNull();
-    expect($tagTeam->currentEmployment()->ended_at)->toBeNull();
+    expect($tagTeam->currentEmployment->ended_at)->toBeNull();
 });
 
 test('it handles reinstatement with cascade effects', function () {

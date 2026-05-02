@@ -190,8 +190,8 @@ test('it preserves employment status during suspension', function () {
     expect($tagTeam->isSuspended())->toBeTrue();
 
     // Employment record should remain unchanged
-    expect($tagTeam->currentEmployment()->id)->toBe($originalEmployment->id);
-    expect($tagTeam->currentEmployment()->ended_at)->toBeNull();
+    expect($tagTeam->currentEmployment->id)->toBe($originalEmployment->id);
+    expect($tagTeam->currentEmployment->ended_at)->toBeNull();
 });
 
 test('it preserves suspension history during new suspension', function () {
