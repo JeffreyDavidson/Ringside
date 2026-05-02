@@ -99,7 +99,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
                     return FakeSuspensionModel::class;
                 }
             };
-            $relation = $model->currentSuspension();
+            $relation = $model->currentSuspension;
             expect($relation)->toBeInstanceOf(HasOne::class);
             expect($relation->getRelated())->toBeInstanceOf(FakeSuspensionModel::class);
         });
@@ -221,7 +221,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
                     return FakeSuspensionModel::class;
                 }
             };
-            $relation = $model->currentSuspension();
+            $relation = $model->currentSuspension;
             $wheres = $relation->getQuery()->getQuery()->wheres;
             $hasWhereNull = collect($wheres)->contains(function ($where) {
                 return ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at';

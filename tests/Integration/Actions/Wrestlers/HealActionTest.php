@@ -22,7 +22,7 @@ test('it heals an injured wrestler', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Verify injury record was ended
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -38,7 +38,7 @@ test('it heals wrestler with specific recovery date', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Verify injury was ended with specific date
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => $recoveryDate->toDateTimeString(),
     ]);
@@ -48,7 +48,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
-    $currentInjury = $wrestler->currentInjury();
+    $currentInjury = $wrestler->currentInjury;
     expect($currentInjury)->not()->toBeNull();
 
     HealAction::run($wrestler);
@@ -60,7 +60,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Verify the specific injury record was updated
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'id' => $currentInjury->id,
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
@@ -76,7 +76,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -104,14 +104,14 @@ test('it handles multiple injury records correctly', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Only the current injury should be ended
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Old injury should remain unchanged
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(30)->toDateTimeString(),
         'ended_at' => now()->subDays(20)->toDateTimeString(),

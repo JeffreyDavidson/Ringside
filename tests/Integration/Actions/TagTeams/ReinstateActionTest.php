@@ -50,7 +50,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $tagTeam->currentSuspension();
+    $currentSuspension = $tagTeam->currentSuspension;
     expect($currentSuspension)->not()->toBeNull();
 
     ReinstateAction::run($tagTeam);

@@ -96,7 +96,7 @@ test('it handles database transactions correctly', function () {
     expect($manager->isSuspended())->toBeTrue();
 
     // Verify suspension record integrity
-    $suspension = $manager->currentSuspension();
+    $suspension = $manager->currentSuspension;
     expect($suspension)->not()->toBeNull();
     expect($suspension->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($suspension->ended_at)->toBeNull();

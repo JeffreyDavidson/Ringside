@@ -48,7 +48,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     $manager = Manager::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
-    $currentInjury = $manager->currentInjury();
+    $currentInjury = $manager->currentInjury;
     expect($currentInjury)->not()->toBeNull();
 
     HealAction::run($manager);

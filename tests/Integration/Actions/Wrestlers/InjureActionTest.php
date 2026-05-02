@@ -23,7 +23,7 @@ test('it injures an employed wrestler', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed while injured
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -39,7 +39,7 @@ test('it injures wrestler with specific injury date', function () {
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => $injuryDate->toDateTimeString(),
         'ended_at' => null,
@@ -59,7 +59,7 @@ test('it uses StatusTransitionPipeline for injury', function () {
     expect($wrestler->currentInjury())->not()->toBeNull();
     expect($wrestler->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -75,7 +75,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
     ]);
@@ -99,14 +99,14 @@ test('it handles multiple injury scenarios', function () {
     expect($wrestler->isInjured())->toBeTrue();
 
     // New injury should be created
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 
     // Old injury should remain unchanged
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(30)->toDateTimeString(),
@@ -165,7 +165,7 @@ test('it can injure suspended wrestler', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isSuspended())->toBeTrue(); // Should remain suspended
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -194,18 +194,18 @@ test('it maintains injury history integrity', function () {
     expect($wrestler->isInjured())->toBeTrue();
 
     // All injury records should be preserved
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'id' => $firstInjury->id,
         'ended_at' => now()->subDays(60)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'id' => $secondInjury->id,
         'ended_at' => now()->subDays(20)->toDateTimeString(),
     ]);
 
     // New current injury should exist
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -237,7 +237,7 @@ test('it allows re-injury after healing', function () {
     expect($wrestler->injuries()->count())->toBe(2);
 
     // Current injury should be active
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,

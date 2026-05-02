@@ -24,7 +24,7 @@ test('it reinstates a suspended wrestler', function () {
     expect($wrestler->isEmployed())->toBeFalse(); // Reinstatement doesn't automatically employ
 
     // Verify suspension record was ended
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -43,7 +43,7 @@ test('it reinstates an injured wrestler', function () {
     expect($wrestler->isEmployed())->toBeFalse(); // Reinstatement doesn't automatically employ
 
     // Verify injury record was ended
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -59,7 +59,7 @@ test('it reinstates wrestler with specific reinstatement date', function () {
     expect($wrestler->isSuspended())->toBeFalse();
 
     // Verify suspension was ended with specific date
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => $reinstatementDate->toDateTimeString(),
     ]);
@@ -82,7 +82,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     expect($wrestler->isSuspended())->toBeFalse();
 
     // Verify the specific suspension record was updated
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'id' => $currentSuspension->id,
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
@@ -98,7 +98,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -131,12 +131,12 @@ test('it reinstates wrestler with both suspension and injury', function () {
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed
 
     // Both suspension and injury should be ended
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -179,25 +179,25 @@ test('it handles multiple suspension/injury records correctly', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Only current records should be ended
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'id' => $currentSuspension->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'id' => $currentInjury->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Old records should remain unchanged
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(40)->toDateTimeString(),
         'notes' => 'Old suspension',
     ]);
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(50)->toDateTimeString(),
         'ended_at' => now()->subDays(30)->toDateTimeString(),
@@ -242,7 +242,7 @@ test('it can reinstate suspended wrestler who is also employed', function () {
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed
     expect($wrestler->isSuspended())->toBeFalse(); // Should no longer be suspended
 
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);

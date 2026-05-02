@@ -125,7 +125,7 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
             };
-            $relation = $model->currentEmployment();
+            $relation = $model->currentEmployment;
             expect($relation)->toBeInstanceOf(HasOne::class);
             expect($relation->getRelated())->toBeInstanceOf(FakeEmploymentModel::class);
         });
@@ -337,7 +337,7 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
             };
-            $relation = $model->currentEmployment();
+            $relation = $model->currentEmployment;
             $wheres = $relation->getQuery()->getQuery()->wheres;
             $hasWhereNull = collect($wheres)->contains(function ($where) {
                 return ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at';

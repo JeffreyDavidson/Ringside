@@ -204,7 +204,7 @@ test('it handles database transactions correctly', function () {
     expect($manager->currentWrestlers)->toHaveCount(0);
 
     // Verify all database changes are consistent
-    $retirement = $manager->currentRetirement();
+    $retirement = $manager->currentRetirement;
     expect($retirement)->not()->toBeNull();
     expect($retirement->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($retirement->ended_at)->toBeNull();

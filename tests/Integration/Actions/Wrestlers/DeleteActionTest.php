@@ -81,7 +81,7 @@ test('it ends retirement before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify retirement was ended before deletion
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'id' => $currentRetirement->id,
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
@@ -102,7 +102,7 @@ test('it ends suspension before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify suspension was ended before deletion
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'id' => $currentSuspension->id,
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
@@ -113,7 +113,7 @@ test('it ends injury before deletion', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
-    $currentInjury = $wrestler->currentInjury();
+    $currentInjury = $wrestler->currentInjury;
     expect($currentInjury)->not()->toBeNull();
     expect($currentInjury->ended_at)->toBeNull();
 
@@ -123,7 +123,7 @@ test('it ends injury before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify injury was ended before deletion
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'id' => $currentInjury->id,
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
@@ -209,12 +209,12 @@ test('it handles complex wrestler with multiple statuses', function () {
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestler_suspensions', [
+    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -295,7 +295,7 @@ test('it handles wrestler with no active relationships', function () {
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->subDays(80)->toDateTimeString(),
     ]);
