@@ -17,6 +17,9 @@ use Throwable;
  * The trait works with both direct property assignment and form object patterns,
  * making it flexible for different form architectures.
  *
+ * @author Ringside
+ *
+ * @since 1.0.0
  *
  * @example
  * ```php
