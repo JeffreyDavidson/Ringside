@@ -73,7 +73,7 @@ class UnretireAction
         Stable $stable,
         ?Carbon $unretiredDate = null,
         bool $unretireMembers = true,
-        bool $establishImmediately = true,
+        bool $establishImmediately = false,
         bool $requireFormerMembers = true
     ): void {
         $stable->ensureCanBeUnretired($requireFormerMembers);

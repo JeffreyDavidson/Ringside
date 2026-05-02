@@ -385,6 +385,15 @@ trait ValidatesStableLifecycle
         }
 
         if ($requireFormerMembers) {
+            // Skip member checks if the stable never had members — restoring an
+            // empty soft-deleted stable is valid; user can attach members later.
+            $hasMemberHistory = $this->previousWrestlers()->exists()
+                || $this->previousTagTeams()->exists();
+
+            if (! $hasMemberHistory) {
+                return;
+            }
+
             // Check if former members are available for restoration
             $availableFormerMembers = $this->getAvailableFormerMembers();
 
@@ -489,8 +498,8 @@ trait ValidatesStableLifecycle
                     ->orWhereHas('suspensions', function ($suspensionQuery) {
                         $suspensionQuery->whereNull('ended_at'); // Currently suspended
                     })
-                    ->orWhereHas('currentStables', function ($stableQuery) {
-                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    ->orWhereHas('currentStable', function ($stableQuery) {
+                        $stableQuery->where('stables.id', '!=', $this->id); // In another stable
                     });
             })
             ->get();
@@ -503,8 +512,8 @@ trait ValidatesStableLifecycle
                     ->orWhereHas('suspensions', function ($suspensionQuery) {
                         $suspensionQuery->whereNull('ended_at'); // Currently suspended
                     })
-                    ->orWhereHas('currentStables', function ($stableQuery) {
-                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    ->orWhereHas('currentStable', function ($stableQuery) {
+                        $stableQuery->where('stables.id', '!=', $this->id); // In another stable
                     });
             })
             ->get();
