@@ -92,10 +92,10 @@ trait ValidatesEmployment
     public function ensureCanBeEmployed(): void
     {
         if ($this->isEmployed()) {
-            throw CannotBeEmployedException::employed();
+            throw CannotBeEmployedException::employed($this);
         }
         if ($this->hasFutureEmployment()) {
-            throw CannotBeEmployedException::employed();
+            throw CannotBeEmployedException::employed($this);
         }
     }
 
@@ -144,15 +144,15 @@ trait ValidatesEmployment
     public function ensureCanBeReleased(): void
     {
         if ($this->isNotInEmployment()) {
-            throw CannotBeReleasedException::unemployed();
+            throw CannotBeReleasedException::unemployed($this);
         }
 
         if ($this->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment();
+            throw CannotBeReleasedException::hasFutureEmployment($this);
         }
 
         if ($this->isRetired()) {
-            throw CannotBeReleasedException::retired();
+            throw CannotBeReleasedException::retired($this);
         }
     }
 }
