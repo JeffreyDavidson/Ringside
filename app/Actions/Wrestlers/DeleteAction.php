@@ -44,7 +44,9 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        $wrestler->ensureCanBeDeleted();
+        if (method_exists($wrestler, 'ensureCanBeDeleted')) {
+            $wrestler->ensureCanBeDeleted();
+        }
 
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
