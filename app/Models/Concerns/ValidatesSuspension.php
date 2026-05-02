@@ -140,28 +140,28 @@ trait ValidatesSuspension
     public function ensureCanBeReinstated(): void
     {
         if ($this instanceof Suspendable && ! $this->isSuspended()) {
-            throw CannotBeReinstatedException::available();
+            throw CannotBeReinstatedException::available($this);
         }
 
         if ($this->isNotInEmployment()) {
-            throw CannotBeReinstatedException::unemployed();
+            throw CannotBeReinstatedException::unemployed($this);
         }
 
         if ($this->hasFutureEmployment()) {
-            throw CannotBeReinstatedException::hasFutureEmployment();
+            throw CannotBeReinstatedException::hasFutureEmployment($this);
         }
 
         $type = RosterMemberType::fromModel($this);
         if ($type->canBeInjured() && ($this instanceof Injurable) && $this->isInjured()) {
-            throw CannotBeReinstatedException::injured();
+            throw CannotBeReinstatedException::injured($this);
         }
 
         if ($this->isRetired()) {
-            throw CannotBeReinstatedException::retired();
+            throw CannotBeReinstatedException::retired($this);
         }
 
         if ($this instanceof Bookable && $this->isBookable()) {
-            throw CannotBeReinstatedException::bookable();
+            throw CannotBeReinstatedException::bookable($this);
         }
     }
 

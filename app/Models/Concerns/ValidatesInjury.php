@@ -82,23 +82,23 @@ trait ValidatesInjury
     public function ensureCanBeInjured(): void
     {
         if ($this->isNotInEmployment()) {
-            throw CannotBeInjuredException::unemployed();
+            throw CannotBeInjuredException::unemployed($this);
         }
 
         if ($this->isRetired()) {
-            throw CannotBeInjuredException::retired();
+            throw CannotBeInjuredException::retired($this);
         }
 
         if ($this->hasFutureEmployment()) {
-            throw CannotBeInjuredException::hasFutureEmployment();
+            throw CannotBeInjuredException::hasFutureEmployment($this);
         }
 
         if ($this->isInjured()) {
-            throw CannotBeInjuredException::injured();
+            throw CannotBeInjuredException::injured($this);
         }
 
         if ($this->isSuspended()) {
-            throw CannotBeInjuredException::suspended();
+            throw CannotBeInjuredException::suspended($this);
         }
     }
 
@@ -142,7 +142,7 @@ trait ValidatesInjury
     public function ensureCanBeClearedFromInjury(): void
     {
         if (! $this->isInjured()) {
-            throw CannotBeClearedFromInjuryException::notInjured();
+            throw CannotBeClearedFromInjuryException::notInjured($this);
         }
     }
 
