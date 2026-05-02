@@ -30,7 +30,7 @@ use LivewireUI\Modal\ModalComponent;
  * - Consistent modal lifecycle management
  * - Type safety through generics
  *
- * @template TModelForm of \App\Livewire\Base\BaseForm
+ * @template TModelForm of BaseForm
  * @template TModelType of Model
  *
  * @see BaseForm For form integration requirements

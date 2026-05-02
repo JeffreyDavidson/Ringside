@@ -97,12 +97,6 @@ use Illuminate\Database\Eloquent\Model;
  * <button wire:click="modal.fillDummyFields">Fill Test Data</button>
  * ```
  */
-/**
- * @template TForm of BaseForm
- * @template TModel of Model
- *
- * @extends BaseModal<TForm, TModel>
- */
 abstract class BaseFormModal extends BaseModal
 {
     use GeneratesDummyData;
