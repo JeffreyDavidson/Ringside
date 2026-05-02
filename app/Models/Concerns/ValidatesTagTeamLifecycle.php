@@ -100,9 +100,8 @@ trait ValidatesTagTeamLifecycle
             throw CannotBeEmployedException::alreadyEmployed($this);
         }
 
-        if ($this->isRetired()) {
-            throw CannotBeEmployedException::retired($this);
-        }
+        // Retired tag teams may be re-employed; the StatusTransitionPipeline ends the
+        // active retirement before creating a new employment record.
 
         // Check partner availability
         $currentPartners = $this->currentWrestlers;
