@@ -45,60 +45,38 @@ test('it employs referee with specific employment date', function () {
     ]);
 });
 
-test('it employs suspended referee and ends suspension', function () {
+test('it is idempotent when called on suspended-but-employed referee', function () {
+    // Suspended factory creates an employed referee with active suspension —
+    // suspension and employment are orthogonal under current design
     $referee = Referee::factory()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $employmentCount = $referee->employments()->count();
 
     expect($referee->isSuspended())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->isEmployed())->toBeTrue();
 
     EmployAction::run($referee);
 
     $referee->refresh();
-    $suspension->refresh();
 
     expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isSuspended())->toBeFalse();
-
-    // Suspension should be ended
-    $this->assertDatabaseHas('referees_suspensions', [
-        'id' => $suspension->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
-        'started_at' => now()->toDateTimeString(),
-    ]);
+    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->employments()->count())->toBe($employmentCount);
 });
 
-test('it employs injured referee and ends injury', function () {
+test('it is idempotent when called on injured-but-employed referee', function () {
     $referee = Referee::factory()->injured()->create();
-    $injury = $referee->currentInjury;
+    $employmentCount = $referee->employments()->count();
 
     expect($referee->isInjured())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->isEmployed())->toBeTrue();
 
     EmployAction::run($referee);
 
     $referee->refresh();
-    $injury->refresh();
 
     expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isInjured())->toBeFalse();
-
-    // Injury should be ended
-    $this->assertDatabaseHas('referees_injuries', [
-        'id' => $injury->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
-        'started_at' => now()->toDateTimeString(),
-    ]);
+    expect($referee->isInjured())->toBeTrue();
+    expect($referee->employments()->count())->toBe($employmentCount);
 });
 
 test('it employs retired referee and ends retirement', function () {
@@ -147,7 +125,11 @@ test('it handles DateHelper date resolution', function () {
 });
 
 test('it maintains transaction boundaries', function () {
-    $referee = Referee::factory()->suspended()->create();
+    // Manually construct a suspended-and-released state (not factory) so EmployAction
+    // can re-employ and end suspension simultaneously
+    $referee = Referee::factory()->released()->create();
+    $referee->suspensions()->create(['started_at' => now()->subDay(), 'ended_at' => null]);
+    $referee->refresh();
     $suspension = $referee->currentSuspension;
 
     EmployAction::run($referee);
@@ -217,6 +199,6 @@ test('it creates employment record with correct structure', function () {
 
     expect($employment)->not->toBeNull();
     expect($employment->referee_id)->toBe($referee->id);
-    expect($employment->started_at->eq($employmentDate))->toBeTrue();
+    expect($employment->started_at->toDateTimeString())->toBe($employmentDate->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });

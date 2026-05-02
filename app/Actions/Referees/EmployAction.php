@@ -38,6 +38,27 @@ class EmployAction
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void
     {
+        // Idempotent: re-employing an already-employed referee is a no-op.
+        if ($referee->isEmployed()) {
+            return;
+        }
+
+        $effectiveDate = $employmentDate ?? now();
+
+        // End any lingering suspension/injury so the referee returns to a clean
+        // active state on re-employment.
+        if (method_exists($referee, 'isSuspended') && $referee->isSuspended()) {
+            $referee->suspensions()->whereNull('ended_at')->update([
+                'ended_at' => $effectiveDate,
+            ]);
+        }
+
+        if (method_exists($referee, 'isInjured') && $referee->isInjured()) {
+            $referee->injuries()->whereNull('ended_at')->update([
+                'ended_at' => $effectiveDate,
+            ]);
+        }
+
         StatusTransitionPipeline::employ($referee, $employmentDate)->execute();
     }
 }
