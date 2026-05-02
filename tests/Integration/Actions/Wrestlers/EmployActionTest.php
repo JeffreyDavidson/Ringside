@@ -84,7 +84,7 @@ test('it employs injured wrestler and ends injury', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Injury should be ended
-    $this->assertDatabaseHas('wrestler_injuries', [
+    $this->assertDatabaseHas('wrestlers_injuries', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);

@@ -96,7 +96,7 @@ test('it handles database transactions correctly', function () {
     expect($manager->isInjured())->toBeTrue();
 
     // Verify injury record integrity
-    $injury = $manager->currentInjury();
+    $injury = $manager->currentInjury;
     expect($injury)->not()->toBeNull();
     expect($injury->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($injury->ended_at)->toBeNull();

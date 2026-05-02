@@ -23,7 +23,7 @@ test('it retires an employed wrestler', function () {
     expect($wrestler->isRetired())->toBeTrue();
     expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed when retired
 
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -39,7 +39,7 @@ test('it retires wrestler with specific retirement date', function () {
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
@@ -59,7 +59,7 @@ test('it uses StatusTransitionPipeline for retirement', function () {
     expect($wrestler->currentRetirement())->not()->toBeNull();
     expect($wrestler->isRetired())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -75,7 +75,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
     ]);
@@ -105,14 +105,14 @@ test('it handles multiple retirement scenarios', function () {
     expect($wrestler->isRetired())->toBeTrue();
 
     // New retirement should be created
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 
     // Old retirement should remain unchanged
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(30)->toDateTimeString(),
@@ -174,7 +174,7 @@ test('it can retire suspended wrestler', function () {
     expect($wrestler->isRetired())->toBeTrue();
     expect($wrestler->isSuspended())->toBeTrue(); // Suspension record remains
 
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
@@ -199,7 +199,7 @@ test('it can retire injured wrestler', function () {
     expect($wrestler->isInjured())->toBeTrue(); // Injury record remains (career-ending injury)
     expect($wrestler->isEmployed())->toBeFalse(); // Employment should end
 
-    $this->assertDatabaseHas('wrestler_retirements', [
+    $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,

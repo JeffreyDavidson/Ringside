@@ -109,7 +109,7 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify suspension record was created
-    $suspension = $tagTeam->currentSuspension();
+    $suspension = $tagTeam->currentSuspension;
     expect($suspension)->not()->toBeNull();
     expect($suspension->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($suspension->ended_at)->toBeNull();
@@ -128,7 +128,7 @@ test('it creates new suspension period', function () {
     expect($tagTeam->isSuspended())->toBeTrue();
 
     // New suspension should be current and active
-    $currentSuspension = $tagTeam->currentSuspension();
+    $currentSuspension = $tagTeam->currentSuspension;
     expect($currentSuspension)->not()->toBeNull();
     expect($currentSuspension->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($currentSuspension->ended_at)->toBeNull();
@@ -170,14 +170,14 @@ test('it handles multiple suspension history correctly', function () {
     expect($tagTeam->suspensions()->count())->toBe(3);
 
     // New suspension should be current
-    $currentSuspension = $tagTeam->currentSuspension();
+    $currentSuspension = $tagTeam->currentSuspension;
     expect($currentSuspension)->not()->toBeNull();
     expect($currentSuspension->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it preserves employment status during suspension', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
-    $originalEmployment = $tagTeam->currentEmployment();
+    $originalEmployment = $tagTeam->currentEmployment;
 
     expect($tagTeam->isEmployed())->toBeTrue();
 
@@ -240,7 +240,7 @@ test('it handles tag team with complex employment history', function () {
     expect($tagTeam->suspensions()->count())->toBe(2); // 1 historical + 1 new
 
     // New suspension should be current
-    $currentSuspension = $tagTeam->currentSuspension();
+    $currentSuspension = $tagTeam->currentSuspension;
     expect($currentSuspension)->not()->toBeNull();
     expect($currentSuspension->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
 });
