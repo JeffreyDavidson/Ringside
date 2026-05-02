@@ -40,7 +40,8 @@
         "phpstan/extension-installer": "^1.4",
         "povils/phpmnd": "^3.4",
         "rector/rector": "^2.0",
-        "spatie/laravel-ignition": "^2.11"
+        "spatie/laravel-ignition": "^2.11",
+        "spatie/pest-plugin-test-time": "^2.2"
     },
     "config": {
         "optimize-autoloader": true,
