@@ -341,6 +341,14 @@ class StatusTransitionPipeline
      */
     protected function createRetirement(): void
     {
+        // End any active employment so the entity is no longer "employed" once retired.
+        if (method_exists($this->entity, 'isEmployed') && $this->entity->isEmployed()) {
+            $employmentTable = $this->getTableName('employments');
+            $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
         $table = $this->getTableName('retirements');
         $this->entity->{$table}()->create([
             'started_at' => $this->effectiveDate,
