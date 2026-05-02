@@ -58,7 +58,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $tagTeam->refresh();
 
     // Verify suspension ended through pipeline
-    expect($tagTeam->currentSuspension())->toBeNull();
+    expect($tagTeam->currentSuspension)->toBeNull();
     expect($tagTeam->isSuspended())->toBeFalse();
     expect($tagTeam->isEmployed())->toBeTrue();
 });
@@ -155,7 +155,7 @@ test('it preserves suspension history during reinstatement', function () {
     expect($tagTeam->suspensions()->whereNull('ended_at')->count())->toBe(0);
 
     // Current suspension should be null
-    expect($tagTeam->currentSuspension())->toBeNull();
+    expect($tagTeam->currentSuspension)->toBeNull();
 });
 
 test('it handles tag team with complex suspension history', function () {

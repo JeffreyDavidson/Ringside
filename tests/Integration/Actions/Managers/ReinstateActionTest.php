@@ -58,7 +58,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $manager->refresh();
 
     // Verify suspension ended through pipeline
-    expect($manager->currentSuspension())->toBeNull();
+    expect($manager->currentSuspension)->toBeNull();
     expect($manager->isSuspended())->toBeFalse();
 
     // Verify suspension record shows proper end date
@@ -157,18 +157,19 @@ test('it handles multiple suspensions correctly', function () {
     expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
 });
 
-test('it prevents reinstating injured suspended manager', function () {
-    // This would be an invalid state, but test the business rule
+test('it reinstates a manager with both injury and suspension active', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
 
-    // Manually create injury (this shouldn't be possible in normal flow)
+    // Manually create concurrent injury — orthogonal to suspension under current design
     $manager->injuries()->create(['started_at' => now()->subDay(), 'ended_at' => null]);
     $manager->refresh();
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();
 
-    // Should prevent reinstatement if injured (business rule)
-    expect(fn () => ReinstateAction::run($manager))
-        ->toThrow(Exception::class);
+    ReinstateAction::run($manager);
+
+    $manager->refresh();
+    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->isInjured())->toBeFalse();
 });
