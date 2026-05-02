@@ -51,5 +51,12 @@ class UnretireAction
 
         // Use StatusTransitionPipeline for consistent unretirement handling
         StatusTransitionPipeline::unretire($manager, $unretiredDate)->execute();
+
+        // Restart employment from the unretirement date so the manager is
+        // available for wrestler/tag team assignments again.
+        $manager->employments()->create([
+            'started_at' => $unretiredDate,
+            'ended_at' => null,
+        ]);
     }
 }
