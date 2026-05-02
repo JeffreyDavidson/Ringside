@@ -167,7 +167,10 @@ trait ValidatesTagTeamLifecycle
             throw CannotBeRetiredException::alreadyRetired($this);
         }
 
-        if (! $this->isEmployed()) {
+        // A tag team that has been employed before (currently or formerly released)
+        // can be retired. A tag team that has never been employed cannot, and a
+        // future-dated employment doesn't count.
+        if (! $this->hasEmployments() || $this->hasFutureEmployment()) {
             throw CannotBeRetiredException::notEmployed($this);
         }
 

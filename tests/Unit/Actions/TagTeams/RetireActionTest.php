@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -64,25 +64,29 @@ test('it retires a released tag team at a specific datetime', function () {
     expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
 });
 
-test('it throws exception when trying to retire a suspended tag team due to wrestler suspension', function () {
-    // Create bookable tag team and manually suspend it (which suspends wrestlers too)
+test('it retires a suspended tag team and ends its suspension', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
     SuspendAction::run($tagTeam);
 
-    // Expect exception because suspended wrestlers prevent tag team retirement
-    expect(fn () => resolve(RetireAction::class)->handle($tagTeam))
-        ->toThrow(CannotBeRetiredException::class);
+    resolve(RetireAction::class)->handle($tagTeam);
+
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
+    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->retirements)->toHaveCount(1);
 });
 
-test('it throws exception when trying to retire a suspended tag team at specific datetime due to wrestler suspension', function () {
-    // Create bookable tag team and manually suspend it (which suspends wrestlers too)
+test('it retires a suspended tag team at a specific datetime', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
     SuspendAction::run($tagTeam);
     $datetime = now()->addDays(2);
 
-    // Expect exception because suspended wrestlers prevent tag team retirement
-    expect(fn () => resolve(RetireAction::class)->handle($tagTeam, $datetime))
-        ->toThrow(CannotBeRetiredException::class);
+    resolve(RetireAction::class)->handle($tagTeam, $datetime);
+
+    $tagTeam->refresh();
+    expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
+    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
 });
 
 test('it retires an employed tag team at the current datetime by default', function () {
