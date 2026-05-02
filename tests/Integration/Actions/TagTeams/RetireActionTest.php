@@ -127,7 +127,7 @@ test('it prevents retiring already retired tag team', function () {
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
-    $originalEmploymentId = $tagTeam->currentEmployment()->id;
+    $originalEmploymentId = $tagTeam->currentEmployment->id;
 
     RetireAction::run($tagTeam);
 

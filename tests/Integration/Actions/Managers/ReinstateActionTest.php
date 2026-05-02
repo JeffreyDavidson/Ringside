@@ -79,7 +79,7 @@ test('it prevents reinstating non-suspended manager', function () {
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
-    $originalSuspensionId = $manager->currentSuspension()->id;
+    $originalSuspensionId = $manager->currentSuspension->id;
 
     ReinstateAction::run($manager);
 

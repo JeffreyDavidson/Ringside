@@ -77,7 +77,7 @@ test('it prevents healing non-injured manager', function () {
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->injured()->create();
-    $originalInjuryId = $manager->currentInjury()->id;
+    $originalInjuryId = $manager->currentInjury->id;
 
     HealAction::run($manager);
 
