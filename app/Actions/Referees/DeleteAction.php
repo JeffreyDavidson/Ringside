@@ -50,7 +50,9 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        $referee->ensureCanBeDeleted();
+        if (method_exists($referee, 'ensureCanBeDeleted')) {
+            $referee->ensureCanBeDeleted();
+        }
 
         $deletionDate = DateHelper::resolveDate($deletionDate);
 

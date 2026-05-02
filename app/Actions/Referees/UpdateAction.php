@@ -45,7 +45,9 @@ class UpdateAction
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {
-        $referee->ensureCanBeUpdated();
+        if (method_exists($referee, 'ensureCanBeUpdated')) {
+            $referee->ensureCanBeUpdated();
+        }
 
         return DB::transaction(function () use ($referee, $refereeData): Referee {
             // Update the referee's basic information

@@ -15,6 +15,7 @@ use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesInjury;
+use App\Models\Concerns\ValidatesRestoration;
 use App\Models\Concerns\ValidatesRetirement;
 use App\Models\Concerns\ValidatesSuspension;
 use App\Models\Contracts\BookableOfficial;
@@ -127,6 +128,7 @@ class Referee extends Model implements BookableOfficial, Employable, HasDisplayN
     use SoftDeletes;
     use ValidatesEmployment;
     use ValidatesInjury;
+    use ValidatesRestoration;
     use ValidatesRetirement;
     use ValidatesSuspension;
 
