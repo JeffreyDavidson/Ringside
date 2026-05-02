@@ -6,6 +6,7 @@ use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReleaseAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
@@ -35,14 +36,19 @@ describe('TagTeam Employment Workflows', function () {
             $employed = $tagTeam->fresh();
             expect($employed->isEmployed())->toBeTrue();
 
-            // Release
+            // Release ends employment AND ends wrestler partnerships (wrestlers become free agents)
             ReleaseAction::run($employed, Carbon::now());
             $released = $tagTeam->fresh();
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();
 
+            // Re-attaching wrestlers is the user's job before re-employing —
+            // the released team has no current partners after the cascade.
+            $wrestlers = Wrestler::factory()->count(2)->create();
+            $released->wrestlers()->attach($wrestlers, ['joined_at' => now(), 'left_at' => null]);
+
             // Re-employ
-            EmployAction::run($released, Carbon::now());
+            EmployAction::run($released->fresh(), Carbon::now());
             $reEmployed = $tagTeam->fresh();
             expect($reEmployed->isEmployed())->toBeTrue();
             expect($reEmployed->isReleased())->toBeFalse();
@@ -156,13 +162,18 @@ describe('TagTeam Employment Workflows', function () {
             expect($employed->isEmployed())->toBeTrue();
             expect($employed->canBeEmployed())->toBeFalse(); // Already employed
 
-            // Release tag team
+            // Release tag team — cascade ends wrestler partnerships, leaving
+            // the team without current partners
             ReleaseAction::run($employed, Carbon::now());
             $released = $tagTeam->fresh();
 
             // Released tag team capabilities
             expect($released->isEmployed())->toBeFalse();
-            expect($released->canBeEmployed())->toBeTrue(); // Can be re-employed
+
+            // Re-attach wrestlers (user's responsibility) to make the team employable again
+            $wrestlers = Wrestler::factory()->count(2)->create();
+            $released->wrestlers()->attach($wrestlers, ['joined_at' => now(), 'left_at' => null]);
+            expect($released->fresh()->canBeEmployed())->toBeTrue();
         });
     });
 

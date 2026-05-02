@@ -49,7 +49,7 @@ class UnretireAction
      * UnretireAction::run($wrestler, employImmediately: false);
      * ```
      */
-    public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void
+    public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = false): void
     {
         $wrestler->ensureCanBeUnretired();
 

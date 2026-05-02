@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchType;
 use App\Models\Matches\EventMatch;
 use Database\Seeders\MatchesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
@@ -51,7 +52,7 @@ describe('MatchesTableSeeder Integration Tests', function () {
             // Assert
             foreach ($eventMatches as $eventMatch) {
                 expect($eventMatch->event_id)->toBeInt();
-                expect($eventMatch->match_type_id)->toBeInt();
+                expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
                 expect($eventMatch->match_number)->toBeInt();
                 expect($eventMatch->match_number)->toBeGreaterThan(0);
             }
@@ -105,23 +106,22 @@ describe('MatchesTableSeeder Integration Tests', function () {
             // Arrange
             $eventMatches = EventMatch::take(10)->get();
 
-            // Assert
+            // Assert — match_type is now a backed PHP enum, not an FK to a table
             foreach ($eventMatches as $eventMatch) {
-                expect($eventMatch->match_type_id)->toBeInt();
-                expect($eventMatch->match_type_id)->toBeGreaterThan(0);
+                expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
             }
             expect(true)->toBeTrue();
         });
 
         test('event matches can load relationships', function () {
             // Arrange
-            $eventMatch = EventMatch::with(['event', 'matchType'])->first();
+            $eventMatch = EventMatch::with(['event'])->first();
 
             // Assert
             expect($eventMatch->event)->not()->toBeNull();
-            expect($eventMatch->matchType)->not()->toBeNull();
             expect($eventMatch->event->name)->toBeString();
-            expect($eventMatch->matchType->name)->toBeString();
+            expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
+            expect($eventMatch->match_type->label())->toBeString();
             expect(true)->toBeTrue();
         });
 
