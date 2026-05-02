@@ -8,6 +8,7 @@ use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Actions\Concerns\WrestlerDeletionCascadeStrategy;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
+use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
@@ -44,6 +45,10 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
+        if ($wrestler->trashed()) {
+            throw new Exception("Wrestler '{$wrestler->name}' is already deleted.");
+        }
+
         if (method_exists($wrestler, 'ensureCanBeDeleted')) {
             $wrestler->ensureCanBeDeleted();
         }
