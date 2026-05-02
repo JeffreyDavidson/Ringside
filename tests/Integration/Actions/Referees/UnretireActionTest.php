@@ -49,7 +49,7 @@ test('it unretires referee with specific unretirement date', function () {
 
     expect($referee->isRetired())->toBeFalse();
     expect($referee->isEmployed())->toBeTrue();
-    expect($retirement->ended_at->eq($unretiredDate))->toBeTrue();
+    expect($retirement->ended_at->toDateTimeString())->toBe($unretiredDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_retirements', [
         'id' => $retirement->id,
@@ -149,6 +149,6 @@ test('it creates new employment after unretirement', function () {
 
     expect($employment)->not->toBeNull();
     expect($employment->referee_id)->toBe($referee->id);
-    expect($employment->started_at->eq(now()))->toBeTrue();
+    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });

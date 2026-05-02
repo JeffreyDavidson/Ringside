@@ -51,5 +51,12 @@ class UnretireAction
 
         // Use StatusTransitionPipeline for consistent unretirement handling
         StatusTransitionPipeline::unretire($referee, $unretiredDate)->execute();
+
+        // Coming out of retirement should restore the referee to employed status
+        // so they're immediately available for match assignments.
+        $referee->employments()->create([
+            'started_at' => $unretiredDate,
+            'ended_at' => null,
+        ]);
     }
 }
