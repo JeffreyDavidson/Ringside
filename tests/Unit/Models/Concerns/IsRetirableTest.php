@@ -102,7 +102,7 @@ describe('IsRetirable Trait Unit Tests', function () {
                     return FakeRetirementModel::class;
                 }
             };
-            $relation = $model->currentRetirement;
+            $relation = $model->currentRetirement();
             expect($relation)->toBeInstanceOf(HasOne::class);
             expect($relation->getRelated())->toBeInstanceOf(FakeRetirementModel::class);
         });
@@ -224,7 +224,7 @@ describe('IsRetirable Trait Unit Tests', function () {
                     return FakeRetirementModel::class;
                 }
             };
-            $relation = $model->currentRetirement;
+            $relation = $model->currentRetirement();
             $wheres = $relation->getQuery()->getQuery()->wheres;
             $hasWhereNull = collect($wheres)->contains(function ($where) {
                 return ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at';
