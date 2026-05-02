@@ -50,7 +50,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $manager->currentSuspension();
+    $currentSuspension = $manager->currentSuspension;
     expect($currentSuspension)->not()->toBeNull();
 
     ReinstateAction::run($manager);

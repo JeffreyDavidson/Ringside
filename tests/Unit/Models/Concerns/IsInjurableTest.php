@@ -103,7 +103,7 @@ describe('IsInjurable Trait Unit Tests', function () {
                     return FakeInjuryModel::class;
                 }
             };
-            $relation = $model->currentInjury();
+            $relation = $model->currentInjury;
             expect($relation)->toBeInstanceOf(HasOne::class);
             expect($relation->getRelated())->toBeInstanceOf(FakeInjuryModel::class);
         });
@@ -250,7 +250,7 @@ describe('IsInjurable Trait Unit Tests', function () {
                 }
             };
 
-            $relation = $model->currentInjury();
+            $relation = $model->currentInjury;
 
             // The trait should add a whereNull('ended_at') constraint
             expect($relation)->toBeInstanceOf(HasOne::class);

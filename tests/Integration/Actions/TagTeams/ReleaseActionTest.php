@@ -73,7 +73,7 @@ test('it uses StatusTransitionPipeline for release', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $tagTeam->currentEmployment();
+    $currentEmployment = $tagTeam->currentEmployment;
     expect($currentEmployment)->not()->toBeNull();
 
     ReleaseAction::run($tagTeam);
