@@ -9,10 +9,8 @@ use App\Models\Stables\StableActivation;
 use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamEmployment;
-use App\Models\TagTeams\TagTeamRetirement;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerEmployment;
-use App\Models\Wrestlers\WrestlerRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -125,35 +123,28 @@ class StableFactory extends Factory
         $start = $now->copy()->subDays(3);
         $end = $now->copy()->subDays();
 
+        // Members "left" the stable when it retired but stayed employed and
+        // available — that's what makes them eligible "former members" for an
+        // unretire / reunite scenario.
         return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
             ->has(StableRetirement::factory()->started($end), 'retirements')
             ->hasAttached(
-                Wrestler::factory()
-                    ->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
-                    ->has(WrestlerRetirement::factory()->started($end), 'retirements'),
-                ['joined_at' => $start]
+                Wrestler::factory()->count(2)
+                    ->has(WrestlerEmployment::factory()->started($start), 'employments'),
+                ['joined_at' => $start, 'left_at' => $end]
             )
             ->hasAttached(
                 TagTeam::factory()
-                    ->has(TagTeamEmployment::factory()->started($start)->ended($end), 'employments')
-                    ->has(TagTeamRetirement::factory()->started($end), 'retirements')
-                    ->afterCreating(function (TagTeam $tagTeam) use ($start, $end) {
-                        // Attach wrestlers to the tag team to ensure it has active wrestlers for validation
+                    ->has(TagTeamEmployment::factory()->started($start), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) use ($start) {
                         $wrestlers = Wrestler::factory()->count(2)
-                            ->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
-                            ->has(WrestlerRetirement::factory()->started($end), 'retirements')
+                            ->has(WrestlerEmployment::factory()->started($start), 'employments')
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
                     }),
-                ['joined_at' => $start]
+                ['joined_at' => $start, 'left_at' => $end]
             )
             ->afterCreating(function (Stable $stable) {
-                $stable->currentWrestlers->each(function ($wrestler) {
-                    $wrestler->save();
-                });
-                $stable->currentTagTeams->each(function ($tagTeam) {
-                    $tagTeam->save();
-                });
                 $stable->save();
             });
     }
