@@ -127,6 +127,10 @@ trait ValidatesRetirement
      */
     public function ensureCanBeUnretired(): void
     {
+        if (method_exists($this, 'trashed') && $this->trashed()) {
+            throw new Exception('Cannot unretire a deleted record.');
+        }
+
         if (! $this->isRetired()) {
             // Determine if this is a Title or Roster member and use appropriate exception
             if ($this instanceof Title) {

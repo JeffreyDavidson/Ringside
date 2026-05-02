@@ -12,6 +12,7 @@ use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
+use Exception;
 
 /**
  * Provides tag team lifecycle validation functionality for TagTeam models.
@@ -391,6 +392,14 @@ trait ValidatesTagTeamLifecycle
      */
     public function ensureCanBeDeleted(): void
     {
+        if ($this->trashed()) {
+            throw new Exception("Tag team '{$this->name}' is already deleted.");
+        }
+
+        if ($this->isRetired()) {
+            throw new Exception("Tag team '{$this->name}' is retired and cannot be deleted.");
+        }
+
         if ($this->isEmployed()) {
             throw CannotBeDeletedException::stillEmployed($this);
         }
