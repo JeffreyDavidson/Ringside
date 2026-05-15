@@ -18,10 +18,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04]
         php: [8.4]
-        laravel: [12]
-        stability: [prefer-dist]
-
-    name: PCOV - ${{ matrix.os }} - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
+    name: PCOV - ${{ matrix.os }} - P${{ matrix.php }}
     env:
       extensionKey: phpextensions-${{ matrix.os }}-P${{ matrix.php }}-withpcov
       extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pcov,pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, fileinfo
@@ -67,8 +64,8 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-
+          key: ${{ matrix.os }}-PHP${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ matrix.os }}-PHP${{ matrix.php }}-composer-
 
       - name: Add token
         env:
@@ -77,12 +74,7 @@ jobs:
           composer config github-oauth.github.com $GITHUB_TOKEN
 
       - name: Install dependencies
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer require "laravel/framework:${{ matrix.laravel }}.*" --no-interaction --no-update
-
-      - name: Update dependencies
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer update --${{ matrix.stability }} --no-interaction
+        run: composer install --no-interaction --prefer-dist
 
       - name: Setup Laravel application
         run: |

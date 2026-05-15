@@ -9,8 +9,6 @@ use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,14 +48,34 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Table('titles_championships')]
-#[Fillable('title_id', 'champion_type', 'champion_id', 'won_match_id', 'lost_match_id', 'won_at', 'lost_at')]
 #[UseFactory(TitleChampionshipFactory::class)]
 #[UseEloquentBuilder(TitleChampionshipBuilder::class)]
 class TitleChampionship extends Model
 {
     /** @use HasFactory<TitleChampionshipFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'title_id',
+        'champion_type',
+        'champion_id',
+        'won_match_id',
+        'lost_match_id',
+        'won_at',
+        'lost_at',
+    ];
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'titles_championships';
 
     /**
      * Get the attributes that should be cast.

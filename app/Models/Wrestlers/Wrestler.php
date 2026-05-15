@@ -44,7 +44,6 @@ use App\Models\Titles\TitleChampionship;
 use App\ValueObjects\Height;
 use Database\Factories\Wrestlers\WrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -113,13 +112,25 @@ use Illuminate\Support\Carbon;
  *
  * @method string getNameLabel()
  */
-#[Fillable('name', 'height', 'weight', 'hometown', 'signature_move')]
 #[Appends('status')]
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements BookableCompetitor, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, Suspendable
 {
     use BelongsToUser;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'height',
+        'weight',
+        'hometown',
+        'signature_move',
+    ];
 
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;

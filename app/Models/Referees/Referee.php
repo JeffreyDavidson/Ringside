@@ -27,7 +27,6 @@ use App\Models\Contracts\Suspendable;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Referees\RefereeFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -98,7 +97,6 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Fillable('first_name', 'last_name')]
 #[Appends('status')]
 #[UseFactory(RefereeFactory::class)]
 #[UseEloquentBuilder(RefereeBuilder::class)]
@@ -106,6 +104,16 @@ class Referee extends Model implements BookableOfficial, Employable, HasDisplayN
 {
     /** @use HasFactory<RefereeFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'first_name',
+        'last_name',
+    ];
 
     use HasMatches, OfficiatesMatches {
         OfficiatesMatches::matches insteadof HasMatches;

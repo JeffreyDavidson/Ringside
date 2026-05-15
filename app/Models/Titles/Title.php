@@ -21,7 +21,6 @@ use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
 use Database\Factories\Titles\TitleFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -98,7 +97,6 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Fillable('name', 'type')]
 #[Appends('status')]
 #[UseFactory(TitleFactory::class)]
 #[UseEloquentBuilder(TitleBuilder::class)]
@@ -116,6 +114,16 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
 
     /** @use HasFactory<TitleFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'type',
+    ];
 
     /** @use HasStatusHistory<TitleStatusChange, static> */
     use HasStatusHistory;

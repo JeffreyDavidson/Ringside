@@ -4,8 +4,29 @@ This document provides a comprehensive reference for all development and testing
 
 ## Testing & Quality Assurance
 
+### Local PHP Tooling
+Ringside targets PHP 8.4 and Laravel 12. On local agent hosts where `php`/`composer` are not on the default `PATH`, use Herd's binaries:
+
+```bash
+export PATH="$HOME/Library/Application Support/Herd/bin:$PATH"
+```
+
+### Canonical Agent Verification Baseline
+Use this baseline before delegating Ringside test work:
+
+```bash
+export PATH="$HOME/Library/Application Support/Herd/bin:$PATH"
+composer install --no-interaction --prefer-dist
+composer validate --strict --no-check-publish
+composer test:lint
+composer test:types
+php ./vendor/bin/pest --ci --testsuite "Feature","Integration","Unit" --no-coverage
+```
+
+Run narrower Pest commands for targeted changes first, then run the baseline when the local tooling state has changed or before handing work off. The baseline is intentionally runnable locally; if it is not fully green, capture the exact failing command and summary before delegating follow-up test fixes.
+
 ### Primary Test Commands
-- `composer test` - Run all tests and quality checks
+- `composer test` - Run all tests and quality checks, including 100% type and line coverage gates
 - `composer test:unit` - Run PHPUnit/Pest tests with coverage
 - `composer test:types` - Run PHPStan static analysis (level 6)
 - `composer test:type-coverage` - Check type coverage (min 100%)

@@ -8,8 +8,6 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchWinnerFactory;
 use Exception;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,13 +39,28 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Table('events_matches_winners')]
-#[Fillable('match_result_id', 'match_competitor_id')]
 #[UseFactory(MatchWinnerFactory::class)]
 class MatchWinner extends Model
 {
     /** @use HasFactory<MatchWinnerFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'match_result_id',
+        'match_competitor_id',
+    ];
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'events_matches_winners';
 
     /**
      * Get the event match result that owns this winner record.

@@ -9,8 +9,6 @@ use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Users\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -54,14 +52,39 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Fillable('first_name', 'last_name', 'email', 'email_verified_at', 'password', 'role', 'status', 'avatar_path', 'phone_number')]
-#[Hidden('password', 'remember_token')]
 #[UseFactory(UserFactory::class)]
 #[UseEloquentBuilder(UserBuilder::class)]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'email',
+        'email_verified_at',
+        'password',
+        'role',
+        'status',
+        'avatar_path',
+        'phone_number',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     /**
      * The model's default values for attributes.

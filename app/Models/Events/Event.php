@@ -10,7 +10,6 @@ use App\Models\Concerns\HasMatches;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Events\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -50,7 +49,6 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Fillable('name', 'date', 'venue_id', 'preview')]
 #[Appends('status')]
 #[UseFactory(EventFactory::class)]
 #[UseEloquentBuilder(EventBuilder::class)]
@@ -58,6 +56,18 @@ class Event extends Model
 {
     /** @use HasFactory<EventFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'date',
+        'venue_id',
+        'preview',
+    ];
 
     use HasMatches;
     use SoftDeletes;

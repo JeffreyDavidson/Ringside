@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Models\TagTeams;
 
 use Database\Factories\TagTeams\TagTeamSuspensionFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,13 +28,29 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Table('tag_teams_suspensions')]
-#[Fillable('tag_team_id', 'started_at', 'ended_at')]
 #[UseFactory(TagTeamSuspensionFactory::class)]
 class TagTeamSuspension extends Model
 {
     /** @use HasFactory<TagTeamSuspensionFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'tag_team_id',
+        'started_at',
+        'ended_at',
+    ];
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'tag_teams_suspensions';
 
     /**
      * Get the attributes that should be cast.

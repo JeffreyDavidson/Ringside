@@ -28,7 +28,6 @@ use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Database\Factories\Managers\ManagerFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -105,7 +104,6 @@ use Tests\Unit\Models\Managers\ManagerTest;
  *
  * @see ManagerTest
  */
-#[Fillable('first_name', 'last_name')]
 #[Appends('status')]
 #[UseFactory(ManagerFactory::class)]
 #[UseEloquentBuilder(ManagerBuilder::class)]
@@ -116,6 +114,16 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
 
     /** @use HasFactory<ManagerFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'first_name',
+        'last_name',
+    ];
 
     /** @use IsEmployable<ManagerEmployment, static> */
     use IsEmployable;
