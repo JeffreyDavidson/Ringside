@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchType;
 use App\Models\Matches\EventMatch;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -30,7 +31,7 @@ describe('EventMatch Model Unit Tests', function () {
             expect($eventMatch->getFillable())->toEqual([
                 'event_id',
                 'match_number',
-                'match_type_id',
+                'match_type',
                 'match_stipulation_id',
                 'preview',
             ]);
@@ -40,8 +41,9 @@ describe('EventMatch Model Unit Tests', function () {
             $eventMatch = new EventMatch();
             $casts = $eventMatch->getCasts();
 
-            // EventMatch model has no custom casts
             expect($casts)->toBeArray();
+            expect($casts['id'])->toBe('int');
+            expect($casts['match_type'])->toBe(MatchType::class);
         });
 
         test('has custom eloquent builder', function () {
