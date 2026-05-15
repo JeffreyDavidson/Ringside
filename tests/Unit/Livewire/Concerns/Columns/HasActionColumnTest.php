@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\Columns\HasActionColumn;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Livewire\Table\Column;
 use Tests\Integration\Livewire\Concerns\Columns\HasActionColumnTest;
 
 /**
@@ -48,7 +48,7 @@ describe('HasActionColumn Unit Tests', function () {
 
             $method = $reflection->getMethod('getDefaultActionColumn');
             expect($method->isProtected())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('Rappasoft\\LaravelLivewireTables\\Views\\Column');
+            expect($method->getReturnType()->getName())->toBe(Column::class);
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });
@@ -70,7 +70,7 @@ describe('HasActionColumn Unit Tests', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
             $source = file_get_contents($reflection->getFileName());
 
-            expect($source)->toContain('use Rappasoft\\LaravelLivewireTables\\Views\\Column;');
+            expect($source)->toContain('use App\\Livewire\\Table\\Column;');
         });
     });
 
