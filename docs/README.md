@@ -71,7 +71,7 @@ This Laravel project is configured with Claude Code and MCP servers for enhanced
 - **Laravel DebugBar** (if installed) - Debug information
 
 ### Environment
-- Laravel Framework with Livewire 3
+- Laravel Framework 13 with Livewire 4
 - Alpine.js for frontend interactivity
 - Tailwind CSS for styling
 - Laravel Breeze for authentication
