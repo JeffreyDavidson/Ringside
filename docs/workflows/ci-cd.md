@@ -9,7 +9,7 @@ The project uses a streamlined CI/CD approach with 3 automated workflows:
 **Purpose**: Comprehensive testing and static analysis
 
 **What it does:**
-- Runs on PHP 8.4 with Laravel 12.* on Ubuntu 24.04
+- Runs on PHP 8.4 with Laravel 13.* on Ubuntu 24.04
 - Executes all test suites in parallel (Feature, Integration, Unit)
 - Runs PHPStan static analysis (`composer test:types`)
 - Uses optimized `.env.testing` configuration
