@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Concerns\BaseTableTrait;
 use App\Livewire\Concerns\Columns\HasActionColumn;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Livewire\Table\Column;
 use Tests\Integration\Livewire\Concerns\BaseTableTraitTest;
 
 /**
@@ -133,7 +133,7 @@ describe('BaseTableTrait Unit Tests', function () {
             $source = file_get_contents($reflection->getFileName());
 
             expect($source)->toContain('use App\\Livewire\\Concerns\\Columns\\HasActionColumn;');
-            expect($source)->toContain('use Rappasoft\\LaravelLivewireTables\\Views\\Column;');
+            expect($source)->toContain('use App\\Livewire\\Table\\Column;');
         });
     });
 
@@ -162,11 +162,11 @@ describe('BaseTableTrait Unit Tests', function () {
     });
 
     describe('laravel livewire tables integration', function () {
-        test('uses Laravel Livewire Tables components', function () {
+        test('uses application Livewire table components', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
             $source = file_get_contents($reflection->getFileName());
 
-            expect($source)->toContain('Rappasoft\\LaravelLivewireTables\\Views\\Column');
+            expect($source)->toContain('App\\Livewire\\Table\\Column');
         });
 
         test('follows Laravel Livewire Tables patterns', function () {

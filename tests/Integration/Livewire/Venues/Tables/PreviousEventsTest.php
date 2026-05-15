@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 use App\Builders\Events\EventBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Table\Columns\DateColumn;
+use App\Livewire\Table\Columns\LinkColumn;
+use App\Livewire\Table\DataTableComponent;
 use App\Livewire\Venues\Tables\PreviousEvents;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
 use Livewire\Livewire;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
 
 /**
  * Integration tests for PreviousEventsTable component query building and functionality.
