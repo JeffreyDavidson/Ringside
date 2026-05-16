@@ -1,15 +1,17 @@
 name: Fix PHP code style issues
 
 on:
-  push:
+  pull_request:
     branches:
-      - '*'         # matches every branch that doesn't contain a '/'
-      - '*/*'       # matches every branch containing a single '/'
-      - '**'        # matches every branch
-      - '!master'
-      - '!development'  # exclude protected development branch
+      - development
+      - master
     paths:
       - '**.php'
+  workflow_dispatch:
+
+concurrency:
+  group: pint-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -22,7 +24,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Fix PHP code style issues
         uses: aglipanci/laravel-pint-action@latest
