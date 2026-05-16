@@ -120,7 +120,7 @@ describe('Stable Formation and Management Workflow', function () {
     test('stable lifecycle management workflow', function () {
         // Given: A stable and administrator
         $admin = administrator();
-        $stable = Stable::factory()->create(['name' => 'The Shield']);
+        $stable = Stable::factory()->withEmployedDefaultMembers()->create(['name' => 'The Shield']);
 
         // When: Establishing the stable
         Livewire::actingAs($admin)
@@ -140,14 +140,17 @@ describe('Stable Formation and Management Workflow', function () {
         // Then: Stable should be retired
         expect($stable->fresh()->isRetired())->toBeTrue();
 
+        // Given: A retired stable with viable former members
+        $retiredStable = Stable::factory()->retired()->create(['name' => 'Evolution']);
+
         // When: Unretiring the stable
         Livewire::actingAs($admin)
             ->test(StablesTable::class)
-            ->call('handleStableAction', 'unretire', $stable->id)
+            ->call('handleStableAction', 'unretire', $retiredStable->id)
             ->assertHasNoErrors();
 
         // Then: Stable should no longer be retired
-        expect($stable->fresh()->isRetired())->toBeFalse();
+        expect($retiredStable->fresh()->isRetired())->toBeFalse();
     });
 });
 

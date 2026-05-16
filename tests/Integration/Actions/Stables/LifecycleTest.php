@@ -8,10 +8,9 @@ use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
+use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeActivatedException;
-use App\Exceptions\Status\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 
@@ -184,18 +183,18 @@ describe('Stable Activation Action Integration', function () {
             UnretireAction::run($this->retiredStable, $unretireDate);
 
             $refreshedStable = $this->retiredStable->fresh();
-            expect($refreshedStable->isInactive())->toBeTrue();
-            expect($refreshedStable->status)->toBe(StableStatus::Inactive);
+            expect($refreshedStable->isCurrentlyActive())->toBeTrue();
+            expect($refreshedStable->status)->toBe(StableStatus::Active);
 
             // Verify retirement is ended
             $retirement = $refreshedStable->retirements()->latest()->first();
             expect($retirement->ended_at->format('Y-m-d H:i:s'))->toBe($unretireDate->format('Y-m-d H:i:s'));
         });
 
-        test('unretire action does not create new activity period', function () {
+        test('unretire action can leave the stable inactive when immediate establishment is disabled', function () {
             $originalPeriodCount = $this->retiredStable->activityPeriods()->count();
 
-            UnretireAction::run($this->retiredStable, Carbon::now());
+            UnretireAction::run($this->retiredStable, Carbon::now(), establishImmediately: false);
 
             $refreshedStable = $this->retiredStable->fresh();
             expect($refreshedStable->activityPeriods()->count())->toBe($originalPeriodCount);
@@ -205,7 +204,7 @@ describe('Stable Activation Action Integration', function () {
 
     describe('complex lifecycle scenarios', function () {
         test('stable can go through full lifecycle with proper status tracking', function () {
-            $stable = Stable::factory()->create();
+            $stable = Stable::factory()->withEmployedDefaultMembers()->create();
 
             // Debut
             $debutDate = Carbon::now()->subYear();
@@ -229,7 +228,7 @@ describe('Stable Activation Action Integration', function () {
 
             // Unretire
             $unretireDate = Carbon::now();
-            UnretireAction::run($stable, $unretireDate);
+            UnretireAction::run($stable, $unretireDate, establishImmediately: false, requireFormerMembers: false);
 
             $finalStable = $stable->fresh();
             expect($finalStable->isInactive())->toBeTrue();
@@ -250,7 +249,7 @@ describe('Stable Activation Action Integration', function () {
         });
 
         test('action date validation maintains data integrity', function () {
-            $stable = Stable::factory()->create();
+            $stable = Stable::factory()->withEmployedDefaultMembers()->create();
 
             $debutDate = Carbon::now()->subMonths(6);
             $disbandDate = Carbon::now()->subMonths(3);
@@ -291,7 +290,7 @@ describe('Stable Activation Action Integration', function () {
             $activeStable = Stable::factory()->active()->create();
 
             expect(fn () => ReuniteAction::run($activeStable, Carbon::now()))
-                ->toThrow(CannotBeActivatedException::class);
+                ->toThrow(CannotBeEstablishedException::class);
         });
 
         test('retire action works from active or disbanded status', function () {

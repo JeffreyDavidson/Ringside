@@ -489,8 +489,8 @@ trait ValidatesStableLifecycle
                     ->orWhereHas('suspensions', function ($suspensionQuery) {
                         $suspensionQuery->whereNull('ended_at'); // Currently suspended
                     })
-                    ->orWhereHas('currentStables', function ($stableQuery) {
-                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    ->orWhereHas('currentStable', function ($stableQuery) {
+                        $stableQuery->whereKeyNot($this->id); // In another stable
                     });
             })
             ->get();
@@ -503,8 +503,8 @@ trait ValidatesStableLifecycle
                     ->orWhereHas('suspensions', function ($suspensionQuery) {
                         $suspensionQuery->whereNull('ended_at'); // Currently suspended
                     })
-                    ->orWhereHas('currentStables', function ($stableQuery) {
-                        $stableQuery->where('stable_id', '!=', $this->id); // In another stable
+                    ->orWhereHas('currentStable', function ($stableQuery) {
+                        $stableQuery->whereKeyNot($this->id); // In another stable
                     });
             })
             ->get();
