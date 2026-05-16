@@ -57,7 +57,7 @@ class StableFactory extends Factory
 
         return $this->has(StableActivation::factory()->started($activationDate), 'activations')
             ->hasAttached(
-                Wrestler::factory()->has(WrestlerEmployment::factory()->started($activationDate), 'employments'),
+                Wrestler::factory()->count(2)->has(WrestlerEmployment::factory()->started($activationDate), 'employments'),
                 ['joined_at' => $activationDate]
             )
             ->hasAttached(
@@ -91,7 +91,7 @@ class StableFactory extends Factory
 
         return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
             ->hasAttached(
-                Wrestler::factory()->has(WrestlerEmployment::factory()->started($start), 'employments'),
+                Wrestler::factory()->count(2)->has(WrestlerEmployment::factory()->started($start), 'employments'),
                 ['joined_at' => $start, 'left_at' => $end]
             )
             ->hasAttached(
@@ -160,7 +160,7 @@ class StableFactory extends Factory
     {
         return $this
             ->hasAttached(
-                Wrestler::factory()
+                Wrestler::factory()->count(2)
                     ->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments'),
                 ['joined_at' => now()]
             )
