@@ -195,7 +195,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is unretired
-            expect($retiredStable->fresh()->isInactive())->toBeTrue();
+            expect($retiredStable->fresh()->isCurrentlyActive())->toBeTrue();
         });
 
         test('establish action integration works correctly', function () {
@@ -213,7 +213,7 @@ describe('StablesTable Component', function () {
         });
 
         test('restore action integration works correctly', function () {
-            $deletedStable = Stable::factory()->trashed()->create(['name' => 'Deleted Stable']);
+            $deletedStable = Stable::factory()->retired()->trashed()->create(['name' => 'Deleted Stable']);
 
             $component = Livewire::actingAs($this->admin)
                 ->test(Main::class);
