@@ -16,11 +16,11 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04]
+        os: [macOS]
         php: [8.4]
         laravel: [13.*]
 

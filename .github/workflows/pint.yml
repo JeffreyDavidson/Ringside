@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   php-code-styling:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
 
     steps:
       - name: Checkout code
