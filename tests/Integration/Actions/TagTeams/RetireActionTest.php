@@ -94,15 +94,15 @@ test('it uses StatusTransitionPipeline for retirement', function () {
     // Get current employment to verify it gets ended
     $currentEmployment = $tagTeam->currentEmployment;
     expect($currentEmployment)->not()->toBeNull();
-    expect($tagTeam->currentRetirement())->toBeNull();
+    expect($tagTeam->currentRetirement)->toBeNull();
 
     RetireAction::run($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify employment ended and retirement created through pipeline
-    expect($tagTeam->currentEmployment())->toBeNull();
-    expect($tagTeam->currentRetirement())->not()->toBeNull();
+    expect($tagTeam->currentEmployment)->toBeNull();
+    expect($tagTeam->currentRetirement)->not()->toBeNull();
     expect($tagTeam->isRetired())->toBeTrue();
     expect($tagTeam->isEmployed())->toBeFalse();
 });
@@ -232,6 +232,6 @@ test('it preserves employment and retirement history', function () {
     expect($tagTeam->retirements()->count())->toBe($originalRetirementCount + 1);
 
     // Current employment should be ended, current retirement should be active
-    expect($tagTeam->currentEmployment())->toBeNull();
-    expect($tagTeam->currentRetirement())->not()->toBeNull();
+    expect($tagTeam->currentEmployment)->toBeNull();
+    expect($tagTeam->currentRetirement)->not()->toBeNull();
 });
