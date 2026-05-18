@@ -153,6 +153,6 @@ test('it creates retirement record with correct structure', function () {
 
     expect($retirement)->not->toBeNull();
     expect($retirement->referee_id)->toBe($referee->id);
-    expect($retirement->started_at->eq($retirementDate))->toBeTrue();
+    expect($retirement->started_at->toDateTimeString())->toBe($retirementDate->toDateTimeString());
     expect($retirement->ended_at)->toBeNull();
 });

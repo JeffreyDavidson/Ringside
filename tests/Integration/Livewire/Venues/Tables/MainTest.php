@@ -36,18 +36,21 @@ describe('VenuesTable Integration Tests', function () {
         // Create test venues with various characteristics
         $this->activeVenue = Venue::factory()->create([
             'name' => 'Active Test Arena',
+            'street_address' => '100 Active Road',
             'city' => 'Active City',
             'state' => 'AC',
         ]);
 
         $this->venueWithEvents = Venue::factory()->create([
             'name' => 'Busy Event Arena',
+            'street_address' => '200 Event Road',
             'city' => 'Event City',
             'state' => 'EC',
         ]);
 
         $this->emptyVenue = Venue::factory()->create([
             'name' => 'Empty Arena',
+            'street_address' => '300 Empty Road',
             'city' => 'Empty City',
             'state' => 'EM',
         ]);

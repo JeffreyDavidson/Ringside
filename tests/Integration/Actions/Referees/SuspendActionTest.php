@@ -108,6 +108,6 @@ test('it creates suspension record with correct structure', function () {
 
     expect($suspension)->not->toBeNull();
     expect($suspension->referee_id)->toBe($referee->id);
-    expect($suspension->started_at->eq($suspensionDate))->toBeTrue();
+    expect($suspension->started_at->toDateTimeString())->toBe($suspensionDate->toDateTimeString());
     expect($suspension->ended_at)->toBeNull();
 });

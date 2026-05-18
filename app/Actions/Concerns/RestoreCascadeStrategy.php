@@ -95,7 +95,7 @@ class RestoreCascadeStrategy
             $formerWrestlers = $entity->wrestlers()->withTrashed()->get();
             $availableWrestlers = $formerWrestlers->filter(function (Wrestler $wrestler) {
                 // Check if wrestler is not currently in any team
-                return $wrestler->currentTagTeams()->count() === 0;
+                return ! $wrestler->currentTagTeam()->exists();
             });
 
             // Note: In this gentle approach, we would typically restore pivot relationships

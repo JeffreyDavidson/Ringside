@@ -109,6 +109,6 @@ test('it handles employment creation through EmployAction dependency injection',
     expect($result->currentEmployment()->exists())->toBeTrue();
 
     $employment = $result->currentEmployment()->first();
-    expect($employment->started_at->eq($employmentDate))->toBeTrue();
+    expect($employment->started_at->toDateTimeString())->toBe($employmentDate->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });

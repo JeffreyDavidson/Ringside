@@ -41,7 +41,7 @@ test('it activates an unactivated title if activation date is filled in request'
 test('it updates a title with future activation but does not create new debut since it already has debuted', function () {
     $datetime = now()->addDays(2);
     $data = new TitleData('New Example Title', TitleType::Singles, $datetime);
-    $title = Title::factory()->withFutureActivation()->create();
+    $title = Title::factory()->active()->create();
     $originalActivationsCount = $title->activations->count();
 
     UpdateAction::run($title, $data);

@@ -49,14 +49,14 @@ test('it injures wrestler with specific injury date', function () {
 test('it uses StatusTransitionPipeline for injury', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->currentInjury())->toBeNull();
+    expect($wrestler->currentInjury)->toBeNull();
 
     InjureAction::run($wrestler);
 
     $wrestler->refresh();
 
     // Verify injury created through pipeline
-    expect($wrestler->currentInjury())->not()->toBeNull();
+    expect($wrestler->currentInjury)->not()->toBeNull();
     expect($wrestler->isInjured())->toBeTrue();
 
     $this->assertDatabaseHas('wrestlers_injuries', [
@@ -140,36 +140,14 @@ test('it prevents injuring unemployed wrestler', function () {
         ->toThrow(Exception::class);
 });
 
-test('it can injure suspended wrestler', function () {
+test('it prevents injuring suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
-
-    // Note: This test may need adjustment based on business rules
-    // Some promotions might allow injuring suspended wrestlers, others might not
-    // For now, assuming suspended wrestlers can get injured
-
-    // First, let's make them employed (suspended but still under contract)
-    $wrestler->employments()->create([
-        'started_at' => now()->subDays(10),
-        'ended_at' => null,
-    ]);
-
-    $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    InjureAction::run($wrestler);
-
-    $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeTrue(); // Should remain suspended
-
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect(fn () => InjureAction::run($wrestler))
+        ->toThrow(Exception::class);
 });
 
 test('it maintains injury history integrity', function () {

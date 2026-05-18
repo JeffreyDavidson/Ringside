@@ -58,7 +58,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $manager->refresh();
 
     // Verify suspension ended through pipeline
-    expect($manager->currentSuspension())->toBeNull();
+    expect($manager->currentSuspension)->toBeNull();
     expect($manager->isSuspended())->toBeFalse();
 
     // Verify suspension record shows proper end date

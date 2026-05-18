@@ -69,7 +69,7 @@ describe('HasChampionships Trait Unit Tests', function () {
             ]);
 
             expect($model->currentChampion())->not->toBeNull();
-            expect($model->currentChampion->id)->toBe($champion->id);
+            expect($model->currentChampion()->id)->toBe($champion->id);
         });
 
         test('currentChampion returns null when no current championship', function () {

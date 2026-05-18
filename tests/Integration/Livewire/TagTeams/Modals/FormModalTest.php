@@ -76,8 +76,8 @@ describe('TagTeams FormModal Tests', function () {
             $component = Livewire::test(FormModal::class)
                 ->call('openModal');
 
-            expect($component->instance()->wrestlersList)->toHaveCount(5);
-            expect($component->instance()->wrestlersList->first()->id)->toBe($wrestlers->first()->id);
+            expect($component->instance()->getWrestlers())->toHaveCount(5);
+            expect(array_key_first($component->instance()->getWrestlers()))->toBe($wrestlers->first()->id);
         });
     });
 

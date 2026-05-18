@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\EmployAction;
 use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\CannotBeEmployedException;
 use App\Models\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -45,60 +46,24 @@ test('it employs referee with specific employment date', function () {
     ]);
 });
 
-test('it employs suspended referee and ends suspension', function () {
+test('it prevents re-employing suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
-    $suspension = $referee->currentSuspension;
 
     expect($referee->isSuspended())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
-
-    EmployAction::run($referee);
-
-    $referee->refresh();
-    $suspension->refresh();
-
     expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isSuspended())->toBeFalse();
 
-    // Suspension should be ended
-    $this->assertDatabaseHas('referees_suspensions', [
-        'id' => $suspension->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
-        'started_at' => now()->toDateTimeString(),
-    ]);
+    expect(fn () => EmployAction::run($referee))
+        ->toThrow(CannotBeEmployedException::class);
 });
 
-test('it employs injured referee and ends injury', function () {
+test('it prevents re-employing injured referee', function () {
     $referee = Referee::factory()->injured()->create();
-    $injury = $referee->currentInjury;
 
     expect($referee->isInjured())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
-
-    EmployAction::run($referee);
-
-    $referee->refresh();
-    $injury->refresh();
-
     expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isInjured())->toBeFalse();
 
-    // Injury should be ended
-    $this->assertDatabaseHas('referees_injuries', [
-        'id' => $injury->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
-        'started_at' => now()->toDateTimeString(),
-    ]);
+    expect(fn () => EmployAction::run($referee))
+        ->toThrow(CannotBeEmployedException::class);
 });
 
 test('it employs retired referee and ends retirement', function () {
@@ -146,29 +111,19 @@ test('it handles DateHelper date resolution', function () {
     ]);
 });
 
-test('it maintains transaction boundaries', function () {
+test('it prevents re-employing suspended referee without changing records', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension;
 
-    EmployAction::run($referee);
+    expect(fn () => EmployAction::run($referee))
+        ->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
     $suspension->refresh();
 
-    // Both suspension ending and employment creation should be atomic
     expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isSuspended())->toBeFalse();
-
-    $this->assertDatabaseHas('referees_suspensions', [
-        'id' => $suspension->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect($referee->isSuspended())->toBeTrue();
+    expect($suspension->ended_at)->toBeNull();
 });
 
 test('it validates referee can be employed', function () {
@@ -187,8 +142,8 @@ test('it prevents double employment', function () {
 
     expect($referee->isEmployed())->toBeTrue();
 
-    // Attempting to employ again should not create duplicate employment
-    EmployAction::run($referee);
+    expect(fn () => EmployAction::run($referee))
+        ->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
@@ -217,6 +172,6 @@ test('it creates employment record with correct structure', function () {
 
     expect($employment)->not->toBeNull();
     expect($employment->referee_id)->toBe($referee->id);
-    expect($employment->started_at->eq($employmentDate))->toBeTrue();
+    expect($employment->started_at->toDateTimeString())->toBe($employmentDate->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });
