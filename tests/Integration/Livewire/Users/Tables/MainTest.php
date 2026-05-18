@@ -262,7 +262,7 @@ describe('UsersTable Component', function () {
     describe('component state management', function () {
         test('component maintains state between interactions', function () {
             $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
-            $jane = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+            $jane = User::factory()->create(['first_name' => 'SearchExcluded', 'last_name' => 'Fixture']);
 
             // Ensure virtual columns are computed
             $john->fresh();
@@ -274,13 +274,13 @@ describe('UsersTable Component', function () {
             $component
                 ->set('search', 'John')
                 ->assertSee('John Doe')
-                ->assertDontSee('Jane Smith');
+                ->assertDontSee('SearchExcluded Fixture');
 
             // Component should maintain search state
             $component
                 ->call('$refresh')
                 ->assertSee('John Doe')
-                ->assertDontSee('Jane Smith');
+                ->assertDontSee('SearchExcluded Fixture');
         });
 
         test('component handles real-time data updates', function () {
