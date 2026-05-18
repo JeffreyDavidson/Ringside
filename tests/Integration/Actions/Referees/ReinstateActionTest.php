@@ -44,7 +44,7 @@ test('it reinstates referee with specific reinstatement date', function () {
     $suspension->refresh();
 
     expect($referee->isSuspended())->toBeFalse();
-    expect($suspension->ended_at->eq($reinstatementDate))->toBeTrue();
+    expect($suspension->ended_at->toDateTimeString())->toBe($reinstatementDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_suspensions', [
         'id' => $suspension->id,

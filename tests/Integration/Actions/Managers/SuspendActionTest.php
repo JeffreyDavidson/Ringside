@@ -49,14 +49,14 @@ test('it suspends manager with specific suspension date', function () {
 test('it uses StatusTransitionPipeline for suspension', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->currentSuspension())->toBeNull();
+    expect($manager->currentSuspension)->toBeNull();
 
     SuspendAction::run($manager);
 
     $manager->refresh();
 
     // Verify suspension was created through pipeline
-    expect($manager->currentSuspension())->not()->toBeNull();
+    expect($manager->currentSuspension)->not()->toBeNull();
     expect($manager->isSuspended())->toBeTrue();
 
     // Verify suspension record shows proper start date
@@ -159,5 +159,5 @@ test('it creates only one suspension record per action', function () {
 
     // Should create exactly one suspension record
     expect($manager->suspensions()->count())->toBe(1);
-    expect($manager->currentSuspension())->not()->toBeNull();
+    expect($manager->currentSuspension)->not()->toBeNull();
 });

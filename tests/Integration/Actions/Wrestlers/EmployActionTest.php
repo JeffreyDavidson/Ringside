@@ -49,52 +49,20 @@ test('it employs suspended wrestler and ends suspension', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
-
-    EmployAction::run($wrestler);
-
-    $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeFalse();
 
-    // Suspension should be ended
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect(fn () => EmployAction::run($wrestler))
+        ->toThrow(Exception::class);
 });
 
 test('it employs injured wrestler and ends injury', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     expect($wrestler->isInjured())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
-
-    EmployAction::run($wrestler);
-
-    $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
 
-    // Injury should be ended
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect(fn () => EmployAction::run($wrestler))
+        ->toThrow(Exception::class);
 });
 
 test('it employs wrestler and also employs unemployed managers', function () {

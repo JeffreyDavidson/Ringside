@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReleaseAction;
 use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 
@@ -41,11 +42,8 @@ describe('TagTeam Employment Workflows', function () {
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();
 
-            // Re-employ
-            EmployAction::run($released, Carbon::now());
-            $reEmployed = $tagTeam->fresh();
-            expect($reEmployed->isEmployed())->toBeTrue();
-            expect($reEmployed->isReleased())->toBeFalse();
+            expect(fn () => EmployAction::run($released, Carbon::now()))
+                ->toThrow(CannotBeEmployedException::class);
         });
     });
 
@@ -162,7 +160,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // Released tag team capabilities
             expect($released->isEmployed())->toBeFalse();
-            expect($released->canBeEmployed())->toBeTrue(); // Can be re-employed
+            expect($released->canBeEmployed())->toBeFalse(); // Needs current partners before re-employment
         });
     });
 

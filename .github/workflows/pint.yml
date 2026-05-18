@@ -1,4 +1,4 @@
-name: Fix PHP code style issues
+name: PHP code style
 
 on:
   pull_request:
@@ -26,17 +26,31 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@latest
-        with:
-          pintVersion: 1.18.3
+      - name: Install Composer
+        run: |
+          mkdir -p "$RUNNER_TEMP/composer-bin"
+          curl -sS https://getcomposer.org/installer -o "$RUNNER_TEMP/composer-setup.php"
+          php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
+          echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/composer-bin/composer" --version
 
-      - name: Commit styling changes
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
         with:
-          commit_message: 'style: apply Laravel Pint formatting fixes'
-          commit_user_name: Jeffrey Davidson
-          commit_user_email: 3826104+JeffreyDavidson@users.noreply.github.com
-          commit_author: Jeffrey Davidson <3826104+JeffreyDavidson@users.noreply.github.com>
-          commit_options: '--gpg-sign'
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: pint-${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: pint-${{ runner.os }}-composer-
+
+      - name: Add token
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: composer config github-oauth.github.com $GITHUB_TOKEN
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Check PHP code style
+        run: php ./vendor/bin/pint --test

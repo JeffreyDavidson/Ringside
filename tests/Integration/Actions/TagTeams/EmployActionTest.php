@@ -12,7 +12,7 @@ beforeEach(function () {
 });
 
 test('it employs an unemployed tag team', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     expect($tagTeam->isEmployed())->toBeFalse();
 
@@ -30,7 +30,7 @@ test('it employs an unemployed tag team', function () {
 });
 
 test('it employs tag team with specific employment date', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
     $employmentDate = now()->subDays(7);
 
     EmployAction::run($tagTeam, $employmentDate);
@@ -46,43 +46,27 @@ test('it employs tag team with specific employment date', function () {
     ]);
 });
 
-test('it employs retired tag team by ending retirement', function () {
+test('it prevents employing retired tag team directly', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     expect($tagTeam->isRetired())->toBeTrue();
     expect($tagTeam->isEmployed())->toBeFalse();
 
-    EmployAction::run($tagTeam);
-
-    $tagTeam->refresh();
-    expect($tagTeam->isRetired())->toBeFalse();
-    expect($tagTeam->isEmployed())->toBeTrue();
-
-    // Verify retirement record was ended
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Verify employment record was created
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect(fn () => EmployAction::run($tagTeam))
+        ->toThrow(Exception::class);
 });
 
 test('it uses StatusTransitionPipeline for employment', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
-    expect($tagTeam->currentEmployment())->toBeNull();
+    expect($tagTeam->currentEmployment)->toBeNull();
 
     EmployAction::run($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify employment created through pipeline
-    expect($tagTeam->currentEmployment())->not()->toBeNull();
+    expect($tagTeam->currentEmployment)->not()->toBeNull();
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify records show proper dates
@@ -103,7 +87,7 @@ test('it prevents employing already employed tag team', function () {
 });
 
 test('it handles database transactions correctly', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     EmployAction::run($tagTeam);
 
@@ -120,7 +104,7 @@ test('it handles database transactions correctly', function () {
 });
 
 test('it creates new employment period', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
     $originalEmploymentCount = $tagTeam->employments()->count();
 
     EmployAction::run($tagTeam);
@@ -139,7 +123,7 @@ test('it creates new employment period', function () {
 });
 
 test('it uses DateHelper for consistent date handling', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
     $customEmploymentDate = now()->subDays(3)->startOfDay();
 
     EmployAction::run($tagTeam, $customEmploymentDate);
@@ -155,7 +139,7 @@ test('it uses DateHelper for consistent date handling', function () {
 });
 
 test('it handles multiple employment history correctly', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     // Create employment history
     $tagTeam->employments()->create(['started_at' => now()->subDays(30), 'ended_at' => now()->subDays(25)]);
@@ -180,7 +164,7 @@ test('it handles multiple employment history correctly', function () {
 });
 
 test('it preserves employment history during new employment', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     // Create historical employment
     $tagTeam->employments()->create(['started_at' => now()->subDays(20), 'ended_at' => now()->subDays(10)]);
@@ -197,11 +181,11 @@ test('it preserves employment history during new employment', function () {
     expect($tagTeam->employments()->where('ended_at', '!=', null)->count())->toBe(1);
 
     // Current employment should be active
-    expect($tagTeam->currentEmployment())->not()->toBeNull();
+    expect($tagTeam->currentEmployment)->not()->toBeNull();
 });
 
 test('it handles tag team with complex status history', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     // Create complex employment/retirement history
     $tagTeam->employments()->create(['started_at' => now()->subDays(30), 'ended_at' => now()->subDays(25)]);

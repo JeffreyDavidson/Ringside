@@ -51,14 +51,14 @@ test('it suspends tag team with specific suspension date', function () {
 test('it uses StatusTransitionPipeline for suspension', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->currentSuspension())->toBeNull();
+    expect($tagTeam->currentSuspension)->toBeNull();
 
     SuspendAction::run($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify suspension created through pipeline
-    expect($tagTeam->currentSuspension())->not()->toBeNull();
+    expect($tagTeam->currentSuspension)->not()->toBeNull();
     expect($tagTeam->isSuspended())->toBeTrue();
     expect($tagTeam->isEmployed())->toBeTrue();
 
@@ -212,7 +212,7 @@ test('it preserves suspension history during new suspension', function () {
     expect($tagTeam->suspensions()->where('ended_at', '!=', null)->count())->toBe(1);
 
     // Current suspension should be active
-    expect($tagTeam->currentSuspension())->not()->toBeNull();
+    expect($tagTeam->currentSuspension)->not()->toBeNull();
 });
 
 test('it handles tag team with complex employment history', function () {

@@ -100,10 +100,10 @@ describe('MatchResult Model Unit Tests', function () {
             expect(method_exists($MatchResult, 'losers'))->toBeTrue();
         });
 
-        test('has decision relationship method', function () {
+        test('has winner relationship method', function () {
             $MatchResult = new MatchResult();
 
-            expect(method_exists($MatchResult, 'decision'))->toBeTrue();
+            expect(method_exists($MatchResult, 'winner'))->toBeTrue();
         });
     });
 });

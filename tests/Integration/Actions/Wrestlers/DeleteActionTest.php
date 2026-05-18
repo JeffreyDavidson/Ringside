@@ -156,7 +156,7 @@ test('it uses StatusTransitionPipeline with cascade strategies', function () {
     ]);
 
     // Verify manager relationship ended through cascade strategy
-    $this->assertDatabaseHas('wrestler_managers', [
+    $this->assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,
         'fired_at' => now()->toDateTimeString(),
@@ -251,7 +251,7 @@ test('it maintains relationship history integrity', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Old relationship should remain unchanged
-    $this->assertDatabaseHas('wrestler_managers', [
+    $this->assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,
         'hired_at' => now()->subDays(30)->toDateTimeString(),
@@ -259,7 +259,7 @@ test('it maintains relationship history integrity', function () {
     ]);
 
     // Current relationship should be ended
-    $this->assertDatabaseHas('wrestler_managers', [
+    $this->assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,
         'hired_at' => now()->subDays(10)->toDateTimeString(),

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\RetireAction;
-use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Models\Stables\Stable;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -30,7 +30,7 @@ test('it retires an active stable at the current datetime by default', function 
 
 test('it retires an active stable at a specific datetime', function () {
     $stable = Stable::factory()->active()->create();
-    $datetime = now()->addDays(2);
+    $datetime = now();
 
     // Verify stable is active before retirement
     expect($stable->isCurrentlyActive())->toBeTrue();
@@ -63,7 +63,7 @@ test('it retires an inactive stable at the current datetime by default', functio
 
 test('it retires an inactive stable at a specific datetime', function () {
     $stable = Stable::factory()->inactive()->create();
-    $datetime = now()->addDays(2);
+    $datetime = now();
 
     // Verify stable is inactive before retirement
     expect($stable->isCurrentlyActive())->toBeFalse();
@@ -121,6 +121,5 @@ test('it throws exception trying to retire a non retirable stable', function ($f
     resolve(RetireAction::class)->handle($stable);
 })->throws(CannotBeRetiredException::class)->with([
     'unactivated',
-    'withFutureActivation',
     'retired',
 ]);

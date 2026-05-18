@@ -156,7 +156,7 @@ test('it uses StatusTransitionPipeline with cascade strategy', function () {
     // Set up management relationship
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
 
-    expect($manager->currentRetirement())->toBeNull();
+    expect($manager->currentRetirement)->toBeNull();
     expect($manager->currentWrestlers)->toHaveCount(1);
 
     RetireAction::run($manager);
@@ -164,7 +164,7 @@ test('it uses StatusTransitionPipeline with cascade strategy', function () {
     $manager->refresh();
 
     // Verify retirement created through pipeline
-    expect($manager->currentRetirement())->not()->toBeNull();
+    expect($manager->currentRetirement)->not()->toBeNull();
     expect($manager->isRetired())->toBeTrue();
 
     // Verify cascade strategy ended relationships

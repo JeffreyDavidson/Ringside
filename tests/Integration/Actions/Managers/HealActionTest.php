@@ -56,7 +56,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     $manager->refresh();
 
     // Verify injury ended through pipeline
-    expect($manager->currentInjury())->toBeNull();
+    expect($manager->currentInjury)->toBeNull();
     expect($manager->isInjured())->toBeFalse();
 
     // Verify injury record shows proper end date

@@ -48,8 +48,8 @@ class WrestlerRetirementCascadeStrategy
     public static function endTagTeamPartnerships(): callable
     {
         return function (Model $entity, Carbon $date, string $transition): void {
-            // Only cascade on retirement transitions
-            if ($transition !== 'retire') {
+            // Only cascade on career-ending transitions
+            if (! in_array($transition, ['retire', 'release'], true)) {
                 return;
             }
 
@@ -77,8 +77,8 @@ class WrestlerRetirementCascadeStrategy
     public static function endStableMemberships(): callable
     {
         return function (Model $entity, Carbon $date, string $transition): void {
-            // Only cascade on retirement transitions
-            if ($transition !== 'retire') {
+            // Only cascade on career-ending transitions
+            if (! in_array($transition, ['retire', 'release'], true)) {
                 return;
             }
 
@@ -106,8 +106,8 @@ class WrestlerRetirementCascadeStrategy
     public static function endManagerRelationships(): callable
     {
         return function (Model $entity, Carbon $date, string $transition): void {
-            // Only cascade on retirement transitions
-            if ($transition !== 'retire') {
+            // Only cascade on career-ending transitions
+            if (! in_array($transition, ['retire', 'release'], true)) {
                 return;
             }
 
@@ -135,8 +135,8 @@ class WrestlerRetirementCascadeStrategy
     public static function vacateChampionships(): callable
     {
         return function (Model $entity, Carbon $date, string $transition): void {
-            // Only cascade on retirement transitions
-            if ($transition !== 'retire') {
+            // Only cascade on career-ending transitions
+            if (! in_array($transition, ['retire', 'release'], true)) {
                 return;
             }
 
@@ -161,8 +161,8 @@ class WrestlerRetirementCascadeStrategy
     public static function endAllRelationships(): callable
     {
         return function (Model $entity, Carbon $date, string $transition): void {
-            // Only cascade on retirement transitions
-            if ($transition !== 'retire') {
+            // Only cascade on career-ending transitions
+            if (! in_array($transition, ['retire', 'release'], true)) {
                 return;
             }
 

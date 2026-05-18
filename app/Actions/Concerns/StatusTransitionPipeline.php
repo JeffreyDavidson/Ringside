@@ -334,6 +334,20 @@ class StatusTransitionPipeline
         $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
             'ended_at' => $this->effectiveDate,
         ]);
+
+        if (method_exists($this->entity, 'isSuspended') && $this->entity->isSuspended()) {
+            $suspensionTable = $this->getTableName('suspensions');
+            $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
+        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
+            $injuryTable = $this->getTableName('injuries');
+            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
     }
 
     /**
@@ -345,6 +359,20 @@ class StatusTransitionPipeline
         if (method_exists($this->entity, 'isEmployed') && $this->entity->isEmployed()) {
             $employmentTable = $this->getTableName('employments');
             $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
+        if (method_exists($this->entity, 'isSuspended') && $this->entity->isSuspended()) {
+            $suspensionTable = $this->getTableName('suspensions');
+            $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
+                'ended_at' => $this->effectiveDate,
+            ]);
+        }
+
+        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
+            $injuryTable = $this->getTableName('injuries');
+            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
                 'ended_at' => $this->effectiveDate,
             ]);
         }

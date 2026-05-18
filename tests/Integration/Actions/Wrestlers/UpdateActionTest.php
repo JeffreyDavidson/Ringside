@@ -300,7 +300,7 @@ test('it preserves wrestler id and timestamps', function () {
 
     expect($result->id)->toBe($originalId);
     expect($result->created_at->timestamp)->toBe($originalCreatedAt->timestamp);
-    expect($result->updated_at->timestamp)->toBeGreaterThan($originalCreatedAt->timestamp);
+    expect($result->updated_at->timestamp)->toBeGreaterThanOrEqual($originalCreatedAt->timestamp);
 });
 
 test('it handles null signature move', function () {

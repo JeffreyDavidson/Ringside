@@ -46,7 +46,7 @@ class FormModal extends BaseFormModal
             'street_address' => fn () => fake()->streetAddress(),
             'city' => fn () => fake()->city(),
             'state' => fn () => $state,
-            'zipcode' => fn () => (int) Str::of(fake()->postcode())->limit(5)->value(),
+            'zipcode' => fn () => fake('en_US')->numerify('#####'),
         ];
     }
 

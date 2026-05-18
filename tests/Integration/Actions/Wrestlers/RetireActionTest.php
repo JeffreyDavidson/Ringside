@@ -49,14 +49,14 @@ test('it retires wrestler with specific retirement date', function () {
 test('it uses StatusTransitionPipeline for retirement', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->currentRetirement())->toBeNull();
+    expect($wrestler->currentRetirement)->toBeNull();
 
     RetireAction::run($wrestler);
 
     $wrestler->refresh();
 
     // Verify retirement created through pipeline
-    expect($wrestler->currentRetirement())->not()->toBeNull();
+    expect($wrestler->currentRetirement)->not()->toBeNull();
     expect($wrestler->isRetired())->toBeTrue();
 
     $this->assertDatabaseHas('wrestlers_retirements', [
@@ -165,14 +165,14 @@ test('it can retire suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->isEmployed())->toBeTrue();
 
     // Suspended wrestlers can be retired (career-ending situation)
     RetireAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeTrue(); // Suspension record remains
+    expect($wrestler->isSuspended())->toBeFalse();
 
     $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
@@ -196,7 +196,7 @@ test('it can retire injured wrestler', function () {
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue(); // Injury record remains (career-ending injury)
+    expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->isEmployed())->toBeFalse(); // Employment should end
 
     $this->assertDatabaseHas('wrestlers_retirements', [

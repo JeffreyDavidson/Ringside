@@ -56,7 +56,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     $wrestler->refresh();
 
     // Verify injury ended through pipeline
-    expect($wrestler->currentInjury())->toBeNull();
+    expect($wrestler->currentInjury)->toBeNull();
     expect($wrestler->isInjured())->toBeFalse();
 
     // Verify the specific injury record was updated

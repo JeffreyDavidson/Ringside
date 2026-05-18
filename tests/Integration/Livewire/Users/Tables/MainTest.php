@@ -131,7 +131,7 @@ describe('UsersTable Component', function () {
             ]);
             $bob = User::factory()->create([
                 'first_name' => 'Bob',
-                'last_name' => 'Johnson',
+                'last_name' => 'Baker',
                 'email' => 'bob@example.com',
             ]);
 
@@ -147,21 +147,21 @@ describe('UsersTable Component', function () {
                 ->set('search', 'John')
                 ->assertSee('John Smith')
                 ->assertDontSee('Jane Doe')
-                ->assertDontSee('Bob Johnson');
+                ->assertDontSee('Bob Baker');
 
             // Test search by last name
             $component
                 ->set('search', 'Doe')
                 ->assertSee('Jane Doe')
                 ->assertDontSee('John Smith')
-                ->assertDontSee('Bob Johnson');
+                ->assertDontSee('Bob Baker');
 
             // Test clearing search
             $component
                 ->set('search', '')
                 ->assertSee('John Smith')
                 ->assertSee('Jane Doe')
-                ->assertSee('Bob Johnson');
+                ->assertSee('Bob Baker');
         });
 
         test('search functionality filters users by email correctly', function () {
@@ -262,7 +262,7 @@ describe('UsersTable Component', function () {
     describe('component state management', function () {
         test('component maintains state between interactions', function () {
             $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
-            $jane = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+            $jane = User::factory()->create(['first_name' => 'SearchExcluded', 'last_name' => 'Fixture']);
 
             // Ensure virtual columns are computed
             $john->fresh();
@@ -274,13 +274,13 @@ describe('UsersTable Component', function () {
             $component
                 ->set('search', 'John')
                 ->assertSee('John Doe')
-                ->assertDontSee('Jane Smith');
+                ->assertDontSee('SearchExcluded Fixture');
 
             // Component should maintain search state
             $component
                 ->call('$refresh')
                 ->assertSee('John Doe')
-                ->assertDontSee('Jane Smith');
+                ->assertDontSee('SearchExcluded Fixture');
         });
 
         test('component handles real-time data updates', function () {

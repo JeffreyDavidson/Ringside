@@ -44,7 +44,7 @@ test('it heals referee with specific recovery date', function () {
     $injury->refresh();
 
     expect($referee->isInjured())->toBeFalse();
-    expect($injury->ended_at->eq($recoveryDate))->toBeTrue();
+    expect($injury->ended_at->toDateTimeString())->toBe($recoveryDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_injuries', [
         'id' => $injury->id,

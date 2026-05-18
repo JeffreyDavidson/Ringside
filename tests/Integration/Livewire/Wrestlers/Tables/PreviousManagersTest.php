@@ -132,7 +132,7 @@ describe('Previous Managers Table Component', function () {
         $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertOk();
-        $table->assertSee('No items found, try to broaden your search');
+        $table->assertSee('No records found.');
         expect(true)->toBeTrue();
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'rendering');
 });
@@ -261,7 +261,7 @@ describe('Previous Managers Table Business Logic', function () {
 
         // Should still work but not show the deleted manager
         $table->assertOk();
-        $table->assertSee('No items found, try to broaden your search');
+        $table->assertSee('No records found.');
         expect(true)->toBeTrue();
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'business', 'deletion');
 });

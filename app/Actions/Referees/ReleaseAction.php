@@ -58,9 +58,8 @@ class ReleaseAction
                 }
             }
 
-            $currentEmployment = $referee->currentEmployment()->first();
-            if ($currentEmployment) {
-                $currentEmployment->update(['ended_at' => $releaseDate]);
+            if ($referee->currentEmployment()->exists()) {
+                $referee->employments()->whereNull('ended_at')->update(['ended_at' => $releaseDate]);
                 $referee->update(['status' => EmploymentStatus::Released]);
             }
         });
