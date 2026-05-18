@@ -15,13 +15,13 @@ test('it reinstates a suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->isEmployed())->toBeTrue();
 
     ReinstateAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse(); // Reinstatement doesn't automatically employ
+    expect($wrestler->isEmployed())->toBeTrue();
 
     // Verify suspension record was ended
     $this->assertDatabaseHas('wrestlers_suspensions', [
@@ -30,23 +30,14 @@ test('it reinstates a suspended wrestler', function () {
     ]);
 });
 
-test('it reinstates an injured wrestler', function () {
+test('it prevents reinstating an injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     expect($wrestler->isInjured())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->isEmployed())->toBeTrue();
 
-    ReinstateAction::run($wrestler);
-
-    $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse(); // Reinstatement doesn't automatically employ
-
-    // Verify injury record was ended
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
+    expect(fn () => ReinstateAction::run($wrestler))
+        ->toThrow(Exception::class);
 });
 
 test('it reinstates wrestler with specific reinstatement date', function () {
@@ -104,7 +95,7 @@ test('it handles DateHelper date resolution', function () {
     ]);
 });
 
-test('it reinstates wrestler with both suspension and injury', function () {
+test('it prevents reinstating wrestler with both suspension and injury', function () {
     // Create employed wrestler, then suspend and injure them
     $wrestler = Wrestler::factory()->employed()->create();
 
@@ -123,38 +114,18 @@ test('it reinstates wrestler with both suspension and injury', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue(); // Still employed despite suspension/injury
 
-    ReinstateAction::run($wrestler);
-
-    $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeFalse();
-    expect($wrestler->isInjured())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed
-
-    // Both suspension and injury should be ended
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
+    expect(fn () => ReinstateAction::run($wrestler))
+        ->toThrow(Exception::class);
 });
 
-test('it handles multiple suspension/injury records correctly', function () {
-    $wrestler = Wrestler::factory()->create();
+test('it handles multiple suspension records correctly', function () {
+    $wrestler = Wrestler::factory()->employed()->create();
 
     // Create old records (already ended)
     $wrestler->suspensions()->create([
         'started_at' => now()->subDays(60),
         'ended_at' => now()->subDays(40),
         'notes' => 'Old suspension',
-    ]);
-
-    $wrestler->injuries()->create([
-        'started_at' => now()->subDays(50),
-        'ended_at' => now()->subDays(30),
     ]);
 
     // Create current active records
@@ -164,28 +135,16 @@ test('it handles multiple suspension/injury records correctly', function () {
         'notes' => 'Current suspension',
     ]);
 
-    $currentInjury = $wrestler->injuries()->create([
-        'started_at' => now()->subDays(15),
-        'ended_at' => null,
-    ]);
-
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
 
     ReinstateAction::run($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
-    expect($wrestler->isInjured())->toBeFalse();
 
-    // Only current records should be ended
+    // Only current suspension should be ended
     $this->assertDatabaseHas('wrestlers_suspensions', [
         'id' => $currentSuspension->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'id' => $currentInjury->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -194,13 +153,6 @@ test('it handles multiple suspension/injury records correctly', function () {
         'wrestler_id' => $wrestler->id,
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(40)->toDateTimeString(),
-        'notes' => 'Old suspension',
-    ]);
-
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => now()->subDays(50)->toDateTimeString(),
-        'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
 });
 
@@ -253,7 +205,7 @@ test('it maintains status integrity after reinstatement', function () {
 
     // Verify initial state
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->isRetired())->toBeFalse();
 
@@ -261,9 +213,9 @@ test('it maintains status integrity after reinstatement', function () {
 
     $wrestler->refresh();
 
-    // After reinstatement, wrestler should be in a clean unemployed state
+    // After reinstatement, wrestler should be active under the same employment.
     expect($wrestler->isSuspended())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->isRetired())->toBeFalse();
 });

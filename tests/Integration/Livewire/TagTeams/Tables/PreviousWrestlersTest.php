@@ -127,7 +127,7 @@ describe('Previous Wrestlers Table Component', function () {
         $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertOk();
-        $table->assertSee('No items found, try to broaden your search');
+        $table->assertSee('No records found.');
     });
 });
 

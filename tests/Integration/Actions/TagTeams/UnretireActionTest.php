@@ -67,15 +67,15 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     // Get current retirement to verify it gets ended
     $currentRetirement = $tagTeam->currentRetirement;
     expect($currentRetirement)->not()->toBeNull();
-    expect($tagTeam->currentEmployment())->toBeNull();
+    expect($tagTeam->currentEmployment)->toBeNull();
 
     UnretireAction::run($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify retirement ended and employment created through pipeline
-    expect($tagTeam->currentRetirement())->toBeNull();
-    expect($tagTeam->currentEmployment())->not()->toBeNull();
+    expect($tagTeam->currentRetirement)->toBeNull();
+    expect($tagTeam->currentEmployment)->not()->toBeNull();
     expect($tagTeam->isRetired())->toBeFalse();
     expect($tagTeam->isEmployed())->toBeTrue();
 });
@@ -90,7 +90,7 @@ test('it prevents unretiring non-retired tag team', function () {
 });
 
 test('it prevents unretiring unemployed tag team', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     expect($tagTeam->isEmployed())->toBeFalse();
     expect($tagTeam->isRetired())->toBeFalse();
@@ -182,7 +182,7 @@ test('it uses DateHelper for consistent date handling', function () {
 });
 
 test('it handles multiple retirement history correctly', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     // Create multiple retirement history
     $tagTeam->retirements()->create(['started_at' => now()->subDays(40), 'ended_at' => now()->subDays(35)]);
@@ -212,7 +212,7 @@ test('it handles multiple retirement history correctly', function () {
 });
 
 test('it preserves employment and retirement history', function () {
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->unemployed()->create();
 
     // Create complex history
     $tagTeam->employments()->create(['started_at' => now()->subDays(50), 'ended_at' => now()->subDays(45)]);
@@ -232,8 +232,8 @@ test('it preserves employment and retirement history', function () {
     expect($tagTeam->retirements()->count())->toBe($originalRetirementCount);
 
     // Current retirement should be ended, current employment should be active
-    expect($tagTeam->currentRetirement())->toBeNull();
-    expect($tagTeam->currentEmployment())->not()->toBeNull();
+    expect($tagTeam->currentRetirement)->toBeNull();
+    expect($tagTeam->currentEmployment)->not()->toBeNull();
 });
 
 test('it handles unretirement with cascade effects', function () {
@@ -281,6 +281,6 @@ test('it transitions from retired to employed seamlessly', function () {
     expect($tagTeam->isSuspended())->toBeFalse();
 
     // Should have active employment and no active retirement
-    expect($tagTeam->currentEmployment())->not()->toBeNull();
-    expect($tagTeam->currentRetirement())->toBeNull();
+    expect($tagTeam->currentEmployment)->not()->toBeNull();
+    expect($tagTeam->currentRetirement)->toBeNull();
 });

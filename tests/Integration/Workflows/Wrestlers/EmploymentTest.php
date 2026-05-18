@@ -143,8 +143,8 @@ describe('Wrestler Employment Workflows', function () {
             UnretireAction::run($retired, Carbon::now());
             $unretired = $wrestler->fresh();
             expect($unretired->isRetired())->toBeFalse();
-            expect($unretired->isEmployed())->toBeFalse(); // Still unemployed after unretiring
-            expect($unretired->status)->toBe(EmploymentStatus::Released);
+            expect($unretired->isEmployed())->toBeTrue();
+            expect($unretired->status)->toBe(EmploymentStatus::Employed);
         });
 
         test('full career lifecycle workflow with multiple state changes', function () {
@@ -181,15 +181,15 @@ describe('Wrestler Employment Workflows', function () {
             expect($wrestler->fresh()->isRetired())->toBeTrue();
             expect($wrestler->fresh()->isEmployed())->toBeFalse();
 
-            // 7. Unretire (back to released)
+            // 7. Unretire and employ immediately
             UnretireAction::run($wrestler, Carbon::now());
             $final = $wrestler->fresh();
             expect($final->isRetired())->toBeFalse();
-            expect($final->isEmployed())->toBeFalse();
-            expect($final->status)->toBe(EmploymentStatus::Released);
+            expect($final->isEmployed())->toBeTrue();
+            expect($final->status)->toBe(EmploymentStatus::Employed);
 
             // Verify all employment periods and status changes are recorded
-            expect($final->employments()->count())->toBe(1);
+            expect($final->employments()->count())->toBe(2);
             expect($final->suspensions()->count())->toBe(1);
             expect($final->injuries()->count())->toBe(1);
             expect($final->retirements()->count())->toBe(1);

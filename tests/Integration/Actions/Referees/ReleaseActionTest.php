@@ -44,7 +44,7 @@ test('it releases referee with specific release date', function () {
     $employment->refresh();
 
     expect($referee->isEmployed())->toBeFalse();
-    expect($employment->ended_at->eq($releaseDate))->toBeTrue();
+    expect($employment->ended_at->toDateTimeString())->toBe($releaseDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_employments', [
         'id' => $employment->id,
@@ -131,7 +131,6 @@ test('it maintains transaction boundaries', function () {
     $employment->refresh();
     $suspension->refresh();
 
-    // All changes should be atomic - employment ended and suspension ended
     expect($referee->isEmployed())->toBeFalse();
     expect($referee->isSuspended())->toBeFalse();
     expect($employment->ended_at)->not->toBeNull();

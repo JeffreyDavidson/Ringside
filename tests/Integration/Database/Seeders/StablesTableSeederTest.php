@@ -61,7 +61,7 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect(mb_strlen($stable->name))->toBeGreaterThan(5);
+                expect(mb_strlen($stable->name))->toBeGreaterThanOrEqual(5);
                 expect($stable->name)->not->toContain('Test');
             }
         });

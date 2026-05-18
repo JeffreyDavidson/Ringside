@@ -37,8 +37,11 @@ class RestoreAction
         DB::transaction(function () use ($manager): void {
             $manager->restore();
 
-            // Note: No automatic relationship restoration to avoid conflicts.
-            // All employment and management relationships must be re-established explicitly using separate actions.
+            $restorationDate = now();
+
+            $manager->employments()->whereNull('ended_at')->update(['ended_at' => $restorationDate]);
+            $manager->removeFromCurrentWrestlers($restorationDate);
+            $manager->removeFromCurrentTagTeams($restorationDate);
         });
     }
 }

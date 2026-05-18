@@ -74,52 +74,20 @@ test('it employs suspended manager and ends suspension', function () {
     $manager = Manager::factory()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
-
-    EmployAction::run($manager);
-
-    $manager->refresh();
     expect($manager->isEmployed())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
 
-    // Suspension should be ended
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect(fn () => EmployAction::run($manager))
+        ->toThrow(Exception::class);
 });
 
 test('it employs injured manager and ends injury', function () {
     $manager = Manager::factory()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
-
-    EmployAction::run($manager);
-
-    $manager->refresh();
     expect($manager->isEmployed())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
 
-    // Injury should be ended
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
-        'started_at' => now()->toDateTimeString(),
-        'ended_at' => null,
-    ]);
+    expect(fn () => EmployAction::run($manager))
+        ->toThrow(Exception::class);
 });
 
 test('it prevents employing already employed manager', function () {

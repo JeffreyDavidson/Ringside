@@ -49,14 +49,14 @@ test('it injures manager with specific injury date', function () {
 test('it uses StatusTransitionPipeline for injury', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->currentInjury())->toBeNull();
+    expect($manager->currentInjury)->toBeNull();
 
     InjureAction::run($manager);
 
     $manager->refresh();
 
     // Verify injury was created through pipeline
-    expect($manager->currentInjury())->not()->toBeNull();
+    expect($manager->currentInjury)->not()->toBeNull();
     expect($manager->isInjured())->toBeTrue();
 
     // Verify injury record shows proper start date

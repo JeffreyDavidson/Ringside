@@ -9,7 +9,6 @@ use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
-use App\Models\Concerns\ValidatesRetirement;
 use App\Models\Concerns\ValidatesStableLifecycle;
 use App\Models\Contracts\Debutable;
 use App\Models\Contracts\Retirable;
@@ -71,7 +70,6 @@ describe('Stable Model Unit Tests', function () {
             expect(Stable::class)->usesTrait(IsRetirable::class);
             expect(Stable::class)->usesTrait(SoftDeletes::class);
             expect(Stable::class)->usesTrait(ValidatesStableLifecycle::class);
-            expect(Stable::class)->usesTrait(ValidatesRetirement::class);
         });
     });
 

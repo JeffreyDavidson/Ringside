@@ -66,15 +66,15 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     // Get current retirement to verify it gets ended
     $currentRetirement = $manager->currentRetirement;
     expect($currentRetirement)->not()->toBeNull();
-    expect($manager->currentEmployment())->toBeNull();
+    expect($manager->currentEmployment)->toBeNull();
 
     UnretireAction::run($manager);
 
     $manager->refresh();
 
     // Verify retirement ended and employment created through pipeline
-    expect($manager->currentRetirement())->toBeNull();
-    expect($manager->currentEmployment())->not()->toBeNull();
+    expect($manager->currentRetirement)->toBeNull();
+    expect($manager->currentEmployment)->not()->toBeNull();
     expect($manager->isRetired())->toBeFalse();
     expect($manager->isEmployed())->toBeTrue();
 
@@ -205,7 +205,7 @@ test('it preserves retirement history during unretirement', function () {
     expect($manager->retirements()->whereNull('ended_at')->count())->toBe(0);
 
     // Current retirement should be null
-    expect($manager->currentRetirement())->toBeNull();
+    expect($manager->currentRetirement)->toBeNull();
 });
 
 test('it handles manager with complex status history', function () {

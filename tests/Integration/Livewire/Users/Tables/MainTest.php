@@ -131,7 +131,7 @@ describe('UsersTable Component', function () {
             ]);
             $bob = User::factory()->create([
                 'first_name' => 'Bob',
-                'last_name' => 'Johnson',
+                'last_name' => 'Baker',
                 'email' => 'bob@example.com',
             ]);
 
@@ -147,21 +147,21 @@ describe('UsersTable Component', function () {
                 ->set('search', 'John')
                 ->assertSee('John Smith')
                 ->assertDontSee('Jane Doe')
-                ->assertDontSee('Bob Johnson');
+                ->assertDontSee('Bob Baker');
 
             // Test search by last name
             $component
                 ->set('search', 'Doe')
                 ->assertSee('Jane Doe')
                 ->assertDontSee('John Smith')
-                ->assertDontSee('Bob Johnson');
+                ->assertDontSee('Bob Baker');
 
             // Test clearing search
             $component
                 ->set('search', '')
                 ->assertSee('John Smith')
                 ->assertSee('Jane Doe')
-                ->assertSee('Bob Johnson');
+                ->assertSee('Bob Baker');
         });
 
         test('search functionality filters users by email correctly', function () {

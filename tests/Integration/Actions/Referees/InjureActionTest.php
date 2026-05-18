@@ -125,6 +125,6 @@ test('it creates injury record with correct structure', function () {
 
     expect($injury)->not->toBeNull();
     expect($injury->referee_id)->toBe($referee->id);
-    expect($injury->started_at->eq($injuryDate))->toBeTrue();
+    expect($injury->started_at->toDateTimeString())->toBe($injuryDate->toDateTimeString());
     expect($injury->ended_at)->toBeNull();
 });

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\RestoreAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\CannotBeRestoredException;
+use App\Exceptions\Data\CannotBeRestoredException;
 use App\Models\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
