@@ -26,11 +26,12 @@ test('it unretires a retired referee', function () {
     $retirement->refresh();
 
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->isEmployed())->toBeTrue();
     expect($retirement->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseMissing('referees_employments', [
+    $this->assertDatabaseHas('referees_employments', [
         'referee_id' => $referee->id,
+        'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
@@ -46,7 +47,7 @@ test('it unretires referee with specific unretirement date', function () {
     $retirement->refresh();
 
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->isEmployed())->toBeTrue();
     expect($retirement->ended_at->toDateTimeString())->toBe($unretiredDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_retirements', [
@@ -54,8 +55,9 @@ test('it unretires referee with specific unretirement date', function () {
         'ended_at' => $unretiredDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseMissing('referees_employments', [
+    $this->assertDatabaseHas('referees_employments', [
         'referee_id' => $referee->id,
+        'started_at' => $unretiredDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
@@ -71,7 +73,7 @@ test('it uses StatusTransitionPipeline for consistent unretirement', function ()
     $referee->refresh();
 
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->isEmployed())->toBeTrue();
 });
 
 test('it handles DateHelper date resolution', function () {
@@ -88,8 +90,9 @@ test('it handles DateHelper date resolution', function () {
         'ended_at' => $unretiredDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseMissing('referees_employments', [
+    $this->assertDatabaseHas('referees_employments', [
         'referee_id' => $referee->id,
+        'started_at' => $unretiredDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
@@ -102,7 +105,7 @@ test('it validates referee can be unretired', function () {
 
     $referee->refresh();
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->isEmployed())->toBeTrue();
 });
 
 test('it throws exception when referee cannot be unretired', function () {
@@ -132,7 +135,7 @@ test('it preserves retirement history', function () {
     ]);
 });
 
-test('it leaves referee unemployed after unretirement', function () {
+test('it restores referee employment after unretirement', function () {
     $referee = Referee::factory()->retired()->create();
 
     expect($referee->isEmployed())->toBeFalse();
@@ -140,5 +143,10 @@ test('it leaves referee unemployed after unretirement', function () {
     UnretireAction::run($referee);
 
     $referee->refresh();
-    expect($referee->currentEmployment)->toBeNull();
+    $employment = $referee->currentEmployment;
+
+    expect($employment)->not->toBeNull();
+    expect($employment->referee_id)->toBe($referee->id);
+    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect($employment->ended_at)->toBeNull();
 });
