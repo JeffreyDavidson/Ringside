@@ -1,0 +1,289 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\Referees\Tables;
+
+use App\Actions\Referees\EmployAction;
+use App\Actions\Referees\HealAction;
+use App\Actions\Referees\InjureAction;
+use App\Actions\Referees\ReinstateAction;
+use App\Actions\Referees\ReleaseAction;
+use App\Actions\Referees\RestoreAction;
+use App\Actions\Referees\RetireAction;
+use App\Actions\Referees\SuspendAction;
+use App\Actions\Referees\UnretireAction;
+use App\Builders\Roster\RefereeBuilder;
+use App\Enums\Shared\EmploymentStatus;
+use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\CannotBeEmployedException;
+use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Exceptions\Roster\CannotBeReleasedException;
+use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Exceptions\Roster\CannotBeUnretiredException;
+use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
+use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Referees\Components\Actions;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Filter;
+use App\Livewire\Table\Filters\SelectFilter;
+use App\Models\Referees\Referee;
+use Exception;
+use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
+
+class Main extends BaseTable
+{
+    protected bool $showActionColumn = true;
+
+    protected string $databaseTableName = 'referees';
+
+    protected string $routeBasePath = 'referees';
+
+    protected string $resourceName = 'referees';
+
+    /**
+     * @return RefereeBuilder<Referee>
+     */
+    public function builder(): RefereeBuilder
+    {
+        return Referee::query()
+            ->with('firstEmployment')
+            ->oldest('last_name');
+    }
+
+    public function configure(): void
+    {
+        Gate::authorize('viewList', Referee::class);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Column>
+     */
+    public function columns(): array
+    {
+        return [
+            Column::make(__('referees.name'), 'full_name')
+                ->searchable(function (Builder $builder, string $searchTerm) {
+                    $builder->orWhere('first_name', 'like', '%'.$searchTerm.'%')
+                        ->orWhere('last_name', 'like', '%'.$searchTerm.'%');
+                }),
+            Column::make(__('core.status'), 'status')
+                ->label(fn (Referee $row) => $row->status->label())
+                ->excludeFromColumnSelect(),
+            FirstEmploymentDateColumn::make(__('employments.started_at')),
+        ];
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array<int, Filter>
+     */
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+                ->setFilterPillTitle(__('core.status'))
+                ->options([
+                    '' => __('core.all'),
+                    'employed' => 'Employed',
+                    'future_employment' => 'Awaiting Employment',
+                    'released' => 'Released',
+                    'unemployed' => 'Unemployed',
+                    'retired' => 'Retired',
+                ])
+                ->filter(function (RefereeBuilder $builder, string $value) {
+                    /** @var RefereeBuilder<Referee> $builder */
+                    match ($value) {
+                        'employed' => $builder->employed(),
+                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'released' => $builder->released(),
+                        'unemployed' => $builder->unemployed(),
+                        'retired' => $builder->retired(),
+                        default => null,
+                    };
+                }),
+            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'referees_employments.started_at', 'referees_employments.ended_at'),
+        ];
+    }
+
+    public function delete(Referee $referee): void
+    {
+        $this->deleteModel($referee);
+    }
+
+    /**
+     * Clear a referee.
+     */
+    public function clearFromInjury(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('clearFromInjury', $referee);
+
+        try {
+            resolve(HealAction::class)->handle($referee);
+        } catch (CannotBeClearedFromInjuryException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Employ a referee.
+     */
+    public function employ(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('employ', $referee);
+
+        try {
+            resolve(EmployAction::class)->handle($referee);
+        } catch (CannotBeEmployedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Injure a referee.
+     */
+    public function injure(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('injure', $referee);
+
+        try {
+            resolve(InjureAction::class)->handle($referee);
+        } catch (CannotBeInjuredException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Reinstate a referee.
+     */
+    public function reinstate(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('reinstate', $referee);
+
+        try {
+            resolve(ReinstateAction::class)->handle($referee);
+        } catch (CannotBeReinstatedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Release a referee.
+     */
+    public function release(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('release', $referee);
+
+        try {
+            resolve(ReleaseAction::class)->handle($referee);
+        } catch (CannotBeReleasedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Retire a referee.
+     */
+    public function retire(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('retire', $referee);
+
+        try {
+            resolve(RetireAction::class)->handle($referee);
+        } catch (CannotBeRetiredException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Restore a deleted referee.
+     */
+    public function restore(int $refereeId): RedirectResponse
+    {
+        $referee = Referee::onlyTrashed()->findOrFail($refereeId);
+
+        Gate::authorize('restore', Referee::class);
+
+        try {
+            resolve(RestoreAction::class)->handle($referee);
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Suspend a referee.
+     */
+    public function suspend(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('suspend', $referee);
+
+        try {
+            resolve(SuspendAction::class)->handle($referee);
+        } catch (CannotBeSuspendedException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    /**
+     * Unretire a referee.
+     */
+    public function unretire(Referee $referee): RedirectResponse
+    {
+        Gate::authorize('unretire', $referee);
+
+        try {
+            resolve(UnretireAction::class)->handle($referee);
+        } catch (CannotBeUnretiredException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return back();
+    }
+
+    public function handleRefereeAction(string $action, int $refereeId): void
+    {
+        $referee = Referee::findOrFail($refereeId);
+
+        // Delegate to the Actions component
+        $actionsComponent = new Actions();
+        $actionsComponent->referee = $referee;
+
+        match ($action) {
+            'employ' => $actionsComponent->employ(),
+            'release' => $actionsComponent->release(),
+            'retire' => $actionsComponent->retire(),
+            'unretire' => $actionsComponent->unretire(),
+            'suspend' => $actionsComponent->suspend(),
+            'reinstate' => $actionsComponent->reinstate(),
+            'injure' => $actionsComponent->injure(),
+            'heal' => $actionsComponent->healFromInjury(),
+            'restore' => $actionsComponent->restore(),
+            default => null,
+        };
+    }
+}

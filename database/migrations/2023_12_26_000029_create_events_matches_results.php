@@ -1,12 +1,14 @@
 <?php
 
-use App\Models\EventMatch;
-use App\Models\MatchDecision;
+declare(strict_types=1);
+
+use App\Models\Matches\EventMatch;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -14,9 +16,10 @@ return new class extends Migration {
     {
         Schema::create('events_matches_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(EventMatch::class);
+            $table->foreignIdFor(EventMatch::class, 'match_id');
             $table->morphs('winner');
-            $table->foreignIdFor(MatchDecision::class);
+            // MatchDecision was converted to an enum, so we use unsignedBigInteger
+            $table->unsignedBigInteger('match_decision_id');
             $table->timestamps();
         });
     }

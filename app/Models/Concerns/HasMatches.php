@@ -4,31 +4,64 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Models\EventMatch;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use App\Models\Matches\EventMatch;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @phpstan-require-implements \App\Models\Contracts\Bookable
+ * Provides match relationships for models that can have matches.
+ *
+ * This trait provides methods for accessing matches associated with
+ * a model. It's designed to be used by models that have a direct relationship
+ * with matches, such as Event models.
+ *
+ * @example
+ * ```php
+ * class Event extends Model
+ * {
+ *     use HasMatches;
+ * }
+ *
+ * $event = Event::find(1);
+ * $allMatches = $event->matches;
+ * $matchCount = $event->matches()->count();
+ * ```
  */
 trait HasMatches
 {
     /**
-     * Retrieve the event matches participated by the model.
+     * Get all event matches associated with this model.
      *
-     * @return MorphToMany<EventMatch, $this>
+     * Returns all event matches regardless of their status or outcome.
+     *
+     * @return HasMany<EventMatch, $this>
+     *                                    A relationship instance for accessing all matches
+     *
+     * @example
+     * ```php
+     * $event = Event::find(1);
+     * $allMatches = $event->matches;
+     * $matchCount = $event->matches()->count();
+     * ```
      */
-    public function previousMatches(): MorphToMany
+    public function matches(): HasMany
     {
-        return $this->matches()
-            ->join('events', 'event_matches.event_id', '=', 'events.id')
-            ->where('events.date', '<', today());
+        return $this->hasMany(EventMatch::class);
     }
 
     /**
-     * Check to see if the model is bookable.
+     * Get event matches for a specific model that has matches.
+     *
+     * This method is designed to be overridden by models that need to specify
+     * a different foreign key or table name for the matches relationship.
+     *
+     * @param  string  $foreignKey  The foreign key to use for the relationship
+     * @return HasMany<EventMatch, $this>
+     *                                    A relationship instance for accessing matches
      */
-    public function isBookable(): bool
+    protected function getMatchesRelation(?string $foreignKey = null): HasMany
     {
-        return ! ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
+        $key = $foreignKey ?? $this->getForeignKey();
+
+        return $this->hasMany(EventMatch::class, $key);
     }
 }

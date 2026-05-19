@@ -1,5 +1,5 @@
 @forelse($matches as $match)
-    <div class="mb-12 d-flex flex-column align-items-center">
+    <div class="mb-12 flex flex-col items-center">
         @if ($loop->last)
             <h3>Main Event</h3>
         @else
@@ -26,10 +26,10 @@
         <p>{{ $match->matchType->name }} Match</p>
 
         <div class="flex-row">
-            @foreach ($match->competitors->propertlyFormattedCompetitors() as $eventMatchCompetitors)
-                @foreach ($eventMatchCompetitors as $eventMatchCompetitor)
+            @foreach ($match->competitors->propertlyFormattedCompetitors() as $MatchCompetitors)
+                @foreach ($MatchCompetitors as $MatchCompetitor)
                     @php
-                        $competitor = $eventMatchCompetitor->competitor;
+                        $competitor = $MatchCompetitor->competitor;
                         $resource = str($competitor->getTable())->replace('_', '-')->value();
                     @endphp
 

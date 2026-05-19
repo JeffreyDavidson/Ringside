@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
-
+/**
+ * Base contract for models that can be booked.
+ *
+ * This interface provides the minimal contract for bookable entities,
+ * containing only the common isBookable() method.
+ */
 interface Bookable
 {
-    public function matches(): MorphToMany;
+    /**
+     * Determine if the entity is eligible to be booked.
+     */
+    public function isBookable(): bool;
 }

@@ -4,58 +4,44 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\CannotBeSuspendedException;
-use App\Models\Referee;
+use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Models\Referees\Referee;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class SuspendAction extends BaseRefereeAction
+class SuspendAction
 {
     use AsAction;
 
     /**
      * Suspend a referee.
      *
-     * @throws CannotBeSuspendedException
+     * This handles the complete referee suspension workflow:
+     * - Validates the referee can be suspended (currently employed, not already suspended)
+     * - Creates a suspension record with the specified start date
+     * - Removes the referee from active match officiating duties
+     * - Maintains employment status while restricting availability
+     *
+     * @param  Referee  $referee  The referee to suspend
+     * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
+     * @throws CannotBeSuspendedException When referee cannot be suspended due to business rules
+     *
+     * @example
+     * ```php
+     * // Suspend referee immediately
+     * SuspendAction::run($referee);
+     *
+     * // Schedule suspension for future date
+     * SuspendAction::run($referee, Carbon::parse('2024-12-31'));
+     * ```
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void
     {
-        $this->ensureCanBeSuspended($referee);
+        $referee->ensureCanBeSuspended();
 
-        $suspensionDate ??= now();
+        $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
-        $this->refereeRepository->suspend($referee, $suspensionDate);
-    }
-
-    /**
-     * Ensure a referee can be suspended.
-     *
-     * @throws CannotBeSuspendedException
-     */
-    private function ensureCanBeSuspended(Referee $referee): void
-    {
-        if ($referee->isUnemployed()) {
-            throw CannotBeSuspendedException::unemployed();
-        }
-
-        if ($referee->isReleased()) {
-            throw CannotBeSuspendedException::released();
-        }
-
-        if ($referee->isRetired()) {
-            throw CannotBeSuspendedException::retired();
-        }
-
-        if ($referee->hasFutureEmployment()) {
-            throw CannotBeSuspendedException::hasFutureEmployment();
-        }
-
-        if ($referee->isSuspended()) {
-            throw CannotBeSuspendedException::suspended();
-        }
-
-        if ($referee->isInjured()) {
-            throw CannotBeSuspendedException::injured();
-        }
+        $referee->suspensions()->create(['started_at' => $suspensionDate]);
     }
 }

@@ -4,31 +4,56 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Modals;
 
-use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Managers\ManagerForm;
-use App\Models\Manager;
-use Illuminate\Support\Carbon;
+use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\GeneratesDummyData;
+use App\Livewire\Managers\Forms\CreateEditForm;
+use App\Models\Managers\Manager;
+use Illuminate\View\View;
 
 /**
- * @extends BaseModal<ManagerForm, Manager>
+ * @extends BaseFormModal<CreateEditForm, Manager>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
-    protected string $modalFormPath = 'managers.modals.form-modal';
+    use GeneratesDummyData;
 
-    protected string $modelTitleField = 'full_name';
-
-    protected $modelForm;
-
-    protected $modelType;
-
-    public function fillDummyFields(): void
+    public function mount(mixed $modelId = null): void
     {
-        /** @var Carbon|null $datetime */
-        $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
+        parent::mount($modelId);
 
-        $this->modelForm->first_name = fake()->firstName();
-        $this->modelForm->last_name = fake()->lastName();
-        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
+        // Override title field to use full_name for managers
+        $this->modelTitleField = 'full_name';
+        $this->titleField = 'full_name';
+    }
+
+    public CreateEditForm $form;
+
+    protected function getFormClass(): string
+    {
+        return CreateEditForm::class;
+    }
+
+    protected function getModelClass(): string
+    {
+        return Manager::class;
+    }
+
+    protected function getModalPath(): string
+    {
+        return 'livewire.managers.modals.form-modal';
+    }
+
+    protected function getDummyDataFields(): array
+    {
+        return [
+            'first_name' => fn () => fake()->firstName(),
+            'last_name' => fn () => fake()->lastName(),
+            'start_date' => fn () => $this->generateOptionalStartDate(),
+        ];
+    }
+
+    public function render(): View
+    {
+        return view($this->modalFormPath ?? 'livewire.managers.modals.form-modal');
     }
 }

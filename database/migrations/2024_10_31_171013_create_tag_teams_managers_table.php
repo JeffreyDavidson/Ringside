@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -15,7 +18,7 @@ return new class extends Migration {
             $table->foreignId('tag_team_id')->constrained();
             $table->foreignId('manager_id')->constrained();
             $table->dateTime('hired_at');
-            $table->dateTime('left_at')->nullable();
+            $table->dateTime('fired_at')->nullable();
             $table->timestamps();
         });
     }

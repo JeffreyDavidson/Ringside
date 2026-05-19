@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Models\Referee;
-use App\Models\Title;
+use App\Models\Referees\Referee;
+use App\Models\Titles\Title;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

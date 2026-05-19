@@ -1,0 +1,82 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - development
+      - master
+  pull_request:
+    branches:
+      - development
+      - master
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macOS]
+        php: [8.4]
+        laravel: [13.*]
+
+    name: CI - PHP-${{ matrix.php }} - Laravel-${{ matrix.laravel }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify local PHP
+        run: php -v && php -m
+
+      - name: Install Composer
+        run: |
+          mkdir -p "$RUNNER_TEMP/composer-bin"
+          curl -sS https://getcomposer.org/installer -o "$RUNNER_TEMP/composer-setup.php"
+          php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
+          echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/composer-bin/composer" --version
+
+      - name: Setup problem matchers for PHP
+        run: echo "PHP problem matcher skipped on self-hosted runner"
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-
+
+      - name: Add token
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          composer config github-oauth.github.com $GITHUB_TOKEN
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Setup Laravel application
+        run: |
+          cp .env.testing .env
+          php artisan key:generate
+          php artisan config:cache
+
+      - name: Setup problem matchers for PHPUnit
+        run: echo "PHPUnit problem matcher skipped on self-hosted runner"
+
+      - name: Run Feature Tests
+        run: php ./vendor/bin/pest --ci --testsuite "Feature" --no-coverage --parallel
+
+      - name: Run Integration Tests
+        run: php ./vendor/bin/pest --ci --testsuite "Integration" --no-coverage --parallel
+
+      - name: Run Unit Tests
+        run: php ./vendor/bin/pest --ci --testsuite "Unit" --no-coverage --parallel

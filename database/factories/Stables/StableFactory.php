@@ -1,0 +1,198 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories\Stables;
+
+use App\Models\Stables\Stable;
+use App\Models\Stables\StableActivation;
+use App\Models\Stables\StableRetirement;
+use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamEmployment;
+use App\Models\Wrestlers\Wrestler;
+use App\Models\Wrestlers\WrestlerEmployment;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Carbon;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Stable>
+ */
+class StableFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => str(fake()->words(2, true))->title()->value(),
+            // Status is now computed from activity periods and retirement state
+        ];
+    }
+
+    public function withFutureActivation(): static
+    {
+        return $this->has(StableActivation::factory()->started(Carbon::tomorrow()), 'activations')
+            ->afterCreating(function (Stable $stable) {
+                $stable->currentWrestlers->each(function ($wrestler) {
+                    $wrestler->save();
+                });
+                $stable->currentTagTeams->each(function ($tagTeam) {
+                    $tagTeam->save();
+                });
+                $stable->save();
+            });
+    }
+
+    public function unactivated(): static
+    {
+        return $this->state(fn () => []);
+    }
+
+    public function active(): static
+    {
+        $activationDate = Carbon::yesterday();
+
+        return $this->has(StableActivation::factory()->started($activationDate), 'activations')
+            ->hasAttached(
+                Wrestler::factory()->count(2)->has(WrestlerEmployment::factory()->started($activationDate), 'employments'),
+                ['joined_at' => $activationDate]
+            )
+            ->hasAttached(
+                TagTeam::factory()
+                    ->has(TagTeamEmployment::factory()->started($activationDate), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) use ($activationDate) {
+                        // Attach wrestlers to the tag team to ensure it has active wrestlers
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started($activationDate), 'employments')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $activationDate]);
+                    }),
+                ['joined_at' => $activationDate]
+            )
+            ->afterCreating(function (Stable $stable) {
+                $stable->currentWrestlers->each(function ($wrestler) {
+                    $wrestler->save();
+                });
+                $stable->currentTagTeams->each(function ($tagTeam) {
+                    $tagTeam->save();
+                });
+                $stable->save();
+            });
+    }
+
+    public function inactive(): static
+    {
+        $now = now();
+        $start = $now->copy()->subDays(2);
+        $end = $now->copy()->subDays();
+
+        return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
+            ->hasAttached(
+                Wrestler::factory()->count(2)->has(WrestlerEmployment::factory()->started($start), 'employments'),
+                ['joined_at' => $start, 'left_at' => $end]
+            )
+            ->hasAttached(
+                TagTeam::factory()
+                    ->has(TagTeamEmployment::factory()->started($start), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) use ($start) {
+                        // Attach wrestlers to the tag team to ensure it has active wrestlers
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started($start), 'employments')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
+                    }),
+                ['joined_at' => $start, 'left_at' => $end]
+            )
+            ->afterCreating(function (Stable $stable) {
+                $stable->currentWrestlers->each(function ($wrestler) {
+                    $wrestler->save();
+                });
+                $stable->currentTagTeams->each(function ($tagTeam) {
+                    $tagTeam->save();
+                });
+                $stable->save();
+            });
+    }
+
+    public function retired(): static
+    {
+        $now = now();
+        $start = $now->copy()->subDays(3);
+        $end = $now->copy()->subDays();
+
+        // Members "left" the stable when it retired but stayed employed and
+        // available — that's what makes them eligible "former members" for an
+        // unretire / reunite scenario.
+        return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
+            ->has(StableRetirement::factory()->started($end), 'retirements')
+            ->hasAttached(
+                Wrestler::factory()->count(2)
+                    ->has(WrestlerEmployment::factory()->started($start), 'employments'),
+                ['joined_at' => $start, 'left_at' => $end]
+            )
+            ->hasAttached(
+                TagTeam::factory()
+                    ->has(TagTeamEmployment::factory()->started($start), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) use ($start) {
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started($start), 'employments')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
+                    }),
+                ['joined_at' => $start, 'left_at' => $end]
+            )
+            ->afterCreating(function (Stable $stable) {
+                $stable->save();
+            });
+    }
+
+    public function withNoMembers(): static
+    {
+        return $this->afterCreating(function (Stable $stable) {
+            $stable->save();
+        });
+    }
+
+    public function withEmployedDefaultMembers(): static
+    {
+        return $this
+            ->hasAttached(
+                Wrestler::factory()->count(2)
+                    ->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments'),
+                ['joined_at' => now()]
+            )
+            ->hasAttached(
+                TagTeam::factory()
+                    ->has(TagTeamEmployment::factory()->started(Carbon::yesterday()), 'employments')
+                    ->afterCreating(function (TagTeam $tagTeam) {
+                        // Attach wrestlers to the tag team to ensure it has active wrestlers
+                        $wrestlers = Wrestler::factory()->count(2)
+                            ->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments')
+                            ->create();
+                        $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => Carbon::yesterday()]);
+                    }),
+                ['joined_at' => now()]
+            )
+            ->afterCreating(function (Stable $stable) {
+                $stable->save();
+            });
+    }
+
+    public function disbanded(): static
+    {
+        return $this->inactive();
+    }
+
+    public function withUnemployedDefaultMembers(): static
+    {
+        return $this
+            ->hasAttached(Wrestler::factory()->unemployed(), ['joined_at' => now()])
+            ->hasAttached(TagTeam::factory()->unemployed(), ['joined_at' => now()])
+            ->afterCreating(function (Stable $stable) {
+                $stable->save();
+            });
+    }
+}

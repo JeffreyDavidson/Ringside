@@ -4,59 +4,59 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
-use App\Exceptions\CannotBeRetiredException;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Actions\Concerns\RetirementCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
+use App\Models\TagTeams\TagTeam;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseTagTeamAction
+class RetireAction
 {
     use AsAction;
 
     /**
-     * Retire a tag team.
+     * Retire a tag team and end their partnership.
      *
-     * @throws CannotBeRetiredException
-     */
-    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null): void
-    {
-        $this->ensureCanBeRetired($tagTeam);
-
-        $retirementDate ??= now();
-
-        if ($tagTeam->isSuspended()) {
-            resolve(ReinstateAction::class)->handle($tagTeam, $retirementDate);
-        }
-
-        $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => resolve(WrestlersRetireAction::class)->handle($wrestler, $retirementDate));
-
-        if ($tagTeam->isCurrentlyEmployed()) {
-            $this->tagTeamRepository->release($tagTeam, $retirementDate);
-        }
-
-        $this->tagTeamRepository->retire($tagTeam, $retirementDate);
-    }
-
-    /**
-     * Ensure a tag team can be retired.
+     * This handles the complete tag team retirement workflow using StatusTransitionPipeline:
+     * - Validates the tag team can be retired (business rule compliance)
+     * - Uses StatusTransitionPipeline to properly handle retirement status transition
+     * - Automatically ends employment and suspension through pipeline
+     * - Optionally cascades retirement to available partners and managers
+     * - Creates retirement record and updates status through pipeline
+     * - Makes the tag team permanently unavailable for competition
+     * - Preserves all historical records and championship lineage
+     * - Individual members may continue their careers independently
      *
-     * @throws CannotBeRetiredException
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline with RetirementCascadeStrategy for consistency
+     * with other entity status transitions and flexible cascade behavior.
+     *
+     * @param  TagTeam  $tagTeam  The tag team to retire
+     * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
+     * @param  bool  $retirePartners  Whether to retire available partners (default: true)
+     * @throws CannotBeRetiredException When tag team cannot be retired due to business rules
+     *
+     * @example
+     * ```php
+     * // Retire tag team immediately with member retirement
+     * $tagTeam = TagTeam::where('name', 'The Undertakers')->first();
+     * RetireAction::run($tagTeam);
+     *
+     * // Retire with specific date
+     * RetireAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     *
+     * // Retire without retiring partners (partners continue independently)
+     * RetireAction::run($tagTeam, retirePartners: false);
+     * ```
      */
-    private function ensureCanBeRetired(TagTeam $tagTeam): void
+    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retirePartners = true): void
     {
-        if ($tagTeam->isUnemployed()) {
-            throw CannotBeRetiredException::unemployed();
-        }
+        $retirementDate = DateHelper::resolveDate($retirementDate);
 
-        if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeRetiredException::hasFutureEmployment();
-        }
-
-        if ($tagTeam->isRetired()) {
-            throw CannotBeRetiredException::retired();
-        }
+        StatusTransitionPipeline::retire($tagTeam, $retirementDate)
+            ->withCascade(RetirementCascadeStrategy::conditionalMembers($retirePartners))
+            ->execute();
     }
 }

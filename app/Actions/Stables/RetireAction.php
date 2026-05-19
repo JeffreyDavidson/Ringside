@@ -4,74 +4,111 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Actions\Managers\RetireAction as ManagerRetireAction;
-use App\Actions\TagTeams\RetireAction as TagTeamRetireAction;
-use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
-use App\Exceptions\CannotBeRetiredException;
-use App\Models\Manager;
-use App\Models\Stable;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Actions\Managers\RetireAction as ManagersRetireAction;
+use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
+use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
+use App\Enums\Stables\StableStatus;
+use App\Exceptions\Roster\Stables\CannotBeRetiredException;
+use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseStableAction
+class RetireAction
 {
     use AsAction;
 
     /**
-     * Retire a stable.
+     * Create a new retire action instance.
+     */
+    public function __construct(
+        protected WrestlersRetireAction $wrestlersRetireAction,
+        protected TagTeamsRetireAction $tagTeamsRetireAction,
+        protected ManagersRetireAction $managersRetireAction,
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RemoveStableMembersAction $removeStableMembersAction
+    ) {}
+
+    /**
+     * Retire a stable and end its operations.
      *
-     * @throws CannotBeRetiredException
+     * This handles the complete stable retirement workflow with flexible options:
+     * - Validates the stable can be retired (business rule compliance)
+     * - Basic retirement: Ends stable operations, members become free agents
+     * - With member retirement: Also retires available members simultaneously
+     * - Forced retirement: Overrides business rule conflicts (admin use)
+     * - Ends current wrestler memberships (wrestlers may continue as singles/other stables)
+     * - Ends current tag team memberships (tag teams may continue independently)
+     * - Ends current manager relationships (managers may continue with other talent)
+     * - Ends debut period if currently active
+     * - Creates retirement record with optional reason metadata
+     * - Makes the stable permanently unavailable for storylines
+     * - Preserves all historical records and championship lineage
+     * - Individual members may continue their careers independently
+     *
+     * @param  Stable  $stable  The stable to retire
+     * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
+     * @throws CannotBeRetiredException When stable cannot be retired due to business rules
+     *
+     * @example
+     * ```php
+     * // Retire stable immediately
+     * RetireAction::run($stable);
+     *
+     * // Retire with specific date
+     * RetireAction::run($stable, Carbon::parse('2024-12-31'));
+     *
+     * // Retire The New World Order stable
+     * $nwo = Stable::where('name', 'The New World Order')->first();
+     * RetireAction::run($nwo, Carbon::parse('2024-04-01'));
+     * ```
      */
     public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {
-        $this->ensureCanBeRetired($stable);
+        $stable->ensureCanBeRetired();
 
-        $retirementDate ??= now();
+        $retirementDate = $retirementDate ?? now();
+        $operationalDate = $retirementDate->isFuture() ? now() : $retirementDate;
 
-        DB::transaction(function () use ($stable, $retirementDate): void {
-            if ($stable->isCurrentlyActivated()) {
-                $this->stableRepository->deactivate($stable, $retirementDate);
+        DB::transaction(function () use ($stable, $retirementDate, $operationalDate): void {
+            // End activity if currently active using injected Action
+            if ($stable->isCurrentlyActive()) {
+                $this->endActivityPeriodAction->handle($stable, $operationalDate);
             }
 
-            if ($stable->currentTagTeams->isNotEmpty()) {
-                $stable->currentTagTeams
-                    ->each(fn (TagTeam $tagTeam) => resolve(TagTeamRetireAction::class)->handle($tagTeam, $retirementDate));
+            // Get current members using enhanced model method
+            $currentMembers = $stable->getCurrentMembersData();
+
+            // Retire current members who are available
+            $membersToRetire = $stable->getMembersToRetire();
+
+            if ($membersToRetire->wrestlers) {
+                foreach ($membersToRetire->wrestlers as $wrestler) {
+                    if ($wrestler->canBeRetired()) {
+                        $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
+                    }
+                }
             }
 
-            if ($stable->currentWrestlers->isNotEmpty()) {
-                $stable->currentWrestlers
-                    ->each(fn (Wrestler $wrestler) => resolve(WrestlerRetireAction::class)->handle($wrestler, $retirementDate));
+            if ($membersToRetire->tagTeams) {
+                foreach ($membersToRetire->tagTeams as $tagTeam) {
+                    if ($tagTeam->canBeRetired()) {
+                        $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate);
+                    }
+                }
             }
 
-            if ($stable->currentManagers->isNotEmpty()) {
-                $stable->currentManagers
-                    ->each(fn (Manager $manager) => resolve(ManagerRetireAction::class)->handle($manager, $retirementDate));
-            }
+            // Remove all current members using injected Action
+            $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
 
-            $this->stableRepository->retire($stable, $retirementDate);
+            // Create retirement record directly
+            $stable->retirements()->create([
+                'started_at' => $retirementDate,
+                'ended_at' => null,
+            ]);
+
+            // Update status to retired
+            $stable->update(['status' => StableStatus::Retired]);
         });
-    }
-
-    /**
-     * Ensure a stable can be retired.
-     *
-     * @throws CannotBeRetiredException
-     */
-    private function ensureCanBeRetired(Stable $stable): void
-    {
-        if ($stable->isUnactivated()) {
-            throw CannotBeRetiredException::unactivated();
-        }
-
-        if ($stable->hasFutureActivation()) {
-            throw CannotBeRetiredException::hasFutureActivation();
-        }
-
-        if ($stable->isRetired()) {
-            throw CannotBeRetiredException::retired();
-        }
     }
 }

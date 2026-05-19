@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns;
 
 use App\Livewire\Concerns\Columns\HasActionColumn;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Livewire\Table\Column;
 
 trait BaseTableTrait
 {
@@ -14,7 +14,7 @@ trait BaseTableTrait
     /** @var array<string, bool> */
     protected array $actionLinksToDisplay = ['view' => true, 'edit' => true, 'delete' => true];
 
-    protected bool $showActionColumn = true;
+    protected bool $showActionColumn = false;
 
     protected string $databaseTableName = '';
 
