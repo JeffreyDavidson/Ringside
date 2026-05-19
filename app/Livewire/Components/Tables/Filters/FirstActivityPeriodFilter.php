@@ -1,0 +1,64 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Livewire\Components\Tables\Filters;
+
+use App\Livewire\Table\Filters\DateRangeFilter;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+
+class FirstActivityPeriodFilter extends DateRangeFilter
+{
+    public string $filterRelationshipName = '';
+
+    public string $filterStartField = '';
+
+    public string $filterEndField = '';
+
+    public function __construct(string $name, ?string $key = null)
+    {
+        parent::__construct($name, $key);
+
+        $this->config([
+            'allowInput' => true,
+            'altFormat' => 'F j, Y',
+            'ariaDateFormat' => 'F j, Y',
+            'dateFormat' => 'Y-m-d',
+            'placeholder' => 'Enter Date Range',
+            'locale' => 'en',
+        ])
+            ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
+            ->filter(function (Builder $query, array $dateRange): void {
+                $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange): void {
+                    /** @var array{'minDate': string, 'maxDate': string} $dateRange */
+                    $query
+                        ->where(function (Builder $query) use ($dateRange): void {
+                            $query->whereBetween(
+                                $this->filterStartField,
+                                [
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today()->startOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay(),
+                                ]);
+                        })
+                        ->orWhere(function (Builder $query) use ($dateRange): void {
+                            $query->whereBetween(
+                                $this->filterEndField,
+                                [
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['minDate'])?->startOfDay() ?? today()->startOfDay(),
+                                    Carbon::createFromFormat('Y-m-d', $dateRange['maxDate'])?->endOfDay() ?? today()->endOfDay(),
+                                ]);
+                        });
+                });
+            });
+    }
+
+    public function setFields(string $relationshipName, string $startField, string $endField): self
+    {
+        $this->filterRelationshipName = $relationshipName;
+        $this->filterStartField = $startField;
+        $this->filterEndField = $endField;
+
+        return $this;
+    }
+}

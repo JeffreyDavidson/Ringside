@@ -1,29 +1,71 @@
 <x-layouts.auth>
     <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('login') }}">
         @csrf
+
+        <!-- Header -->
         <div class="text-center mb-2.5">
-            <h3 class="text-lg font-medium text-gray-900 leading-none mb-2.5">
+            <h3 class="text-lg font-medium text-foreground leading-none mb-2.5">
                 Sign in
             </h3>
-        </div>
-        <div class="flex flex-col gap-1">
-            <label class="flex w-full text-2sm font-normal text-gray-900">Email</label>
-            <input class="block w-full appearance-none shadow-none outline-none font-medium text-2sm leading-4 bg-[#fcfcfc] rounded-md h-10 ps-3 pe-3 border border-solid border-gray-300 text-gray-700" placeholder="email@email.com" type="text" value="{{ old('email') }}" name="email">
-            @error('email')
-                <span class="font-medium text-xs leading-4 text-red-500">
-                    {{ $message }}
+            <div class="flex items-center justify-center font-medium">
+                <span class="text-sm text-secondary-foreground me-1.5">
+                    Need an account?
                 </span>
-            @enderror
+                <a class="text-sm font-medium" href="{{ route('register') }}">
+                    Sign up
+                </a>
+            </div>
         </div>
+
+        <!-- Social Login Buttons -->
+        <div class="grid grid-cols-2 gap-2.5">
+            <x-auth.social-login-button provider="google" />
+            <x-auth.social-login-button provider="apple" />
+        </div>
+
+        <!-- Divider -->
+        <x-auth.form-divider />
+
+        <!-- Email Field - Explicit structure for custom label classes -->
         <div class="flex flex-col gap-1">
-            <label class="flex w-full text-2sm font-normal text-gray-900">Password</label>
-            <input name="password" placeholder="Enter Password" type="password" value="" class="block w-full appearance-none shadow-none outline-none font-medium text-2sm leading-4 bg-[#fcfcfc] rounded-md h-10 ps-3 pe-3 border border-solid border-gray-300 text-gray-700" value="{{ old('password') }}">
-            @error('password')
-                <span class="font-medium text-xs leading-4 text-red-500">
-                    {{ $message }}
-                </span>
-            @enderror
+            <x-form.label for="email" class="font-normal text-[var(--mono)]">Email</x-form.label>
+
+            <x-form.input
+                type="email"
+                name="email"
+                id="email"
+                data-test="email"
+                placeholder="email@email.com"
+                value="{{ old('email') }}" />
+
+            <x-form.error name="email" />
         </div>
-        <button class="flex items-center cursor-pointer leading-4 rounded-md h-10 ps-px pe-px gap-1.5 border border-solid border-transparent font-medium text-2sm outline-none text-white bg-primary justify-center grow hover:bg-primary-active hover:shadow-[0_4px_12px_0px_rgba(40,132,239,0.35)]">Sign In</button>
+
+        <!-- Password Field - Simplified structure -->
+        <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between gap-1">
+                <x-form.label for="password" class="font-normal text-[var(--mono)]">Password</x-form.label>
+                <a class="text-sm text-primary hover:text-primary-active font-medium shrink-0" href="{{ route('password.request') }}">
+                    Forgot Password?
+                </a>
+            </div>
+
+            <x-form.input
+                type="password"
+                name="password"
+                id="password"
+                data-test="password"
+                placeholder="Enter Password" />
+
+            <x-form.error name="password" />
+        </div>
+
+        <!-- Remember Me -->
+        <x-form.inputs.checkbox name="remember" label="Remember me" value="1" size="sm" data-test="remember"/>
+
+        <!-- Submit Button -->
+        <x-button type="submit" variant="primary" class="w-full flex justify-center" data-test="sign-in">
+            Sign In
+        </x-button>
     </form>
 </x-layouts.auth>

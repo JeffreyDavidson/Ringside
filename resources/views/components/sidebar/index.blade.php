@@ -1,111 +1,117 @@
-<div x-data="{ expanded: true }"
-    :class="expanded ? 'w-[--sidebar-default-width]' : 'w-[--sidebar-collapsed-width] lg:hover:w-[--sidebar-default-width]'"
-    class="bg-light border-e border-e-gray-200 fixed z-20 hidden lg:flex flex-col items-stretch shrink-0 h-full">
-    <div class="h-[--header-height] hidden items-center relative justify-between px-3 shrink-0 lg:flex lg:px-6">
+{{-- Desktop Sidebar --}}
+<aside x-data="{
+        expanded: $store.sidebar ? $store.sidebar.expanded : true,
+        init() {
+            if ($store.sidebar) {
+                this.$watch('$store.sidebar.expanded', value => this.expanded = value);
+            }
+        },
+        toggle() {
+            if ($store.sidebar) $store.sidebar.toggle();
+        }
+    }"
+    @mouseenter="$store.sidebar && ($store.sidebar.hovered = true)"
+    @mouseleave="$store.sidebar && ($store.sidebar.hovered = false)"
+    :class="expanded ? 'w-[280px]' : 'w-[80px] hover:w-[280px]'"
+    :data-collapsed="!expanded"
+    class="bg-background border-e border-e-border fixed top-0 bottom-0 z-20 hidden lg:flex flex-col items-stretch shrink-0 transition-all duration-300 group"
+    :aria-label="expanded ? 'Main navigation' : 'Main navigation (collapsed)'"
+>
+    {{-- Sidebar Header --}}
+    <div class="hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0 h-[70px]">
         <a href="{{ route('dashboard') }}">
-            <img class="min-h-[22px] max-w-none" :class="expanded ? 'lg:block' : 'hidden'"
-                src="{{ Vite::image('app/default-logo.svg') }}" />
-            <img class="min-h-[22px] max-w-none" src="{{ Vite::image('app/mini-logo.svg') }}"
-                :class="expanded ? 'hidden' : 'lg:block'" />
+            <img class="default-logo min-h-[22px] max-w-none transition-opacity duration-200"
+                :class="expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+                src="{{ Vite::image('app/default-logo.svg') }}"
+                alt="{{ config('app.name') }}"
+            />
+            <img class="small-logo min-h-[22px] max-w-none absolute left-6 top-1/2 -translate-y-1/2 transition-opacity duration-200"
+                :class="expanded ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'"
+                src="{{ Vite::image('app/mini-logo.svg') }}"
+                alt="{{ config('app.name') }}"
+            />
         </a>
-        <button @click="expanded = !expanded"
-            class="inline-flex items-center cursor-pointer leading-none ps-1 pe-1 font-medium text-2sm outline-none justify-center p-0 gap-0 btn-icon-md size-[30px] rounded-lg border border-gray-200 bg-light text-gray-500 hover:text-gray-700 toggle absolute left-full top-2/4 -translate-x-2/4 -translate-y-2/4">
-            <i :class="expanded ? '' : 'rotate-180'"
-                class="ki-filled ki-black-left-line text-[.9375rem] toggle-active:rotate-180 transition-all duration-300"></i>
+
+        {{-- Toggle Button --}}
+        <button @click="toggle()"
+            @keydown.escape="$store.sidebar && ($store.sidebar.expanded = false)"
+            :aria-expanded="expanded"
+            aria-label="Toggle sidebar navigation"
+            class="size-[30px] absolute start-full top-2/4 -translate-x-2/4 -translate-y-2/4
+                   inline-flex items-center justify-center
+                   rounded-lg border border-border bg-background
+                   hover:bg-accent hover:text-accent-foreground
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+                   cursor-pointer transition-colors"
+        >
+            <x-heroicon-s-chevron-left class="size-4 text-muted-foreground transition-all duration-300"
+               x-bind:class="expanded ? '' : 'rotate-180'" />
         </button>
     </div>
 
-    <div class="flex grow shrink-0 py-5 pr-2" id="sidebar_content">
-        <div class="scrollable-y-hover grow shrink-0 flex pl-2 lg:pl-5 pr-1 lg:pr-3">
-            <!-- Sidebar Menu -->
-            <x-menu class="flex flex-col grow gap-0.5">
-                <x-sidebar.menu-item>
-                    <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-home" />
-                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" href="{{ route('dashboard') }}"
-                            :isCurrent="request()->routeIs('dashboard')">Dashboard</x-sidebar.menu-link>
-                    </x-sidebar.menu-label>
-                </x-sidebar.menu-item>
-                <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :
-                    'hidden relative before:content-['...
-                    '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">User</x-sidebar.menu-heading>
-                <div x-data="{
-                    open: @json(request()->is('roster/*')),
-                    toggle() {
-                        this.open = !this.open
-                    }
-                }">
-                    <x-sidebar.menu-label @click="toggle">
-                        <x-sidebar.menu-icon icon="ki-people" />
-                        <x-sidebar.menu-title ::class="expanded ? 'lg:block' : 'hidden'">Roster</x-sidebar.menu-title>
-                        <x-sidebar.menu-accordian-icons ::class="expanded ? '' : 'hidden'" />
-                    </x-sidebar.menu-label>
-                    <x-sidebar.menu-accordian x-show="open">
-                        <x-sidebar.accordian-link href="{{ route('wrestlers.index') }}" :isCurrent="request()->routeIs('wrestlers.*')"
-                            x-show="open || expanded">Wrestlers</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('tag-teams.index') }}" :isCurrent="request()->routeIs('tag-teams.*')"
-                            x-show="open">
-                            Tag Teams</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('managers.index') }}" :isCurrent="request()->routeIs('managers.*')"
-                            x-show="open">Managers</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('referees.index') }}" :isCurrent="request()->routeIs('referees.*')"
-                            x-show="open">Referees</x-sidebar.accordian-link>
-                        <x-sidebar.accordian-link href="{{ route('stables.index') }}" :isCurrent="request()->routeIs('stables.*')"
-                            x-show="open">Stables</x-sidebar.accordian-link>
-                    </x-sidebar.menu-accordian>
-                </div>
-                <x-sidebar.menu-item>
-                    <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-cup" />
-                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('titles.index')"
-                            :isCurrent="request()->routeIs('titles.*')">Titles</x-sidebar.menu-link>
-                    </x-sidebar.menu-label>
-                </x-sidebar.menu-item>
-                <x-sidebar.menu-item>
-                    <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-home-3" />
-                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('venues.index')"
-                            :isCurrent="request()->routeIs('venues.*')">Venues</x-sidebar.menu-link>
-                    </x-sidebar.menu-label>
-                </x-sidebar.menu-item>
-                <x-sidebar.menu-item>
-                    <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-calendar" />
-                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('events.index')"
-                            :isCurrent="request()->routeIs('events.*')">Events</x-sidebar.menu-link>
-                    </x-sidebar.menu-label>
-                </x-sidebar.menu-item>
-                <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :
-                    'hidden relative before:content-['...
-                    '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">System</x-sidebar.menu-heading>
-                <div x-data="{
-                    open: @json(request()->is('user-management/*')),
-                    toggle() {
-                        this.open = !this.open
-                    }
-                }">
-                    <x-sidebar.menu-label @click="toggle">
-                        <x-sidebar.menu-icon icon="ki-people" />
-                        <x-sidebar.menu-title ::class="expanded ? 'lg:block' : 'hidden'">User Management</x-sidebar.menu-title>
-                        <x-sidebar.menu-accordian-icons ::class="expanded ? '' : 'hidden'" />
-                    </x-sidebar.menu-label>
-                    <x-sidebar.menu-accordian x-show="open">
-                        <x-sidebar.accordian-link href="{{ route('users.index') }}" :isCurrent="request()->routeIs('users.*')"
-                            x-show="open || expanded">Users</x-sidebar.accordian-link>
-                    </x-sidebar.menu-accordian>
-                </div>
-                <x-sidebar.menu-heading ::class="expanded ? 'lg:block' :
-                    'hidden relative before:content-['...
-                    '] before:absolute before:text-current before:font-before:visible before:inline-block before:bottom-2/4 before:start-0 before:ms-[.225rem] before:translate-x-full'">Docs</x-sidebar.menu-heading>
-                <x-sidebar.menu-item>
-                    <x-sidebar.menu-label>
-                        <x-sidebar.menu-icon icon="ki-cup" />
-                        <x-sidebar.menu-link ::class="expanded ? 'lg:block' : 'hidden'" :href="route('docs.buttons')"
-                            :isCurrent="request()->routeIs('docs.buttons')">Buttons</x-sidebar.menu-link>
-                    </x-sidebar.menu-label>
-                </x-sidebar.menu-item>
-            </x-menu>
-            <!-- End of Sidebar Menu -->
+    {{-- Sidebar Content --}}
+    <div class="flex grow shrink-0 py-5 pe-2">
+        <div class="grow shrink-0 flex ps-2 lg:ps-5 pe-1 lg:pe-3 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground">
+            <x-sidebar.menu />
         </div>
     </div>
+</aside>
+
+{{-- Mobile Sidebar Drawer --}}
+<div x-data
+    x-show="$store.sidebar && $store.sidebar.mobileOpen"
+    x-cloak
+    class="lg:hidden fixed inset-0 z-50"
+>
+    {{-- Backdrop --}}
+    <div x-show="$store.sidebar && $store.sidebar.mobileOpen"
+        x-transition:enter="transition-opacity ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        @click="$store.sidebar && $store.sidebar.closeMobile()"
+        class="absolute inset-0 bg-black/50"
+    ></div>
+
+    {{-- Drawer --}}
+    <aside x-show="$store.sidebar && $store.sidebar.mobileOpen"
+        x-transition:enter="transition-transform ease-out duration-300"
+        x-transition:enter-start="-translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition-transform ease-in duration-200"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="-translate-x-full"
+        @keydown.escape.window="$store.sidebar && $store.sidebar.closeMobile()"
+        class="relative w-[280px] h-full bg-background border-e border-e-border flex flex-col"
+    >
+        {{-- Mobile Logo Area --}}
+        <div class="h-[60px] flex items-center justify-between px-6 shrink-0 border-b border-border">
+            <a href="{{ route('dashboard') }}">
+                <img class="min-h-[22px] max-w-none"
+                    src="{{ Vite::image('app/default-logo.svg') }}"
+                    alt="{{ config('app.name') }}"
+                />
+            </a>
+
+            {{-- Close Button --}}
+            <button @click="$store.sidebar && $store.sidebar.closeMobile()"
+                aria-label="Close navigation"
+                class="inline-flex items-center justify-center size-8
+                       rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+                       cursor-pointer transition-colors"
+            >
+                <x-heroicon-o-x-mark class="size-5" />
+            </button>
+        </div>
+
+        {{-- Mobile Menu Area --}}
+        <div class="flex grow shrink-0 py-5 pe-2">
+            <div class="grow shrink-0 flex ps-5 pe-3 overflow-y-auto">
+                <x-sidebar.menu />
+            </div>
+        </div>
+    </aside>
 </div>

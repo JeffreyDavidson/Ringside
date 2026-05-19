@@ -24,5 +24,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RefereesTableSeeder::class);
         $this->call(StablesTableSeeder::class);
         $this->call(EventsTableSeeder::class);
+        $this->call(MatchesTableSeeder::class);
     }
 }

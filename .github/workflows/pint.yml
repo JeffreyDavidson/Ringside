@@ -1,37 +1,56 @@
-name: Fix PHP code style issues
+name: PHP code style
 
 on:
-  push:
+  pull_request:
     branches:
-      - '*'         # matches every branch that doesn't contain a '/'
-      - '*/*'       # matches every branch containing a single '/'
-      - '**'        # matches every branch
-      - '!master'
+      - development
+      - master
     paths:
       - '**.php'
+  workflow_dispatch:
+
+concurrency:
+  group: pint-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
   php-code-styling:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@latest
+      - name: Install Composer
+        run: |
+          mkdir -p "$RUNNER_TEMP/composer-bin"
+          curl -sS https://getcomposer.org/installer -o "$RUNNER_TEMP/composer-setup.php"
+          php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
+          echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/composer-bin/composer" --version
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
         with:
-          pintVersion: 1.18.3
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: pint-${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: pint-${{ runner.os }}-composer-
 
-      - name: Fix styling
-        run: composer format
+      - name: Add token
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: composer config github-oauth.github.com $GITHUB_TOKEN
 
-      - name: Commit styling changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Fix styling
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Check PHP code style
+        run: php ./vendor/bin/pint --test

@@ -1,63 +1,40 @@
 name: run-tests-pcov-pull
 
 on:
-  push:
-    branches:
-      - 'development'
-      - 'master'
-  pull_request:
-    branches:
-      - 'development'
-      - 'master'
+  workflow_dispatch:
+
+concurrency:
+  group: pcov-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04]
-        php: [8.3]
-        laravel: [11]
-        stability: [prefer-dist]
+        os: [macOS]
+        php: [8.4]
+        laravel: [13]
 
-    name: PCOV - ${{ matrix.os }} - P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
-    env:
-      extensionKey: phpextensions-${{ matrix.os }}-P${{ matrix.php }}-withpcov
-      extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pcov,pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, fileinfo
-
+    name: PCOV - ${{ matrix.os }} - P${{ matrix.php }} - L${{ matrix.laravel }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup cache environment
-        id: extcache
-        uses: shivammathur/cache-extensions@v1
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: ${{ env.extensions }}
-          key: ${{ env.extensionKey }}
+      - name: Verify local PHP
+        run: php -v && php -m
 
-      - name: Cache extensions
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.extcache.outputs.dir }}
-          key: ${{ steps.extcache.outputs.key }}
-          restore-keys: ${{ steps.extcache.outputs.key }}
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: ${{ env.extensions }}
-          tools: phpunit:latest
-          ini-values: memory_limit=512M
-          coverage: pcov
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Composer
+        run: |
+          mkdir -p "$RUNNER_TEMP/composer-bin"
+          curl -sS https://getcomposer.org/installer -o "$RUNNER_TEMP/composer-setup.php"
+          php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
+          echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/composer-bin/composer" --version
 
       - name: Setup problem matchers for PHP
-        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+        run: echo "PHP problem matcher skipped on self-hosted runner"
 
       - name: Get composer cache directory
         id: composer-cache
@@ -77,15 +54,16 @@ jobs:
           composer config github-oauth.github.com $GITHUB_TOKEN
 
       - name: Install dependencies
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer require "laravel/framework:${{ matrix.laravel }}.*" --no-interaction --no-update
+        run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Update dependencies
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer update --${{ matrix.stability }} --no-interaction
+      - name: Setup Laravel application
+        run: |
+          cp .env.testing .env
+          php artisan key:generate
+          php artisan config:cache
 
       - name: Setup problem matchers for PHPUnit
-        run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+        run: echo "PHPUnit problem matcher skipped on self-hosted runner"
 
       - name: Run All Tests
         run: ./vendor/bin/pest --parallel --cache-directory=".phpunit.cache/code-coverage" --strict-coverage --coverage-clover ./coverage.xml --testsuite "Feature","Integration","Unit"

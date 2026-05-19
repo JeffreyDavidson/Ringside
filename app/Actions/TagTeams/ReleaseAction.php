@@ -4,59 +4,54 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Wrestlers\ReleaseAction as WrestlersReleaseAction;
-use App\Exceptions\CannotBeReleasedException;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Actions\Concerns\ReleaseCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Exceptions\Roster\CannotBeReleasedException;
+use App\Models\TagTeams\TagTeam;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseTagTeamAction
+class ReleaseAction
 {
     use AsAction;
 
     /**
-     * Release a tag team.
+     * Release a tag team from employment and end all current relationships.
      *
-     * @throws CannotBeReleasedException
+     * This handles the complete tag team release workflow using StatusTransitionPipeline:
+     * - Validates the tag team can be released (currently employed)
+     * - Uses StatusTransitionPipeline to properly handle employment termination
+     * - Automatically ends suspension if active through pipeline
+     * - Cascades to end wrestler partnerships (wrestlers become free agents)
+     * - Cascades to end manager relationships (managers remain available)
+     * - Maintains all historical records for tracking purposes
+     * - Individual members retain employment status and may form new partnerships
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline with ReleaseCascadeStrategy for consistency
+     * with other entity status transitions and proper relationship management.
+     *
+     * @param  TagTeam  $tagTeam  The tag team to release
+     * @param  Carbon|null  $releaseDate  The release date (defaults to now)
+     * @throws CannotBeReleasedException When tag team cannot be released due to business rules
+     *
+     * @example
+     * ```php
+     * // Release tag team immediately
+     * $tagTeam = TagTeam::where('name', 'The Shield')->first();
+     * ReleaseAction::run($tagTeam);
+     *
+     * // Release with specific date
+     * ReleaseAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
-        $this->ensureCanBeReleased($tagTeam);
+        $releaseDate = DateHelper::resolveDate($releaseDate);
 
-        $releaseDate ??= now();
-
-        if ($tagTeam->isSuspended()) {
-            $this->tagTeamRepository->reinstate($tagTeam, $releaseDate);
-        }
-
-        $this->tagTeamRepository->release($tagTeam, $releaseDate);
-
-        $tagTeam->currentWrestlers
-            ->each(fn (Wrestler $wrestler) => resolve(WrestlersReleaseAction::class)->handle($wrestler, $releaseDate));
-    }
-
-    /**
-     * Ensure a tag team can be released.
-     *
-     * @throws CannotBeReleasedException
-     */
-    private function ensureCanBeReleased(TagTeam $tagTeam): void
-    {
-        if ($tagTeam->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed();
-        }
-
-        if ($tagTeam->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment();
-        }
-
-        if ($tagTeam->isRetired()) {
-            throw CannotBeReleasedException::retired();
-        }
-
-        if ($tagTeam->isReleased()) {
-            throw CannotBeReleasedException::released();
-        }
+        StatusTransitionPipeline::release($tagTeam, $releaseDate)
+            ->withCascade(ReleaseCascadeStrategy::endAllRelationships())
+            ->execute();
     }
 }

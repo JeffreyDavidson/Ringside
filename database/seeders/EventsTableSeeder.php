@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Event;
+use App\Models\Events\Event;
 use Illuminate\Database\Seeder;
 
 class EventsTableSeeder extends Seeder

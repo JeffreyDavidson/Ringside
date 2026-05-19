@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Referee;
+use App\Models\Referees\Referee;
 use Illuminate\Database\Seeder;
 
 class RefereesTableSeeder extends Seeder

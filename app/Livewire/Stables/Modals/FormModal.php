@@ -4,36 +4,62 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Modals;
 
-use App\Livewire\Concerns\BaseModal;
-use App\Livewire\Stables\StableForm;
-use App\Models\Stable;
-use App\Traits\Data\PresentsManagersList;
-use App\Traits\Data\PresentsTagTeamsList;
-use App\Traits\Data\PresentsWrestlersList;
-use Illuminate\Support\Carbon;
+use App\Livewire\Base\BaseFormModal;
+use App\Livewire\Concerns\Data\PresentsManagersList;
+use App\Livewire\Concerns\Data\PresentsTagTeamsList;
+use App\Livewire\Concerns\Data\PresentsWrestlersList;
+use App\Livewire\Concerns\GeneratesDummyData;
+use App\Livewire\Stables\Forms\CreateEditForm;
+use App\Models\Stables\Stable;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 /**
- * @extends BaseModal<StableForm, Stable>
+ * @extends BaseFormModal<CreateEditForm, Stable>
  */
-class FormModal extends BaseModal
+class FormModal extends BaseFormModal
 {
+    use GeneratesDummyData;
     use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 
-    protected string $modalFormPath = 'stables.modals.form-modal';
+    public CreateEditForm $form;
 
-    protected $modelForm;
-
-    protected $modelType;
-
-    public function fillDummyFields(): void
+    protected function getFormClass(): string
     {
-        /** @var Carbon|null $datetime */
-        $datetime = fake()->optional(0.8)->dateTimeBetween('now', '+3 month');
+        return CreateEditForm::class;
+    }
 
-        $this->modelForm->name = Str::of(fake()->sentence(2))->title()->value();
-        $this->modelForm->start_date = $datetime?->format('Y-m-d H:i:s');
+    protected function getModelClass(): string
+    {
+        return Stable::class;
+    }
+
+    protected function getModalPath(): string
+    {
+        return 'livewire.stables.modals.form-modal';
+    }
+
+    protected function getDummyDataFields(): array
+    {
+        return [
+            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
+            'start_date' => fn () => $this->generateOptionalStartDate(),
+        ];
+    }
+
+    public function getModalTitle(): string
+    {
+        if (isset($this->model)) {
+            return 'Edit Stable';
+        }
+
+        return 'Create Stable';
+    }
+
+    public function render(): View
+    {
+        return view($this->modalFormPath ?? 'livewire.stables.modals.form-modal');
     }
 }

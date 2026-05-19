@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace App\Livewire\Base\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Models\EventMatch;
-use App\Models\EventMatchCompetitor;
-use App\Models\Referee;
-use App\Models\Title;
-use Illuminate\Database\Eloquent\Model;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\ArrayColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
-use Rappasoft\LaravelLivewireTables\Views\Columns\LinkColumn;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\ArrayColumn;
+use App\Livewire\Table\Columns\DateColumn;
+use App\Livewire\Table\Columns\LinkColumn;
+use App\Livewire\Table\DataTableComponent;
+use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Referees\Referee;
+use App\Models\Titles\Title;
 
 abstract class BasePreviousMatchesTable extends DataTableComponent
 {
@@ -40,8 +39,8 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('events.name'), 'event.name')
-                ->title(fn (Model $row) => $row->event->name)
-                ->location(fn (Model $row) => route('events.show', $row->event)),
+                ->title(fn (EventMatch $row) => $row->event->name)
+                ->location(fn (EventMatch $row) => route('events.show', $row->event)),
             DateColumn::make(__('events.date'), 'event.date')
                 ->inputFormat('Y-m-d H:i:s')
                 ->outputFormat('Y-m-d')
@@ -55,7 +54,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('event-matches.competitors'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(function (int $index, EventMatchCompetitor $value): string {
+                ->outputFormat(function (int $index, MatchCompetitor $value): string {
                     $competitor = $value->getCompetitor();
                     $type = str($competitor->getMorphClass())->kebab()->plural();
 
@@ -70,10 +69,10 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
                     if ($row->result) {
-                        $winner = $row->result?->getWinner();
+                        $winner = $row->result->winner;
                         $type = str($winner->getMorphClass())->kebab()->plural();
 
-                        return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->decision->name;
+                        return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result->decision->name;
                     }
 
                     return 'N/A';

@@ -6,10 +6,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\View;
 
+/**
+ * Controller for displaying the dashboard.
+ */
 class DashboardController
 {
     /**
-     * Handle the incoming request.
+     * Display the dashboard.
      */
     public function __invoke(): View
     {

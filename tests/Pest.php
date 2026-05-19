@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Models\User;
+use App\Models\Users\User;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Collection;
@@ -17,6 +18,11 @@ use Illuminate\Support\Collection;
 | need to change it using the "uses()" function to bind a different classes or traits.
 |
 */
+
+uses(
+    TestCase::class,
+    DatabaseMigrations::class,
+)->in('Browser');
 
 uses(TestCase::class, RefreshDatabase::class)
     ->in('Feature', 'Integration', 'Unit');
@@ -76,6 +82,21 @@ expect()->extend('usesTrait', function ($trait) {
 
 /*
 |--------------------------------------------------------------------------
+| Custom Expectations
+|--------------------------------------------------------------------------
+|
+| Load custom expectations for domain-specific testing. These expectations
+| provide more expressive and maintainable assertions for wrestling business
+| logic, database operations, and model structure validation.
+|
+*/
+
+require_once __DIR__.'/Expectations/WrestlingExpectations.php';
+require_once __DIR__.'/Expectations/DatabaseExpectations.php';
+require_once __DIR__.'/Expectations/ModelExpectations.php';
+
+/*
+|--------------------------------------------------------------------------
 | Functions
 |--------------------------------------------------------------------------
 |
@@ -94,3 +115,16 @@ function basicUser()
 {
     return User::factory()->basicUser()->create();
 }
+
+/*
+|--------------------------------------------------------------------------
+| Custom Test Helpers
+|--------------------------------------------------------------------------
+|
+| Load custom helper functions for common testing scenarios. These helpers
+| provide convenient methods for creating test data, setting up scenarios,
+| and performing repetitive test operations.
+|
+*/
+
+require_once __DIR__.'/Helpers/TestHelpers.php';

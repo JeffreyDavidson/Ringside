@@ -24,17 +24,14 @@
         <x-sidebar />
         <!-- End of Sidebar -->
         <!-- Wrapper -->
-        <div class="pt-[--header-height] flex grow flex-col lg:pt-[--header-height] lg:ps-[--sidebar-default-width]">
+        <div class="pt-[--header-height] flex grow flex-col lg:pt-[--header-height] transition-all duration-300"
+             x-data
+             :class="($store.sidebar && $store.sidebar.expanded) ? 'lg:ps-[--sidebar-default-width]' : 'lg:ps-[--sidebar-collapsed-width]'">
             <!-- Header -->
             <x-layouts.partials.header />
             <!-- End of Header -->
             <!-- Content -->
             <main class="grow pt-5">
-                <!-- Container -->
-                <x-container-fixed>
-                    <x-breadcrumbs class="flex lg:hidden" />
-                </x-container-fixed>
-                <!-- End of Container -->
                 {{ $slot }}
             </main>
             <!-- End of Content -->
@@ -49,7 +46,6 @@
     <!-- End of Main -->
     <!-- End of Page -->
     @livewireScriptConfig
-    @livewire('wire-elements-modal')
 </body>
 
 </html>

@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Columns;
 
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Livewire\Table\Column;
 
+/** @phpstan-ignore-next-line trait.unused */
 trait HasStatusColumn
 {
     protected function getDefaultStatusColumn(): Column

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\User;
+use App\Models\Users\User;
 use App\Providers\AppServiceProvider;
 
 use function Pest\Laravel\assertAuthenticated;

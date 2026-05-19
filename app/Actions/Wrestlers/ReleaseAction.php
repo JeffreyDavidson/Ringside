@@ -4,61 +4,55 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Events\Wrestlers\WrestlerReleased;
-use App\Exceptions\CannotBeReleasedException;
-use App\Models\Wrestler;
+use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Actions\Concerns\WrestlerRetirementCascadeStrategy;
+use App\Exceptions\Roster\CannotBeReleasedException;
+use App\Models\Wrestlers\Wrestler;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class ReleaseAction extends BaseWrestlerAction
+class ReleaseAction
 {
     use AsAction;
 
     /**
-     * Release a wrestler.
+     * Release a wrestler from employment and end all current relationships.
      *
-     * @throws CannotBeReleasedException
+     * This handles the complete wrestler release workflow using StatusTransitionPipeline:
+     * - Validates the wrestler can be released through pipeline validation
+     * - Uses StatusTransitionPipeline to properly handle employment termination
+     * - Automatically ends suspension and injury if active through pipeline
+     * - Cascades to end all professional relationships (same as retirement pattern)
+     * - Maintains all historical records for tracking purposes
+     * - Maintains transaction boundaries and error handling through pipeline
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline with WrestlerRetirementCascadeStrategy for consistency.
+     * Release follows the same relationship-ending pattern as retirement since both
+     * terminate all professional relationships.
+     *
+     * @param  Wrestler  $wrestler  The wrestler to release
+     * @param  Carbon|null  $releaseDate  The release date (defaults to now)
+     * @throws CannotBeReleasedException When wrestler cannot be released due to business rules
+     *
+     * @example
+     * ```php
+     * // Release wrestler immediately
+     * ReleaseAction::run($wrestler);
+     *
+     * // Release with specific date
+     * ReleaseAction::run($wrestler, Carbon::parse('2024-12-31'));
+     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
-        $this->ensureCanBeReleased($wrestler);
+        $wrestler->ensureCanBeReleased();
 
-        $releaseDate ??= now();
+        $releaseDate = DateHelper::resolveDate($releaseDate);
 
-        if ($wrestler->isSuspended()) {
-            $this->wrestlerRepository->reinstate($wrestler, $releaseDate);
-        }
-
-        if ($wrestler->isInjured()) {
-            $this->wrestlerRepository->clearInjury($wrestler, $releaseDate);
-        }
-
-        $this->wrestlerRepository->release($wrestler, $releaseDate);
-
-        event(new WrestlerReleased($wrestler, $releaseDate));
-    }
-
-    /**
-     * Ensure a wrestler can be released.
-     *
-     * @throws CannotBeReleasedException
-     */
-    private function ensureCanBeReleased(Wrestler $wrestler): void
-    {
-        if ($wrestler->isUnemployed()) {
-            throw CannotBeReleasedException::unemployed();
-        }
-
-        if ($wrestler->isReleased()) {
-            throw CannotBeReleasedException::released();
-        }
-
-        if ($wrestler->hasFutureEmployment()) {
-            throw CannotBeReleasedException::hasFutureEmployment();
-        }
-
-        if ($wrestler->isRetired()) {
-            throw CannotBeReleasedException::retired();
-        }
+        StatusTransitionPipeline::release($wrestler, $releaseDate)
+            ->withCascade(WrestlerRetirementCascadeStrategy::endAllRelationships())
+            ->execute();
     }
 }

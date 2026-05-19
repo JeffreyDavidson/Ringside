@@ -4,58 +4,51 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\CannotBeReinstatedException;
-use App\Models\Manager;
+use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-final class ReinstateAction extends BaseManagerAction
+final class ReinstateAction
 {
     use AsAction;
 
     /**
-     * Reinstate a manager.
+     * Reinstate a suspended manager.
      *
-     * @throws CannotBeReinstatedException
+     * This handles the complete manager reinstatement workflow:
+     * - Uses StatusTransitionPipeline for consistent reinstatement handling
+     * - Validates the manager can be reinstated (currently suspended)
+     * - Ends the current suspension period with the specified date
+     * - Restores the manager to active management duties
+     * - Makes the manager available for wrestler/tag team assignments
+     *
+     * ARCHITECTURAL PATTERN:
+     * Uses StatusTransitionPipeline for consistent status handling, following the same
+     * pattern as other manager actions.
+     *
+     * @param  Manager  $manager  The manager to reinstate
+     * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
+     * @throws CannotBeReinstatedException When manager cannot be reinstated due to business rules
+     *
+     * @example
+     * ```php
+     * // Reinstate manager immediately
+     * ReinstateAction::run($manager);
+     *
+     * // Reinstate with specific date
+     * ReinstateAction::run($manager, Carbon::parse('2024-01-01'));
+     * ```
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {
-        $this->ensureCanBeReinstated($manager);
+        $manager->ensureCanBeReinstated();
 
-        $reinstatementDate ??= now();
+        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        $this->managerRepository->reinstate($manager, $reinstatementDate);
-    }
-
-    /**
-     * Ensure a manager can be reinstated.
-     *
-     * @throws CannotBeReinstatedException
-     */
-    private function ensureCanBeReinstated(Manager $manager): void
-    {
-        if ($manager->isUnemployed()) {
-            throw CannotBeReinstatedException::unemployed();
-        }
-
-        if ($manager->isReleased()) {
-            throw CannotBeReinstatedException::released();
-        }
-
-        if ($manager->hasFutureEmployment()) {
-            throw CannotBeReinstatedException::hasFutureEmployment();
-        }
-
-        if ($manager->isInjured()) {
-            throw CannotBeReinstatedException::injured();
-        }
-
-        if ($manager->isRetired()) {
-            throw CannotBeReinstatedException::retired();
-        }
-
-        if ($manager->isAvailable()) {
-            throw CannotBeReinstatedException::available();
-        }
+        // Use StatusTransitionPipeline for consistent reinstatement handling
+        StatusTransitionPipeline::reinstate($manager, $reinstatementDate)->execute();
     }
 }

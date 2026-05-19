@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Livewire\Base\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
-use Rappasoft\LaravelLivewireTables\Views\Columns\DateColumn;
+use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\DateColumn;
+use App\Livewire\Table\DataTableComponent;
 
 abstract class BasePreviousStablesTable extends DataTableComponent
 {
@@ -27,7 +27,7 @@ abstract class BasePreviousStablesTable extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('stables.name'), 'stable.name')
+            Column::make(__('stables.name'), 'name')
                 ->searchable(),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),

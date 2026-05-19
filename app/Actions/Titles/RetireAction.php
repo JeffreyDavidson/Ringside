@@ -4,50 +4,63 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Exceptions\CannotBeRetiredException;
-use App\Models\Title;
+use App\Exceptions\Titles\CannotBeRetiredException;
+use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class RetireAction extends BaseTitleAction
+class RetireAction
 {
     use AsAction;
 
     /**
-     * Retire a title.
+     * Retire a title and permanently end its championship lineage.
      *
-     * @throws CannotBeRetiredException
+     * This handles the complete title retirement workflow:
+     * - Validates the title can be retired (currently active or inactive)
+     * - Ends active status if currently active
+     * - Creates retirement record to permanently retire the championship
+     * - Makes the title unavailable for future competition permanently
+     * - Preserves championship history and lineage for legacy purposes
+     * - Ends any current championship reigns associated with the title
+     *
+     * @param  Title  $title  The title to retire
+     * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
+     * @throws CannotBeRetiredException When title cannot be retired due to business rules
+     *
+     * @example
+     * ```php
+     * // Retire title immediately
+     * RetireAction::run($title);
+     *
+     * // Retire with specific date
+     * RetireAction::run($title, Carbon::parse('2024-12-31'));
+     * ```
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
-        $this->ensureCanBeRetired($title);
+        $title->ensureCanBeRetired();
 
-        $retirementDate ??= now();
+        $retirementDate = $retirementDate ?? now();
 
-        if ($title->isCurrentlyActivated()) {
-            $this->titleRepository->deactivate($title, $retirementDate);
-        }
+        DB::transaction(function () use ($title, $retirementDate): void {
+            // Handle title status - active titles need to be pulled before retirement
+            if ($title->hasActivityPeriods() && $title->isCurrentlyActive()) {
+                $currentActivityPeriod = $title->currentActivityPeriod()->first();
+                if ($currentActivityPeriod) {
+                    $currentActivityPeriod->update(['ended_at' => $retirementDate]);
+                }
+            }
 
-        $this->titleRepository->retire($title, $retirementDate);
-    }
+            // End current championship if title has an active champion
+            $currentChampionship = $title->currentChampionship;
+            if ($currentChampionship) {
+                $currentChampionship->update(['lost_at' => $retirementDate]);
+            }
 
-    /**
-     * Ensure a title can be retired.
-     *
-     * @throws CannotBeRetiredException
-     */
-    private function ensureCanBeRetired(Title $title): void
-    {
-        if ($title->isUnactivated()) {
-            throw CannotBeRetiredException::unemployed();
-        }
-
-        if ($title->hasFutureActivation()) {
-            throw CannotBeRetiredException::hasFutureEmployment();
-        }
-
-        if ($title->isRetired()) {
-            throw CannotBeRetiredException::retired();
-        }
+            // Create the retirement record to permanently end the title's lineage
+            $title->retirements()->create(['started_at' => $retirementDate]);
+        });
     }
 }

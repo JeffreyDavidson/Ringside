@@ -4,50 +4,111 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Data\TagTeamData;
-use App\Models\TagTeam;
-use App\Models\Wrestler;
+use App\Actions\Concerns\EmploymentCascadeStrategy;
+use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Data\TagTeams\TagTeamData;
+use App\Models\TagTeams\TagTeam;
+use App\Services\TagTeamMembershipService;
+use App\Services\TagTeamValidationService;
+use Illuminate\Support\Facades\DB;
 use Lorisleiva\Actions\Concerns\AsAction;
 
-class UpdateAction extends BaseTagTeamAction
+class UpdateAction
 {
     use AsAction;
 
     /**
-     * Update a tag team.
+     * Create a new update action instance.
+     */
+    public function __construct(
+        protected TagTeamValidationService $validationService,
+        protected TagTeamMembershipService $membershipService
+    ) {}
+
+    /**
+     * Update a tag team with comprehensive business rule validation and service integration.
+     *
+     * This handles the complete tag team update workflow using dedicated services:
+     * - Validates all business rules for updates including uniqueness and availability
+     * - Updates tag team information with validated data
+     * - Manages partnership changes through membership service
+     * - Manages manager relationship changes through membership service
+     * - Handles employment workflows through lifecycle service
+     * - Maintains data integrity and business rule compliance throughout
+     *
+     * @param  TagTeam  $tagTeam  The tag team to update
+     * @param  TagTeamData  $tagTeamData  The updated tag team information
+     * @return TagTeam The updated tag team instance with all changes applied
+     *
+     * @example
+     * ```php
+     * // Update tag team name only
+     * $tagTeamData = new TagTeamData([
+     *     'name' => 'The New Day (Updated)',
+     *     'wrestlerA' => $existingWrestlerA,
+     *     'wrestlerB' => $existingWrestlerB
+     * ]);
+     * $updatedTeam = UpdateAction::run($tagTeam, $tagTeamData);
+     *
+     * // Change partners and employ unemployed tag team
+     * $tagTeamData = new TagTeamData([
+     *     'name' => 'The New Day',
+     *     'wrestlerA' => $kofi,
+     *     'wrestlerB' => $bigE,
+     *     'employment_date' => Carbon::parse('2024-01-01')
+     * ]);
+     * $updatedTeam = UpdateAction::run($unemployedTeam, $tagTeamData);
+     * ```
      */
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam
     {
-        $this->tagTeamRepository->update($tagTeam, $tagTeamData);
-        $datetime = now();
+        // Validate all business rules for update
+        $this->validationService->validateForUpdate($tagTeam, $tagTeamData);
 
-        if ($tagTeamData->wrestlerA && $tagTeamData->wrestlerA->currentTagTeam?->isNot($tagTeam)) {
-            $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerA, $datetime);
-        }
+        return DB::transaction(function () use ($tagTeam, $tagTeamData): TagTeam {
+            // Update the tag team's basic information
+            $tagTeam->update([
+                'name' => mb_trim($tagTeamData->name),
+                'signature_move' => $tagTeamData->signature_move,
+            ]);
 
-        if ($tagTeamData->wrestlerB && $tagTeamData->wrestlerB->currentTagTeam?->isNot($tagTeam)) {
-            $this->tagTeamRepository->addTagTeamPartner($tagTeam, $tagTeamData->wrestlerB, $datetime);
-        }
+            $updateDate = now();
 
-        if ($tagTeam->currentWrestlers->isNotEmpty()) {
-            $tagTeam
-                ->currentWrestlers
-                ->reject(fn (Wrestler $wrestler): bool => in_array($wrestler, [$tagTeamData->wrestlerA, $tagTeamData->wrestlerB]))
-                ->each(fn (Wrestler $wrestler) => $this->tagTeamRepository->removeTagTeamPartner($tagTeam, $wrestler, $datetime));
-        }
+            // Handle partnership changes through membership service using membership data
+            $membershipData = $tagTeamData->getMembershipData();
 
-        if (! is_null($tagTeamData->start_date) && $this->shouldBeEmployed($tagTeam)) {
-            $this->tagTeamRepository->employ($tagTeam, $tagTeamData->start_date);
-        }
+            $newWrestlers = $this->membershipService->updatePartnerships(
+                $tagTeam,
+                $membershipData->wrestlers ?? collect(),
+                $updateDate,
+                false // Don't employ through membership service - handle separately if needed
+            );
 
-        return $tagTeam;
-    }
+            $newManagers = $this->membershipService->updateManagerRelationships(
+                $tagTeam,
+                $membershipData->managers ?? collect(),
+                $updateDate,
+                false // Don't employ through membership service - handle separately if needed
+            );
 
-    /**
-     * Find out if the tag team can be employed.
-     */
-    private function shouldBeEmployed(TagTeam $tagTeam): bool
-    {
-        return ! $tagTeam->isCurrentlyEmployed();
+            // Handle employment for newly added members if employment date provided
+            if ($tagTeamData->employment_date) {
+                // Employ new members first
+                if ($newWrestlers->isNotEmpty() || $newManagers->isNotEmpty()) {
+                    $allNewMembers = $newWrestlers->merge($newManagers);
+                    $this->membershipService->employMembers($allNewMembers, $tagTeamData->employment_date);
+                }
+
+                // Handle tag team employment if not already employed
+                if (! $tagTeam->isEmployed()) {
+                    StatusTransitionPipeline::employ($tagTeam, $tagTeamData->employment_date)
+                        ->withCascade(EmploymentCascadeStrategy::wrestlers())
+                        ->withCascade(EmploymentCascadeStrategy::managers())
+                        ->execute();
+                }
+            }
+
+            return $tagTeam;
+        });
     }
 }
