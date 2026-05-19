@@ -534,6 +534,10 @@ trait ValidatesStableLifecycle
             return false;
         }
 
+        if (! $this->isCurrentlyActive() && $this->hasFutureActivation()) {
+            return false;
+        }
+
         // Basic retirement is possible if not already retired and has been active
         return true;
     }
@@ -554,6 +558,10 @@ trait ValidatesStableLifecycle
         }
 
         if (! $this->hasActivityPeriods()) {
+            throw CannotBeRetiredException::notActive($this);
+        }
+
+        if (! $this->isCurrentlyActive() && $this->hasFutureActivation()) {
             throw CannotBeRetiredException::notActive($this);
         }
 
