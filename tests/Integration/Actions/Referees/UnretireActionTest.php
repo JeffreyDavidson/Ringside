@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Referees\UnretireAction;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Referees\Referee;
+use App\Models\Referees\RefereeEmployment;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -149,4 +150,27 @@ test('it restores referee employment after unretirement', function () {
     expect($employment->referee_id)->toBe($referee->id);
     expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
+});
+
+test('it rolls back retirement changes when employment restoration fails', function () {
+    $referee = Referee::factory()->retired()->create();
+    $retirement = $referee->currentRetirement;
+
+    RefereeEmployment::creating(function (): void {
+        throw new RuntimeException('Employment restoration failed.');
+    });
+
+    try {
+        expect(fn () => UnretireAction::run($referee))
+            ->toThrow(RuntimeException::class);
+    } finally {
+        RefereeEmployment::flushEventListeners();
+    }
+
+    $referee->refresh();
+    $retirement->refresh();
+
+    expect($referee->isRetired())->toBeTrue();
+    expect($referee->isEmployed())->toBeFalse();
+    expect($retirement->ended_at)->toBeNull();
 });
