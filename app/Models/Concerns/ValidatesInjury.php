@@ -39,7 +39,6 @@ trait ValidatesInjury
      * - Must not be retired
      * - Must not have future employment scheduled
      * - Must not already be injured
-     * - Must not be suspended
      *
      * @return bool True if the model can be injured, false otherwise
      *
@@ -57,8 +56,7 @@ trait ValidatesInjury
         return ! $this->isNotInEmployment()
             && ! $this->isRetired()
             && ! $this->hasFutureEmployment()
-            && ! $this->isInjured()
-            && ! $this->isSuspended();
+            && ! $this->isInjured();
     }
 
     /**
@@ -97,9 +95,6 @@ trait ValidatesInjury
             throw CannotBeInjuredException::injured($this);
         }
 
-        if ($this->isSuspended()) {
-            throw CannotBeInjuredException::suspended($this);
-        }
     }
 
     /**

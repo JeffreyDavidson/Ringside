@@ -95,9 +95,8 @@ trait ValidatesSuspension
      * - Must not be unemployed
      * - Must not be released
      * - Must not have future employment
-     * - Must not be injured
      * - Must not be retired
-     * - Must not be bookable (already reinstated)
+     * - Must be suspended or injured
      *
      * @return bool True if the model can be reinstated, false otherwise
      *
@@ -113,13 +112,14 @@ trait ValidatesSuspension
     public function canBeReinstated(): bool
     {
         $type = RosterMemberType::fromModel($this);
+        $isSuspended = $this instanceof Suspendable && $this->isSuspended();
+        $isInjured = $type->canBeInjured() && $this instanceof Injurable && $this->isInjured();
 
         return ! $this->isNotInEmployment()
             && ! $this->isReleased()
             && ! $this->hasFutureEmployment()
-            && (! $type->canBeInjured() || ! ($this instanceof Injurable) || ! $this->isInjured())
             && ! $this->isRetired()
-            && (! ($this instanceof Bookable) || ! $this->isBookable());
+            && ($isSuspended || $isInjured);
     }
 
     /**
@@ -139,7 +139,11 @@ trait ValidatesSuspension
      */
     public function ensureCanBeReinstated(): void
     {
-        if ($this instanceof Suspendable && ! $this->isSuspended()) {
+        $type = RosterMemberType::fromModel($this);
+        $isSuspended = $this instanceof Suspendable && $this->isSuspended();
+        $isInjured = $type->canBeInjured() && $this instanceof Injurable && $this->isInjured();
+
+        if (! $isSuspended && ! $isInjured) {
             throw CannotBeReinstatedException::available($this);
         }
 
@@ -149,11 +153,6 @@ trait ValidatesSuspension
 
         if ($this->hasFutureEmployment()) {
             throw CannotBeReinstatedException::hasFutureEmployment($this);
-        }
-
-        $type = RosterMemberType::fromModel($this);
-        if ($type->canBeInjured() && ($this instanceof Injurable) && $this->isInjured()) {
-            throw CannotBeReinstatedException::injured($this);
         }
 
         if ($this->isRetired()) {
