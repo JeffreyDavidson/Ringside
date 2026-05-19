@@ -45,9 +45,6 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
             throw CannotBeSuspendedException::suspended($entity);
         }
 
-        if (method_exists($entity, 'isInjured') && $entity->isInjured()) {
-            throw CannotBeSuspendedException::injured($entity);
-        }
     }
 
     /**

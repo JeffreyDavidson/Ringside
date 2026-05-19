@@ -162,7 +162,7 @@ test('it prevents suspending unemployed wrestler', function () {
         ->toThrow(Exception::class);
 });
 
-test('it prevents suspending injured employed wrestler', function () {
+test('it suspends injured employed wrestler', function () {
     // Create employed wrestler who then gets injured
     $wrestler = Wrestler::factory()->employed()->create();
     $wrestler->injuries()->create([
@@ -173,6 +173,11 @@ test('it prevents suspending injured employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    expect(fn () => SuspendAction::run($wrestler))
-        ->toThrow(Exception::class);
+    SuspendAction::run($wrestler);
+
+    $wrestler->refresh();
+
+    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->isEmployed())->toBeTrue();
 });

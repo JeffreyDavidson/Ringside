@@ -157,7 +157,7 @@ test('it handles multiple suspensions correctly', function () {
     expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
 });
 
-test('it prevents reinstating injured suspended manager', function () {
+test('it reinstates injured suspended manager', function () {
     // This would be an invalid state, but test the business rule
     $manager = Manager::factory()->employed()->suspended()->create();
 
@@ -167,8 +167,22 @@ test('it prevents reinstating injured suspended manager', function () {
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();
+    $suspensionId = $manager->currentSuspension->id;
+    $injuryId = $manager->currentInjury->id;
 
-    // Should prevent reinstatement if injured (business rule)
-    expect(fn () => ReinstateAction::run($manager))
-        ->toThrow(Exception::class);
+    ReinstateAction::run($manager);
+
+    $manager->refresh();
+
+    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->isInjured())->toBeFalse();
+    expect($manager->isEmployed())->toBeTrue();
+    $this->assertDatabaseMissing('managers_suspensions', [
+        'id' => $suspensionId,
+        'ended_at' => null,
+    ]);
+    $this->assertDatabaseMissing('managers_injuries', [
+        'id' => $injuryId,
+        'ended_at' => null,
+    ]);
 });

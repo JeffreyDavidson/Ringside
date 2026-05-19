@@ -235,24 +235,28 @@ describe('Wrestler Employment Workflows', function () {
             EmployAction::run($wrestler, Carbon::now());
             $employed = $wrestler->fresh();
 
-            // Test mutually exclusive statuses - injured wrestler cannot be suspended
+            // Injury and suspension are orthogonal states.
             InjureAction::run($employed, Carbon::now());
             $injured = $wrestler->fresh();
-            expect($injured->canBeSuspended())->toBeFalse();
+            expect($injured->canBeSuspended())->toBeTrue();
             expect($injured->isEmployed())->toBeTrue();
             expect($injured->isInjured())->toBeTrue();
 
-            // Heal wrestler, then test suspended wrestler cannot be injured
-            HealAction::run($injured, Carbon::now());
-            SuspendAction::run($wrestler->fresh(), Carbon::now());
-            $suspended = $wrestler->fresh();
-            expect($suspended->canBeInjured())->toBeFalse();
-            expect($suspended->isEmployed())->toBeTrue();
-            expect($suspended->isSuspended())->toBeTrue();
+            SuspendAction::run($injured, Carbon::now());
+            $injuredAndSuspended = $wrestler->fresh();
+            expect($injuredAndSuspended->canBeInjured())->toBeFalse();
+            expect($injuredAndSuspended->isEmployed())->toBeTrue();
+            expect($injuredAndSuspended->isInjured())->toBeTrue();
+            expect($injuredAndSuspended->isSuspended())->toBeTrue();
 
             // Reinstate, then test retired wrestler cannot be employed
-            ReinstateAction::run($suspended, Carbon::now());
-            RetireAction::run($wrestler->fresh(), Carbon::now());
+            ReinstateAction::run($injuredAndSuspended, Carbon::now());
+            $reinstated = $wrestler->fresh();
+            expect($reinstated->isSuspended())->toBeFalse();
+            expect($reinstated->isInjured())->toBeFalse();
+            expect($reinstated->isEmployed())->toBeTrue();
+
+            RetireAction::run($reinstated, Carbon::now());
             $retired = $wrestler->fresh();
             expect($retired->canBeEmployed())->toBeFalse();
             expect($retired->isRetired())->toBeTrue();
