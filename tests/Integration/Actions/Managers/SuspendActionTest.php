@@ -124,14 +124,19 @@ test('it maintains employment status during suspension', function () {
     expect($employment->ended_at)->toBeNull();
 });
 
-test('it prevents suspending injured manager', function () {
+test('it suspends injured manager', function () {
     $manager = Manager::factory()->employed()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
 
-    expect(fn () => SuspendAction::run($manager))
-        ->toThrow(Exception::class);
+    SuspendAction::run($manager);
+
+    $manager->refresh();
+
+    expect($manager->isInjured())->toBeTrue();
+    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->isEmployed())->toBeTrue();
 });
 
 test('it uses DateHelper for consistent date handling', function () {
