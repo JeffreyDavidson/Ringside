@@ -30,7 +30,7 @@ describe('VenueBuilder Query Scopes', function () {
         $this->venueWithBothEvents = Venue::factory()->create(['name' => 'Mixed Events Venue']);
 
         // Create events for different venues
-        Event::factory()->atVenue($this->venueWithEvents)->create(['date' => Carbon::now()->subHour()]);  // Past event (1 hour ago)
+        Event::factory()->atVenue($this->venueWithEvents)->create(['date' => null]);
 
         Event::factory()->atVenue($this->venueWithPastEvents)->create([
             'date' => Carbon::yesterday(),
