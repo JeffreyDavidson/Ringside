@@ -333,7 +333,7 @@ describe('RefereesActions Integration Tests', function () {
             // Comeback
             $component->call('unretire');
             expect($referee->fresh()->isRetired())->toBeFalse();
-            expect($referee->fresh()->isEmployed())->toBeFalse();
+            expect($referee->fresh()->isEmployed())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
