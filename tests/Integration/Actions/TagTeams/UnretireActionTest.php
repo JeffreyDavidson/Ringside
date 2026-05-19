@@ -80,6 +80,28 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 });
 
+test('it unretires without auto-employing when no current wrestlers are available', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $tagTeam->retirements()->create([
+        'started_at' => now()->subDays(2),
+        'ended_at' => null,
+    ]);
+
+    $tagTeam->refresh();
+    expect($tagTeam->isRetired())->toBeTrue();
+    expect($tagTeam->currentWrestlers)->toBeEmpty();
+
+    UnretireAction::run($tagTeam, requireAvailablePartners: false);
+
+    $tagTeam->refresh();
+
+    expect($tagTeam->isRetired())->toBeFalse();
+    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentRetirement)->toBeNull();
+    expect($tagTeam->currentEmployment)->toBeNull();
+    expect($tagTeam->employments()->count())->toBe(0);
+});
+
 test('it prevents unretiring non-retired tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 

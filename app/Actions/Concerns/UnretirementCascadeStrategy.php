@@ -188,6 +188,10 @@ class UnretirementCascadeStrategy
                 return;
             }
 
+            if (method_exists($entity, 'currentWrestlers') && $entity->currentWrestlers->isEmpty()) {
+                return;
+            }
+
             // Employ the entity using StatusTransitionPipeline
             StatusTransitionPipeline::employ($entity, $date)
                 ->withCascade(EmploymentCascadeStrategy::wrestlers())
