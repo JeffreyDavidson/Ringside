@@ -251,7 +251,12 @@ describe('Wrestler Employment Workflows', function () {
 
             // Reinstate, then test retired wrestler cannot be employed
             ReinstateAction::run($injuredAndSuspended, Carbon::now());
-            RetireAction::run($wrestler->fresh(), Carbon::now());
+            $reinstated = $wrestler->fresh();
+            expect($reinstated->isSuspended())->toBeFalse();
+            expect($reinstated->isInjured())->toBeFalse();
+            expect($reinstated->isEmployed())->toBeTrue();
+
+            RetireAction::run($reinstated, Carbon::now());
             $retired = $wrestler->fresh();
             expect($retired->canBeEmployed())->toBeFalse();
             expect($retired->isRetired())->toBeTrue();

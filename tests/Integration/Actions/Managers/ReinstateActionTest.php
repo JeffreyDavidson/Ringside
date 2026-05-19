@@ -167,6 +167,8 @@ test('it reinstates injured suspended manager', function () {
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();
+    $suspensionId = $manager->currentSuspension->id;
+    $injuryId = $manager->currentInjury->id;
 
     ReinstateAction::run($manager);
 
@@ -175,4 +177,12 @@ test('it reinstates injured suspended manager', function () {
     expect($manager->isSuspended())->toBeFalse();
     expect($manager->isInjured())->toBeFalse();
     expect($manager->isEmployed())->toBeTrue();
+    $this->assertDatabaseMissing('managers_suspensions', [
+        'id' => $suspensionId,
+        'ended_at' => null,
+    ]);
+    $this->assertDatabaseMissing('managers_injuries', [
+        'id' => $injuryId,
+        'ended_at' => null,
+    ]);
 });

@@ -96,6 +96,7 @@ trait ValidatesSuspension
      * - Must not be released
      * - Must not have future employment
      * - Must not be retired
+     * - Must not be bookable
      * - Must be suspended or injured
      *
      * @return bool True if the model can be reinstated, false otherwise
@@ -114,11 +115,13 @@ trait ValidatesSuspension
         $type = RosterMemberType::fromModel($this);
         $isSuspended = $this instanceof Suspendable && $this->isSuspended();
         $isInjured = $type->canBeInjured() && $this instanceof Injurable && $this->isInjured();
+        $isBookable = $this instanceof Bookable && $this->isBookable();
 
         return ! $this->isNotInEmployment()
             && ! $this->isReleased()
             && ! $this->hasFutureEmployment()
             && ! $this->isRetired()
+            && ! $isBookable
             && ($isSuspended || $isInjured);
     }
 
