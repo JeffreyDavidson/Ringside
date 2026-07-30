@@ -142,6 +142,7 @@ test('user can logout successfully', function () {
         ->assertScript('window.location.pathname === "/dashboard"')
         ->assertSee('Dashboard')
         ->press('Log out')
+        ->assertScript('window.location.pathname === "/login"')
         ->assertSee('Sign in');
 
     // Verify we can't access protected pages

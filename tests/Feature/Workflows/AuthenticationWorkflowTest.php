@@ -112,7 +112,7 @@ describe('Administrator Authentication Journey', function () {
         // And: Logging out
         actingAs($admin)
             ->post(route('logout'))
-            ->assertRedirect('/');
+            ->assertRedirect(route('login'));
 
         // Then: Cannot access protected areas anymore
         get(route('dashboard'))

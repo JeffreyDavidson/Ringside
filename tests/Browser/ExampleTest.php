@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 test('basic example', function () {
-    $page = visit('/');
+    $page = visit(route('login'));
 
-    $page->assertSee('Laravel')
+    $page->assertSee('Sign in')
         ->assertNoJavascriptErrors();
 });
