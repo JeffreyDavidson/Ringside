@@ -1,3 +1,6 @@
+includes:
+  - phpstan-baseline.neon
+
 parameters:
   level: 6  # ✅ Reasonable for a Laravel project (go up to 8+ for stricter static analysis)
 

@@ -1,0 +1,1789 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentManagers\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Concerns/ReleaseCascadeStrategy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentWrestlers\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Concerns/ReleaseCascadeStrategy.php
+
+		-
+			message: '#^Call to private method exists\(\) of parent class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\<Illuminate\\Database\\Eloquent\\Model,Illuminate\\Database\\Eloquent\\Model,Illuminate\\Database\\Eloquent\\Relations\\Pivot,string\>\.$#'
+			identifier: method.private
+			count: 1
+			path: app/Actions/Concerns/RestoreCascadeStrategy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentManagers\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Concerns/UnretirementCascadeStrategy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentWrestlers\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Actions/Concerns/UnretirementCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''currentChampionships'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''managers'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''stables'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''tagTeams'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''currentChampionships'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''managers'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''stables'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''tagTeams'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
+
+		-
+			message: '#^Access to an undefined property App\\Enums\\MatchType\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/Matches/AddMatchForEventAction.php
+
+		-
+			message: '#^Parameter \#1 \$otherStable of method App\\Models\\Stables\\Stable\:\:ensureCanBeMergedWith\(\) expects App\\Models\\Concerns\\Stable, App\\Models\\Stables\\Stable given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Actions/Stables/MergeStablesAction.php
+
+		-
+			message: '#^Cannot access property \$id on class\-string\|object\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Actions/Stables/UnretireAction.php
+
+		-
+			message: '#^Cannot access property \$name on class\-string\|object\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Actions/Stables/UnretireAction.php
+
+		-
+			message: '#^Parameter \#2 \$wrestlers of method App\\Services\\TagTeamMembershipService\:\:addFoundingMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Database\\Eloquent\\Collection given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Actions/TagTeams/CreateAction.php
+
+		-
+			message: '#^Parameter \#3 \$managers of method App\\Services\\TagTeamMembershipService\:\:addFoundingMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\>\|null, Illuminate\\Database\\Eloquent\\Collection given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Actions/TagTeams/CreateAction.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Actions\\Titles\\CannotBeDeactivatedException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Actions/Titles/PullAction.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Matches\\MatchCompetitor\>\:\:map\(\) expects callable\(App\\Models\\Matches\\MatchCompetitor, int\)\: Illuminate\\Support\\Collection\<int, App\\Models\\TagTeams\\TagTeam\|App\\Models\\Wrestlers\\Wrestler\>, Closure\(App\\Collections\\MatchCompetitorsCollection\)\: Illuminate\\Support\\Collection\<int, App\\Models\\TagTeams\\TagTeam\|App\\Models\\Wrestlers\\Wrestler\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Collections/MatchCompetitorsCollection.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Matches\\MatchCompetitor\>\:\:map\(\) expects callable\(App\\Models\\Matches\\MatchCompetitor, int\)\: int\<0, max\>, Closure\(App\\Collections\\MatchCompetitorsCollection\)\: int\<0, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Collections/MatchCompetitorsCollection.php
+
+		-
+			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getTagTeamsToRetire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Stables/StableMembershipData.php
+
+		-
+			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getTagTeamsToUnretire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Stables/StableMembershipData.php
+
+		-
+			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getWrestlersToRetire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Stables/StableMembershipData.php
+
+		-
+			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getWrestlersToUnretire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Stables/StableMembershipData.php
+
+		-
+			message: '#^Parameter \#3 \$managers of static method App\\Data\\TagTeams\\TagTeamMembershipData\:\:fromWrestlers\(\) expects Illuminate\\Database\\Eloquent\\Collection\|null, Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\>\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Data/TagTeams/TagTeamData.php
+
+		-
+			message: '#^Method App\\Data\\TagTeams\\TagTeamMembershipData\:\:fromWrestlers\(\) has parameter \$managers with generic class Illuminate\\Database\\Eloquent\\Collection but does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/TagTeams/TagTeamMembershipData.php
+
+		-
+			message: '#^Method App\\Data\\TagTeams\\TagTeamMembershipData\:\:getManagers\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/TagTeams/TagTeamMembershipData.php
+
+		-
+			message: '#^Method App\\Data\\TagTeams\\TagTeamMembershipData\:\:getWrestlers\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/TagTeams/TagTeamMembershipData.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:failedMedicalEvaluation\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:incompleteRehabilitation\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:insufficientMedicalDocumentation\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:insuranceCompliance\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:minimumRecoveryPeriod\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:notInjured\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:ongoingTreatment\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeClearedFromInjuryException\:\:unauthorizedClearance\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 8
+			path: app/Exceptions/Roster/CannotBeClearedFromInjuryException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeEmployedException\:\:contractualConflict\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeEmployedException\:\:employed\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeEmployedException\:\:medicalClearance\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeEmployedException\:\:missingRequirement\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeEmployedException\:\:retired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeEmployedException\:\:suspended\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeEmployedException\:\:unauthorizedEmployment\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 7
+			path: app/Exceptions/Roster/CannotBeEmployedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:contractualRestriction\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:hasFutureEmployment\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:injured\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:insufficientMedicalCoverage\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:pendingMedicalExamination\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:probationaryPeriod\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:released\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:retired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:suspended\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeInjuredException\:\:unemployed\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 10
+			path: app/Exceptions/Roster/CannotBeInjuredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:available\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:bookable\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:contractualDispute\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:hasFutureEmployment\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:incompleteRehabilitation\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:injured\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:minimumSuspensionPeriod\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:pendingDisciplinaryReview\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:released\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:retired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:unauthorizedReinstatement\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:unemployed\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReinstatedException\:\:unresolvedSuspensionCondition\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 13
+			path: app/Exceptions/Roster/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:activeChampion\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:activeStoryline\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:hasFutureEmployment\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:noticePeriodRequired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:ongoingDisciplinaryProceedings\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:pendingMedicalEvaluation\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:released\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:retired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:unauthorizedRelease\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:unemployed\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:unionRestriction\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeReleasedException\:\:upcomingObligations\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 12
+			path: app/Exceptions/Roster/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:alreadyRetired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeRetiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:contractualObligation\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeRetiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:hasFutureEmployment\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeRetiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:released\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeRetiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:unemployed\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeRetiredException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Exceptions/Roster/CannotBeRetiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:activeChampion\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:contractualProtection\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:criticalStorylineRole\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:hasFutureEmployment\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:injured\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:pendingLegalProceedings\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:probationaryPeriod\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:released\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:retired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:suspended\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:unauthorizedSuspension\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:unemployed\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:unionProtection\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 13
+			path: app/Exceptions/Roster/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeUnretiredException\:\:contractualLimitation\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeUnretiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeUnretiredException\:\:medicalRestriction\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeUnretiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeUnretiredException\:\:notRetired\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeUnretiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeUnretiredException\:\:permanentRetirement\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeUnretiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\CannotBeUnretiredException\:\:unauthorizedUnretirement\(\) has parameter \$entity with generic interface App\\Models\\Contracts\\Employable but does not specify its types\: TEmployment, TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Exceptions/Roster/CannotBeUnretiredException.php
+
+		-
+			message: '#^Parameter \#1 \$model of static method App\\Exceptions\\BaseBusinessException\:\:formatModelContext\(\) expects Illuminate\\Database\\Eloquent\\Model, App\\Models\\Contracts\\Employable given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Exceptions/Roster/CannotBeUnretiredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:activeRelationships\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:championshipHistory\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:dataIntegrityIssues\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:historicalSignificance\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:insufficientAuthorization\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:ongoingInvestigations\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:stillEmployed\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\:\:stillSuspended\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeDeletedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeDeletedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:notEmployed\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:notSuspended\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:partnersUnavailable\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:requiresAuthorization\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:requiresDisciplinaryClearance\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:timingConflicts\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\:\:contractualObligations\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\:\:hasChampionshipObligations\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\:\:hasScheduledMatches\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\:\:notEmployed\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\:\:probationaryPeriod\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\:\:requiresAuthorization\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\:\:storylineConflicts\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReleasedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeReleasedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:dataIntegrityIssues\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:insufficientAuthorization\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:legalConflicts\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:nameConflict\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:notDeleted\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:partnersUnavailable\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:requiresAdministrativeApproval\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\:\:timingConflicts\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeRestoredException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeRestoredException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\:\:alreadySuspended\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\:\:hasChampionshipObligations\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\:\:hasScheduledMatches\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\:\:notEmployed\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\:\:requiresAuthorization\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeSuspendedException.php
+
+		-
+			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\:\:storylineConflicts\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeSuspendedException\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Exceptions/Roster/TagTeams/CannotBeSuspendedException.php
+
+		-
+			message: '#^Call to static method create\(\) on an unknown class App\\Models\\User\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Controllers/Auth/RegisteredUserController.php
+
+		-
+			message: '#^Class App\\Models\\User not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Controllers/Auth/RegisteredUserController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Users\\User\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/AddWrestlingContext.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Base\\BaseFormModal\<TForm of App\\Livewire\\Base\\BaseForm, TModel of Illuminate\\Database\\Eloquent\\Model\>\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Livewire/Base/BaseFormModal.php
+
+		-
+			message: '#^PHPDoc tag @var for property App\\Livewire\\Base\\BaseModal\:\:\$modelForm with type \(TModelForm of App\\Livewire\\Base\\BaseForm\)\|null is not subtype of native type App\\Livewire\\Base\\BaseForm\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Livewire/Base/BaseModal.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between TModelForm of App\\Livewire\\Base\\BaseForm and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Livewire/Base/BaseModal.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Matches\\MatchResult\:\:\$decision\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Base/Tables/BasePreviousMatchesTable.php
+
+		-
+			message: '#^Access to an undefined property App\\Livewire\\Base\\Tables\\BaseTable\:\:\$columns\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Base/Tables/BaseTable.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Events\\EventBuilder\<App\\Models\\Events\\Event\>\) of method App\\Livewire\\Events\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Events/Tables/Main.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$signature_move\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isEmployed\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isInjured\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isRetired\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isSuspended\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Method App\\Livewire\\Managers\\Components\\Actions\:\:buildEntityLogData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Method App\\Livewire\\Managers\\Components\\Actions\:\:executeActionWithContext\(\) has parameter \$actionParams with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Livewire/Managers/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Contracts\\Database\\Query\\Builder\:\:whereNameMatches\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Livewire/Managers/Tables/Main.php
+
+		-
+			message: '#^Call to method getMessage\(\) on an unknown class App\\Exceptions\\Status\\CannotBeReinstatedException\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/Managers/Tables/Main.php
+
+		-
+			message: '#^Caught class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/Managers/Tables/Main.php
+
+		-
+			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Livewire/Managers/Tables/Main.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Roster\\ManagerBuilder\<App\\Models\\Managers\\Manager\>\) of method App\\Livewire\\Managers\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Managers/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\Managers\\Tables\\PreviousStables\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Managers/Tables/PreviousStables.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamManager\>\) of method App\\Livewire\\Managers\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Managers/Tables/PreviousTagTeams.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Wrestlers\\WrestlerManager\>\) of method App\\Livewire\\Managers\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Managers/Tables/PreviousWrestlers.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: app/Livewire/Matches/Forms/CreateEditForm.php
+
+		-
+			message: '#^Property App\\Livewire\\Matches\\Forms\\CreateEditForm\:\:\$competitors \(array\<int\>\) does not accept array\<int\<0, max\>, array\<string, array\>\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Livewire/Matches/Modals/FormModal.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Livewire/Matches/Modals/FormModal.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Matches\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Matches/Tables/Main.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Matches\\MatchResult\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Livewire/Matches/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Matches\\Tables\\MatchesTable\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Matches/Tables/MatchesTable.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Matches\\MatchResult\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Livewire/Matches/Tables/MatchesTable.php
+
+		-
+			message: '#^Call to method getMessage\(\) on an unknown class App\\Exceptions\\Status\\CannotBeReinstatedException\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/Referees/Tables/Main.php
+
+		-
+			message: '#^Caught class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/Referees/Tables/Main.php
+
+		-
+			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Livewire/Referees/Tables/Main.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Roster\\RefereeBuilder\<App\\Models\\Referees\\Referee\>\) of method App\\Livewire\\Referees\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Referees/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Referees\\Tables\\PreviousMatches\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Referees/Tables/PreviousMatches.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Roster\\StableBuilder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\Stables\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Stables/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Managers\\Manager\>\) of method App\\Livewire\\Stables\\Tables\\PreviousManagers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Stables/Tables/PreviousManagers.php
+
+		-
+			message: '#^Parameter \#1 \$relations of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeam\>\:\:with\(\) expects array\<array\|\(Closure\(Illuminate\\Database\\Eloquent\\Relations\\Relation\<\*, \*, \*\>\)\: mixed\)\|string\>\|string, array\{stables\: Closure\(Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\)\: void\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Livewire/Stables/Tables/PreviousTagTeams.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeam\>\) of method App\\Livewire\\Stables\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Stables/Tables/PreviousTagTeams.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Wrestlers\\Wrestler\>\) of method App\\Livewire\\Stables\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Stables/Tables/PreviousWrestlers.php
+
+		-
+			message: '#^Instanceof between Illuminate\\View\\View and Illuminate\\Contracts\\View\\View will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: app/Livewire/Table/Column.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Livewire/Table/Column.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Livewire/Table/Filters/DateRangeFilter.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Livewire/Table/Filters/SelectFilter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$signature_move\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isEmployed\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isInjured\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isRetired\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isSuspended\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Method App\\Livewire\\TagTeams\\Components\\Actions\:\:buildEntityLogData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Method App\\Livewire\\TagTeams\\Components\\Actions\:\:executeActionWithContext\(\) has parameter \$actionParams with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Livewire/TagTeams/Components/Actions.php
+
+		-
+			message: '#^Call to method getMessage\(\) on an unknown class App\\Exceptions\\Status\\CannotBeReinstatedException\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/TagTeams/Tables/Main.php
+
+		-
+			message: '#^Caught class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/TagTeams/Tables/Main.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Roster\\TagTeamBuilder\<App\\Models\\TagTeams\\TagTeam\>\) of method App\\Livewire\\TagTeams\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/TagTeams/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamManager\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousManagers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/TagTeams/Tables/PreviousManagers.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousMatches\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/TagTeams/Tables/PreviousMatches.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousStables\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/TagTeams/Tables/PreviousStables.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Titles\\TitleChampionship\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousTitleChampionships\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/TagTeams/Tables/PreviousTitleChampionships.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamWrestler\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/TagTeams/Tables/PreviousWrestlers.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Titles\\TitleBuilder\<App\\Models\\Titles\\Title\>\) of method App\\Livewire\\Titles\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Titles/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Titles\\TitleChampionship\>\) of method App\\Livewire\\Titles\\Tables\\PreviousTitleChampionships\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Titles/Tables/PreviousTitleChampionships.php
+
+		-
+			message: '#^Call to method whereNameMatches\(\) on an unknown class App\\Livewire\\Users\\Tables\\Builder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/Users/Tables/Main.php
+
+		-
+			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Livewire/Users/Tables/Main.php
+
+		-
+			message: '#^Parameter \$builder of anonymous function has invalid type App\\Livewire\\Users\\Tables\\Builder\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Livewire/Users/Tables/Main.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Users\\UserBuilder\<App\\Models\\Users\\User\>\) of method App\\Livewire\\Users\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Users/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Events\\Venue\>\) of method App\\Livewire\\Venues\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Venues/Tables/Main.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Events\\EventBuilder\<App\\Models\\Events\\Event\>\) of method App\\Livewire\\Venues\\Tables\\PreviousEvents\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Venues/Tables/PreviousEvents.php
+
+		-
+			message: '#^Return type \(App\\Builders\\Roster\\WrestlerBuilder\<App\\Models\\Wrestlers\\Wrestler\>\) of method App\\Livewire\\Wrestlers\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Wrestlers/Tables/Main.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Wrestlers\\WrestlerManager\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousManagers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Wrestlers/Tables/PreviousManagers.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousMatches\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Wrestlers/Tables/PreviousMatches.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousStables\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Wrestlers/Tables/PreviousStables.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamWrestler\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Wrestlers/Tables/PreviousTagTeams.php
+
+		-
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Titles\\TitleChampionship\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousTitleChampionships\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionships.php
+
+		-
+			message: '#^Type \$this\(App\\Models\\Contracts\\BookableCompetitor\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\) in generic type Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\<App\\Models\\Matches\\EventMatch, \$this\(App\\Models\\Contracts\\BookableCompetitor\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\), App\\Models\\Matches\\MatchCompetitor, string\> in PHPDoc tag @return is not subtype of template type TDeclaringModel of Illuminate\\Database\\Eloquent\\Model of class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\.$#'
+			identifier: generics.notSubtype
+			count: 2
+			path: app/Models/Contracts/BookableCompetitor.php
+
+		-
+			message: '#^Type \$this\(App\\Models\\Contracts\\BookableOfficial\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\) in generic type Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\<App\\Models\\Matches\\EventMatch, \$this\(App\\Models\\Contracts\\BookableOfficial\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\), Illuminate\\Database\\Eloquent\\Relations\\Pivot, string\> in PHPDoc tag @return is not subtype of template type TDeclaringModel of Illuminate\\Database\\Eloquent\\Model of class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\.$#'
+			identifier: generics.notSubtype
+			count: 2
+			path: app/Models/Contracts/BookableOfficial.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Exceptions\\Status\\CannotBeRetiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Contracts/RetirementValidationStrategy.php
+
+		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Managers\\Manager\) and ''trashed'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/Managers/Manager.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Managers/Manager.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Managers/Manager.php
+
+		-
+			message: '#^Variable \$firstName on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Models/Managers/Manager.php
+
+		-
+			message: '#^Variable \$lastName on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Models/Managers/Manager.php
+
+		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Referees\\Referee\) and ''trashed'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/Referees/Referee.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Referees/Referee.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Referees/Referee.php
+
+		-
+			message: '#^Variable \$firstName on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Models/Referees/Referee.php
+
+		-
+			message: '#^Variable \$lastName on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Models/Referees/Referee.php
+
+		-
+			message: '#^Access to property \$id on an unknown class App\\Models\\Concerns\\Stable\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Call to method isCurrentlyActive\(\) on an unknown class App\\Models\\Concerns\\Stable\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Call to method isRetired\(\) on an unknown class App\\Models\\Concerns\\Stable\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 2
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Method App\\Models\\Stables\\Stable\:\:getAvailableFormerMembers\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Method App\\Models\\Stables\\Stable\:\:getUnavailableKeyFormerMembers\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Parameter \#1 \$secondaryStable of static method App\\Exceptions\\Roster\\Stables\\CannotBeMergedException\:\:secondaryNotActive\(\) expects App\\Models\\Stables\\Stable, App\\Models\\Concerns\\Stable given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Parameter \#1 \$secondaryStable of static method App\\Exceptions\\Roster\\Stables\\CannotBeMergedException\:\:secondaryRetired\(\) expects App\\Models\\Stables\\Stable, App\\Models\\Concerns\\Stable given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Parameter \$otherStable of method App\\Models\\Stables\\Stable\:\:canBeMergedWith\(\) has invalid type App\\Models\\Concerns\\Stable\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Parameter \$otherStable of method App\\Models\\Stables\\Stable\:\:ensureCanBeMergedWith\(\) has invalid type App\\Models\\Concerns\\Stable\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Models/Stables/Stable.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Titles\\Title\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Titles/Title.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Titles\\Title\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Titles/Title.php
+
+		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Titles\\Title\) and ''trashed'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/Titles/Title.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Titles/Title.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Titles/Title.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between Illuminate\\Support\\Carbon and null will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/Titles/TitleChampionship.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:alreadyRetired\(\) expects App\\Models\\Contracts\\Employable\|App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:hasFutureEmployment\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:unemployed\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:hasFutureEmployment\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:released\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:retired\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:suspended\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:unemployed\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:alreadyRetired\(\) expects App\\Models\\Contracts\\Employable\|App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/StableRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$stable of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:hasFutureEstablishment\(\) expects App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/StableRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$stable of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:unactivated\(\) expects App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/StableRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:alreadyRetired\(\) expects App\\Models\\Contracts\\Employable\|App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:hasFutureEmployment\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:unemployed\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:noActiveWrestlers\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:wrestlerCannotBeRetired\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:wrestlerInjured\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
+
+		-
+			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:wrestlerSuspended\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
+
+		-
+			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:noActiveWrestlers\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:wrestlerAlreadySuspended\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:wrestlerCannotBeSuspended\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:wrestlerInjured\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:hasFutureEmployment\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:injured\(\) invoked with 0 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:released\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:retired\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:suspended\(\) invoked with 0 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:unemployed\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Wrestlers/Wrestler.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Wrestlers/Wrestler.php
+
+		-
+			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Wrestlers\\Wrestler\) and ''trashed'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Models/Wrestlers/Wrestler.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Wrestlers/Wrestler.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: app/Models/Wrestlers/Wrestler.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$this contains generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany but does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Providers/AppServiceProvider.php
+
+		-
+			message: '#^Class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
+			identifier: class.notFound
+			count: 4
+			path: app/Services/ErrorMessageMappingService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: mixed, Closure\(App\\Models\\TagTeams\\TagTeam\)\: mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/StableMembershipService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: mixed, Closure\(App\\Models\\Wrestlers\\Wrestler\)\: mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/StableMembershipService.php
+
+		-
+			message: '#^Method App\\Services\\StableValidationService\:\:validateSplitMembers\(\) has parameter \$membersForNewStable with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/StableValidationService.php
+
+		-
+			message: '#^Parameter \#1 \$members of method App\\Services\\TagTeamMembershipService\:\:employMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\|App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Support\\Collection\<\(int\|string\), App\\Models\\Managers\\Manager\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/TagTeamMembershipService.php
+
+		-
+			message: '#^Parameter \#1 \$members of method App\\Services\\TagTeamMembershipService\:\:employMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\|App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/TagTeamMembershipService.php
+
+		-
+			message: '#^Parameter \#1 \$members of method App\\Services\\TagTeamMembershipService\:\:employMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\|App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Support\\Collection\<int, App\\Models\\Wrestlers\\Wrestler\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Services/TagTeamMembershipService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Managers\\Manager\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/TagTeamValidationService.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''isInjured'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Services/TagTeamValidationService.php
