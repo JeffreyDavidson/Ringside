@@ -101,6 +101,8 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Manager> $currentManagers
  * @property-read Collection<int, Manager> $previousManagers
  * @property-read Collection<int, TagTeam> $tagTeams
+ * @property-read TagTeam|null $currentTagTeam
+ * @property-read TagTeam|null $previousTagTeam
  * @property-read Collection<int, TagTeam> $previousTagTeams
  * @property-read Collection<int, Stable> $stables
  * @property-read Collection<int, Stable> $previousStables

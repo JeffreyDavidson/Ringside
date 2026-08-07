@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Managers\Manager;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
 /**
@@ -27,8 +26,6 @@ use Livewire\Livewire;
  * @see Form
  */
 describe('Managers FormModal Tests', function () {
-    pest()->use(RefreshDatabase::class);
-
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
             Livewire::test(FormModal::class)

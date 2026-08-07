@@ -9,6 +9,7 @@ use Pest\Rector\Rules\Pest2ToPest3\ToHaveMethodOnClassRector;
 use Pest\Rector\Rules\Pest2ToPest3\UsesToExtendRector;
 use Pest\Rector\Rules\RemoveDebugExpectationsRector;
 use Pest\Rector\Rules\RemoveOnlyRector;
+use Pest\Rector\Rules\RemoveRedundantPestUsesRector;
 use Rector\Config\RectorConfig;
 
 return RectorConfig::configure()
@@ -23,4 +24,5 @@ return RectorConfig::configure()
         FixInvalidRepeatValueRector::class,
         RemoveDebugExpectationsRector::class,
         RemoveOnlyRector::class,
+        RemoveRedundantPestUsesRector::class,
     ]);

@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Collection;
 
+use function Pest\Laravel\withoutVite;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -23,9 +25,10 @@ pest()->extend(TestCase::class)->use(DatabaseMigrations::class)->in('Browser');
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature', 'Integration', 'Unit');
 
-pest()
-    ->in('Feature')
-    ->beforeEach(fn () => $this->withoutVite());
+beforeEach(function () {
+    withoutVite();
+})
+    ->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -51,7 +54,7 @@ expect()->extend('collectionHas', function ($entity) {
         return $this;
     }
 
-    expect($this->value)->contains($entity)->toBeTrue();
+    expect($this->value->contains($entity))->toBeTrue();
 
     return $this;
 });
@@ -65,7 +68,7 @@ expect()->extend('collectionDoesntHave', function ($entity) {
         return $this;
     }
 
-    expect($this->value)->contains($entity)->toBeFalse();
+    expect($this->value->contains($entity))->toBeFalse();
 
     return $this;
 });

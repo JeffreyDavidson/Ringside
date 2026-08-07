@@ -202,12 +202,12 @@ test('it maintains referential integrity during restoration', function () {
 
     // Verify pivot data integrity
     $wrestlerPivot = $restoredManager->wrestlers()->first()->pivot;
-    expect($wrestlerPivot->hired_at)->not()->toBeNull();
-    expect($wrestlerPivot->fired_at)->not()->toBeNull();
+    expect($wrestlerPivot->getAttribute('hired_at'))->not()->toBeNull();
+    expect($wrestlerPivot->getAttribute('fired_at'))->not()->toBeNull();
 
     $tagTeamPivot = $restoredManager->tagTeams()->first()->pivot;
-    expect($tagTeamPivot->hired_at)->not()->toBeNull();
-    expect($tagTeamPivot->fired_at)->not()->toBeNull();
+    expect($tagTeamPivot->getAttribute('hired_at'))->not()->toBeNull();
+    expect($tagTeamPivot->getAttribute('fired_at'))->not()->toBeNull();
 });
 
 test('it allows separate employment after restoration', function () {

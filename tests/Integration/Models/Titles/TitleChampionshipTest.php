@@ -73,7 +73,6 @@ describe('TitleChampionship Model', function () {
                     'lost_at' => null,
                 ]);
 
-            expect($championship)->not()->toBeNull();
             expect($championship->title_id)->toBe($this->title->id);
             expect($championship->champion_id)->toBe($this->wrestler->id);
             expect($championship->champion_type)->toBe('wrestler');

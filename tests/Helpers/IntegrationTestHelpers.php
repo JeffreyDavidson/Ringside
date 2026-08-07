@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
+use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
