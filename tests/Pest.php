@@ -23,11 +23,14 @@ use function Pest\Laravel\withoutVite;
 
 pest()->extend(TestCase::class)->use(DatabaseMigrations::class)->in('Browser');
 
-pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature', 'Integration', 'Unit');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Integration', 'Unit');
 
-beforeEach(function () {
-    withoutVite();
-})
+pest()
+    ->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->beforeEach(function () {
+        withoutVite();
+    })
     ->in('Feature');
 
 /*

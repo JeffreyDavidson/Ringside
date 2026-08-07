@@ -1,4 +1,4 @@
-name: PHPStan
+name: PHP quality
 
 on:
   push:
@@ -11,14 +11,17 @@ on:
       - master
 
 concurrency:
-  group: phpstan-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: php-quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-jobs:
-  phpstan:
-    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+permissions:
+  contents: read
 
-    name: PHPStan Static Analysis
+jobs:
+  php-quality:
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+    name: Rector and Pest type coverage
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,9 +32,6 @@ jobs:
           echo "$php_bin_dir" >> "$GITHUB_PATH"
           "$php_bin_dir/php" -v
 
-      - name: Verify local PHP
-        run: php -v && php -m
-
       - name: Install Composer
         run: |
           mkdir -p "$RUNNER_TEMP/composer-bin"
@@ -40,38 +40,26 @@ jobs:
           echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/composer-bin/composer" --version
 
-      - name: Get composer cache directory
+      - name: Get Composer cache directory
         id: composer-cache
-        run: |
-          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: macOS-PHP8.4-L13-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: macOS-PHP8.4-L13-composer-
+          key: php-quality-${{ runner.os }}-PHP8.4-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: php-quality-${{ runner.os }}-PHP8.4-composer-
 
       - name: Add token
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          composer config github-oauth.github.com $GITHUB_TOKEN
+        run: composer config github-oauth.github.com "$GITHUB_TOKEN"
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Setup Laravel application
-        run: |
-          cp .env.testing .env
-          php artisan key:generate
-          php artisan config:cache
+      - name: Check Rector
+        run: composer test:rector
 
-      - name: Cache PHPStan results
-        uses: actions/cache@v4
-        with:
-          path: ./build/phpstan
-          key: phpstan-macOS-PHP8.4-L13-${{ github.sha }}
-          restore-keys: phpstan-macOS-PHP8.4-L13-
-
-      - name: Run PHPStan Static Analysis
-        run: composer test:types
+      - name: Check Pest type coverage
+        run: composer test:type-coverage
