@@ -29,7 +29,7 @@ use Livewire\Livewire;
  * @see RefereeForm
  */
 describe('Referees FormModal Tests', function () {
-    uses(RefreshDatabase::class);
+    pest()->use(RefreshDatabase::class);
 
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {

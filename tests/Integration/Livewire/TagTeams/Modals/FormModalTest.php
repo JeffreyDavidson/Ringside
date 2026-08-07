@@ -30,7 +30,7 @@ use Livewire\Livewire;
  * @see Form
  */
 describe('TagTeams FormModal Tests', function () {
-    uses(RefreshDatabase::class);
+    pest()->use(RefreshDatabase::class);
 
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {

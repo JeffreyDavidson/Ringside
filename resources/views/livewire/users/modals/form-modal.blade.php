@@ -13,11 +13,12 @@
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>
-            <x-form.inputs.select 
-                label="Role" 
+            <x-form.inputs.select
+                label="Role"
                 wire:model="form.role"
                 :options="['basic' => 'Basic', 'administrator' => 'Administrator']"
-                :selected="$form->role ?? 'basic'" />
+                :selected="$form->role ?? 'basic'"
+            />
         </x-form-modal.modal-input>
 
         <x-form-modal.modal-input>

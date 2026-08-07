@@ -7,10 +7,19 @@
 </div>
 
 <div class="mb-10">
-    <x-form.inputs.select label="Venue:" name="venue_id" :options="$venues" :selected="old('venue_id', $event->venue_id)" />
+    <x-form.inputs.select
+        label="Venue:"
+        name="venue_id"
+        :options="$venues"
+        :selected="old('venue_id', $event->venue_id)"
+    />
 </div>
 
 <div class="mb-10">
-    <x-form.inputs.textarea label="Preview:" name="preview" placeholder="Enter a preview description of the event."
-        :value="old('preview', $event->preview)" />
+    <x-form.inputs.textarea
+        label="Preview:"
+        name="preview"
+        placeholder="Enter a preview description of the event."
+        :value="old('preview', $event->preview)"
+    />
 </div>

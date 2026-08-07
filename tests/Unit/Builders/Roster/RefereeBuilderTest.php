@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\Referees\Referee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 test('bookable referees can be retrieved', function () {
     $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();

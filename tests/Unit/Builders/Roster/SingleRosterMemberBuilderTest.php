@@ -13,7 +13,7 @@ use App\Builders\Roster\WrestlerBuilder;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 /**
  * Unit tests for SingleRosterMemberBuilder abstract base class.

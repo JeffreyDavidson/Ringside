@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(RefreshDatabase::class);
+pest()->use(RefreshDatabase::class);
 
 test('bookable tag teams can be retrieved', function () {
     $futureEmployedTagTeam = TagTeam::factory()->withFutureEmployment()->create();

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\Users\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
-uses(DatabaseMigrations::class);
+pest()->use(DatabaseMigrations::class);
 
 test('login screen displays correctly', function () {
     $page = visit(route('login'));

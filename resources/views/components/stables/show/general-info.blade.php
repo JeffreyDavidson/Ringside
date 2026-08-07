@@ -17,5 +17,8 @@
             @endforeach
         </x-card.general-info.link-list>
     @endif
-    <x-card.general-info.stat label="Start Date" :value="$stable->firstActivation?->started_at->toDateString() ?? 'No Start Date Set'" />
+    <x-card.general-info.stat
+        label="Start Date"
+        :value="$stable->firstActivation?->started_at->toDateString() ?? 'No Start Date Set'"
+    />
 </x-card.general-info>

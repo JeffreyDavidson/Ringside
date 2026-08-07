@@ -53,4 +53,4 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Check PHP code style
-        run: php ./vendor/bin/pint --test
+        run: php ./vendor/bin/pint --blade --test

@@ -1,5 +1,8 @@
-<div class="flex items-center text-gray-800 font-normal gap-1.5">
-    <img alt="" class="rounded-full size-4 shrink-0"
-        src="{{ Vite::image('flags/' . Str::of($country)->lower()->kebab() . '.svg') }}">
+<div class="flex items-center gap-1.5 font-normal text-gray-800">
+    <img
+        alt=""
+        class="size-4 shrink-0 rounded-full"
+        src="{{ Vite::image('flags/' . Str::of($country)->lower()->kebab() . '.svg') }}"
+    />
     {{ $country }}
 </div>

@@ -1,4 +1,4 @@
-@forelse($matches as $match)
+@forelse ($matches as $match)
     <div class="mb-12 flex flex-col items-center">
         @if ($loop->last)
             <h3>Main Event</h3>
@@ -9,10 +9,7 @@
         @if ($match->titles->isNotEmpty())
             <p>
                 @foreach ($match->titles as $title)
-                    <x-route-link
-                        :route="route('titles.show', $title)"
-                        label="{{ $title->name }}"
-                    />
+                    <x-route-link :route="route('titles.show', $title)" label="{{ $title->name }}" />
 
                     @if (! $loop->last)
                         @php echo " & " @endphp
@@ -33,10 +30,7 @@
                         $resource = str($competitor->getTable())->replace('_', '-')->value();
                     @endphp
 
-                    <x-route-link
-                        :route="route($resource.'.show', $competitor)"
-                        label="{{ $competitor->name }}"
-                    />
+                    <x-route-link :route="route($resource.'.show', $competitor)" label="{{ $competitor->name }}" />
 
                     @if (! $loop->last)
                         @php echo " & " @endphp
@@ -53,10 +47,7 @@
             {{ str('Referee')->plural($match->referees->count()) }}:
 
             @foreach ($match->referees as $referee)
-                <x-route-link
-                    :route="route('referees.show', $referee)"
-                    label="{{ $referee->full_name }}"
-                />
+                <x-route-link :route="route('referees.show', $referee)" label="{{ $referee->full_name }}" />
 
                 @if (! $loop->last)
                     @php echo " & " @endphp

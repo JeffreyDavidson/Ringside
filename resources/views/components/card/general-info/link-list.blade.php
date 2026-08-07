@@ -1,12 +1,8 @@
 @props(['label'])
 
 <tr>
-    <td class="text-sm text-gray-600 pb-3 pe-4 lg:pe-8">
-        {{ $label }}:
-    </td>
-    <td class="text-sm text-gray-900 pb-3">
-        <div class="space-y-1">
-            {{ $slot }}
-        </div>
+    <td class="pe-4 pb-3 text-sm text-gray-600 lg:pe-8">{{ $label }}:</td>
+    <td class="pb-3 text-sm text-gray-900">
+        <div class="space-y-1">{{ $slot }}</div>
     </td>
 </tr>

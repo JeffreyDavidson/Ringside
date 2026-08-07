@@ -19,13 +19,9 @@ use Illuminate\Support\Collection;
 |
 */
 
-uses(
-    TestCase::class,
-    DatabaseMigrations::class,
-)->in('Browser');
+pest()->extend(TestCase::class)->use(DatabaseMigrations::class)->in('Browser');
 
-uses(TestCase::class, RefreshDatabase::class)
-    ->in('Feature', 'Integration', 'Unit');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature', 'Integration', 'Unit');
 
 pest()
     ->in('Feature')
