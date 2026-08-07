@@ -1084,16 +1084,16 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'employments', 'currentEmployment', 'futureEmployment', 'previousEmployments', 'previousEmployment',
             'firstEmployment', 'hasEmployments', 'isEmployed', 'isCurrentlyEmployed', 'hasFutureEmployment',
             'isNotInEmployment', 'isReleased', 'employmentStartedOn', 'employmentStartedBefore',
-            'getFormattedFirstEmployment', 'fakeEmploymentModel', 'hasEmploymentHistory', 'hasStatus',
+            'getFormattedFirstEmployment', 'hasEmploymentHistory', 'hasStatus',
             'hasAnyStatus', 'doesNotHaveStatus', 'hasNoneOfStatuses',
 
             // Retirement trait methods
             'retirements', 'currentRetirement', 'previousRetirements', 'previousRetirement',
-            'isRetired', 'hasRetirements', 'fakeRetirementModel',
+            'isRetired', 'hasRetirements',
 
             // Suspension trait methods
             'suspensions', 'currentSuspension', 'previousSuspensions', 'previousSuspension',
-            'isSuspended', 'hasSuspensions', 'fakeSuspensionModel',
+            'isSuspended', 'hasSuspensions',
 
             // Validation trait methods
             'canBeEmployed', 'ensureCanBeEmployed', 'canBeReleased', 'ensureCanBeReleased',

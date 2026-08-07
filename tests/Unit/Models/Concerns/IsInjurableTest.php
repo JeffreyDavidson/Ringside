@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Trait Isolation Test for IsInjurable
  *
  * This test ensures the IsInjurable trait is agnostic, reusable, and not tied to any business/domain model.
- * It verifies relationship types, related model resolution, static override, cache reset, and error handling.
+ * It verifies relationship types, related model resolution, resolver overrides, and error handling.
  *
  * This is NOT a business logic test. It is meant to guarantee the trait can be safely reused across any model.
  */
@@ -209,32 +209,27 @@ describe('IsInjurable Trait Unit Tests', function () {
     });
 
     describe('injury model resolution', function () {
-        test('can fake injury model class', function () {
-            $modelClass = new class extends Model
+        test('uses the model-specific injury resolver', function () {
+            $model = new class extends Model
             {
                 use IsInjurable;
+
+                protected function resolveInjuryModelClass(): string
+                {
+                    return FakeInjuryModel::class;
+                }
             };
 
-            $modelClass::fakeInjuryModel(FakeInjuryModel::class);
-            // The relationship should use the faked model class
-            $relation = $modelClass->injuries();
-            expect($relation->getRelated())->toBeInstanceOf(FakeInjuryModel::class);
+            expect($model->injuries()->getRelated())->toBeInstanceOf(FakeInjuryModel::class);
         });
+
         test('throws if related model does not exist', function () {
             $model = new class extends Model
             {
                 use IsInjurable;
             };
+
             expect(fn () => $model->injuries())->toThrow(RuntimeException::class);
-        });
-        test('can clear fake model override', function () {
-            $modelClass = new class extends Model
-            {
-                use IsInjurable;
-            };
-            $modelClass::fakeInjuryModel(FakeInjuryModel::class);
-            $modelClass::clearRelatedModelCache('Injury');
-            expect(fn () => $modelClass->injuries())->toThrow(RuntimeException::class);
         });
     });
 

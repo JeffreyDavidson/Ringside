@@ -198,13 +198,8 @@ trait IsInjurable
      * conventions. For example, if the parent model is 'Wrestler', it will look for
      * a 'WrestlerInjury' model class.
      *
-     * The resolution can be overridden by calling the fakeInjuryModel() method (useful for testing).
-     *
-     *
      * @throws RuntimeException If the resolved model class doesn't exist
      * @return class-string<TInjury> The fully qualified class name of the injury model
-     *
-     * @see fakeInjuryModel() For overriding the resolved model class
      *
      * @example
      * For a 'Wrestler' model, this will resolve to 'App\\Models\\Wrestlers\\WrestlerInjury'
@@ -212,30 +207,5 @@ trait IsInjurable
     protected function resolveInjuryModelClass(): string
     {
         return $this->resolveRelatedModelClass('Injury');
-    }
-
-    /**
-     * Override the resolved model class for testing or customization.
-     *
-     * This method allows you to override the automatic model class resolution,
-     * which is particularly useful for testing scenarios where you might want
-     * to use a different model class or mock.
-     *
-     * @param  class-string<TInjury>  $class  The fully qualified class name to use
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Wrestler::fakeInjuryModel(MockWrestlerInjury::class);
-     *
-     * // Or for customization:
-     * Wrestler::fakeInjuryModel(CustomInjuryModel::class);
-     * ```
-     *
-     * @see resolveInjuryModelClass() For the automatic resolution logic
-     */
-    public static function fakeInjuryModel(string $class): void
-    {
-        self::cacheRelatedModel('Injury', $class);
     }
 }

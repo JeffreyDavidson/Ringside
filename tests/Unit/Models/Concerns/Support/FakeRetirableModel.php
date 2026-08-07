@@ -19,27 +19,8 @@ class FakeRetirableModel extends Model
 {
     use IsRetirable;
 
-    /**
-     * Static method to override retirement model class for testing.
-     */
-    public static function fakeRetirementModel(?string $modelClass): void
+    protected function resolveRetirementModelClass(): string
     {
-        static::$fakeRetirementModelClass = $modelClass;
-    }
-
-    private static ?string $fakeRetirementModelClass = null;
-
-    public function resolveRetirementModelClass(): string
-    {
-        return static::$fakeRetirementModelClass ?? FakeRetirementModel::class;
-    }
-
-    protected function resolveRelatedModelClass(string $suffix): string
-    {
-        if ($suffix === 'Retirement') {
-            return $this->resolveRetirementModelClass();
-        }
-
-        return parent::resolveRelatedModelClass($suffix);
+        return FakeRetirementModel::class;
     }
 }

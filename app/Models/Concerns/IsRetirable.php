@@ -198,13 +198,8 @@ trait IsRetirable
      * conventions. For example, if the parent model is 'Wrestler', it will look for
      * a 'WrestlerRetirement' model class.
      *
-     * The resolution can be overridden by calling the fakeRetirementModel() method (useful for testing).
-     *
-     *
      * @throws RuntimeException If the resolved model class doesn't exist
      * @return class-string<TRetirement> The fully qualified class name of the retirement model
-     *
-     * @see fakeRetirementModel() For overriding the resolved model class
      *
      * @example
      * For a 'Wrestler' model, this will resolve to 'App\\Models\\Wrestlers\\WrestlerRetirement'
@@ -212,30 +207,5 @@ trait IsRetirable
     protected function resolveRetirementModelClass(): string
     {
         return $this->resolveRelatedModelClass('Retirement');
-    }
-
-    /**
-     * Override the resolved model class for testing or customization.
-     *
-     * This method allows you to override the automatic model class resolution,
-     * which is particularly useful for testing scenarios where you might want
-     * to use a different model class or mock.
-     *
-     * @param  class-string<TRetirement>  $class  The fully qualified class name to use
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Wrestler::fakeRetirementModel(MockWrestlerRetirement::class);
-     *
-     * // Or for customization:
-     * Wrestler::fakeRetirementModel(CustomRetirementModel::class);
-     * ```
-     *
-     * @see resolveRetirementModelClass() For the automatic resolution logic
-     */
-    public static function fakeRetirementModel(string $class): void
-    {
-        self::cacheRelatedModel('Retirement', $class);
     }
 }

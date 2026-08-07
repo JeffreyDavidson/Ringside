@@ -453,8 +453,6 @@ trait HasActivityPeriods
      * @throws RuntimeException If the resolved model class doesn't exist
      * @return class-string<TActivityPeriod> The fully qualified class name of the activity period model
      *
-     * @see fakeActivityPeriodModel() For overriding the resolved model class
-     *
      * @example
      * For a 'Title' model, this will resolve to 'App\\Models\\Titles\\TitleActivityPeriod'
      */
@@ -477,30 +475,5 @@ trait HasActivityPeriods
         $model = new $modelClass();
 
         return $model->getTable();
-    }
-
-    /**
-     * Override the resolved model class for testing or customization.
-     *
-     * This method allows you to override the automatic model class resolution,
-     * which is particularly useful for testing scenarios where you might want
-     * to use a different model class or mock.
-     *
-     * @param  class-string<TActivityPeriod>  $class  The fully qualified class name to use
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Title::fakeActivityPeriodModel(MockTitleActivityPeriod::class);
-     *
-     * // Or for customization:
-     * Title::fakeActivityPeriodModel(CustomActivityPeriodModel::class);
-     * ```
-     *
-     * @see resolveActivityPeriodModelClass() For the automatic resolution logic
-     */
-    public static function fakeActivityPeriodModel(string $class): void
-    {
-        self::cacheRelatedModel('ActivityPeriod', $class);
     }
 }

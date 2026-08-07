@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Trait Isolation Test for IsSuspendable
  *
  * This test ensures the IsSuspendable trait is agnostic, reusable, and not tied to any business/domain model.
- * It verifies relationship types, related model resolution, static override, cache reset, and error handling.
+ * It verifies relationship types, related model resolution, resolver overrides, and error handling.
  *
  * This is NOT a business logic test. It is meant to guarantee the trait can be safely reused across any model.
  */
@@ -201,12 +201,10 @@ describe('IsSuspendable Trait Unit Tests', function () {
     });
 
     describe('suspension model resolution', function () {
-        test('can fake suspension model class', function () {
-            FakeSuspendableModel::fakeSuspensionModel(FakeSuspensionModel::class);
+        test('uses the model-specific suspension resolver', function () {
             $model = new FakeSuspendableModel();
-            expect($model->resolveSuspensionModelClass())->toBe(FakeSuspensionModel::class);
-            // Reset static override
-            FakeSuspendableModel::fakeSuspensionModel(null);
+
+            expect($model->suspensions()->getRelated())->toBeInstanceOf(FakeSuspensionModel::class);
         });
     });
 

@@ -418,13 +418,8 @@ trait IsEmployable
      * conventions. For example, if the parent model is 'Wrestler', it will look for
      * a 'WrestlerEmployment' model class.
      *
-     * The resolution can be overridden by calling the fakeEmploymentModel() method (useful for testing).
-     *
-     *
      * @throws RuntimeException If the resolved model class doesn't exist
      * @return class-string<TEmployment> The fully qualified class name of the employment model
-     *
-     * @see fakeEmploymentModel() For overriding the resolved model class
      *
      * @example
      * For a 'Wrestler' model, this will resolve to 'App\\Models\\Wrestlers\\WrestlerEmployment'
@@ -432,31 +427,6 @@ trait IsEmployable
     protected function resolveEmploymentModelClass(): string
     {
         return $this->resolveRelatedModelClass('Employment');
-    }
-
-    /**
-     * Override the resolved model class for testing or customization.
-     *
-     * This method allows you to override the automatic model class resolution,
-     * which is particularly useful for testing scenarios where you might want
-     * to use a different model class or mock.
-     *
-     * @param  class-string<TEmployment>  $class  The fully qualified class name to use
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Wrestler::fakeEmploymentModel(MockWrestlerEmployment::class);
-     *
-     * // Or for customization:
-     * Wrestler::fakeEmploymentModel(CustomEmploymentModel::class);
-     * ```
-     *
-     * @see resolveEmploymentModelClass() For the automatic resolution logic
-     */
-    public static function fakeEmploymentModel(string $class): void
-    {
-        self::cacheRelatedModel('Employment', $class);
     }
 
     /**

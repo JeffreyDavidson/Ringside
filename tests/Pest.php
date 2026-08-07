@@ -84,21 +84,6 @@ expect()->extend('usesTrait', function ($trait) {
 
 /*
 |--------------------------------------------------------------------------
-| Custom Expectations
-|--------------------------------------------------------------------------
-|
-| Load custom expectations for domain-specific testing. These expectations
-| provide more expressive and maintainable assertions for wrestling business
-| logic, database operations, and model structure validation.
-|
-*/
-
-require_once __DIR__.'/Expectations/WrestlingExpectations.php';
-require_once __DIR__.'/Expectations/DatabaseExpectations.php';
-require_once __DIR__.'/Expectations/ModelExpectations.php';
-
-/*
-|--------------------------------------------------------------------------
 | Functions
 |--------------------------------------------------------------------------
 |
