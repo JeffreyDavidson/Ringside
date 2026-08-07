@@ -6,7 +6,6 @@ use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
 /**
@@ -30,8 +29,6 @@ use Livewire\Livewire;
  * @see Form
  */
 describe('TagTeams FormModal Tests', function () {
-    uses(RefreshDatabase::class);
-
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
             Livewire::test(FormModal::class)

@@ -26,7 +26,6 @@ tests/coverage
 .idea/
 .phpunit.cache
 .php-cs-fixer.cache
-package-lock.json
 yarn.lock
 /.nova
 build

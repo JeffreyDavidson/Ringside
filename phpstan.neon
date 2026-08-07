@@ -1,3 +1,6 @@
+includes:
+  - phpstan-baseline.neon
+
 parameters:
   level: 6  # ✅ Reasonable for a Laravel project (go up to 8+ for stricter static analysis)
 
@@ -8,7 +11,7 @@ parameters:
     - bootstrap/app.php  # ✅ Correct — loads Laravel's autoloader and service container
 
   excludePaths:
-    - tests  # ✅ Tests are usually excluded (unless you're analyzing them too)
+    - tests  # ✅ Tests are analyzed separately with the Pest PHPStan plugin
     - bootstrap/cache  # ✅ Should always be excluded
     - storage  # ✅ Should always be excluded
 

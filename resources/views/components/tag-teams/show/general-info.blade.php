@@ -5,7 +5,7 @@
             @if ($loop->count === 1)
                 and TBD
             @endif
-            @if (!$loop->last)
+            @if (! $loop->last)
                 and
             @endif
         @empty
@@ -25,7 +25,10 @@
 
     @if ($tagTeam->currentStable)
         <x-card.general-info.links label="Current Stable">
-            <x-route-link :route="route('stables.show', $tagTeam->currentStable)" label="{{ $tagTeam->currentStable->name }}" />
+            <x-route-link
+                :route="route('stables.show', $tagTeam->currentStable)"
+                label="{{ $tagTeam->currentStable->name }}"
+            />
         </x-card.general-info.links>
     @endif
 

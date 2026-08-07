@@ -1,41 +1,56 @@
 <div class="flex" x-data="{ open: false }">
-    <div class="flex flex-col m-0 p-0">
-        <button x-ref="button" @click="open = ! open"
-            class="flex items-center grow cursor-pointer w-8 hover:bg-gray-200 hover:border-transparent hover:shadow-none hover:text-gray-800 justify-center shrink-0 p-0 gap-0">
+    <div class="m-0 flex flex-col p-0">
+        <button
+            x-ref="button"
+            @click="open = ! open"
+            class="flex w-8 shrink-0 grow cursor-pointer items-center justify-center gap-0 p-0 hover:border-transparent hover:bg-gray-200 hover:text-gray-800 hover:shadow-none"
+        >
             <x-heroicon-m-ellipsis-vertical class="size-5" />
         </button>
-        <div x-show="open" @click.outside="open = false" x-anchor.bottom-start="$refs.button"
-            class="m-0 py-2.5 border border-solid border-gray-200 bg-white rounded-xl shadow-[0_7px_18px_0px_rgba(0,0,0,0.09)] w-full max-w-[175px] z-[105]">
+        <div
+            x-show="open"
+            @click.outside="open = false"
+            x-anchor.bottom-start="$refs.button"
+            class="z-[105] m-0 w-full max-w-[175px] rounded-xl border border-solid border-gray-200 bg-white py-2.5 shadow-[0_7px_18px_0px_rgba(0,0,0,0.09)]"
+        >
             <ul>
-                <li class="flex flex-col m-0 p-0">
-                    <a class="group flex items-center grow cursor-pointer m-0 p-2.5 ms-2.5 me-2.5 rounded-md hover:bg-gray-100"
-                        x-on:click="open = false;" href="{{ route($path . '.show', $rowId) }}">
-                        <span class="flex items-center shrink-0 me-2.5">
-                            <x-heroicon-m-magnifying-glass class="size-5 text-gray-500 group-hover:text-primary" />
+                <li class="m-0 flex flex-col p-0">
+                    <a
+                        class="group m-0 ms-2.5 me-2.5 flex grow cursor-pointer items-center rounded-md p-2.5 hover:bg-gray-100"
+                        x-on:click="open = false"
+                        href="{{ route($path . '.show', $rowId) }}"
+                    >
+                        <span class="me-2.5 flex shrink-0 items-center">
+                            <x-heroicon-m-magnifying-glass class="group-hover:text-primary size-5 text-gray-500" />
                         </span>
-                        <span class="flex items-center grow font-medium text-2sm text-gray-800">View</span>
+                        <span class="text-2sm flex grow items-center font-medium text-gray-800">View</span>
                     </a>
                 </li>
-                <div class="border-b border-solid border-gray-200 my-2.5"></div>
-                <li class="flex flex-col m-0 p-0">
+                <div class="my-2.5 border-b border-solid border-gray-200"></div>
+                <li class="m-0 flex flex-col p-0">
                     <button
-                        class="group flex items-center grow cursor-pointer m-0 p-2.5 ms-2.5 me-2.5 rounded-md hover:bg-gray-100"
-                        x-on:click="open = false;"
-                        wire:click="$dispatch('openModal', { component: '{{ $this->resourceName }}.modals.form-modal', arguments: { 'modelId': '{{ $rowId }}' }})">
-                        <span class="flex items-center shrink-0 me-2.5">
-                            <x-heroicon-m-pencil-square class="size-5 text-gray-500 group-hover:text-primary" />
+                        class="group m-0 ms-2.5 me-2.5 flex grow cursor-pointer items-center rounded-md p-2.5 hover:bg-gray-100"
+                        x-on:click="open = false"
+                        wire:click="$dispatch('openModal', { component: '{{ $this->resourceName }}.modals.form-modal', arguments: { 'modelId': '{{ $rowId }}' }})"
+                    >
+                        <span class="me-2.5 flex shrink-0 items-center">
+                            <x-heroicon-m-pencil-square class="group-hover:text-primary size-5 text-gray-500" />
                         </span>
-                        <span class="flex items-center grow font-medium text-2sm text-gray-800">Edit</span>
+                        <span class="text-2sm flex grow items-center font-medium text-gray-800">Edit</span>
                     </button>
                 </li>
-                <div class="border-b border-solid border-gray-200 my-2.5"></div>
-                <li class="flex flex-col m-0 p-0">
-                    <a class="group flex items-center grow cursor-pointer m-0 p-2.5 ms-2.5 me-2.5 rounded-md hover:bg-gray-100"
-                        x-on:click="open = false;" wire:click="delete({{ $rowId }})" wire:confirm>
-                        <span class="flex items-center shrink-0 me-2.5">
-                            <x-heroicon-m-trash class="size-5 text-gray-500 group-hover:text-primary" />
+                <div class="my-2.5 border-b border-solid border-gray-200"></div>
+                <li class="m-0 flex flex-col p-0">
+                    <a
+                        class="group m-0 ms-2.5 me-2.5 flex grow cursor-pointer items-center rounded-md p-2.5 hover:bg-gray-100"
+                        x-on:click="open = false"
+                        wire:click="delete({{ $rowId }})"
+                        wire:confirm
+                    >
+                        <span class="me-2.5 flex shrink-0 items-center">
+                            <x-heroicon-m-trash class="group-hover:text-primary size-5 text-gray-500" />
                         </span>
-                        <span class="flex items-center grow font-medium text-2sm text-gray-800">Remove</span>
+                        <span class="text-2sm flex grow items-center font-medium text-gray-800">Remove</span>
                     </a>
                 </li>
             </ul>

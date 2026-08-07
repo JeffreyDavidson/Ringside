@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use App\Models\Managers\Manager;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 test('employed managers can be retrieved', function () {
     $futureEmployedManager = Manager::factory()->withFutureEmployment()->create();

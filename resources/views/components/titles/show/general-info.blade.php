@@ -8,5 +8,8 @@
             {{ 'Vacant' }}
         @endif
     </x-card.general-info.links> --}}
-    <x-card.general-info.stat label="Date Introduced" :value="$title->firstActivation?->started_at->toDateString() ?? 'No Start Date Set'" />
+    <x-card.general-info.stat
+        label="Date Introduced"
+        :value="$title->firstActivation?->started_at->toDateString() ?? 'No Start Date Set'"
+    />
 </x-card.general-info>

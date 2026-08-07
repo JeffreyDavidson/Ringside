@@ -88,7 +88,7 @@ class Main extends BaseTable
         $venues = Venue::query()->orderBy('name')->pluck('name', 'id')->toArray();
 
         return [
-            SelectFilter::make(__('core.status')) // @phpstan-ignore-line method.notFound
+            SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
                 ->options([
                     '' => __('core.all'),

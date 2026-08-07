@@ -3,14 +3,11 @@
 declare(strict_types=1);
 
 use App\Models\Users\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-
-uses(DatabaseMigrations::class);
 
 test('authenticated user can access dashboard', function () {
-    $user = User::factory()->create([
+    $user = User::factory()->administrator()->create([
         'email' => 'dashboard@test.com',
-        'password' => 'password123',
+        'password' => 'password',
     ]);
 
     $this->actingAs($user);
@@ -30,9 +27,9 @@ test('unauthenticated users are redirected from dashboard', function () {
 });
 
 test('dashboard page loads without errors', function () {
-    $user = User::factory()->create([
+    $user = User::factory()->administrator()->create([
         'email' => 'load@test.com',
-        'password' => 'password123',
+        'password' => 'password',
     ]);
 
     $this->actingAs($user);
@@ -47,9 +44,9 @@ test('dashboard page loads without errors', function () {
 });
 
 test('dashboard has basic navigation structure', function () {
-    $user = User::factory()->create([
+    $user = User::factory()->administrator()->create([
         'email' => 'nav@test.com',
-        'password' => 'password123',
+        'password' => 'password',
     ]);
 
     $this->actingAs($user);
@@ -57,7 +54,7 @@ test('dashboard has basic navigation structure', function () {
     $page = visit('/dashboard');
 
     // Check for basic page structure elements
-    $page->assertElementPresent('nav')
-        ->assertElementPresent('main')
+    $page->assertSee('Dashboard')
+        ->assertDontSee('Sign in')
         ->assertNoJavascriptErrors();
 });

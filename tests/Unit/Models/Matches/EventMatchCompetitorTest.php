@@ -66,7 +66,7 @@ describe('MatchCompetitor Model Unit Tests', function () {
         });
 
         test('uses custom collection class', function () {
-            expect(MatchCompetitor::make()->newCollection())->toBeInstanceOf(MatchCompetitorsCollection::class);
+            expect((new MatchCompetitor())->newCollection())->toBeInstanceOf(MatchCompetitorsCollection::class);
         });
     });
 

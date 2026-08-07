@@ -29,6 +29,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup PHP
+        run: |
+          php_bin_dir="$(brew --prefix php@${{ matrix.php }})/bin"
+          echo "$php_bin_dir" >> "$GITHUB_PATH"
+          "$php_bin_dir/php" -v
+
       - name: Verify local PHP
         run: php -v && php -m
 

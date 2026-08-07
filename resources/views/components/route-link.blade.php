@@ -1,3 +1,3 @@
 @props(['route', 'label'])
 
-<a class="text-gray-800 text-hover-primary" href="{{ $route }}">{{ $label }}</a>
+<a class="text-hover-primary text-gray-800" href="{{ $route }}">{{ $label }}</a>

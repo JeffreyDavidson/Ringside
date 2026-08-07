@@ -12,16 +12,29 @@
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.select label="{{ __('tag-teams.wrestlerA') }}" wire:model="form.wrestlerA" :options="$this->getWrestlers"
-            selected="form.wrestlerA" />
+        <x-form.inputs.select
+            label="{{ __('tag-teams.wrestlerA') }}"
+            wire:model="form.wrestlerA"
+            :options="$this->getWrestlers"
+            selected="form.wrestlerA"
+        />
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.select label="{{ __('tag-teams.wrestlerB') }}" wire:model="form.wrestlerB" :options="$this->getWrestlers"
-            selected="form.wrestlerB" />
+        <x-form.inputs.select
+            label="{{ __('tag-teams.wrestlerB') }}"
+            wire:model="form.wrestlerB"
+            :options="$this->getWrestlers"
+            selected="form.wrestlerB"
+        />
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.select label="{{ __('tag-teams.managers') }}" wire:model="form.managers" :options="$this->getManagers" :multiple="true" />
+        <x-form.inputs.select
+            label="{{ __('tag-teams.managers') }}"
+            wire:model="form.managers"
+            :options="$this->getManagers"
+            :multiple="true"
+        />
     </x-form-modal.modal-input>
 </x-form-modal>

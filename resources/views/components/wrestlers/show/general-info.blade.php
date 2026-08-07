@@ -7,7 +7,10 @@
     @endif
     @if ($wrestler->currentTagTeam)
         <x-card.general-info.links label="Current Tag Team">
-            <x-route-link :route="route('tag-teams.show', $wrestler->currentTagTeam)" label="{{ $wrestler->currentTagTeam->name }}" />
+            <x-route-link
+                :route="route('tag-teams.show', $wrestler->currentTagTeam)"
+                label="{{ $wrestler->currentTagTeam->name }}"
+            />
         </x-card.general-info.links>
     @endif
     @if ($wrestler->currentManagers->isNotEmpty())
@@ -21,7 +24,10 @@
     @endif
     @if ($wrestler->currentStable)
         <x-card.general-info.links label="Current Stable">
-            <x-route-link :route="route('stables.show', $wrestler->currentStable)" label="{{ $wrestler->currentStable->name }}" />
+            <x-route-link
+                :route="route('stables.show', $wrestler->currentStable)"
+                label="{{ $wrestler->currentStable->name }}"
+            />
         </x-card.general-info.links>
     @endif
     {{-- @if ($wrestler->currentChampionships->isNotEmpty())
@@ -33,5 +39,8 @@
             @endforeach
         </x-card.general-info.link-list>
     @endif --}}
-    <x-card.general-info.stat label="Start Date" :value="$wrestler->firstEmployment?->started_at->toDateString() ?? 'No Start Date Set'" />
+    <x-card.general-info.stat
+        label="Start Date"
+        :value="$wrestler->firstEmployment?->started_at->toDateString() ?? 'No Start Date Set'"
+    />
 </x-card.general-info>

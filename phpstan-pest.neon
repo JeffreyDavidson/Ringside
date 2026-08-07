@@ -1,0 +1,20 @@
+parameters:
+  level: 0
+
+  paths:
+    - tests
+
+  bootstrapFiles:
+    - bootstrap/app.php
+
+  excludePaths:
+    - bootstrap/cache
+    - storage
+
+  ignoreErrors:
+    - identifier: pest.expectation.redundant
+
+  type_coverage:
+    param: 0
+    return: 0
+    property: 0

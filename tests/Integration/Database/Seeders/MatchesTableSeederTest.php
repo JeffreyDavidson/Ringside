@@ -118,7 +118,6 @@ describe('MatchesTableSeeder Integration Tests', function () {
             $eventMatch = EventMatch::with(['event'])->first();
 
             // Assert
-            expect($eventMatch->event)->not()->toBeNull();
             expect($eventMatch->event->name)->toBeString();
             expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
             expect(true)->toBeTrue();

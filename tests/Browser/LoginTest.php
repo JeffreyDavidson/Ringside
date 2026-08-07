@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use App\Models\Users\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-
-uses(DatabaseMigrations::class);
 
 test('login screen displays correctly', function () {
     $page = visit(route('login'));
@@ -142,6 +139,7 @@ test('user can logout successfully', function () {
         ->assertScript('window.location.pathname === "/dashboard"')
         ->assertSee('Dashboard')
         ->press('Log out')
+        ->assertScript('window.location.pathname === "/login"')
         ->assertSee('Sign in');
 
     // Verify we can't access protected pages

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Referees\Modals\FormModal;
 use App\Livewire\Referees\RefereeForm;
 use App\Models\Referees\Referee;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
 /**
@@ -29,8 +28,6 @@ use Livewire\Livewire;
  * @see RefereeForm
  */
 describe('Referees FormModal Tests', function () {
-    uses(RefreshDatabase::class);
-
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
             Livewire::test(FormModal::class)
