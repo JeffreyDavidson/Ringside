@@ -198,13 +198,8 @@ trait IsSuspendable
      * conventions. For example, if the parent model is 'Wrestler', it will look for
      * a 'WrestlerSuspension' model class.
      *
-     * The resolution can be overridden by calling the fakeSuspensionModel() method (useful for testing).
-     *
-     *
      * @throws RuntimeException If the resolved model class doesn't exist
      * @return class-string<TSuspension> The fully qualified class name of the suspension model
-     *
-     * @see fakeSuspensionModel() For overriding the resolved model class
      *
      * @example
      * For a 'Wrestler' model, this will resolve to 'App\\Models\\Wrestlers\\WrestlerSuspension'
@@ -212,30 +207,5 @@ trait IsSuspendable
     protected function resolveSuspensionModelClass(): string
     {
         return $this->resolveRelatedModelClass('Suspension');
-    }
-
-    /**
-     * Override the resolved model class for testing or customization.
-     *
-     * This method allows you to override the automatic model class resolution,
-     * which is particularly useful for testing scenarios where you might want
-     * to use a different model class or mock.
-     *
-     * @param  class-string<TSuspension>  $class  The fully qualified class name to use
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Wrestler::fakeSuspensionModel(MockWrestlerSuspension::class);
-     *
-     * // Or for customization:
-     * Wrestler::fakeSuspensionModel(CustomSuspensionModel::class);
-     * ```
-     *
-     * @see resolveSuspensionModelClass() For the automatic resolution logic
-     */
-    public static function fakeSuspensionModel(string $class): void
-    {
-        self::cacheRelatedModel('Suspension', $class);
     }
 }

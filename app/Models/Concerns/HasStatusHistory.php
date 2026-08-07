@@ -320,38 +320,11 @@ trait HasStatusHistory
      * @throws RuntimeException If the resolved model class doesn't exist
      * @return class-string<TStatusChange> The fully qualified class name of the status change model
      *
-     * @see fakeStatusChangeModel() For overriding the resolved model class
-     *
      * @example
      * For a 'Title' model, this will resolve to 'App\\Models\\Titles\\TitleStatusChange'
      */
     protected function resolveStatusChangeModelClass(): string
     {
         return $this->resolveRelatedModelClass('StatusChange');
-    }
-
-    /**
-     * Override the resolved model class for testing or customization.
-     *
-     * This method allows you to override the automatic model class resolution,
-     * which is particularly useful for testing scenarios where you might want
-     * to use a different model class or mock.
-     *
-     * @param  class-string<TStatusChange>  $class  The fully qualified class name to use
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Title::fakeStatusChangeModel(MockTitleStatusChange::class);
-     *
-     * // Or for customization:
-     * Title::fakeStatusChangeModel(CustomStatusChangeModel::class);
-     * ```
-     *
-     * @see resolveStatusChangeModelClass() For the automatic resolution logic
-     */
-    public static function fakeStatusChangeModel(string $class): void
-    {
-        self::cacheRelatedModel('StatusChange', $class);
     }
 }

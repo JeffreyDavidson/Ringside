@@ -19,27 +19,8 @@ class FakeEmployableModel extends Model
 {
     use IsEmployable;
 
-    /**
-     * Static method to override employment model class for testing.
-     */
-    public static function fakeEmploymentModel(?string $modelClass): void
+    protected function resolveEmploymentModelClass(): string
     {
-        static::$fakeEmploymentModelClass = $modelClass;
-    }
-
-    private static ?string $fakeEmploymentModelClass = null;
-
-    public function resolveEmploymentModelClass(): string
-    {
-        return static::$fakeEmploymentModelClass ?? FakeEmploymentModel::class;
-    }
-
-    protected function resolveRelatedModelClass(string $suffix): string
-    {
-        if ($suffix === 'Employment') {
-            return $this->resolveEmploymentModelClass();
-        }
-
-        return parent::resolveRelatedModelClass($suffix);
+        return FakeEmploymentModel::class;
     }
 }

@@ -23,6 +23,14 @@
 - Domain-organized builders in `app/Builders/{Domain}/`
 - Domain-organized enums in `app/Enums/{Domain}/`
 
+## Related Model Resolution
+
+- Status concerns resolve related models by convention through `ResolvesRelatedModels`.
+- A model such as `Wrestler` resolves the `Employment` suffix to `WrestlerEmployment` in the same namespace.
+- Domain-specific protected methods such as `resolveEmploymentModelClass()` are the extension points for specialized models and test fakes.
+- Resolution is stateless. Production concerns do not expose test-only fake APIs or mutable static resolver caches.
+- Tests override the protected domain-specific resolver on a purpose-built fake model instead of setting and resetting global state.
+
 ## Computed Status Pattern
 - **Status fields are computed, not stored** - eliminates data inconsistency
 - Models use computed attributes: `protected function status(): Attribute`

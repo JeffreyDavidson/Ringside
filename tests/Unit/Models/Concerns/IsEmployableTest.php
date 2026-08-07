@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Trait Isolation Test for IsEmployable
  *
  * This test ensures the IsEmployable trait is agnostic, reusable, and not tied to any business/domain model.
- * It verifies relationship types, related model resolution, static override, cache reset, and error handling.
+ * It verifies relationship types, related model resolution, resolver overrides, and error handling.
  *
  * This is NOT a business logic test. It is meant to guarantee the trait can be safely reused across any model.
  */
@@ -317,12 +317,10 @@ describe('IsEmployable Trait Unit Tests', function () {
     });
 
     describe('employment model resolution', function () {
-        test('can fake employment model class', function () {
-            FakeEmployableModel::fakeEmploymentModel(FakeEmploymentModel::class);
+        test('uses the model-specific employment resolver', function () {
             $model = new FakeEmployableModel();
-            expect($model->resolveEmploymentModelClass())->toBe(FakeEmploymentModel::class);
-            // Reset static override
-            FakeEmployableModel::fakeEmploymentModel(null);
+
+            expect($model->employments()->getRelated())->toBeInstanceOf(FakeEmploymentModel::class);
         });
     });
 

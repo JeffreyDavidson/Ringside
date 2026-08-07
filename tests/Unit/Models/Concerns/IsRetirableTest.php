@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Trait Isolation Test for IsRetirable
  *
  * This test ensures the IsRetirable trait is agnostic, reusable, and not tied to any business/domain model.
- * It verifies relationship types, related model resolution, static override, cache reset, and error handling.
+ * It verifies relationship types, related model resolution, resolver overrides, and error handling.
  *
  * This is NOT a business logic test. It is meant to guarantee the trait can be safely reused across any model.
  */
@@ -204,12 +204,10 @@ describe('IsRetirable Trait Unit Tests', function () {
     });
 
     describe('retirement model resolution', function () {
-        test('can fake retirement model class', function () {
-            FakeRetirableModel::fakeRetirementModel(FakeRetirementModel::class);
+        test('uses the model-specific retirement resolver', function () {
             $model = new FakeRetirableModel();
-            expect($model->resolveRetirementModelClass())->toBe(FakeRetirementModel::class);
-            // Reset static override
-            FakeRetirableModel::fakeRetirementModel(null);
+
+            expect($model->retirements()->getRelated())->toBeInstanceOf(FakeRetirementModel::class);
         });
     });
 
