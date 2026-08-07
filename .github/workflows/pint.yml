@@ -28,6 +28,12 @@ jobs:
           echo "$php_bin_dir" >> "$GITHUB_PATH"
           "$php_bin_dir/php" -v
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
       - name: Install Composer
         run: |
           mkdir -p "$RUNNER_TEMP/composer-bin"
