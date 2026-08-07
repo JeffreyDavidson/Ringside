@@ -24,6 +24,8 @@ class TitleChampionshipsTable extends DataTableComponent
     public function mount(?Title $title = null): void
     {
         $this->title = $title;
+
+        parent::mount();
     }
 
     public function configure(): void {}

@@ -877,18 +877,6 @@ parameters:
 			path: app/Exceptions/Roster/TagTeams/CannotBeSuspendedException.php
 
 		-
-			message: '#^Call to static method create\(\) on an unknown class App\\Models\\User\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Http/Controllers/Auth/RegisteredUserController.php
-
-		-
-			message: '#^Class App\\Models\\User not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Http/Controllers/Auth/RegisteredUserController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Users\\User\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1637,66 +1625,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
-			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:noActiveWrestlers\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:wrestlerAlreadySuspended\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:wrestlerCannotBeSuspended\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Call to an undefined static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:wrestlerInjured\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:hasFutureEmployment\(\) invoked with 0 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:injured\(\) invoked with 0 parameters, 1\-2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:released\(\) invoked with 0 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:retired\(\) invoked with 0 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:suspended\(\) invoked with 0 parameters, 1\-2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
-
-		-
-			message: '#^Static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:unemployed\(\) invoked with 0 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamSuspensionValidation.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$first_name\.$#'
