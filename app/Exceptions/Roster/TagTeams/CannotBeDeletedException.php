@@ -34,7 +34,7 @@ use App\Models\TagTeams\TagTeam;
  * // Check deletion eligibility
  * try {
  *     $tagTeam->ensureCanBeDeleted();
- *     DeleteAction::run($tagTeam);
+ *     resolve(DeleteAction::class)->handle($tagTeam);
  * } catch (CannotBeDeletedException $e) {
  *     // Handle deletion conflict
  *     logger()->warning('Tag team deletion blocked', [

@@ -17,7 +17,7 @@ test('it reinstates a suspended wrestler', function () {
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
@@ -36,7 +36,7 @@ test('it reinstates an injured wrestler', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -53,7 +53,7 @@ test('it reinstates wrestler with specific reinstatement date', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
     $reinstatementDate = now()->subDays(3);
 
-    ReinstateAction::run($wrestler, $reinstatementDate);
+    resolve(ReinstateAction::class)->handle($wrestler, $reinstatementDate);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
@@ -72,7 +72,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $currentSuspension = $wrestler->currentSuspension()->firstOrFail();
     expect($currentSuspension->ended_at)->toBeNull();
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -92,7 +92,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     // Test with null date (should use now())
-    ReinstateAction::run($wrestler, null);
+    resolve(ReinstateAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
@@ -122,7 +122,7 @@ test('it reinstates wrestler with both suspension and injury', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue(); // Still employed despite suspension/injury
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -150,7 +150,7 @@ test('it handles multiple suspension records correctly', function () {
 
     expect($wrestler->isSuspended())->toBeTrue();
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
@@ -175,7 +175,7 @@ test('it prevents reinstating non-suspended non-injured wrestler', function () {
     expect($wrestler->isSuspended())->toBeFalse();
     expect($wrestler->isInjured())->toBeFalse();
 
-    expect(fn () => ReinstateAction::run($wrestler))
+    expect(fn () => resolve(ReinstateAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -184,7 +184,7 @@ test('it prevents reinstating retired wrestler', function () {
 
     expect($wrestler->isRetired())->toBeTrue();
 
-    expect(fn () => ReinstateAction::run($wrestler))
+    expect(fn () => resolve(ReinstateAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -201,7 +201,7 @@ test('it can reinstate suspended wrestler who is also employed', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isSuspended())->toBeTrue();
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed
@@ -222,7 +222,7 @@ test('it maintains status integrity after reinstatement', function () {
     expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->isRetired())->toBeFalse();
 
-    ReinstateAction::run($wrestler);
+    resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 

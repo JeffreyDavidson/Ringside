@@ -7,12 +7,9 @@ namespace App\Actions\TagTeams;
 use App\Actions\Concerns\RestoreCascadeStrategy;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
-
     /**
      * Restore a soft-deleted tag team.
      *
@@ -33,15 +30,6 @@ class RestoreAction
      *
      * @param  TagTeam  $tagTeam  The soft-deleted tag team to restore
      * @param  bool  $forceReunite  Whether to force wrestlers out of current teams (default: false)
-     *
-     * @example
-     * ```php
-     * $deletedTagTeam = TagTeam::onlyTrashed()->where('name', 'The Dudley Boyz')->first();
-     * RestoreAction::run($deletedTagTeam);
-     *
-     * // Force reunion (removes wrestlers from current teams)
-     * RestoreAction::run($deletedTagTeam, true);
-     * ```
      */
     public function handle(TagTeam $tagTeam, bool $forceReunite = false): void
     {

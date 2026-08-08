@@ -10,7 +10,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Complex workflow composition pipeline for wrestling promotion operations.
@@ -29,29 +28,9 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * Pipeline pattern - Chainable operations with consistent execution flow.
  * Command pattern - Each operation is encapsulated as an executable command.
  * Strategy pattern - Different execution strategies for different workflow types.
- *
- * @example
- * ```php
- * // Complex stable merger with employment and championship transfer
- * ActionPipeline::create()
- *     ->stableMerger($primaryStable, $secondaryStable, 'New Stable Name')
- *     ->employAllMembers($date)
- *     ->transferChampionships($titleIds, $newChampions)
- *     ->execute();
- *
- * // Roster overhaul workflow
- * ActionPipeline::create()
- *     ->releaseMembers($wrestlersToRelease)
- *     ->retireStables($stablesToRetire)
- *     ->employNewTalent($newSignings)
- *     ->createNewStables($newStableData)
- *     ->execute();
- * ```
  */
 class ActionPipeline
 {
-    use AsAction;
-
     /** @var array<int, array<string, mixed>> */
     protected array $operations = [];
 

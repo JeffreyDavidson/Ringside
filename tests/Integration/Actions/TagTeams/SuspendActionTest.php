@@ -17,7 +17,7 @@ test('it suspends an employed tag team', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
     expect($tagTeam->isSuspended())->toBeFalse();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isEmployed())->toBeTrue();
@@ -35,7 +35,7 @@ test('it suspends tag team with specific suspension date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $suspensionDate = now()->subDays(3);
 
-    SuspendAction::run($tagTeam, $suspensionDate);
+    resolve(SuspendAction::class)->handle($tagTeam, $suspensionDate);
 
     $tagTeam->refresh();
     expect($tagTeam->isSuspended())->toBeTrue();
@@ -53,7 +53,7 @@ test('it uses StatusTransitionPipeline for suspension', function () {
 
     expect($tagTeam->currentSuspension)->toBeNull();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -75,7 +75,7 @@ test('it prevents suspending unemployed tag team', function () {
 
     expect($tagTeam->isEmployed())->toBeFalse();
 
-    expect(fn () => SuspendAction::run($tagTeam))
+    expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -84,7 +84,7 @@ test('it prevents suspending already suspended tag team', function () {
 
     expect($tagTeam->isSuspended())->toBeTrue();
 
-    expect(fn () => SuspendAction::run($tagTeam))
+    expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -93,14 +93,14 @@ test('it prevents suspending retired tag team', function () {
 
     expect($tagTeam->isRetired())->toBeTrue();
 
-    expect(fn () => SuspendAction::run($tagTeam))
+    expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -118,7 +118,7 @@ test('it creates new suspension period', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalSuspensionCount = $tagTeam->suspensions()->count();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -136,7 +136,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $customSuspensionDate = now()->subDays(2)->startOfDay();
 
-    SuspendAction::run($tagTeam, $customSuspensionDate);
+    resolve(SuspendAction::class)->handle($tagTeam, $customSuspensionDate);
 
     $tagTeam->refresh();
 
@@ -159,7 +159,7 @@ test('it handles multiple suspension history correctly', function () {
     expect($tagTeam->isSuspended())->toBeFalse();
     expect($tagTeam->suspensions()->count())->toBe(2);
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -178,7 +178,7 @@ test('it preserves employment status during suspension', function () {
 
     expect($tagTeam->isEmployed())->toBeTrue();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -198,7 +198,7 @@ test('it preserves suspension history during new suspension', function () {
     $tagTeam->suspensions()->create(['started_at' => now()->subDays(20), 'ended_at' => now()->subDays(10)]);
     $originalSuspensionCount = $tagTeam->suspensions()->count();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -224,7 +224,7 @@ test('it handles tag team with complex employment history', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
     expect($tagTeam->isSuspended())->toBeFalse();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -244,7 +244,7 @@ test('it handles tag team with complex employment history', function () {
 test('it handles suspension with cascade effects', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 

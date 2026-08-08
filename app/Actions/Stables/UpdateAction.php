@@ -9,12 +9,9 @@ use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use App\Services\StableValidationService;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Create a new update action instance.
      */
@@ -34,19 +31,6 @@ class UpdateAction
      * @param  Stable  $stable  The stable to update
      * @param  StableData  $stableData  The updated stable information
      * @return Stable The updated stable instance
-     *
-     * @example
-     * ```php
-     * $stableData = new StableData(
-     *     name: 'Updated Stable Name',
-     *     start_date: null,
-     *     members: new StableMembershipData(
-     *         wrestlers: collect([$wrestler1, $wrestler2, $wrestler3]),
-     *         tagTeams: collect([])
-     *     )
-     * );
-     * $updatedStable = UpdateAction::run($stable, $stableData);
-     * ```
      */
     public function handle(Stable $stable, StableData $stableData): Stable
     {

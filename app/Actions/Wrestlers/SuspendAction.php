@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class SuspendAction
 {
-    use AsAction;
-
     /**
      * Suspend a wrestler and make them unavailable for competition.
      *
@@ -32,15 +29,6 @@ class SuspendAction
      * @param  Wrestler  $wrestler  The wrestler to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
      * @throws CannotBeSuspendedException When wrestler cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Suspend wrestler immediately
-     * SuspendAction::run($wrestler);
-     *
-     * // Suspend with specific start date
-     * SuspendAction::run($wrestler, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void
     {

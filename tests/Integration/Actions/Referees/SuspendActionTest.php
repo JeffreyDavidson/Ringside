@@ -18,7 +18,7 @@ test('it suspends an employed referee', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isSuspended())->toBeFalse();
 
-    SuspendAction::run($referee);
+    resolve(SuspendAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isSuspended())->toBeTrue();
@@ -34,7 +34,7 @@ test('it suspends referee with specific suspension date', function () {
     $referee = Referee::factory()->employed()->create();
     $suspensionDate = now()->subDays(5);
 
-    SuspendAction::run($referee, $suspensionDate);
+    resolve(SuspendAction::class)->handle($referee, $suspensionDate);
 
     $referee->refresh();
     expect($referee->isSuspended())->toBeTrue();
@@ -50,7 +50,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->employed()->create();
     $suspensionDate = now()->subDays(3);
 
-    SuspendAction::run($referee, $suspensionDate);
+    resolve(SuspendAction::class)->handle($referee, $suspensionDate);
 
     $referee->refresh();
 
@@ -66,7 +66,7 @@ test('it validates referee can be suspended', function () {
     $referee = Referee::factory()->employed()->create();
 
     // Should succeed without throwing validation exception
-    SuspendAction::run($referee);
+    resolve(SuspendAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isSuspended())->toBeTrue();
@@ -77,7 +77,7 @@ test('it throws exception when referee cannot be suspended', function () {
 
     expect($referee->isEmployed())->toBeFalse();
 
-    expect(fn () => SuspendAction::run($referee))
+    expect(fn () => resolve(SuspendAction::class)->handle($referee))
         ->toThrow(CannotBeSuspendedException::class);
 });
 
@@ -87,7 +87,7 @@ test('it maintains referee employment after suspension', function () {
 
     expect($referee->isEmployed())->toBeTrue();
 
-    SuspendAction::run($referee);
+    resolve(SuspendAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -102,7 +102,7 @@ test('it creates suspension record with correct structure', function () {
     $referee = Referee::factory()->employed()->create();
     $suspensionDate = now()->subDays(1);
 
-    SuspendAction::run($referee, $suspensionDate);
+    resolve(SuspendAction::class)->handle($referee, $suspensionDate);
 
     $suspension = freshModel($referee)->currentSuspension()->firstOrFail();
 

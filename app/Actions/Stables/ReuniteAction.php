@@ -7,12 +7,9 @@ namespace App\Actions\Stables;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReuniteAction
 {
-    use AsAction;
-
     /**
      * Create a new reunite action instance.
      */
@@ -32,15 +29,6 @@ class ReuniteAction
      * @param  Stable  $stable  The stable to reunite
      * @param  Carbon|null  $reuniteDate  The reunite date (defaults to now)
      * @throws CannotBeReunitedException When stable cannot be reunited due to business rules
-     *
-     * @example
-     * ```php
-     * // Reunite stable immediately
-     * ReuniteAction::run($stable);
-     *
-     * // Reunite with specific date
-     * ReuniteAction::run($stable, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $reuniteDate = null): void
     {

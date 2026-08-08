@@ -29,20 +29,6 @@ use InvalidArgumentException;
  * DESIGN PATTERN:
  * Builder pattern - Chainable methods for building complex filter criteria.
  * Strategy pattern - Different filtering strategies for different use cases.
- *
- * @example
- * ```php
- * // Filter and employ all unemployed wrestlers in a stable
- * MemberCollectionManager::from($stable->currentWrestlers)
- *     ->filterByEmploymentStatus('unemployed')
- *     ->batchEmploy($date);
- *
- * // Get suspended managers who aren't injured
- * $suspendedHealthyManagers = MemberCollectionManager::from($managers)
- *     ->filterBySuspensionStatus('suspended')
- *     ->filterByInjuryStatus('healthy')
- *     ->get();
- * ```
  */
 class MemberCollectionManager
 {

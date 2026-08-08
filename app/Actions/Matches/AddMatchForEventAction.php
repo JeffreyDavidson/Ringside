@@ -12,12 +12,9 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddMatchForEventAction
 {
-    use AsAction;
-
     /**
      * Create a new add match for event action instance.
      */
@@ -58,46 +55,6 @@ class AddMatchForEventAction
      * @param  Event  $event  The event to add the match to
      * @param  EventMatchData  $eventMatchData  Complete match data including all participants
      * @return EventMatch The newly created match with all components properly assigned
-     *
-     * @example
-     * ```php
-     * // Championship singles match
-     * $matchData = new EventMatchData([
-     *     'match_type_id' => 1, // Singles match
-     *     'competitors' => collect([
-     *         1 => ['wrestlers' => [$johnCena], 'tag_teams' => []],
-     *         2 => ['wrestlers' => [$randyOrton], 'tag_teams' => []]
-     *     ]),
-     *     'referees' => collect([$earlHebner]),
-     *     'titles' => collect([$wweChampionship])
-     * ]);
-     * $match = AddMatchForEventAction::run($event, $matchData);
-     *
-     * // Tag team championship match
-     * $matchData = new EventMatchData([
-     *     'match_type_id' => 2, // Tag team match
-     *     'competitors' => collect([
-     *         1 => ['wrestlers' => [], 'tag_teams' => [$hardyBoyz]],
-     *         2 => ['wrestlers' => [], 'tag_teams' => [$edgeAndChristian]]
-     *     ]),
-     *     'referees' => collect([$mikeChaota]),
-     *     'titles' => collect([$tagTeamChampionship])
-     * ]);
-     * $match = AddMatchForEventAction::run($event, $matchData);
-     *
-     * // Non-title multi-man match
-     * $matchData = new EventMatchData([
-     *     'match_type_id' => 3, // Triple threat
-     *     'competitors' => collect([
-     *         1 => ['wrestlers' => [$wrestler1], 'tag_teams' => []],
-     *         2 => ['wrestlers' => [$wrestler2], 'tag_teams' => []],
-     *         3 => ['wrestlers' => [$wrestler3], 'tag_teams' => []]
-     *     ]),
-     *     'referees' => collect([$referee]),
-     *     'titles' => collect([])
-     * ]);
-     * $match = AddMatchForEventAction::run($event, $matchData);
-     * ```
      */
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch
     {

@@ -17,7 +17,7 @@ test('it employs an unemployed wrestler', function () {
 
     expect($wrestler->isEmployed())->toBeFalse();
 
-    EmployAction::run($wrestler);
+    resolve(EmployAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
@@ -33,7 +33,7 @@ test('it employs wrestler with specific employment date', function () {
     $wrestler = Wrestler::factory()->create();
     $employmentDate = now()->subDays(30);
 
-    EmployAction::run($wrestler, $employmentDate);
+    resolve(EmployAction::class)->handle($wrestler, $employmentDate);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
@@ -51,7 +51,7 @@ test('it employs suspended wrestler and ends suspension', function () {
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($wrestler))
+    expect(fn () => resolve(EmployAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -61,7 +61,7 @@ test('it employs injured wrestler and ends injury', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($wrestler))
+    expect(fn () => resolve(EmployAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -78,7 +78,7 @@ test('it employs wrestler and also employs unemployed managers', function () {
     expect($manager1->isEmployed())->toBeFalse();
     expect($manager2->isEmployed())->toBeTrue();
 
-    EmployAction::run($wrestler);
+    resolve(EmployAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     $manager1->refresh();
@@ -105,6 +105,6 @@ test('it prevents employing already employed wrestler', function () {
 
     expect($wrestler->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($wrestler))
+    expect(fn () => resolve(EmployAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });

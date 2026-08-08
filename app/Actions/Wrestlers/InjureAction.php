@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class InjureAction
 {
-    use AsAction;
-
     /**
      * Injure a wrestler and make them unavailable for competition.
      *
@@ -32,15 +29,6 @@ class InjureAction
      * @param  Wrestler  $wrestler  The wrestler to injure
      * @param  Carbon|null  $injuryDate  The injury start date (defaults to now)
      * @throws CannotBeInjuredException When wrestler cannot be injured due to business rules
-     *
-     * @example
-     * ```php
-     * // Injure wrestler immediately
-     * InjureAction::run($wrestler);
-     *
-     * // Injure with specific start date
-     * InjureAction::run($wrestler, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $injuryDate = null): void
     {

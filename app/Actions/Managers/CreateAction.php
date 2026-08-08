@@ -8,12 +8,9 @@ use App\Data\Managers\ManagerData;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     public function __construct(
         private EmployAction $employAction
     ) {}
@@ -32,24 +29,6 @@ class CreateAction
      *
      * @param  ManagerData  $managerData  The data transfer object containing manager information
      * @return Manager The newly created manager instance
-     *
-     * @example
-     * ```php
-     * // Create manager with immediate employment
-     * $managerData = new ManagerData([
-     *     'name' => 'Paul Heyman',
-     *     'hometown' => 'New York, NY',
-     *     'employment_date' => now()
-     * ]);
-     * $manager = CreateAction::run($managerData);
-     *
-     * // Create manager without employment (must be employed separately)
-     * $managerData = new ManagerData([
-     *     'name' => 'Stephanie McMahon',
-     *     'hometown' => 'Greenwich, CT'
-     * ]);
-     * $manager = CreateAction::run($managerData);
-     * ```
      */
     public function handle(ManagerData $managerData): Manager
     {

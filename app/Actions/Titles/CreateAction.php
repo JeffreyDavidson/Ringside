@@ -7,12 +7,9 @@ namespace App\Actions\Titles;
 use App\Data\Titles\TitleData;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a title.
      *
@@ -24,15 +21,6 @@ class CreateAction
      *
      * @param  TitleData  $titleData  The data transfer object containing title information
      * @return Title The newly created title instance
-     *
-     * @example
-     * ```php
-     * $titleData = new TitleData([
-     *     'name' => 'World Heavyweight Championship',
-     *     'debut_date' => now()
-     * ]);
-     * $title = CreateAction::run($titleData);
-     * ```
      */
     public function handle(TitleData $titleData): Title
     {

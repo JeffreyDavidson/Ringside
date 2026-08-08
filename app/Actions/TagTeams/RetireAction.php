@@ -10,12 +10,9 @@ use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
-
     /**
      * Retire a tag team and end their partnership.
      *
@@ -37,19 +34,6 @@ class RetireAction
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @param  bool  $retirePartners  Whether to retire available partners (default: true)
      * @throws CannotBeRetiredException When tag team cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire tag team immediately with member retirement
-     * $tagTeam = TagTeam::where('name', 'The Undertakers')->first();
-     * RetireAction::run($tagTeam);
-     *
-     * // Retire with specific date
-     * RetireAction::run($tagTeam, Carbon::parse('2024-12-31'));
-     *
-     * // Retire without retiring partners (partners continue independently)
-     * RetireAction::run($tagTeam, retirePartners: false);
-     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retirePartners = true): void
     {

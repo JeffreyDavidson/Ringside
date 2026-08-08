@@ -7,12 +7,9 @@ namespace App\Actions\Titles;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete a title.
      *
@@ -35,17 +32,6 @@ class DeleteAction
      *
      * @param  Title  $title  The title to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete a title immediately
-     * $title = Title::find(1);
-     * DeleteAction::run($title);
-     *
-     * // Delete with specific date
-     * $title = Title::find(1);
-     * DeleteAction::run($title, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Title $title, ?Carbon $deletionDate = null): void
     {

@@ -269,9 +269,9 @@ describe('ManagerPolicy Unit Tests', function () {
             $complexManager = Manager::factory()->employed()->create();
 
             // Apply business-compatible status changes
-            InjureAction::run($complexManager, now());
+            resolve(InjureAction::class)->handle($complexManager, now());
             // Note: Cannot suspend an injured manager per business rules
-            // SuspendAction::run($complexManager, now());
+            // resolve(SuspendAction::class)->handle($complexManager, now());
 
             // Authorization should remain consistent regardless of complex state
             expect(Gate::forUser($this->admin)->allows('view', $complexManager))->toBeTrue();

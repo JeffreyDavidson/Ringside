@@ -8,12 +8,9 @@ use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DisbandAction
 {
-    use AsAction;
-
     /**
      * Create a new disband action instance.
      */
@@ -35,12 +32,6 @@ class DisbandAction
      * @param  Stable  $stable  The stable to disband
      * @param  Carbon|null  $disbandDate  The disbandment date (defaults to now)
      * @throws CannotBeDisbandedException If the stable cannot be disbanded
-     *
-     * @example
-     * ```php
-     * $stable = Stable::find(1);
-     * DisbandAction::run($stable, now());
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $disbandDate = null): void
     {

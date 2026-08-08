@@ -8,12 +8,9 @@ use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class MergeStablesAction
 {
-    use AsAction;
-
     /**
      * Create a new merge stables action instance.
      */

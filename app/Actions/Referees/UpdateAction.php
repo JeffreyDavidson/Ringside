@@ -8,12 +8,9 @@ use App\Data\Referees\RefereeData;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     public function __construct(
         private EmployAction $employAction
     ) {}
@@ -33,15 +30,6 @@ class UpdateAction
      * @param  Referee  $referee  The referee to update
      * @param  RefereeData  $refereeData  The updated referee information
      * @return Referee The updated referee instance
-     *
-     * @example
-     * ```php
-     * $refereeData = new RefereeData([
-     *     'name' => 'Updated Name',
-     *     'hometown' => 'New Hometown'
-     * ]);
-     * $updatedReferee = UpdateAction::run($referee, $refereeData);
-     * ```
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {

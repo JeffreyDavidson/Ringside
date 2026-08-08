@@ -10,12 +10,9 @@ use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
-
     /**
      * Unretire a retired referee and return them to active officiating.
      *
@@ -34,15 +31,6 @@ class UnretireAction
      * @param  Referee  $referee  The referee to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
      * @throws CannotBeUnretiredException When referee cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire referee immediately
-     * UnretireAction::run($referee);
-     *
-     * // Unretire with specific date
-     * UnretireAction::run($referee, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {

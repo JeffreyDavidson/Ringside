@@ -46,7 +46,7 @@ interface Validatable
      * @example
      * ```php
      * if ($wrestler->canBeEmployed()) {
-     *     EmployAction::run($wrestler, $startDate);
+     *     resolve(EmployAction::class)->handle($wrestler, $startDate);
      * }
      * ```
      */
@@ -64,7 +64,7 @@ interface Validatable
      * @example
      * ```php
      * if ($wrestler->canBeRetired()) {
-     *     RetireAction::run($wrestler, $retirementDate);
+     *     resolve(RetireAction::class)->handle($wrestler, $retirementDate);
      * }
      * ```
      */
@@ -82,7 +82,7 @@ interface Validatable
      * @example
      * ```php
      * if ($wrestler->canBeSuspended()) {
-     *     SuspendAction::run($wrestler, $suspensionDate);
+     *     resolve(SuspendAction::class)->handle($wrestler, $suspensionDate);
      * }
      * ```
      */
@@ -100,7 +100,7 @@ interface Validatable
      * @example
      * ```php
      * if ($wrestler->canBeInjured()) {
-     *     InjureAction::run($wrestler, $injuryDate);
+     *     resolve(InjureAction::class)->handle($wrestler, $injuryDate);
      * }
      * ```
      */
@@ -118,7 +118,7 @@ interface Validatable
      * @example
      * ```php
      * if ($wrestler->canBeReleased()) {
-     *     ReleaseAction::run($wrestler, $releaseDate);
+     *     resolve(ReleaseAction::class)->handle($wrestler, $releaseDate);
      * }
      * ```
      */
@@ -136,7 +136,7 @@ interface Validatable
      * @example
      * ```php
      * if ($wrestler->canBeReinstated()) {
-     *     ReinstateAction::run($wrestler, $reinstatementDate);
+     *     resolve(ReinstateAction::class)->handle($wrestler, $reinstatementDate);
      * }
      * ```
      */

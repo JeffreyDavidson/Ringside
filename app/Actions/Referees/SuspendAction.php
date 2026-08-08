@@ -8,12 +8,9 @@ use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class SuspendAction
 {
-    use AsAction;
-
     /**
      * Suspend a referee.
      *
@@ -26,15 +23,6 @@ class SuspendAction
      * @param  Referee  $referee  The referee to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
      * @throws CannotBeSuspendedException When referee cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Suspend referee immediately
-     * SuspendAction::run($referee);
-     *
-     * // Schedule suspension for future date
-     * SuspendAction::run($referee, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void
     {

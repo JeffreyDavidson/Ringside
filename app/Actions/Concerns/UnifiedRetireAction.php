@@ -16,7 +16,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Unified retirement action that can handle any retirable entity.
@@ -33,23 +32,9 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * DESIGN PATTERN:
  * Strategy pattern - Uses cascade strategies to handle entity-specific retirement logic.
  * Template method - Provides consistent retirement workflow with customizable cascading.
- *
- * @example
- * ```php
- * // Retire a wrestler with complex cascading
- * UnifiedRetireAction::run($wrestler, $date);
- *
- * // Retire a title (simple retirement)
- * UnifiedRetireAction::run($title, $date);
- *
- * // Retire a stable with member handling
- * UnifiedRetireAction::run($stable, $date);
- * ```
  */
 class UnifiedRetireAction
 {
-    use AsAction;
-
     /**
      * Retire an entity with appropriate cascading behavior.
      *
@@ -61,15 +46,6 @@ class UnifiedRetireAction
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @param  string|null  $notes  Optional notes for the retirement record
      * @throws Exception When entity cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Basic retirement
-     * UnifiedRetireAction::run($wrestler);
-     *
-     * // Retirement with specific date and notes
-     * UnifiedRetireAction::run($wrestler, Carbon::parse('2024-12-31'), 'Hall of Fame induction');
-     * ```
      */
     public function handle(Model $entity, ?Carbon $retirementDate = null, ?string $notes = null): void
     {
@@ -320,7 +296,7 @@ class UnifiedRetireAction
     public static function batch(iterable $entities, ?Carbon $retirementDate = null, ?string $notes = null): void
     {
         foreach ($entities as $entity) {
-            static::run($entity, $retirementDate, $notes);
+            resolve(static::class)->handle($entity, $retirementDate, $notes);
         }
     }
 

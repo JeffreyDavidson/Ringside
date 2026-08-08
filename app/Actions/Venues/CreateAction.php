@@ -6,12 +6,9 @@ namespace App\Actions\Venues;
 
 use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a venue.
      *
@@ -22,18 +19,6 @@ class CreateAction
      *
      * @param  VenueData  $venueData  The data transfer object containing venue information
      * @return Venue The newly created venue instance
-     *
-     * @example
-     * ```php
-     * $venueData = new VenueData([
-     *     'name' => 'Madison Square Garden',
-     *     'street_address' => '4 Pennsylvania Plaza',
-     *     'city' => 'New York',
-     *     'state' => 'NY',
-     *     'zipcode' => '10001'
-     * ]);
-     * $venue = CreateAction::run($venueData);
-     * ```
      */
     public function handle(VenueData $venueData): Venue
     {

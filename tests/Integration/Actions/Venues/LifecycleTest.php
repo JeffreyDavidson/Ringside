@@ -41,7 +41,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '12345'
             );
 
-            $venue = CreateAction::make()->handle($venueData);
+            $venue = resolve(CreateAction::class)->handle($venueData);
 
             expect($venue)->toBeInstanceOf(Venue::class);
             expect($venue->name)->toBe('Integration Test Arena');
@@ -61,7 +61,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '54321'
             );
 
-            $venue = CreateAction::make()->handle($venueData);
+            $venue = resolve(CreateAction::class)->handle($venueData);
 
             $retrievedVenue = Venue::query()->whereKey($venue->getKey())->firstOrFail();
             expect($retrievedVenue->name)->toBe('Database Test Arena');
@@ -80,7 +80,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '63101'
             );
 
-            $venue = CreateAction::make()->handle($venueData);
+            $venue = resolve(CreateAction::class)->handle($venueData);
 
             expect($venue->name)->toBe('O\'Malley\'s Arena & Entertainment Center');
             expect($venue->street_address)->toBe('789 O\'Connor St.');
@@ -98,7 +98,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '10000'
             );
 
-            $venue = CreateAction::make()->handle($venueData);
+            $venue = resolve(CreateAction::class)->handle($venueData);
 
             expect($venue->name)->toBe('Minimal Arena');
             expect($venue->street_address)->toBe('100 Basic St');
@@ -123,7 +123,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: $venue->zipcode
             );
 
-            $updatedVenue = UpdateAction::make()->handle($venue, $venueData);
+            $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
 
             expect($updatedVenue->name)->toBe('Updated Arena');
             expect($updatedVenue->city)->toBe('Updated City');
@@ -144,7 +144,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: $venue->zipcode
             );
 
-            UpdateAction::make()->handle($venue, $venueData);
+            resolve(UpdateAction::class)->handle($venue, $venueData);
 
             $retrievedVenue = Venue::findOrFail($venue->id);
             expect($retrievedVenue->name)->toBe('Database Updated');
@@ -167,7 +167,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '54321'
             );
 
-            $updatedVenue = UpdateAction::make()->handle($venue, $venueData);
+            $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
 
             expect($updatedVenue->street_address)->toBe('456 New Avenue');
             expect($updatedVenue->city)->toBe('New City');
@@ -187,7 +187,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: $venue->zipcode
             );
 
-            $updatedVenue = UpdateAction::make()->handle($venue, $venueData);
+            $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
 
             expect($updatedVenue->events->pluck('id'))->toContain($event->id);
             expect(freshModel($event)->venue_id)->toBe($venue->id);
@@ -198,7 +198,7 @@ describe('Venue Action Integration Tests', function () {
         test('delete action soft deletes venue', function () {
             $venue = Venue::factory()->create(['name' => 'Deletion Test Arena']);
 
-            DeleteAction::make()->handle($venue);
+            resolve(DeleteAction::class)->handle($venue);
 
             expect(Venue::find($venue->id))->toBeNull();
             expect(Venue::onlyTrashed()->find($venue->id))->not()->toBeNull();
@@ -208,7 +208,7 @@ describe('Venue Action Integration Tests', function () {
             $venue = Venue::factory()->create();
             $event = Event::factory()->atVenue($venue)->create();
 
-            DeleteAction::make()->handle($venue);
+            resolve(DeleteAction::class)->handle($venue);
 
             expect(freshModel($event)->venue_id)->toBe($venue->id);
             expect(freshModel($event)->venue)->toBeNull(); // Soft deleted venue
@@ -219,7 +219,7 @@ describe('Venue Action Integration Tests', function () {
             $event1 = Event::factory()->atVenue($venue)->create(['name' => 'Event 1']);
             $event2 = Event::factory()->atVenue($venue)->create(['name' => 'Event 2']);
 
-            DeleteAction::make()->handle($venue);
+            resolve(DeleteAction::class)->handle($venue);
 
             expect(Venue::find($venue->id))->toBeNull();
             expect(freshModel($event1)->venue_id)->toBe($venue->id);
@@ -229,7 +229,7 @@ describe('Venue Action Integration Tests', function () {
         test('delete action handles venue without events', function () {
             $venue = Venue::factory()->create(['name' => 'No Events Arena']);
 
-            DeleteAction::make()->handle($venue);
+            resolve(DeleteAction::class)->handle($venue);
 
             expect(Venue::find($venue->id))->toBeNull();
             expect(Venue::onlyTrashed()->find($venue->id))->not()->toBeNull();
@@ -245,7 +245,7 @@ describe('Venue Action Integration Tests', function () {
             expect(Venue::find($venueId))->toBeNull();
 
             $deletedVenue = Venue::onlyTrashed()->findOrFail($venueId);
-            RestoreAction::make()->handle($deletedVenue);
+            resolve(RestoreAction::class)->handle($deletedVenue);
 
             $restoredVenue = Venue::findOrFail($venueId);
             expect($restoredVenue->name)->toBe('Restoration Test Arena');
@@ -257,7 +257,7 @@ describe('Venue Action Integration Tests', function () {
 
             $venue->delete();
             $deletedVenue = Venue::onlyTrashed()->findOrFail($venue->id);
-            RestoreAction::make()->handle($deletedVenue);
+            resolve(RestoreAction::class)->handle($deletedVenue);
 
             $restoredVenue = Venue::findOrFail($venue->id);
             expect($restoredVenue->events->pluck('id'))->toContain($event->id);
@@ -277,7 +277,7 @@ describe('Venue Action Integration Tests', function () {
 
             $venue->delete();
             $deletedVenue = Venue::onlyTrashed()->findOrFail($venue->id);
-            RestoreAction::make()->handle($deletedVenue);
+            resolve(RestoreAction::class)->handle($deletedVenue);
 
             $restoredVenue = Venue::findOrFail($venue->id);
             $restoredVenue->load(['events', 'previousEvents']);
@@ -298,7 +298,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '12345'
             );
 
-            $venue = CreateAction::make()->handle($venueData);
+            $venue = resolve(CreateAction::class)->handle($venueData);
             $event = Event::factory()->create(['venue_id' => $venue->id]);
 
             $venue->refresh();
@@ -318,7 +318,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: $venue->zipcode
             );
 
-            $updatedVenue = UpdateAction::make()->handle($venue, $venueData);
+            $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
 
             expect($updatedVenue->events->pluck('id'))->toContain($event1->id);
             expect($updatedVenue->events->pluck('id'))->toContain($event2->id);
@@ -328,7 +328,7 @@ describe('Venue Action Integration Tests', function () {
             $venue = Venue::factory()->create();
             $event = Event::factory()->atVenue($venue)->create(['name' => 'Preserved Event']);
 
-            DeleteAction::make()->handle($venue);
+            resolve(DeleteAction::class)->handle($venue);
 
             expect(Event::find($event->id))->not()->toBeNull();
             expect(freshModel($event)->venue_id)->toBe($venue->id);
@@ -345,7 +345,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '12345'
             );
 
-            $venue = CreateAction::make()->handle($venueData);
+            $venue = resolve(CreateAction::class)->handle($venueData);
 
             expect($venue->name)->not->toBeEmpty();
             expect($venue->street_address)->not->toBeEmpty();
@@ -365,7 +365,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '54321'
             );
 
-            $updatedVenue = UpdateAction::make()->handle($venue, $venueData);
+            $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
 
             expect($updatedVenue->name)->toBe('Updated Validation Arena');
             expect($updatedVenue->street_address)->toBe('456 Updated St');
@@ -385,7 +385,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: '12345'
             );
 
-            $venue = CreateAction::make()->handle($venueData);
+            $venue = resolve(CreateAction::class)->handle($venueData);
 
             expect($venue->created_at)->not()->toBeNull();
             expect($venue->updated_at)->not()->toBeNull();
@@ -407,7 +407,7 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: $venue->zipcode
             );
 
-            $updatedVenue = UpdateAction::make()->handle($venue, $venueData);
+            $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
 
             // Verify the name actually changed to confirm update happened
             expect($updatedVenue->name)->toBe('Timestamp Updated Arena');
@@ -433,8 +433,8 @@ describe('Venue Action Integration Tests', function () {
                 zipcode: $venue->zipcode
             );
 
-            $updatedVenue1 = UpdateAction::make()->handle($venue, $venueData1);
-            $updatedVenue2 = UpdateAction::make()->handle(freshModel($venue), $venueData2);
+            $updatedVenue1 = resolve(UpdateAction::class)->handle($venue, $venueData1);
+            $updatedVenue2 = resolve(UpdateAction::class)->handle(freshModel($venue), $venueData2);
 
             expect($updatedVenue2->name)->toBe('Concurrent Update 2');
         });

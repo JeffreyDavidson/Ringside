@@ -324,7 +324,7 @@ describe('RefereesTable Component', function () {
             $component = livewire(Main::class);
 
             // Employ the referee
-            EmployAction::run($referee, now());
+            resolve(EmployAction::class)->handle($referee, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -337,7 +337,7 @@ describe('RefereesTable Component', function () {
             $component = livewire(Main::class);
 
             // Injure the referee
-            InjureAction::run($referee, now());
+            resolve(InjureAction::class)->handle($referee, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -350,7 +350,7 @@ describe('RefereesTable Component', function () {
             $component = livewire(Main::class);
 
             // Heal the referee
-            HealAction::run($referee, now());
+            resolve(HealAction::class)->handle($referee, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -364,7 +364,7 @@ describe('RefereesTable Component', function () {
             $referee = Referee::factory()->employed()->create(['first_name' => 'Complex', 'last_name' => 'Referee']);
 
             // Referee is employed but also injured
-            InjureAction::run($referee, now());
+            resolve(InjureAction::class)->handle($referee, now());
 
             $component = livewire(Main::class);
 
@@ -409,7 +409,7 @@ describe('RefereesTable Component', function () {
             $component->assertSee('Retiring Referee');
 
             // Retire the referee
-            RetireAction::run($referee, now());
+            resolve(RetireAction::class)->handle($referee, now());
 
             $component->call('$refresh');
             $component->assertSee('Retiring Referee');
@@ -482,8 +482,8 @@ describe('RefereesTable Component', function () {
                 ->assertSee('Releasing Referee');
 
             // Test status transitions
-            EmployAction::run($hiringReferee, now());
-            ReleaseAction::run($releasingReferee, now());
+            resolve(EmployAction::class)->handle($hiringReferee, now());
+            resolve(ReleaseAction::class)->handle($releasingReferee, now());
 
             $component->call('$refresh');
             $component

@@ -7,7 +7,6 @@ namespace App\Actions\Stables;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * End the current activity period for a stable.
@@ -17,8 +16,6 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class EndActivityPeriodAction
 {
-    use AsAction;
-
     /**
      * End the current activity period for a stable.
      *

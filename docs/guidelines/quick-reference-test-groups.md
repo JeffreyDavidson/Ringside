@@ -98,7 +98,7 @@ When adding ANY test, ensure it includes:
 ```php
 test('can employ wrestler with valid employment date', function () {
     $wrestler = Wrestler::factory()->create();
-    $result = EmployAction::run($wrestler, now());
+    $result = resolve(EmployAction::class)->handle($wrestler, now());
     expect($result)->toBeInstanceOf(WrestlerEmployment::class);
 })->group('wrestlers', 'unit', 'actions', 'employment');
 ```

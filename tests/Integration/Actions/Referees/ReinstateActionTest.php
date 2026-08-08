@@ -19,7 +19,7 @@ test('it reinstates a suspended referee', function () {
     expect($referee->isSuspended())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 
-    ReinstateAction::run($referee);
+    resolve(ReinstateAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
@@ -38,7 +38,7 @@ test('it reinstates referee with specific reinstatement date', function () {
     $suspension = $referee->currentSuspension()->firstOrFail();
     $reinstatementDate = now()->subDays(1);
 
-    ReinstateAction::run($referee, $reinstatementDate);
+    resolve(ReinstateAction::class)->handle($referee, $reinstatementDate);
 
     $referee->refresh();
     $suspension->refresh();
@@ -56,7 +56,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->employed()->suspended()->create();
     $reinstatementDate = now()->subDays(2);
 
-    ReinstateAction::run($referee, $reinstatementDate);
+    resolve(ReinstateAction::class)->handle($referee, $reinstatementDate);
 
     $referee->refresh();
 
@@ -71,7 +71,7 @@ test('it validates referee can be reinstated', function () {
     $referee = Referee::factory()->employed()->suspended()->create();
 
     // Should succeed without throwing validation exception
-    ReinstateAction::run($referee);
+    resolve(ReinstateAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isSuspended())->toBeFalse();
@@ -82,7 +82,7 @@ test('it throws exception when referee cannot be reinstated', function () {
 
     expect($referee->isSuspended())->toBeFalse();
 
-    expect(fn () => ReinstateAction::run($referee))
+    expect(fn () => resolve(ReinstateAction::class)->handle($referee))
         ->toThrow(CannotBeReinstatedException::class);
 });
 
@@ -93,7 +93,7 @@ test('it maintains referee employment after reinstatement', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isSuspended())->toBeTrue();
 
-    ReinstateAction::run($referee);
+    resolve(ReinstateAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -109,7 +109,7 @@ test('it preserves suspension history', function () {
     $suspension = $referee->currentSuspension()->firstOrFail();
     $originalStartedAt = $suspension->started_at;
 
-    ReinstateAction::run($referee);
+    resolve(ReinstateAction::class)->handle($referee);
 
     $suspension->refresh();
 

@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 final class ReinstateAction
 {
-    use AsAction;
-
     /**
      * Reinstate a suspended manager.
      *
@@ -32,15 +29,6 @@ final class ReinstateAction
      * @param  Manager  $manager  The manager to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
      * @throws CannotBeReinstatedException When manager cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate manager immediately
-     * ReinstateAction::run($manager);
-     *
-     * // Reinstate with specific date
-     * ReinstateAction::run($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {

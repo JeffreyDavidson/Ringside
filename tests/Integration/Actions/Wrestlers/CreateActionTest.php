@@ -23,7 +23,7 @@ test('it creates a wrestler with basic information', function () {
         employment_date: null
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result)->toBeInstanceOf(Wrestler::class);
     expect($result->name)->toBe('John Cena');
@@ -58,7 +58,7 @@ test('it creates a wrestler with employment when employment date is provided', f
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result->name)->toBe('The Rock');
     expect($result->isEmployed())->toBeTrue();
@@ -90,7 +90,7 @@ test('it creates wrestler with all optional fields', function () {
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result)->toBeInstanceOf(Wrestler::class);
     expect($result->name)->toBe('Stone Cold Steve Austin');
@@ -126,7 +126,7 @@ test('it handles height conversion correctly', function () {
         employment_date: null
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result->height)->toBeInstanceOf(Height::class);
     expect($result->height->feet)->toBe(5);

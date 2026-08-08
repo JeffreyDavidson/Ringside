@@ -30,7 +30,7 @@ use App\Models\TagTeams\TagTeam;
  * // Check release eligibility
  * try {
  *     $tagTeam->ensureCanBeReleased();
- *     ReleaseAction::run($tagTeam);
+ *     resolve(ReleaseAction::class)->handle($tagTeam);
  * } catch (CannotBeReleasedException $e) {
  *     // Handle release conflict
  *     logger()->warning('Tag team release blocked', [

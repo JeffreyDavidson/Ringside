@@ -16,7 +16,7 @@ test('it heals an injured manager', function () {
 
     expect($manager->isInjured())->toBeTrue();
 
-    HealAction::run($manager);
+    resolve(HealAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isInjured())->toBeFalse();
@@ -32,7 +32,7 @@ test('it heals manager with specific recovery date', function () {
     $manager = Manager::factory()->injured()->create();
     $recoveryDate = now()->subDays(5);
 
-    HealAction::run($manager, $recoveryDate);
+    resolve(HealAction::class)->handle($manager, $recoveryDate);
 
     $manager->refresh();
     expect($manager->isInjured())->toBeFalse();
@@ -50,7 +50,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     // Get current injury to verify it gets ended
     $currentInjury = $manager->currentInjury()->firstOrFail();
 
-    HealAction::run($manager);
+    resolve(HealAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -70,7 +70,7 @@ test('it prevents healing non-injured manager', function () {
 
     expect($manager->isInjured())->toBeFalse();
 
-    expect(fn () => HealAction::run($manager))
+    expect(fn () => resolve(HealAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -78,7 +78,7 @@ test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->injured()->create();
     $originalInjuryId = $manager->currentInjury()->firstOrFail()->id;
 
-    HealAction::run($manager);
+    resolve(HealAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -102,7 +102,7 @@ test('it maintains employment status during healing', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();
 
-    HealAction::run($manager);
+    resolve(HealAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -119,7 +119,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->injured()->create();
     $customRecoveryDate = now()->subDays(3)->startOfDay();
 
-    HealAction::run($manager, $customRecoveryDate);
+    resolve(HealAction::class)->handle($manager, $customRecoveryDate);
 
     $manager->refresh();
 

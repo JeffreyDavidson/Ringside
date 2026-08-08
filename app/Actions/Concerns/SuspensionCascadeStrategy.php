@@ -24,15 +24,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - each method returns a callable strategy that can be used
  * with StatusTransitionPipeline.withCascade().
- *
- * @example
- * ```php
- * // Suspend a tag team and automatically suspend eligible members
- * StatusTransitionPipeline::suspend($tagTeam, $date)
- *     ->withCascade(SuspensionCascadeStrategy::wrestlers())
- *     ->withCascade(SuspensionCascadeStrategy::managers())
- *     ->execute();
- * ```
  */
 class SuspensionCascadeStrategy
 {

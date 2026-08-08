@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
-
     /**
      * Retire a manager and end their management career.
      *
@@ -35,15 +32,6 @@ class RetireAction
      * @param  Manager  $manager  The manager to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @throws CannotBeRetiredException When manager cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire manager immediately
-     * RetireAction::run($manager);
-     *
-     * // Retire with specific date
-     * RetireAction::run($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void
     {

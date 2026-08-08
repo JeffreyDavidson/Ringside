@@ -15,12 +15,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
-
     /**
      * Create a new unretire action instance.
      */
@@ -49,25 +46,6 @@ class UnretireAction
      * @param  bool  $establishImmediately  Whether to establish the stable immediately (default: true)
      * @param  bool  $requireFormerMembers  Whether to require available former members (default: true)
      * @throws CannotBeUnretiredException When stable cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire stable immediately
-     * $retiredStable = Stable::where('name', 'Evolution')->first();
-     * UnretireAction::run($retiredStable);
-     *
-     * // Unretire with specific date
-     * UnretireAction::run($retiredStable, Carbon::parse('2024-01-01'));
-     *
-     * // Unretire without establishing immediately (manual activation later)
-     * UnretireAction::run($retiredStable, establishImmediately: false);
-     *
-     * // Unretire without requiring former members
-     * UnretireAction::run($retiredStable, requireFormerMembers: false);
-     *
-     * // Unretire without unretiring members (stable only)
-     * UnretireAction::run($retiredStable, unretireMembers: false);
-     * ```
      */
     public function handle(
         Stable $stable,

@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class HealAction
 {
-    use AsAction;
-
     /**
      * Heal a wrestler from injury.
      *

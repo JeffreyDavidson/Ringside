@@ -32,17 +32,17 @@ describe('TagTeam Employment Workflows', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
 
             // Initial employ
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             $employed = freshModel($tagTeam);
             expect($employed->isEmployed())->toBeTrue();
 
             // Release
-            ReleaseAction::run($employed, Carbon::now());
+            resolve(ReleaseAction::class)->handle($employed, Carbon::now());
             $released = freshModel($tagTeam);
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();
 
-            expect(fn () => EmployAction::run($released, Carbon::now()))
+            expect(fn () => resolve(EmployAction::class)->handle($released, Carbon::now()))
                 ->toThrow(CannotBeEmployedException::class);
         });
     });
@@ -55,13 +55,13 @@ describe('TagTeam Employment Workflows', function () {
             expect($tagTeam->status)->toBe(EmploymentStatus::Unemployed);
 
             // Employ tag team
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             $afterEmployment = freshModel($tagTeam);
             expect($afterEmployment->status)->toBe(EmploymentStatus::Employed);
             expect($afterEmployment->isEmployed())->toBeTrue();
 
             // Release tag team
-            ReleaseAction::run($afterEmployment, Carbon::now());
+            resolve(ReleaseAction::class)->handle($afterEmployment, Carbon::now());
             $afterRelease = freshModel($tagTeam);
 
             // Verify release status synchronization
@@ -74,15 +74,15 @@ describe('TagTeam Employment Workflows', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
 
             // First employment
-            EmployAction::run($tagTeam, Carbon::now()->subYear());
-            ReleaseAction::run($tagTeam, Carbon::now()->subMonths(9));
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now()->subYear());
+            resolve(ReleaseAction::class)->handle($tagTeam, Carbon::now()->subMonths(9));
 
             // Second employment
-            EmployAction::run($tagTeam, Carbon::now()->subMonths(6));
-            ReleaseAction::run($tagTeam, Carbon::now()->subMonths(3));
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now()->subMonths(6));
+            resolve(ReleaseAction::class)->handle($tagTeam, Carbon::now()->subMonths(3));
 
             // Current employment
-            EmployAction::run($tagTeam, Carbon::now()->subMonths(1));
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now()->subMonths(1));
 
             $refreshedTagTeam = freshModel($tagTeam);
             expect($refreshedTagTeam->isEmployed())->toBeTrue();
@@ -96,7 +96,7 @@ describe('TagTeam Employment Workflows', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
 
             // Verify the action handles transactions properly
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
 
             // All changes should be committed together
             $refreshedTagTeam = freshModel($tagTeam);
@@ -113,7 +113,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // This test would require mocking a failure scenario
             // For now, just verify normal operation doesn't leave partial state
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
 
             $refreshedTagTeam = freshModel($tagTeam);
 
@@ -130,7 +130,7 @@ describe('TagTeam Employment Workflows', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
 
             // Test that employment follows business rules
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
 
             $refreshedTagTeam = freshModel($tagTeam);
 
@@ -147,7 +147,7 @@ describe('TagTeam Employment Workflows', function () {
             expect($tagTeam->canBeEmployed())->toBeTrue();
 
             // Employ tag team
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             $employed = freshModel($tagTeam);
 
             // Employed tag team has different capabilities
@@ -155,7 +155,7 @@ describe('TagTeam Employment Workflows', function () {
             expect($employed->canBeEmployed())->toBeFalse(); // Already employed
 
             // Release tag team
-            ReleaseAction::run($employed, Carbon::now());
+            resolve(ReleaseAction::class)->handle($employed, Carbon::now());
             $released = freshModel($tagTeam);
 
             // Released tag team capabilities
@@ -169,7 +169,7 @@ describe('TagTeam Employment Workflows', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
             $futureDate = Carbon::now()->addDays(7);
 
-            EmployAction::run($tagTeam, $futureDate);
+            resolve(EmployAction::class)->handle($tagTeam, $futureDate);
 
             $refreshedTagTeam = freshModel($tagTeam);
             expect($refreshedTagTeam->status)->toBe(EmploymentStatus::FutureEmployment);
@@ -184,14 +184,14 @@ describe('TagTeam Employment Workflows', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
 
             // Employ tag team
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(1);
 
             // Multiple release/employ cycles
-            ReleaseAction::run($tagTeam, Carbon::now());
+            resolve(ReleaseAction::class)->handle($tagTeam, Carbon::now());
             expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(0);
 
-            EmployAction::run($tagTeam, Carbon::now());
+            resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(1);
 
             // Should maintain single active employment

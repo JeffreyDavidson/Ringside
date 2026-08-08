@@ -32,13 +32,13 @@ describe('Referee Employment Workflows', function () {
             expect($referee->status)->toBe(EmploymentStatus::Unemployed);
 
             // Employ referee
-            EmployAction::run($referee, Carbon::now());
+            resolve(EmployAction::class)->handle($referee, Carbon::now());
             $afterEmployment = freshModel($referee);
             expect($afterEmployment->status)->toBe(EmploymentStatus::Employed);
             expect($afterEmployment->isEmployed())->toBeTrue();
 
             // Release referee
-            ReleaseAction::run($afterEmployment, Carbon::now());
+            resolve(ReleaseAction::class)->handle($afterEmployment, Carbon::now());
             $afterRelease = freshModel($referee);
 
             // Verify release status synchronization
@@ -51,18 +51,18 @@ describe('Referee Employment Workflows', function () {
             $referee = Referee::factory()->unemployed()->create();
 
             // Initial employ
-            EmployAction::run($referee, Carbon::now());
+            resolve(EmployAction::class)->handle($referee, Carbon::now());
             $employed = freshModel($referee);
             expect($employed->isEmployed())->toBeTrue();
 
             // Release
-            ReleaseAction::run($employed, Carbon::now());
+            resolve(ReleaseAction::class)->handle($employed, Carbon::now());
             $released = freshModel($referee);
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();
 
             // Re-employ
-            EmployAction::run($released, Carbon::now());
+            resolve(EmployAction::class)->handle($released, Carbon::now());
             $reEmployed = freshModel($referee);
             expect($reEmployed->isEmployed())->toBeTrue();
             expect($reEmployed->isReleased())->toBeFalse();
@@ -74,11 +74,11 @@ describe('Referee Employment Workflows', function () {
             $referee = Referee::factory()->unemployed()->create();
 
             // Execute multi-action workflow within transaction context
-            EmployAction::run($referee, Carbon::now());
+            resolve(EmployAction::class)->handle($referee, Carbon::now());
             $employed = freshModel($referee);
 
             // Then suspend the referee
-            SuspendAction::run($employed, Carbon::now());
+            resolve(SuspendAction::class)->handle($employed, Carbon::now());
             $suspended = freshModel($referee);
 
             // Verify all state changes are consistent
@@ -93,7 +93,7 @@ describe('Referee Employment Workflows', function () {
 
             // This test would require mocking a failure scenario
             // For now, just verify normal operation doesn't leave partial state
-            EmployAction::run($referee, Carbon::now());
+            resolve(EmployAction::class)->handle($referee, Carbon::now());
 
             $refreshedReferee = freshModel($referee);
 
@@ -110,7 +110,7 @@ describe('Referee Employment Workflows', function () {
             $referee = Referee::factory()->unemployed()->create();
 
             // Test that employment follows business rules
-            EmployAction::run($referee, Carbon::now());
+            resolve(EmployAction::class)->handle($referee, Carbon::now());
 
             $refreshedReferee = freshModel($referee);
 
@@ -126,7 +126,7 @@ describe('Referee Employment Workflows', function () {
             // Released referee should not be bookable
             expect($referee->isBookable())->toBeFalse();
 
-            EmployAction::run($referee, Carbon::now());
+            resolve(EmployAction::class)->handle($referee, Carbon::now());
 
             // Employed referee should be bookable
             expect(freshModel($referee)->isBookable())->toBeTrue();
@@ -136,16 +136,16 @@ describe('Referee Employment Workflows', function () {
             $referee = Referee::factory()->retired()->create();
 
             // Retire -> Employ -> Suspend -> Release workflow
-            EmployAction::run($referee, Carbon::now());
+            resolve(EmployAction::class)->handle($referee, Carbon::now());
             $employed = freshModel($referee);
             expect($employed->isEmployed())->toBeTrue();
 
-            SuspendAction::run($employed, Carbon::now());
+            resolve(SuspendAction::class)->handle($employed, Carbon::now());
             $suspended = freshModel($referee);
             expect($suspended->isEmployed())->toBeTrue();
             expect($suspended->isSuspended())->toBeTrue();
 
-            ReleaseAction::run($suspended, Carbon::now());
+            resolve(ReleaseAction::class)->handle($suspended, Carbon::now());
             $released = freshModel($referee);
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();

@@ -9,12 +9,9 @@ use App\Models\Wrestlers\Wrestler;
 use App\Services\WrestlerManagerAssignmentService;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a new wrestler create action instance.
      */
@@ -40,20 +37,6 @@ class CreateAction
      *
      * @param  WrestlerData  $wrestlerData  The data transfer object containing wrestler information
      * @return Wrestler The newly created wrestler instance
-     *
-     * @example
-     * ```php
-     * $wrestlerData = new WrestlerData([
-     *     'name' => 'John Doe',
-     *     'hometown' => 'Chicago, IL',
-     *     'height' => 72,
-     *     'weight' => 220,
-     *     'signature_moves' => ['Suplex', 'DDT'],
-     *     'employment_date' => now(),
-     *     'managers' => [1, 2] // Manager IDs
-     * ]);
-     * $wrestler = CreateAction::run($wrestlerData);
-     * ```
      */
     public function handle(WrestlerData $wrestlerData): Wrestler
     {

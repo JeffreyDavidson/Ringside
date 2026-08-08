@@ -17,7 +17,7 @@ test('it soft deletes an unemployed referee', function () {
     expect($referee->isEmployed())->toBeFalse();
     expect($referee->trashed())->toBeFalse();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
@@ -34,7 +34,7 @@ test('it soft deletes referee with specific deletion date', function () {
     $referee = Referee::factory()->create();
     $deletionDate = now()->subDays(2);
 
-    DeleteAction::run($referee, $deletionDate);
+    resolve(DeleteAction::class)->handle($referee, $deletionDate);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
@@ -53,7 +53,7 @@ test('it ends employment before deletion using StatusTransitionPipeline', functi
     expect($referee->isEmployed())->toBeTrue();
     expect($employment->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -76,7 +76,7 @@ test('it ends suspension before deletion', function () {
     expect($referee->isSuspended())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
@@ -99,7 +99,7 @@ test('it ends injury before deletion', function () {
     expect($referee->isInjured())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
@@ -122,7 +122,7 @@ test('it ends retirement before deletion', function () {
     expect($referee->isRetired())->toBeTrue();
     expect($retirement->ended_at)->toBeNull();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $retirement->refresh();
@@ -142,7 +142,7 @@ test('it handles DateHelper date resolution for deletion', function () {
     $referee = Referee::factory()->employed()->create();
     $deletionDate = now()->subDays(5);
 
-    DeleteAction::run($referee, $deletionDate);
+    resolve(DeleteAction::class)->handle($referee, $deletionDate);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
@@ -159,7 +159,7 @@ test('it maintains transaction boundaries', function () {
     $employment = $referee->currentEmployment()->firstOrFail();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -175,7 +175,7 @@ test('it validates referee can be deleted', function () {
     $referee = Referee::factory()->create();
 
     // Should succeed without throwing validation exception
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
@@ -185,7 +185,7 @@ test('it preserves historical data after deletion', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -213,7 +213,7 @@ test('it uses StatusTransitionPipeline for consistent status handling', function
     expect($referee->isSuspended())->toBeTrue();
     expect($referee->isInjured())->toBeTrue();
 
-    DeleteAction::run($referee);
+    resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
 

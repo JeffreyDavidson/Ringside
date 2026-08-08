@@ -18,7 +18,7 @@ test('it unretires a retired wrestler with employment', function () {
     expect($wrestler->isRetired())->toBeTrue();
     expect($wrestler->isEmployed())->toBeFalse();
 
-    UnretireAction::run($wrestler);
+    resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
@@ -43,7 +43,7 @@ test('it unretires wrestler without immediate employment', function () {
 
     expect($wrestler->isRetired())->toBeTrue();
 
-    UnretireAction::run($wrestler, null, false);
+    resolve(UnretireAction::class)->handle($wrestler, null, false);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
@@ -66,7 +66,7 @@ test('it unretires wrestler with specific date', function () {
     $wrestler = Wrestler::factory()->retired()->create();
     $unretirementDate = now()->subDays(5);
 
-    UnretireAction::run($wrestler, $unretirementDate);
+    resolve(UnretireAction::class)->handle($wrestler, $unretirementDate);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
@@ -93,7 +93,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     $currentRetirement = $wrestler->currentRetirement()->firstOrFail();
     expect($currentRetirement->ended_at)->toBeNull();
 
-    UnretireAction::run($wrestler);
+    resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -122,7 +122,7 @@ test('it employs unemployed managers when wrestler is employed', function () {
     expect($manager1->isEmployed())->toBeFalse();
     expect($manager2->isEmployed())->toBeTrue();
 
-    UnretireAction::run($wrestler); // employImmediately defaults to true
+    resolve(UnretireAction::class)->handle($wrestler); // employImmediately defaults to true
 
     $wrestler->refresh();
     $manager1->refresh();
@@ -153,7 +153,7 @@ test('it does not employ managers when wrestler is not employed immediately', fu
     expect($wrestler->isRetired())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 
-    UnretireAction::run($wrestler, null, false); // employImmediately = false
+    resolve(UnretireAction::class)->handle($wrestler, null, false); // employImmediately = false
 
     $wrestler->refresh();
     $manager->refresh();
@@ -177,7 +177,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     // Test with null date (should use now())
-    UnretireAction::run($wrestler, null);
+    resolve(UnretireAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
@@ -204,7 +204,7 @@ test('it handles multiple retirement records correctly', function () {
 
     expect($wrestler->isRetired())->toBeTrue();
 
-    UnretireAction::run($wrestler);
+    resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
@@ -230,7 +230,7 @@ test('it prevents unretiring non-retired wrestler', function () {
 
     expect($wrestler->isRetired())->toBeFalse();
 
-    expect(fn () => UnretireAction::run($wrestler))
+    expect(fn () => resolve(UnretireAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -238,7 +238,7 @@ test('it prevents unretiring deleted wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
     $wrestler->delete(); // Soft delete
 
-    expect(fn () => UnretireAction::run($wrestler))
+    expect(fn () => resolve(UnretireAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -263,7 +263,7 @@ test('it maintains retirement history integrity', function () {
 
     expect($wrestler->isRetired())->toBeTrue();
 
-    UnretireAction::run($wrestler);
+    resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();

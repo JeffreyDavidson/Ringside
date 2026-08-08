@@ -8,7 +8,6 @@ use App\Data\Wrestlers\WrestlerData;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Action for updating wrestler information and managing employment status.
@@ -26,8 +25,6 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Create a new update action instance.
      */

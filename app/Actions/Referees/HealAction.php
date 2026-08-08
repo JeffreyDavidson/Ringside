@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class HealAction
 {
-    use AsAction;
-
     /**
      * Heal a referee from injury and return them to active officiating.
      *
@@ -33,15 +30,6 @@ class HealAction
      * @param  Referee  $referee  The injured referee to heal
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
      * @throws CannotBeClearedFromInjuryException When referee cannot be healed due to business rules
-     *
-     * @example
-     * ```php
-     * // Heal injury immediately
-     * HealAction::run($referee);
-     *
-     * // Heal injury with specific recovery date
-     * HealAction::run($referee, Carbon::parse('2024-02-01'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {

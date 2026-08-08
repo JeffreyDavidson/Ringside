@@ -25,18 +25,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - each method returns a callable strategy that can be used
  * with StatusTransitionPipeline.withCascade().
- *
- * @example
- * ```php
- * // Retire a tag team and automatically retire available members
- * StatusTransitionPipeline::retire($tagTeam, $date)
- *     ->withCascade(RetirementCascadeStrategy::wrestlers())
- *     ->withCascade(RetirementCascadeStrategy::managers())
- *     ->execute();
- *
- * // Retire only the partnership, not the individual members
- * StatusTransitionPipeline::retire($tagTeam, $date)->execute();
- * ```
  */
 class RetirementCascadeStrategy
 {

@@ -12,12 +12,9 @@ use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
-
     /**
      * Create a new retire action instance.
      */
@@ -49,19 +46,6 @@ class RetireAction
      * @param  Stable  $stable  The stable to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @throws CannotBeRetiredException When stable cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire stable immediately
-     * RetireAction::run($stable);
-     *
-     * // Retire with specific date
-     * RetireAction::run($stable, Carbon::parse('2024-12-31'));
-     *
-     * // Retire The New World Order stable
-     * $nwo = Stable::where('name', 'The New World Order')->first();
-     * RetireAction::run($nwo, Carbon::parse('2024-04-01'));
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {

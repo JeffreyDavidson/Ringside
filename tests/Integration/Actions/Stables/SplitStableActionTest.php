@@ -66,7 +66,7 @@ describe('SplitStableAction Integration Tests', function () {
             $initialTagTeamCount = $this->originalStable->currentTagTeams()->count();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -96,7 +96,7 @@ describe('SplitStableAction Integration Tests', function () {
             $transferTagTeamIds = $this->transferTagTeams->pluck('id');
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -125,7 +125,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -171,7 +171,7 @@ describe('SplitStableAction Integration Tests', function () {
             $initialTagTeamCount = $this->originalStable->currentTagTeams()->count();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -197,7 +197,7 @@ describe('SplitStableAction Integration Tests', function () {
                 wrestlers: $this->transferWrestlers,
             );
 
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -221,7 +221,7 @@ describe('SplitStableAction Integration Tests', function () {
                 tagTeams: $this->transferTagTeams,
             );
 
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -241,7 +241,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Split with mixed member types
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -265,7 +265,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             $membersForSplit = new StableMembershipData();
 
-            expect(fn () => SplitStableAction::make()->handle(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -286,7 +286,7 @@ describe('SplitStableAction Integration Tests', function () {
                 tagTeams: $this->tagTeams,
             );
 
-            expect(fn () => SplitStableAction::make()->handle(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -314,7 +314,7 @@ describe('SplitStableAction Integration Tests', function () {
                 tagTeams: $this->transferTagTeams,
             );
 
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
@@ -333,7 +333,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Expect validation exception
-            expect(fn () => SplitStableAction::make()->handle(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $retiredStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -347,7 +347,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -372,7 +372,7 @@ describe('SplitStableAction Integration Tests', function () {
             Stable::factory()->create(['name' => $this->newStableName]);
 
             // Try to split with duplicate name
-            expect(fn () => SplitStableAction::make()->handle(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -389,7 +389,7 @@ describe('SplitStableAction Integration Tests', function () {
             $initialStableCount = Stable::count();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -412,7 +412,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // For now, verify that normal split doesn't affect counts negatively
             try {
-                $newStable = SplitStableAction::make()->handle(
+                $newStable = resolve(SplitStableAction::class)->handle(
                     $this->originalStable,
                     $this->newStableName,
                     $this->membersForNewStable,
@@ -434,7 +434,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -456,7 +456,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -486,7 +486,7 @@ describe('SplitStableAction Integration Tests', function () {
             $originalTagTeamIds = $this->transferTagTeams->pluck('id');
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,
@@ -507,7 +507,7 @@ describe('SplitStableAction Integration Tests', function () {
             $splitDate = Carbon::now();
 
             // Execute split
-            $newStable = SplitStableAction::make()->handle(
+            $newStable = resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $this->membersForNewStable,

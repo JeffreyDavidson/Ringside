@@ -10,12 +10,9 @@ use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction
 {
-    use AsAction;
-
     /**
      * Release a referee from employment.
      *
@@ -28,15 +25,6 @@ class ReleaseAction
      * @param  Referee  $referee  The referee to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
      * @throws CannotBeReleasedException When referee cannot be released due to business rules
-     *
-     * @example
-     * ```php
-     * // Release referee immediately
-     * ReleaseAction::run($referee);
-     *
-     * // Release with specific date
-     * ReleaseAction::run($referee, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {

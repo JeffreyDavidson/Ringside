@@ -19,7 +19,7 @@ test('it retires an employed referee', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isRetired())->toBeFalse();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -39,7 +39,7 @@ test('it retires referee with specific retirement date', function () {
     $referee = Referee::factory()->employed()->create();
     $retirementDate = now()->subDays(10);
 
-    RetireAction::run($referee, $retirementDate);
+    resolve(RetireAction::class)->handle($referee, $retirementDate);
 
     $referee->refresh();
     expect($referee->isRetired())->toBeTrue();
@@ -61,7 +61,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->employed()->create();
     $retirementDate = now()->subDays(7);
 
-    RetireAction::run($referee, $retirementDate);
+    resolve(RetireAction::class)->handle($referee, $retirementDate);
 
     $referee->refresh();
 
@@ -77,7 +77,7 @@ test('it validates referee can be retired', function () {
     $referee = Referee::factory()->employed()->create();
 
     // Should succeed without throwing validation exception
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isRetired())->toBeTrue();
@@ -88,7 +88,7 @@ test('it throws exception when referee cannot be retired', function () {
 
     expect($referee->isEmployed())->toBeFalse();
 
-    expect(fn () => RetireAction::run($referee))
+    expect(fn () => resolve(RetireAction::class)->handle($referee))
         ->toThrow(CannotBeRetiredException::class);
 });
 
@@ -98,7 +98,7 @@ test('it ends employment when retiring', function () {
 
     expect($employment->ended_at)->toBeNull();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $employment->refresh();
     expect($employment->ended_at)->not->toBeNull();
@@ -116,7 +116,7 @@ test('it ends suspension before retiring', function () {
     expect($referee->isSuspended())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
@@ -133,7 +133,7 @@ test('it ends injury before retiring', function () {
     expect($referee->isInjured())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
 
-    RetireAction::run($referee);
+    resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
@@ -147,7 +147,7 @@ test('it creates retirement record with correct structure', function () {
     $referee = Referee::factory()->employed()->create();
     $retirementDate = now()->subDays(5);
 
-    RetireAction::run($referee, $retirementDate);
+    resolve(RetireAction::class)->handle($referee, $retirementDate);
 
     $retirement = freshModel($referee)->currentRetirement()->firstOrFail();
 

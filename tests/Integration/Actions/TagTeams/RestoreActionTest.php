@@ -14,7 +14,7 @@ test('it restores a soft-deleted tag team', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -36,7 +36,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -51,7 +51,7 @@ test('it prevents restoring non-deleted tag team', function () {
 
     expect($tagTeam->trashed())->toBeFalse();
 
-    expect(fn () => RestoreAction::run($tagTeam))
+    expect(fn () => resolve(RestoreAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -76,7 +76,7 @@ test('it restores tag team with historical data intact', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -102,7 +102,7 @@ test('it restores tag team with partnership history', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -123,7 +123,7 @@ test('it restores tag team to unemployed state', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -157,7 +157,7 @@ test('it handles restoration with complex historical status', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -183,7 +183,7 @@ test('it restores all tag team attributes correctly', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
@@ -201,12 +201,12 @@ test('it handles concurrent restoration attempts gracefully', function () {
     expect($tagTeam->trashed())->toBeTrue();
 
     // First restoration should succeed
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
 
     // Second restoration attempt should fail
-    expect(fn () => RestoreAction::run($tagTeam))
+    expect(fn () => resolve(RestoreAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -219,7 +219,7 @@ test('it maintains data integrity during restoration', function () {
     $tagTeam->delete();
     expect($tagTeam->trashed())->toBeTrue();
 
-    RestoreAction::run($tagTeam);
+    resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();

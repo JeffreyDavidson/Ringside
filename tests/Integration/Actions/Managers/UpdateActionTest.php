@@ -20,7 +20,7 @@ test('it updates a manager with new information', function () {
 
     $updateData = new ManagerData('Updated', 'Manager', null);
 
-    $result = UpdateAction::make()->handle($manager, $updateData);
+    $result = resolve(UpdateAction::class)->handle($manager, $updateData);
 
     expect($result)->toBeInstanceOf(Manager::class);
     expect($result->id)->toBe($manager->id);
@@ -43,7 +43,7 @@ test('it updates manager and creates employment when employment date is provided
     $employmentDate = now();
     $updateData = new ManagerData('John', 'Updated', $employmentDate);
 
-    $result = UpdateAction::make()->handle($manager, $updateData);
+    $result = resolve(UpdateAction::class)->handle($manager, $updateData);
 
     expect($result->last_name)->toBe('Updated');
     expect($result->isEmployed())->toBeTrue();
@@ -71,7 +71,7 @@ test('it updates manager without affecting existing employment', function () {
 
     $updateData = new ManagerData('Still', 'Employed', null);
 
-    $result = UpdateAction::make()->handle($manager, $updateData);
+    $result = resolve(UpdateAction::class)->handle($manager, $updateData);
 
     expect($result->first_name)->toBe('Still');
     expect($result->last_name)->toBe('Employed');

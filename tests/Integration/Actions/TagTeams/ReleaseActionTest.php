@@ -16,7 +16,7 @@ test('it releases an employed tag team', function () {
 
     expect($tagTeam->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isEmployed())->toBeFalse();
@@ -32,7 +32,7 @@ test('it releases tag team with specific release date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $releaseDate = now()->subDays(3);
 
-    ReleaseAction::run($tagTeam, $releaseDate);
+    resolve(ReleaseAction::class)->handle($tagTeam, $releaseDate);
 
     $tagTeam->refresh();
     expect($tagTeam->isEmployed())->toBeFalse();
@@ -50,7 +50,7 @@ test('it releases suspended tag team', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
     expect($tagTeam->isSuspended())->toBeTrue();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isEmployed())->toBeFalse();
@@ -75,7 +75,7 @@ test('it uses StatusTransitionPipeline for release', function () {
     // Get current employment to verify it gets ended
     $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -95,7 +95,7 @@ test('it prevents releasing unemployed tag team', function () {
 
     expect($tagTeam->isEmployed())->toBeFalse();
 
-    expect(fn () => ReleaseAction::run($tagTeam))
+    expect(fn () => resolve(ReleaseAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -103,7 +103,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalEmploymentId = $tagTeam->currentEmployment()->firstOrFail()->id;
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -122,7 +122,7 @@ test('it ends current employment period', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalEmploymentCount = $tagTeam->employments()->count();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -138,7 +138,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $customReleaseDate = now()->subDays(2)->startOfDay();
 
-    ReleaseAction::run($tagTeam, $customReleaseDate);
+    resolve(ReleaseAction::class)->handle($tagTeam, $customReleaseDate);
 
     $tagTeam->refresh();
 
@@ -153,7 +153,7 @@ test('it preserves employment history during release', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalEmploymentCount = $tagTeam->employments()->count();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -179,7 +179,7 @@ test('it handles tag team with complex employment history', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
     expect($tagTeam->employments()->count())->toBe(3);
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -199,7 +199,7 @@ test('it handles release with cascade to partners and managers', function () {
     // Get current employment to verify cascade effects
     expect($tagTeam->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -218,7 +218,7 @@ test('it handles release with cascade to partners and managers', function () {
 test('it uses ReleaseCascadeStrategy for comprehensive cleanup', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    ReleaseAction::run($tagTeam);
+    resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 

@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Venues;
 
 use App\Models\Events\Venue;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete a venue.
      *
@@ -21,12 +18,6 @@ class DeleteAction
      * - Allows for future restoration if needed
      *
      * @param  Venue  $venue  The venue to delete
-     *
-     * @example
-     * ```php
-     * $venue = Venue::find(1);
-     * DeleteAction::run($venue);
-     * ```
      */
     public function handle(Venue $venue): void
     {

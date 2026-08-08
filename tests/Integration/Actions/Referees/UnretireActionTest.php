@@ -21,7 +21,7 @@ test('it unretires a retired referee', function () {
     expect($referee->isEmployed())->toBeFalse();
     expect($retirement->ended_at)->toBeNull();
 
-    UnretireAction::run($referee);
+    resolve(UnretireAction::class)->handle($referee);
 
     $referee->refresh();
     $retirement->refresh();
@@ -42,7 +42,7 @@ test('it unretires referee with specific unretirement date', function () {
     $retirement = $referee->currentRetirement()->firstOrFail();
     $unretiredDate = now()->subDays(3);
 
-    UnretireAction::run($referee, $unretiredDate);
+    resolve(UnretireAction::class)->handle($referee, $unretiredDate);
 
     $referee->refresh();
     $retirement->refresh();
@@ -69,7 +69,7 @@ test('it uses StatusTransitionPipeline for consistent unretirement', function ()
     expect($referee->isRetired())->toBeTrue();
     expect($referee->isEmployed())->toBeFalse();
 
-    UnretireAction::run($referee);
+    resolve(UnretireAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -81,7 +81,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->retired()->create();
     $unretiredDate = now()->subDays(5);
 
-    UnretireAction::run($referee, $unretiredDate);
+    resolve(UnretireAction::class)->handle($referee, $unretiredDate);
 
     $referee->refresh();
 
@@ -102,7 +102,7 @@ test('it validates referee can be unretired', function () {
     $referee = Referee::factory()->retired()->create();
 
     // Should succeed without throwing validation exception
-    UnretireAction::run($referee);
+    resolve(UnretireAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isRetired())->toBeFalse();
@@ -114,7 +114,7 @@ test('it throws exception when referee cannot be unretired', function () {
 
     expect($referee->isRetired())->toBeFalse();
 
-    expect(fn () => UnretireAction::run($referee))
+    expect(fn () => resolve(UnretireAction::class)->handle($referee))
         ->toThrow(CannotBeUnretiredException::class);
 });
 
@@ -123,7 +123,7 @@ test('it preserves retirement history', function () {
     $retirement = $referee->currentRetirement()->firstOrFail();
     $originalStartedAt = $retirement->started_at;
 
-    UnretireAction::run($referee);
+    resolve(UnretireAction::class)->handle($referee);
 
     $retirement->refresh();
 
@@ -141,7 +141,7 @@ test('it restores referee employment after unretirement', function () {
 
     expect($referee->isEmployed())->toBeFalse();
 
-    UnretireAction::run($referee);
+    resolve(UnretireAction::class)->handle($referee);
 
     $referee->refresh();
     $employment = $referee->currentEmployment()->firstOrFail();
@@ -161,7 +161,7 @@ test('it rolls back retirement changes when employment restoration fails', funct
     });
 
     try {
-        expect(fn () => UnretireAction::run($referee))
+        expect(fn () => resolve(UnretireAction::class)->handle($referee))
             ->toThrow(RuntimeException::class);
     } finally {
         RefereeEmployment::flushEventListeners();

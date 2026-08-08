@@ -301,7 +301,7 @@ describe('ManagersTable Component', function () {
             $component = livewire(Main::class);
 
             // Employ the manager
-            EmployAction::run($manager, now());
+            resolve(EmployAction::class)->handle($manager, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -314,7 +314,7 @@ describe('ManagersTable Component', function () {
             $component = livewire(Main::class);
 
             // Injure the manager
-            InjureAction::run($manager, now());
+            resolve(InjureAction::class)->handle($manager, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -328,7 +328,7 @@ describe('ManagersTable Component', function () {
             $manager = Manager::factory()->employed()->create(['first_name' => 'Complex', 'last_name' => 'Manager']);
 
             // Manager is employed but also injured
-            InjureAction::run($manager, now());
+            resolve(InjureAction::class)->handle($manager, now());
 
             $component = livewire(Main::class);
 

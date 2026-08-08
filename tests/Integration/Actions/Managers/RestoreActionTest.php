@@ -28,7 +28,7 @@ test('it restores a soft-deleted manager', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored
     $restoredManager = Manager::findOrFail($managerId);
@@ -45,7 +45,7 @@ test('it handles database transactions correctly', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify transaction was successful
     $restoredManager = Manager::findOrFail($managerId);
@@ -72,7 +72,7 @@ test('it preserves all historical records during restoration', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify all historical records are preserved
     $restoredManager = Manager::findOrFail($managerId);
@@ -93,7 +93,7 @@ test('it does not automatically restore employment relationships', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored but not automatically employed
     $restoredManager = Manager::findOrFail($managerId);
@@ -122,7 +122,7 @@ test('it does not automatically restore management relationships', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager is restored
     $restoredManager = Manager::findOrFail($managerId);
@@ -154,7 +154,7 @@ test('it handles managers with complex deletion history', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify all complex history is preserved
     $restoredManager = Manager::findOrFail($managerId);
@@ -169,7 +169,7 @@ test('it prevents restoring non-deleted managers', function () {
     expect($manager->deleted_at)->toBeNull();
 
     // Should not be able to restore a non-deleted manager
-    expect(fn () => RestoreAction::run($manager))
+    expect(fn () => resolve(RestoreAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -189,7 +189,7 @@ test('it maintains referential integrity during restoration', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify referential integrity is maintained
     $restoredManager = Manager::findOrFail($managerId);
@@ -223,14 +223,14 @@ test('it allows separate employment after restoration', function () {
 
     // Restore the manager
     $deletedManager = Manager::onlyTrashed()->findOrFail($managerId);
-    RestoreAction::run($deletedManager);
+    resolve(RestoreAction::class)->handle($deletedManager);
 
     // Verify manager can be employed separately after restoration
     $restoredManager = Manager::findOrFail($managerId);
     expect($restoredManager->isEmployed())->toBeFalse();
 
     // This would require a separate EmployAction call
-    // expect(() => EmployAction::run($restoredManager))->not()->toThrow();
+    // expect(() => resolve(EmployAction::class)->handle($restoredManager))->not()->toThrow();
     // Testing the capability without actually running EmployAction
 
     // Manager should be in a state where employment is possible

@@ -7,7 +7,6 @@ namespace App\Actions\Concerns;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Unified employment action that can handle any employable entity.
@@ -23,23 +22,9 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * DESIGN PATTERN:
  * Strategy pattern - Uses cascade strategies to handle entity-specific employment logic.
  * Template method - Provides consistent employment workflow with customizable cascading.
- *
- * @example
- * ```php
- * // Employ a wrestler with manager cascade
- * UnifiedEmployAction::run($wrestler, $date);
- *
- * // Employ a tag team with wrestler and manager cascade
- * UnifiedEmployAction::run($tagTeam, $date);
- *
- * // Employ a manager (no cascading needed)
- * UnifiedEmployAction::run($manager, $date);
- * ```
  */
 class UnifiedEmployAction
 {
-    use AsAction;
-
     /**
      * Employ an entity with appropriate cascading behavior.
      *
@@ -50,15 +35,6 @@ class UnifiedEmployAction
      * @param  Carbon|null  $employmentDate  The employment date (defaults to now)
      * @param  string|null  $notes  Optional notes for the employment record
      * @throws Exception When entity cannot be employed due to business rules
-     *
-     * @example
-     * ```php
-     * // Basic employment
-     * UnifiedEmployAction::run($wrestler);
-     *
-     * // Employment with specific date and notes
-     * UnifiedEmployAction::run($wrestler, Carbon::parse('2024-01-01'), 'New signing');
-     * ```
      */
     public function handle(Model $entity, ?Carbon $employmentDate = null, ?string $notes = null): void
     {
@@ -111,7 +87,7 @@ class UnifiedEmployAction
     public static function batch(iterable $entities, ?Carbon $employmentDate = null, ?string $notes = null): void
     {
         foreach ($entities as $entity) {
-            static::run($entity, $employmentDate, $notes);
+            resolve(static::class)->handle($entity, $employmentDate, $notes);
         }
     }
 

@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class SuspendAction
 {
-    use AsAction;
-
     /**
      * Suspend a manager.
      *
@@ -32,15 +29,6 @@ class SuspendAction
      * @param  Manager  $manager  The manager to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
      * @throws CannotBeSuspendedException When manager cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Suspend manager immediately
-     * SuspendAction::run($manager);
-     *
-     * // Schedule suspension for future date
-     * SuspendAction::run($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $suspensionDate = null): void
     {

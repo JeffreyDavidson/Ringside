@@ -8,12 +8,9 @@ use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\Managers\Manager;
 use Exception;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction
 {
-    use AsAction;
-
     /**
      * Employ a manager.
      *
@@ -26,15 +23,6 @@ class EmployAction
      * @param  Manager  $manager  The manager to employ
      * @param  Carbon|null  $startDate  The employment start date (defaults to now)
      * @throws Exception When manager cannot be employed due to business rules
-     *
-     * @example
-     * ```php
-     * // Employ manager immediately
-     * EmployAction::run($manager);
-     *
-     * // Employ with specific start date
-     * EmployAction::run($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {

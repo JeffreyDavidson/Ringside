@@ -8,12 +8,9 @@ use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
-
     /**
      * Retire a title and permanently end its championship lineage.
      *
@@ -28,15 +25,6 @@ class RetireAction
      * @param  Title  $title  The title to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @throws CannotBeRetiredException When title cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire title immediately
-     * RetireAction::run($title);
-     *
-     * // Retire with specific date
-     * RetireAction::run($title, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {

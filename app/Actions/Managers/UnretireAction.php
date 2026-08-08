@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
-
     /**
      * Unretire a retired manager and return them to active talent management.
      *
@@ -33,15 +30,6 @@ class UnretireAction
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire manager immediately
-     * UnretireAction::run($manager);
-     *
-     * // Unretire with specific date
-     * UnretireAction::run($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
     {

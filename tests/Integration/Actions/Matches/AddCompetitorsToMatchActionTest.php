@@ -12,7 +12,8 @@ use JMac\Testing\Double;
 
 test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
+    $wrestlerA = Wrestler::factory()->bookable()->create();
+    $wrestlerB = Wrestler::factory()->bookable()->create();
     $competitors = collect([
         0 => [
             'wrestlers' => [$wrestlerA],
@@ -29,7 +30,7 @@ test('it adds wrestler competitors to a match', function () {
     $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
     $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
-    AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 
     $addWrestlersAction->verify();
     $addTagTeamsAction->unused();
@@ -37,7 +38,8 @@ test('it adds wrestler competitors to a match', function () {
 
 test('it adds tag team competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    [$tagTeamA, $tagTeamB] = TagTeam::factory()->bookable()->count(2)->create();
+    $tagTeamA = TagTeam::factory()->bookable()->create();
+    $tagTeamB = TagTeam::factory()->bookable()->create();
     $competitors = collect([
         0 => [
             'tag_teams' => [$tagTeamA],
@@ -54,7 +56,7 @@ test('it adds tag team competitors to a match', function () {
     $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
     $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
-    AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 
     $addTagTeamsAction->verify();
     $addWrestlersAction->unused();

@@ -19,7 +19,7 @@ test('it releases an employed referee', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect($employment->ended_at)->toBeNull();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -38,7 +38,7 @@ test('it releases referee with specific release date', function () {
     $employment = $referee->currentEmployment()->firstOrFail();
     $releaseDate = now()->subDays(4);
 
-    ReleaseAction::run($referee, $releaseDate);
+    resolve(ReleaseAction::class)->handle($referee, $releaseDate);
 
     $referee->refresh();
     $employment->refresh();
@@ -56,7 +56,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->employed()->create();
     $releaseDate = now()->subDays(6);
 
-    ReleaseAction::run($referee, $releaseDate);
+    resolve(ReleaseAction::class)->handle($referee, $releaseDate);
 
     $referee->refresh();
 
@@ -71,7 +71,7 @@ test('it validates referee can be released', function () {
     $referee = Referee::factory()->employed()->create();
 
     // Should succeed without throwing validation exception
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isEmployed())->toBeFalse();
@@ -82,7 +82,7 @@ test('it throws exception when referee cannot be released', function () {
 
     expect($referee->isEmployed())->toBeFalse();
 
-    expect(fn () => ReleaseAction::run($referee))
+    expect(fn () => resolve(ReleaseAction::class)->handle($referee))
         ->toThrow(CannotBeReleasedException::class);
 });
 
@@ -93,7 +93,7 @@ test('it ends suspension before releasing', function () {
     expect($referee->isSuspended())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
@@ -110,7 +110,7 @@ test('it ends injury before releasing', function () {
     expect($referee->isInjured())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
@@ -125,7 +125,7 @@ test('it maintains transaction boundaries', function () {
     $employment = $referee->currentEmployment()->firstOrFail();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -142,7 +142,7 @@ test('it preserves employment history', function () {
     $employment = $referee->currentEmployment()->firstOrFail();
     $originalStartedAt = $employment->started_at;
 
-    ReleaseAction::run($referee);
+    resolve(ReleaseAction::class)->handle($referee);
 
     $employment->refresh();
 

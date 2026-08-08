@@ -11,12 +11,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Services\TagTeamMembershipService;
 use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a new create action instance.
      */
@@ -37,27 +34,6 @@ class CreateAction
      *
      * @param  TagTeamData  $tagTeamData  The data transfer object containing tag team information
      * @return TagTeam The newly created tag team with all members and relationships
-     *
-     * @example
-     * ```php
-     * // Create tag team with immediate employment
-     * $tagTeamData = new TagTeamData([
-     *     'name' => 'The Hardy Boyz',
-     *     'wrestlerA' => $matt,
-     *     'wrestlerB' => $jeff,
-     *     'managers' => [$lita],
-     *     'employment_date' => now()
-     * ]);
-     * $tagTeam = CreateAction::run($tagTeamData);
-     *
-     * // Create tag team without employment (must be employed separately)
-     * $tagTeamData = new TagTeamData([
-     *     'name' => 'The New Day',
-     *     'wrestlerA' => $kofi,
-     *     'wrestlerB' => $xavier
-     * ]);
-     * $tagTeam = CreateAction::run($tagTeamData);
-     * ```
      */
     public function handle(TagTeamData $tagTeamData): TagTeam
     {

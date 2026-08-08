@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction
 {
-    use AsAction;
-
     /**
      * Reinstate a wrestler and make them available for employment.
      *
@@ -31,15 +28,6 @@ class ReinstateAction
      * @param  Wrestler  $wrestler  The wrestler to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
      * @throws CannotBeReinstatedException When wrestler cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate wrestler immediately
-     * ReinstateAction::run($wrestler);
-     *
-     * // Reinstate with specific date
-     * ReinstateAction::run($wrestler, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {

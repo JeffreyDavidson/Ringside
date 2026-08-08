@@ -10,12 +10,9 @@ use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete a manager.
      *
@@ -42,16 +39,6 @@ class DeleteAction
      *
      * @param  Manager  $manager  The manager to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete manager immediately
-     * $manager = Manager::find(1);
-     * DeleteAction::run($manager);
-     *
-     * // Delete with specific date
-     * DeleteAction::run($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {

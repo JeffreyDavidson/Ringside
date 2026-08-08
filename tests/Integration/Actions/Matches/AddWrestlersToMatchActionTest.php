@@ -19,7 +19,7 @@ test('it adds a single wrestler to a match', function () {
     $wrestlers = collect([$wrestler]);
     $sideNumber = 1;
 
-    AddWrestlersToMatchAction::run($match, $wrestlers, $sideNumber);
+    resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
 
     // Should create competitor record
     $this->assertDatabaseHas('events_matches_competitors', [
@@ -42,7 +42,7 @@ test('it adds multiple wrestlers to the same side', function () {
     $wrestlers = collect([$wrestler1, $wrestler2]);
     $sideNumber = 1;
 
-    AddWrestlersToMatchAction::run($match, $wrestlers, $sideNumber);
+    resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
 
     // Should create competitor records for both wrestlers
     $this->assertDatabaseHas('events_matches_competitors', [
@@ -69,10 +69,10 @@ test('it adds wrestlers to different sides', function () {
     $wrestler2 = Wrestler::factory()->employed()->create();
 
     // Add wrestler1 to side 1
-    AddWrestlersToMatchAction::run($match, collect([$wrestler1]), 1);
+    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler1]), 1);
 
     // Add wrestler2 to side 2
-    AddWrestlersToMatchAction::run($match, collect([$wrestler2]), 2);
+    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler2]), 2);
 
     // Should create competitor records with different side numbers
     $this->assertDatabaseHas('events_matches_competitors', [
@@ -100,7 +100,7 @@ test('it filters out ineligible wrestlers', function () {
     $wrestlers = collect([$eligibleWrestler, $ineligibleWrestler]);
     $sideNumber = 1;
 
-    AddWrestlersToMatchAction::run($match, $wrestlers, $sideNumber);
+    resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
 
     // Should only add the eligible wrestler
     $this->assertDatabaseHas('events_matches_competitors', [
@@ -126,7 +126,7 @@ test('it throws exception when no eligible wrestlers provided', function () {
     $wrestlers = collect([$ineligibleWrestler]);
     $sideNumber = 1;
 
-    expect(fn () => AddWrestlersToMatchAction::run($match, $wrestlers, $sideNumber))
+    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber))
         ->toThrow(InvalidArgumentException::class, 'No eligible wrestlers provided for match assignment');
 });
 
@@ -137,7 +137,7 @@ test('it throws exception when side number is invalid', function () {
     $wrestlers = collect([$wrestler]);
     $invalidSideNumber = 0;
 
-    expect(fn () => AddWrestlersToMatchAction::run($match, $wrestlers, $invalidSideNumber))
+    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $invalidSideNumber))
         ->toThrow(InvalidArgumentException::class, 'Side number must be positive');
 });
 
@@ -149,7 +149,7 @@ test('it handles transaction rollback on failure', function () {
     $wrestlers = collect([$wrestler]);
     $invalidSideNumber = -1;
 
-    expect(fn () => AddWrestlersToMatchAction::run($match, $wrestlers, $invalidSideNumber))
+    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $invalidSideNumber))
         ->toThrow(InvalidArgumentException::class);
 
     // No competitors should be added due to transaction rollback

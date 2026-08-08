@@ -11,12 +11,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddCompetitorsToMatchAction
 {
-    use AsAction;
-
     /**
      * Add competitors to an event match.
      *
@@ -35,32 +32,7 @@ class AddCompetitorsToMatchAction
      * - Competitors must not have conflicting bookings on the event date
      *
      * @param  EventMatch  $eventMatch  The match to add competitors to
-     * @param  Collection<int, array<string, array<int, Wrestler|TagTeam>>>  $competitors  Competitors organized by side number and type
-     *
-     * @example
-     * ```php
-     * // Singles match: John Cena vs Randy Orton
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [$johnCena], 'tag_teams' => []],
-     *     2 => ['wrestlers' => [$randyOrton], 'tag_teams' => []]
-     * ]);
-     * AddCompetitorsToMatchAction::run($match, $competitors);
-     *
-     * // Tag team match: The Hardy Boyz vs Edge & Christian
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [], 'tag_teams' => [$hardyBoyz]],
-     *     2 => ['wrestlers' => [], 'tag_teams' => [$edgeAndChristian]]
-     * ]);
-     * AddCompetitorsToMatchAction::run($match, $competitors);
-     *
-     * // Triple threat match: Stone Cold vs The Rock vs Triple H
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [$stoneColid], 'tag_teams' => []],
-     *     2 => ['wrestlers' => [$theRock], 'tag_teams' => []],
-     *     3 => ['wrestlers' => [$tripleH], 'tag_teams' => []]
-     * ]);
-     * AddCompetitorsToMatchAction::run($match, $competitors);
-     * ```
+     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors  Competitors organized by side number and type
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {

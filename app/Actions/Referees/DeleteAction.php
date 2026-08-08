@@ -9,12 +9,9 @@ use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete a referee.
      *
@@ -41,12 +38,6 @@ class DeleteAction
      *
      * @param  Referee  $referee  The referee to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * $referee = Referee::find(1);
-     * DeleteAction::run($referee);
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {

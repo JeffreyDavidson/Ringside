@@ -26,7 +26,7 @@ test('it updates tag team basic information', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('Updated Team');
@@ -48,7 +48,7 @@ test('it updates only the name when signature move is repeated', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('Updated Team Only');
@@ -64,7 +64,7 @@ test('it updates only the signature move when name is repeated', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('Original Team');
@@ -80,7 +80,7 @@ test('it handles clearing the signature move', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('Original Team');
@@ -96,7 +96,7 @@ test('it handles database transactions correctly', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
 
@@ -115,7 +115,7 @@ test('it validates unique name constraint', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    expect(fn () => UpdateAction::run($this->tagTeam, $updateData))
+    expect(fn () => resolve(UpdateAction::class)->handle($this->tagTeam, $updateData))
         ->toThrow(Exception::class);
 
     $this->tagTeam->refresh();
@@ -131,7 +131,7 @@ test('it allows updating to the same name', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('Original Team');
@@ -147,7 +147,7 @@ test('it rejects an empty name', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    expect(fn () => UpdateAction::run($this->tagTeam, $updateData))
+    expect(fn () => resolve(UpdateAction::class)->handle($this->tagTeam, $updateData))
         ->toThrow(Exception::class);
 
     $this->tagTeam->refresh();
@@ -167,7 +167,7 @@ test('it updates timestamps correctly', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect(requiredDate($this->tagTeam->updated_at)->toDateTimeString())->not()->toBe(requiredDate($originalUpdatedAt)->toDateTimeString());
@@ -185,7 +185,7 @@ test('it preserves unmodified attributes', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
 
@@ -206,7 +206,7 @@ test('it handles long signature move names', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->signature_move)->toBe($longSignatureMove);
@@ -221,7 +221,7 @@ test('it handles special characters in updates', function () {
         wrestlerB: $this->wrestlerB,
     );
 
-    UpdateAction::run($this->tagTeam, $updateData);
+    resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('The "Elite" & Dangerous Team');

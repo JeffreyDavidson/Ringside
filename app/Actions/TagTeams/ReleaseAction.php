@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction
 {
-    use AsAction;
-
     /**
      * Release a tag team from employment and end all current relationships.
      *
@@ -35,16 +32,6 @@ class ReleaseAction
      * @param  TagTeam  $tagTeam  The tag team to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
      * @throws CannotBeReleasedException When tag team cannot be released due to business rules
-     *
-     * @example
-     * ```php
-     * // Release tag team immediately
-     * $tagTeam = TagTeam::where('name', 'The Shield')->first();
-     * ReleaseAction::run($tagTeam);
-     *
-     * // Release with specific date
-     * ReleaseAction::run($tagTeam, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {

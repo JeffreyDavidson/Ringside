@@ -10,12 +10,9 @@ use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction
 {
-    use AsAction;
-
     /**
      * Employ a wrestler and activate their career.
      *
@@ -29,15 +26,6 @@ class EmployAction
      * @param  Wrestler  $wrestler  The wrestler to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
      * @throws Exception When wrestler cannot be employed due to business rules
-     *
-     * @example
-     * ```php
-     * // Employ wrestler immediately
-     * EmployAction::run($wrestler);
-     *
-     * // Employ with specific start date
-     * EmployAction::run($wrestler, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void
     {

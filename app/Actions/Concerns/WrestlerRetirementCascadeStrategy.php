@@ -26,14 +26,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - each method returns a callable strategy that can be used
  * with StatusTransitionPipeline.withCascade().
- *
- * @example
- * ```php
- * // Retire a wrestler and end all professional relationships
- * StatusTransitionPipeline::retire($wrestler, $date)
- *     ->withCascade(WrestlerRetirementCascadeStrategy::endAllRelationships())
- *     ->execute();
- * ```
  */
 class WrestlerRetirementCascadeStrategy
 {

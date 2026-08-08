@@ -20,7 +20,7 @@ test('it releases an employed manager', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isReleased())->toBeFalse();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isReleased())->toBeTrue();
@@ -37,7 +37,7 @@ test('it releases manager with specific release date', function () {
     $manager = Manager::factory()->employed()->create();
     $releaseDate = now()->subDays(4);
 
-    ReleaseAction::run($manager, $releaseDate);
+    resolve(ReleaseAction::class)->handle($manager, $releaseDate);
 
     $manager->refresh();
     expect($manager->isReleased())->toBeTrue();
@@ -55,7 +55,7 @@ test('it releases suspended manager and ends suspension', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isReleased())->toBeTrue();
@@ -81,7 +81,7 @@ test('it releases injured manager and ends injury', function () {
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isReleased())->toBeTrue();
@@ -113,7 +113,7 @@ test('it ends management relationships with cascade strategy', function () {
     expect($manager->currentWrestlers)->toHaveCount(1);
     expect($manager->currentTagTeams)->toHaveCount(1);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -145,7 +145,7 @@ test('it uses StatusTransitionPipeline with cascade strategy', function () {
     expect($manager->isReleased())->toBeFalse();
     expect($manager->currentWrestlers)->toHaveCount(1);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -162,7 +162,7 @@ test('it prevents releasing already released manager', function () {
 
     expect($manager->isReleased())->toBeTrue();
 
-    expect(fn () => ReleaseAction::run($manager))
+    expect(fn () => resolve(ReleaseAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -171,7 +171,7 @@ test('it prevents releasing unemployed manager', function () {
 
     expect($manager->isEmployed())->toBeFalse();
 
-    expect(fn () => ReleaseAction::run($manager))
+    expect(fn () => resolve(ReleaseAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -180,7 +180,7 @@ test('it handles database transactions correctly', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -206,7 +206,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
     $customReleaseDate = now()->subDays(2)->startOfDay();
 
-    ReleaseAction::run($manager, $customReleaseDate);
+    resolve(ReleaseAction::class)->handle($manager, $customReleaseDate);
 
     $manager->refresh();
 
@@ -238,7 +238,7 @@ test('it preserves management history during release', function () {
     expect($manager->wrestlers()->count())->toBe(2); // Total relationships
     expect($manager->currentWrestlers)->toHaveCount(1); // Current relationships
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -261,7 +261,7 @@ test('it handles manager with no management relationships', function () {
     expect($manager->currentWrestlers)->toHaveCount(0);
     expect($manager->currentTagTeams)->toHaveCount(0);
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -286,7 +286,7 @@ test('it handles complex status combinations', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($manager);
+    resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
 

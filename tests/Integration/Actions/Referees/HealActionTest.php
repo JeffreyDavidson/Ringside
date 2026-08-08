@@ -19,7 +19,7 @@ test('it heals an injured referee', function () {
     expect($referee->isInjured())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
 
-    HealAction::run($referee);
+    resolve(HealAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
@@ -38,7 +38,7 @@ test('it heals referee with specific recovery date', function () {
     $injury = $referee->currentInjury()->firstOrFail();
     $recoveryDate = now()->subDays(2);
 
-    HealAction::run($referee, $recoveryDate);
+    resolve(HealAction::class)->handle($referee, $recoveryDate);
 
     $referee->refresh();
     $injury->refresh();
@@ -57,7 +57,7 @@ test('it uses StatusTransitionPipeline for consistent healing', function () {
 
     expect($referee->isInjured())->toBeTrue();
 
-    HealAction::run($referee);
+    resolve(HealAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -70,7 +70,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->employed()->injured()->create();
     $recoveryDate = now()->subDays(5);
 
-    HealAction::run($referee, $recoveryDate);
+    resolve(HealAction::class)->handle($referee, $recoveryDate);
 
     $referee->refresh();
 
@@ -85,7 +85,7 @@ test('it validates referee can be healed', function () {
     $referee = Referee::factory()->employed()->injured()->create();
 
     // Should succeed without throwing validation exception
-    HealAction::run($referee);
+    resolve(HealAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isInjured())->toBeFalse();
@@ -96,7 +96,7 @@ test('it throws exception when referee cannot be healed', function () {
 
     expect($referee->isInjured())->toBeFalse();
 
-    expect(fn () => HealAction::run($referee))
+    expect(fn () => resolve(HealAction::class)->handle($referee))
         ->toThrow(CannotBeClearedFromInjuryException::class);
 });
 
@@ -107,7 +107,7 @@ test('it maintains referee employment status after healing', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isInjured())->toBeTrue();
 
-    HealAction::run($referee);
+    resolve(HealAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -123,7 +123,7 @@ test('it preserves injury history', function () {
     $injury = $referee->currentInjury()->firstOrFail();
     $originalStartedAt = $injury->started_at;
 
-    HealAction::run($referee);
+    resolve(HealAction::class)->handle($referee);
 
     $injury->refresh();
 

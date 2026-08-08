@@ -27,15 +27,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - each method returns a callable strategy that can be used
  * with StatusTransitionPipeline.withCascade().
- *
- * @example
- * ```php
- * // Release a tag team and end all partnerships/manager relationships
- * StatusTransitionPipeline::release($tagTeam, $date)
- *     ->withCascade(ReleaseCascadeStrategy::endPartnerships())
- *     ->withCascade(ReleaseCascadeStrategy::endManagerRelationships())
- *     ->execute();
- * ```
  */
 class ReleaseCascadeStrategy
 {

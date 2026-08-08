@@ -17,7 +17,7 @@ test('it reinstates a suspended tag team', function () {
     expect($tagTeam->isSuspended())->toBeTrue();
     expect($tagTeam->isEmployed())->toBeTrue();
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isSuspended())->toBeFalse();
@@ -34,7 +34,7 @@ test('it reinstates tag team with specific reinstatement date', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
     $reinstatementDate = now()->subDays(2);
 
-    ReinstateAction::run($tagTeam, $reinstatementDate);
+    resolve(ReinstateAction::class)->handle($tagTeam, $reinstatementDate);
 
     $tagTeam->refresh();
     expect($tagTeam->isSuspended())->toBeFalse();
@@ -52,7 +52,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     // Get current suspension to verify it gets ended
     $currentSuspension = $tagTeam->currentSuspension()->firstOrFail();
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -67,7 +67,7 @@ test('it prevents reinstating non-suspended tag team', function () {
 
     expect($tagTeam->isSuspended())->toBeFalse();
 
-    expect(fn () => ReinstateAction::run($tagTeam))
+    expect(fn () => resolve(ReinstateAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -77,7 +77,7 @@ test('it prevents reinstating unemployed tag team', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 
-    expect(fn () => ReinstateAction::run($tagTeam))
+    expect(fn () => resolve(ReinstateAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -85,7 +85,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
     $originalSuspensionId = $tagTeam->currentSuspension()->firstOrFail()->id;
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -105,7 +105,7 @@ test('it ends current suspension period', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
     $originalSuspensionCount = $tagTeam->suspensions()->count();
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -121,7 +121,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
     $customReinstatementDate = now()->subDays(1)->startOfDay();
 
-    ReinstateAction::run($tagTeam, $customReinstatementDate);
+    resolve(ReinstateAction::class)->handle($tagTeam, $customReinstatementDate);
 
     $tagTeam->refresh();
 
@@ -143,7 +143,7 @@ test('it preserves suspension history during reinstatement', function () {
 
     $originalSuspensionCount = $tagTeam->suspensions()->count();
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -170,7 +170,7 @@ test('it handles tag team with complex suspension history', function () {
     expect($tagTeam->isSuspended())->toBeTrue();
     expect($tagTeam->suspensions()->count())->toBe(3);
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -192,7 +192,7 @@ test('it maintains employment status during reinstatement', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
     expect($tagTeam->isSuspended())->toBeTrue();
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -208,7 +208,7 @@ test('it maintains employment status during reinstatement', function () {
 test('it handles reinstatement with cascade effects', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    ReinstateAction::run($tagTeam);
+    resolve(ReinstateAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 

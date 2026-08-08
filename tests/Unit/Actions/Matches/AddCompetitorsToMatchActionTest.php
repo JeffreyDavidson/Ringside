@@ -13,7 +13,8 @@ use JMac\Testing\Matching\Argument;
 
 test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
+    $wrestlerA = Wrestler::factory()->bookable()->create();
+    $wrestlerB = Wrestler::factory()->bookable()->create();
     $competitors = collect([
         0 => [
             'wrestlers' => [$wrestlerA],
@@ -32,7 +33,7 @@ test('it adds wrestler competitors to a match', function () {
     $addWrestlersToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 0);
     $addWrestlersToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 1);
 
-    AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 
     $addWrestlersToMatchAction->verify();
     $addTagTeamsToMatchAction->unused();
@@ -40,7 +41,8 @@ test('it adds wrestler competitors to a match', function () {
 
 test('it adds tag team competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
-    [$tagTeamA, $tagTeamB] = TagTeam::factory()->bookable()->count(2)->create();
+    $tagTeamA = TagTeam::factory()->bookable()->create();
+    $tagTeamB = TagTeam::factory()->bookable()->create();
     $competitors = collect([
         0 => [
             'tag_teams' => [$tagTeamA],
@@ -59,7 +61,7 @@ test('it adds tag team competitors to a match', function () {
     $addTagTeamsToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 0);
     $addTagTeamsToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 1);
 
-    AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+    resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 
     $addTagTeamsToMatchAction->verify();
     $addWrestlersToMatchAction->unused();

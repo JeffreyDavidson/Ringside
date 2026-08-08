@@ -7,12 +7,9 @@ namespace App\Actions\Titles;
 use App\Data\Titles\TitleData;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Update a title.
      *
@@ -25,23 +22,6 @@ class UpdateAction
      * @param  Title  $title  The title to update
      * @param  TitleData  $titleData  The updated title information
      * @return Title The updated title instance
-     *
-     * @example
-     * ```php
-     * // Update title information only
-     * $titleData = new TitleData([
-     *     'name' => 'Updated Championship Name',
-     *     'description' => 'New championship description'
-     * ]);
-     * $updatedTitle = UpdateAction::run($title, $titleData);
-     *
-     * // Update and debut a new title
-     * $titleData = new TitleData([
-     *     'name' => 'Brand New Championship',
-     *     'debut_date' => Carbon::parse('2024-01-01')
-     * ]);
-     * $updatedTitle = UpdateAction::run($newTitle, $titleData);
-     * ```
      */
     public function handle(Title $title, TitleData $titleData): Title
     {

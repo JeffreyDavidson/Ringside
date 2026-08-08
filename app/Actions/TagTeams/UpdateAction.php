@@ -11,12 +11,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Services\TagTeamMembershipService;
 use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Create a new update action instance.
      */
@@ -39,26 +36,6 @@ class UpdateAction
      * @param  TagTeam  $tagTeam  The tag team to update
      * @param  TagTeamData  $tagTeamData  The updated tag team information
      * @return TagTeam The updated tag team instance with all changes applied
-     *
-     * @example
-     * ```php
-     * // Update tag team name only
-     * $tagTeamData = new TagTeamData([
-     *     'name' => 'The New Day (Updated)',
-     *     'wrestlerA' => $existingWrestlerA,
-     *     'wrestlerB' => $existingWrestlerB
-     * ]);
-     * $updatedTeam = UpdateAction::run($tagTeam, $tagTeamData);
-     *
-     * // Change partners and employ unemployed tag team
-     * $tagTeamData = new TagTeamData([
-     *     'name' => 'The New Day',
-     *     'wrestlerA' => $kofi,
-     *     'wrestlerB' => $bigE,
-     *     'employment_date' => Carbon::parse('2024-01-01')
-     * ]);
-     * $updatedTeam = UpdateAction::run($unemployedTeam, $tagTeamData);
-     * ```
      */
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam
     {

@@ -23,15 +23,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - each method returns a callable strategy that can be used
  * with StatusTransitionPipeline.withCascade().
- *
- * @example
- * ```php
- * // Reinstate a tag team and automatically reinstate suspended members
- * StatusTransitionPipeline::reinstate($tagTeam, $date)
- *     ->withCascade(ReinstatementCascadeStrategy::wrestlers())
- *     ->withCascade(ReinstatementCascadeStrategy::managers())
- *     ->execute();
- * ```
  */
 class ReinstatementCascadeStrategy
 {

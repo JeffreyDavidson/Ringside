@@ -6,15 +6,12 @@ namespace App\Actions\Matches;
 
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddTitlesToMatchAction
 {
-    use AsAction;
-
     /**
      * Add titles to an event match.
      *
@@ -42,27 +39,8 @@ class AddTitlesToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add titles to
      * @param  Collection<int, Title>  $titles  The championships at stake in the match
-     *
-     * @example
-     * ```php
-     * // WWE Championship title defense
-     * $titles = collect([$wweChampionship]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     *
-     * // Unification match with two titles
-     * $titles = collect([$wweChampionship, $universalTitle]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     *
-     * // Tag team championship match
-     * $titles = collect([$tagTeamChampionship]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     *
-     * // Vacant title tournament final
-     * $titles = collect([$vacantIntercontinentalTitle]);
-     * AddTitlesToMatchAction::run($match, $titles);
-     * ```
      */
-    public function handle(EventMatch $eventMatch, \Illuminate\Support\Collection $titles): void
+    public function handle(EventMatch $eventMatch, Collection $titles): void
     {
         // Pre-filter titles to ensure only eligible championships are processed
         $eligibleTitles = $titles->filter(

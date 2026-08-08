@@ -6,12 +6,9 @@ namespace App\Actions\Managers;
 
 use App\Models\Managers\Manager;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
-
     /**
      * Restore a soft-deleted manager.
      *
@@ -23,12 +20,6 @@ class RestoreAction
      * - Requires separate employment action to make manager active again
      *
      * @param  Manager  $manager  The soft-deleted manager to restore
-     *
-     * @example
-     * ```php
-     * $deletedManager = Manager::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedManager);
-     * ```
      */
     public function handle(Manager $manager): void
     {

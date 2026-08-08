@@ -8,12 +8,9 @@ use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DebutAction
 {
-    use AsAction;
-
     /**
      * Debut a title and make it available for championship competition.
      *
@@ -28,15 +25,6 @@ class DebutAction
      * @param  Carbon|null  $debutDate  The debut date (defaults to now)
      * @param  string|null  $notes  Optional notes about the debut
      * @throws CannotBeDebutedException When title cannot be debuted due to business rules
-     *
-     * @example
-     * ```php
-     * // Debut title immediately
-     * DebutAction::run($title, null, 'Brand new championship');
-     *
-     * // Debut with specific date
-     * DebutAction::run($title, Carbon::parse('2024-01-01'), 'New era begins');
-     * ```
      */
     public function handle(Title $title, ?Carbon $debutDate = null, ?string $notes = null): void
     {

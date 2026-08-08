@@ -16,7 +16,7 @@ test('it employs an unemployed manager', function () {
 
     expect($manager->isEmployed())->toBeFalse();
 
-    EmployAction::run($manager);
+    resolve(EmployAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isEmployed())->toBeTrue();
@@ -32,7 +32,7 @@ test('it employs manager with specific employment date', function () {
     $manager = Manager::factory()->create();
     $employmentDate = now()->subDays(30);
 
-    EmployAction::run($manager, $employmentDate);
+    resolve(EmployAction::class)->handle($manager, $employmentDate);
 
     $manager->refresh();
     expect($manager->isEmployed())->toBeTrue();
@@ -50,7 +50,7 @@ test('it employs retired manager and ends retirement', function () {
     expect($manager->isRetired())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 
-    EmployAction::run($manager);
+    resolve(EmployAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isEmployed())->toBeTrue();
@@ -76,7 +76,7 @@ test('it employs suspended manager and ends suspension', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($manager))
+    expect(fn () => resolve(EmployAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -86,7 +86,7 @@ test('it employs injured manager and ends injury', function () {
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($manager))
+    expect(fn () => resolve(EmployAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -95,7 +95,7 @@ test('it prevents employing already employed manager', function () {
 
     expect($manager->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($manager))
+    expect(fn () => resolve(EmployAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -104,7 +104,7 @@ test('it handles database transactions correctly', function () {
 
     expect($manager->isEmployed())->toBeFalse();
 
-    EmployAction::run($manager);
+    resolve(EmployAction::class)->handle($manager);
 
     // Verify the transaction was successful
     $manager->refresh();
@@ -120,7 +120,7 @@ test('it handles database transactions correctly', function () {
 test('it uses StatusTransitionPipeline for consistent status handling', function () {
     $manager = Manager::factory()->create();
 
-    EmployAction::run($manager);
+    resolve(EmployAction::class)->handle($manager);
 
     $manager->refresh();
 
