@@ -19,6 +19,10 @@ use InvalidArgumentException;
  */
 class RemoveStableMembersAction
 {
+    public function __construct(
+        protected StableMembershipService $membershipService,
+    ) {}
+
     /**
      * Remove members from a stable.
      *
@@ -35,8 +39,7 @@ class RemoveStableMembersAction
         }
 
         if ($members->isNotEmpty()) {
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->removeMembers($stable, $members, $removalDate);
+            $this->membershipService->removeMembers($stable, $members, $removalDate);
         }
     }
 }

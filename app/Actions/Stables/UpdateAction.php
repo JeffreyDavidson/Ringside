@@ -16,7 +16,9 @@ class UpdateAction
      * Create a new update action instance.
      */
     public function __construct(
-        protected EstablishAction $establishAction
+        protected EstablishAction $establishAction,
+        protected StableMembershipService $membershipService,
+        protected StableValidationService $validationService,
     ) {}
 
     /**
@@ -36,9 +38,8 @@ class UpdateAction
     {
         return DB::transaction(function () use ($stable, $stableData): Stable {
             // Validate business rules before updating
-            $validationService = app(StableValidationService::class);
-            $validationService->validateUniqueName($stableData->getTrimmedName(), $stable);
-            $validationService->validateMembersAvailable($stableData->members);
+            $this->validationService->validateUniqueName($stableData->getTrimmedName(), $stable);
+            $this->validationService->validateMembersAvailable($stableData->members);
 
             $stable->update([
                 'name' => $stableData->getTrimmedName(),
@@ -46,13 +47,12 @@ class UpdateAction
 
             // Use enhanced DTO method and centralized validation
             if ($stableData->hasStartDate()) {
-                $validationService->validateEstablishmentDateChange($stable);
+                $this->validationService->validateEstablishmentDateChange($stable);
                 $this->establishAction->handle($stable, $stableData->start_date);
             }
 
             // Update stable membership using service
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->updateMembership($stable, $stableData->members, now());
+            $this->membershipService->updateMembership($stable, $stableData->members, now());
 
             return $stable;
         });
