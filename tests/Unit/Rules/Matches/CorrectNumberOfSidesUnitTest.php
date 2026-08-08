@@ -68,7 +68,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act - Test with 2 sides (standard match)
-            $rule->validate('competitors', ['side1', 'side2'], $failCallback);
+            $rule->validate('competitors', ['side1', 'side2'], validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();
@@ -85,7 +85,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act - Test with 3 sides when match type expects 2
-            $rule->validate('competitors', ['side1', 'side2', 'side3'], $failCallback);
+            $rule->validate('competitors', ['side1', 'side2', 'side3'], validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();
@@ -102,7 +102,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act - Test with 1 side when match type expects 2
-            $rule->validate('competitors', ['side1'], $failCallback);
+            $rule->validate('competitors', ['side1'], validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();
@@ -121,7 +121,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', ['side1', 'side2'], $failCallback);
+            $rule->validate('competitors', ['side1', 'side2'], validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -138,7 +138,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', ['side1', 'side2'], $failCallback);
+            $rule->validate('competitors', ['side1', 'side2'], validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -157,7 +157,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', [], $failCallback);
+            $rule->validate('competitors', [], validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();
@@ -174,7 +174,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', null, $failCallback);
+            $rule->validate('competitors', null, validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();
@@ -191,7 +191,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', 'single_competitor', $failCallback);
+            $rule->validate('competitors', 'single_competitor', validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();
@@ -208,7 +208,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act - Test with exactly 2 competitors
-            $rule->validate('competitors', ['competitor1', 'competitor2'], $failCallback);
+            $rule->validate('competitors', ['competitor1', 'competitor2'], validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();
@@ -227,7 +227,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act - This won't actually fail because no match type exists, but we test the message format
-            $rule->validate('competitors', ['side1'], $failCallback);
+            $rule->validate('competitors', ['side1'], validationFailureCallback($failCallback));
 
             // Assert - Should not fail because no match type exists to validate against
             expect($failMessage)->toBe('');
@@ -244,7 +244,7 @@ describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('different_attribute', ['side1'], $failCallback);
+            $rule->validate('different_attribute', ['side1'], validationFailureCallback($failCallback));
 
             // Assert - Should pass because no match type exists to validate against
             expect($failCalled)->toBeFalse();

@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use JMac\Testing\Double;
 use Mockery;
 use Tests\Unit\Models\Concerns\Support\FakeEmployableModel;
 use Tests\Unit\Models\Concerns\Support\FakeEmploymentModel;
@@ -229,9 +230,8 @@ describe('IsEmployable Trait Unit Tests', function () {
 
                 public function futureEmployment(): HasOne
                 {
-                    $query = Mockery::mock(QueryBuilder::class);
-                    $query->shouldIgnoreMissing();
-                    $query->expects('exists')->andReturn(true);
+                    $query = Double::for(QueryBuilder::class);
+                    $query->expects('exists')->returns(true);
                     $builder = new EloquentBuilder($query);
                     $builder->setModel(new FakeEmploymentModel());
 
@@ -249,9 +249,8 @@ describe('IsEmployable Trait Unit Tests', function () {
 
                 public function futureEmployment(): HasOne
                 {
-                    $query = Mockery::mock(QueryBuilder::class);
-                    $query->shouldIgnoreMissing();
-                    $query->expects('exists')->andReturn(false);
+                    $query = Double::for(QueryBuilder::class);
+                    $query->expects('exists')->returns(false);
                     $builder = new EloquentBuilder($query);
                     $builder->setModel(new FakeEmploymentModel());
 

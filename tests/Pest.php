@@ -6,6 +6,8 @@ use App\Models\Users\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
+use Illuminate\Translation\PotentiallyTranslatedString;
+use Illuminate\Translation\Translator;
 
 use function Pest\Laravel\withoutVite;
 
@@ -68,6 +70,18 @@ function administrator()
 function basicUser()
 {
     return User::factory()->basicUser()->create();
+}
+
+/**
+ * Adapt a test observer to Laravel's validation failure callback contract.
+ */
+function validationFailureCallback(Closure $observer): Closure
+{
+    return function (string $message) use ($observer): PotentiallyTranslatedString {
+        $observer($message);
+
+        return new PotentiallyTranslatedString($message, app(Translator::class));
+    };
 }
 
 /*

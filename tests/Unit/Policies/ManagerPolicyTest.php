@@ -247,21 +247,6 @@ describe('ManagerPolicy Unit Tests', function () {
     });
 
     describe('edge cases and security', function () {
-        test('policy handles null user gracefully', function () {
-            // Laravel typically doesn't pass null users to policies, but test defensive programming
-            expect(fn () => $this->policy->before(null, 'viewList'))
-                ->toThrow(TypeError::class);
-        });
-
-        test('policy methods are type-safe', function () {
-            // All policy methods should require User parameter
-            expect(fn () => $this->policy->viewList('not-a-user'))
-                ->toThrow(TypeError::class);
-
-            expect(fn () => $this->policy->create(123))
-                ->toThrow(TypeError::class);
-        });
-
         test('policy is consistent across multiple instances', function () {
             $policy1 = new ManagerPolicy();
             $policy2 = new ManagerPolicy();

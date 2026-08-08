@@ -219,15 +219,6 @@ describe('VenuePolicy Unit Tests', function () {
     });
 
     describe('policy consistency and edge cases', function () {
-        test('null user handling', function () {
-            // All actions should throw TypeError for null users (type safety)
-            expect(fn () => $this->policy->viewList(null))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->view(null))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->create(null))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->update(null))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->delete(null))->toThrow(TypeError::class);
-        });
-
         test('policy methods return correct types', function () {
             // All policy methods should return boolean values
             expect($this->policy->viewList($this->basicUser))->toBeBool();

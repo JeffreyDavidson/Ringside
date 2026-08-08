@@ -27,9 +27,18 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('model validation with activity methods', function () {
         test('validation passes when model is not currently active', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isCurrentlyActive')->andReturn(false);
-            $model->shouldReceive('wasActiveOn')->andReturn(true);
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive(): bool
+                {
+                    return false;
+                }
+
+                public function wasActiveOn(): bool
+                {
+                    return true;
+                }
+            };
 
             $rule = new CanChangeDebutDate($model);
             $failCalled = false;
@@ -38,7 +47,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -73,7 +82,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addMonth(), $failCallback);
+            $rule->validate('debuted_at', now()->addMonth(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -107,7 +116,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addMonth(), $failCallback);
+            $rule->validate('debuted_at', now()->addMonth(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -115,9 +124,13 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model is currently active but lacks wasActiveOn method', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isCurrentlyActive')->andReturn(true);
-            $model->shouldReceive('getAttribute')->andReturn('Test Model');
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive(): bool
+                {
+                    return true;
+                }
+            };
 
             $rule = new CanChangeDebutDate($model);
             $failCalled = false;
@@ -126,7 +139,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -136,7 +149,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('method existence checking logic', function () {
         test('validation passes when model lacks isCurrentlyActive method', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
+            $model = new class extends Model {};
             // Note: No isCurrentlyActive method mocked - simulates method_exists() returning false
 
             $rule = new CanChangeDebutDate($model);
@@ -146,7 +159,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -154,8 +167,13 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model lacks wasActiveOn method', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isCurrentlyActive')->andReturn(true);
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive(): bool
+                {
+                    return true;
+                }
+            };
             // Note: No wasActiveOn method mocked - simulates method_exists() returning false
 
             $rule = new CanChangeDebutDate($model);
@@ -165,7 +183,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -173,7 +191,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model lacks both activity methods', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
+            $model = new class extends Model {};
             // Note: No activity methods mocked - simulates method_exists() returning false for both
 
             $rule = new CanChangeDebutDate($model);
@@ -183,7 +201,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -198,7 +216,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -238,7 +256,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failMessage)->toContain('Custom Display Name');
@@ -271,7 +289,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failMessage)->toContain('Model Name Property');
@@ -304,7 +322,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failMessage)->toMatch('/The debut date cannot be changed while .+ is currently active\./');
@@ -339,7 +357,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -372,7 +390,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', '2024-12-25', $failCallback);
+            $rule->validate('debuted_at', '2024-12-25', validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -405,7 +423,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', $targetDate, $failCallback);
+            $rule->validate('debuted_at', $targetDate, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -477,8 +495,8 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
                 $messages[] = $message;
             };
             // Act
-            (new CanChangeDebutDate($model1))->validate('debuted_at', now(), $failCallback);
-            (new CanChangeDebutDate($model2))->validate('debuted_at', now(), $failCallback);
+            (new CanChangeDebutDate($model1))->validate('debuted_at', now(), validationFailureCallback($failCallback));
+            (new CanChangeDebutDate($model2))->validate('debuted_at', now(), validationFailureCallback($failCallback));
             // Assert
             expect($messages)->toHaveCount(2);
             expect($messages[0])->toBe('The debut date cannot be changed while First Title is currently active.');
@@ -509,9 +527,9 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
                 $failCallCount++;
             };
             // Act
-            $rule->validate('debuted_at', now(), $failCallback);
-            $rule->validate('debut_date', now(), $failCallback);
-            $rule->validate('introduced_at', now(), $failCallback);
+            $rule->validate('debuted_at', now(), validationFailureCallback($failCallback));
+            $rule->validate('debut_date', now(), validationFailureCallback($failCallback));
+            $rule->validate('introduced_at', now(), validationFailureCallback($failCallback));
             // Assert
             expect($failCallCount)->toBe(3);
         });
@@ -520,8 +538,13 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     describe('combined validation logic edge cases', function () {
         test('validation handles complex method existence scenarios', function () {
             // Arrange - Model has isCurrentlyActive but not wasActiveOn
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isCurrentlyActive')->andReturn(true);
+            $model = new class extends Model
+            {
+                public function isCurrentlyActive(): bool
+                {
+                    return true;
+                }
+            };
             // Note: wasActiveOn method not mocked to simulate method_exists() returning false
 
             $rule = new CanChangeDebutDate($model);
@@ -531,7 +554,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse(); // Should pass when wasActiveOn method doesn't exist
@@ -564,7 +587,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('debuted_at', now()->addWeek(), $failCallback);
+            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue(); // Should fail when both conditions are met

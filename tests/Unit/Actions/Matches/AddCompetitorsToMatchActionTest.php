@@ -16,10 +16,10 @@ test('it adds wrestler competitors to a match', function () {
     [$wrestlerA, $wrestlerB] = Wrestler::factory()->bookable()->count(2)->create();
     $competitors = collect([
         0 => [
-            'wrestlers' => collect([$wrestlerA]),
+            'wrestlers' => [$wrestlerA],
         ],
         1 => [
-            'wrestlers' => collect([$wrestlerB]),
+            'wrestlers' => [$wrestlerB],
         ],
     ]);
 
@@ -43,10 +43,10 @@ test('it adds tag team competitors to a match', function () {
     [$tagTeamA, $tagTeamB] = TagTeam::factory()->bookable()->count(2)->create();
     $competitors = collect([
         0 => [
-            'tag_teams' => collect([$tagTeamA]),
+            'tag_teams' => [$tagTeamA],
         ],
         1 => [
-            'tag_teams' => collect([$tagTeamB]),
+            'tag_teams' => [$tagTeamB],
         ],
     ]);
 

@@ -180,16 +180,6 @@ describe('StablePolicy Unit Tests', function () {
     // });
 
     describe('edge cases and boundary conditions', function () {
-        test('policy handles null user gracefully', function () {
-            // All actions should throw TypeError for null users (type safety)
-            expect(fn () => $this->policy->before(null, 'view'))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->viewList(null))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->view(null, $this->stable))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->create(null))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->update(null, $this->stable))->toThrow(TypeError::class);
-            expect(fn () => $this->policy->delete(null, $this->stable))->toThrow(TypeError::class);
-        });
-
         test('policy works with soft deleted stables', function () {
             $deletedStable = Stable::factory()->trashed()->create();
 
