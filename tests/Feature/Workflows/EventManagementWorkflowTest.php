@@ -223,7 +223,7 @@ describe('Event Detail and Management Workflow', function () {
 
         // And: Viewing event matches
         actingAs($admin)
-            ->get(route('events.matches', $event))
+            ->get(route('events.matches.index', $event))
             ->assertOk();
         // Note: Removed specific text assertions as they depend on view implementation
     });
