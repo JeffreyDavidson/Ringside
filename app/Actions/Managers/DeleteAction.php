@@ -39,16 +39,6 @@ class DeleteAction
      *
      * @param  Manager  $manager  The manager to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete manager immediately
-     * $manager = Manager::find(1);
-     * resolve(DeleteAction::class)->handle($manager);
-     *
-     * // Delete with specific date
-     * resolve(DeleteAction::class)->handle($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {

@@ -32,12 +32,6 @@ class DisbandAction
      * @param  Stable  $stable  The stable to disband
      * @param  Carbon|null  $disbandDate  The disbandment date (defaults to now)
      * @throws CannotBeDisbandedException If the stable cannot be disbanded
-     *
-     * @example
-     * ```php
-     * $stable = Stable::find(1);
-     * resolve(DisbandAction::class)->handle($stable, now());
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $disbandDate = null): void
     {

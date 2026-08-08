@@ -36,22 +36,6 @@ class RestoreAction
      * @param  bool  $reuniteMembers  Whether to automatically reunite available former members
      * @param  bool  $requireFormerMembers  Whether to require available former members for restoration
      * @param  Carbon|null  $restorationDate  The restoration date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Basic restoration (stable remains inactive)
-     * $deletedStable = Stable::onlyTrashed()->find(1);
-     * resolve(RestoreAction::class)->handle($deletedStable);
-     *
-     * // Restore with automatic reunion
-     * resolve(RestoreAction::class)->handle($deletedStable, reuniteMembers: true);
-     *
-     * // Restore without requiring former members
-     * resolve(RestoreAction::class)->handle($deletedStable, requireFormerMembers: false);
-     *
-     * // Restore with specific date
-     * resolve(RestoreAction::class)->handle($deletedStable, restorationDate: Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(
         Stable $stable,

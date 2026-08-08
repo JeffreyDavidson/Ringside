@@ -20,12 +20,6 @@ class RestoreAction
      * - Reactivates event for venue booking and promotional activities
      *
      * @param  Event  $event  The soft-deleted event to restore
-     *
-     * @example
-     * ```php
-     * $deletedEvent = Event::onlyTrashed()->find(1);
-     * resolve(RestoreAction::class)->handle($deletedEvent);
-     * ```
      */
     public function handle(Event $event): void
     {

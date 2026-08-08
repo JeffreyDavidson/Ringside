@@ -38,21 +38,6 @@ class AddWrestlersToMatchAction
      * @param  EventMatch  $eventMatch  The match to add wrestlers to
      * @param  Collection<int, Wrestler>  $wrestlers  The wrestlers to add to the match
      * @param  int  $sideNumber  The side/team number for the wrestlers (1, 2, 3, etc.)
-     *
-     * @example
-     * ```php
-     * // Singles match - Add John Cena to side 1
-     * $wrestlers = collect([$johnCena]);
-     * resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 1);
-     *
-     * // Handicap match - Add multiple wrestlers to one side
-     * $wrestlers = collect([$wrestler1, $wrestler2]);
-     * resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 2);
-     *
-     * // Battle royal - Add multiple wrestlers to same side
-     * $wrestlers = collect([$wrestler1, $wrestler2, $wrestler3]);
-     * resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 1);
-     * ```
      */
     public function handle(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void
     {

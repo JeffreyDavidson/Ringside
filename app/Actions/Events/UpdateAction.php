@@ -22,24 +22,6 @@ class UpdateAction
      * @param  Event  $event  The event to update
      * @param  EventData  $eventData  The updated event information
      * @return Event The updated event instance
-     *
-     * @example
-     * ```php
-     * // Update event details
-     * $eventData = new EventData([
-     *     'name' => 'Updated Event Name',
-     *     'date' => now()->addMonth(),
-     *     'venue_id' => 2
-     * ]);
-     * $updatedEvent = resolve(UpdateAction::class)->handle($event, $eventData);
-     *
-     * // Change venue for an event
-     * $eventData = new EventData([
-     *     'venue_id' => 3,
-     *     'preview' => 'Updated with new venue information'
-     * ]);
-     * $updatedEvent = resolve(UpdateAction::class)->handle($event, $eventData);
-     * ```
      */
     public function handle(Event $event, EventData $eventData): Event
     {

@@ -32,16 +32,6 @@ class ReleaseAction
      * @param  TagTeam  $tagTeam  The tag team to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
      * @throws CannotBeReleasedException When tag team cannot be released due to business rules
-     *
-     * @example
-     * ```php
-     * // Release tag team immediately
-     * $tagTeam = TagTeam::where('name', 'The Shield')->first();
-     * resolve(ReleaseAction::class)->handle($tagTeam);
-     *
-     * // Release with specific date
-     * resolve(ReleaseAction::class)->handle($tagTeam, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {

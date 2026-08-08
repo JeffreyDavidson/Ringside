@@ -30,15 +30,6 @@ class ReleaseAction
      * @param  Manager  $manager  The manager to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
      * @throws CannotBeReleasedException When manager cannot be released due to business rules
-     *
-     * @example
-     * ```php
-     * // Release manager immediately
-     * resolve(ReleaseAction::class)->handle($manager);
-     *
-     * // Release with specific date
-     * resolve(ReleaseAction::class)->handle($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {

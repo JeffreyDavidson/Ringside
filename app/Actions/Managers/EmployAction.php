@@ -23,15 +23,6 @@ class EmployAction
      * @param  Manager  $manager  The manager to employ
      * @param  Carbon|null  $startDate  The employment start date (defaults to now)
      * @throws Exception When manager cannot be employed due to business rules
-     *
-     * @example
-     * ```php
-     * // Employ manager immediately
-     * resolve(EmployAction::class)->handle($manager);
-     *
-     * // Employ with specific start date
-     * resolve(EmployAction::class)->handle($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {

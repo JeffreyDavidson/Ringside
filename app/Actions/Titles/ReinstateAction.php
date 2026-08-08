@@ -25,15 +25,6 @@ class ReinstateAction
      * @param  Carbon|null  $reinstateDate  The reinstatement date (defaults to now)
      * @param  string|null  $notes  Optional notes about the reinstatement
      * @throws CannotBeReinstatedException When title cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate title immediately
-     * resolve(ReinstateAction::class)->handle($title, null, 'New storyline beginning');
-     *
-     * // Reinstate with specific date
-     * resolve(ReinstateAction::class)->handle($title, Carbon::parse('2024-01-01'), 'Return after rebrand');
-     * ```
      */
     public function handle(Title $title, ?Carbon $reinstateDate = null, ?string $notes = null): void
     {

@@ -21,15 +21,6 @@ class CreateAction
      *
      * @param  TitleData  $titleData  The data transfer object containing title information
      * @return Title The newly created title instance
-     *
-     * @example
-     * ```php
-     * $titleData = new TitleData([
-     *     'name' => 'World Heavyweight Championship',
-     *     'debut_date' => now()
-     * ]);
-     * $title = resolve(CreateAction::class)->handle($titleData);
-     * ```
      */
     public function handle(TitleData $titleData): Title
     {

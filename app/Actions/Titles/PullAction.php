@@ -27,15 +27,6 @@ class PullAction
      * @param  Carbon|null  $pullDate  The pull date (defaults to now)
      * @param  string|null  $notes  Optional notes about the pull
      * @throws CannotBeDeactivatedException When title cannot be pulled due to business rules
-     *
-     * @example
-     * ```php
-     * // Pull title immediately
-     * resolve(PullAction::class)->handle($title, null, 'Brand overhaul');
-     *
-     * // Pull with specific date
-     * resolve(PullAction::class)->handle($title, Carbon::parse('2024-06-30'), 'Summer break');
-     * ```
      */
     public function handle(Title $title, ?Carbon $pullDate = null, ?string $notes = null): void
     {

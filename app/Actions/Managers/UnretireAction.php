@@ -30,15 +30,6 @@ class UnretireAction
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire manager immediately
-     * resolve(UnretireAction::class)->handle($manager);
-     *
-     * // Unretire with specific date
-     * resolve(UnretireAction::class)->handle($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
     {

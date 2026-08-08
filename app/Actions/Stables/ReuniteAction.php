@@ -29,15 +29,6 @@ class ReuniteAction
      * @param  Stable  $stable  The stable to reunite
      * @param  Carbon|null  $reuniteDate  The reunite date (defaults to now)
      * @throws CannotBeReunitedException When stable cannot be reunited due to business rules
-     *
-     * @example
-     * ```php
-     * // Reunite stable immediately
-     * resolve(ReuniteAction::class)->handle($stable);
-     *
-     * // Reunite with specific date
-     * resolve(ReuniteAction::class)->handle($stable, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $reuniteDate = null): void
     {

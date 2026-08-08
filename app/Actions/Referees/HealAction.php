@@ -30,15 +30,6 @@ class HealAction
      * @param  Referee  $referee  The injured referee to heal
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
      * @throws CannotBeClearedFromInjuryException When referee cannot be healed due to business rules
-     *
-     * @example
-     * ```php
-     * // Heal injury immediately
-     * resolve(HealAction::class)->handle($referee);
-     *
-     * // Heal injury with specific recovery date
-     * resolve(HealAction::class)->handle($referee, Carbon::parse('2024-02-01'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {

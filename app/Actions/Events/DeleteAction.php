@@ -32,16 +32,6 @@ class DeleteAction
      *
      * @param  Event  $event  The event to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete event immediately
-     * $event = Event::find(1);
-     * resolve(DeleteAction::class)->handle($event);
-     *
-     * // Delete with specific date
-     * resolve(DeleteAction::class)->handle($event, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Event $event, ?Carbon $deletionDate = null): void
     {

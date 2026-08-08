@@ -26,20 +26,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - each method returns a callable strategy that can be used
  * with StatusTransitionPipeline.withCascade().
- *
- * @example
- * ```php
- * // Employ a wrestler and automatically employ their managers
- * StatusTransitionPipeline::employ($wrestler, $date)
- *     ->withCascade(EmploymentCascadeStrategy::managers())
- *     ->execute();
- *
- * // Employ a tag team and cascade to wrestlers and managers
- * StatusTransitionPipeline::employ($tagTeam, $date)
- *     ->withCascade(EmploymentCascadeStrategy::wrestlers())
- *     ->withCascade(EmploymentCascadeStrategy::managers())
- *     ->execute();
- * ```
  */
 class EmploymentCascadeStrategy
 {
@@ -201,13 +187,6 @@ class EmploymentCascadeStrategy
      *
      * @param  array<int, string>  $relationships  Array of relationship method names to cascade
      * @return callable Custom strategy function
-     *
-     * @example
-     * ```php
-     * // Custom cascade for specific relationships
-     * $customCascade = EmploymentCascadeStrategy::custom(['currentManagers', 'currentPartners']);
-     * StatusTransitionPipeline::employ($entity, $date)->withCascade($customCascade)->execute();
-     * ```
      */
     public static function custom(array $relationships): callable
     {

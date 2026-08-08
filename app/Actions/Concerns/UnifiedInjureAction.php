@@ -32,18 +32,6 @@ use InvalidArgumentException;
  * DESIGN PATTERN:
  * Strategy pattern - Uses cascade strategies to handle entity-specific injury logic.
  * Template method - Provides consistent injury workflow with validation.
- *
- * @example
- * ```php
- * // Injure a wrestler
- * resolve(UnifiedInjureAction::class)->handle($wrestler, $date);
- *
- * // Injure a manager
- * resolve(UnifiedInjureAction::class)->handle($manager, $date);
- *
- * // Injure a referee
- * resolve(UnifiedInjureAction::class)->handle($referee, $date);
- * ```
  */
 class UnifiedInjureAction
 {
@@ -58,15 +46,6 @@ class UnifiedInjureAction
      * @param  Carbon|null  $injuryDate  The injury date (defaults to now)
      * @param  string|null  $notes  Optional notes for the injury record (injury description)
      * @throws Exception When entity cannot be injured due to business rules or entity type
-     *
-     * @example
-     * ```php
-     * // Basic injury
-     * resolve(UnifiedInjureAction::class)->handle($wrestler);
-     *
-     * // Injury with specific date and description
-     * resolve(UnifiedInjureAction::class)->handle($wrestler, Carbon::parse('2024-01-15'), 'Torn ACL during match');
-     * ```
      */
     public function handle(Model $entity, ?Carbon $injuryDate = null, ?string $notes = null): void
     {

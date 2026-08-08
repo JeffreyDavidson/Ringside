@@ -39,25 +39,6 @@ class AddRefereesToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add referees to
      * @param  Collection<int, Referee>  $referees  The referees to assign for officiating
-     *
-     * @example
-     * ```php
-     * // Standard match with one referee
-     * $referees = collect([$mikeChaota]);
-     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
-     *
-     * // High-profile match with senior referee
-     * $referees = collect([$earlHebner]);
-     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
-     *
-     * // Special stipulation match with multiple officials
-     * $referees = collect([$referee1, $referee2]);
-     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
-     *
-     * // Championship match with experienced official
-     * $referees = collect([$charlesRobinson]);
-     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
-     * ```
      */
     public function handle(EventMatch $eventMatch, \Illuminate\Support\Collection $referees): void
     {

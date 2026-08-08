@@ -22,18 +22,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - Uses cascade strategies to handle entity-specific employment logic.
  * Template method - Provides consistent employment workflow with customizable cascading.
- *
- * @example
- * ```php
- * // Employ a wrestler with manager cascade
- * resolve(UnifiedEmployAction::class)->handle($wrestler, $date);
- *
- * // Employ a tag team with wrestler and manager cascade
- * resolve(UnifiedEmployAction::class)->handle($tagTeam, $date);
- *
- * // Employ a manager (no cascading needed)
- * resolve(UnifiedEmployAction::class)->handle($manager, $date);
- * ```
  */
 class UnifiedEmployAction
 {
@@ -47,15 +35,6 @@ class UnifiedEmployAction
      * @param  Carbon|null  $employmentDate  The employment date (defaults to now)
      * @param  string|null  $notes  Optional notes for the employment record
      * @throws Exception When entity cannot be employed due to business rules
-     *
-     * @example
-     * ```php
-     * // Basic employment
-     * resolve(UnifiedEmployAction::class)->handle($wrestler);
-     *
-     * // Employment with specific date and notes
-     * resolve(UnifiedEmployAction::class)->handle($wrestler, Carbon::parse('2024-01-01'), 'New signing');
-     * ```
      */
     public function handle(Model $entity, ?Carbon $employmentDate = null, ?string $notes = null): void
     {

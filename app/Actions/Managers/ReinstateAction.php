@@ -29,15 +29,6 @@ final class ReinstateAction
      * @param  Manager  $manager  The manager to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
      * @throws CannotBeReinstatedException When manager cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate manager immediately
-     * resolve(ReinstateAction::class)->handle($manager);
-     *
-     * // Reinstate with specific date
-     * resolve(ReinstateAction::class)->handle($manager, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {

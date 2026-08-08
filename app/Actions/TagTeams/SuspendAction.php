@@ -29,16 +29,6 @@ class SuspendAction
      *
      * @param  TagTeam  $tagTeam  The tag team to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Suspend tag team immediately
-     * $tagTeam = TagTeam::where('name', 'D-Generation X')->first();
-     * resolve(SuspendAction::class)->handle($tagTeam);
-     *
-     * // Schedule suspension for future date
-     * resolve(SuspendAction::class)->handle($tagTeam, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void
     {

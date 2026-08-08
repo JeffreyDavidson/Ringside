@@ -32,18 +32,6 @@ use InvalidArgumentException;
  * DESIGN PATTERN:
  * Strategy pattern - Uses cascade strategies to handle entity-specific retirement logic.
  * Template method - Provides consistent retirement workflow with customizable cascading.
- *
- * @example
- * ```php
- * // Retire a wrestler with complex cascading
- * resolve(UnifiedRetireAction::class)->handle($wrestler, $date);
- *
- * // Retire a title (simple retirement)
- * resolve(UnifiedRetireAction::class)->handle($title, $date);
- *
- * // Retire a stable with member handling
- * resolve(UnifiedRetireAction::class)->handle($stable, $date);
- * ```
  */
 class UnifiedRetireAction
 {
@@ -58,15 +46,6 @@ class UnifiedRetireAction
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @param  string|null  $notes  Optional notes for the retirement record
      * @throws Exception When entity cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Basic retirement
-     * resolve(UnifiedRetireAction::class)->handle($wrestler);
-     *
-     * // Retirement with specific date and notes
-     * resolve(UnifiedRetireAction::class)->handle($wrestler, Carbon::parse('2024-12-31'), 'Hall of Fame induction');
-     * ```
      */
     public function handle(Model $entity, ?Carbon $retirementDate = null, ?string $notes = null): void
     {

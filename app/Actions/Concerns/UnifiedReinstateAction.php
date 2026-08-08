@@ -33,18 +33,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - Uses cascade strategies to handle entity-specific reinstatement logic.
  * Template method - Provides consistent reinstatement workflow with customizable cascading.
- *
- * @example
- * ```php
- * // Reinstate a wrestler (may cascade to managers)
- * resolve(UnifiedReinstateAction::class)->handle($wrestler, $date);
- *
- * // Reinstate a tag team (may cascade to wrestlers and managers)
- * resolve(UnifiedReinstateAction::class)->handle($tagTeam, $date);
- *
- * // Reinstate a manager (no cascading)
- * resolve(UnifiedReinstateAction::class)->handle($manager, $date);
- * ```
  */
 class UnifiedReinstateAction
 {
@@ -59,15 +47,6 @@ class UnifiedReinstateAction
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
      * @param  string|null  $notes  Optional notes for the reinstatement record
      * @throws Exception When entity cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Basic reinstatement
-     * resolve(UnifiedReinstateAction::class)->handle($wrestler);
-     *
-     * // Reinstatement with specific date and notes
-     * resolve(UnifiedReinstateAction::class)->handle($wrestler, Carbon::parse('2024-06-01'), 'Suspension period complete');
-     * ```
      */
     public function handle(Model $entity, ?Carbon $reinstatementDate = null, ?string $notes = null): void
     {

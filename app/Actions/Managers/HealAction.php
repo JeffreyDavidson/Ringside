@@ -30,15 +30,6 @@ class HealAction
      * @param  Manager  $manager  The injured manager to heal
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
      * @throws CannotBeClearedFromInjuryException When manager cannot be healed due to business rules
-     *
-     * @example
-     * ```php
-     * // Heal injury immediately
-     * resolve(HealAction::class)->handle($manager);
-     *
-     * // Heal injury with specific recovery date
-     * resolve(HealAction::class)->handle($manager, Carbon::parse('2024-02-01'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void
     {

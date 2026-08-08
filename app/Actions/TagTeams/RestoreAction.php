@@ -30,15 +30,6 @@ class RestoreAction
      *
      * @param  TagTeam  $tagTeam  The soft-deleted tag team to restore
      * @param  bool  $forceReunite  Whether to force wrestlers out of current teams (default: false)
-     *
-     * @example
-     * ```php
-     * $deletedTagTeam = TagTeam::onlyTrashed()->where('name', 'The Dudley Boyz')->first();
-     * resolve(RestoreAction::class)->handle($deletedTagTeam);
-     *
-     * // Force reunion (removes wrestlers from current teams)
-     * resolve(RestoreAction::class)->handle($deletedTagTeam, true);
-     * ```
      */
     public function handle(TagTeam $tagTeam, bool $forceReunite = false): void
     {

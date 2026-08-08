@@ -33,20 +33,6 @@ use Illuminate\Support\Facades\DB;
  * Orchestrator pattern - Coordinates multiple lower-level operations.
  * Builder pattern - Chainable methods for building complex operations.
  * Command pattern - Encapsulates complex operations as executable commands.
- *
- * @example
- * ```php
- * // Merge two stables and employ all members
- * StableMembershipOrchestrator::mergeStables($stableA, $stableB, 'New Stable Name')
- *     ->withEmploymentCascade($date)
- *     ->execute();
- *
- * // Split stable and transfer specific members
- * StableMembershipOrchestrator::splitStable($originalStable, 'New Stable')
- *     ->transferWrestlers($wrestlerCollection)
- *     ->transferManagers($managerCollection)
- *     ->execute();
- * ```
  */
 class StableMembershipOrchestrator
 {

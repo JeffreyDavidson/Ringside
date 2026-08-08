@@ -20,12 +20,6 @@ class RestoreAction
      * - Requires separate employment action to make referee active again
      *
      * @param  Referee  $referee  The soft-deleted referee to restore
-     *
-     * @example
-     * ```php
-     * $deletedReferee = Referee::onlyTrashed()->find(1);
-     * resolve(RestoreAction::class)->handle($deletedReferee);
-     * ```
      */
     public function handle(Referee $referee): void
     {

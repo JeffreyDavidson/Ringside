@@ -23,15 +23,6 @@ class EmployAction
      * @param  Referee  $referee  The referee to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
      * @throws Exception When referee cannot be employed due to business rules
-     *
-     * @example
-     * ```php
-     * // Employ referee immediately
-     * resolve(EmployAction::class)->handle($referee);
-     *
-     * // Employ with specific start date
-     * resolve(EmployAction::class)->handle($referee, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void
     {

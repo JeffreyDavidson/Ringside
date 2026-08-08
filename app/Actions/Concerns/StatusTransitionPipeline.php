@@ -33,20 +33,6 @@ use InvalidArgumentException;
  * - Retirement (from active to retired)
  * - Injury (from healthy to injured)
  * - Recovery/Reinstatement (from suspended/injured back to active)
- *
- * @example
- * ```php
- * // Basic usage - employ a wrestler
- * StatusTransitionPipeline::employ($wrestler, $date)
- *     ->withCascade(EmploymentCascadeStrategy::managers())
- *     ->execute();
- *
- * // Complex usage - retire with custom validation
- * StatusTransitionPipeline::retire($tagTeam, $date)
- *     ->withValidation(TagTeamRetirementValidator::class)
- *     ->withCascade(RetirementCascadeStrategy::members())
- *     ->execute();
- * ```
  */
 class StatusTransitionPipeline
 {

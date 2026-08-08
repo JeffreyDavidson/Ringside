@@ -20,15 +20,6 @@ class UpdateAction
      * @param  Venue  $venue  The venue to update
      * @param  VenueData  $venueData  The updated venue information
      * @return Venue The updated venue instance
-     *
-     * @example
-     * ```php
-     * $venueData = new VenueData([
-     *     'name' => 'Updated Arena Name',
-     *     'street_address' => 'New Address'
-     * ]);
-     * $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
-     * ```
      */
     public function handle(Venue $venue, VenueData $venueData): Venue
     {

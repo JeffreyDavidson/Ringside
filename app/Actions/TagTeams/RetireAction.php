@@ -34,19 +34,6 @@ class RetireAction
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @param  bool  $retirePartners  Whether to retire available partners (default: true)
      * @throws CannotBeRetiredException When tag team cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire tag team immediately with member retirement
-     * $tagTeam = TagTeam::where('name', 'The Undertakers')->first();
-     * resolve(RetireAction::class)->handle($tagTeam);
-     *
-     * // Retire with specific date
-     * resolve(RetireAction::class)->handle($tagTeam, Carbon::parse('2024-12-31'));
-     *
-     * // Retire without retiring partners (partners continue independently)
-     * resolve(RetireAction::class)->handle($tagTeam, retirePartners: false);
-     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retirePartners = true): void
     {

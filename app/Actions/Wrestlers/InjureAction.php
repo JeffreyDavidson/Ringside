@@ -29,15 +29,6 @@ class InjureAction
      * @param  Wrestler  $wrestler  The wrestler to injure
      * @param  Carbon|null  $injuryDate  The injury start date (defaults to now)
      * @throws CannotBeInjuredException When wrestler cannot be injured due to business rules
-     *
-     * @example
-     * ```php
-     * // Injure wrestler immediately
-     * resolve(InjureAction::class)->handle($wrestler);
-     *
-     * // Injure with specific start date
-     * resolve(InjureAction::class)->handle($wrestler, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $injuryDate = null): void
     {

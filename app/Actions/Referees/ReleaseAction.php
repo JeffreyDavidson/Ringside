@@ -25,15 +25,6 @@ class ReleaseAction
      * @param  Referee  $referee  The referee to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
      * @throws CannotBeReleasedException When referee cannot be released due to business rules
-     *
-     * @example
-     * ```php
-     * // Release referee immediately
-     * resolve(ReleaseAction::class)->handle($referee);
-     *
-     * // Release with specific date
-     * resolve(ReleaseAction::class)->handle($referee, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {

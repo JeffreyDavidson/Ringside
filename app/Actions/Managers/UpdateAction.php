@@ -30,23 +30,6 @@ class UpdateAction
      * @param  Manager  $manager  The manager to update
      * @param  ManagerData  $managerData  The updated manager information
      * @return Manager The updated manager instance
-     *
-     * @example
-     * ```php
-     * // Update manager information only
-     * $managerData = new ManagerData([
-     *     'name' => 'Updated Name',
-     *     'hometown' => 'New Hometown'
-     * ]);
-     * $updatedManager = resolve(UpdateAction::class)->handle($manager, $managerData);
-     *
-     * // Update and employ an unemployed manager
-     * $managerData = new ManagerData([
-     *     'name' => 'Triple H',
-     *     'employment_date' => Carbon::parse('2024-01-01')
-     * ]);
-     * $updatedManager = resolve(UpdateAction::class)->handle($unemployedManager, $managerData);
-     * ```
      */
     public function handle(Manager $manager, ManagerData $managerData): Manager
     {

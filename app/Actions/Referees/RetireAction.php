@@ -27,15 +27,6 @@ class RetireAction
      * @param  Referee  $referee  The referee to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @throws CannotBeRetiredException When referee cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire referee immediately
-     * resolve(RetireAction::class)->handle($referee);
-     *
-     * // Retire with specific date
-     * resolve(RetireAction::class)->handle($referee, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {

@@ -25,12 +25,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - each method returns a callable strategy that can be used
  * for post-restoration relationship management.
- *
- * @example
- * ```php
- * // After restoring a tag team
- * RestoreCascadeStrategy::forceReunion()($tagTeam, now(), 'restore');
- * ```
  */
 class RestoreCascadeStrategy
 {

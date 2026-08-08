@@ -47,16 +47,6 @@ class DeleteAction
      *
      * @param  TagTeam  $tagTeam  The tag team to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete tag team immediately
-     * $tagTeam = TagTeam::where('name', 'The Hardys')->first();
-     * resolve(DeleteAction::class)->handle($tagTeam);
-     *
-     * // Delete with specific date
-     * resolve(DeleteAction::class)->handle($tagTeam, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void
     {

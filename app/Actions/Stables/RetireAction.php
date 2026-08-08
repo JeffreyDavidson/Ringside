@@ -46,19 +46,6 @@ class RetireAction
      * @param  Stable  $stable  The stable to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @throws CannotBeRetiredException When stable cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire stable immediately
-     * resolve(RetireAction::class)->handle($stable);
-     *
-     * // Retire with specific date
-     * resolve(RetireAction::class)->handle($stable, Carbon::parse('2024-12-31'));
-     *
-     * // Retire The New World Order stable
-     * $nwo = Stable::where('name', 'The New World Order')->first();
-     * resolve(RetireAction::class)->handle($nwo, Carbon::parse('2024-04-01'));
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {

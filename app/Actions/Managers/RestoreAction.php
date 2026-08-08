@@ -20,12 +20,6 @@ class RestoreAction
      * - Requires separate employment action to make manager active again
      *
      * @param  Manager  $manager  The soft-deleted manager to restore
-     *
-     * @example
-     * ```php
-     * $deletedManager = Manager::onlyTrashed()->find(1);
-     * resolve(RestoreAction::class)->handle($deletedManager);
-     * ```
      */
     public function handle(Manager $manager): void
     {

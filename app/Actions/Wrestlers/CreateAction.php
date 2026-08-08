@@ -37,20 +37,6 @@ class CreateAction
      *
      * @param  WrestlerData  $wrestlerData  The data transfer object containing wrestler information
      * @return Wrestler The newly created wrestler instance
-     *
-     * @example
-     * ```php
-     * $wrestlerData = new WrestlerData([
-     *     'name' => 'John Doe',
-     *     'hometown' => 'Chicago, IL',
-     *     'height' => 72,
-     *     'weight' => 220,
-     *     'signature_moves' => ['Suplex', 'DDT'],
-     *     'employment_date' => now(),
-     *     'managers' => [1, 2] // Manager IDs
-     * ]);
-     * $wrestler = resolve(CreateAction::class)->handle($wrestlerData);
-     * ```
      */
     public function handle(WrestlerData $wrestlerData): Wrestler
     {

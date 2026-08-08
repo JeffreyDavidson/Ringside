@@ -32,15 +32,6 @@ class RetireAction
      * @param  Wrestler  $wrestler  The wrestler to retire
      * @param  Carbon|null  $retirementDate  The retirement start date (defaults to now)
      * @throws CannotBeRetiredException When wrestler cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire wrestler immediately
-     * resolve(RetireAction::class)->handle($wrestler);
-     *
-     * // Retire with specific start date
-     * resolve(RetireAction::class)->handle($wrestler, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void
     {

@@ -29,15 +29,6 @@ class InjureAction
      * @param  Manager  $manager  The manager to mark as injured
      * @param  Carbon|null  $injureDate  The injury date (defaults to now)
      * @throws CannotBeInjuredException When manager cannot be injured due to business rules
-     *
-     * @example
-     * ```php
-     * // Mark manager as injured immediately
-     * resolve(InjureAction::class)->handle($manager);
-     *
-     * // Record injury with specific date
-     * resolve(InjureAction::class)->handle($manager, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $injureDate = null): void
     {

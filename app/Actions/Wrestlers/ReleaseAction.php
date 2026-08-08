@@ -32,15 +32,6 @@ class ReleaseAction
      * @param  Wrestler  $wrestler  The wrestler to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
      * @throws CannotBeReleasedException When wrestler cannot be released due to business rules
-     *
-     * @example
-     * ```php
-     * // Release wrestler immediately
-     * resolve(ReleaseAction::class)->handle($wrestler);
-     *
-     * // Release with specific date
-     * resolve(ReleaseAction::class)->handle($wrestler, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {

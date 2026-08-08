@@ -31,12 +31,6 @@ use Illuminate\Support\Carbon;
  *
  * Note: Unretirement is not a typical StatusTransitionPipeline operation as it
  * involves ending retirement rather than starting a new status.
- *
- * @example
- * ```php
- * // After unretiring a tag team, cascade to eligible members
- * UnretirementCascadeStrategy::conditionalMembers(true)($tagTeam, $date, 'unretire');
- * ```
  */
 class UnretirementCascadeStrategy
 {

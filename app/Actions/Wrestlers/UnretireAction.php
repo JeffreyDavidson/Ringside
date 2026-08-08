@@ -33,18 +33,6 @@ class UnretireAction
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)
      * @param  bool  $employImmediately  Whether to employ the wrestler immediately (default: true)
      * @throws CannotBeUnretiredException When wrestler cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire wrestler and employ immediately
-     * resolve(UnretireAction::class)->handle($wrestler);
-     *
-     * // Unretire with specific date
-     * resolve(UnretireAction::class)->handle($wrestler, Carbon::parse('2024-01-15'));
-     *
-     * // Unretire without employing immediately (manual employment later)
-     * resolve(UnretireAction::class)->handle($wrestler, employImmediately: false);
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void
     {

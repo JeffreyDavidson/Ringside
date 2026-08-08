@@ -46,25 +46,6 @@ class UnretireAction
      * @param  bool  $establishImmediately  Whether to establish the stable immediately (default: true)
      * @param  bool  $requireFormerMembers  Whether to require available former members (default: true)
      * @throws CannotBeUnretiredException When stable cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire stable immediately
-     * $retiredStable = Stable::where('name', 'Evolution')->first();
-     * resolve(UnretireAction::class)->handle($retiredStable);
-     *
-     * // Unretire with specific date
-     * resolve(UnretireAction::class)->handle($retiredStable, Carbon::parse('2024-01-01'));
-     *
-     * // Unretire without establishing immediately (manual activation later)
-     * resolve(UnretireAction::class)->handle($retiredStable, establishImmediately: false);
-     *
-     * // Unretire without requiring former members
-     * resolve(UnretireAction::class)->handle($retiredStable, requireFormerMembers: false);
-     *
-     * // Unretire without unretiring members (stable only)
-     * resolve(UnretireAction::class)->handle($retiredStable, unretireMembers: false);
-     * ```
      */
     public function handle(
         Stable $stable,

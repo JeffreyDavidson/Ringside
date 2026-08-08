@@ -29,16 +29,6 @@ class CreateAction
      *
      * @param  RefereeData  $refereeData  The data transfer object containing referee information
      * @return Referee The newly created referee instance
-     *
-     * @example
-     * ```php
-     * $refereeData = new RefereeData([
-     *     'name' => 'Earl Hebner',
-     *     'hometown' => 'Richmond, VA',
-     *     'employment_date' => now()
-     * ]);
-     * $referee = resolve(CreateAction::class)->handle($refereeData);
-     * ```
      */
     public function handle(RefereeData $refereeData): Referee
     {

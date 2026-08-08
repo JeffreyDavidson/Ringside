@@ -38,12 +38,6 @@ class DeleteAction
      *
      * @param  Referee  $referee  The referee to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * $referee = Referee::find(1);
-     * resolve(DeleteAction::class)->handle($referee);
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {

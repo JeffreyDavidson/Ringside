@@ -40,24 +40,6 @@ class AddTagTeamsToMatchAction
      * @param  EventMatch  $eventMatch  The match to add tag teams to
      * @param  Collection<int, TagTeam>  $tagTeams  The tag teams to add to the match
      * @param  int  $sideNumber  The side/team number for the tag teams (1, 2, 3, etc.)
-     *
-     * @example
-     * ```php
-     * // Tag team match - The Hardy Boyz vs Edge & Christian
-     * $tagTeams = collect([$hardyBoyz]);
-     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1);
-     *
-     * $tagTeams = collect([$edgeAndChristian]);
-     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 2);
-     *
-     * // Triple threat tag match - Three teams competing
-     * $tagTeams = collect([$dudleyBoyz]);
-     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 3);
-     *
-     * // Elimination tag match - Multiple teams on one side
-     * $tagTeams = collect([$team1, $team2]);
-     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1);
-     * ```
      */
     public function handle(EventMatch $eventMatch, Collection $tagTeams, int $sideNumber): void
     {

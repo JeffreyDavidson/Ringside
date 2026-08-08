@@ -35,18 +35,6 @@ use Illuminate\Support\Carbon;
  * DESIGN PATTERN:
  * Strategy pattern - Uses cascade strategies to handle entity-specific suspension logic.
  * Template method - Provides consistent suspension workflow with customizable cascading.
- *
- * @example
- * ```php
- * // Suspend a wrestler (may cascade to managers)
- * resolve(UnifiedSuspendAction::class)->handle($wrestler, $date);
- *
- * // Suspend a tag team (cascades to wrestlers and managers)
- * resolve(UnifiedSuspendAction::class)->handle($tagTeam, $date);
- *
- * // Suspend a manager (no cascading)
- * resolve(UnifiedSuspendAction::class)->handle($manager, $date);
- * ```
  */
 class UnifiedSuspendAction
 {
@@ -61,15 +49,6 @@ class UnifiedSuspendAction
      * @param  Carbon|null  $suspensionDate  The suspension date (defaults to now)
      * @param  string|null  $notes  Optional notes for the suspension record
      * @throws Exception When entity cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Basic suspension
-     * resolve(UnifiedSuspendAction::class)->handle($wrestler);
-     *
-     * // Suspension with specific date and notes
-     * resolve(UnifiedSuspendAction::class)->handle($wrestler, Carbon::parse('2024-01-01'), 'Conduct violation');
-     * ```
      */
     public function handle(Model $entity, ?Carbon $suspensionDate = null, ?string $notes = null): void
     {

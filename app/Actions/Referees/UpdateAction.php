@@ -30,15 +30,6 @@ class UpdateAction
      * @param  Referee  $referee  The referee to update
      * @param  RefereeData  $refereeData  The updated referee information
      * @return Referee The updated referee instance
-     *
-     * @example
-     * ```php
-     * $refereeData = new RefereeData([
-     *     'name' => 'Updated Name',
-     *     'hometown' => 'New Hometown'
-     * ]);
-     * $updatedReferee = resolve(UpdateAction::class)->handle($referee, $refereeData);
-     * ```
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {

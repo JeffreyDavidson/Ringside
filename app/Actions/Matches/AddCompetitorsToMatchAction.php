@@ -33,31 +33,6 @@ class AddCompetitorsToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add competitors to
      * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors  Competitors organized by side number and type
-     *
-     * @example
-     * ```php
-     * // Singles match: John Cena vs Randy Orton
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [$johnCena], 'tag_teams' => []],
-     *     2 => ['wrestlers' => [$randyOrton], 'tag_teams' => []]
-     * ]);
-     * resolve(AddCompetitorsToMatchAction::class)->handle($match, $competitors);
-     *
-     * // Tag team match: The Hardy Boyz vs Edge & Christian
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [], 'tag_teams' => [$hardyBoyz]],
-     *     2 => ['wrestlers' => [], 'tag_teams' => [$edgeAndChristian]]
-     * ]);
-     * resolve(AddCompetitorsToMatchAction::class)->handle($match, $competitors);
-     *
-     * // Triple threat match: Stone Cold vs The Rock vs Triple H
-     * $competitors = collect([
-     *     1 => ['wrestlers' => [$stoneColid], 'tag_teams' => []],
-     *     2 => ['wrestlers' => [$theRock], 'tag_teams' => []],
-     *     3 => ['wrestlers' => [$tripleH], 'tag_teams' => []]
-     * ]);
-     * resolve(AddCompetitorsToMatchAction::class)->handle($match, $competitors);
-     * ```
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {

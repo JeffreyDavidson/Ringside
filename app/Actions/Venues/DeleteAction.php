@@ -18,12 +18,6 @@ class DeleteAction
      * - Allows for future restoration if needed
      *
      * @param  Venue  $venue  The venue to delete
-     *
-     * @example
-     * ```php
-     * $venue = Venue::find(1);
-     * resolve(DeleteAction::class)->handle($venue);
-     * ```
      */
     public function handle(Venue $venue): void
     {

@@ -20,12 +20,6 @@ class RestoreAction
      * - Requires separate debut/reinstate action to make title active again
      *
      * @param  Title  $title  The soft-deleted title to restore
-     *
-     * @example
-     * ```php
-     * $deletedTitle = Title::onlyTrashed()->find(1);
-     * resolve(RestoreAction::class)->handle($deletedTitle);
-     * ```
      */
     public function handle(Title $title): void
     {

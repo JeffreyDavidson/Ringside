@@ -39,25 +39,6 @@ class AddTitlesToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add titles to
      * @param  Collection<int, Title>  $titles  The championships at stake in the match
-     *
-     * @example
-     * ```php
-     * // WWE Championship title defense
-     * $titles = collect([$wweChampionship]);
-     * resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
-     *
-     * // Unification match with two titles
-     * $titles = collect([$wweChampionship, $universalTitle]);
-     * resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
-     *
-     * // Tag team championship match
-     * $titles = collect([$tagTeamChampionship]);
-     * resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
-     *
-     * // Vacant title tournament final
-     * $titles = collect([$vacantIntercontinentalTitle]);
-     * resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
-     * ```
      */
     public function handle(EventMatch $eventMatch, Collection $titles): void
     {

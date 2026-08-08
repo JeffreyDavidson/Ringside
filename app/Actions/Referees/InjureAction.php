@@ -23,15 +23,6 @@ class InjureAction
      * @param  Referee  $referee  The referee to mark as injured
      * @param  Carbon|null  $injureDate  The injury date (defaults to now)
      * @throws CannotBeInjuredException When referee cannot be injured due to business rules
-     *
-     * @example
-     * ```php
-     * // Mark referee as injured immediately
-     * resolve(InjureAction::class)->handle($referee);
-     *
-     * // Record injury with specific date
-     * resolve(InjureAction::class)->handle($referee, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void
     {

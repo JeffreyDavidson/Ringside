@@ -18,12 +18,6 @@ class RestoreAction
      * - Reactivates the venue for future bookings
      *
      * @param  Venue  $venue  The soft-deleted venue to restore
-     *
-     * @example
-     * ```php
-     * $deletedVenue = Venue::onlyTrashed()->find(1);
-     * resolve(RestoreAction::class)->handle($deletedVenue);
-     * ```
      */
     public function handle(Venue $venue): void
     {

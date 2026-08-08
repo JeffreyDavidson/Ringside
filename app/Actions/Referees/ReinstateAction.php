@@ -24,15 +24,6 @@ class ReinstateAction
      * @param  Referee  $referee  The referee to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
      * @throws CannotBeReinstatedException When referee cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate referee immediately
-     * resolve(ReinstateAction::class)->handle($referee);
-     *
-     * // Reinstate with specific date
-     * resolve(ReinstateAction::class)->handle($referee, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {

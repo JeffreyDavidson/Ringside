@@ -29,15 +29,6 @@ class SuspendAction
      * @param  Manager  $manager  The manager to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
      * @throws CannotBeSuspendedException When manager cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Suspend manager immediately
-     * resolve(SuspendAction::class)->handle($manager);
-     *
-     * // Schedule suspension for future date
-     * resolve(SuspendAction::class)->handle($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $suspensionDate = null): void
     {

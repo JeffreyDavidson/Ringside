@@ -42,20 +42,6 @@ class DeleteAction
      *
      * @param  Stable  $stable  The stable to delete
      * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
-     *
-     * @example
-     * ```php
-     * // Delete stable immediately
-     * $stable = Stable::find(1);
-     * resolve(DeleteAction::class)->handle($stable);
-     *
-     * // Delete with specific date
-     * resolve(DeleteAction::class)->handle($stable, Carbon::parse('2024-12-31'));
-     *
-     * // Delete The Ministry stable
-     * $ministry = Stable::where('name', 'The Ministry')->first();
-     * resolve(DeleteAction::class)->handle($ministry, Carbon::parse('2024-06-30'));
-     * ```
      */
     public function handle(Stable $stable, ?Carbon $deletionDate = null): void
     {

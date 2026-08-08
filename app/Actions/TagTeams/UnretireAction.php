@@ -39,25 +39,6 @@ class UnretireAction
      * @param  bool  $employImmediately  Whether to employ the team immediately (default: true)
      * @param  bool  $requireAvailablePartners  Whether to require available partners (default: true)
      * @throws CannotBeUnretiredException When tag team cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire tag team immediately
-     * $tagTeam = TagTeam::where('name', 'The Hardy Boyz')->first();
-     * resolve(UnretireAction::class)->handle($tagTeam);
-     *
-     * // Unretire with specific date
-     * resolve(UnretireAction::class)->handle($tagTeam, Carbon::parse('2024-01-01'));
-     *
-     * // Unretire without employing immediately (manual employment later)
-     * resolve(UnretireAction::class)->handle($tagTeam, employImmediately: false);
-     *
-     * // Unretire without requiring available partners
-     * resolve(UnretireAction::class)->handle($tagTeam, requireAvailablePartners: false);
-     *
-     * // Unretire without unretiring partners (team only)
-     * resolve(UnretireAction::class)->handle($tagTeam, unretirePartners: false);
-     * ```
      */
     public function handle(
         TagTeam $tagTeam,

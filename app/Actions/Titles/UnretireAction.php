@@ -25,15 +25,6 @@ class UnretireAction
      * @param  Title  $title  The title to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
      * @throws CannotBeUnretiredException When title cannot be unretired due to business rules
-     *
-     * @example
-     * ```php
-     * // Unretire title immediately
-     * resolve(UnretireAction::class)->handle($title);
-     *
-     * // Unretire with specific date
-     * resolve(UnretireAction::class)->handle($title, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void
     {

@@ -29,15 +29,6 @@ class SuspendAction
      * @param  Wrestler  $wrestler  The wrestler to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
      * @throws CannotBeSuspendedException When wrestler cannot be suspended due to business rules
-     *
-     * @example
-     * ```php
-     * // Suspend wrestler immediately
-     * resolve(SuspendAction::class)->handle($wrestler);
-     *
-     * // Suspend with specific start date
-     * resolve(SuspendAction::class)->handle($wrestler, Carbon::parse('2024-01-15'));
-     * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void
     {

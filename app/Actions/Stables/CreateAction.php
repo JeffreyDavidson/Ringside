@@ -31,31 +31,6 @@ class CreateAction
      *
      * @param  StableData  $stableData  The data transfer object containing stable information
      * @return Stable The newly created stable with all members
-     *
-     * @example
-     * ```php
-     * // Create stable with immediate debut
-     * $stableData = new StableData(
-     *     name: 'The Four Horsemen',
-     *     start_date: now(),
-     *     members: new StableMembershipData(
-     *         wrestlers: collect([$ricFlair, $arnAnderson, $tullyblanchard]),
-     *         tagTeams: collect([])
-     *     )
-     * );
-     * $stable = resolve(CreateAction::class)->handle($stableData);
-     *
-     * // Create stable without debut (must be debuted separately)
-     * $stableData = new StableData(
-     *     name: 'D-Generation X',
-     *     start_date: null,
-     *     members: new StableMembershipData(
-     *         wrestlers: collect([$shawnMichaels, $tripleH]),
-     *         tagTeams: collect([])
-     *     )
-     * );
-     * $stable = resolve(CreateAction::class)->handle($stableData);
-     * ```
      */
     public function handle(StableData $stableData): Stable
     {

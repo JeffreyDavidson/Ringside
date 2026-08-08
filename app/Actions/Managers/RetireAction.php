@@ -32,15 +32,6 @@ class RetireAction
      * @param  Manager  $manager  The manager to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
      * @throws CannotBeRetiredException When manager cannot be retired due to business rules
-     *
-     * @example
-     * ```php
-     * // Retire manager immediately
-     * resolve(RetireAction::class)->handle($manager);
-     *
-     * // Retire with specific date
-     * resolve(RetireAction::class)->handle($manager, Carbon::parse('2024-12-31'));
-     * ```
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void
     {

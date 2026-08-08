@@ -30,16 +30,6 @@ class ReinstateAction
      * @param  TagTeam  $tagTeam  The tag team to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
      * @throws CannotBeReinstatedException When tag team cannot be reinstated due to business rules
-     *
-     * @example
-     * ```php
-     * // Reinstate tag team immediately
-     * $tagTeam = TagTeam::where('name', 'The Usos')->first();
-     * resolve(ReinstateAction::class)->handle($tagTeam);
-     *
-     * // Reinstate with specific date
-     * resolve(ReinstateAction::class)->handle($tagTeam, Carbon::parse('2024-01-01'));
-     * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {

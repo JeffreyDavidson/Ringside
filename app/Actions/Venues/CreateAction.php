@@ -19,18 +19,6 @@ class CreateAction
      *
      * @param  VenueData  $venueData  The data transfer object containing venue information
      * @return Venue The newly created venue instance
-     *
-     * @example
-     * ```php
-     * $venueData = new VenueData([
-     *     'name' => 'Madison Square Garden',
-     *     'street_address' => '4 Pennsylvania Plaza',
-     *     'city' => 'New York',
-     *     'state' => 'NY',
-     *     'zipcode' => '10001'
-     * ]);
-     * $venue = resolve(CreateAction::class)->handle($venueData);
-     * ```
      */
     public function handle(VenueData $venueData): Venue
     {
