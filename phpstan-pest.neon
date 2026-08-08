@@ -7,6 +7,11 @@ parameters:
   bootstrapFiles:
     - bootstrap/app.php
 
+  stubFiles:
+    - stubs/Illuminate/Http/Response.stub
+    - stubs/Illuminate/Testing/TestResponse.stub
+    - stubs/Symfony/Component/HttpFoundation/Response.stub
+
   excludePaths:
     - bootstrap/cache
     - storage
