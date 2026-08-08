@@ -24,7 +24,7 @@ test('it updates referee basic information', function () {
         employment_date: null
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     expect($result)->toBeInstanceOf(Referee::class);
     expect($result->first_name)->toBe('Updated');
@@ -49,7 +49,7 @@ test('it updates referee and employs them when employment date provided', functi
         employment_date: $employmentDate
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     $result->refresh();
     expect($result->first_name)->toBe('Earl');
@@ -75,7 +75,7 @@ test('it updates referee without employing when no employment date', function ()
         employment_date: null
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     $result->refresh();
     expect($result->first_name)->toBe('Mike');
@@ -100,7 +100,7 @@ test('it does not re-employ already employed referee', function () {
         employment_date: now()
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     $result->refresh();
     expect($result->first_name)->toBe('Updated');
@@ -121,7 +121,7 @@ test('it handles DateHelper date resolution for employment', function () {
         employment_date: now()->subDays(10) // Past date
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     $result->refresh();
     expect($result->isEmployed())->toBeTrue();
@@ -144,7 +144,7 @@ test('it maintains transaction boundaries', function () {
     );
 
     // Simulate transaction - all changes should be atomic
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     $result->refresh();
 
@@ -170,7 +170,7 @@ test('it returns updated referee instance', function () {
         employment_date: null
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     expect($result)->toBeInstanceOf(Referee::class);
     expect($result->id)->toBe($referee->id);
@@ -189,7 +189,7 @@ test('it preserves referee id and timestamps', function () {
         employment_date: null
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     expect($result->id)->toBe($originalId);
     expect(requiredDate($result->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp);
@@ -206,7 +206,7 @@ test('it validates referee can be updated', function () {
     );
 
     // Should succeed without throwing validation exception
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     expect($result)->toBeInstanceOf(Referee::class);
     expect($result->first_name)->toBe('Valid');
@@ -223,7 +223,7 @@ test('it uses EmployAction for consistent employment handling', function () {
         employment_date: $employmentDate
     );
 
-    $result = UpdateAction::make()->handle($referee, $updateData);
+    $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     // Verify the referee was employed using the correct architectural pattern
     expect($result->isEmployed())->toBeTrue();

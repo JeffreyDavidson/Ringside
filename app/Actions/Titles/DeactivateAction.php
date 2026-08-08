@@ -6,7 +6,6 @@ namespace App\Actions\Titles;
 
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Deactivate action for titles.
@@ -16,8 +15,6 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class DeactivateAction
 {
-    use AsAction;
-
     public function __construct(
         private PullAction $pullAction
     ) {}

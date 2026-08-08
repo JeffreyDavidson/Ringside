@@ -15,7 +15,7 @@ beforeEach(function () {
 test('it creates a manager with basic information', function () {
     $data = new ManagerData('Taylor', 'Otwell', null);
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result)->toBeInstanceOf(Manager::class);
     expect($result->first_name)->toBe('Taylor');
@@ -36,7 +36,7 @@ test('it creates a manager with employment when employment date is provided', fu
     $employmentDate = now();
     $data = new ManagerData('Jeffrey', 'Davidson', $employmentDate);
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result)->toBeInstanceOf(Manager::class);
     expect($result->first_name)->toBe('Jeffrey');
@@ -66,7 +66,7 @@ test('it creates manager with all optional fields', function () {
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result)->toBeInstanceOf(Manager::class);
     expect($result->first_name)->toBe('John');

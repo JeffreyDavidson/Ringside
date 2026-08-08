@@ -16,7 +16,7 @@ test('it releases an employed wrestler', function () {
 
     expect($wrestler->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();
@@ -32,7 +32,7 @@ test('it releases wrestler with specific release date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $releaseDate = now()->subDays(2);
 
-    ReleaseAction::run($wrestler, $releaseDate);
+    resolve(ReleaseAction::class)->handle($wrestler, $releaseDate);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();
@@ -51,7 +51,7 @@ test('it uses StatusTransitionPipeline for release', function () {
     $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -71,7 +71,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    ReleaseAction::run($wrestler, null);
+    resolve(ReleaseAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();
@@ -98,7 +98,7 @@ test('it handles multiple employment records correctly', function () {
 
     expect($wrestler->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();
@@ -124,7 +124,7 @@ test('it prevents releasing non-employed wrestler', function () {
 
     expect($wrestler->isEmployed())->toBeFalse();
 
-    expect(fn () => ReleaseAction::run($wrestler))
+    expect(fn () => resolve(ReleaseAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -134,7 +134,7 @@ test('it prevents releasing retired wrestler', function () {
     expect($wrestler->isRetired())->toBeTrue();
     expect($wrestler->isEmployed())->toBeFalse();
 
-    expect(fn () => ReleaseAction::run($wrestler))
+    expect(fn () => resolve(ReleaseAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -144,7 +144,7 @@ test('it can release suspended wrestler', function () {
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();
@@ -167,7 +167,7 @@ test('it can release injured wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed
@@ -195,7 +195,7 @@ test('it maintains employment history integrity', function () {
 
     expect($wrestler->isEmployed())->toBeTrue();
 
-    ReleaseAction::run($wrestler);
+    resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();

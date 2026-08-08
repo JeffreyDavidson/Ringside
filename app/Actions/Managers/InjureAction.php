@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class InjureAction
 {
-    use AsAction;
-
     /**
      * Record a manager injury.
      *
@@ -36,10 +33,10 @@ class InjureAction
      * @example
      * ```php
      * // Mark manager as injured immediately
-     * InjureAction::run($manager);
+     * resolve(InjureAction::class)->handle($manager);
      *
      * // Record injury with specific date
-     * InjureAction::run($manager, Carbon::parse('2024-01-15'));
+     * resolve(InjureAction::class)->handle($manager, Carbon::parse('2024-01-15'));
      * ```
      */
     public function handle(Manager $manager, ?Carbon $injureDate = null): void

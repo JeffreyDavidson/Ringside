@@ -17,7 +17,7 @@ test('it unretires a retired manager', function () {
     expect($manager->isRetired())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isRetired())->toBeFalse();
@@ -41,7 +41,7 @@ test('it unretires manager with specific unretirement date', function () {
     $manager = Manager::factory()->retired()->create();
     $unretirementDate = now()->subDays(3);
 
-    UnretireAction::run($manager, $unretirementDate);
+    resolve(UnretireAction::class)->handle($manager, $unretirementDate);
 
     $manager->refresh();
     expect($manager->isRetired())->toBeFalse();
@@ -67,7 +67,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     $currentRetirement = $manager->currentRetirement()->firstOrFail();
     expect($manager->currentEmployment)->toBeNull();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -95,7 +95,7 @@ test('it prevents unretiring non-retired manager', function () {
 
     expect($manager->isRetired())->toBeFalse();
 
-    expect(fn () => UnretireAction::run($manager))
+    expect(fn () => resolve(UnretireAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -103,7 +103,7 @@ test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->retired()->create();
     $originalRetirementId = $manager->currentRetirement()->firstOrFail()->id;
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -128,7 +128,7 @@ test('it creates new employment period during unretirement', function () {
     $manager = Manager::factory()->retired()->create();
     $originalEmploymentCount = $manager->employments()->count();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -146,7 +146,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->retired()->create();
     $customUnretirementDate = now()->subDays(2)->startOfDay();
 
-    UnretireAction::run($manager, $customUnretirementDate);
+    resolve(UnretireAction::class)->handle($manager, $customUnretirementDate);
 
     $manager->refresh();
 
@@ -174,7 +174,7 @@ test('it handles multiple retirement history correctly', function () {
     expect($manager->isRetired())->toBeTrue();
     expect($manager->retirements()->count())->toBe(2);
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -191,7 +191,7 @@ test('it preserves retirement history during unretirement', function () {
     $manager = Manager::factory()->retired()->create();
     $originalRetirementCount = $manager->retirements()->count();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -218,7 +218,7 @@ test('it handles manager with complex status history', function () {
     expect($manager->isRetired())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 
-    UnretireAction::run($manager);
+    resolve(UnretireAction::class)->handle($manager);
 
     $manager->refresh();
 

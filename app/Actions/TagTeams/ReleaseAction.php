@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction
 {
-    use AsAction;
-
     /**
      * Release a tag team from employment and end all current relationships.
      *
@@ -40,10 +37,10 @@ class ReleaseAction
      * ```php
      * // Release tag team immediately
      * $tagTeam = TagTeam::where('name', 'The Shield')->first();
-     * ReleaseAction::run($tagTeam);
+     * resolve(ReleaseAction::class)->handle($tagTeam);
      *
      * // Release with specific date
-     * ReleaseAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     * resolve(ReleaseAction::class)->handle($tagTeam, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void

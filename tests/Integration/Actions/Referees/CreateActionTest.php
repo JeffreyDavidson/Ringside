@@ -19,7 +19,7 @@ test('it creates a referee with basic information', function () {
         employment_date: null
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result)->toBeInstanceOf(Referee::class);
     expect($result->first_name)->toBe('Earl');
@@ -45,7 +45,7 @@ test('it creates a referee with employment when employment date is provided', fu
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result->first_name)->toBe('Mike');
     expect($result->last_name)->toBe('Chioda');
@@ -73,7 +73,7 @@ test('it creates referee with proper database transactions', function () {
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     expect($result)->toBeInstanceOf(Referee::class);
     expect($result->first_name)->toBe('Charles');
@@ -102,7 +102,7 @@ test('it handles employment creation through EmployAction dependency injection',
         employment_date: $employmentDate
     );
 
-    $result = CreateAction::make()->handle($data);
+    $result = resolve(CreateAction::class)->handle($data);
 
     // Verify the referee was created and employed using the correct architectural pattern
     expect($result->isEmployed())->toBeTrue();

@@ -16,7 +16,7 @@ test('it heals an injured wrestler', function () {
 
     expect($wrestler->isInjured())->toBeTrue();
 
-    HealAction::run($wrestler);
+    resolve(HealAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -32,7 +32,7 @@ test('it heals wrestler with specific recovery date', function () {
     $wrestler = Wrestler::factory()->injured()->create();
     $recoveryDate = now()->subDays(5);
 
-    HealAction::run($wrestler, $recoveryDate);
+    resolve(HealAction::class)->handle($wrestler, $recoveryDate);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -50,7 +50,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     // Get current injury to verify it gets ended
     $currentInjury = $wrestler->currentInjury()->firstOrFail();
 
-    HealAction::run($wrestler);
+    resolve(HealAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -70,7 +70,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Test with null date (should use now())
-    HealAction::run($wrestler, null);
+    resolve(HealAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -97,7 +97,7 @@ test('it handles multiple injury records correctly', function () {
 
     expect($wrestler->isInjured())->toBeTrue();
 
-    HealAction::run($wrestler);
+    resolve(HealAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -122,7 +122,7 @@ test('it prevents healing non-injured wrestler', function () {
 
     expect($wrestler->isInjured())->toBeFalse();
 
-    expect(fn () => HealAction::run($wrestler))
+    expect(fn () => resolve(HealAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -132,7 +132,7 @@ test('it prevents healing retired wrestler', function () {
     expect($wrestler->isRetired())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
 
-    expect(fn () => HealAction::run($wrestler))
+    expect(fn () => resolve(HealAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -147,7 +147,7 @@ test('it works with employed injured wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    HealAction::run($wrestler);
+    resolve(HealAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed

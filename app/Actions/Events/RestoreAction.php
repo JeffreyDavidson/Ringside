@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Models\Events\Event;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
-
     /**
      * Restore a soft-deleted event.
      *
@@ -27,7 +24,7 @@ class RestoreAction
      * @example
      * ```php
      * $deletedEvent = Event::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedEvent);
+     * resolve(RestoreAction::class)->handle($deletedEvent);
      * ```
      */
     public function handle(Event $event): void

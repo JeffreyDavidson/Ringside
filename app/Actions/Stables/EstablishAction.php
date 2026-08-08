@@ -8,12 +8,9 @@ use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class EstablishAction
 {
-    use AsAction;
-
     /**
      * Establish a stable and make it active.
      *
@@ -31,10 +28,10 @@ class EstablishAction
      * ```php
      * // Establish stable immediately
      * $stable = Stable::where('name', 'The Shield')->first();
-     * EstablishAction::run($stable);
+     * resolve(EstablishAction::class)->handle($stable);
      *
      * // Establish with specific date
-     * EstablishAction::run($stable, Carbon::parse('2024-01-01'));
+     * resolve(EstablishAction::class)->handle($stable, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(Stable $stable, ?Carbon $activationDate = null): void

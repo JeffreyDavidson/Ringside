@@ -11,12 +11,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Services\TagTeamMembershipService;
 use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a new create action instance.
      */
@@ -48,7 +45,7 @@ class CreateAction
      *     'managers' => [$lita],
      *     'employment_date' => now()
      * ]);
-     * $tagTeam = CreateAction::run($tagTeamData);
+     * $tagTeam = resolve(CreateAction::class)->handle($tagTeamData);
      *
      * // Create tag team without employment (must be employed separately)
      * $tagTeamData = new TagTeamData([
@@ -56,7 +53,7 @@ class CreateAction
      *     'wrestlerA' => $kofi,
      *     'wrestlerB' => $xavier
      * ]);
-     * $tagTeam = CreateAction::run($tagTeamData);
+     * $tagTeam = resolve(CreateAction::class)->handle($tagTeamData);
      * ```
      */
     public function handle(TagTeamData $tagTeamData): TagTeam

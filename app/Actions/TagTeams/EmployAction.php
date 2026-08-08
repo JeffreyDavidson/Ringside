@@ -10,12 +10,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction
 {
-    use AsAction;
-
     /**
      * Employ a tag team using the StatusTransitionPipeline.
      *
@@ -35,10 +32,10 @@ class EmployAction
      * ```php
      * // Employ tag team immediately
      * $tagTeam = TagTeam::where('name', 'The Young Bucks')->first();
-     * EmployAction::run($tagTeam);
+     * resolve(EmployAction::class)->handle($tagTeam);
      *
      * // Employ with specific start date
-     * EmployAction::run($tagTeam, Carbon::parse('2024-01-01'));
+     * resolve(EmployAction::class)->handle($tagTeam, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void

@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
-
     /**
      * Unretire a wrestler and return them to active competition.
      *
@@ -40,13 +37,13 @@ class UnretireAction
      * @example
      * ```php
      * // Unretire wrestler and employ immediately
-     * UnretireAction::run($wrestler);
+     * resolve(UnretireAction::class)->handle($wrestler);
      *
      * // Unretire with specific date
-     * UnretireAction::run($wrestler, Carbon::parse('2024-01-15'));
+     * resolve(UnretireAction::class)->handle($wrestler, Carbon::parse('2024-01-15'));
      *
      * // Unretire without employing immediately (manual employment later)
-     * UnretireAction::run($wrestler, employImmediately: false);
+     * resolve(UnretireAction::class)->handle($wrestler, employImmediately: false);
      * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void

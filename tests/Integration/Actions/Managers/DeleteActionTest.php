@@ -18,7 +18,7 @@ test('it soft deletes an unemployed manager', function () {
 
     expect($manager->isEmployed())->toBeFalse();
 
-    DeleteAction::run($manager);
+    resolve(DeleteAction::class)->handle($manager);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
@@ -38,7 +38,7 @@ test('it soft deletes an employed manager and ends employment', function () {
     expect($manager->isEmployed())->toBeTrue();
 
     $deletionDate = now();
-    DeleteAction::run($manager, $deletionDate);
+    resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
@@ -69,7 +69,7 @@ test('it ends manager relationships with wrestlers when deleted', function () {
     ]);
 
     $deletionDate = now();
-    DeleteAction::run($manager, $deletionDate);
+    resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
@@ -102,7 +102,7 @@ test('it ends manager relationships with tag teams when deleted', function () {
     ]);
 
     $deletionDate = now();
-    DeleteAction::run($manager, $deletionDate);
+    resolve(DeleteAction::class)->handle($manager, $deletionDate);
 
     // Manager should be soft deleted
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
@@ -120,7 +120,7 @@ test('it handles deletion with specific date', function () {
     $manager = Manager::factory()->employed()->create();
     $customDeletionDate = now()->subDay();
 
-    DeleteAction::run($manager, $customDeletionDate);
+    resolve(DeleteAction::class)->handle($manager, $customDeletionDate);
 
     $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
     expect($trashedManager->deleted_at)->not->toBeNull();

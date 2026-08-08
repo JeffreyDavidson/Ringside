@@ -6,12 +6,9 @@ namespace App\Actions\Venues;
 
 use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Update a venue.
      *
@@ -30,7 +27,7 @@ class UpdateAction
      *     'name' => 'Updated Arena Name',
      *     'street_address' => 'New Address'
      * ]);
-     * $updatedVenue = UpdateAction::run($venue, $venueData);
+     * $updatedVenue = resolve(UpdateAction::class)->handle($venue, $venueData);
      * ```
      */
     public function handle(Venue $venue, VenueData $venueData): Venue

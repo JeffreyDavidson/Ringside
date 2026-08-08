@@ -315,7 +315,7 @@ describe('Main Component Integration', function () {
             $component = livewire(Main::class);
 
             // Employ the wrestler
-            EmployAction::run($wrestler, now());
+            resolve(EmployAction::class)->handle($wrestler, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -328,7 +328,7 @@ describe('Main Component Integration', function () {
             $component = livewire(Main::class);
 
             // Injure the wrestler
-            InjureAction::run($wrestler, now());
+            resolve(InjureAction::class)->handle($wrestler, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -342,7 +342,7 @@ describe('Main Component Integration', function () {
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Complex Wrestler']);
 
             // Wrestler is employed but also injured
-            InjureAction::run($wrestler, now());
+            resolve(InjureAction::class)->handle($wrestler, now());
 
             $component = livewire(Main::class);
 

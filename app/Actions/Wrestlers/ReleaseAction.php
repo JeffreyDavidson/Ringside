@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction
 {
-    use AsAction;
-
     /**
      * Release a wrestler from employment and end all current relationships.
      *
@@ -39,10 +36,10 @@ class ReleaseAction
      * @example
      * ```php
      * // Release wrestler immediately
-     * ReleaseAction::run($wrestler);
+     * resolve(ReleaseAction::class)->handle($wrestler);
      *
      * // Release with specific date
-     * ReleaseAction::run($wrestler, Carbon::parse('2024-12-31'));
+     * resolve(ReleaseAction::class)->handle($wrestler, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void

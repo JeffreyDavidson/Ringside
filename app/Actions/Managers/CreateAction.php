@@ -8,12 +8,9 @@ use App\Data\Managers\ManagerData;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     public function __construct(
         private EmployAction $employAction
     ) {}
@@ -41,14 +38,14 @@ class CreateAction
      *     'hometown' => 'New York, NY',
      *     'employment_date' => now()
      * ]);
-     * $manager = CreateAction::run($managerData);
+     * $manager = resolve(CreateAction::class)->handle($managerData);
      *
      * // Create manager without employment (must be employed separately)
      * $managerData = new ManagerData([
      *     'name' => 'Stephanie McMahon',
      *     'hometown' => 'Greenwich, CT'
      * ]);
-     * $manager = CreateAction::run($managerData);
+     * $manager = resolve(CreateAction::class)->handle($managerData);
      * ```
      */
     public function handle(ManagerData $managerData): Manager

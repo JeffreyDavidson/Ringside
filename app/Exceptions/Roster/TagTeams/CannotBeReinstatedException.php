@@ -30,7 +30,7 @@ use App\Models\TagTeams\TagTeam;
  * // Check reinstatement eligibility
  * try {
  *     $tagTeam->ensureCanBeReinstated();
- *     ReinstateAction::run($tagTeam);
+ *     resolve(ReinstateAction::class)->handle($tagTeam);
  * } catch (CannotBeReinstatedException $e) {
  *     // Handle reinstatement conflict
  *     logger()->warning('Tag team reinstatement blocked', [

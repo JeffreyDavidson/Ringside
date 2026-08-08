@@ -17,7 +17,7 @@ test('it suspends an employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
 
-    SuspendAction::run($wrestler);
+    resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
@@ -34,7 +34,7 @@ test('it suspends wrestler with specific suspension date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $suspensionDate = now()->subDays(3);
 
-    SuspendAction::run($wrestler, $suspensionDate);
+    resolve(SuspendAction::class)->handle($wrestler, $suspensionDate);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
@@ -46,11 +46,10 @@ test('it suspends wrestler with specific suspension date', function () {
     ]);
 });
 
-test('it ignores legacy suspension notes', function () {
+test('it suspends a wrestler without suspension notes', function () {
     $wrestler = Wrestler::factory()->employed()->create();
-    $notes = 'Suspended for violating wellness policy';
 
-    SuspendAction::run($wrestler, null, $notes);
+    resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
@@ -67,7 +66,7 @@ test('it uses StatusTransitionPipeline for suspension', function () {
 
     expect($wrestler->currentSuspension)->toBeNull();
 
-    SuspendAction::run($wrestler);
+    resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -86,7 +85,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    SuspendAction::run($wrestler, null);
+    resolve(SuspendAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
@@ -115,7 +114,7 @@ test('it handles multiple suspension scenarios', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
 
-    SuspendAction::run($wrestler, null, 'Current suspension');
+    resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
@@ -140,7 +139,7 @@ test('it prevents suspending already suspended wrestler', function () {
 
     expect($wrestler->isSuspended())->toBeTrue();
 
-    expect(fn () => SuspendAction::run($wrestler))
+    expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -149,7 +148,7 @@ test('it prevents suspending retired wrestler', function () {
 
     expect($wrestler->isRetired())->toBeTrue();
 
-    expect(fn () => SuspendAction::run($wrestler))
+    expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -158,7 +157,7 @@ test('it prevents suspending unemployed wrestler', function () {
 
     expect($wrestler->isEmployed())->toBeFalse();
 
-    expect(fn () => SuspendAction::run($wrestler))
+    expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -173,7 +172,7 @@ test('it suspends injured employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    SuspendAction::run($wrestler);
+    resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 

@@ -7,12 +7,9 @@ namespace App\Actions\Stables;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
-
     /**
      * Create a new restore action instance.
      */
@@ -44,16 +41,16 @@ class RestoreAction
      * ```php
      * // Basic restoration (stable remains inactive)
      * $deletedStable = Stable::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedStable);
+     * resolve(RestoreAction::class)->handle($deletedStable);
      *
      * // Restore with automatic reunion
-     * RestoreAction::run($deletedStable, reuniteMembers: true);
+     * resolve(RestoreAction::class)->handle($deletedStable, reuniteMembers: true);
      *
      * // Restore without requiring former members
-     * RestoreAction::run($deletedStable, requireFormerMembers: false);
+     * resolve(RestoreAction::class)->handle($deletedStable, requireFormerMembers: false);
      *
      * // Restore with specific date
-     * RestoreAction::run($deletedStable, restorationDate: Carbon::parse('2024-01-01'));
+     * resolve(RestoreAction::class)->handle($deletedStable, restorationDate: Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(

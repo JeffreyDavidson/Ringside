@@ -8,12 +8,9 @@ use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction
 {
-    use AsAction;
-
     /**
      * Reinstate an inactive title and make it active again.
      *
@@ -32,10 +29,10 @@ class ReinstateAction
      * @example
      * ```php
      * // Reinstate title immediately
-     * ReinstateAction::run($title, null, 'New storyline beginning');
+     * resolve(ReinstateAction::class)->handle($title, null, 'New storyline beginning');
      *
      * // Reinstate with specific date
-     * ReinstateAction::run($title, Carbon::parse('2024-01-01'), 'Return after rebrand');
+     * resolve(ReinstateAction::class)->handle($title, Carbon::parse('2024-01-01'), 'Return after rebrand');
      * ```
      */
     public function handle(Title $title, ?Carbon $reinstateDate = null, ?string $notes = null): void

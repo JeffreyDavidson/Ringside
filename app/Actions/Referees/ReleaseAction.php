@@ -10,12 +10,9 @@ use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction
 {
-    use AsAction;
-
     /**
      * Release a referee from employment.
      *
@@ -32,10 +29,10 @@ class ReleaseAction
      * @example
      * ```php
      * // Release referee immediately
-     * ReleaseAction::run($referee);
+     * resolve(ReleaseAction::class)->handle($referee);
      *
      * // Release with specific date
-     * ReleaseAction::run($referee, Carbon::parse('2024-12-31'));
+     * resolve(ReleaseAction::class)->handle($referee, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void

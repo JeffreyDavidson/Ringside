@@ -57,7 +57,7 @@ test('it prevents retiring a released tag team at a specific datetime', function
 test('it retires a suspended tag team at the current datetime by default', function () {
     // Create bookable tag team and manually suspend it (which suspends wrestlers too)
     $tagTeam = TagTeam::factory()->bookable()->create();
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
 
     resolve(RetireAction::class)->handle($tagTeam);
 
@@ -71,7 +71,7 @@ test('it retires a suspended tag team at the current datetime by default', funct
 test('it retires a suspended tag team at a specific datetime', function () {
     // Create bookable tag team and manually suspend it (which suspends wrestlers too)
     $tagTeam = TagTeam::factory()->bookable()->create();
-    SuspendAction::run($tagTeam);
+    resolve(SuspendAction::class)->handle($tagTeam);
     $datetime = now()->addDays(2);
 
     resolve(RetireAction::class)->handle($tagTeam, $datetime);

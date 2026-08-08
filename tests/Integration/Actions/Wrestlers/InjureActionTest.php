@@ -17,7 +17,7 @@ test('it injures an employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
 
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
@@ -34,7 +34,7 @@ test('it injures wrestler with specific injury date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $injuryDate = now()->subDays(4);
 
-    InjureAction::run($wrestler, $injuryDate);
+    resolve(InjureAction::class)->handle($wrestler, $injuryDate);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
@@ -51,7 +51,7 @@ test('it uses StatusTransitionPipeline for injury', function () {
 
     expect($wrestler->currentInjury)->toBeNull();
 
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -70,7 +70,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    InjureAction::run($wrestler, null);
+    resolve(InjureAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
@@ -93,7 +93,7 @@ test('it handles multiple injury scenarios', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
 
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
@@ -118,7 +118,7 @@ test('it prevents injuring already injured wrestler', function () {
 
     expect($wrestler->isInjured())->toBeTrue();
 
-    expect(fn () => InjureAction::run($wrestler))
+    expect(fn () => resolve(InjureAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -127,7 +127,7 @@ test('it prevents injuring retired wrestler', function () {
 
     expect($wrestler->isRetired())->toBeTrue();
 
-    expect(fn () => InjureAction::run($wrestler))
+    expect(fn () => resolve(InjureAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -136,7 +136,7 @@ test('it prevents injuring unemployed wrestler', function () {
 
     expect($wrestler->isEmployed())->toBeFalse();
 
-    expect(fn () => InjureAction::run($wrestler))
+    expect(fn () => resolve(InjureAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -146,7 +146,7 @@ test('it injures suspended wrestler', function () {
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -171,7 +171,7 @@ test('it maintains injury history integrity', function () {
 
     expect($wrestler->isInjured())->toBeFalse();
 
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
@@ -211,7 +211,7 @@ test('it allows re-injury after healing', function () {
     expect($wrestler->isEmployed())->toBeTrue();
 
     // Should be able to get injured again
-    InjureAction::run($wrestler);
+    resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();

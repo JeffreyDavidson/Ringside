@@ -17,7 +17,7 @@ test('it retires an employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isRetired())->toBeFalse();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
@@ -34,7 +34,7 @@ test('it retires wrestler with specific retirement date', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $retirementDate = now()->subDays(7);
 
-    RetireAction::run($wrestler, $retirementDate);
+    resolve(RetireAction::class)->handle($wrestler, $retirementDate);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
@@ -51,7 +51,7 @@ test('it uses StatusTransitionPipeline for retirement', function () {
 
     expect($wrestler->currentRetirement)->toBeNull();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -70,7 +70,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    RetireAction::run($wrestler, null);
+    resolve(RetireAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
@@ -99,7 +99,7 @@ test('it handles multiple retirement scenarios', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isRetired())->toBeFalse();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
@@ -126,7 +126,7 @@ test('it ends employment when retiring', function () {
     $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -146,7 +146,7 @@ test('it prevents retiring already retired wrestler', function () {
 
     expect($wrestler->isRetired())->toBeTrue();
 
-    expect(fn () => RetireAction::run($wrestler))
+    expect(fn () => resolve(RetireAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -156,7 +156,7 @@ test('it prevents retiring unemployed wrestler', function () {
     expect($wrestler->isEmployed())->toBeFalse();
     expect($wrestler->isRetired())->toBeFalse();
 
-    expect(fn () => RetireAction::run($wrestler))
+    expect(fn () => resolve(RetireAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -167,7 +167,7 @@ test('it can retire suspended wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
 
     // Suspended wrestlers can be retired (career-ending situation)
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();
@@ -191,7 +191,7 @@ test('it can retire injured wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    RetireAction::run($wrestler);
+    resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeTrue();

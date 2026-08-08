@@ -13,7 +13,6 @@ use App\Models\Contracts\Suspendable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Unified reinstatement action that can handle any suspendable entity.
@@ -38,19 +37,17 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * @example
  * ```php
  * // Reinstate a wrestler (may cascade to managers)
- * UnifiedReinstateAction::run($wrestler, $date);
+ * resolve(UnifiedReinstateAction::class)->handle($wrestler, $date);
  *
  * // Reinstate a tag team (may cascade to wrestlers and managers)
- * UnifiedReinstateAction::run($tagTeam, $date);
+ * resolve(UnifiedReinstateAction::class)->handle($tagTeam, $date);
  *
  * // Reinstate a manager (no cascading)
- * UnifiedReinstateAction::run($manager, $date);
+ * resolve(UnifiedReinstateAction::class)->handle($manager, $date);
  * ```
  */
 class UnifiedReinstateAction
 {
-    use AsAction;
-
     /**
      * Reinstate an entity with appropriate cascading behavior.
      *
@@ -66,10 +63,10 @@ class UnifiedReinstateAction
      * @example
      * ```php
      * // Basic reinstatement
-     * UnifiedReinstateAction::run($wrestler);
+     * resolve(UnifiedReinstateAction::class)->handle($wrestler);
      *
      * // Reinstatement with specific date and notes
-     * UnifiedReinstateAction::run($wrestler, Carbon::parse('2024-06-01'), 'Suspension period complete');
+     * resolve(UnifiedReinstateAction::class)->handle($wrestler, Carbon::parse('2024-06-01'), 'Suspension period complete');
      * ```
      */
     public function handle(Model $entity, ?Carbon $reinstatementDate = null, ?string $notes = null): void
@@ -218,7 +215,7 @@ class UnifiedReinstateAction
     public static function batch(iterable $entities, ?Carbon $reinstatementDate = null, ?string $notes = null): void
     {
         foreach ($entities as $entity) {
-            static::run($entity, $reinstatementDate, $notes);
+            resolve(static::class)->handle($entity, $reinstatementDate, $notes);
         }
     }
 
@@ -298,7 +295,7 @@ class UnifiedReinstateAction
                     ->filter(fn (Model $member) => $member instanceof Suspendable && $member->isSuspended());
 
                 foreach ($members as $member) {
-                    static::run($member, $reinstatementDate, $notes);
+                    resolve(static::class)->handle($member, $reinstatementDate, $notes);
                 }
             }
         }

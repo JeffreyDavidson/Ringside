@@ -344,7 +344,7 @@ describe('TagTeamsTable Component', function () {
             $component = livewire(Main::class);
 
             // Employ the tag team
-            EmployAction::run($tagTeam, now());
+            resolve(EmployAction::class)->handle($tagTeam, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -357,7 +357,7 @@ describe('TagTeamsTable Component', function () {
             $component = livewire(Main::class);
 
             // Suspend the tag team
-            SuspendAction::run($tagTeam, now());
+            resolve(SuspendAction::class)->handle($tagTeam, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -370,7 +370,7 @@ describe('TagTeamsTable Component', function () {
             $component = livewire(Main::class);
 
             // Retire the tag team
-            RetireAction::run($tagTeam, now());
+            resolve(RetireAction::class)->handle($tagTeam, now());
 
             // Refresh component
             $component->call('$refresh');
@@ -384,7 +384,7 @@ describe('TagTeamsTable Component', function () {
             $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Complex Team']);
 
             // Tag team is employed but also suspended
-            SuspendAction::run($tagTeam, now());
+            resolve(SuspendAction::class)->handle($tagTeam, now());
 
             $component = livewire(Main::class);
 
@@ -504,8 +504,8 @@ describe('TagTeamsTable Component', function () {
                 ->assertSee('Dissolving Team');
 
             // Test status transitions
-            EmployAction::run($formingTeam, now());
-            ReleaseAction::run($dissolvingTeam, now());
+            resolve(EmployAction::class)->handle($formingTeam, now());
+            resolve(ReleaseAction::class)->handle($dissolvingTeam, now());
 
             $component->call('$refresh');
             $component

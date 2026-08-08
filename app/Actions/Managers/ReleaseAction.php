@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReleaseAction
 {
-    use AsAction;
-
     /**
      * Release a manager from employment and end all current relationships.
      *
@@ -37,10 +34,10 @@ class ReleaseAction
      * @example
      * ```php
      * // Release manager immediately
-     * ReleaseAction::run($manager);
+     * resolve(ReleaseAction::class)->handle($manager);
      *
      * // Release with specific date
-     * ReleaseAction::run($manager, Carbon::parse('2024-12-31'));
+     * resolve(ReleaseAction::class)->handle($manager, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void

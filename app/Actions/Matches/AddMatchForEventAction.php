@@ -12,12 +12,9 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddMatchForEventAction
 {
-    use AsAction;
-
     /**
      * Create a new add match for event action instance.
      */
@@ -71,7 +68,7 @@ class AddMatchForEventAction
      *     'referees' => collect([$earlHebner]),
      *     'titles' => collect([$wweChampionship])
      * ]);
-     * $match = AddMatchForEventAction::run($event, $matchData);
+     * $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
      *
      * // Tag team championship match
      * $matchData = new EventMatchData([
@@ -83,7 +80,7 @@ class AddMatchForEventAction
      *     'referees' => collect([$mikeChaota]),
      *     'titles' => collect([$tagTeamChampionship])
      * ]);
-     * $match = AddMatchForEventAction::run($event, $matchData);
+     * $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
      *
      * // Non-title multi-man match
      * $matchData = new EventMatchData([
@@ -96,7 +93,7 @@ class AddMatchForEventAction
      *     'referees' => collect([$referee]),
      *     'titles' => collect([])
      * ]);
-     * $match = AddMatchForEventAction::run($event, $matchData);
+     * $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
      * ```
      */
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch

@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class HealAction
 {
-    use AsAction;
-
     /**
      * Heal a manager from injury and return them to active management.
      *
@@ -37,10 +34,10 @@ class HealAction
      * @example
      * ```php
      * // Heal injury immediately
-     * HealAction::run($manager);
+     * resolve(HealAction::class)->handle($manager);
      *
      * // Heal injury with specific recovery date
-     * HealAction::run($manager, Carbon::parse('2024-02-01'));
+     * resolve(HealAction::class)->handle($manager, Carbon::parse('2024-02-01'));
      * ```
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void

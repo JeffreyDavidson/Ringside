@@ -6,12 +6,9 @@ namespace App\Actions\Referees;
 
 use App\Models\Referees\Referee;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
-
     /**
      * Restore a soft-deleted referee.
      *
@@ -27,7 +24,7 @@ class RestoreAction
      * @example
      * ```php
      * $deletedReferee = Referee::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedReferee);
+     * resolve(RestoreAction::class)->handle($deletedReferee);
      * ```
      */
     public function handle(Referee $referee): void

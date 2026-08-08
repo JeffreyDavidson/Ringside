@@ -17,7 +17,7 @@ test('it suspends an employed manager', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isSuspended())->toBeTrue();
@@ -34,7 +34,7 @@ test('it suspends manager with specific suspension date', function () {
     $manager = Manager::factory()->employed()->create();
     $suspensionDate = now()->subDays(3);
 
-    SuspendAction::run($manager, $suspensionDate);
+    resolve(SuspendAction::class)->handle($manager, $suspensionDate);
 
     $manager->refresh();
     expect($manager->isSuspended())->toBeTrue();
@@ -51,7 +51,7 @@ test('it uses StatusTransitionPipeline for suspension', function () {
 
     expect($manager->currentSuspension)->toBeNull();
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -72,7 +72,7 @@ test('it prevents suspending already suspended manager', function () {
 
     expect($manager->isSuspended())->toBeTrue();
 
-    expect(fn () => SuspendAction::run($manager))
+    expect(fn () => resolve(SuspendAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -81,14 +81,14 @@ test('it prevents suspending unemployed manager', function () {
 
     expect($manager->isEmployed())->toBeFalse();
 
-    expect(fn () => SuspendAction::run($manager))
+    expect(fn () => resolve(SuspendAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->employed()->create();
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -108,7 +108,7 @@ test('it maintains employment status during suspension', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -128,7 +128,7 @@ test('it suspends injured manager', function () {
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -141,7 +141,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->employed()->create();
     $customSuspensionDate = now()->subDays(1)->startOfDay();
 
-    SuspendAction::run($manager, $customSuspensionDate);
+    resolve(SuspendAction::class)->handle($manager, $customSuspensionDate);
 
     $manager->refresh();
 
@@ -156,7 +156,7 @@ test('it uses DateHelper for consistent date handling', function () {
 test('it creates only one suspension record per action', function () {
     $manager = Manager::factory()->employed()->create();
 
-    SuspendAction::run($manager);
+    resolve(SuspendAction::class)->handle($manager);
 
     $manager->refresh();
 

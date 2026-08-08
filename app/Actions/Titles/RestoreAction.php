@@ -6,12 +6,9 @@ namespace App\Actions\Titles;
 
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
-
     /**
      * Restore a soft-deleted title.
      *
@@ -27,7 +24,7 @@ class RestoreAction
      * @example
      * ```php
      * $deletedTitle = Title::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedTitle);
+     * resolve(RestoreAction::class)->handle($deletedTitle);
      * ```
      */
     public function handle(Title $title): void

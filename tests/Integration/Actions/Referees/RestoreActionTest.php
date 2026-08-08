@@ -20,7 +20,7 @@ test('it restores a soft-deleted referee', function () {
 
     expect($referee->trashed())->toBeTrue();
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeFalse();
@@ -40,7 +40,7 @@ test('it validates referee can be restored', function () {
     expect($referee->trashed())->toBeTrue();
 
     // Should succeed without throwing validation exception
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeFalse();
@@ -51,7 +51,7 @@ test('it throws exception when referee cannot be restored', function () {
 
     expect($referee->trashed())->toBeFalse();
 
-    expect(fn () => RestoreAction::run($referee))
+    expect(fn () => resolve(RestoreAction::class)->handle($referee))
         ->toThrow(CannotBeRestoredException::class);
 });
 
@@ -59,7 +59,7 @@ test('it maintains transaction boundaries', function () {
     $referee = Referee::factory()->create();
     $referee->delete(); // Soft delete
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -78,7 +78,7 @@ test('it preserves referee data after restoration', function () {
 
     $referee->delete(); // Soft delete
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -101,7 +101,7 @@ test('it does not automatically restore employment relationships', function () {
     expect($referee->trashed())->toBeTrue();
     expect(freshModel($employment)->ended_at)->not->toBeNull();
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -128,7 +128,7 @@ test('it preserves historical relationships', function () {
 
     $referee->delete(); // Soft delete
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -153,7 +153,7 @@ test('it allows referee to be re-employed after restoration', function () {
     $employment->update(['ended_at' => now()]);
     $referee->delete();
 
-    RestoreAction::run($referee);
+    resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->trashed())->toBeFalse();

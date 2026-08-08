@@ -7,12 +7,9 @@ namespace App\Actions\Stables;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Create a new delete action instance.
      */
@@ -50,14 +47,14 @@ class DeleteAction
      * ```php
      * // Delete stable immediately
      * $stable = Stable::find(1);
-     * DeleteAction::run($stable);
+     * resolve(DeleteAction::class)->handle($stable);
      *
      * // Delete with specific date
-     * DeleteAction::run($stable, Carbon::parse('2024-12-31'));
+     * resolve(DeleteAction::class)->handle($stable, Carbon::parse('2024-12-31'));
      *
      * // Delete The Ministry stable
      * $ministry = Stable::where('name', 'The Ministry')->first();
-     * DeleteAction::run($ministry, Carbon::parse('2024-06-30'));
+     * resolve(DeleteAction::class)->handle($ministry, Carbon::parse('2024-06-30'));
      * ```
      */
     public function handle(Stable $stable, ?Carbon $deletionDate = null): void

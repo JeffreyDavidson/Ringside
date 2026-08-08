@@ -8,12 +8,9 @@ use App\Data\Managers\ManagerData;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     public function __construct(
         private EmployAction $employAction
     ) {}
@@ -41,14 +38,14 @@ class UpdateAction
      *     'name' => 'Updated Name',
      *     'hometown' => 'New Hometown'
      * ]);
-     * $updatedManager = UpdateAction::run($manager, $managerData);
+     * $updatedManager = resolve(UpdateAction::class)->handle($manager, $managerData);
      *
      * // Update and employ an unemployed manager
      * $managerData = new ManagerData([
      *     'name' => 'Triple H',
      *     'employment_date' => Carbon::parse('2024-01-01')
      * ]);
-     * $updatedManager = UpdateAction::run($unemployedManager, $managerData);
+     * $updatedManager = resolve(UpdateAction::class)->handle($unemployedManager, $managerData);
      * ```
      */
     public function handle(Manager $manager, ManagerData $managerData): Manager

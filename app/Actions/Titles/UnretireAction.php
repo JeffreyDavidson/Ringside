@@ -8,12 +8,9 @@ use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
-
     /**
      * Unretire a retired title and make it available for future competition.
      *
@@ -32,10 +29,10 @@ class UnretireAction
      * @example
      * ```php
      * // Unretire title immediately
-     * UnretireAction::run($title);
+     * resolve(UnretireAction::class)->handle($title);
      *
      * // Unretire with specific date
-     * UnretireAction::run($title, Carbon::parse('2024-01-01'));
+     * resolve(UnretireAction::class)->handle($title, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void

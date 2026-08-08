@@ -18,7 +18,7 @@ test('it soft deletes an unemployed wrestler', function () {
     expect($wrestler->isEmployed())->toBeFalse();
     expect($wrestler->trashed())->toBeFalse();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -34,7 +34,7 @@ test('it soft deletes wrestler with specific deletion date', function () {
     $wrestler = Wrestler::factory()->create();
     $deletionDate = now()->subDays(2);
 
-    DeleteAction::run($wrestler, $deletionDate);
+    resolve(DeleteAction::class)->handle($wrestler, $deletionDate);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -53,7 +53,7 @@ test('it ends employment before deletion', function () {
     $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -73,7 +73,7 @@ test('it ends retirement before deletion', function () {
     $currentRetirement = $wrestler->currentRetirement()->firstOrFail();
     expect($currentRetirement->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -93,7 +93,7 @@ test('it ends suspension before deletion', function () {
     $currentSuspension = $wrestler->currentSuspension()->firstOrFail();
     expect($currentSuspension->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -113,7 +113,7 @@ test('it ends injury before deletion', function () {
     $currentInjury = $wrestler->currentInjury()->firstOrFail();
     expect($currentInjury->ended_at)->toBeNull();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -140,7 +140,7 @@ test('it uses StatusTransitionPipeline with cascade strategies', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->currentManagers)->toHaveCount(1);
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -163,7 +163,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
-    DeleteAction::run($wrestler, null);
+    resolve(DeleteAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -194,7 +194,7 @@ test('it handles complex wrestler with multiple statuses', function () {
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -222,7 +222,7 @@ test('it prevents deleting already deleted wrestler', function () {
 
     expect($wrestler->trashed())->toBeTrue();
 
-    expect(fn () => DeleteAction::run($wrestler))
+    expect(fn () => resolve(DeleteAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -241,7 +241,7 @@ test('it maintains relationship history integrity', function () {
         'fired_at' => null, // Current relationship
     ]);
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
@@ -280,7 +280,7 @@ test('it handles wrestler with no active relationships', function () {
     expect($wrestler->isEmployed())->toBeFalse();
     expect($wrestler->isRetired())->toBeFalse();
 
-    DeleteAction::run($wrestler);
+    resolve(DeleteAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();

@@ -7,12 +7,9 @@ namespace App\Actions\Events;
 use App\Data\Events\EventData;
 use App\Models\Events\Event;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create an event.
      *
@@ -33,14 +30,14 @@ class CreateAction
      *     'venue_id' => 1,
      *     'preview' => 'The grandest stage of them all'
      * ]);
-     * $event = CreateAction::run($eventData);
+     * $event = resolve(CreateAction::class)->handle($eventData);
      *
      * // Create a draft event (no date yet)
      * $eventData = new EventData([
      *     'name' => 'Summer Slam TBD',
      *     'preview' => 'The biggest party of the summer'
      * ]);
-     * $draftEvent = CreateAction::run($eventData);
+     * $draftEvent = resolve(CreateAction::class)->handle($eventData);
      * ```
      */
     public function handle(EventData $eventData): Event

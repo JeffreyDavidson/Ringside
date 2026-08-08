@@ -9,12 +9,9 @@ use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddTagTeamsToMatchAction
 {
-    use AsAction;
-
     /**
      * Add tag teams to an event match.
      *
@@ -48,18 +45,18 @@ class AddTagTeamsToMatchAction
      * ```php
      * // Tag team match - The Hardy Boyz vs Edge & Christian
      * $tagTeams = collect([$hardyBoyz]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 1);
+     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1);
      *
      * $tagTeams = collect([$edgeAndChristian]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 2);
+     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 2);
      *
      * // Triple threat tag match - Three teams competing
      * $tagTeams = collect([$dudleyBoyz]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 3);
+     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 3);
      *
      * // Elimination tag match - Multiple teams on one side
      * $tagTeams = collect([$team1, $team2]);
-     * AddTagTeamsToMatchAction::run($match, $tagTeams, 1);
+     * resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1);
      * ```
      */
     public function handle(EventMatch $eventMatch, Collection $tagTeams, int $sideNumber): void

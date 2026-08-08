@@ -17,7 +17,7 @@ test('it unretires a retired tag team', function () {
     expect($tagTeam->isRetired())->toBeTrue();
     expect($tagTeam->isEmployed())->toBeFalse();
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isRetired())->toBeFalse();
@@ -41,7 +41,7 @@ test('it unretires tag team with specific unretirement date', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $unretirementDate = now()->subDays(4);
 
-    UnretireAction::run($tagTeam, $unretirementDate);
+    resolve(UnretireAction::class)->handle($tagTeam, $unretirementDate);
 
     $tagTeam->refresh();
     expect($tagTeam->isRetired())->toBeFalse();
@@ -68,7 +68,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     $currentRetirement = $tagTeam->currentRetirement()->firstOrFail();
     expect($tagTeam->currentEmployment)->toBeNull();
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -90,7 +90,7 @@ test('it unretires without auto-employing when no current wrestlers are availabl
     expect($tagTeam->isRetired())->toBeTrue();
     expect($tagTeam->currentWrestlers)->toBeEmpty();
 
-    UnretireAction::run($tagTeam, requireAvailablePartners: false);
+    resolve(UnretireAction::class)->handle($tagTeam, requireAvailablePartners: false);
 
     $tagTeam->refresh();
 
@@ -106,7 +106,7 @@ test('it prevents unretiring non-retired tag team', function () {
 
     expect($tagTeam->isRetired())->toBeFalse();
 
-    expect(fn () => UnretireAction::run($tagTeam))
+    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -116,7 +116,7 @@ test('it prevents unretiring unemployed tag team', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
     expect($tagTeam->isRetired())->toBeFalse();
 
-    expect(fn () => UnretireAction::run($tagTeam))
+    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -124,7 +124,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $originalRetirementId = $tagTeam->currentRetirement()->firstOrFail()->id;
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -149,7 +149,7 @@ test('it ends current retirement period', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $originalRetirementCount = $tagTeam->retirements()->count();
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -165,7 +165,7 @@ test('it creates new employment period', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $originalEmploymentCount = $tagTeam->employments()->count();
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -183,7 +183,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $customUnretirementDate = now()->subDays(2)->startOfDay();
 
-    UnretireAction::run($tagTeam, $customUnretirementDate);
+    resolve(UnretireAction::class)->handle($tagTeam, $customUnretirementDate);
 
     $tagTeam->refresh();
 
@@ -212,7 +212,7 @@ test('it handles multiple retirement history correctly', function () {
     expect($tagTeam->isRetired())->toBeTrue();
     expect($tagTeam->retirements()->count())->toBe(3);
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -242,7 +242,7 @@ test('it preserves employment and retirement history', function () {
     $originalEmploymentCount = $tagTeam->employments()->count();
     $originalRetirementCount = $tagTeam->retirements()->count();
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -258,7 +258,7 @@ test('it preserves employment and retirement history', function () {
 test('it handles unretirement with cascade effects', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -290,7 +290,7 @@ test('it transitions from retired to employed seamlessly', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 
-    UnretireAction::run($tagTeam);
+    resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 

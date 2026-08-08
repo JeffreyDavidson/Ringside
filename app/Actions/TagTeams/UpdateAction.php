@@ -11,12 +11,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Services\TagTeamMembershipService;
 use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Create a new update action instance.
      */
@@ -48,7 +45,7 @@ class UpdateAction
      *     'wrestlerA' => $existingWrestlerA,
      *     'wrestlerB' => $existingWrestlerB
      * ]);
-     * $updatedTeam = UpdateAction::run($tagTeam, $tagTeamData);
+     * $updatedTeam = resolve(UpdateAction::class)->handle($tagTeam, $tagTeamData);
      *
      * // Change partners and employ unemployed tag team
      * $tagTeamData = new TagTeamData([
@@ -57,7 +54,7 @@ class UpdateAction
      *     'wrestlerB' => $bigE,
      *     'employment_date' => Carbon::parse('2024-01-01')
      * ]);
-     * $updatedTeam = UpdateAction::run($unemployedTeam, $tagTeamData);
+     * $updatedTeam = resolve(UpdateAction::class)->handle($unemployedTeam, $tagTeamData);
      * ```
      */
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam

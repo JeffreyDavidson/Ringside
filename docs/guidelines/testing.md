@@ -27,7 +27,7 @@ test('can employ wrestler with valid data', function () {
     $employmentDate = now()->subDays(30);
 
     // Act
-    $result = EmployAction::run($wrestler, $employmentDate);
+    $result = resolve(EmployAction::class)->handle($wrestler, $employmentDate);
 
     // Assert
     expect($result)->toBeInstanceOf(WrestlerEmployment::class);

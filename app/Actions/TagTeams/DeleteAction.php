@@ -11,12 +11,9 @@ use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete a tag team.
      *
@@ -55,10 +52,10 @@ class DeleteAction
      * ```php
      * // Delete tag team immediately
      * $tagTeam = TagTeam::where('name', 'The Hardys')->first();
-     * DeleteAction::run($tagTeam);
+     * resolve(DeleteAction::class)->handle($tagTeam);
      *
      * // Delete with specific date
-     * DeleteAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     * resolve(DeleteAction::class)->handle($tagTeam, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void

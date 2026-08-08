@@ -9,12 +9,9 @@ use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use App\Services\StableValidationService;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a new create action instance.
      */
@@ -46,7 +43,7 @@ class CreateAction
      *         tagTeams: collect([])
      *     )
      * );
-     * $stable = CreateAction::run($stableData);
+     * $stable = resolve(CreateAction::class)->handle($stableData);
      *
      * // Create stable without debut (must be debuted separately)
      * $stableData = new StableData(
@@ -57,7 +54,7 @@ class CreateAction
      *         tagTeams: collect([])
      *     )
      * );
-     * $stable = CreateAction::run($stableData);
+     * $stable = resolve(CreateAction::class)->handle($stableData);
      * ```
      */
     public function handle(StableData $stableData): Stable

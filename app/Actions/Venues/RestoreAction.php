@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Venues;
 
 use App\Models\Events\Venue;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RestoreAction
 {
-    use AsAction;
-
     /**
      * Restore a soft-deleted venue.
      *
@@ -25,7 +22,7 @@ class RestoreAction
      * @example
      * ```php
      * $deletedVenue = Venue::onlyTrashed()->find(1);
-     * RestoreAction::run($deletedVenue);
+     * resolve(RestoreAction::class)->handle($deletedVenue);
      * ```
      */
     public function handle(Venue $venue): void

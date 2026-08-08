@@ -17,7 +17,7 @@ test('it reinstates a suspended manager', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isSuspended())->toBeFalse();
@@ -34,7 +34,7 @@ test('it reinstates manager with specific reinstatement date', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
     $reinstatementDate = now()->subDays(2);
 
-    ReinstateAction::run($manager, $reinstatementDate);
+    resolve(ReinstateAction::class)->handle($manager, $reinstatementDate);
 
     $manager->refresh();
     expect($manager->isSuspended())->toBeFalse();
@@ -52,7 +52,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     // Get current suspension to verify it gets ended
     $currentSuspension = $manager->currentSuspension()->firstOrFail();
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -72,7 +72,7 @@ test('it prevents reinstating non-suspended manager', function () {
 
     expect($manager->isSuspended())->toBeFalse();
 
-    expect(fn () => ReinstateAction::run($manager))
+    expect(fn () => resolve(ReinstateAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -80,7 +80,7 @@ test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
     $originalSuspensionId = $manager->currentSuspension()->firstOrFail()->id;
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -105,7 +105,7 @@ test('it maintains employment status during reinstatement', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isSuspended())->toBeTrue();
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -123,7 +123,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
     $customReinstatementDate = now()->subDays(1)->startOfDay();
 
-    ReinstateAction::run($manager, $customReinstatementDate);
+    resolve(ReinstateAction::class)->handle($manager, $customReinstatementDate);
 
     $manager->refresh();
 
@@ -145,7 +145,7 @@ test('it handles multiple suspensions correctly', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->suspensions()->count())->toBe(2);
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -168,7 +168,7 @@ test('it reinstates injured suspended manager', function () {
     $suspensionId = $manager->currentSuspension()->firstOrFail()->id;
     $injuryId = $manager->currentInjury()->firstOrFail()->id;
 
-    ReinstateAction::run($manager);
+    resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
 

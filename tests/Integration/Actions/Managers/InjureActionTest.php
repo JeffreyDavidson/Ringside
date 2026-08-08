@@ -17,7 +17,7 @@ test('it injures an employed manager', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isInjured())->toBeFalse();
 
-    InjureAction::run($manager);
+    resolve(InjureAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isInjured())->toBeTrue();
@@ -34,7 +34,7 @@ test('it injures manager with specific injury date', function () {
     $manager = Manager::factory()->employed()->create();
     $injuryDate = now()->subDays(4);
 
-    InjureAction::run($manager, $injuryDate);
+    resolve(InjureAction::class)->handle($manager, $injuryDate);
 
     $manager->refresh();
     expect($manager->isInjured())->toBeTrue();
@@ -51,7 +51,7 @@ test('it uses StatusTransitionPipeline for injury', function () {
 
     expect($manager->currentInjury)->toBeNull();
 
-    InjureAction::run($manager);
+    resolve(InjureAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -72,7 +72,7 @@ test('it prevents injuring already injured manager', function () {
 
     expect($manager->isInjured())->toBeTrue();
 
-    expect(fn () => InjureAction::run($manager))
+    expect(fn () => resolve(InjureAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -81,14 +81,14 @@ test('it prevents injuring unemployed manager', function () {
 
     expect($manager->isEmployed())->toBeFalse();
 
-    expect(fn () => InjureAction::run($manager))
+    expect(fn () => resolve(InjureAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->employed()->create();
 
-    InjureAction::run($manager);
+    resolve(InjureAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -108,7 +108,7 @@ test('it maintains employment status during injury', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isInjured())->toBeFalse();
 
-    InjureAction::run($manager);
+    resolve(InjureAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -128,7 +128,7 @@ test('it injures suspended manager', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isInjured())->toBeFalse();
 
-    InjureAction::run($manager);
+    resolve(InjureAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -141,7 +141,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->employed()->create();
     $customInjuryDate = now()->subDays(2)->startOfDay();
 
-    InjureAction::run($manager, $customInjuryDate);
+    resolve(InjureAction::class)->handle($manager, $customInjuryDate);
 
     $manager->refresh();
 

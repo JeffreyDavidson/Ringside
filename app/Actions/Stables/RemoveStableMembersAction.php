@@ -9,7 +9,6 @@ use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Remove members from a stable.
@@ -20,8 +19,6 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class RemoveStableMembersAction
 {
-    use AsAction;
-
     /**
      * Remove members from a stable.
      *

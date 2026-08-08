@@ -297,9 +297,9 @@ describe('RefereePolicy Unit Tests', function () {
             $complexReferee = Referee::factory()->bookable()->create();
 
             // Apply business-compatible status changes
-            InjureAction::run($complexReferee, now());
+            resolve(InjureAction::class)->handle($complexReferee, now());
             // Note: Cannot suspend an injured referee per business rules
-            // SuspendAction::run($complexReferee, now());
+            // resolve(SuspendAction::class)->handle($complexReferee, now());
 
             // Authorization should remain consistent regardless of complex state
             expect(Gate::forUser($this->admin)->allows('view', $complexReferee))->toBeTrue();

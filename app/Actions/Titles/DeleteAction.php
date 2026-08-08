@@ -7,12 +7,9 @@ namespace App\Actions\Titles;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete a title.
      *
@@ -40,11 +37,11 @@ class DeleteAction
      * ```php
      * // Delete a title immediately
      * $title = Title::find(1);
-     * DeleteAction::run($title);
+     * resolve(DeleteAction::class)->handle($title);
      *
      * // Delete with specific date
      * $title = Title::find(1);
-     * DeleteAction::run($title, Carbon::parse('2024-12-31'));
+     * resolve(DeleteAction::class)->handle($title, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Title $title, ?Carbon $deletionDate = null): void

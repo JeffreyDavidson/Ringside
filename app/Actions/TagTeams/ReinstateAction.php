@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction
 {
-    use AsAction;
-
     /**
      * Reinstate a suspended tag team.
      *
@@ -38,10 +35,10 @@ class ReinstateAction
      * ```php
      * // Reinstate tag team immediately
      * $tagTeam = TagTeam::where('name', 'The Usos')->first();
-     * ReinstateAction::run($tagTeam);
+     * resolve(ReinstateAction::class)->handle($tagTeam);
      *
      * // Reinstate with specific date
-     * ReinstateAction::run($tagTeam, Carbon::parse('2024-01-01'));
+     * resolve(ReinstateAction::class)->handle($tagTeam, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void

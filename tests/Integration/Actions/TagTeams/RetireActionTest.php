@@ -17,7 +17,7 @@ test('it retires an employed tag team', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
     expect($tagTeam->isRetired())->toBeFalse();
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isEmployed())->toBeFalse();
@@ -41,7 +41,7 @@ test('it retires tag team with specific retirement date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $retirementDate = now()->subDays(5);
 
-    RetireAction::run($tagTeam, $retirementDate);
+    resolve(RetireAction::class)->handle($tagTeam, $retirementDate);
 
     $tagTeam->refresh();
     expect($tagTeam->isRetired())->toBeTrue();
@@ -67,7 +67,7 @@ test('it retires suspended tag team', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
     expect($tagTeam->isSuspended())->toBeTrue();
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isRetired())->toBeTrue();
@@ -95,7 +95,7 @@ test('it uses StatusTransitionPipeline for retirement', function () {
     $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
     expect($tagTeam->currentRetirement)->toBeNull();
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -111,7 +111,7 @@ test('it prevents retiring unemployed tag team', function () {
 
     expect($tagTeam->isEmployed())->toBeFalse();
 
-    expect(fn () => RetireAction::run($tagTeam))
+    expect(fn () => resolve(RetireAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -120,7 +120,7 @@ test('it prevents retiring already retired tag team', function () {
 
     expect($tagTeam->isRetired())->toBeTrue();
 
-    expect(fn () => RetireAction::run($tagTeam))
+    expect(fn () => resolve(RetireAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
 });
 
@@ -128,7 +128,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalEmploymentId = $tagTeam->currentEmployment()->firstOrFail()->id;
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -153,7 +153,7 @@ test('it creates new retirement period', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $originalRetirementCount = $tagTeam->retirements()->count();
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -171,7 +171,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $customRetirementDate = now()->subDays(2)->startOfDay();
 
-    RetireAction::run($tagTeam, $customRetirementDate);
+    resolve(RetireAction::class)->handle($tagTeam, $customRetirementDate);
 
     $tagTeam->refresh();
 
@@ -198,7 +198,7 @@ test('it handles multiple retirement history correctly', function () {
     expect($tagTeam->isRetired())->toBeFalse();
     expect($tagTeam->retirements()->count())->toBe(1);
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
@@ -219,7 +219,7 @@ test('it preserves employment and retirement history', function () {
     $originalEmploymentCount = $tagTeam->employments()->count();
     $originalRetirementCount = $tagTeam->retirements()->count();
 
-    RetireAction::run($tagTeam);
+    resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 

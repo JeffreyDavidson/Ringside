@@ -13,12 +13,9 @@ use App\Services\StableValidationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class SplitStableAction
 {
-    use AsAction;
-
     /**
      * Create a new split stable action instance.
      */

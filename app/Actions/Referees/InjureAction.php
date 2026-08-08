@@ -8,12 +8,9 @@ use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class InjureAction
 {
-    use AsAction;
-
     /**
      * Record a referee injury.
      *
@@ -30,10 +27,10 @@ class InjureAction
      * @example
      * ```php
      * // Mark referee as injured immediately
-     * InjureAction::run($referee);
+     * resolve(InjureAction::class)->handle($referee);
      *
      * // Record injury with specific date
-     * InjureAction::run($referee, Carbon::parse('2024-01-15'));
+     * resolve(InjureAction::class)->handle($referee, Carbon::parse('2024-01-15'));
      * ```
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void

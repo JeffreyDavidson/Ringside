@@ -9,12 +9,9 @@ use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class SuspendAction
 {
-    use AsAction;
-
     /**
      * Suspend a wrestler and make them unavailable for competition.
      *
@@ -36,10 +33,10 @@ class SuspendAction
      * @example
      * ```php
      * // Suspend wrestler immediately
-     * SuspendAction::run($wrestler);
+     * resolve(SuspendAction::class)->handle($wrestler);
      *
      * // Suspend with specific start date
-     * SuspendAction::run($wrestler, Carbon::parse('2024-01-15'));
+     * resolve(SuspendAction::class)->handle($wrestler, Carbon::parse('2024-01-15'));
      * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void

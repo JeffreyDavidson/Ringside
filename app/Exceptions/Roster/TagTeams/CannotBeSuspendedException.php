@@ -30,7 +30,7 @@ use App\Models\TagTeams\TagTeam;
  * // Check suspension eligibility
  * try {
  *     $tagTeam->ensureCanBeSuspended();
- *     SuspendAction::run($tagTeam);
+ *     resolve(SuspendAction::class)->handle($tagTeam);
  * } catch (CannotBeSuspendedException $e) {
  *     // Handle suspension conflict
  *     logger()->warning('Tag team suspension blocked', [

@@ -9,12 +9,9 @@ use App\Models\Referees\Referee;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddRefereesToMatchAction
 {
-    use AsAction;
-
     /**
      * Add referees to an event match.
      *
@@ -47,19 +44,19 @@ class AddRefereesToMatchAction
      * ```php
      * // Standard match with one referee
      * $referees = collect([$mikeChaota]);
-     * AddRefereesToMatchAction::run($match, $referees);
+     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
      *
      * // High-profile match with senior referee
      * $referees = collect([$earlHebner]);
-     * AddRefereesToMatchAction::run($match, $referees);
+     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
      *
      * // Special stipulation match with multiple officials
      * $referees = collect([$referee1, $referee2]);
-     * AddRefereesToMatchAction::run($match, $referees);
+     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
      *
      * // Championship match with experienced official
      * $referees = collect([$charlesRobinson]);
-     * AddRefereesToMatchAction::run($match, $referees);
+     * resolve(AddRefereesToMatchAction::class)->handle($match, $referees);
      * ```
      */
     public function handle(EventMatch $eventMatch, \Illuminate\Support\Collection $referees): void

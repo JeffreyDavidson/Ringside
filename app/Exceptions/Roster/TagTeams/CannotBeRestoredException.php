@@ -30,7 +30,7 @@ use App\Models\TagTeams\TagTeam;
  * // Check restoration eligibility
  * try {
  *     $tagTeam->ensureCanBeRestored();
- *     RestoreAction::run($tagTeam);
+ *     resolve(RestoreAction::class)->handle($tagTeam);
  * } catch (CannotBeRestoredException $e) {
  *     // Handle restoration conflict
  *     logger()->warning('Tag team restoration blocked', [

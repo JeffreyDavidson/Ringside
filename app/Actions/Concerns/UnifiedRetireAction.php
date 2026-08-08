@@ -16,7 +16,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Unified retirement action that can handle any retirable entity.
@@ -37,19 +36,17 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * @example
  * ```php
  * // Retire a wrestler with complex cascading
- * UnifiedRetireAction::run($wrestler, $date);
+ * resolve(UnifiedRetireAction::class)->handle($wrestler, $date);
  *
  * // Retire a title (simple retirement)
- * UnifiedRetireAction::run($title, $date);
+ * resolve(UnifiedRetireAction::class)->handle($title, $date);
  *
  * // Retire a stable with member handling
- * UnifiedRetireAction::run($stable, $date);
+ * resolve(UnifiedRetireAction::class)->handle($stable, $date);
  * ```
  */
 class UnifiedRetireAction
 {
-    use AsAction;
-
     /**
      * Retire an entity with appropriate cascading behavior.
      *
@@ -65,10 +62,10 @@ class UnifiedRetireAction
      * @example
      * ```php
      * // Basic retirement
-     * UnifiedRetireAction::run($wrestler);
+     * resolve(UnifiedRetireAction::class)->handle($wrestler);
      *
      * // Retirement with specific date and notes
-     * UnifiedRetireAction::run($wrestler, Carbon::parse('2024-12-31'), 'Hall of Fame induction');
+     * resolve(UnifiedRetireAction::class)->handle($wrestler, Carbon::parse('2024-12-31'), 'Hall of Fame induction');
      * ```
      */
     public function handle(Model $entity, ?Carbon $retirementDate = null, ?string $notes = null): void
@@ -320,7 +317,7 @@ class UnifiedRetireAction
     public static function batch(iterable $entities, ?Carbon $retirementDate = null, ?string $notes = null): void
     {
         foreach ($entities as $entity) {
-            static::run($entity, $retirementDate, $notes);
+            resolve(static::class)->handle($entity, $retirementDate, $notes);
         }
     }
 

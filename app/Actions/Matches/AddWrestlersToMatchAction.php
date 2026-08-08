@@ -9,12 +9,9 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class AddWrestlersToMatchAction
 {
-    use AsAction;
-
     /**
      * Add wrestlers to an event match.
      *
@@ -46,15 +43,15 @@ class AddWrestlersToMatchAction
      * ```php
      * // Singles match - Add John Cena to side 1
      * $wrestlers = collect([$johnCena]);
-     * AddWrestlersToMatchAction::run($match, $wrestlers, 1);
+     * resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 1);
      *
      * // Handicap match - Add multiple wrestlers to one side
      * $wrestlers = collect([$wrestler1, $wrestler2]);
-     * AddWrestlersToMatchAction::run($match, $wrestlers, 2);
+     * resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 2);
      *
      * // Battle royal - Add multiple wrestlers to same side
      * $wrestlers = collect([$wrestler1, $wrestler2, $wrestler3]);
-     * AddWrestlersToMatchAction::run($match, $wrestlers, 1);
+     * resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, 1);
      * ```
      */
     public function handle(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void

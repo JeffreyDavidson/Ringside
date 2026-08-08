@@ -8,12 +8,9 @@ use App\Data\Referees\RefereeData;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     public function __construct(
         private EmployAction $employAction
     ) {}
@@ -40,7 +37,7 @@ class UpdateAction
      *     'name' => 'Updated Name',
      *     'hometown' => 'New Hometown'
      * ]);
-     * $updatedReferee = UpdateAction::run($referee, $refereeData);
+     * $updatedReferee = resolve(UpdateAction::class)->handle($referee, $refereeData);
      * ```
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee

@@ -8,12 +8,9 @@ use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class SuspendAction
 {
-    use AsAction;
-
     /**
      * Suspend a referee.
      *
@@ -30,10 +27,10 @@ class SuspendAction
      * @example
      * ```php
      * // Suspend referee immediately
-     * SuspendAction::run($referee);
+     * resolve(SuspendAction::class)->handle($referee);
      *
      * // Schedule suspension for future date
-     * SuspendAction::run($referee, Carbon::parse('2024-12-31'));
+     * resolve(SuspendAction::class)->handle($referee, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void

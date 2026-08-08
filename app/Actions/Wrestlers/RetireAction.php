@@ -10,12 +10,9 @@ use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
-
     /**
      * Retire a wrestler and end their career.
      *
@@ -39,10 +36,10 @@ class RetireAction
      * @example
      * ```php
      * // Retire wrestler immediately
-     * RetireAction::run($wrestler);
+     * resolve(RetireAction::class)->handle($wrestler);
      *
      * // Retire with specific start date
-     * RetireAction::run($wrestler, Carbon::parse('2024-12-31'));
+     * resolve(RetireAction::class)->handle($wrestler, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void

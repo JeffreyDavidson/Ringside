@@ -11,12 +11,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
-
     /**
      * Unretire a retired tag team and return them to active competition.
      *
@@ -47,19 +44,19 @@ class UnretireAction
      * ```php
      * // Unretire tag team immediately
      * $tagTeam = TagTeam::where('name', 'The Hardy Boyz')->first();
-     * UnretireAction::run($tagTeam);
+     * resolve(UnretireAction::class)->handle($tagTeam);
      *
      * // Unretire with specific date
-     * UnretireAction::run($tagTeam, Carbon::parse('2024-01-01'));
+     * resolve(UnretireAction::class)->handle($tagTeam, Carbon::parse('2024-01-01'));
      *
      * // Unretire without employing immediately (manual employment later)
-     * UnretireAction::run($tagTeam, employImmediately: false);
+     * resolve(UnretireAction::class)->handle($tagTeam, employImmediately: false);
      *
      * // Unretire without requiring available partners
-     * UnretireAction::run($tagTeam, requireAvailablePartners: false);
+     * resolve(UnretireAction::class)->handle($tagTeam, requireAvailablePartners: false);
      *
      * // Unretire without unretiring partners (team only)
-     * UnretireAction::run($tagTeam, unretirePartners: false);
+     * resolve(UnretireAction::class)->handle($tagTeam, unretirePartners: false);
      * ```
      */
     public function handle(

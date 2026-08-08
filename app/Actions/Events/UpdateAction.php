@@ -7,12 +7,9 @@ namespace App\Actions\Events;
 use App\Data\Events\EventData;
 use App\Models\Events\Event;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Update an event.
      *
@@ -34,14 +31,14 @@ class UpdateAction
      *     'date' => now()->addMonth(),
      *     'venue_id' => 2
      * ]);
-     * $updatedEvent = UpdateAction::run($event, $eventData);
+     * $updatedEvent = resolve(UpdateAction::class)->handle($event, $eventData);
      *
      * // Change venue for an event
      * $eventData = new EventData([
      *     'venue_id' => 3,
      *     'preview' => 'Updated with new venue information'
      * ]);
-     * $updatedEvent = UpdateAction::run($event, $eventData);
+     * $updatedEvent = resolve(UpdateAction::class)->handle($event, $eventData);
      * ```
      */
     public function handle(Event $event, EventData $eventData): Event

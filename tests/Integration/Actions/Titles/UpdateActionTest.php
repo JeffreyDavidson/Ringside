@@ -17,7 +17,7 @@ test('it updates a title', function () {
     $data = new TitleData('New Example Title', TitleType::Singles, null);
     $title = Title::factory()->create();
 
-    UpdateAction::run($title, $data);
+    resolve(UpdateAction::class)->handle($title, $data);
 
     $title->refresh();
     expect($title->name)->toBe('New Example Title');
@@ -29,7 +29,7 @@ test('it activates an unactivated title if activation date is filled in request'
     $data = new TitleData('New Example Title', TitleType::Singles, $datetime);
     $title = Title::factory()->unactivated()->create();
 
-    UpdateAction::run($title, $data);
+    resolve(UpdateAction::class)->handle($title, $data);
 
     $title->refresh();
     expect($title->name)->toBe('New Example Title');
@@ -44,7 +44,7 @@ test('it updates a title with future activation but does not create new debut si
     $title = Title::factory()->active()->create();
     $originalActivationsCount = $title->activations->count();
 
-    UpdateAction::run($title, $data);
+    resolve(UpdateAction::class)->handle($title, $data);
 
     $title->refresh();
     expect($title->name)->toBe('New Example Title');

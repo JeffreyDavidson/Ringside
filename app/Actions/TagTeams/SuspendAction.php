@@ -9,12 +9,9 @@ use App\Actions\Concerns\SuspensionCascadeStrategy;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class SuspendAction
 {
-    use AsAction;
-
     /**
      * Suspend a tag team.
      *
@@ -37,10 +34,10 @@ class SuspendAction
      * ```php
      * // Suspend tag team immediately
      * $tagTeam = TagTeam::where('name', 'D-Generation X')->first();
-     * SuspendAction::run($tagTeam);
+     * resolve(SuspendAction::class)->handle($tagTeam);
      *
      * // Schedule suspension for future date
-     * SuspendAction::run($tagTeam, Carbon::parse('2024-12-31'));
+     * resolve(SuspendAction::class)->handle($tagTeam, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void

@@ -11,12 +11,9 @@ use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete a wrestler.
      *

@@ -18,7 +18,7 @@ test('it adds a single title to a match', function () {
 
     $titles = collect([$title]);
 
-    AddTitlesToMatchAction::run($match, $titles);
+    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
 
     // Should create title-match relationship
     $this->assertDatabaseHas('events_matches_titles', [
@@ -38,7 +38,7 @@ test('it adds multiple titles to a match', function () {
 
     $titles = collect([$title1, $title2]);
 
-    AddTitlesToMatchAction::run($match, $titles);
+    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
 
     // Should create relationships for both titles
     $this->assertDatabaseHas('events_matches_titles', [
@@ -63,7 +63,7 @@ test('it filters out inactive titles', function () {
 
     $titles = collect([$activeTitle, $inactiveTitle]);
 
-    AddTitlesToMatchAction::run($match, $titles);
+    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
 
     // Should only add the active title
     $this->assertDatabaseHas('events_matches_titles', [
@@ -86,15 +86,15 @@ test('it throws exception when no eligible titles provided', function () {
 
     $titles = collect([$inactiveTitle]);
 
-    expect(fn () => AddTitlesToMatchAction::run($match, $titles))
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
         ->toThrow(InvalidArgumentException::class, 'No eligible titles provided for championship match');
 });
 
 test('it handles empty collection', function () {
     $match = EventMatch::factory()->create();
-    $titles = collect([]);
+    $titles = Title::query()->whereKey([])->get();
 
-    expect(fn () => AddTitlesToMatchAction::run($match, $titles))
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
         ->toThrow(InvalidArgumentException::class, 'No eligible titles provided for championship match');
 });
 
@@ -109,7 +109,7 @@ test('it creates championship match correctly', function () {
 
     $titles = collect([$wweChampionship, $intercontinentalTitle]);
 
-    AddTitlesToMatchAction::run($match, $titles);
+    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
 
     // Match should be associated with both titles
     $matchTitles = $match->refresh()->titles;
@@ -127,7 +127,7 @@ test('it handles transaction consistency', function () {
 
     $titles = collect([$title1, $title2]);
 
-    AddTitlesToMatchAction::run($match, $titles);
+    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
 
     // Both titles should be added atomically
     expect($match->refresh()->titles)->toHaveCount(2);

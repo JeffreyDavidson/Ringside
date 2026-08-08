@@ -10,12 +10,9 @@ use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class RetireAction
 {
-    use AsAction;
-
     /**
      * Retire a referee and end their officiating career.
      *
@@ -34,10 +31,10 @@ class RetireAction
      * @example
      * ```php
      * // Retire referee immediately
-     * RetireAction::run($referee);
+     * resolve(RetireAction::class)->handle($referee);
      *
      * // Retire with specific date
-     * RetireAction::run($referee, Carbon::parse('2024-12-31'));
+     * resolve(RetireAction::class)->handle($referee, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void

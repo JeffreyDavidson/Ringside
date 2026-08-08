@@ -6,12 +6,9 @@ namespace App\Actions\Events;
 
 use App\Models\Events\Event;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class DeleteAction
 {
-    use AsAction;
-
     /**
      * Delete an event.
      *
@@ -40,10 +37,10 @@ class DeleteAction
      * ```php
      * // Delete event immediately
      * $event = Event::find(1);
-     * DeleteAction::run($event);
+     * resolve(DeleteAction::class)->handle($event);
      *
      * // Delete with specific date
-     * DeleteAction::run($event, Carbon::parse('2024-12-31'));
+     * resolve(DeleteAction::class)->handle($event, Carbon::parse('2024-12-31'));
      * ```
      */
     public function handle(Event $event, ?Carbon $deletionDate = null): void

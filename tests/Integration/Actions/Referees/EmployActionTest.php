@@ -18,7 +18,7 @@ test('it employs an unemployed referee', function () {
 
     expect($referee->isEmployed())->toBeFalse();
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
@@ -34,7 +34,7 @@ test('it employs referee with specific employment date', function () {
     $referee = Referee::factory()->create();
     $employmentDate = now()->subDays(30);
 
-    EmployAction::run($referee, $employmentDate);
+    resolve(EmployAction::class)->handle($referee, $employmentDate);
 
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
@@ -52,7 +52,7 @@ test('it prevents re-employing suspended referee', function () {
     expect($referee->isSuspended())->toBeTrue();
     expect($referee->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($referee))
+    expect(fn () => resolve(EmployAction::class)->handle($referee))
         ->toThrow(CannotBeEmployedException::class);
 });
 
@@ -62,7 +62,7 @@ test('it prevents re-employing injured referee', function () {
     expect($referee->isInjured())->toBeTrue();
     expect($referee->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($referee))
+    expect(fn () => resolve(EmployAction::class)->handle($referee))
         ->toThrow(CannotBeEmployedException::class);
 });
 
@@ -73,7 +73,7 @@ test('it employs retired referee and ends retirement', function () {
     expect($referee->isRetired())->toBeTrue();
     expect($referee->isEmployed())->toBeFalse();
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 
     $referee->refresh();
     $retirement->refresh();
@@ -98,7 +98,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->create();
     $employmentDate = now()->subDays(10);
 
-    EmployAction::run($referee, $employmentDate);
+    resolve(EmployAction::class)->handle($referee, $employmentDate);
 
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
@@ -115,7 +115,7 @@ test('it prevents re-employing suspended referee without changing records', func
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect(fn () => EmployAction::run($referee))
+    expect(fn () => resolve(EmployAction::class)->handle($referee))
         ->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
@@ -130,7 +130,7 @@ test('it validates referee can be employed', function () {
     $referee = Referee::factory()->create();
 
     // Should succeed without throwing validation exception
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
@@ -142,7 +142,7 @@ test('it prevents double employment', function () {
 
     expect($referee->isEmployed())->toBeTrue();
 
-    expect(fn () => EmployAction::run($referee))
+    expect(fn () => resolve(EmployAction::class)->handle($referee))
         ->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
@@ -156,7 +156,7 @@ test('it updates referee status to employed', function () {
 
     expect($referee->status)->not->toBe(EmploymentStatus::Employed);
 
-    EmployAction::run($referee);
+    resolve(EmployAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->status)->toBe(EmploymentStatus::Employed);
@@ -166,7 +166,7 @@ test('it creates employment record with correct structure', function () {
     $referee = Referee::factory()->create();
     $employmentDate = now()->subDays(7);
 
-    EmployAction::run($referee, $employmentDate);
+    resolve(EmployAction::class)->handle($referee, $employmentDate);
 
     $employment = freshModel($referee)->currentEmployment()->firstOrFail();
 

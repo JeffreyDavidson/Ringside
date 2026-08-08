@@ -20,7 +20,7 @@ test('it retires an employed manager', function () {
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isRetired())->toBeFalse();
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isRetired())->toBeTrue();
@@ -44,7 +44,7 @@ test('it retires manager with specific retirement date', function () {
     $manager = Manager::factory()->employed()->create();
     $retirementDate = now()->subDays(5);
 
-    RetireAction::run($manager, $retirementDate);
+    resolve(RetireAction::class)->handle($manager, $retirementDate);
 
     $manager->refresh();
     expect($manager->isRetired())->toBeTrue();
@@ -68,7 +68,7 @@ test('it retires suspended manager and ends suspension', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isRetired())->toBeTrue();
@@ -95,7 +95,7 @@ test('it retires injured manager and ends injury', function () {
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isRetired())->toBeTrue();
@@ -128,7 +128,7 @@ test('it ends management relationships with cascade strategy', function () {
     expect($manager->currentWrestlers)->toHaveCount(1);
     expect($manager->currentTagTeams)->toHaveCount(1);
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -160,7 +160,7 @@ test('it uses StatusTransitionPipeline with cascade strategy', function () {
     expect($manager->currentRetirement)->toBeNull();
     expect($manager->currentWrestlers)->toHaveCount(1);
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -177,7 +177,7 @@ test('it prevents retiring already retired manager', function () {
 
     expect($manager->isRetired())->toBeTrue();
 
-    expect(fn () => RetireAction::run($manager))
+    expect(fn () => resolve(RetireAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -186,7 +186,7 @@ test('it prevents retiring unemployed manager', function () {
 
     expect($manager->isEmployed())->toBeFalse();
 
-    expect(fn () => RetireAction::run($manager))
+    expect(fn () => resolve(RetireAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -195,7 +195,7 @@ test('it handles database transactions correctly', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -214,7 +214,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->employed()->create();
     $customRetirementDate = now()->subDays(3)->startOfDay();
 
-    RetireAction::run($manager, $customRetirementDate);
+    resolve(RetireAction::class)->handle($manager, $customRetirementDate);
 
     $manager->refresh();
 
@@ -247,7 +247,7 @@ test('it preserves management history during retirement', function () {
     expect($manager->wrestlers()->count())->toBe(2); // Total relationships
     expect($manager->currentWrestlers)->toHaveCount(1); // Current relationships
 
-    RetireAction::run($manager);
+    resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
 

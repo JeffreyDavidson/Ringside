@@ -18,7 +18,7 @@ test('it injures an employed referee', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isInjured())->toBeFalse();
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isInjured())->toBeTrue();
@@ -34,7 +34,7 @@ test('it injures referee with specific injury date', function () {
     $referee = Referee::factory()->employed()->create();
     $injuryDate = now()->subDays(3);
 
-    InjureAction::run($referee, $injuryDate);
+    resolve(InjureAction::class)->handle($referee, $injuryDate);
 
     $referee->refresh();
     expect($referee->isInjured())->toBeTrue();
@@ -50,7 +50,7 @@ test('it handles DateHelper date resolution', function () {
     $referee = Referee::factory()->employed()->create();
     $injuryDate = now()->subDays(7);
 
-    InjureAction::run($referee, $injuryDate);
+    resolve(InjureAction::class)->handle($referee, $injuryDate);
 
     $referee->refresh();
 
@@ -66,7 +66,7 @@ test('it validates referee can be injured', function () {
     $referee = Referee::factory()->employed()->create();
 
     // Should succeed without throwing validation exception
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
     expect($referee->isInjured())->toBeTrue();
@@ -77,14 +77,14 @@ test('it throws exception when referee cannot be injured', function () {
 
     expect($referee->isEmployed())->toBeFalse();
 
-    expect(fn () => InjureAction::run($referee))
+    expect(fn () => resolve(InjureAction::class)->handle($referee))
         ->toThrow(CannotBeInjuredException::class);
 });
 
 test('it maintains transaction boundaries', function () {
     $referee = Referee::factory()->employed()->create();
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
 
@@ -104,7 +104,7 @@ test('it maintains referee employment after injury', function () {
 
     expect($referee->isEmployed())->toBeTrue();
 
-    InjureAction::run($referee);
+    resolve(InjureAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
@@ -119,7 +119,7 @@ test('it creates injury record with correct structure', function () {
     $referee = Referee::factory()->employed()->create();
     $injuryDate = now()->subDays(2);
 
-    InjureAction::run($referee, $injuryDate);
+    resolve(InjureAction::class)->handle($referee, $injuryDate);
 
     $injury = freshModel($referee)->currentInjury()->firstOrFail();
 

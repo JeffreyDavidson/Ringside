@@ -8,7 +8,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Unified injury action that can handle any injurable entity.
@@ -37,19 +36,17 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * @example
  * ```php
  * // Injure a wrestler
- * UnifiedInjureAction::run($wrestler, $date);
+ * resolve(UnifiedInjureAction::class)->handle($wrestler, $date);
  *
  * // Injure a manager
- * UnifiedInjureAction::run($manager, $date);
+ * resolve(UnifiedInjureAction::class)->handle($manager, $date);
  *
  * // Injure a referee
- * UnifiedInjureAction::run($referee, $date);
+ * resolve(UnifiedInjureAction::class)->handle($referee, $date);
  * ```
  */
 class UnifiedInjureAction
 {
-    use AsAction;
-
     /**
      * Injure an entity with appropriate validation and effects.
      *
@@ -65,10 +62,10 @@ class UnifiedInjureAction
      * @example
      * ```php
      * // Basic injury
-     * UnifiedInjureAction::run($wrestler);
+     * resolve(UnifiedInjureAction::class)->handle($wrestler);
      *
      * // Injury with specific date and description
-     * UnifiedInjureAction::run($wrestler, Carbon::parse('2024-01-15'), 'Torn ACL during match');
+     * resolve(UnifiedInjureAction::class)->handle($wrestler, Carbon::parse('2024-01-15'), 'Torn ACL during match');
      * ```
      */
     public function handle(Model $entity, ?Carbon $injuryDate = null, ?string $notes = null): void
@@ -174,7 +171,7 @@ class UnifiedInjureAction
     public static function batch(iterable $entities, ?Carbon $injuryDate = null, ?string $notes = null): void
     {
         foreach ($entities as $entity) {
-            static::run($entity, $injuryDate, $notes);
+            resolve(static::class)->handle($entity, $injuryDate, $notes);
         }
     }
 

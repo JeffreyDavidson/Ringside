@@ -32,7 +32,7 @@ test('it updates wrestler basic information', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     expect($result)->toBeInstanceOf(Wrestler::class);
     expect($result->name)->toBe('Updated Name');
@@ -67,7 +67,7 @@ test('it updates wrestler and employs them when employment date provided', funct
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
     expect($result->name)->toBe('John Cena');
@@ -96,7 +96,7 @@ test('it updates wrestler without employing when no employment date', function (
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
     expect($result->name)->toBe('The Rock');
@@ -124,7 +124,7 @@ test('it does not re-employ already employed wrestler', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
     expect($result->name)->toBe('Updated Name');
@@ -159,7 +159,7 @@ test('it employs managers when wrestler gets employed', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
     $manager1->refresh();
@@ -196,7 +196,7 @@ test('it handles DateHelper date resolution for employment', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
     expect($result->isEmployed())->toBeTrue();
@@ -223,7 +223,7 @@ test('it maintains transaction boundaries', function () {
     );
 
     // Simulate transaction - all changes should be atomic
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
 
@@ -252,7 +252,7 @@ test('it returns updated wrestler instance', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     expect($result)->toBeInstanceOf(Wrestler::class);
     expect($result->id)->toBe($wrestler->id);
@@ -274,7 +274,7 @@ test('it handles height conversion correctly', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     expect($result->height->feet)->toBe(5);
     expect($result->height->inches)->toBe(11);
@@ -296,7 +296,7 @@ test('it preserves wrestler id and timestamps', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     expect($result->id)->toBe($originalId);
     expect(requiredDate($result->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp);
@@ -316,7 +316,7 @@ test('it handles null signature move', function () {
         managers: null
     );
 
-    $result = UpdateAction::make()->handle($wrestler, $updateData);
+    $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     expect($result->signature_move)->toBeNull();
 

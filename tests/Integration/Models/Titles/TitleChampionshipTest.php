@@ -453,7 +453,7 @@ describe('TitleChampionship Model', function () {
             expect(freshModel($this->title)->currentChampionship)->not()->toBeNull();
 
             // Retire wrestler
-            WrestlerRetireAction::run($this->wrestler, Carbon::now());
+            resolve(WrestlerRetireAction::class)->handle($this->wrestler, Carbon::now());
 
             // Business rule: Champion retirement should vacate title
             $refreshedWrestler = freshModel($this->wrestler);
@@ -479,7 +479,7 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Injure wrestler
-            InjureAction::run($this->wrestler, Carbon::now());
+            resolve(InjureAction::class)->handle($this->wrestler, Carbon::now());
 
             $refreshedWrestler = freshModel($this->wrestler);
 
@@ -501,7 +501,7 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Release wrestler from employment
-            ReleaseAction::run($this->wrestler, Carbon::now());
+            resolve(ReleaseAction::class)->handle($this->wrestler, Carbon::now());
 
             $refreshedWrestler = freshModel($this->wrestler);
 
@@ -523,7 +523,7 @@ describe('TitleChampionship Model', function () {
                 ]);
 
             // Retire title
-            RetireAction::run($this->title, Carbon::now());
+            resolve(RetireAction::class)->handle($this->title, Carbon::now());
 
             $refreshedTitle = freshModel($this->title);
 

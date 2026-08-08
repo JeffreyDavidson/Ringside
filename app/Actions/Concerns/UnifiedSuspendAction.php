@@ -16,7 +16,6 @@ use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Unified suspension action that can handle any suspendable entity.
@@ -40,19 +39,17 @@ use Lorisleiva\Actions\Concerns\AsAction;
  * @example
  * ```php
  * // Suspend a wrestler (may cascade to managers)
- * UnifiedSuspendAction::run($wrestler, $date);
+ * resolve(UnifiedSuspendAction::class)->handle($wrestler, $date);
  *
  * // Suspend a tag team (cascades to wrestlers and managers)
- * UnifiedSuspendAction::run($tagTeam, $date);
+ * resolve(UnifiedSuspendAction::class)->handle($tagTeam, $date);
  *
  * // Suspend a manager (no cascading)
- * UnifiedSuspendAction::run($manager, $date);
+ * resolve(UnifiedSuspendAction::class)->handle($manager, $date);
  * ```
  */
 class UnifiedSuspendAction
 {
-    use AsAction;
-
     /**
      * Suspend an entity with appropriate cascading behavior.
      *
@@ -68,10 +65,10 @@ class UnifiedSuspendAction
      * @example
      * ```php
      * // Basic suspension
-     * UnifiedSuspendAction::run($wrestler);
+     * resolve(UnifiedSuspendAction::class)->handle($wrestler);
      *
      * // Suspension with specific date and notes
-     * UnifiedSuspendAction::run($wrestler, Carbon::parse('2024-01-01'), 'Conduct violation');
+     * resolve(UnifiedSuspendAction::class)->handle($wrestler, Carbon::parse('2024-01-01'), 'Conduct violation');
      * ```
      */
     public function handle(Model $entity, ?Carbon $suspensionDate = null, ?string $notes = null): void
@@ -177,7 +174,7 @@ class UnifiedSuspendAction
     public static function batch(iterable $entities, ?Carbon $suspensionDate = null, ?string $notes = null): void
     {
         foreach ($entities as $entity) {
-            static::run($entity, $suspensionDate, $notes);
+            resolve(static::class)->handle($entity, $suspensionDate, $notes);
         }
     }
 
@@ -260,7 +257,7 @@ class UnifiedSuspendAction
                     });
 
                 foreach ($members as $member) {
-                    static::run($member, $suspensionDate, $notes);
+                    resolve(static::class)->handle($member, $suspensionDate, $notes);
                 }
             }
         }

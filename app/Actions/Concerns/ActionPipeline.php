@@ -10,7 +10,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Complex workflow composition pipeline for wrestling promotion operations.
@@ -50,8 +49,6 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class ActionPipeline
 {
-    use AsAction;
-
     /** @var array<int, array<string, mixed>> */
     protected array $operations = [];
 

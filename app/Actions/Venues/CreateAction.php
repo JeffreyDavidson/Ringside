@@ -6,12 +6,9 @@ namespace App\Actions\Venues;
 
 use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class CreateAction
 {
-    use AsAction;
-
     /**
      * Create a venue.
      *
@@ -32,7 +29,7 @@ class CreateAction
      *     'state' => 'NY',
      *     'zipcode' => '10001'
      * ]);
-     * $venue = CreateAction::run($venueData);
+     * $venue = resolve(CreateAction::class)->handle($venueData);
      * ```
      */
     public function handle(VenueData $venueData): Venue

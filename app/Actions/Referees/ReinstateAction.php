@@ -9,12 +9,9 @@ use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class ReinstateAction
 {
-    use AsAction;
-
     /**
      * Reinstate a suspended referee.
      *
@@ -31,10 +28,10 @@ class ReinstateAction
      * @example
      * ```php
      * // Reinstate referee immediately
-     * ReinstateAction::run($referee);
+     * resolve(ReinstateAction::class)->handle($referee);
      *
      * // Reinstate with specific date
-     * ReinstateAction::run($referee, Carbon::parse('2024-01-01'));
+     * resolve(ReinstateAction::class)->handle($referee, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void

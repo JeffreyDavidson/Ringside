@@ -10,12 +10,9 @@ use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction
 {
-    use AsAction;
-
     /**
      * Employ a wrestler and activate their career.
      *
@@ -33,10 +30,10 @@ class EmployAction
      * @example
      * ```php
      * // Employ wrestler immediately
-     * EmployAction::run($wrestler);
+     * resolve(EmployAction::class)->handle($wrestler);
      *
      * // Employ with specific start date
-     * EmployAction::run($wrestler, Carbon::parse('2024-01-01'));
+     * resolve(EmployAction::class)->handle($wrestler, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void

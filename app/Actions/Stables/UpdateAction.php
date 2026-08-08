@@ -9,12 +9,9 @@ use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use App\Services\StableValidationService;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UpdateAction
 {
-    use AsAction;
-
     /**
      * Create a new update action instance.
      */
@@ -45,7 +42,7 @@ class UpdateAction
      *         tagTeams: collect([])
      *     )
      * );
-     * $updatedStable = UpdateAction::run($stable, $stableData);
+     * $updatedStable = resolve(UpdateAction::class)->handle($stable, $stableData);
      * ```
      */
     public function handle(Stable $stable, StableData $stableData): Stable

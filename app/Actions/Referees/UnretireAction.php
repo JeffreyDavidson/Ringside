@@ -10,12 +10,9 @@ use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class UnretireAction
 {
-    use AsAction;
-
     /**
      * Unretire a retired referee and return them to active officiating.
      *
@@ -38,10 +35,10 @@ class UnretireAction
      * @example
      * ```php
      * // Unretire referee immediately
-     * UnretireAction::run($referee);
+     * resolve(UnretireAction::class)->handle($referee);
      *
      * // Unretire with specific date
-     * UnretireAction::run($referee, Carbon::parse('2024-01-01'));
+     * resolve(UnretireAction::class)->handle($referee, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void

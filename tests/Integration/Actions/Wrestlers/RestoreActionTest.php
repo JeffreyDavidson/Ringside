@@ -17,7 +17,7 @@ test('it restores a soft-deleted wrestler', function () {
 
     expect($wrestler->trashed())->toBeTrue();
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -37,7 +37,7 @@ test('it restores wrestler with specific restore date', function () {
 
     expect($wrestler->trashed())->toBeTrue();
 
-    RestoreAction::run($wrestler, $restoreDate);
+    resolve(RestoreAction::class)->handle($wrestler, $restoreDate);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -55,7 +55,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->delete(); // Soft delete
 
     // Test with null date (should use now())
-    RestoreAction::run($wrestler, null);
+    resolve(RestoreAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -82,7 +82,7 @@ test('it restores wrestler without automatically restoring relationships', funct
     expect($wrestler->trashed())->toBeTrue();
     expect($wrestler->isEmployed())->toBeFalse();
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -117,7 +117,7 @@ test('it maintains historical data integrity', function () {
 
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -144,7 +144,7 @@ test('it prevents restoring non-deleted wrestler', function () {
 
     expect($wrestler->trashed())->toBeFalse();
 
-    expect(fn () => RestoreAction::run($wrestler))
+    expect(fn () => resolve(RestoreAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -175,7 +175,7 @@ test('it restores wrestler with complex status history', function () {
 
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -199,7 +199,7 @@ test('it allows wrestler to be re-employed after restoration', function () {
     $wrestler->employments()->whereNull('ended_at')->update(['ended_at' => now()->subDays(5)]);
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -224,7 +224,7 @@ test('it preserves wrestler identity and metadata', function () {
     $originalId = $wrestler->id;
     $wrestler->delete(); // Soft delete
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
@@ -244,7 +244,7 @@ test('it handles wrestler with no relationships', function () {
     expect($wrestler->employments)->toBeEmpty();
     expect($wrestler->managers)->toBeEmpty();
 
-    RestoreAction::run($wrestler);
+    resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();

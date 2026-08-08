@@ -8,12 +8,9 @@ use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\Referees\Referee;
 use Exception;
 use Illuminate\Support\Carbon;
-use Lorisleiva\Actions\Concerns\AsAction;
 
 class EmployAction
 {
-    use AsAction;
-
     /**
      * Employ a referee.
      *
@@ -30,10 +27,10 @@ class EmployAction
      * @example
      * ```php
      * // Employ referee immediately
-     * EmployAction::run($referee);
+     * resolve(EmployAction::class)->handle($referee);
      *
      * // Employ with specific start date
-     * EmployAction::run($referee, Carbon::parse('2024-01-01'));
+     * resolve(EmployAction::class)->handle($referee, Carbon::parse('2024-01-01'));
      * ```
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void
