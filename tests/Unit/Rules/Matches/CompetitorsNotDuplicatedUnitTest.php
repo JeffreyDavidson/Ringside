@@ -35,7 +35,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -57,7 +57,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -80,7 +80,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -103,7 +103,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -125,7 +125,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -148,7 +148,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -169,7 +169,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -188,7 +188,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -209,7 +209,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -230,7 +230,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -250,7 +250,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -268,7 +268,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', null, $failCallback);
+            $rule->validate('competitors', null, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -284,7 +284,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', 'invalid', $failCallback);
+            $rule->validate('competitors', 'invalid', validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -300,7 +300,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', 123, $failCallback);
+            $rule->validate('competitors', 123, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -322,7 +322,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -344,7 +344,7 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('competitors', $competitors, $failCallback);
+            $rule->validate('competitors', $competitors, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();

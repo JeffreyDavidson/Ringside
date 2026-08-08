@@ -27,8 +27,13 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     describe('model validation with employment methods', function () {
         test('validation passes when model is not employed', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isEmployed')->andReturn(false);
+            $model = new class extends Model
+            {
+                public function isEmployed(): bool
+                {
+                    return false;
+                }
+            };
 
             $rule = new CanChangeEmploymentDate($model);
             $failCalled = false;
@@ -37,7 +42,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addWeek(), $failCallback);
+            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -73,7 +78,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addMonth(), $failCallback);
+            $rule->validate('started_at', now()->addMonth(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -107,7 +112,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addMonth(), $failCallback);
+            $rule->validate('started_at', now()->addMonth(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -115,9 +120,13 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
 
         test('validation passes when model is employed but lacks employedOn method', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isEmployed')->andReturn(true);
-            $model->shouldReceive('getAttribute')->andReturn('Test Model');
+            $model = new class extends Model
+            {
+                public function isEmployed(): bool
+                {
+                    return true;
+                }
+            };
 
             $rule = new CanChangeEmploymentDate($model);
             $failCalled = false;
@@ -126,7 +135,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addWeek(), $failCallback);
+            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -136,7 +145,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     describe('method existence checking logic', function () {
         test('validation passes when model lacks isEmployed method', function () {
             // Arrange
-            $model = Mockery::mock(Model::class);
+            $model = new class extends Model {};
             // Note: No isEmployed method mocked - simulates method_exists() returning false
 
             $rule = new CanChangeEmploymentDate($model);
@@ -146,7 +155,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addWeek(), $failCallback);
+            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -161,7 +170,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addWeek(), $failCallback);
+            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -196,7 +205,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addWeek(), $failCallback);
+            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failMessage)->toContain('Custom Model Name');
@@ -229,7 +238,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addWeek(), $failCallback);
+            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failMessage)->toMatch('/The employment date cannot be changed while .+ is currently employed\./');
@@ -264,7 +273,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', now()->addWeek(), $failCallback);
+            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -297,7 +306,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', '2024-12-25', $failCallback);
+            $rule->validate('started_at', '2024-12-25', validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
@@ -330,7 +339,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('started_at', $targetDate, $failCallback);
+            $rule->validate('started_at', $targetDate, validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -402,8 +411,8 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
                 $messages[] = $message;
             };
             // Act
-            (new CanChangeEmploymentDate($model1))->validate('started_at', now(), $failCallback);
-            (new CanChangeEmploymentDate($model2))->validate('started_at', now(), $failCallback);
+            (new CanChangeEmploymentDate($model1))->validate('started_at', now(), validationFailureCallback($failCallback));
+            (new CanChangeEmploymentDate($model2))->validate('started_at', now(), validationFailureCallback($failCallback));
             // Assert
             expect($messages)->toHaveCount(2);
             expect($messages[0])->toBe('The employment date cannot be changed while Model One is currently employed.');
@@ -434,9 +443,9 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
                 $failCallCount++;
             };
             // Act
-            $rule->validate('started_at', now(), $failCallback);
-            $rule->validate('employment_date', now(), $failCallback);
-            $rule->validate('hire_date', now(), $failCallback);
+            $rule->validate('started_at', now(), validationFailureCallback($failCallback));
+            $rule->validate('employment_date', now(), validationFailureCallback($failCallback));
+            $rule->validate('hire_date', now(), validationFailureCallback($failCallback));
             // Assert
             expect($failCallCount)->toBe(3);
         });

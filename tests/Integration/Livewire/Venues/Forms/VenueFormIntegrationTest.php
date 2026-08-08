@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
+use JMac\Testing\Double;
 use Livewire\Component;
 
 /**
@@ -29,7 +30,7 @@ use Livewire\Component;
  */
 describe('VenueForm Integration Tests', function () {
     beforeEach(function () {
-        $mockComponent = mock(Component::class);
+        $mockComponent = Double::for(Component::class);
         $this->form = new CreateEditForm($mockComponent, 'form');
     });
 
