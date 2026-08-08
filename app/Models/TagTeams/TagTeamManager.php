@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\TagTeams;
 
 use App\Models\Managers\Manager;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
@@ -27,21 +28,10 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Fillable('tag_team_id', 'manager_id', 'hired_at', 'fired_at')]
 class TagTeamManager extends Pivot
 {
     protected $table = 'tag_teams_managers';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'tag_team_id',
-        'manager_id',
-        'hired_at',
-        'fired_at',
-    ];
 
     /**
      * Get the attributes that should be cast.

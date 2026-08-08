@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Stables;
 
 use App\Models\TagTeams\TagTeam;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
@@ -33,6 +34,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Fillable('stable_id', 'tag_team_id', 'joined_at', 'left_at')]
 class StableTagTeam extends Pivot
 {
     /**
@@ -41,18 +43,6 @@ class StableTagTeam extends Pivot
      * @var string
      */
     protected $table = 'stables_tag_teams';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'stable_id',
-        'tag_team_id',
-        'joined_at',
-        'left_at',
-    ];
 
     /**
      * Get the attributes that should be cast.
