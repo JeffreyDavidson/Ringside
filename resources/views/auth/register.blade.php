@@ -22,19 +22,34 @@
         <!-- Divider -->
         <x-auth.form-divider />
 
-        <!-- Name Field -->
         <div class="flex flex-col gap-1">
-            <label class="text-2sm font-normal text-gray-900">Name</label>
+            <label for="first_name" class="text-2sm font-normal text-gray-900">First Name</label>
             <input
                 class="text-2sm focus:border-primary focus:ring-primary block h-10 w-full appearance-none rounded-md border border-solid border-gray-300 bg-gray-50 px-3 leading-4 font-medium text-gray-700 shadow-none transition-colors outline-none focus:bg-white focus:ring-1"
-                placeholder="Enter your full name"
+                placeholder="Enter your first name"
                 type="text"
-                value="{{ old('name') }}"
-                name="name"
-                id="name"
+                value="{{ old('first_name') }}"
+                name="first_name"
+                id="first_name"
                 required
             />
-            @error('name')
+            @error('first_name')
+                <span class="text-xs leading-4 font-medium text-red-500"> {{ $message }} </span>
+            @enderror
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label for="last_name" class="text-2sm font-normal text-gray-900">Last Name</label>
+            <input
+                class="text-2sm focus:border-primary focus:ring-primary block h-10 w-full appearance-none rounded-md border border-solid border-gray-300 bg-gray-50 px-3 leading-4 font-medium text-gray-700 shadow-none transition-colors outline-none focus:bg-white focus:ring-1"
+                placeholder="Enter your last name"
+                type="text"
+                value="{{ old('last_name') }}"
+                name="last_name"
+                id="last_name"
+                required
+            />
+            @error('last_name')
                 <span class="text-xs leading-4 font-medium text-red-500"> {{ $message }} </span>
             @enderror
         </div>
