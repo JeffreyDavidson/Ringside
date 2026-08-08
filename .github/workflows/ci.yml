@@ -1,88 +1,42 @@
-name: CI Pipeline
+name: Application Tests
 
 on:
-  push:
-    branches:
-      - development
-      - master
-  pull_request:
-    branches:
-      - development
-      - master
+    push:
+        branches:
+            - development
+            - master
+    pull_request:
+        branches:
+            - development
+            - master
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
 
 jobs:
-  ci:
-    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macOS]
-        php: [8.4]
-        laravel: [13.*]
+    tests:
+        name: CI - PHP-8.4 - Laravel-13.*
+        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        timeout-minutes: 20
 
-    name: CI - PHP-${{ matrix.php }} - Laravel-${{ matrix.laravel }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
 
-      - name: Setup PHP
-        run: |
-          php_bin_dir="$(brew --prefix php@${{ matrix.php }})/bin"
-          echo "$php_bin_dir" >> "$GITHUB_PATH"
-          "$php_bin_dir/php" -v
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify local PHP
-        run: php -v && php -m
+            - name: Prepare Laravel
+              run: |
+                  cp .env.testing .env
+                  php artisan key:generate
+                  php artisan config:cache
 
-      - name: Install Composer
-        run: |
-          mkdir -p "$RUNNER_TEMP/composer-bin"
-          curl -sS https://getcomposer.org/installer -o "$RUNNER_TEMP/composer-setup.php"
-          php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
-          echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/composer-bin/composer" --version
-
-      - name: Setup problem matchers for PHP
-        run: echo "PHP problem matcher skipped on self-hosted runner"
-
-      - name: Get composer cache directory
-        id: composer-cache
-        run: |
-          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ matrix.os }}-PHP${{ matrix.php }}-L${{ matrix.laravel }}-composer-
-
-      - name: Add token
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          composer config github-oauth.github.com $GITHUB_TOKEN
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
-
-      - name: Setup Laravel application
-        run: |
-          cp .env.testing .env
-          php artisan key:generate
-          php artisan config:cache
-
-      - name: Setup problem matchers for PHPUnit
-        run: echo "PHPUnit problem matcher skipped on self-hosted runner"
-
-      - name: Run Feature Tests
-        run: php ./vendor/bin/pest --ci --testsuite "Feature" --no-coverage --parallel
-
-      - name: Run Integration Tests
-        run: php ./vendor/bin/pest --ci --testsuite "Integration" --no-coverage --parallel
-
-      - name: Run Unit Tests
-        run: php ./vendor/bin/pest --ci --testsuite "Unit" --no-coverage --parallel
+            - name: Run application tests
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite "Feature","Integration","Unit" --no-coverage --parallel
