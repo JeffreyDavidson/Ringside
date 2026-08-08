@@ -33,7 +33,7 @@ function controllerAction(IlluminateRoute $route): array
 
     [$controller, $method] = explode('@', $action, 2);
 
-    if (! class_exists($controller) || $method === '') {
+    if (! class_exists($controller) || $method === '' || ! method_exists($controller, $method)) {
         throw new RuntimeException("Nested resource route [{$route->uri()}] has an invalid controller action [{$action}].");
     }
 
