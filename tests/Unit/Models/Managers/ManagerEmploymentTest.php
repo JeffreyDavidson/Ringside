@@ -62,7 +62,7 @@ describe('ManagerEmployment Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(ManagerEmployment::class)->usesTrait(HasFactory::class);
+            expect(class_uses(ManagerEmployment::class))->toContain(HasFactory::class);
         });
     });
 

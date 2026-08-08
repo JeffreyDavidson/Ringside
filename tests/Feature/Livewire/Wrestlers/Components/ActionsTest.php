@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -15,14 +14,14 @@ beforeEach(function () {
 
 describe('Actions Basic Functionality', function () {
     it('can be instantiated', function () {
-        $component = Livewire::test(Actions::class, ['wrestler' => $this->wrestler]);
+        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
 
         expect($component->instance())->toBeInstanceOf(Actions::class);
         expect($component->instance()->wrestler->id)->toBe($this->wrestler->id);
     });
 
     it('can mount with wrestler', function () {
-        $component = Livewire::test(Actions::class, ['wrestler' => $this->wrestler]);
+        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
 
         expect($component->instance()->wrestler->id)->toBe($this->wrestler->id);
     });
@@ -41,7 +40,7 @@ describe('Actions Basic Functionality', function () {
     });
 
     it('can render successfully', function () {
-        $component = Livewire::test(Actions::class, ['wrestler' => $this->wrestler]);
+        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
 
         $component->assertSuccessful();
     });

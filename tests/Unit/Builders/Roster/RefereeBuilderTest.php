@@ -17,7 +17,7 @@ test('bookable referees can be retrieved', function () {
 
     expect($bookableReferees)
         ->toHaveCount(1)
-        ->collectionHas($bookableReferee);
+        ->and($bookableReferees->contains($bookableReferee))->toBeTrue();
 });
 
 test('future employed referees can be retrieved', function () {
@@ -33,7 +33,7 @@ test('future employed referees can be retrieved', function () {
 
     expect($futureEmployedReferees)
         ->toHaveCount(1)
-        ->collectionHas($futureEmployedReferee);
+        ->and($futureEmployedReferees->contains($futureEmployedReferee))->toBeTrue();
 });
 
 test('suspended referees can be retrieved', function () {
@@ -49,7 +49,7 @@ test('suspended referees can be retrieved', function () {
 
     expect($suspendedReferees)
         ->toHaveCount(1)
-        ->collectionHas($suspendedReferee);
+        ->and($suspendedReferees->contains($suspendedReferee))->toBeTrue();
 });
 
 test('released referees can be retrieved', function () {
@@ -65,7 +65,7 @@ test('released referees can be retrieved', function () {
 
     expect($releasedReferees)
         ->toHaveCount(1)
-        ->collectionHas($releasedReferee);
+        ->and($releasedReferees->contains($releasedReferee))->toBeTrue();
 });
 
 test('retired referees can be retrieved', function () {
@@ -81,7 +81,7 @@ test('retired referees can be retrieved', function () {
 
     expect($retiredReferees)
         ->toHaveCount(1)
-        ->collectionHas($retiredReferee);
+        ->and($retiredReferees->contains($retiredReferee))->toBeTrue();
 });
 
 test('unemployed referees can be retrieved', function () {
@@ -97,7 +97,7 @@ test('unemployed referees can be retrieved', function () {
 
     expect($unemployedReferees)
         ->toHaveCount(1)
-        ->collectionHas($unemployedReferee);
+        ->and($unemployedReferees->contains($unemployedReferee))->toBeTrue();
 });
 
 test('injured referees can be retrieved', function () {
@@ -113,5 +113,5 @@ test('injured referees can be retrieved', function () {
 
     expect($injuredReferees)
         ->toHaveCount(1)
-        ->collectionHas($injuredReferee);
+        ->and($injuredReferees->contains($injuredReferee))->toBeTrue();
 });

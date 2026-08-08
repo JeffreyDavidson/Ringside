@@ -62,14 +62,14 @@ describe('Stable Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(Stable::class)->usesTrait(HasActivityPeriods::class);
-            expect(Stable::class)->usesTrait(HasFactory::class);
-            expect(Stable::class)->usesTrait(HasMembers::class);
-            expect(Stable::class)->usesTrait(HasStatusHistory::class);
-            expect(Stable::class)->usesTrait(HasStatusScopes::class);
-            expect(Stable::class)->usesTrait(IsRetirable::class);
-            expect(Stable::class)->usesTrait(SoftDeletes::class);
-            expect(Stable::class)->usesTrait(ValidatesStableLifecycle::class);
+            expect(class_uses(Stable::class))->toContain(HasActivityPeriods::class);
+            expect(class_uses(Stable::class))->toContain(HasFactory::class);
+            expect(class_uses(Stable::class))->toContain(HasMembers::class);
+            expect(class_uses(Stable::class))->toContain(HasStatusHistory::class);
+            expect(class_uses(Stable::class))->toContain(HasStatusScopes::class);
+            expect(class_uses(Stable::class))->toContain(IsRetirable::class);
+            expect(class_uses(Stable::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Stable::class))->toContain(ValidatesStableLifecycle::class);
         });
     });
 

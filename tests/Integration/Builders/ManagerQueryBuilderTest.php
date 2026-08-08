@@ -40,7 +40,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
             // Assert
             expect($availableManagers)
                 ->toHaveCount(1)
-                ->collectionHas($this->availableManager);
+                ->and($availableManagers->contains($this->availableManager))->toBeTrue();
         });
     });
 
@@ -52,7 +52,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
             // Assert
             expect($futureEmployedManagers)
                 ->toHaveCount(1)
-                ->collectionHas($this->futureEmployedManager);
+                ->and($futureEmployedManagers->contains($this->futureEmployedManager))->toBeTrue();
         });
 
         test('unemployed managers can be retrieved', function () {
@@ -62,7 +62,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
             // Assert
             expect($unemployedManagers)
                 ->toHaveCount(1)
-                ->collectionHas($this->unemployedManager);
+                ->and($unemployedManagers->contains($this->unemployedManager))->toBeTrue();
         });
 
         test('released managers can be retrieved', function () {
@@ -72,7 +72,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
             // Assert
             expect($releasedManagers)
                 ->toHaveCount(1)
-                ->collectionHas($this->releasedManager);
+                ->and($releasedManagers->contains($this->releasedManager))->toBeTrue();
         });
     });
 
@@ -84,7 +84,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
             // Assert
             expect($suspendedManagers)
                 ->toHaveCount(1)
-                ->collectionHas($this->suspendedManager);
+                ->and($suspendedManagers->contains($this->suspendedManager))->toBeTrue();
         });
 
         test('retired managers can be retrieved', function () {
@@ -94,7 +94,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
             // Assert
             expect($retiredManagers)
                 ->toHaveCount(1)
-                ->collectionHas($this->retiredManager);
+                ->and($retiredManagers->contains($this->retiredManager))->toBeTrue();
         });
 
         test('injured managers can be retrieved', function () {
@@ -104,7 +104,7 @@ describe('ManagerQueryBuilder Unit Tests', function () {
             // Assert
             expect($injuredManagers)
                 ->toHaveCount(1)
-                ->collectionHas($this->injuredManager);
+                ->and($injuredManagers->contains($this->injuredManager))->toBeTrue();
         });
     });
 });

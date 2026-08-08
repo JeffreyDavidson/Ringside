@@ -62,7 +62,7 @@ describe('WrestlerRetirement Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(WrestlerRetirement::class)->usesTrait(HasFactory::class);
+            expect(class_uses(WrestlerRetirement::class))->toContain(HasFactory::class);
         });
     });
 

@@ -253,15 +253,15 @@ describe('User Role Integration Tests', function () {
             $user = User::factory()->create();
 
             // Valid role assignments should work
-            $user->role = Role::Administrator;
+            $user->setAttribute('role', Role::Administrator);
             expect($user->role)->toBe(Role::Administrator);
 
-            $user->role = Role::Basic;
+            $user->setAttribute('role', Role::Basic);
             expect($user->role)->toBe(Role::Basic);
 
             // Invalid role values should be rejected by enum type system
             expect(function () use ($user) {
-                $user->role = 'invalid-role';
+                $user->setAttribute('role', 'invalid-role');
             })->toThrow(ValueError::class);
         });
 

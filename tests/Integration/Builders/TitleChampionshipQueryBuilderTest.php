@@ -10,6 +10,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * Unit tests for TitleChampionshipBuilder query scopes.
@@ -399,8 +400,8 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             $current = TitleChampionship::query()->current()->get();
             $previous = TitleChampionship::query()->previous()->get();
 
-            expect($current)->toBeCollection();
-            expect($previous)->toBeCollection();
+            expect($current)->toBeInstanceOf(Collection::class);
+            expect($previous)->toBeInstanceOf(Collection::class);
             expect($current->count())->toBe(0);
             expect($previous->count())->toBe(0);
         });
@@ -426,7 +427,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
                 ->get();
 
             // Should handle mixed null/non-null lost_at values
-            expect($championships)->toBeCollection();
+            expect($championships)->toBeInstanceOf(Collection::class);
             expect($championships->count())->toBeGreaterThan(0);
         });
 

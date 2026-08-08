@@ -62,7 +62,7 @@ describe('TitleChampionship Model Unit Tests', function () {
 
     describe('title championship trait integration', function () {
         test('title championship uses all required traits', function () {
-            expect(TitleChampionship::class)->usesTrait(HasFactory::class);
+            expect(class_uses(TitleChampionship::class))->toContain(HasFactory::class);
         });
 
         test('title championship implements all required interfaces', function () {

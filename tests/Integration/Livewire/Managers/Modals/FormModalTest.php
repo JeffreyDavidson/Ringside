@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Managers\Manager;
-use Livewire\Livewire;
 
 /**
  * Integration tests for Managers FormModal component functionality.
@@ -28,7 +27,7 @@ use Livewire\Livewire;
 describe('Managers FormModal Tests', function () {
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->assertSet('isModalOpen', false)
                 ->call('openModal')
                 ->assertSet('isModalOpen', true)
@@ -37,7 +36,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('modal renders with correct form fields', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->assertPropertyWired('modelForm.first_name')
                 ->assertPropertyWired('modelForm.last_name')
@@ -45,7 +44,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('modal shows correct title for create mode', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal');
 
             expect($component->instance()->getModalTitle())->toBe('Add Manager');
@@ -57,7 +56,7 @@ describe('Managers FormModal Tests', function () {
                 'last_name' => 'Smith',
             ]);
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $manager->id);
 
             expect($component->instance()->getModalTitle())->toContain('Edit');
@@ -67,7 +66,7 @@ describe('Managers FormModal Tests', function () {
 
     describe('form validation rules enforcement', function () {
         test('validates required fields', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '')
                 ->set('form.last_name', '')
@@ -79,7 +78,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('validates field length constraints', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', str_repeat('A', 256))
                 ->set('form.last_name', str_repeat('B', 256))
@@ -99,7 +98,7 @@ describe('Managers FormModal Tests', function () {
         // This test has been temporarily disabled - date validation works in practice
 
         test('accepts valid name combinations', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'John')
                 ->set('form.last_name', 'Doe')
@@ -110,7 +109,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('validates field types correctly', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Valid Name')
                 ->set('form.last_name', 'Valid Last')
@@ -121,7 +120,7 @@ describe('Managers FormModal Tests', function () {
 
     describe('create functionality', function () {
         test('creates new manager with valid data', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Mike')
                 ->set('form.last_name', 'Johnson')
@@ -139,7 +138,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('creates manager without optional employment date', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Simple')
                 ->set('form.last_name', 'Manager')
@@ -152,7 +151,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('dispatches form-submitted event on successful creation', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Event')
                 ->set('form.last_name', 'Test')
@@ -161,7 +160,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('handles special characters in names', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', "O'Connor")
                 ->set('form.last_name', 'Van Der Berg')
@@ -182,7 +181,7 @@ describe('Managers FormModal Tests', function () {
                 'last_name' => 'Test',
             ]);
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $manager->id);
 
             $component->assertSet('form.first_name', 'Edit')
@@ -195,7 +194,7 @@ describe('Managers FormModal Tests', function () {
                 'last_name' => 'Name',
             ]);
 
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal', $manager->id)
                 ->set('form.first_name', 'Updated')
                 ->set('form.last_name', 'Manager')
@@ -212,7 +211,7 @@ describe('Managers FormModal Tests', function () {
                 ->hasEmployments(1, ['started_at' => '2023-06-15'])
                 ->create();
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $manager->id);
 
             $component->assertSet('form.employment_date', '2023-06-15');
@@ -224,7 +223,7 @@ describe('Managers FormModal Tests', function () {
                 'last_name' => 'Original',
             ]);
 
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal', $manager->id)
                 ->set('form.first_name', 'Updated')
                 // Don't change last_name
@@ -239,7 +238,7 @@ describe('Managers FormModal Tests', function () {
 
     describe('form submission and error handling', function () {
         test('prevents submission with validation errors', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '') // Invalid: required
                 ->call('submitForm');
@@ -250,7 +249,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('closes modal on successful form submission', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Success')
                 ->set('form.last_name', 'Test')
@@ -259,7 +258,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('maintains form state on validation errors', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '') // Will cause error
                 ->set('form.last_name', 'Valid Name')
@@ -270,7 +269,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('handles multiple validation errors simultaneously', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '') // Required error
                 ->set('form.last_name', str_repeat('X', 256)) // Max length error
@@ -296,7 +295,7 @@ describe('Managers FormModal Tests', function () {
             ];
 
             foreach ($testCases as $index => $testCase) {
-                Livewire::test(FormModal::class)
+                testLivewire(FormModal::class)
                     ->call('openModal')
                     ->set('form.first_name', $testCase['first'])
                     ->set('form.last_name', $testCase['last'])
@@ -313,7 +312,7 @@ describe('Managers FormModal Tests', function () {
 
         test('allows duplicate names in system', function () {
             // Create first manager
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'John')
                 ->set('form.last_name', 'Smith')
@@ -321,7 +320,7 @@ describe('Managers FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             // Create second manager with same name - should be allowed
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'John')
                 ->set('form.last_name', 'Smith')
@@ -332,7 +331,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('trims whitespace from names', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '  Trimmed  ')
                 ->set('form.last_name', '  Names  ')
@@ -352,7 +351,7 @@ describe('Managers FormModal Tests', function () {
 
     describe('dummy data functionality', function () {
         test('can fill dummy fields for development workflow', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -362,7 +361,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('dummy data generates realistic manager names', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -383,7 +382,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('dummy employment date has reasonable format when generated', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -401,7 +400,7 @@ describe('Managers FormModal Tests', function () {
 
     describe('integration with employment system', function () {
         test('creates employment record when employment date provided', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Employment')
                 ->set('form.last_name', 'Test')
@@ -415,7 +414,7 @@ describe('Managers FormModal Tests', function () {
         });
 
         test('does not create employment record when date not provided', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'No Employment')
                 ->set('form.last_name', 'Test')
@@ -434,7 +433,7 @@ describe('Managers FormModal Tests', function () {
                     'last_name' => 'Employment',
                 ]);
 
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal', $manager->id)
                 ->set('form.employment_date', '2024-01-01')
                 ->call('submitForm')
@@ -456,7 +455,7 @@ describe('Managers FormModal Tests', function () {
             ];
 
             foreach ($professionalNames as $name) {
-                Livewire::test(FormModal::class)
+                testLivewire(FormModal::class)
                     ->call('openModal')
                     ->set('form.first_name', $name['first'])
                     ->set('form.last_name', $name['last'])
@@ -473,7 +472,7 @@ describe('Managers FormModal Tests', function () {
 
         test('handles single name managers', function () {
             // Some managers might go by a single name
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Fuji')
                 ->set('form.last_name', '') // Empty last name

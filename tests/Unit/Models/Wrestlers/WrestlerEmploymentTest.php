@@ -58,7 +58,7 @@ describe('WrestlerEmployment Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(WrestlerEmployment::class)->usesTrait(HasFactory::class);
+            expect(class_uses(WrestlerEmployment::class))->toContain(HasFactory::class);
         });
     });
 

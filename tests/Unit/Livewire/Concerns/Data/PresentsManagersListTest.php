@@ -40,7 +40,7 @@ describe('PresentsManagersList Unit Tests', function () {
 
             $method = $reflection->getMethod('getManagers');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($method))->toBe('array');
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });
@@ -229,7 +229,7 @@ describe('PresentsManagersList Unit Tests', function () {
             $method = $reflection->getMethod('getManagers');
 
             // Should return array suitable for form dropdowns
-            expect($method->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($method))->toBe('array');
         });
     });
 });

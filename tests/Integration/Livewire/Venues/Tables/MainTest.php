@@ -78,7 +78,9 @@ describe('VenuesTable Integration Tests', function () {
 
     describe('component initialization and rendering', function () {
         test('renders successfully for administrators', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            Livewire::actingAs($this->admin);
+
+            $component = testLivewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Active Test Arena')
@@ -278,11 +280,9 @@ describe('VenuesTable Integration Tests', function () {
         test('administrators have full access to all operations', function () {
             $component = Livewire::actingAs($this->admin)->test(Main::class);
 
-            $component->assertOk()
-                ->call('delete', $this->activeVenue)
-                ->assertHasNoErrors()
-                ->call('restore', $this->deletedVenue->id)
-                ->assertHasNoErrors();
+            $component->assertOk();
+            $component->call('delete', $this->activeVenue)->assertHasNoErrors();
+            $component->call('restore', $this->deletedVenue->id)->assertHasNoErrors();
         });
     });
 

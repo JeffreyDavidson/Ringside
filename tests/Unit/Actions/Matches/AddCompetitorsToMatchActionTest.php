@@ -8,6 +8,8 @@ use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use JMac\Testing\Double;
+use JMac\Testing\Matching\Argument;
 
 test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
@@ -21,26 +23,19 @@ test('it adds wrestler competitors to a match', function () {
         ],
     ]);
 
-    $addWrestlersToMatchAction = $this->mock(AddWrestlersToMatchAction::class);
-    $addTagTeamsToMatchAction = $this->mock(AddTagTeamsToMatchAction::class);
+    $addWrestlersToMatchAction = Double::for(AddWrestlersToMatchAction::class);
+    $addTagTeamsToMatchAction = Double::for(AddTagTeamsToMatchAction::class);
 
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addWrestlersToMatchAction
-        ->shouldReceive('handle')
-        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 0)
-        ->once();
-
-    $addWrestlersToMatchAction
-        ->shouldReceive('handle')
-        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 1)
-        ->once();
-
-    $addTagTeamsToMatchAction
-        ->shouldNotReceive('handle');
+    $addWrestlersToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 0);
+    $addWrestlersToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 1);
 
     AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+
+    $addWrestlersToMatchAction->verify();
+    $addTagTeamsToMatchAction->unused();
 });
 
 test('it adds tag team competitors to a match', function () {
@@ -55,24 +50,17 @@ test('it adds tag team competitors to a match', function () {
         ],
     ]);
 
-    $addWrestlersToMatchAction = $this->mock(AddWrestlersToMatchAction::class);
-    $addTagTeamsToMatchAction = $this->mock(AddTagTeamsToMatchAction::class);
+    $addWrestlersToMatchAction = Double::for(AddWrestlersToMatchAction::class);
+    $addTagTeamsToMatchAction = Double::for(AddTagTeamsToMatchAction::class);
 
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addTagTeamsToMatchAction
-        ->shouldReceive('handle')
-        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 0)
-        ->once();
-
-    $addTagTeamsToMatchAction
-        ->shouldReceive('handle')
-        ->with($eventMatch, Mockery::type('Illuminate\Support\Collection'), 1)
-        ->once();
-
-    $addWrestlersToMatchAction
-        ->shouldNotReceive('handle');
+    $addTagTeamsToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 0);
+    $addTagTeamsToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 1);
 
     AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+
+    $addTagTeamsToMatchAction->verify();
+    $addWrestlersToMatchAction->unused();
 });

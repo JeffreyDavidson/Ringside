@@ -59,9 +59,9 @@ describe('Event Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(Event::class)->usesTrait(HasFactory::class);
-            expect(Event::class)->usesTrait(HasMatches::class);
-            expect(Event::class)->usesTrait(SoftDeletes::class);
+            expect(class_uses(Event::class))->toContain(HasFactory::class);
+            expect(class_uses(Event::class))->toContain(HasMatches::class);
+            expect(class_uses(Event::class))->toContain(SoftDeletes::class);
         });
     });
 

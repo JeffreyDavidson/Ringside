@@ -62,7 +62,7 @@ describe('TagTeamSuspension Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(TagTeamSuspension::class)->usesTrait(HasFactory::class);
+            expect(class_uses(TagTeamSuspension::class))->toContain(HasFactory::class);
         });
     });
 

@@ -44,7 +44,7 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
             // Assert
             expect($bookableTagTeams)
                 ->toHaveCount(1)
-                ->collectionHas($tagTeam);
+                ->and($bookableTagTeams->contains($tagTeam))->toBeTrue();
         });
 
         test('future employed tag teams can be retrieved', function () {
@@ -54,7 +54,7 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
             // Assert
             expect($futureEmployedTagTeams)
                 ->toHaveCount(1)
-                ->collectionHas($this->futureEmployedTagTeam);
+                ->and($futureEmployedTagTeams->contains($this->futureEmployedTagTeam))->toBeTrue();
         });
 
         test('unemployed tag teams can be retrieved', function () {
@@ -64,8 +64,8 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
             // Assert - Unemployed scope includes both unemployed and unbookable (no employment history)
             expect($unemployedTagTeams)
                 ->toHaveCount(2)
-                ->collectionHas($this->unemployedTagTeam)
-                ->collectionHas($this->unbookableTagTeam);
+                ->and($unemployedTagTeams->contains($this->unemployedTagTeam))->toBeTrue()
+                ->and($unemployedTagTeams->contains($this->unbookableTagTeam))->toBeTrue();
         });
 
         test('released tag teams can be retrieved', function () {
@@ -75,7 +75,7 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
             // Assert
             expect($releasedTagTeams)
                 ->toHaveCount(1)
-                ->collectionHas($this->releasedTagTeam);
+                ->and($releasedTagTeams->contains($this->releasedTagTeam))->toBeTrue();
         });
     });
 
@@ -87,7 +87,7 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
             // Assert
             expect($suspendedTagTeams)
                 ->toHaveCount(1)
-                ->collectionHas($this->suspendedTagTeam);
+                ->and($suspendedTagTeams->contains($this->suspendedTagTeam))->toBeTrue();
         });
 
         test('retired tag teams can be retrieved', function () {
@@ -97,7 +97,7 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
             // Assert
             expect($retiredTagTeams)
                 ->toHaveCount(1)
-                ->collectionHas($this->retiredTagTeam);
+                ->and($retiredTagTeams->contains($this->retiredTagTeam))->toBeTrue();
         });
     });
 

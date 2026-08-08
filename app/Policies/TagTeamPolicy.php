@@ -60,7 +60,7 @@ class TagTeamPolicy
     /**
      * Only administrators can update entities (handled by before hook).
      */
-    public function update(User $user): bool
+    public function update(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -68,7 +68,7 @@ class TagTeamPolicy
     /**
      * Only administrators can delete entities (handled by before hook).
      */
-    public function delete(User $user): bool
+    public function delete(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -76,7 +76,7 @@ class TagTeamPolicy
     /**
      * Only administrators can restore entities (handled by before hook).
      */
-    public function restore(User $user): bool
+    public function restore(User $user, ?TagTeam $tagTeam = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

@@ -14,16 +14,18 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Mockery;
 use Tests\Unit\Models\Concerns\Support\FakeSuspendableModel;
 use Tests\Unit\Models\Concerns\Support\FakeSuspensionModel;
 
 describe('IsSuspendable Trait Unit Tests', function () {
     describe('suspension relationships', function () {
         test('provides suspensions relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -36,7 +38,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         });
 
         test('provides current suspension relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -49,7 +51,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         });
 
         test('provides previous suspensions relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -62,7 +64,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         });
 
         test('provides previous suspension relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -75,7 +77,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         });
 
         test('suspensions relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -90,7 +92,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         });
 
         test('currentSuspension relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -107,7 +109,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
 
     describe('suspension status checks', function () {
         test('can check if model is suspended', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -116,22 +118,19 @@ describe('IsSuspendable Trait Unit Tests', function () {
                     return FakeSuspensionModel::class;
                 }
 
-                public function currentSuspension()
+                public function currentSuspension(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
             expect($model->isSuspended())->toBeTrue();
         });
 
         test('can check if model is not suspended', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -140,22 +139,19 @@ describe('IsSuspendable Trait Unit Tests', function () {
                     return FakeSuspensionModel::class;
                 }
 
-                public function currentSuspension()
+                public function currentSuspension(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($model->isSuspended())->toBeFalse();
         });
 
         test('can check if model has suspensions', function () {
-            $modelWith = new class extends Model
+            $modelWith = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -164,18 +160,15 @@ describe('IsSuspendable Trait Unit Tests', function () {
                     return FakeSuspensionModel::class;
                 }
 
-                public function suspensions()
+                public function suspensions(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
-            $modelWithout = new class extends Model
+            $modelWithout = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 
@@ -184,15 +177,12 @@ describe('IsSuspendable Trait Unit Tests', function () {
                     return FakeSuspensionModel::class;
                 }
 
-                public function suspensions()
+                public function suspensions(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($modelWith->hasSuspensions())->toBeTrue();
@@ -210,7 +200,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
 
     describe('suspension relationship queries', function () {
         test('current suspension query includes whereNull ended_at', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Suspendable
             {
                 use IsSuspendable;
 

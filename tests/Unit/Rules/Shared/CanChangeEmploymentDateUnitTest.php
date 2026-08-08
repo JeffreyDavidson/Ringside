@@ -117,7 +117,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = Mockery::mock(Model::class);
             $model->shouldReceive('isEmployed')->andReturn(true);
-            $model->shouldReceive('getAttribute')->with('name')->andReturn('Test Model');
+            $model->shouldReceive('getAttribute')->andReturn('Test Model');
 
             $rule = new CanChangeEmploymentDate($model);
             $failCalled = false;
@@ -306,15 +306,22 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
         test('correctly passes parsed date to employedOn method', function () {
             // Arrange
             $targetDate = now()->addWeek();
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isEmployed')->andReturn(true);
-            $model->shouldReceive('employedOn')
-                ->with(Mockery::on(function ($date) use ($targetDate) {
-                    return $date instanceof Carbon &&
-                           $date->equalTo($targetDate);
-                }))
-                ->andReturn(true);
-            $model->shouldReceive('getAttribute')->with('name')->andReturn('Test Model');
+            $model = new class extends Model
+            {
+                public ?Carbon $receivedDate = null;
+
+                public function isEmployed(): bool
+                {
+                    return true;
+                }
+
+                public function employedOn(Carbon $date): bool
+                {
+                    $this->receivedDate = $date;
+
+                    return true;
+                }
+            };
 
             $rule = new CanChangeEmploymentDate($model);
             $failCalled = false;
@@ -327,6 +334,7 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
 
             // Assert
             expect($failCalled)->toBeFalse();
+            expect($model->receivedDate?->equalTo($targetDate))->toBeTrue();
         });
     });
 

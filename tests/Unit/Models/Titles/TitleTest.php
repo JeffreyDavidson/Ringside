@@ -61,12 +61,12 @@ describe('Title Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(Title::class)->usesTrait(HasChampionships::class);
-            expect(Title::class)->usesTrait(HasFactory::class);
-            expect(Title::class)->usesTrait(HasStatusHistory::class);
-            expect(Title::class)->usesTrait(IsRetirable::class);
-            expect(Title::class)->usesTrait(ProvidesDisplayName::class);
-            expect(Title::class)->usesTrait(SoftDeletes::class);
+            expect(class_uses(Title::class))->toContain(HasChampionships::class);
+            expect(class_uses(Title::class))->toContain(HasFactory::class);
+            expect(class_uses(Title::class))->toContain(HasStatusHistory::class);
+            expect(class_uses(Title::class))->toContain(IsRetirable::class);
+            expect(class_uses(Title::class))->toContain(ProvidesDisplayName::class);
+            expect(class_uses(Title::class))->toContain(SoftDeletes::class);
         });
     });
 

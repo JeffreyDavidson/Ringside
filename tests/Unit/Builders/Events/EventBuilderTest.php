@@ -16,8 +16,8 @@ test('scheduled events can be retrieved', function () {
 
     expect($scheduledEvents)
         ->toHaveCount(2)
-        ->collectionHas($scheduledEvent)
-        ->collectionHas($pastEvent);
+        ->and($scheduledEvents->contains($scheduledEvent))->toBeTrue()
+        ->and($scheduledEvents->contains($pastEvent))->toBeTrue();
 });
 
 test('unscheduled events can be retrieved', function () {
@@ -32,7 +32,7 @@ test('unscheduled events can be retrieved', function () {
 
     expect($unscheduledEvents)
         ->toHaveCount(1)
-        ->collectionHas($unscheduledEvent);
+        ->and($unscheduledEvents->contains($unscheduledEvent))->toBeTrue();
 });
 
 test('past events can be retrieved', function () {
@@ -47,5 +47,5 @@ test('past events can be retrieved', function () {
 
     expect($pastEvents)
         ->toHaveCount(1)
-        ->collectionHas($pastEvent);
+        ->and($pastEvents->contains($pastEvent))->toBeTrue();
 });

@@ -59,7 +59,7 @@ describe('StableRetirement Model Unit Tests', function () {
 
     describe('stableRetirement trait integration', function () {
         test('stableRetirement uses all required traits', function () {
-            expect(StableRetirement::class)->usesTrait(HasFactory::class);
+            expect(class_uses(StableRetirement::class))->toContain(HasFactory::class);
         });
 
         test('stableRetirement implements all required interfaces', function () {

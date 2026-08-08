@@ -128,8 +128,8 @@ describe('ManagersTable Component', function () {
             $component->assertOk();
 
             // Actions should be available (specific actions depend on component implementation)
-            $component->assertSee($employedManager->name);
-            $component->assertSee($retiredManager->name);
+            $component->assertSee($employedManager->full_name);
+            $component->assertSee($retiredManager->full_name);
         });
 
         test('component integrates with authorization policies', function () {
@@ -138,7 +138,7 @@ describe('ManagersTable Component', function () {
             // Test as administrator (should see all actions)
             $component = Livewire::actingAs($this->user)->test(Main::class);
             $component->assertOk();
-            $component->assertSee($manager->name);
+            $component->assertSee($manager->full_name);
         });
     });
 

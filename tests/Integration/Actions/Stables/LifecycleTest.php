@@ -244,8 +244,8 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify retirement record
             $retirement = $finalStable->retirements()->first();
-            expect($retirement->started_at)->not()->toBeNull();
-            expect($retirement->ended_at)->not()->toBeNull();
+            expect($retirement->started_at)->toBeInstanceOf(Carbon::class);
+            expect($retirement->ended_at)->toBeInstanceOf(Carbon::class);
         });
 
         test('action date validation maintains data integrity', function () {

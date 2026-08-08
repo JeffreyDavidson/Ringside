@@ -8,6 +8,7 @@ use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 /**
  * Unit tests for UserBuilder query scopes.
@@ -57,7 +58,7 @@ describe('UserBuilder Unit Tests', function () {
         test('builder can execute basic queries', function () {
             $users = User::query()->get();
 
-            expect($users)->toBeCollection();
+            expect($users)->toBeInstanceOf(Collection::class);
             expect($users->count())->toBeGreaterThan(0);
             expect($users->first())->toBeInstanceOf(User::class);
         });
@@ -66,8 +67,8 @@ describe('UserBuilder Unit Tests', function () {
             $adminUsers = User::query()->where('role', Role::Administrator)->get();
             $basicUsers = User::query()->where('role', Role::Basic)->get();
 
-            expect($adminUsers)->toBeCollection();
-            expect($basicUsers)->toBeCollection();
+            expect($adminUsers)->toBeInstanceOf(Collection::class);
+            expect($basicUsers)->toBeInstanceOf(Collection::class);
 
             foreach ($adminUsers as $user) {
                 expect($user->role)->toBe(Role::Administrator);
@@ -82,8 +83,8 @@ describe('UserBuilder Unit Tests', function () {
             $activeUsers = User::query()->where('status', UserStatus::Active)->get();
             $unverifiedUsers = User::query()->where('status', UserStatus::Unverified)->get();
 
-            expect($activeUsers)->toBeCollection();
-            expect($unverifiedUsers)->toBeCollection();
+            expect($activeUsers)->toBeInstanceOf(Collection::class);
+            expect($unverifiedUsers)->toBeInstanceOf(Collection::class);
 
             foreach ($activeUsers as $user) {
                 expect($user->status)->toBe(UserStatus::Active);
@@ -133,7 +134,7 @@ describe('UserBuilder Unit Tests', function () {
                 ->limit(3)
                 ->get();
 
-            expect($users)->toBeCollection();
+            expect($users)->toBeInstanceOf(Collection::class);
             expect($users->count())->toBeLessThanOrEqual(3);
 
             // Verify ordering (newest first)
@@ -150,7 +151,7 @@ describe('UserBuilder Unit Tests', function () {
                 ->with('wrestlers')
                 ->get();
 
-            expect($usersWithWrestlers)->toBeCollection();
+            expect($usersWithWrestlers)->toBeInstanceOf(Collection::class);
 
             // Check that the relationship is loaded
             foreach ($usersWithWrestlers as $user) {
@@ -167,8 +168,8 @@ describe('UserBuilder Unit Tests', function () {
                 ->doesntHave('wrestlers')
                 ->get();
 
-            expect($usersWithWrestlers)->toBeCollection();
-            expect($usersWithoutWrestlers)->toBeCollection();
+            expect($usersWithWrestlers)->toBeInstanceOf(Collection::class);
+            expect($usersWithoutWrestlers)->toBeInstanceOf(Collection::class);
         });
 
         test('builder can perform whereHas queries', function () {
@@ -178,7 +179,7 @@ describe('UserBuilder Unit Tests', function () {
                 });
 
             $users = $query->get();
-            expect($users)->toBeCollection();
+            expect($users)->toBeInstanceOf(Collection::class);
         });
         expect(true)->toBeTrue();
     });
@@ -190,7 +191,7 @@ describe('UserBuilder Unit Tests', function () {
                 ->where('role', Role::Administrator)
                 ->get();
 
-            expect($adminUsers)->toBeCollection();
+            expect($adminUsers)->toBeInstanceOf(Collection::class);
 
             foreach ($adminUsers as $user) {
                 expect($user->isAdministrator())->toBeTrue();
@@ -203,7 +204,7 @@ describe('UserBuilder Unit Tests', function () {
                 ->where('status', UserStatus::Active)
                 ->get();
 
-            expect($activeUsers)->toBeCollection();
+            expect($activeUsers)->toBeInstanceOf(Collection::class);
 
             foreach ($activeUsers as $user) {
                 expect($user->status)->toBe(UserStatus::Active);
@@ -216,7 +217,7 @@ describe('UserBuilder Unit Tests', function () {
                 ->whereIn('status', [UserStatus::Active, UserStatus::Inactive])
                 ->get();
 
-            expect($verifiedUsers)->toBeCollection();
+            expect($verifiedUsers)->toBeInstanceOf(Collection::class);
 
             foreach ($verifiedUsers as $user) {
                 expect($user->status)->not->toBe(UserStatus::Unverified);
@@ -279,7 +280,7 @@ describe('UserBuilder Unit Tests', function () {
                 ->where('email', 'nonexistent@example.com')
                 ->get();
 
-            expect($noUsers)->toBeCollection();
+            expect($noUsers)->toBeInstanceOf(Collection::class);
             expect($noUsers->count())->toBe(0);
             expect($noUsers->isEmpty())->toBeTrue();
         });
@@ -289,8 +290,8 @@ describe('UserBuilder Unit Tests', function () {
             $query1 = User::query()->where('role', 'invalid-role');
             $query2 = User::query()->where('status', 'invalid-status');
 
-            expect($query1->get())->toBeCollection();
-            expect($query2->get())->toBeCollection();
+            expect($query1->get())->toBeInstanceOf(Collection::class);
+            expect($query2->get())->toBeInstanceOf(Collection::class);
             expect($query1->count())->toBe(0);
             expect($query2->count())->toBe(0);
         });
@@ -315,8 +316,8 @@ describe('UserBuilder Unit Tests', function () {
                 ->whereNull('phone_number')
                 ->get();
 
-            expect($usersWithoutAvatar)->toBeCollection();
-            expect($usersWithoutPhone)->toBeCollection();
+            expect($usersWithoutAvatar)->toBeInstanceOf(Collection::class);
+            expect($usersWithoutPhone)->toBeInstanceOf(Collection::class);
         });
         expect(true)->toBeTrue();
     });

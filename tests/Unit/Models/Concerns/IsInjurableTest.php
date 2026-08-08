@@ -14,16 +14,18 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\IsInjurable;
+use App\Models\Contracts\Injurable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Mockery;
 use RuntimeException;
 use Tests\Unit\Models\Concerns\Support\FakeInjuryModel;
 
 describe('IsInjurable Trait Unit Tests', function () {
     describe('injury relationships', function () {
         test('provides injuries relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -37,7 +39,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('provides current injury relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -51,7 +53,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('provides previous injuries relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -65,7 +67,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('provides previous injury relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -79,7 +81,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('injuries relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -94,7 +96,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('currentInjury relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -111,7 +113,7 @@ describe('IsInjurable Trait Unit Tests', function () {
 
     describe('injury status checks', function () {
         test('can check if model is injured', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -120,15 +122,12 @@ describe('IsInjurable Trait Unit Tests', function () {
                     return FakeInjuryModel::class;
                 }
 
-                public function currentInjury()
+                public function currentInjury(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
 
@@ -136,7 +135,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('can check if model is not injured', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -145,15 +144,12 @@ describe('IsInjurable Trait Unit Tests', function () {
                     return FakeInjuryModel::class;
                 }
 
-                public function currentInjury()
+                public function currentInjury(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
 
@@ -161,7 +157,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('can check if model has injuries', function () {
-            $modelWithInjuries = new class extends Model
+            $modelWithInjuries = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -170,19 +166,16 @@ describe('IsInjurable Trait Unit Tests', function () {
                     return FakeInjuryModel::class;
                 }
 
-                public function injuries()
+                public function injuries(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
 
-            $modelWithoutInjuries = new class extends Model
+            $modelWithoutInjuries = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -191,15 +184,12 @@ describe('IsInjurable Trait Unit Tests', function () {
                     return FakeInjuryModel::class;
                 }
 
-                public function injuries()
+                public function injuries(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
 
@@ -210,7 +200,7 @@ describe('IsInjurable Trait Unit Tests', function () {
 
     describe('injury model resolution', function () {
         test('uses the model-specific injury resolver', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -224,7 +214,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('throws if related model does not exist', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
             };
@@ -235,7 +225,7 @@ describe('IsInjurable Trait Unit Tests', function () {
 
     describe('injury relationship queries', function () {
         test('current injury query includes whereNull ended_at', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -252,7 +242,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('previous injuries query includes whereNotNull ended_at', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 
@@ -269,7 +259,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         });
 
         test('previous injury query includes ofMany constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Injurable
             {
                 use IsInjurable;
 

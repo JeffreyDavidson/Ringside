@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\WrestlerInjury>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Wrestlers\WrestlerInjury>
  */
 class WrestlerInjuryFactory extends Factory
 {

@@ -48,7 +48,7 @@ describe('HasActionColumn Unit Tests', function () {
 
             $method = $reflection->getMethod('getDefaultActionColumn');
             expect($method->isProtected())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe(Column::class);
+            expect(reflectionReturnTypeName($method))->toBe(Column::class);
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });

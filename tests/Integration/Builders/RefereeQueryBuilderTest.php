@@ -40,7 +40,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
             // Assert
             expect($bookableReferees)
                 ->toHaveCount(1)
-                ->collectionHas($this->bookableReferee);
+                ->and($bookableReferees->contains($this->bookableReferee))->toBeTrue();
         });
     });
 
@@ -52,7 +52,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
             // Assert
             expect($futureEmployedReferees)
                 ->toHaveCount(1)
-                ->collectionHas($this->futureEmployedReferee);
+                ->and($futureEmployedReferees->contains($this->futureEmployedReferee))->toBeTrue();
         });
 
         test('unemployed referees can be retrieved', function () {
@@ -62,7 +62,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
             // Assert
             expect($unemployedReferees)
                 ->toHaveCount(1)
-                ->collectionHas($this->unemployedReferee);
+                ->and($unemployedReferees->contains($this->unemployedReferee))->toBeTrue();
         });
 
         test('released referees can be retrieved', function () {
@@ -72,7 +72,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
             // Assert
             expect($releasedReferees)
                 ->toHaveCount(1)
-                ->collectionHas($this->releasedReferee);
+                ->and($releasedReferees->contains($this->releasedReferee))->toBeTrue();
         });
     });
 
@@ -84,7 +84,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
             // Assert
             expect($suspendedReferees)
                 ->toHaveCount(1)
-                ->collectionHas($this->suspendedReferee);
+                ->and($suspendedReferees->contains($this->suspendedReferee))->toBeTrue();
         });
 
         test('retired referees can be retrieved', function () {
@@ -94,7 +94,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
             // Assert
             expect($retiredReferees)
                 ->toHaveCount(1)
-                ->collectionHas($this->retiredReferee);
+                ->and($retiredReferees->contains($this->retiredReferee))->toBeTrue();
         });
 
         test('injured referees can be retrieved', function () {
@@ -104,7 +104,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
             // Assert
             expect($injuredReferees)
                 ->toHaveCount(1)
-                ->collectionHas($this->injuredReferee);
+                ->and($injuredReferees->contains($this->injuredReferee))->toBeTrue();
         });
     });
 });

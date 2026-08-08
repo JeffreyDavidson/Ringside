@@ -56,7 +56,7 @@ describe('MatchStipulation Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(MatchStipulation::class)->usesTrait(HasFactory::class);
+            expect(class_uses(MatchStipulation::class))->toContain(HasFactory::class);
         });
     });
 

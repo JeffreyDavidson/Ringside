@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
  *
+ * @property-read int|string|null $reign_length
  * @property-read EventMatch|null $wonEventMatch
  * @property-read EventMatch|null $lostEventMatch
  * @property-read Title|null $title

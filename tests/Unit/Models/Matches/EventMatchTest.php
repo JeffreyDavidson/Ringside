@@ -61,7 +61,7 @@ describe('EventMatch Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(EventMatch::class)->usesTrait(HasFactory::class);
+            expect(class_uses(EventMatch::class))->toContain(HasFactory::class);
         });
     });
 

@@ -7,7 +7,8 @@ This document provides a comprehensive reference for all development and testing
 ### Primary Test Commands
 - `composer test` - Run all tests and quality checks
 - `composer test:unit` - Run PHPUnit/Pest tests with coverage
-- `composer test:types` - Run PHPStan static analysis (level 6)
+- `composer test:types` - Run PHPStan for the application (level 6) and Pest tests (level 2)
+- `composer test:types:pest` - Run PHPStan against the Pest test suite (level 2)
 - `composer test:type-coverage` - Check type coverage (min 100%)
 - `composer test:lint` - Test code formatting (Laravel Pint)
 - `composer test:rector` - Test code modernization (dry-run)
@@ -15,6 +16,11 @@ This document provides a comprehensive reference for all development and testing
 ### Code Quality Tools
 - `composer lint` - Fix code formatting with Laravel Pint
 - `composer rector` - Apply code modernization with Rector
+
+### Test Utilities
+- Use `testLivewire()` for Livewire component tests so PHPStan retains the concrete component type.
+- Prefer native Pest expectations. Add a custom expectation only when it expresses reusable domain behavior that native expectations cannot represent clearly.
+- Use `JMac\Testing\Double` for focused interaction tests where its explicit expectations improve clarity. Mockery remains available for existing tests and cases that need dynamic methods.
 
 ## Development Server
 
@@ -91,7 +97,7 @@ php artisan make:test ProductTest --unit
 ### Test Running Best Practices
 - **IMPORTANT**: Do not run tests automatically. The user will run tests manually when needed.
 - Use specific test commands for targeted testing
-- Always verify PHPStan level 6 compliance
+- Always verify application PHPStan level 6 and Pest PHPStan level 2 compliance
 - Maintain 100% type coverage requirement
 
 ## Git Integration

@@ -61,9 +61,9 @@ describe('Venue Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(Venue::class)->usesTrait(HasFactory::class);
-            expect(Venue::class)->usesTrait(HoldsEvents::class);
-            expect(Venue::class)->usesTrait(SoftDeletes::class);
+            expect(class_uses(Venue::class))->toContain(HasFactory::class);
+            expect(class_uses(Venue::class))->toContain(HoldsEvents::class);
+            expect(class_uses(Venue::class))->toContain(SoftDeletes::class);
         });
     });
 

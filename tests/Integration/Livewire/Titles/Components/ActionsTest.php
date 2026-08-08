@@ -177,12 +177,12 @@ describe('Title Actions Event Dispatching', function () {
     it('does not dispatch events on failed actions', function () {
         $user = User::factory()->create(); // Non-admin user
 
-        $component = Livewire::actingAs($user)
-            ->test(Actions::class, ['title' => $this->title]);
+        Livewire::actingAs($user);
 
-        $component->call('debut')
-            ->assertForbidden()
-            ->assertNotDispatched('title-updated');
+        $component = testLivewire(Actions::class, ['title' => $this->title]);
+
+        $component->call('debut')->assertForbidden();
+        $component->assertNotDispatched('title-updated');
     });
 });
 

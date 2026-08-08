@@ -127,7 +127,7 @@ describe('ProvidesTagTeamWrestlers Trait Unit Tests', function () {
 
     describe('trait integration', function () {
         test('TagTeam model uses ProvidesTagTeamWrestlers trait', function () {
-            expect(TagTeam::class)->usesTrait(ProvidesTagTeamWrestlers::class);
+            expect(class_uses(TagTeam::class))->toContain(ProvidesTagTeamWrestlers::class);
         });
     });
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stables\RetireAction;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Models\Stables\Stable;
+use Illuminate\Support\Carbon;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -58,11 +59,13 @@ test('it records a future retirement date while ending current operations now', 
     expect($stable->activityPeriods()->latest('id')->first()->ended_at->toDateTimeString())->toBe(now()->toDateTimeString());
 
     foreach ($stable->previousWrestlers as $wrestler) {
-        expect($wrestler->pivot->left_at->toDateTimeString())->toBe(now()->toDateTimeString());
+        expect(Carbon::parse(relatedPivotAttribute($wrestler, 'left_at'))->toDateTimeString())
+            ->toBe(now()->toDateTimeString());
     }
 
     foreach ($stable->previousTagTeams as $tagTeam) {
-        expect($tagTeam->pivot->left_at->toDateTimeString())->toBe(now()->toDateTimeString());
+        expect(Carbon::parse(relatedPivotAttribute($tagTeam, 'left_at'))->toDateTimeString())
+            ->toBe(now()->toDateTimeString());
     }
 });
 

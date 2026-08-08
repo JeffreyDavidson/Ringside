@@ -171,7 +171,7 @@ describe('HasMembers Trait Unit Tests', function () {
 
     describe('trait integration', function () {
         test('Stable model uses HasMembers trait', function () {
-            expect(Stable::class)->usesTrait(HasMembers::class);
+            expect(class_uses(Stable::class))->toContain(HasMembers::class);
         });
     });
 });

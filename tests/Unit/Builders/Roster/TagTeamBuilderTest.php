@@ -17,7 +17,7 @@ test('bookable tag teams can be retrieved', function () {
 
     expect($bookableTagTeams)
         ->toHaveCount(1)
-        ->collectionHas($bookableTagTeam);
+        ->and($bookableTagTeams->contains($bookableTagTeam))->toBeTrue();
 });
 
 test('future employed tag teams can be retrieved', function () {
@@ -33,7 +33,7 @@ test('future employed tag teams can be retrieved', function () {
 
     expect($futureEmployedTagTeams)
         ->toHaveCount(1)
-        ->collectionHas($futureEmployedTagTeam);
+        ->and($futureEmployedTagTeams->contains($futureEmployedTagTeam))->toBeTrue();
 });
 
 test('unbookable tag teams can be retrieved', function () {
@@ -49,12 +49,12 @@ test('unbookable tag teams can be retrieved', function () {
 
     expect($unbookableTagTeams)
         ->toHaveCount(6)
-        ->collectionHas($futureEmployedTagTeam)
-        ->collectionHas($suspendedTagTeam)
-        ->collectionHas($retiredTagTeam)
-        ->collectionHas($releasedTagTeam)
-        ->collectionHas($unemployedTagTeam)
-        ->collectionHas($unbookableTagTeam);
+        ->and($unbookableTagTeams->contains($futureEmployedTagTeam))->toBeTrue()
+        ->and($unbookableTagTeams->contains($suspendedTagTeam))->toBeTrue()
+        ->and($unbookableTagTeams->contains($retiredTagTeam))->toBeTrue()
+        ->and($unbookableTagTeams->contains($releasedTagTeam))->toBeTrue()
+        ->and($unbookableTagTeams->contains($unemployedTagTeam))->toBeTrue()
+        ->and($unbookableTagTeams->contains($unbookableTagTeam))->toBeTrue();
 });
 
 test('released tag teams can be retrieved', function () {
@@ -70,7 +70,7 @@ test('released tag teams can be retrieved', function () {
 
     expect($releasedTagTeams)
         ->toHaveCount(1)
-        ->collectionHas($releasedTagTeam);
+        ->and($releasedTagTeams->contains($releasedTagTeam))->toBeTrue();
 });
 
 test('suspended tag teams can be retrieved', function () {
@@ -86,7 +86,7 @@ test('suspended tag teams can be retrieved', function () {
 
     expect($suspendedTagTeams)
         ->toHaveCount(1)
-        ->collectionHas($suspendedTagTeam);
+        ->and($suspendedTagTeams->contains($suspendedTagTeam))->toBeTrue();
 });
 
 test('retired tag teams can be retrieved', function () {
@@ -102,7 +102,7 @@ test('retired tag teams can be retrieved', function () {
 
     expect($retiredTagTeams)
         ->toHaveCount(1)
-        ->collectionHas($retiredTagTeam);
+        ->and($retiredTagTeams->contains($retiredTagTeam))->toBeTrue();
 });
 
 test('unemployed tag teams can be retrieved', function () {
@@ -118,6 +118,6 @@ test('unemployed tag teams can be retrieved', function () {
 
     expect($unemployedTagTeams)
         ->toHaveCount(2)
-        ->collectionHas($unemployedTagTeam)
-        ->collectionHas($unbookableTagTeam);
+        ->and($unemployedTagTeams->contains($unemployedTagTeam))->toBeTrue()
+        ->and($unemployedTagTeams->contains($unbookableTagTeam))->toBeTrue();
 });

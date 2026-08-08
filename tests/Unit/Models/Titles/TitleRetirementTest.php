@@ -58,7 +58,7 @@ describe('Title Retirement Model Unit Tests', function () {
 
     describe('title retirement trait integration', function () {
         test('title uses all required traits', function () {
-            expect(Title::class)->usesTrait(HasFactory::class);
+            expect(class_uses(Title::class))->toContain(HasFactory::class);
         });
     });
 });

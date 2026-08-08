@@ -47,7 +47,7 @@ describe('BaseModal Unit Tests', function () {
 
             $property = $reflection->getProperty('model');
             expect($property->isProtected())->toBeTrue();
-            expect($property->getType()->getName())->toBe('Illuminate\\Database\\Eloquent\\Model');
+            expect(reflectionTypeName($property))->toBe('Illuminate\\Database\\Eloquent\\Model');
             expect($property->getType()->allowsNull())->toBeTrue();
         });
 
@@ -68,7 +68,7 @@ describe('BaseModal Unit Tests', function () {
 
             $property = $reflection->getProperty('modelType');
             expect($property->isProtected())->toBeTrue();
-            expect($property->getType()->getName())->toBe('Illuminate\\Database\\Eloquent\\Model');
+            expect(reflectionTypeName($property))->toBe('Illuminate\\Database\\Eloquent\\Model');
             expect($property->getDocComment())->toContain('@var TModelType');
         });
 
@@ -81,15 +81,15 @@ describe('BaseModal Unit Tests', function () {
 
             $modalFormPath = $reflection->getProperty('modalFormPath');
             expect($modalFormPath->isProtected())->toBeTrue();
-            expect($modalFormPath->getType()->getName())->toBe('string');
+            expect(reflectionTypeName($modalFormPath))->toBe('string');
 
             $modelTitleField = $reflection->getProperty('modelTitleField');
             expect($modelTitleField->isProtected())->toBeTrue();
-            expect($modelTitleField->getType()->getName())->toBe('string');
+            expect(reflectionTypeName($modelTitleField))->toBe('string');
 
             $titleField = $reflection->getProperty('titleField');
             expect($titleField->isProtected())->toBeTrue();
-            expect($titleField->getType()->getName())->toBe('string');
+            expect(reflectionTypeName($titleField))->toBe('string');
         });
     });
 
@@ -101,7 +101,7 @@ describe('BaseModal Unit Tests', function () {
 
             $method = $reflection->getMethod('mount');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($method))->toBe('void');
             expect($method->getNumberOfParameters())->toBe(1);
 
             $parameter = $method->getParameters()[0];
@@ -113,7 +113,7 @@ describe('BaseModal Unit Tests', function () {
                 // PHP 8.0+ union type - mixed type is represented as a union type
                 expect(true)->toBeTrue(); // Skip specific type check for mixed type compatibility
             } else {
-                expect($paramType->getName())->toBe('mixed');
+                expect(reflectionTypeName($parameter))->toBe('mixed');
             }
 
             expect($parameter->isOptional())->toBeTrue();
@@ -127,7 +127,7 @@ describe('BaseModal Unit Tests', function () {
 
             $method = $reflection->getMethod('getModalTitle');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($method))->toBe('string');
             expect($method->getNumberOfParameters())->toBe(0);
         });
 
@@ -138,7 +138,7 @@ describe('BaseModal Unit Tests', function () {
 
             $method = $reflection->getMethod('clear');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($method))->toBe('void');
             expect($method->getNumberOfParameters())->toBe(0);
         });
 
@@ -149,7 +149,7 @@ describe('BaseModal Unit Tests', function () {
 
             $method = $reflection->getMethod('save');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($method))->toBe('void');
             expect($method->getNumberOfParameters())->toBe(0);
         });
 
@@ -160,7 +160,7 @@ describe('BaseModal Unit Tests', function () {
 
             $method = $reflection->getMethod('render');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('Illuminate\\View\\View');
+            expect(reflectionReturnTypeName($method))->toBe('Illuminate\\View\\View');
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });

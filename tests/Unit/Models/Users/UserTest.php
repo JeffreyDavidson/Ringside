@@ -64,8 +64,8 @@ describe('User Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(User::class)->usesTrait(HasFactory::class);
-            expect(User::class)->usesTrait(Notifiable::class);
+            expect(class_uses(User::class))->toContain(HasFactory::class);
+            expect(class_uses(User::class))->toContain(Notifiable::class);
         });
     });
 

@@ -75,17 +75,17 @@ describe('TagTeam Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(TagTeam::class)->usesTrait(CanBeManaged::class);
-            expect(TagTeam::class)->usesTrait(CanJoinStables::class);
-            expect(TagTeam::class)->usesTrait(CanWinTitles::class);
-            expect(TagTeam::class)->usesTrait(HasFactory::class);
-            expect(TagTeam::class)->usesTrait(IsBookableCompetitor::class);
-            expect(TagTeam::class)->usesTrait(IsEmployable::class);
-            expect(TagTeam::class)->usesTrait(IsRetirable::class);
-            expect(TagTeam::class)->usesTrait(IsSuspendable::class);
-            expect(TagTeam::class)->usesTrait(ProvidesTagTeamWrestlers::class);
-            expect(TagTeam::class)->usesTrait(SoftDeletes::class);
-            expect(TagTeam::class)->usesTrait(ValidatesTagTeamLifecycle::class);
+            expect(class_uses(TagTeam::class))->toContain(CanBeManaged::class);
+            expect(class_uses(TagTeam::class))->toContain(CanJoinStables::class);
+            expect(class_uses(TagTeam::class))->toContain(CanWinTitles::class);
+            expect(class_uses(TagTeam::class))->toContain(HasFactory::class);
+            expect(class_uses(TagTeam::class))->toContain(IsBookableCompetitor::class);
+            expect(class_uses(TagTeam::class))->toContain(IsEmployable::class);
+            expect(class_uses(TagTeam::class))->toContain(IsRetirable::class);
+            expect(class_uses(TagTeam::class))->toContain(IsSuspendable::class);
+            expect(class_uses(TagTeam::class))->toContain(ProvidesTagTeamWrestlers::class);
+            expect(class_uses(TagTeam::class))->toContain(SoftDeletes::class);
+            expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamLifecycle::class);
         });
     });
 

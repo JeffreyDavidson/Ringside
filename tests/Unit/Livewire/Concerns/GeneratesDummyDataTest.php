@@ -49,7 +49,7 @@ describe('GeneratesDummyData Unit Tests', function () {
 
             $method = $reflection->getMethod('fillDummyFields');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($method))->toBe('void');
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });
@@ -62,14 +62,14 @@ describe('GeneratesDummyData Unit Tests', function () {
 
             $method = $reflection->getMethod('populateField');
             expect($method->isPrivate())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($method))->toBe('void');
             expect($method->getNumberOfParameters())->toBe(2);
 
             $parameters = $method->getParameters();
             expect($parameters[0]->getName())->toBe('field');
-            expect($parameters[0]->getType()->getName())->toBe('string');
+            expect(reflectionTypeName($parameters[0]))->toBe('string');
             expect($parameters[1]->getName())->toBe('value');
-            expect($parameters[1]->getType()->getName())->toBe('mixed');
+            expect(reflectionTypeName($parameters[1]))->toBe('mixed');
         });
 
         test('has strategy methods', function () {
@@ -86,14 +86,14 @@ describe('GeneratesDummyData Unit Tests', function () {
 
                 $method = $reflection->getMethod($methodName);
                 expect($method->isPrivate())->toBeTrue();
-                expect($method->getReturnType()->getName())->toBe('bool');
+                expect(reflectionReturnTypeName($method))->toBe('bool');
                 expect($method->getNumberOfParameters())->toBe(2);
 
                 $parameters = $method->getParameters();
                 expect($parameters[0]->getName())->toBe('field');
-                expect($parameters[0]->getType()->getName())->toBe('string');
+                expect(reflectionTypeName($parameters[0]))->toBe('string');
                 expect($parameters[1]->getName())->toBe('value');
-                expect($parameters[1]->getType()->getName())->toBe('mixed');
+                expect(reflectionTypeName($parameters[1]))->toBe('mixed');
             }
         });
     });
@@ -107,12 +107,12 @@ describe('GeneratesDummyData Unit Tests', function () {
 
             $nameMethod = $reflection->getMethod('generateWrestlingName');
             expect($nameMethod->isProtected())->toBeTrue();
-            expect($nameMethod->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($nameMethod))->toBe('string');
             expect($nameMethod->getNumberOfParameters())->toBe(0);
 
             $moveMethod = $reflection->getMethod('generateSignatureMove');
             expect($moveMethod->isProtected())->toBeTrue();
-            expect($moveMethod->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($moveMethod))->toBe('string');
             expect($moveMethod->getNumberOfParameters())->toBe(0);
         });
 
@@ -124,12 +124,12 @@ describe('GeneratesDummyData Unit Tests', function () {
 
             $venueMethod = $reflection->getMethod('generateVenueName');
             expect($venueMethod->isProtected())->toBeTrue();
-            expect($venueMethod->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($venueMethod))->toBe('string');
             expect($venueMethod->getNumberOfParameters())->toBe(0);
 
             $titleMethod = $reflection->getMethod('generateChampionshipTitle');
             expect($titleMethod->isProtected())->toBeTrue();
-            expect($titleMethod->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($titleMethod))->toBe('string');
             expect($titleMethod->getNumberOfParameters())->toBe(0);
         });
 
@@ -141,12 +141,12 @@ describe('GeneratesDummyData Unit Tests', function () {
 
             $addressMethod = $reflection->getMethod('generateUSAddress');
             expect($addressMethod->isProtected())->toBeTrue();
-            expect($addressMethod->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($addressMethod))->toBe('array');
             expect($addressMethod->getNumberOfParameters())->toBe(0);
 
             $dateMethod = $reflection->getMethod('generateFutureDate');
             expect($dateMethod->isProtected())->toBeTrue();
-            expect($dateMethod->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($dateMethod))->toBe('string');
             expect($dateMethod->getReturnType()->allowsNull())->toBeTrue();
             expect($dateMethod->getNumberOfParameters())->toBe(2);
         });
@@ -161,7 +161,7 @@ describe('GeneratesDummyData Unit Tests', function () {
             $method = $reflection->getMethod('getDummyDataFields');
             expect($method->isAbstract())->toBeTrue();
             expect($method->isProtected())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($method))->toBe('array');
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });
@@ -288,12 +288,12 @@ describe('GeneratesDummyData Unit Tests', function () {
             $parameters = $method->getParameters();
 
             expect($parameters[0]->getName())->toBe('probability');
-            expect($parameters[0]->getType()->getName())->toBe('float');
+            expect(reflectionTypeName($parameters[0]))->toBe('float');
             expect($parameters[0]->isOptional())->toBeTrue();
             expect($parameters[0]->getDefaultValue())->toBe(0.8);
 
             expect($parameters[1]->getName())->toBe('maxPeriod');
-            expect($parameters[1]->getType()->getName())->toBe('string');
+            expect(reflectionTypeName($parameters[1]))->toBe('string');
             expect($parameters[1]->isOptional())->toBeTrue();
             expect($parameters[1]->getDefaultValue())->toBe('+3 months');
         });

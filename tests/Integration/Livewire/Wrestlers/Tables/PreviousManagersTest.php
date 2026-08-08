@@ -8,7 +8,6 @@ use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerManager;
 use Illuminate\Support\Carbon;
-use Livewire\Livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -26,7 +25,7 @@ beforeEach(function () {
 
 describe('Previous Managers Table Component', function () {
     it('can mount with wrestler ID', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertOk();
         $table->assertSet('wrestlerId', $this->wrestler->id);
@@ -35,7 +34,7 @@ describe('Previous Managers Table Component', function () {
 
     it('throws exception when wrestler ID not specified', function () {
         expect(function () {
-            Livewire::test(PreviousManagers::class);
+            testLivewire(PreviousManagers::class);
         })->toThrow(Exception::class, "You didn't specify a wrestler");
         expect(true)->toBeTrue();
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
@@ -58,7 +57,7 @@ describe('Previous Managers Table Component', function () {
             'fired_at' => Carbon::now()->subDays(5),
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertSee($this->manager->full_name); // Should see the fired manager
         $table->assertDontSee($currentManager->full_name); // Should not see the current manager
@@ -92,7 +91,7 @@ describe('Previous Managers Table Component', function () {
             'fired_at' => Carbon::now()->subDays(15),
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         // Should be ordered by hired_at descending (most recent first)
         $table->assertSee($manager1->full_name) // hired 10 days ago
@@ -121,7 +120,7 @@ describe('Previous Managers Table Component', function () {
             'fired_at' => Carbon::now()->subDays(8),
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertSee($this->manager->full_name);
         $table->assertDontSee($otherManager->full_name);
@@ -129,7 +128,7 @@ describe('Previous Managers Table Component', function () {
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'relationships');
 
     it('handles empty previous managers list', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertOk();
         $table->assertSee('No records found.');
@@ -139,7 +138,7 @@ describe('Previous Managers Table Component', function () {
 
 describe('Previous Managers Table Configuration', function () {
     it('configures additional selects correctly', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertOk();
         // The table should be configured with additional selects for manager_id
@@ -148,7 +147,7 @@ describe('Previous Managers Table Configuration', function () {
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
 
     it('uses correct database table name', function () {
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         expect($table->instance()->databaseTableName)->toBe('wrestlers_managers');
         expect(true)->toBeTrue();
@@ -176,7 +175,7 @@ describe('Previous Managers Table Filtering', function () {
             'fired_at' => Carbon::now()->subDays(90),
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertSee($recentManager->full_name)
             ->assertSee($oldManager->full_name);
@@ -194,7 +193,7 @@ describe('Previous Managers Table Filtering', function () {
             'fired_at' => $firedDate,
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertSee($this->manager->full_name);
         // The table should show the employment period dates
@@ -222,7 +221,7 @@ describe('Previous Managers Table Business Logic', function () {
             'fired_at' => Carbon::now()->subDays(10),
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         // Should show both employment periods
         $table->assertSee($this->manager->full_name);
@@ -237,7 +236,7 @@ describe('Previous Managers Table Business Logic', function () {
             'fired_at' => Carbon::now()->subDays(5),
         ]);
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $table->assertSee($this->manager->full_name);
 
@@ -257,7 +256,7 @@ describe('Previous Managers Table Business Logic', function () {
         // Delete the manager
         $this->manager->delete();
 
-        $table = Livewire::test(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $table = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         // Should still work but not show the deleted manager
         $table->assertOk();

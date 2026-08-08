@@ -40,7 +40,7 @@ describe('PresentsTitlesList Unit Tests', function () {
 
             $method = $reflection->getMethod('getTitles');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($method))->toBe('array');
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });
@@ -135,7 +135,7 @@ describe('PresentsTitlesList Unit Tests', function () {
             $method = $reflection->getMethod('getTitles');
 
             // Should return array suitable for form dropdowns
-            expect($method->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($method))->toBe('array');
         });
     });
 

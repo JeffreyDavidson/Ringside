@@ -6,9 +6,10 @@ use App\Models\Users\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
-use Illuminate\Support\Collection;
 
 use function Pest\Laravel\withoutVite;
+
+require_once __DIR__.'/Helpers/LivewireHelpers.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -48,40 +49,6 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
-expect()->extend('collectionHas', function ($entity) {
-    if (is_array($entity) || $entity instanceof Collection) {
-        foreach ($entity as $test) {
-            $this->value->assertContains($this, $test);
-        }
-
-        return $this;
-    }
-
-    expect($this->value->contains($entity))->toBeTrue();
-
-    return $this;
-});
-
-expect()->extend('collectionDoesntHave', function ($entity) {
-    if (is_array($entity) || $entity instanceof Collection) {
-        foreach ($entity as $test) {
-            $this->value->assertNotContains($this, $test);
-        }
-
-        return $this;
-    }
-
-    expect($this->value->contains($entity))->toBeFalse();
-
-    return $this;
-});
-
-expect()->extend('usesTrait', function ($trait) {
-    expect(class_uses($this->value))->toContain($trait);
-
-    return $this;
-});
-
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -115,3 +82,4 @@ function basicUser()
 */
 
 require_once __DIR__.'/Helpers/TestHelpers.php';
+require_once __DIR__.'/Helpers/ReflectionHelpers.php';

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns\Support;
 
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 #[Table('fake_suspendables')]
 #[Fillable('name')]
-class FakeSuspendableModel extends Model
+class FakeSuspendableModel extends Model implements Suspendable
 {
     use IsSuspendable;
 

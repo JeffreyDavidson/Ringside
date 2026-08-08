@@ -66,14 +66,14 @@ describe('Manager Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(Manager::class)->usesTrait(DefinesManagedAliases::class);
-            expect(Manager::class)->usesTrait(HasFactory::class);
-            expect(Manager::class)->usesTrait(IsEmployable::class);
-            expect(Manager::class)->usesTrait(IsInjurable::class);
-            expect(Manager::class)->usesTrait(IsRetirable::class);
-            expect(Manager::class)->usesTrait(IsSuspendable::class);
-            expect(Manager::class)->usesTrait(ProvidesDisplayName::class);
-            expect(Manager::class)->usesTrait(SoftDeletes::class);
+            expect(class_uses(Manager::class))->toContain(DefinesManagedAliases::class);
+            expect(class_uses(Manager::class))->toContain(HasFactory::class);
+            expect(class_uses(Manager::class))->toContain(IsEmployable::class);
+            expect(class_uses(Manager::class))->toContain(IsInjurable::class);
+            expect(class_uses(Manager::class))->toContain(IsRetirable::class);
+            expect(class_uses(Manager::class))->toContain(IsSuspendable::class);
+            expect(class_uses(Manager::class))->toContain(ProvidesDisplayName::class);
+            expect(class_uses(Manager::class))->toContain(SoftDeletes::class);
         });
     });
 
