@@ -1,0 +1,97 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches:
+      - development
+      - master
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: security-scan-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  ward:
+    name: Ward Security Scan
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+    continue-on-error: true
+    timeout-minutes: 15
+
+    env:
+      GOPATH: ${{ runner.temp }}/ward-go
+      WARD_HOME: ${{ runner.temp }}/ward-home
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+
+      - name: Install Ward
+        run: |
+          go install github.com/eljakani/ward@v0.4.2
+          echo "$GOPATH/bin" >> "$GITHUB_PATH"
+
+      - name: Initialize Ward
+        env:
+          HOME: ${{ env.WARD_HOME }}
+        run: |
+          mkdir -p "$HOME"
+          ward init
+
+      - name: Generate pull request baseline
+        if: github.event_name == 'pull_request'
+        env:
+          HOME: ${{ env.WARD_HOME }}
+        run: |
+          git checkout "${{ github.event.pull_request.base.sha }}"
+          ward scan . --output json --update-baseline "$RUNNER_TEMP/ward-baseline.json" || true
+          git checkout "${{ github.sha }}"
+
+      - name: Scan pull request changes
+        if: github.event_name == 'pull_request'
+        env:
+          HOME: ${{ env.WARD_HOME }}
+        run: |
+          if [ -f "$RUNNER_TEMP/ward-baseline.json" ]; then
+            ward scan . --output json,sarif --baseline "$RUNNER_TEMP/ward-baseline.json" --fail-on high
+          else
+            ward scan . --output json,sarif --fail-on high
+          fi
+
+      - name: Run scheduled security scan
+        if: github.event_name != 'pull_request'
+        env:
+          HOME: ${{ env.WARD_HOME }}
+        run: ward scan . --output json,sarif --fail-on high
+
+      - name: Upload Ward reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ward-security-reports
+          path: |
+            ward-report.json
+            ward-report.sarif
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Ward SARIF
+        if: always() && hashFiles('ward-report.sarif') != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ward-report.sarif
