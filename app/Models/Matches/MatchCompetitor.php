@@ -9,6 +9,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchCompetitorFactory;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @mixin \Eloquent
  */
 #[CollectedBy(MatchCompetitorsCollection::class)]
+#[Fillable('match_id', 'competitor_id', 'competitor_type', 'side_number')]
 #[UseFactory(MatchCompetitorFactory::class)]
 class MatchCompetitor extends MorphPivot
 {
@@ -49,18 +51,6 @@ class MatchCompetitor extends MorphPivot
      * @var string
      */
     protected $table = 'events_matches_competitors';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
-    protected $fillable = [
-        'match_id',
-        'competitor_id',
-        'competitor_type',
-        'side_number',
-    ];
 
     /**
      * Get the competitor for the match (Wrestler or TagTeam).
