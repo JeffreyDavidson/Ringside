@@ -15,7 +15,7 @@ test('active stables can be retrieved', function () {
 
     expect($activeStables)
         ->toHaveCount(1)
-        ->collectionHas($activeStable);
+        ->and($activeStables->contains($activeStable))->toBeTrue();
 });
 
 test('future activated stables can be retrieved', function () {
@@ -29,7 +29,7 @@ test('future activated stables can be retrieved', function () {
 
     expect($futureActivatedStables)
         ->toHaveCount(1)
-        ->collectionHas($futureActivatedStable);
+        ->and($futureActivatedStables->contains($futureActivatedStable))->toBeTrue();
 });
 
 test('inactive stables can be retrieved', function () {
@@ -43,7 +43,7 @@ test('inactive stables can be retrieved', function () {
 
     expect($inactiveStables)
         ->toHaveCount(1)
-        ->collectionHas($inactiveStable);
+        ->and($inactiveStables->contains($inactiveStable))->toBeTrue();
 });
 
 test('retired stables can be retrieved', function () {
@@ -57,7 +57,7 @@ test('retired stables can be retrieved', function () {
 
     expect($retiredStables)
         ->toHaveCount(1)
-        ->collectionHas($retiredStable);
+        ->and($retiredStables->contains($retiredStable))->toBeTrue();
 });
 
 test('unactivated stables can be retrieved', function () {
@@ -71,5 +71,5 @@ test('unactivated stables can be retrieved', function () {
 
     expect($unactivatedStables)
         ->toHaveCount(1)
-        ->collectionHas($unactivatedStable);
+        ->and($unactivatedStables->contains($unactivatedStable))->toBeTrue();
 });

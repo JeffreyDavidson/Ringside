@@ -38,7 +38,7 @@ describe('ShowTableTrait Unit Tests', function () {
 
             $method = $reflection->getMethod('configuringShowTableTrait');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($method))->toBe('void');
             expect($method->getNumberOfParameters())->toBe(0);
         });
     });

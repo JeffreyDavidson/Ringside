@@ -23,7 +23,7 @@ use Tests\Integration\Livewire\Concerns\BaseTableTraitTest;
 describe('BaseTableTrait Unit Tests', function () {
     describe('trait integration', function () {
         test('uses HasActionColumn trait', function () {
-            expect(BaseTableTrait::class)->usesTrait(HasActionColumn::class);
+            expect(class_uses(BaseTableTrait::class))->toContain(HasActionColumn::class);
         });
     });
 
@@ -35,7 +35,7 @@ describe('BaseTableTrait Unit Tests', function () {
 
             $property = $reflection->getProperty('actionLinksToDisplay');
             expect($property->isProtected())->toBeTrue();
-            expect($property->getType()->getName())->toBe('array');
+            expect(reflectionTypeName($property))->toBe('array');
             expect($property->hasDefaultValue())->toBeTrue();
             expect($property->getDefaultValue())->toEqual(['view' => true, 'edit' => true, 'delete' => true]);
             expect($property->getDocComment())->toContain('@var array<string, bool>');
@@ -48,7 +48,7 @@ describe('BaseTableTrait Unit Tests', function () {
 
             $property = $reflection->getProperty('showActionColumn');
             expect($property->isProtected())->toBeTrue();
-            expect($property->getType()->getName())->toBe('bool');
+            expect(reflectionTypeName($property))->toBe('bool');
             expect($property->hasDefaultValue())->toBeTrue();
             expect($property->getDefaultValue())->toBeFalse();
         });
@@ -63,7 +63,7 @@ describe('BaseTableTrait Unit Tests', function () {
 
                 $property = $reflection->getProperty($propertyName);
                 expect($property->isProtected())->toBeTrue();
-                expect($property->getType()->getName())->toBe('string');
+                expect(reflectionTypeName($property))->toBe('string');
                 expect($property->hasDefaultValue())->toBeTrue();
                 expect($property->getDefaultValue())->toBe('');
             }
@@ -78,7 +78,7 @@ describe('BaseTableTrait Unit Tests', function () {
 
             $method = $reflection->getMethod('configuringBaseTableTrait');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($method))->toBe('void');
             expect($method->getNumberOfParameters())->toBe(0);
         });
 
@@ -89,7 +89,7 @@ describe('BaseTableTrait Unit Tests', function () {
 
             $method = $reflection->getMethod('appendColumns');
             expect($method->isPublic())->toBeTrue();
-            expect($method->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($method))->toBe('array');
             expect($method->getNumberOfParameters())->toBe(0);
             expect($method->getDocComment())->toContain('@return array<Column>');
         });
@@ -102,11 +102,11 @@ describe('BaseTableTrait Unit Tests', function () {
 
             $setupMethod = $reflection->getMethod('setupTableStructure');
             expect($setupMethod->isPrivate())->toBeTrue();
-            expect($setupMethod->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($setupMethod))->toBe('void');
 
             $searchMethod = $reflection->getMethod('setSearchAttributes');
             expect($searchMethod->isPrivate())->toBeTrue();
-            expect($searchMethod->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($searchMethod))->toBe('void');
         });
     });
 

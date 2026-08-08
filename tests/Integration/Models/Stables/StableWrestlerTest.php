@@ -124,8 +124,8 @@ describe('StableWrestler Pivot Model', function () {
             // Verify current stable is correct
             $currentStable = $this->wrestler->currentStable;
             expect($currentStable->id)->toBe($this->secondStable->id);
-            expect(Carbon::parse($currentStable->pivot->joined_at)->format('Y-m-d H:i:s'))->toBe($secondPeriodStart->format('Y-m-d H:i:s'));
-            expect($currentStable->pivot->left_at)->toBeNull();
+            expect(Carbon::parse(relatedPivotAttribute($currentStable, 'joined_at'))->format('Y-m-d H:i:s'))->toBe($secondPeriodStart->format('Y-m-d H:i:s'));
+            expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
 
             // Verify previous stable is correct
             $previousStable = $this->wrestler->previousStables()->first();
@@ -247,7 +247,7 @@ describe('StableWrestler Pivot Model', function () {
 
             expect($currentStable)->not()->toBeNull();
             expect($currentStable->id)->toBe($this->secondStable->id);
-            expect($currentStable->pivot->left_at)->toBeNull();
+            expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
         });
 
         test('previous stables query returns only completed relationships', function () {
@@ -255,7 +255,7 @@ describe('StableWrestler Pivot Model', function () {
 
             expect($previousStables)->toHaveCount(1);
             expect($previousStables->first()->id)->toBe($this->stable->id);
-            expect($previousStables->first()->pivot->left_at)->not()->toBeNull();
+            expect(relatedPivotAttribute($previousStables->first(), 'left_at'))->not()->toBeNull();
         });
 
         test('all stables query returns complete membership history', function () {

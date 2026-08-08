@@ -213,7 +213,7 @@ describe('VenueForm Integration Tests', function () {
             expect(method_exists($this->form, 'loadExtraData'))->toBeTrue();
 
             $reflection = new ReflectionMethod($this->form, 'loadExtraData');
-            expect($reflection->getReturnType()->getName())->toBe('void');
+            expect(reflectionReturnTypeName($reflection))->toBe('void');
         });
     });
 });

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories\Referees;
 
 use App\Models\Referees\Referee;
+use App\Models\Referees\RefereeInjury;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 

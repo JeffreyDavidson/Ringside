@@ -14,16 +14,18 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\IsEmployable;
+use App\Models\Contracts\Employable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Mockery;
 use Tests\Unit\Models\Concerns\Support\FakeEmployableModel;
 use Tests\Unit\Models\Concerns\Support\FakeEmploymentModel;
 
 describe('IsEmployable Trait Unit Tests', function () {
     describe('employment relationships', function () {
         test('provides employments relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -36,7 +38,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('provides current employment relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -49,7 +51,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('provides future employment relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -62,7 +64,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('provides previous employments relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -75,7 +77,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('provides previous employment relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -88,7 +90,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('provides first employment relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -101,7 +103,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('employments relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -116,7 +118,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('currentEmployment relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -133,7 +135,7 @@ describe('IsEmployable Trait Unit Tests', function () {
 
     describe('employment status checks', function () {
         test('can check if model is employed', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -142,22 +144,19 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function currentEmployment()
+                public function currentEmployment(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
             expect($model->isEmployed())->toBeTrue();
         });
 
         test('can check if model is not employed', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -166,22 +165,19 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function currentEmployment()
+                public function currentEmployment(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($model->isEmployed())->toBeFalse();
         });
 
         test('can check if model has employments', function () {
-            $modelWith = new class extends Model
+            $modelWith = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -190,18 +186,15 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function employments()
+                public function employments(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
-            $modelWithout = new class extends Model
+            $modelWithout = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -210,15 +203,12 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function employments()
+                public function employments(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($modelWith->hasEmployments())->toBeTrue();
@@ -226,7 +216,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('can check if model has future employment', function () {
-            $modelWith = new class extends Model
+            $modelWith = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -235,18 +225,15 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function futureEmployment()
+                public function futureEmployment(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
-            $modelWithout = new class extends Model
+            $modelWithout = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -255,15 +242,12 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function futureEmployment()
+                public function futureEmployment(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($modelWith->hasFutureEmployment())->toBeTrue();
@@ -271,7 +255,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('can check if model has employment history', function () {
-            $modelWith = new class extends Model
+            $modelWith = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -280,18 +264,15 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function employments()
+                public function employments(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
-            $modelWithout = new class extends Model
+            $modelWithout = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -300,15 +281,12 @@ describe('IsEmployable Trait Unit Tests', function () {
                     return FakeEmploymentModel::class;
                 }
 
-                public function employments()
+                public function employments(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($modelWith->hasEmploymentHistory())->toBeTrue();
@@ -326,7 +304,7 @@ describe('IsEmployable Trait Unit Tests', function () {
 
     describe('employment relationship queries', function () {
         test('current employment query includes whereNull ended_at', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -344,7 +322,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('future employment query includes whereNull ended_at and started_at > now', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -366,7 +344,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('previous employments query includes whereNotNull ended_at', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -384,7 +362,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('previous employment query includes ofMany constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 
@@ -400,7 +378,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('first employment query includes ofMany constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Employable
             {
                 use IsEmployable;
 

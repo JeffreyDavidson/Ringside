@@ -117,7 +117,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = Mockery::mock(Model::class);
             $model->shouldReceive('isCurrentlyActive')->andReturn(true);
-            $model->shouldReceive('getAttribute')->with('name')->andReturn('Test Model');
+            $model->shouldReceive('getAttribute')->andReturn('Test Model');
 
             $rule = new CanChangeDebutDate($model);
             $failCalled = false;
@@ -381,14 +381,22 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
         test('correctly passes parsed date to wasActiveOn method', function () {
             // Arrange
             $targetDate = now()->addWeek();
-            $model = Mockery::mock(Model::class);
-            $model->shouldReceive('isCurrentlyActive')->andReturn(true);
-            $model->shouldReceive('wasActiveOn')
-                ->with(Mockery::on(function ($date) use ($targetDate) {
-                    return $date instanceof Carbon &&
-                           $date->equalTo($targetDate);
-                }))
-                ->andReturn(true);
+            $model = new class extends Model
+            {
+                public ?Carbon $receivedDate = null;
+
+                public function isCurrentlyActive(): bool
+                {
+                    return true;
+                }
+
+                public function wasActiveOn(Carbon $date): bool
+                {
+                    $this->receivedDate = $date;
+
+                    return true;
+                }
+            };
 
             $rule = new CanChangeDebutDate($model);
             $failCalled = false;
@@ -401,6 +409,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
 
             // Assert
             expect($failCalled)->toBeFalse();
+            expect($model->receivedDate?->equalTo($targetDate))->toBeTrue();
         });
     });
 

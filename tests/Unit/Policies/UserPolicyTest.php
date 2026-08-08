@@ -183,9 +183,9 @@ describe('UserPolicy method signatures', function () {
         $reflection = new ReflectionMethod(UserPolicy::class, 'before');
 
         expect($reflection->getParameters())->toHaveCount(2);
-        expect($reflection->getParameters()[0]->getType()?->getName())->toBe(User::class);
-        expect($reflection->getParameters()[1]->getType()?->getName())->toBe('string');
-        expect($reflection->getReturnType()?->getName())->toBe('bool');
+        expect(reflectionTypeName($reflection->getParameters()[0]))->toBe(User::class);
+        expect(reflectionTypeName($reflection->getParameters()[1]))->toBe('string');
+        expect(reflectionReturnTypeName($reflection))->toBe('bool');
     });
 
     test('policy methods have correct signatures', function () {
@@ -195,8 +195,8 @@ describe('UserPolicy method signatures', function () {
             $reflection = new ReflectionMethod(UserPolicy::class, $method);
 
             expect($reflection->getParameters())->toHaveCount(1);
-            expect($reflection->getParameters()[0]->getType()?->getName())->toBe(User::class);
-            expect($reflection->getReturnType()?->getName())->toBe('bool');
+            expect(reflectionTypeName($reflection->getParameters()[0]))->toBe(User::class);
+            expect(reflectionReturnTypeName($reflection))->toBe('bool');
         }
     });
 });

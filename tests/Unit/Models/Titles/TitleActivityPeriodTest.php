@@ -62,7 +62,7 @@ describe('TitleActivityPeriod Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(TitleActivityPeriod::class)->usesTrait(HasFactory::class);
+            expect(class_uses(TitleActivityPeriod::class))->toContain(HasFactory::class);
         });
     });
 

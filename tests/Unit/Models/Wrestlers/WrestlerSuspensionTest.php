@@ -58,7 +58,7 @@ describe('WrestlerSuspension Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(WrestlerSuspension::class)->usesTrait(HasFactory::class);
+            expect(class_uses(WrestlerSuspension::class))->toContain(HasFactory::class);
         });
     });
 

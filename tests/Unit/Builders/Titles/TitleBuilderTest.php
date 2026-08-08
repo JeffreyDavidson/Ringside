@@ -14,7 +14,7 @@ test('active titles can be retrieved', function () {
 
     expect($activeTitles)
         ->toHaveCount(1)
-        ->collectionHas($activeTitle);
+        ->and($activeTitles->contains($activeTitle))->toBeTrue();
 });
 
 test('future activated titles can be retrieved', function () {
@@ -27,7 +27,7 @@ test('future activated titles can be retrieved', function () {
 
     expect($futureActivatedTitles)
         ->toHaveCount(1)
-        ->collectionHas($futureActivatedTitle);
+        ->and($futureActivatedTitles->contains($futureActivatedTitle))->toBeTrue();
 });
 
 test('inactive titles can be retrieved', function () {
@@ -40,9 +40,9 @@ test('inactive titles can be retrieved', function () {
 
     expect($inactiveTitles)
         ->toHaveCount(3)
-        ->collectionHas($inactiveTitle)
-        ->collectionHas($retiredTitle)
-        ->collectionHas($futureActivatedTitle);
+        ->and($inactiveTitles->contains($inactiveTitle))->toBeTrue()
+        ->and($inactiveTitles->contains($retiredTitle))->toBeTrue()
+        ->and($inactiveTitles->contains($futureActivatedTitle))->toBeTrue();
 });
 
 test('retired titles can be retrieved', function () {
@@ -55,5 +55,5 @@ test('retired titles can be retrieved', function () {
 
     expect($retiredTitles)
         ->toHaveCount(1)
-        ->collectionHas($retiredTitle);
+        ->and($retiredTitles->contains($retiredTitle))->toBeTrue();
 });

@@ -59,7 +59,7 @@ describe('TagTeamRetirement Model Unit Tests', function () {
 
     describe('tagTeamRetirement trait integration', function () {
         test('tagTeamRetirement uses all required traits', function () {
-            expect(TagTeamRetirement::class)->usesTrait(HasFactory::class);
+            expect(class_uses(TagTeamRetirement::class))->toContain(HasFactory::class);
         });
 
         test('tagTeamRetirement implements all required interfaces', function () {

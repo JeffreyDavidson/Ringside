@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns\Support;
 
 use App\Models\Concerns\CanBeManaged;
+use App\Models\Contracts\Manageable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 #[Table('fake_manageable_models')]
 #[Fillable('name')]
-class FakeManageableModel extends Model
+class FakeManageableModel extends Model implements Manageable
 {
     use CanBeManaged;
 

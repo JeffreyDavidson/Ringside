@@ -34,7 +34,7 @@ describe('BaseFormModal Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses GeneratesDummyData trait', function () {
-            expect(BaseFormModal::class)->usesTrait(GeneratesDummyData::class);
+            expect(class_uses(BaseFormModal::class))->toContain(GeneratesDummyData::class);
         });
     });
 
@@ -61,19 +61,19 @@ describe('BaseFormModal Unit Tests', function () {
             $getFormClass = $reflection->getMethod('getFormClass');
             expect($getFormClass->isAbstract())->toBeTrue();
             expect($getFormClass->isProtected())->toBeTrue();
-            expect($getFormClass->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($getFormClass))->toBe('string');
 
             // getModelClass method
             $getModelClass = $reflection->getMethod('getModelClass');
             expect($getModelClass->isAbstract())->toBeTrue();
             expect($getModelClass->isProtected())->toBeTrue();
-            expect($getModelClass->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($getModelClass))->toBe('string');
 
             // getModalPath method
             $getModalPath = $reflection->getMethod('getModalPath');
             expect($getModalPath->isAbstract())->toBeTrue();
             expect($getModalPath->isProtected())->toBeTrue();
-            expect($getModalPath->getReturnType()->getName())->toBe('string');
+            expect(reflectionReturnTypeName($getModalPath))->toBe('string');
         });
     });
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns\Support;
 
 use App\Models\Concerns\IsEmployable;
+use App\Models\Contracts\Employable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 #[Table('fake_employables')]
 #[Fillable('name')]
-class FakeEmployableModel extends Model
+class FakeEmployableModel extends Model implements Employable
 {
     use IsEmployable;
 

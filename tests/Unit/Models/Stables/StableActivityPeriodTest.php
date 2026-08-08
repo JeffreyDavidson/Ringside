@@ -62,7 +62,7 @@ describe('StableActivityPeriod Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(StableActivityPeriod::class)->usesTrait(HasFactory::class);
+            expect(class_uses(StableActivityPeriod::class))->toContain(HasFactory::class);
         });
     });
 

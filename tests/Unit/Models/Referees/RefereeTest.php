@@ -69,18 +69,18 @@ describe('Referee Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(Referee::class)->usesTrait(HasFactory::class);
-            expect(Referee::class)->usesTrait(HasMatches::class);
-            expect(Referee::class)->usesTrait(IsEmployable::class);
-            expect(Referee::class)->usesTrait(IsInjurable::class);
-            expect(Referee::class)->usesTrait(IsRetirable::class);
-            expect(Referee::class)->usesTrait(IsSuspendable::class);
-            expect(Referee::class)->usesTrait(ProvidesDisplayName::class);
-            expect(Referee::class)->usesTrait(SoftDeletes::class);
-            expect(Referee::class)->usesTrait(ValidatesEmployment::class);
-            expect(Referee::class)->usesTrait(ValidatesInjury::class);
-            expect(Referee::class)->usesTrait(ValidatesRetirement::class);
-            expect(Referee::class)->usesTrait(ValidatesSuspension::class);
+            expect(class_uses(Referee::class))->toContain(HasFactory::class);
+            expect(class_uses(Referee::class))->toContain(HasMatches::class);
+            expect(class_uses(Referee::class))->toContain(IsEmployable::class);
+            expect(class_uses(Referee::class))->toContain(IsInjurable::class);
+            expect(class_uses(Referee::class))->toContain(IsRetirable::class);
+            expect(class_uses(Referee::class))->toContain(IsSuspendable::class);
+            expect(class_uses(Referee::class))->toContain(ProvidesDisplayName::class);
+            expect(class_uses(Referee::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Referee::class))->toContain(ValidatesEmployment::class);
+            expect(class_uses(Referee::class))->toContain(ValidatesInjury::class);
+            expect(class_uses(Referee::class))->toContain(ValidatesRetirement::class);
+            expect(class_uses(Referee::class))->toContain(ValidatesSuspension::class);
         });
     });
 

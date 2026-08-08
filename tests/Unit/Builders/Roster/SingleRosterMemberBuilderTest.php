@@ -67,8 +67,8 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
 
         test('uses required traits', function () {
             // Act & Assert
-            expect(SingleRosterMemberBuilder::class)->usesTrait(HasAvailabilityScopes::class);
-            expect(SingleRosterMemberBuilder::class)->usesTrait(HasRetirementScopes::class);
+            expect(class_uses(SingleRosterMemberBuilder::class))->toContain(HasAvailabilityScopes::class);
+            expect(class_uses(SingleRosterMemberBuilder::class))->toContain(HasRetirementScopes::class);
         });
     });
 
@@ -80,7 +80,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert - Available means employed, not injured, not suspended, not retired
             expect($availableWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->availableWrestler);
+                ->and($availableWrestlers->contains($this->availableWrestler))->toBeTrue();
         });
 
         test('unavailable wrestlers can be retrieved', function () {
@@ -104,9 +104,9 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // because factories create employment records for wrestlers in different states
             expect($employedWrestlers)
                 ->toHaveCount(3)
-                ->collectionHas($this->availableWrestler)
-                ->collectionHas($this->suspendedWrestler)
-                ->collectionHas($this->injuredWrestler);
+                ->and($employedWrestlers->contains($this->availableWrestler))->toBeTrue()
+                ->and($employedWrestlers->contains($this->suspendedWrestler))->toBeTrue()
+                ->and($employedWrestlers->contains($this->injuredWrestler))->toBeTrue();
         });
 
         test('unemployed wrestlers can be retrieved', function () {
@@ -116,7 +116,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert
             expect($unemployedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->unemployedWrestler);
+                ->and($unemployedWrestlers->contains($this->unemployedWrestler))->toBeTrue();
         });
 
         test('released wrestlers can be retrieved', function () {
@@ -126,7 +126,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert
             expect($releasedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->releasedWrestler);
+                ->and($releasedWrestlers->contains($this->releasedWrestler))->toBeTrue();
         });
 
         test('future employed wrestlers can be retrieved', function () {
@@ -136,7 +136,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert
             expect($futureEmployedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->futureEmployedWrestler);
+                ->and($futureEmployedWrestlers->contains($this->futureEmployedWrestler))->toBeTrue();
         });
     });
 
@@ -148,7 +148,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert
             expect($injuredWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->injuredWrestler);
+                ->and($injuredWrestlers->contains($this->injuredWrestler))->toBeTrue();
         });
 
         test('suspended wrestlers can be retrieved', function () {
@@ -158,7 +158,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert
             expect($suspendedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->suspendedWrestler);
+                ->and($suspendedWrestlers->contains($this->suspendedWrestler))->toBeTrue();
         });
 
         test('retired wrestlers can be retrieved', function () {
@@ -168,7 +168,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert
             expect($retiredWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->retiredWrestler);
+                ->and($retiredWrestlers->contains($this->retiredWrestler))->toBeTrue();
         });
     });
 

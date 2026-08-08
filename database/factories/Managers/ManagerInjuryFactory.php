@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ManagerInjury>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Managers\ManagerInjury>
  */
 class ManagerInjuryFactory extends Factory
 {

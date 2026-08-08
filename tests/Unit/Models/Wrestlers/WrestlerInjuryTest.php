@@ -59,7 +59,7 @@ describe('WrestlerInjury Model Unit Tests', function () {
 
     describe('wrestlerInjury trait integration', function () {
         test('wrestlerInjury uses all required traits', function () {
-            expect(WrestlerInjury::class)->usesTrait(HasFactory::class);
+            expect(class_uses(WrestlerInjury::class))->toContain(HasFactory::class);
         });
 
         test('wrestlerInjury implements all required interfaces', function () {

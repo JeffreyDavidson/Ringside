@@ -306,7 +306,7 @@ describe('StablesTable Component', function () {
         });
 
         test('guest users cannot access component', function () {
-            Livewire::test(Main::class)
+            testLivewire(Main::class)
                 ->assertForbidden();
         });
 

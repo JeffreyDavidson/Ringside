@@ -60,7 +60,7 @@ class StablePolicy
     /**
      * Only administrators can update entities (handled by before hook).
      */
-    public function update(User $user): bool
+    public function update(User $user, ?Stable $stable = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -68,7 +68,7 @@ class StablePolicy
     /**
      * Only administrators can delete entities (handled by before hook).
      */
-    public function delete(User $user): bool
+    public function delete(User $user, ?Stable $stable = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -76,7 +76,7 @@ class StablePolicy
     /**
      * Only administrators can restore entities (handled by before hook).
      */
-    public function restore(User $user): bool
+    public function restore(User $user, ?Stable $stable = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -100,7 +100,7 @@ class StablePolicy
     /**
      * Only administrators can retire stables (handled by before hook).
      */
-    public function retire(User $user): bool
+    public function retire(User $user, ?Stable $stable = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -108,7 +108,7 @@ class StablePolicy
     /**
      * Only administrators can unretire stables (handled by before hook).
      */
-    public function unretire(User $user): bool
+    public function unretire(User $user, ?Stable $stable = null): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

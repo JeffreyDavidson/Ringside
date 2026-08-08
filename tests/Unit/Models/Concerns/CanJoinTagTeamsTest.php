@@ -15,6 +15,7 @@ namespace Tests\Unit\Models\Concerns;
 
 use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Concerns\CanJoinTagTeams;
+use App\Models\Contracts\CanBeATagTeamMember;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Tests\Unit\Models\Concerns\Support\FakeTagTeamMemberModel;
@@ -23,7 +24,7 @@ use Tests\Unit\Models\Concerns\Support\FakeTagTeamPivotModel;
 describe('CanJoinTagTeams Trait Unit Tests', function () {
     describe('tag team relationships', function () {
         test('provides tagTeams relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -36,7 +37,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         });
 
         test('provides currentTagTeam relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -49,7 +50,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         });
 
         test('provides previousTagTeams relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -62,7 +63,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         });
 
         test('provides previousTagTeam relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -87,7 +88,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
 
     describe('tag team pivot table naming', function () {
         test('generates correct pivot table name', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -112,7 +113,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
 
     describe('tag team relationship queries', function () {
         test('tagTeams relationship includes pivot data', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -128,7 +129,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         });
 
         test('currentTagTeam relationship includes wherePivotNull constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -142,7 +143,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         });
 
         test('previousTagTeams relationship includes wherePivotNotNull constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 
@@ -156,7 +157,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         });
 
         test('all tag team relationships use timestamps', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements CanBeATagTeamMember
             {
                 use CanJoinTagTeams;
 

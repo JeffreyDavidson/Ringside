@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Referees\Modals\FormModal;
 use App\Livewire\Referees\RefereeForm;
 use App\Models\Referees\Referee;
-use Livewire\Livewire;
 
 /**
  * Integration tests for Referees FormModal component functionality.
@@ -30,7 +29,7 @@ use Livewire\Livewire;
 describe('Referees FormModal Tests', function () {
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->assertSet('isModalOpen', false)
                 ->call('openModal')
                 ->assertSet('isModalOpen', true)
@@ -39,7 +38,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('modal renders with correct form fields', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->assertPropertyWired('form.first_name')
                 ->assertPropertyWired('form.last_name')
@@ -47,7 +46,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('modal shows correct title for create mode', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal');
 
             expect($component->instance()->getModalTitle())->toBe('Add Referee');
@@ -59,7 +58,7 @@ describe('Referees FormModal Tests', function () {
                 'last_name' => 'Smith',
             ]);
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $referee->id);
 
             expect($component->instance()->getModalTitle())->toContain('Edit');
@@ -69,7 +68,7 @@ describe('Referees FormModal Tests', function () {
 
     describe('form validation rules enforcement', function () {
         test('validates required fields', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '')
                 ->set('form.last_name', '')
@@ -81,7 +80,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('validates field length constraints', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', str_repeat('A', 256))
                 ->set('form.last_name', str_repeat('B', 256))
@@ -98,7 +97,7 @@ describe('Referees FormModal Tests', function () {
         // This test has been temporarily disabled - date validation works in practice
 
         test('accepts valid name combinations', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'John')
                 ->set('form.last_name', 'Doe')
@@ -111,7 +110,7 @@ describe('Referees FormModal Tests', function () {
 
     describe('create functionality', function () {
         test('creates new referee with valid data', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Mike')
                 ->set('form.last_name', 'Johnson')
@@ -129,7 +128,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('creates referee without optional start date', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Simple')
                 ->set('form.last_name', 'Referee')
@@ -142,7 +141,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('dispatches refreshDatatable event on successful creation', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Event')
                 ->set('form.last_name', 'Test')
@@ -151,7 +150,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('closes modal after successful creation', function () {
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Close')
                 ->set('form.last_name', 'Test')
@@ -167,7 +166,7 @@ describe('Referees FormModal Tests', function () {
                 'last_name' => 'Test',
             ]);
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $referee->id);
 
             $component->assertSet('form.first_name', 'Edit')
@@ -180,7 +179,7 @@ describe('Referees FormModal Tests', function () {
                 'last_name' => 'Name',
             ]);
 
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal', $referee->id)
                 ->set('form.first_name', 'Updated')
                 ->set('form.last_name', 'Referee')
@@ -197,7 +196,7 @@ describe('Referees FormModal Tests', function () {
                 ->hasEmployments(1, ['started_at' => '2023-06-15'])
                 ->create();
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $referee->id);
 
             $component->assertSet('form.employment_date', '2023-06-15');
@@ -209,7 +208,7 @@ describe('Referees FormModal Tests', function () {
                 'last_name' => 'Original',
             ]);
 
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal', $referee->id)
                 ->set('form.first_name', 'Updated')
                 // Don't change last_name
@@ -224,7 +223,7 @@ describe('Referees FormModal Tests', function () {
 
     describe('form submission and error handling', function () {
         test('prevents submission with validation errors', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '') // Invalid: required
                 ->call('save');
@@ -235,7 +234,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('maintains form state on validation errors', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', '') // Will cause error
                 ->set('form.last_name', 'Valid Name')
@@ -253,7 +252,7 @@ describe('Referees FormModal Tests', function () {
             ]);
 
             // This should work normally since there are no unique constraints on referee names
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Test')
                 ->set('form.last_name', 'Constraint')
@@ -267,7 +266,7 @@ describe('Referees FormModal Tests', function () {
 
     describe('dummy data functionality', function () {
         test('can fill dummy fields for development workflow', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -277,7 +276,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('dummy data generates realistic referee names', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -296,7 +295,7 @@ describe('Referees FormModal Tests', function () {
         });
 
         test('dummy start date has reasonable format', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -314,7 +313,7 @@ describe('Referees FormModal Tests', function () {
 
     describe('clear functionality', function () {
         test('clears form when called without model', function () {
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Test')
                 ->set('form.last_name', 'Clear')
@@ -332,7 +331,7 @@ describe('Referees FormModal Tests', function () {
                 'last_name' => 'Data',
             ]);
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $referee->id)
                 ->set('form.first_name', 'Changed')
                 ->set('form.last_name', 'Values')
@@ -351,7 +350,7 @@ describe('Referees FormModal Tests', function () {
                 'last_name' => 'Doe',
             ]);
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $referee->id);
 
             $title = $component->instance()->getModalTitle();
@@ -364,7 +363,7 @@ describe('Referees FormModal Tests', function () {
                 'last_name' => '',
             ]);
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $referee->id);
 
             // Should handle empty last name gracefully
@@ -377,7 +376,7 @@ describe('Referees FormModal Tests', function () {
         test('handles employment date creation through form store method', function () {
             // Note: The RefereeForm has a custom store method that doesn't handle employment
             // This test documents the current behavior
-            Livewire::test(FormModal::class)
+            testLivewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.first_name', 'Employment')
                 ->set('form.last_name', 'Test')
@@ -395,7 +394,7 @@ describe('Referees FormModal Tests', function () {
                 ->hasEmployments(1, ['started_at' => '2023-12-01'])
                 ->create();
 
-            $component = Livewire::test(FormModal::class)
+            $component = testLivewire(FormModal::class)
                 ->call('openModal', $referee->id);
 
             $component->assertSet('form.employment_date', '2023-12-01');

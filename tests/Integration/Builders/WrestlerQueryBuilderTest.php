@@ -40,7 +40,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
             // Assert
             expect($bookableWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->bookableWrestler);
+                ->and($bookableWrestlers->contains($this->bookableWrestler))->toBeTrue();
         });
 
         test('future employed wrestlers can be retrieved', function () {
@@ -50,7 +50,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
             // Assert
             expect($futureEmployedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->futureEmployedWrestler);
+                ->and($futureEmployedWrestlers->contains($this->futureEmployedWrestler))->toBeTrue();
         });
 
         test('unemployed wrestlers can be retrieved', function () {
@@ -60,7 +60,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
             // Assert
             expect($unemployedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->unemployedWrestler);
+                ->and($unemployedWrestlers->contains($this->unemployedWrestler))->toBeTrue();
         });
 
         test('released wrestlers can be retrieved', function () {
@@ -70,7 +70,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
             // Assert
             expect($releasedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->releasedWrestler);
+                ->and($releasedWrestlers->contains($this->releasedWrestler))->toBeTrue();
         });
     });
 
@@ -82,7 +82,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
             // Assert
             expect($suspendedWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->suspendedWrestler);
+                ->and($suspendedWrestlers->contains($this->suspendedWrestler))->toBeTrue();
         });
 
         test('retired wrestlers can be retrieved', function () {
@@ -92,7 +92,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
             // Assert
             expect($retiredWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->retiredWrestler);
+                ->and($retiredWrestlers->contains($this->retiredWrestler))->toBeTrue();
         });
 
         test('injured wrestlers can be retrieved', function () {
@@ -102,7 +102,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
             // Assert
             expect($injuredWrestlers)
                 ->toHaveCount(1)
-                ->collectionHas($this->injuredWrestler);
+                ->and($injuredWrestlers->contains($this->injuredWrestler))->toBeTrue();
         });
     });
 });

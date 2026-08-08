@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns\Support;
 
 use App\Models\Concerns\CanJoinTagTeams;
+use App\Models\Contracts\CanBeATagTeamMember;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 #[Table('fake_tag_team_members')]
 #[Fillable('name')]
-class FakeTagTeamMemberModel extends Model
+class FakeTagTeamMemberModel extends Model implements CanBeATagTeamMember
 {
     use CanJoinTagTeams;
 
@@ -24,13 +25,13 @@ class FakeTagTeamMemberModel extends Model
      */
     public static function fakeTagTeamPivotModel(?string $modelClass): void
     {
-        static::$fakeTagTeamPivotModelClass = $modelClass;
+        self::$fakeTagTeamPivotModelClass = $modelClass;
     }
 
     private static ?string $fakeTagTeamPivotModelClass = null;
 
     public function resolveTagTeamPivotModel(): string
     {
-        return static::$fakeTagTeamPivotModelClass ?? FakeTagTeamPivotModel::class;
+        return self::$fakeTagTeamPivotModelClass ?? FakeTagTeamPivotModel::class;
     }
 }

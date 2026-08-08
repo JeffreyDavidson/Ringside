@@ -77,7 +77,7 @@ describe('State Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(State::class)->usesTrait(Sushi::class);
+            expect(class_uses(State::class))->toContain(Sushi::class);
         });
     });
 

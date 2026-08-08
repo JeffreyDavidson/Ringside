@@ -59,7 +59,7 @@ describe('RefereeSuspension Model Unit Tests', function () {
 
     describe('refereeSuspension trait integration', function () {
         test('refereeSuspension uses all required traits', function () {
-            expect(RefereeSuspension::class)->usesTrait(HasFactory::class);
+            expect(class_uses(RefereeSuspension::class))->toContain(HasFactory::class);
         });
 
         test('refereeSuspension implements all required interfaces', function () {

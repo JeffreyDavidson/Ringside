@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\CanBeManaged;
+use App\Models\Contracts\Manageable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Tests\Unit\Models\Concerns\Support\FakeManageableModel;
@@ -30,7 +31,7 @@ use Tests\Unit\Models\Concerns\Support\FakeManagerPivotModel;
 describe('CanBeManaged Trait Unit Tests', function () {
     describe('manager relationships', function () {
         test('provides managers relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 
@@ -43,7 +44,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         });
 
         test('provides currentManagers relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 
@@ -56,7 +57,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         });
 
         test('provides previousManagers relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 
@@ -81,7 +82,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
 
     describe('manager pivot table naming', function () {
         test('generates correct pivot table name', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 
@@ -105,7 +106,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
 
     describe('manager relationship queries', function () {
         test('managers relationship includes pivot data', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 
@@ -121,7 +122,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         });
 
         test('currentManagers relationship includes wherePivotNull constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 
@@ -135,7 +136,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         });
 
         test('previousManagers relationship includes wherePivotNotNull constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 
@@ -149,7 +150,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         });
 
         test('all manager relationships use timestamps', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Manageable
             {
                 use CanBeManaged;
 

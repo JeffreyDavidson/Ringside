@@ -87,20 +87,20 @@ describe('Wrestler Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(Wrestler::class)->usesTrait(BelongsToUser::class);
-            expect(Wrestler::class)->usesTrait(CanBeManaged::class);
-            expect(Wrestler::class)->usesTrait(CanJoinStables::class);
-            expect(Wrestler::class)->usesTrait(CanJoinTagTeams::class);
-            expect(Wrestler::class)->usesTrait(CanWinTitles::class);
-            expect(Wrestler::class)->usesTrait(HasEnumStatus::class);
-            expect(Wrestler::class)->usesTrait(HasFactory::class);
-            expect(Wrestler::class)->usesTrait(IsBookableCompetitor::class);
-            expect(Wrestler::class)->usesTrait(IsEmployable::class);
-            expect(Wrestler::class)->usesTrait(IsInjurable::class);
-            expect(Wrestler::class)->usesTrait(IsRetirable::class);
-            expect(Wrestler::class)->usesTrait(IsSuspendable::class);
-            expect(Wrestler::class)->usesTrait(ProvidesDisplayName::class);
-            expect(Wrestler::class)->usesTrait(SoftDeletes::class);
+            expect(class_uses(Wrestler::class))->toContain(BelongsToUser::class);
+            expect(class_uses(Wrestler::class))->toContain(CanBeManaged::class);
+            expect(class_uses(Wrestler::class))->toContain(CanJoinStables::class);
+            expect(class_uses(Wrestler::class))->toContain(CanJoinTagTeams::class);
+            expect(class_uses(Wrestler::class))->toContain(CanWinTitles::class);
+            expect(class_uses(Wrestler::class))->toContain(HasEnumStatus::class);
+            expect(class_uses(Wrestler::class))->toContain(HasFactory::class);
+            expect(class_uses(Wrestler::class))->toContain(IsBookableCompetitor::class);
+            expect(class_uses(Wrestler::class))->toContain(IsEmployable::class);
+            expect(class_uses(Wrestler::class))->toContain(IsInjurable::class);
+            expect(class_uses(Wrestler::class))->toContain(IsRetirable::class);
+            expect(class_uses(Wrestler::class))->toContain(IsSuspendable::class);
+            expect(class_uses(Wrestler::class))->toContain(ProvidesDisplayName::class);
+            expect(class_uses(Wrestler::class))->toContain(SoftDeletes::class);
         });
     });
 

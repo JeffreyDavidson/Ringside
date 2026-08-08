@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Models\Concerns\Support;
 
 use App\Models\Concerns\IsRetirable;
+use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 #[Table('fake_retirables')]
 #[Fillable('name')]
-class FakeRetirableModel extends Model
+class FakeRetirableModel extends Model implements Retirable
 {
     use IsRetirable;
 

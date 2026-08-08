@@ -62,7 +62,7 @@ describe('TagTeamEmployment Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(TagTeamEmployment::class)->usesTrait(HasFactory::class);
+            expect(class_uses(TagTeamEmployment::class))->toContain(HasFactory::class);
         });
     });
 

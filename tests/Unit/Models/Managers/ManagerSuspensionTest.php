@@ -59,7 +59,7 @@ describe('ManagerSuspension Model Unit Tests', function () {
 
     describe('managerSuspension trait integration', function () {
         test('managerSuspension uses all required traits', function () {
-            expect(ManagerSuspension::class)->usesTrait(HasFactory::class);
+            expect(class_uses(ManagerSuspension::class))->toContain(HasFactory::class);
         });
 
         test('managerSuspension implements all required interfaces', function () {

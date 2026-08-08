@@ -69,7 +69,7 @@ describe('HasChampionships Trait Unit Tests', function () {
             ]);
 
             expect($model->currentChampion())->not->toBeNull();
-            expect($model->currentChampion()->id)->toBe($champion->id);
+            expect($model->currentChampion()->getKey())->toBe($champion->id);
         });
 
         test('currentChampion returns null when no current championship', function () {
@@ -134,7 +134,7 @@ describe('HasChampionships Trait Unit Tests', function () {
             ]);
 
             expect($model->previousChampion())->not->toBeNull();
-            expect($model->previousChampion()->id)->toBe($champion1->id);
+            expect($model->previousChampion()->getKey())->toBe($champion1->id);
         });
 
         test('previousChampion returns null when no previous reigns', function () {
@@ -199,7 +199,7 @@ describe('HasChampionships Trait Unit Tests', function () {
             ]);
 
             expect($model->firstChampion())->not->toBeNull();
-            expect($model->firstChampion()->id)->toBe($champion1->id);
+            expect($model->firstChampion()->getKey())->toBe($champion1->id);
         });
 
         test('firstChampion returns null when no championships', function () {
@@ -264,7 +264,7 @@ describe('HasChampionships Trait Unit Tests', function () {
             ]);
 
             expect($model->longestChampion())->not->toBeNull();
-            expect($model->longestChampion()->id)->toBe($champion2->id);
+            expect($model->longestChampion()->getKey())->toBe($champion2->id);
         });
 
         test('longestChampion returns null when no championships', function () {

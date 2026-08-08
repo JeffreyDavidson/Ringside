@@ -22,7 +22,7 @@ use ReflectionClass;
 describe('DefinesManagedAliases Trait Unit Tests', function () {
     describe('trait integration', function () {
         test('trait uses ManagesEntities trait', function () {
-            expect(DefinesManagedAliases::class)->usesTrait(ManagesEntities::class);
+            expect(class_uses(DefinesManagedAliases::class))->toContain(ManagesEntities::class);
         });
     });
 

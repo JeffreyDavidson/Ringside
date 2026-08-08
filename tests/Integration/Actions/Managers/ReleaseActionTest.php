@@ -250,7 +250,7 @@ test('it preserves management history during release', function () {
         ->wherePivot('hired_at', now()->subDays(10)->toDateTimeString())
         ->first();
 
-    expect($currentRelationship->pivot->fired_at)->toBe(now()->toDateTimeString());
+    expect(relatedPivotAttribute($currentRelationship, 'fired_at'))->toBe(now()->toDateTimeString());
 });
 
 test('it handles manager with no management relationships', function () {

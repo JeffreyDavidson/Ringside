@@ -8,12 +8,7 @@ use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-
-beforeEach(function () {
-    // Mock the sub-actions in the container
-    $this->app->instance(AddWrestlersToMatchAction::class, $this->mock(AddWrestlersToMatchAction::class));
-    $this->app->instance(AddTagTeamsToMatchAction::class, $this->mock(AddTagTeamsToMatchAction::class));
-});
+use JMac\Testing\Double;
 
 test('it adds wrestler competitors to a match', function () {
     $eventMatch = EventMatch::factory()->create();
@@ -27,18 +22,17 @@ test('it adds wrestler competitors to a match', function () {
         ],
     ]);
 
-    $addWrestlersAction = $this->app->make(AddWrestlersToMatchAction::class);
-    $addTagTeamsAction = $this->app->make(AddTagTeamsToMatchAction::class);
+    $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
+    $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
+    $addWrestlersAction->expects('handle')->times(2);
 
-    $addWrestlersAction
-        ->shouldReceive('handle')
-        ->withAnyArgs()
-        ->twice();
-
-    $addTagTeamsAction
-        ->shouldNotReceive('handle');
+    $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
+    $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
     AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+
+    $addWrestlersAction->verify();
+    $addTagTeamsAction->unused();
 });
 
 test('it adds tag team competitors to a match', function () {
@@ -53,16 +47,15 @@ test('it adds tag team competitors to a match', function () {
         ],
     ]);
 
-    $addWrestlersAction = $this->app->make(AddWrestlersToMatchAction::class);
-    $addTagTeamsAction = $this->app->make(AddTagTeamsToMatchAction::class);
+    $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
+    $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
+    $addTagTeamsAction->expects('handle')->times(2);
 
-    $addTagTeamsAction
-        ->shouldReceive('handle')
-        ->withAnyArgs()
-        ->twice();
-
-    $addWrestlersAction
-        ->shouldNotReceive('handle');
+    $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
+    $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
 
     AddCompetitorsToMatchAction::run($eventMatch, $competitors);
+
+    $addTagTeamsAction->verify();
+    $addWrestlersAction->unused();
 });

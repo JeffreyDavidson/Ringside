@@ -38,7 +38,7 @@ describe('StableQueryBuilder Unit Tests', function () {
             // Assert
             expect($activeStables)
                 ->toHaveCount(1)
-                ->collectionHas($this->activeStable);
+                ->and($activeStables->contains($this->activeStable))->toBeTrue();
         });
 
         test('future activated stables can be retrieved', function () {
@@ -48,7 +48,7 @@ describe('StableQueryBuilder Unit Tests', function () {
             // Assert
             expect($futureActivatedStables)
                 ->toHaveCount(1)
-                ->collectionHas($this->futureActivatedStable);
+                ->and($futureActivatedStables->contains($this->futureActivatedStable))->toBeTrue();
         });
 
         test('inactive stables can be retrieved', function () {
@@ -58,7 +58,7 @@ describe('StableQueryBuilder Unit Tests', function () {
             // Assert
             expect($inactiveStables)
                 ->toHaveCount(1)
-                ->collectionHas($this->inactiveStable);
+                ->and($inactiveStables->contains($this->inactiveStable))->toBeTrue();
         });
 
         test('unactivated stables can be retrieved', function () {
@@ -68,7 +68,7 @@ describe('StableQueryBuilder Unit Tests', function () {
             // Assert
             expect($unactivatedStables)
                 ->toHaveCount(1)
-                ->collectionHas($this->unactivatedStable);
+                ->and($unactivatedStables->contains($this->unactivatedStable))->toBeTrue();
         });
     });
 
@@ -80,7 +80,7 @@ describe('StableQueryBuilder Unit Tests', function () {
             // Assert
             expect($retiredStables)
                 ->toHaveCount(1)
-                ->collectionHas($this->retiredStable);
+                ->and($retiredStables->contains($this->retiredStable))->toBeTrue();
         });
     });
 });

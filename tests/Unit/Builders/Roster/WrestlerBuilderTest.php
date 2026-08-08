@@ -17,7 +17,7 @@ test('bookable wrestlers can be retrieved', function () {
 
     expect($bookableWrestlers)
         ->toHaveCount(1)
-        ->collectionHas($bookableWrestler);
+        ->and($bookableWrestlers->contains($bookableWrestler))->toBeTrue();
 });
 
 test('future employed wrestlers can be retrieved', function () {
@@ -33,7 +33,7 @@ test('future employed wrestlers can be retrieved', function () {
 
     expect($futureEmployedWrestlers)
         ->toHaveCount(1)
-        ->collectionHas($futureEmployedWrestler);
+        ->and($futureEmployedWrestlers->contains($futureEmployedWrestler))->toBeTrue();
 });
 
 test('suspended wrestlers can be retrieved', function () {
@@ -49,7 +49,7 @@ test('suspended wrestlers can be retrieved', function () {
 
     expect($suspendedWrestlers)
         ->toHaveCount(1)
-        ->collectionHas($suspendedWrestler);
+        ->and($suspendedWrestlers->contains($suspendedWrestler))->toBeTrue();
 });
 
 test('released wrestlers can be retrieved', function () {
@@ -65,7 +65,7 @@ test('released wrestlers can be retrieved', function () {
 
     expect($releasedWrestlers)
         ->toHaveCount(1)
-        ->collectionHas($releasedWrestler);
+        ->and($releasedWrestlers->contains($releasedWrestler))->toBeTrue();
 });
 
 test('retired wrestlers can be retrieved', function () {
@@ -81,7 +81,7 @@ test('retired wrestlers can be retrieved', function () {
 
     expect($retiredWrestlers)
         ->toHaveCount(1)
-        ->collectionHas($retiredWrestler);
+        ->and($retiredWrestlers->contains($retiredWrestler))->toBeTrue();
 });
 
 test('unemployed wrestlers can be retrieved', function () {
@@ -97,7 +97,7 @@ test('unemployed wrestlers can be retrieved', function () {
 
     expect($unemployedWrestlers)
         ->toHaveCount(1)
-        ->collectionHas($unemployedWrestler);
+        ->and($unemployedWrestlers->contains($unemployedWrestler))->toBeTrue();
 });
 
 test('injured wrestlers can be retrieved', function () {
@@ -113,5 +113,5 @@ test('injured wrestlers can be retrieved', function () {
 
     expect($injuredWrestlers)
         ->toHaveCount(1)
-        ->collectionHas($injuredWrestler);
+        ->and($injuredWrestlers->contains($injuredWrestler))->toBeTrue();
 });

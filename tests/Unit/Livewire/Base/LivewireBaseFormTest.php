@@ -51,13 +51,13 @@ describe('BaseForm Unit Tests', function () {
             $rules = $reflection->getMethod('rules');
             expect($rules->isAbstract())->toBeTrue();
             expect($rules->isProtected())->toBeTrue();
-            expect($rules->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($rules))->toBe('array');
 
             // getModelData method
             $getModelData = $reflection->getMethod('getModelData');
             expect($getModelData->isAbstract())->toBeTrue();
             expect($getModelData->isProtected())->toBeTrue();
-            expect($getModelData->getReturnType()->getName())->toBe('array');
+            expect(reflectionReturnTypeName($getModelData))->toBe('array');
         });
     });
 
@@ -83,7 +83,7 @@ describe('BaseForm Unit Tests', function () {
             $formModelProperty = $reflection->getProperty('formModel');
             expect($formModelProperty->isProtected())->toBeTrue();
             expect($formModelProperty->hasType())->toBeTrue();
-            expect($formModelProperty->getType()->getName())->toBe('Illuminate\\Database\\Eloquent\\Model');
+            expect(reflectionTypeName($formModelProperty))->toBe('Illuminate\\Database\\Eloquent\\Model');
             expect($formModelProperty->getType()->allowsNull())->toBeTrue();
         });
     });

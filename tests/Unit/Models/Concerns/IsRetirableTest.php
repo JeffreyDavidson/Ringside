@@ -15,18 +15,20 @@ namespace Tests\Unit\Models\Concerns;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\IsRetirable;
+use App\Models\Contracts\Retirable;
 use App\Models\Wrestlers\WrestlerRetirement;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Mockery;
 use Tests\Unit\Models\Concerns\Support\FakeRetirableModel;
 use Tests\Unit\Models\Concerns\Support\FakeRetirementModel;
 
 describe('IsRetirable Trait Unit Tests', function () {
     describe('retirement relationships', function () {
         test('provides retirements relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -39,7 +41,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('provides current retirement relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -52,7 +54,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('provides previous retirements relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -65,7 +67,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('provides previous retirement relationship', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -78,7 +80,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('retirements relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -93,7 +95,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('currentRetirement relationship uses the correct related model', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -110,7 +112,7 @@ describe('IsRetirable Trait Unit Tests', function () {
 
     describe('retirement status checks', function () {
         test('can check if model is retired', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -119,22 +121,19 @@ describe('IsRetirable Trait Unit Tests', function () {
                     return FakeRetirementModel::class;
                 }
 
-                public function currentRetirement()
+                public function currentRetirement(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
             expect($model->isRetired())->toBeTrue();
         });
 
         test('can check if model is not retired', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -143,22 +142,19 @@ describe('IsRetirable Trait Unit Tests', function () {
                     return FakeRetirementModel::class;
                 }
 
-                public function currentRetirement()
+                public function currentRetirement(): HasOne
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasOne::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($model->isRetired())->toBeFalse();
         });
 
         test('can check if model has retirements', function () {
-            $modelWith = new class extends Model
+            $modelWith = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -167,18 +163,15 @@ describe('IsRetirable Trait Unit Tests', function () {
                     return FakeRetirementModel::class;
                 }
 
-                public function retirements()
+                public function retirements(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return true;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(true);
+
+                    return $relation;
                 }
             };
-            $modelWithout = new class extends Model
+            $modelWithout = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -187,15 +180,12 @@ describe('IsRetirable Trait Unit Tests', function () {
                     return FakeRetirementModel::class;
                 }
 
-                public function retirements()
+                public function retirements(): HasMany
                 {
-                    return new class
-                    {
-                        public function exists(): bool
-                        {
-                            return false;
-                        }
-                    };
+                    $relation = Mockery::mock(HasMany::class);
+                    $relation->expects('exists')->andReturn(false);
+
+                    return $relation;
                 }
             };
             expect($modelWith->hasRetirements())->toBeTrue();
@@ -213,7 +203,7 @@ describe('IsRetirable Trait Unit Tests', function () {
 
     describe('retirement relationship queries', function () {
         test('current retirement query includes whereNull ended_at', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -231,7 +221,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('previous retirements query includes whereNotNull ended_at', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -249,7 +239,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('previous retirement query includes ofMany constraint', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -267,7 +257,7 @@ describe('IsRetirable Trait Unit Tests', function () {
 
     describe('retirement validation methods', function () {
         test('can check if model can be retired', function () {
-            $employedModel = new class extends Model
+            $employedModel = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -279,7 +269,7 @@ describe('IsRetirable Trait Unit Tests', function () {
                 }
             };
 
-            $retiredModel = new class extends Model
+            $retiredModel = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -296,7 +286,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('can check if model can be unretired', function () {
-            $retiredModel = new class extends Model
+            $retiredModel = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -308,7 +298,7 @@ describe('IsRetirable Trait Unit Tests', function () {
                 }
             };
 
-            $employedModel = new class extends Model
+            $employedModel = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -325,7 +315,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('can ensure model can be retired', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -348,7 +338,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('can ensure model can be unretired', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -373,7 +363,7 @@ describe('IsRetirable Trait Unit Tests', function () {
 
     describe('retirement period accessors', function () {
         test('provides previous retirement accessor', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -404,7 +394,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('provides previous retirement accessor (single)', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -436,7 +426,7 @@ describe('IsRetirable Trait Unit Tests', function () {
 
     describe('retirement history methods', function () {
         test('can get retirement history', function () {
-            $model = new class extends Model
+            $model = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -467,7 +457,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         });
 
         test('can check if model has retirement history', function () {
-            $modelWithHistory = new class extends Model
+            $modelWithHistory = new class extends Model implements Retirable
             {
                 use IsRetirable;
 
@@ -492,7 +482,7 @@ describe('IsRetirable Trait Unit Tests', function () {
                 }
             };
 
-            $modelWithoutHistory = new class extends Model
+            $modelWithoutHistory = new class extends Model implements Retirable
             {
                 use IsRetirable;
 

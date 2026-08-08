@@ -222,7 +222,7 @@ describe('PreviousEventsTable Integration Tests', function () {
 
     describe('ShowTableTrait integration', function () {
         test('uses ShowTableTrait for enhanced table functionality', function () {
-            expect(PreviousEvents::class)->usesTrait(ShowTableTrait::class);
+            expect(class_uses(PreviousEvents::class))->toContain(ShowTableTrait::class);
         });
 
         test('has required properties from ShowTableTrait', function () {
