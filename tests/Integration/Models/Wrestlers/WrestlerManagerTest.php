@@ -172,7 +172,11 @@ describe('WrestlerManager Pivot Model', function () {
 
             expect($currentManagers)->toHaveCount(1);
             expect($currentManagers->firstOrFail()->id)->toBe($this->secondManager->id);
-            expect(relatedPivotAttribute($currentManagers->firstOrFail(), 'fired_at'))->toBeNull();
+            $management = WrestlerManager::query()
+                ->whereBelongsTo($this->wrestler)
+                ->whereBelongsTo($this->secondManager)
+                ->firstOrFail();
+            expect($management->fired_at)->toBeNull();
         });
 
         test('previous managers query returns only completed relationships', function () {
@@ -180,7 +184,11 @@ describe('WrestlerManager Pivot Model', function () {
 
             expect($previousManagers)->toHaveCount(1);
             expect($previousManagers->firstOrFail()->id)->toBe($this->manager->id);
-            expect(relatedPivotAttribute($previousManagers->firstOrFail(), 'fired_at'))->not()->toBeNull();
+            $management = WrestlerManager::query()
+                ->whereBelongsTo($this->wrestler)
+                ->whereBelongsTo($this->manager)
+                ->firstOrFail();
+            expect($management->fired_at)->not->toBeNull();
         });
 
         test('all managers query returns complete relationship history', function () {

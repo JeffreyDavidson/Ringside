@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Actions\Managers\RestoreAction;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamManager;
 use App\Models\Wrestlers\Wrestler;
+use App\Models\Wrestlers\WrestlerManager;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -197,13 +199,19 @@ test('it maintains referential integrity during restoration', function () {
     expect($restoredManager->tagTeams()->count())->toBe(1);
 
     // Verify pivot data integrity
-    $wrestlerPivot = $restoredManager->wrestlers()->firstOrFail()->pivot;
-    expect($wrestlerPivot->getAttribute('hired_at'))->not()->toBeNull();
-    expect($wrestlerPivot->getAttribute('fired_at'))->not()->toBeNull();
+    $wrestlerManagement = WrestlerManager::query()
+        ->whereBelongsTo($restoredManager, 'manager')
+        ->whereBelongsTo($wrestler)
+        ->firstOrFail();
+    expect($wrestlerManagement->hired_at->toDateTimeString())->toBe(now()->subDays(5)->toDateTimeString());
+    expect($wrestlerManagement->fired_at)->not()->toBeNull();
 
-    $tagTeamPivot = $restoredManager->tagTeams()->firstOrFail()->pivot;
-    expect($tagTeamPivot->getAttribute('hired_at'))->not()->toBeNull();
-    expect($tagTeamPivot->getAttribute('fired_at'))->not()->toBeNull();
+    $tagTeamManagement = TagTeamManager::query()
+        ->whereBelongsTo($restoredManager, 'manager')
+        ->whereBelongsTo($tagTeam, 'tagTeam')
+        ->firstOrFail();
+    expect($tagTeamManagement->hired_at->toDateTimeString())->toBe(now()->subDays(4)->toDateTimeString());
+    expect($tagTeamManagement->fired_at)->not()->toBeNull();
 });
 
 test('it allows separate employment after restoration', function () {

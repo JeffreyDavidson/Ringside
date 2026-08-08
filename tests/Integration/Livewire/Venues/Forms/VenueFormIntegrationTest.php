@@ -12,6 +12,41 @@ use Illuminate\Validation\Rules\Unique;
 use JMac\Testing\Double;
 use Livewire\Component;
 
+final class VenueFormTestProxy extends CreateEditForm
+{
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    public function rulesForTesting(): array
+    {
+        return $this->rules();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function modelDataForTesting(): array
+    {
+        return $this->getModelData();
+    }
+
+    /**
+     * @return class-string<Venue>
+     */
+    public function modelClassForTesting(): string
+    {
+        return $this->getModelClass();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function validationAttributesForTesting(): array
+    {
+        return $this->validationAttributes();
+    }
+}
+
 /**
  * Integration tests for VenueForm component validation and behavior.
  *
@@ -31,14 +66,12 @@ use Livewire\Component;
 describe('VenueForm Integration Tests', function () {
     beforeEach(function () {
         $mockComponent = Double::for(Component::class);
-        $this->form = new CreateEditForm($mockComponent, 'form');
+        $this->form = new VenueFormTestProxy($mockComponent, 'form');
     });
 
     describe('validation rules configuration', function () {
         test('rules method returns complete address validation structure', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
             expect($rules)->toBeArray();
             expect($rules)->toHaveKeys([
@@ -47,9 +80,7 @@ describe('VenueForm Integration Tests', function () {
         });
 
         test('venue name validation includes uniqueness constraint', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
             expect($rules['name'])->toContain('required');
             expect($rules['name'])->toContain('string');
@@ -57,9 +88,6 @@ describe('VenueForm Integration Tests', function () {
 
             // Should contain Rule::unique validation for venues table
             $nameRules = $rules['name'];
-            if (! is_array($nameRules)) {
-                throw new UnexpectedValueException('Venue name rules must be an array.');
-            }
 
             $hasUniqueRule = collect($nameRules)->contains(function ($rule) {
                 return $rule instanceof Unique;
@@ -68,9 +96,7 @@ describe('VenueForm Integration Tests', function () {
         });
 
         test('address validation enforces complete information', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
             // Street address validation
             expect($rules['street_address'])->toContain('required');
@@ -84,18 +110,13 @@ describe('VenueForm Integration Tests', function () {
         });
 
         test('state validation enforces database referential integrity', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
             expect($rules['state'])->toContain('required');
             expect($rules['state'])->toContain('string');
 
             // Should validate against states table
             $stateRules = $rules['state'];
-            if (! is_array($stateRules)) {
-                throw new UnexpectedValueException('Venue state rules must be an array.');
-            }
 
             $hasExistsRule = collect($stateRules)->contains(function ($rule) {
                 return $rule instanceof Exists;
@@ -104,9 +125,7 @@ describe('VenueForm Integration Tests', function () {
         });
 
         test('zipcode validation enforces US postal format', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
             expect($rules['zipcode'])->toContain('required');
             expect($rules['zipcode'])->toContain('digits:5');
@@ -115,25 +134,17 @@ describe('VenueForm Integration Tests', function () {
 
     describe('data transformation methods', function () {
         test('getModelClass returns correct Venue class', function () {
-            $reflection = new ReflectionMethod($this->form, 'getModelClass');
-            $reflection->setAccessible(true);
-            $modelClass = $reflection->invoke($this->form);
-
-            expect($modelClass)->toBe(Venue::class);
+            expect($this->form->modelClassForTesting())->toBe(Venue::class);
         });
 
         test('getModelData transforms complete venue data correctly', function () {
-            $reflection = new ReflectionMethod($this->form, 'getModelData');
-            $reflection->setAccessible(true);
-
-            // Set complete test data
             $this->form->name = 'Madison Square Garden';
             $this->form->street_address = '4 Pennsylvania Plaza';
             $this->form->city = 'New York';
             $this->form->state = 'New York';
             $this->form->zipcode = '10001';
 
-            $data = $reflection->invoke($this->form);
+            $data = $this->form->modelDataForTesting();
 
             expect($data)->toBeArray();
             expect($data)->toHaveKeys([
@@ -149,9 +160,7 @@ describe('VenueForm Integration Tests', function () {
 
     describe('validation attributes customization', function () {
         test('validationAttributes provides readable field names', function () {
-            $reflection = new ReflectionMethod($this->form, 'validationAttributes');
-            $reflection->setAccessible(true);
-            $attributes = $reflection->invoke($this->form);
+            $attributes = $this->form->validationAttributesForTesting();
 
             expect($attributes)->toBeArray();
             expect($attributes)->toHaveKeys(['street_address', 'zipcode']);
@@ -162,15 +171,10 @@ describe('VenueForm Integration Tests', function () {
 
     describe('business logic validation', function () {
         test('enforces venue name uniqueness across all venues', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
             // Check that unique rule is configured for venues table
             $nameRules = $rules['name'];
-            if (! is_array($nameRules)) {
-                throw new UnexpectedValueException('Venue name rules must be an array.');
-            }
 
             $uniqueRule = collect($nameRules)->first(function ($rule) {
                 return $rule instanceof Unique;
@@ -180,24 +184,16 @@ describe('VenueForm Integration Tests', function () {
         });
 
         test('validates US ZIP code format specifically', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
-            // Should enforce exactly 5 digits for US postal codes
             expect($rules['zipcode'])->toContain('digits:5');
         });
 
         test('validates state against existing state records', function () {
-            $reflection = new ReflectionMethod($this->form, 'rules');
-            $reflection->setAccessible(true);
-            $rules = $reflection->invoke($this->form);
+            $rules = $this->form->rulesForTesting();
 
             // Should validate that state exists in states table
             $stateRules = $rules['state'];
-            if (! is_array($stateRules)) {
-                throw new UnexpectedValueException('Venue state rules must be an array.');
-            }
 
             $existsRule = collect($stateRules)->first(function ($rule) {
                 return $rule instanceof Exists;

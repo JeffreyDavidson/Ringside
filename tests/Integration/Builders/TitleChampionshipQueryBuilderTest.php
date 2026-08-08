@@ -187,9 +187,11 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             expect($championships->firstOrFail()->id)->toBe(requiredModel($this->currentChampionship)->id);
 
             // Verify ordering
-            $wonDates = $championships->pluck('won_at');
+            $wonDates = $championships->map(
+                fn (TitleChampionship $championship): Carbon => requiredDate($championship->won_at)
+            )->values();
             for ($i = 0; $i < $wonDates->count() - 1; $i++) {
-                expect($wonDates[$i]->gte($wonDates[$i + 1]))->toBeTrue();
+                expect(requiredDate($wonDates->get($i))->gte(requiredDate($wonDates->get($i + 1))))->toBeTrue();
             }
         });
 
@@ -203,9 +205,11 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             expect($endedChampionships->firstOrFail()->id)->toBe($this->recentEndedChampionship->id);
 
             // Verify ordering for ended championships
-            $lostDates = $endedChampionships->pluck('lost_at');
+            $lostDates = $endedChampionships->map(
+                fn (TitleChampionship $championship): Carbon => requiredDate($championship->lost_at)
+            )->values();
             for ($i = 0; $i < $lostDates->count() - 1; $i++) {
-                expect($lostDates[$i]->gte($lostDates[$i + 1]))->toBeTrue();
+                expect(requiredDate($lostDates->get($i))->gte(requiredDate($lostDates->get($i + 1))))->toBeTrue();
             }
         });
 
