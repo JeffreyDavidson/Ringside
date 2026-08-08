@@ -1,0 +1,95 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches:
+      - development
+      - master
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: security-scan-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  ward:
+    name: Ward Security Scan
+    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+    continue-on-error: true
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+
+      - name: Configure Ward environment
+        run: |
+          echo "GOPATH=$RUNNER_TEMP/ward-go" >> "$GITHUB_ENV"
+          echo "HOME=$RUNNER_TEMP/ward-home" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/ward-home"
+
+      - name: Install Ward
+        run: |
+          go install github.com/eljakani/ward@v0.4.2
+          echo "$GOPATH/bin" >> "$GITHUB_PATH"
+
+      - name: Initialize Ward
+        run: ward init
+
+      - name: Generate pull request baseline
+        if: github.event_name == 'pull_request'
+        run: |
+          git checkout "${{ github.event.pull_request.base.sha }}"
+          ward scan . --output json --update-baseline "$RUNNER_TEMP/ward-baseline.json" || true
+          git checkout "${{ github.sha }}"
+
+      - name: Scan pull request changes
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ -f "$RUNNER_TEMP/ward-baseline.json" ]; then
+            ward scan . --output json,sarif --baseline "$RUNNER_TEMP/ward-baseline.json" --fail-on high
+          else
+            ward scan . --output json,sarif --fail-on high
+          fi
+
+      - name: Run scheduled security scan
+        if: github.event_name != 'pull_request'
+        run: ward scan . --output json,sarif --fail-on high
+
+      - name: Normalize empty SARIF collections
+        if: always() && hashFiles('ward-report.sarif') != ''
+        run: |
+          jq '(.runs[].tool.driver.rules //= []) | (.runs[].results //= [])' ward-report.sarif > "$RUNNER_TEMP/ward-report.sarif"
+          mv "$RUNNER_TEMP/ward-report.sarif" ward-report.sarif
+
+      - name: Upload Ward reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ward-security-reports
+          path: |
+            ward-report.json
+            ward-report.sarif
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Ward SARIF
+        if: always() && hashFiles('ward-report.sarif') != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ward-report.sarif
