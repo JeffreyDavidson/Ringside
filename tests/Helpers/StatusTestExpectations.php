@@ -181,9 +181,6 @@ function expectTagTeamMembership($wrestler, $tagTeam, array $expectedPivotData =
         } elseif ($expectedValue instanceof Carbon) {
             // Handle Carbon instance comparison with string format
             expect(Carbon::parse($actualValue)->format('Y-m-d H:i:s'))->toBe($expectedValue->format('Y-m-d H:i:s'));
-        } elseif ($actualValue instanceof Carbon && $expectedValue instanceof Carbon) {
-            // Handle Carbon instance comparison with string format
-            expect($actualValue->format('Y-m-d H:i:s'))->toBe($expectedValue->format('Y-m-d H:i:s'));
         } elseif (is_numeric($actualValue) && is_numeric($expectedValue)) {
             expect((int) $actualValue)->toBe((int) $expectedValue);
         } else {
@@ -202,11 +199,9 @@ function expectCurrentRelationshipsActive(Wrestler $wrestler): void
         expect(relatedPivotAttribute($manager, 'fired_at'))->toBeNull();
     }
 
-    if (method_exists($wrestler, 'currentTagTeam')) {
-        $currentTagTeam = $wrestler->currentTagTeam;
-        if ($currentTagTeam) {
-            expect($currentTagTeam->pivot->left_at)->toBeNull();
-        }
+    $currentTagTeam = $wrestler->currentTagTeam;
+    if ($currentTagTeam) {
+        expect($currentTagTeam->pivot->left_at)->toBeNull();
     }
 }
 
@@ -220,11 +215,9 @@ function expectPreviousRelationshipsEnded(Wrestler $wrestler): void
         expect(relatedPivotAttribute($manager, 'fired_at'))->not->toBeNull();
     }
 
-    if (method_exists($wrestler, 'previousTagTeams')) {
-        $previousTagTeams = $wrestler->previousTagTeams()->get();
-        foreach ($previousTagTeams as $tagTeam) {
-            expect($tagTeam->pivot->left_at)->not->toBeNull();
-        }
+    $previousTagTeams = $wrestler->previousTagTeams()->get();
+    foreach ($previousTagTeams as $tagTeam) {
+        expect($tagTeam->pivot->left_at)->not->toBeNull();
     }
 }
 

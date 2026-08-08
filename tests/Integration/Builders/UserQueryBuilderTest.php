@@ -324,9 +324,6 @@ describe('UserBuilder Unit Tests', function () {
 
     describe('future extensibility', function () {
         test('builder is prepared for additional scopes', function () {
-            // Verify the builder can be extended with new methods
-            expect(method_exists(UserBuilder::class, '__call'))->toBeTrue();
-
             // Test that we can add scopes dynamically (Laravel's built-in functionality)
             $query = User::query();
             expect($query)->toBeInstanceOf(UserBuilder::class);

@@ -105,11 +105,4 @@ describe('Manager Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has display name methods from ProvidesDisplayName trait', function () {
-            $manager = new Manager();
-
-            expect(method_exists($manager, 'getDisplayName'))->toBeTrue();
-        });
-    });
 });

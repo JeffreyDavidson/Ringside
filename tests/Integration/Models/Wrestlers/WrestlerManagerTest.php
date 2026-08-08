@@ -71,12 +71,10 @@ describe('WrestlerManager Pivot Model', function () {
             expect($this->secondWrestler->currentManagers()->count())->toBe(1);
 
             // Verify manager has both wrestlers
-            if (method_exists($this->manager, 'currentWrestlers')) {
-                expect($this->manager->currentWrestlers()->count())->toBe(2);
-                expect($this->manager->currentWrestlers->pluck('id'))
-                    ->toContain($this->wrestler->id)
-                    ->toContain($this->secondWrestler->id);
-            }
+            expect($this->manager->currentWrestlers()->count())->toBe(2);
+            expect($this->manager->currentWrestlers->pluck('id'))
+                ->toContain($this->wrestler->id)
+                ->toContain($this->secondWrestler->id);
         });
 
         test('wrestler can have multiple managers during different time periods', function () {

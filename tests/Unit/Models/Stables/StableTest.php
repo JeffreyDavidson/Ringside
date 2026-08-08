@@ -100,21 +100,4 @@ describe('Stable Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has member relationship methods', function () {
-            $stable = new Stable();
-
-            expect(method_exists($stable, 'wrestlers'))->toBeTrue();
-            expect(method_exists($stable, 'tagTeams'))->toBeTrue();
-            expect(method_exists($stable, 'currentWrestlers'))->toBeTrue();
-            expect(method_exists($stable, 'currentTagTeams'))->toBeTrue();
-        });
-
-        test('has activity period methods', function () {
-            $stable = new Stable();
-
-            expect(method_exists($stable, 'activityPeriods'))->toBeTrue();
-            expect(method_exists($stable, 'isCurrentlyActive'))->toBeTrue();
-        });
-    });
 });

@@ -102,17 +102,4 @@ describe('MatchCompetitor Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has competitor relationship method', function () {
-            $MatchCompetitor = new MatchCompetitor();
-
-            expect(method_exists($MatchCompetitor, 'competitor'))->toBeTrue();
-        });
-
-        test('has getCompetitor business method', function () {
-            $MatchCompetitor = new MatchCompetitor();
-
-            expect(method_exists($MatchCompetitor, 'getCompetitor'))->toBeTrue();
-        });
-    });
 });

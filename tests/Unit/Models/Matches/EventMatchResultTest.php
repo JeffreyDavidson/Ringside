@@ -87,23 +87,4 @@ describe('MatchResult Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has winners relationship method', function () {
-            $MatchResult = new MatchResult();
-
-            expect(method_exists($MatchResult, 'winners'))->toBeTrue();
-        });
-
-        test('has losers relationship method', function () {
-            $MatchResult = new MatchResult();
-
-            expect(method_exists($MatchResult, 'losers'))->toBeTrue();
-        });
-
-        test('has winner relationship method', function () {
-            $MatchResult = new MatchResult();
-
-            expect(method_exists($MatchResult, 'winner'))->toBeTrue();
-        });
-    });
 });

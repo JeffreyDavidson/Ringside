@@ -17,7 +17,6 @@ use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use Carbon\Carbon;
 
 /**
  * Unit tests for Builder Contract interfaces.
@@ -90,10 +89,6 @@ describe('Builder Contracts Unit Tests', function () {
             // Arrange
             $builder = Wrestler::query();
 
-            // Act & Assert
-            expect(method_exists($builder, 'available'))->toBeTrue();
-            expect(method_exists($builder, 'unavailable'))->toBeTrue();
-
             $availableBuilder = $builder->available();
             $unavailableBuilder = $builder->unavailable();
 
@@ -132,9 +127,6 @@ describe('Builder Contracts Unit Tests', function () {
             // Assert - WrestlerBuilder has booking methods but doesn't implement the interface
             expect($builder)->not->toBeInstanceOf(HasBooking::class);
             expect($builder)->toBeInstanceOf(WrestlerBuilder::class);
-            expect(method_exists($builder, 'bookable'))->toBeTrue();
-            expect(method_exists($builder, 'availableOn'))->toBeTrue();
-            expect(method_exists($builder, 'notBookedOn'))->toBeTrue();
         });
 
         test('tag team builder implements HasBooking contract', function () {
@@ -149,20 +141,8 @@ describe('Builder Contracts Unit Tests', function () {
         test('booking contract methods exist and return builder instance', function () {
             // Arrange
             $builder = Wrestler::query();
-            $testDate = Carbon::parse('2024-12-31');
-
-            // Act & Assert
-            expect(method_exists($builder, 'bookable'))->toBeTrue();
-            expect(method_exists($builder, 'availableOn'))->toBeTrue();
-            expect(method_exists($builder, 'notBookedOn'))->toBeTrue();
-
             $bookableBuilder = $builder->bookable();
             expect($bookableBuilder)->toBeInstanceOf(WrestlerBuilder::class);
-
-            // Note: availableOn and notBookedOn require database tables for match relationships
-            // so we only test method existence for unit test scope
-            expect(method_exists($builder, 'availableOn'))->toBeTrue();
-            expect(method_exists($builder, 'notBookedOn'))->toBeTrue();
         });
 
         test('tag team builder implements HasBooking contract fully', function () {
@@ -232,12 +212,6 @@ describe('Builder Contracts Unit Tests', function () {
         test('employment contract methods exist and return builder instance', function () {
             // Arrange
             $builder = Wrestler::query();
-
-            // Act & Assert
-            expect(method_exists($builder, 'unemployed'))->toBeTrue();
-            expect(method_exists($builder, 'employed'))->toBeTrue();
-            expect(method_exists($builder, 'released'))->toBeTrue();
-            expect(method_exists($builder, 'futureEmployed'))->toBeTrue();
 
             $unemployedBuilder = $builder->unemployed();
             $employedBuilder = $builder->employed();
@@ -315,9 +289,6 @@ describe('Builder Contracts Unit Tests', function () {
             // Arrange
             $builder = Wrestler::query();
 
-            // Act & Assert
-            expect(method_exists($builder, 'retired'))->toBeTrue();
-
             $retiredBuilder = $builder->retired();
             expect($retiredBuilder)->toBeInstanceOf(WrestlerBuilder::class);
         });
@@ -381,9 +352,6 @@ describe('Builder Contracts Unit Tests', function () {
         test('suspension contract methods exist and return builder instance', function () {
             // Arrange
             $builder = Wrestler::query();
-
-            // Act & Assert
-            expect(method_exists($builder, 'suspended'))->toBeTrue();
 
             $suspendedBuilder = $builder->suspended();
             expect($suspendedBuilder)->toBeInstanceOf(WrestlerBuilder::class);

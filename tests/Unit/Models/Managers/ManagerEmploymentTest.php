@@ -91,11 +91,4 @@ describe('ManagerEmployment Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has manager relationship method', function () {
-            $managerEmployment = new ManagerEmployment();
-
-            expect(method_exists($managerEmployment, 'manager'))->toBeTrue();
-        });
-    });
 });

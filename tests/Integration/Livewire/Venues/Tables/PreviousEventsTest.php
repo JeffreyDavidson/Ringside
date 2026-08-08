@@ -229,9 +229,6 @@ describe('PreviousEventsTable Integration Tests', function () {
             $table = new PreviousEvents();
             $reflection = new ReflectionClass($table);
 
-            expect(property_exists($table, 'databaseTableName'))->toBeTrue();
-            expect(property_exists($table, 'resourceName'))->toBeTrue();
-
             $databaseTableNameProperty = $reflection->getProperty('databaseTableName');
             $databaseTableNameProperty->setAccessible(true);
             expect($databaseTableNameProperty->getValue($table))->toBe('events');

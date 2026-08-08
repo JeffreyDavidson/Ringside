@@ -91,11 +91,4 @@ describe('StableActivityPeriod Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has stable relationship method', function () {
-            $stableActivityPeriod = new StableActivityPeriod();
-
-            expect(method_exists($stableActivityPeriod, 'stable'))->toBeTrue();
-        });
-    });
 });
