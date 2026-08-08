@@ -375,10 +375,10 @@ function seedBasicLookupData(): void
 function wrestlingDate(string $period = 'recent'): Carbon\Carbon
 {
     return match ($period) {
-        'recent' => now()->subDays(rand(1, 30)),
-        'past' => now()->subMonths(rand(1, 24)),
-        'future' => now()->addDays(rand(1, 90)),
-        'historical' => now()->subYears(rand(1, 10)),
+        'recent' => now()->subDays(random_int(1, 30)),
+        'past' => now()->subMonths(random_int(1, 24)),
+        'future' => now()->addDays(random_int(1, 90)),
+        'historical' => now()->subYears(random_int(1, 10)),
         default => now(),
     };
 }
@@ -391,19 +391,19 @@ function wrestlingDate(string $period = 'recent'): Carbon\Carbon
 function wrestlingTimePeriod(string $type = 'employment'): array
 {
     $start = match ($type) {
-        'employment' => now()->subMonths(rand(1, 24)),
-        'injury' => now()->subWeeks(rand(1, 12)),
-        'suspension' => now()->subMonths(rand(1, 6)),
-        'retirement' => now()->subYears(rand(1, 5)),
-        default => now()->subMonths(rand(1, 12)),
+        'employment' => now()->subMonths(random_int(1, 24)),
+        'injury' => now()->subWeeks(random_int(1, 12)),
+        'suspension' => now()->subMonths(random_int(1, 6)),
+        'retirement' => now()->subYears(random_int(1, 5)),
+        default => now()->subMonths(random_int(1, 12)),
     };
 
     $end = match ($type) {
-        'employment' => rand(0, 1) ? $start->copy()->addMonths(rand(1, 12)) : null,
-        'injury' => rand(0, 1) ? $start->copy()->addWeeks(rand(1, 8)) : null,
-        'suspension' => rand(0, 1) ? $start->copy()->addMonths(rand(1, 3)) : null,
-        'retirement' => rand(0, 1) ? $start->copy()->addYears(rand(1, 3)) : null,
-        default => rand(0, 1) ? $start->copy()->addMonths(rand(1, 6)) : null,
+        'employment' => random_int(0, 1) ? $start->copy()->addMonths(random_int(1, 12)) : null,
+        'injury' => random_int(0, 1) ? $start->copy()->addWeeks(random_int(1, 8)) : null,
+        'suspension' => random_int(0, 1) ? $start->copy()->addMonths(random_int(1, 3)) : null,
+        'retirement' => random_int(0, 1) ? $start->copy()->addYears(random_int(1, 3)) : null,
+        default => random_int(0, 1) ? $start->copy()->addMonths(random_int(1, 6)) : null,
     };
 
     return [
