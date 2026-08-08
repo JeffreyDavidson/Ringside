@@ -76,7 +76,7 @@ describe('Venue Creation and Setup Workflow', function () {
         // Then: Venue should be created in database
         expect(Venue::where('name', 'Madison Square Garden')->exists())->toBeTrue();
 
-        $venue = Venue::where('name', 'Madison Square Garden')->first();
+        $venue = Venue::where('name', 'Madison Square Garden')->firstOrFail();
         expect($venue->city)->toBe('New York');
         expect($venue->state)->toBe('NY');
         expect($venue->street_address)->toBe('4 Pennsylvania Plaza');
@@ -168,7 +168,7 @@ describe('Event Creation and Scheduling Workflow', function () {
         // Then: Event should be created in database
         expect(Event::where('name', 'WrestleMania 40')->exists())->toBeTrue();
 
-        $event = Event::where('name', 'WrestleMania 40')->first();
+        $event = Event::where('name', 'WrestleMania 40')->firstOrFail();
         expect($event->venue_id)->toBe($venue->id);
 
         // And: Should appear in the events table
@@ -357,7 +357,7 @@ describe('Event Deletion and Restoration Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Event should be soft deleted
-        expect($event->fresh()->trashed())->toBeTrue();
+        expect(freshModel($event)->trashed())->toBeTrue();
         expect(Event::onlyTrashed()->find($event->id))->not->toBeNull();
 
         // When: Restoring the event
@@ -369,7 +369,7 @@ describe('Event Deletion and Restoration Workflow', function () {
 
         // Then: Event should be restored
         expect($event->fresh())->not->toBeNull();
-        expect($event->fresh()->name)->toBe('Test Event');
+        expect(freshModel($event)->name)->toBe('Test Event');
     });
 });
 

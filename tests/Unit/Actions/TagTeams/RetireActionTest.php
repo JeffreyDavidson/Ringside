@@ -23,7 +23,7 @@ test('it retires a bookable tag team at the current datetime by default', functi
     $tagTeam->refresh();
     expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
     expect($tagTeam->retirements)->toHaveCount(1);
-    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect(requiredDate($tagTeam->retirements->firstOrFail()->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it retires a bookable tag team at a specific datetime', function () {
@@ -36,7 +36,7 @@ test('it retires a bookable tag team at a specific datetime', function () {
     $tagTeam->refresh();
     expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
     expect($tagTeam->retirements)->toHaveCount(1);
-    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
+    expect(requiredDate($tagTeam->retirements->firstOrFail()->started_at)->toDateTimeString())->toBe($datetime->toDateTimeString());
 });
 
 test('it prevents retiring a released tag team at the current datetime by default', function () {
@@ -65,7 +65,7 @@ test('it retires a suspended tag team at the current datetime by default', funct
     expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
     expect($tagTeam->isSuspended())->toBeFalse();
     expect($tagTeam->retirements)->toHaveCount(1);
-    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect(requiredDate($tagTeam->retirements->firstOrFail()->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it retires a suspended tag team at a specific datetime', function () {
@@ -80,7 +80,7 @@ test('it retires a suspended tag team at a specific datetime', function () {
     expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
     expect($tagTeam->isSuspended())->toBeFalse();
     expect($tagTeam->retirements)->toHaveCount(1);
-    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
+    expect(requiredDate($tagTeam->retirements->firstOrFail()->started_at)->toDateTimeString())->toBe($datetime->toDateTimeString());
 });
 
 test('it retires an employed tag team at the current datetime by default', function () {
@@ -92,7 +92,7 @@ test('it retires an employed tag team at the current datetime by default', funct
     $tagTeam->refresh();
     expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
     expect($tagTeam->retirements)->toHaveCount(1);
-    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect(requiredDate($tagTeam->retirements->firstOrFail()->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it retires an employed tag team at a specific datetime', function () {
@@ -105,7 +105,7 @@ test('it retires an employed tag team at a specific datetime', function () {
     $tagTeam->refresh();
     expect($tagTeam->status)->toBe(EmploymentStatus::Retired);
     expect($tagTeam->retirements)->toHaveCount(1);
-    expect($tagTeam->retirements->first()->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
+    expect(requiredDate($tagTeam->retirements->firstOrFail()->started_at)->toDateTimeString())->toBe($datetime->toDateTimeString());
 });
 
 test('it throws exception for retiring a non retirable tag team', function ($factoryState) {

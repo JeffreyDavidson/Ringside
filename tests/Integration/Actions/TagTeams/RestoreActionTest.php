@@ -225,6 +225,6 @@ test('it maintains data integrity during restoration', function () {
     expect($tagTeam->trashed())->toBeFalse();
 
     // Timestamps should be preserved (creation) but updated (modification)
-    expect($tagTeam->created_at->toDateTimeString())->toBe($originalCreatedAt->toDateTimeString());
+    expect(requiredDate($tagTeam->created_at)->toDateTimeString())->toBe(requiredDate($originalCreatedAt)->toDateTimeString());
     expect($tagTeam->deleted_at)->toBeNull();
 });

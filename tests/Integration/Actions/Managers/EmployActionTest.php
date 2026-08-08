@@ -112,9 +112,8 @@ test('it handles database transactions correctly', function () {
     expect($manager->status->value)->toBe('employed');
 
     // Verify employment record integrity
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
-    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $employment = $manager->currentEmployment()->firstOrFail();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });
 

@@ -86,10 +86,8 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             $query = TitleChampionship::query();
 
             // Verify the builder returns TitleChampionship models
-            $championship = $query->first();
-            if ($championship) {
-                expect($championship)->toBeInstanceOf(TitleChampionship::class);
-            }
+            $championship = $query->firstOrFail();
+            expect($championship)->toBeInstanceOf(TitleChampionship::class);
         });
     });
 
@@ -103,8 +101,8 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
 
             // Assert
             expect($currentChampionships)->toHaveCount(1);
-            expect($currentChampionships->first()->id)->toBe($expectedCurrentChampionship->id);
-            expect($currentChampionships->first()->lost_at)->toBeNull();
+            expect($currentChampionships->firstOrFail()->id)->toBe($expectedCurrentChampionship->id);
+            expect($currentChampionships->firstOrFail()->lost_at)->toBeNull();
         });
 
         test('current scope filters out ended championships', function () {
@@ -136,9 +134,9 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             $specificCurrentChampionship = TitleChampionship::query()
                 ->current()
                 ->where('title_id', $this->title->id)
-                ->first();
+                ->firstOrFail();
 
-            expect($specificCurrentChampionship->id)->toBe($this->currentChampionship->id);
+            expect($specificCurrentChampionship->id)->toBe(requiredModel($this->currentChampionship)->id);
             expect($specificCurrentChampionship->lost_at)->toBeNull();
         });
     });
@@ -160,7 +158,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             $previousIds = $previousChampionships->pluck('id');
             expect($previousIds)->toContain($this->recentEndedChampionship->id);
             expect($previousIds)->toContain($this->olderEndedChampionship->id);
-            expect($previousIds)->not->toContain($this->currentChampionship->id);
+            expect($previousIds)->not->toContain(requiredModel($this->currentChampionship)->id);
         });
 
         test('previous scope generates correct SQL', function () {
@@ -177,7 +175,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
                 ->get();
 
             expect($recentPrevious)->toHaveCount(1);
-            expect($recentPrevious->first()->id)->toBe($this->recentEndedChampionship->id);
+            expect($recentPrevious->firstOrFail()->id)->toBe($this->recentEndedChampionship->id);
         });
     });
 
@@ -186,7 +184,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             $championships = TitleChampionship::query()->latestWon()->get();
 
             // Most recent win should be first (2024-01-01)
-            expect($championships->first()->id)->toBe($this->currentChampionship->id);
+            expect($championships->firstOrFail()->id)->toBe(requiredModel($this->currentChampionship)->id);
 
             // Verify ordering
             $wonDates = $championships->pluck('won_at');
@@ -202,7 +200,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
                 ->get();
 
             // Most recently lost should be first (2023-12-31)
-            expect($endedChampionships->first()->id)->toBe($this->recentEndedChampionship->id);
+            expect($endedChampionships->firstOrFail()->id)->toBe($this->recentEndedChampionship->id);
 
             // Verify ordering for ended championships
             $lostDates = $endedChampionships->pluck('lost_at');
@@ -234,7 +232,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             expect($previousByLatestLost)->toHaveCount(2);
 
             // Most recently lost should be first
-            expect($previousByLatestLost->first()->id)->toBe($this->recentEndedChampionship->id);
+            expect($previousByLatestLost->firstOrFail()->id)->toBe($this->recentEndedChampionship->id);
         });
     });
 
@@ -258,7 +256,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             $currentWithLength = TitleChampionship::query()
                 ->current()
                 ->withReignLength()
-                ->first();
+                ->firstOrFail();
 
             // Assert - Just verify the calculation returns a numeric value
             // NOTE: SQLite date calculations differ from MySQL, needs separate investigation
@@ -271,7 +269,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
                 ->previous()
                 ->withReignLength()
                 ->where('id', $this->recentEndedChampionship->id)
-                ->first();
+                ->firstOrFail();
 
             // Assert - Just verify the calculation returns a numeric value
             expect($endedWithLength->reign_length)->toBeNumeric();
@@ -299,7 +297,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
                 ->get();
 
             expect($currentWithLength)->toHaveCount(1);
-            expect($currentWithLength->first()->reign_length)->toBeNumeric();
+            expect($currentWithLength->firstOrFail()->reign_length)->toBeNumeric();
         });
     });
 
@@ -317,7 +315,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
 
             // Assert
             expect($result)->toHaveCount(2);
-            expect($result->first()->id)->toBe($expectedFirstChampionship->id);
+            expect($result->firstOrFail()->id)->toBe($expectedFirstChampionship->id);
 
             foreach ($result as $championship) {
                 expect($championship->reign_length)->toBeNumeric();
@@ -343,9 +341,8 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
                 ->latestLost()
                 ->limit(1);
 
-            $result = $complexQuery->first();
+            $result = $complexQuery->firstOrFail();
 
-            expect($result)->not()->toBeNull();
             expect($result->id)->toBe($this->recentEndedChampionship->id);
             expect($result->reign_length)->toBeNumeric();
         });
@@ -416,7 +413,7 @@ describe('TitleChampionshipBuilder Unit Tests', function () {
             $result = TitleChampionship::query()
                 ->where('id', $sameDayChampionship->id)
                 ->withReignLength()
-                ->first();
+                ->firstOrFail();
 
             expect($result->reign_length)->toBe(0);
         });

@@ -147,7 +147,7 @@ describe('GeneratesDummyData Unit Tests', function () {
             $dateMethod = $reflection->getMethod('generateFutureDate');
             expect($dateMethod->isProtected())->toBeTrue();
             expect(reflectionReturnTypeName($dateMethod))->toBe('string');
-            expect($dateMethod->getReturnType()->allowsNull())->toBeTrue();
+            expect(requiredReflectionType($dateMethod->getReturnType())->allowsNull())->toBeTrue();
             expect($dateMethod->getNumberOfParameters())->toBe(2);
         });
     });

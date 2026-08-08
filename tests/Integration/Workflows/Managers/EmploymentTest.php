@@ -30,18 +30,18 @@ describe('Manager Employment Workflows', function () {
 
             // Initial employ
             EmployAction::run($manager, Carbon::now());
-            $employed = $manager->fresh();
+            $employed = freshModel($manager);
             expect($employed->isEmployed())->toBeTrue();
 
             // Release
             ReleaseAction::run($employed, Carbon::now());
-            $released = $manager->fresh();
+            $released = freshModel($manager);
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();
 
             // Re-employ
             EmployAction::run($released, Carbon::now());
-            $reEmployed = $manager->fresh();
+            $reEmployed = freshModel($manager);
             expect($reEmployed->isEmployed())->toBeTrue();
             expect($reEmployed->isReleased())->toBeFalse();
         });
@@ -56,13 +56,13 @@ describe('Manager Employment Workflows', function () {
 
             // Employ manager
             EmployAction::run($manager, Carbon::now());
-            $afterEmployment = $manager->fresh();
+            $afterEmployment = freshModel($manager);
             expect($afterEmployment->status)->toBe(EmploymentStatus::Employed);
             expect($afterEmployment->isEmployed())->toBeTrue();
 
             // Release manager
             ReleaseAction::run($afterEmployment, Carbon::now());
-            $afterRelease = $manager->fresh();
+            $afterRelease = freshModel($manager);
 
             // Verify release status synchronization
             expect($afterRelease->status)->toBe(EmploymentStatus::Released);
@@ -77,11 +77,11 @@ describe('Manager Employment Workflows', function () {
 
             // Execute multi-action workflow within transaction context
             EmployAction::run($manager, Carbon::now());
-            $employed = $manager->fresh();
+            $employed = freshModel($manager);
 
             // Then suspend the manager
             SuspendAction::run($employed, Carbon::now());
-            $suspended = $manager->fresh();
+            $suspended = freshModel($manager);
 
             // Verify all state changes are consistent
             expect($suspended->isEmployed())->toBeTrue(); // Still employed
@@ -97,7 +97,7 @@ describe('Manager Employment Workflows', function () {
             // For now, just verify normal operation doesn't leave partial state
             EmployAction::run($manager, Carbon::now());
 
-            $refreshedManager = $manager->fresh();
+            $refreshedManager = freshModel($manager);
 
             // Verify all state is consistent - no orphaned records
             if ($refreshedManager->isEmployed()) {
@@ -114,7 +114,7 @@ describe('Manager Employment Workflows', function () {
             // Test that employment follows business rules
             EmployAction::run($manager, Carbon::now());
 
-            $refreshedManager = $manager->fresh();
+            $refreshedManager = freshModel($manager);
 
             // Verify business rule compliance
             expect($refreshedManager->isEmployed())->toBeTrue();
@@ -130,7 +130,7 @@ describe('Manager Employment Workflows', function () {
             EmployAction::run($manager, Carbon::now());
 
             // Employed manager should be available for management duties
-            expect($manager->fresh()->isEmployed())->toBeTrue();
+            expect(freshModel($manager)->isEmployed())->toBeTrue();
         });
 
         test('complex multi-action management workflows maintain data consistency', function () {
@@ -138,16 +138,16 @@ describe('Manager Employment Workflows', function () {
 
             // Retire -> Employ -> Suspend -> Release workflow
             EmployAction::run($manager, Carbon::now());
-            $employed = $manager->fresh();
+            $employed = freshModel($manager);
             expect($employed->isEmployed())->toBeTrue();
 
             SuspendAction::run($employed, Carbon::now());
-            $suspended = $manager->fresh();
+            $suspended = freshModel($manager);
             expect($suspended->isEmployed())->toBeTrue();
             expect($suspended->isSuspended())->toBeTrue();
 
             ReleaseAction::run($suspended, Carbon::now());
-            $released = $manager->fresh();
+            $released = freshModel($manager);
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();
             expect($released->isSuspended())->toBeFalse();

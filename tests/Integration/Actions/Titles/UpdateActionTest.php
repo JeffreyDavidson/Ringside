@@ -35,7 +35,7 @@ test('it activates an unactivated title if activation date is filled in request'
     expect($title->name)->toBe('New Example Title');
     expect($title->type)->toBe(TitleType::Singles);
     expect($title->activations)->toHaveCount(1);
-    expect($title->activations->first()->started_at->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect(requiredDate($title->activations->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
 test('it updates a title with future activation but does not create new debut since it already has debuted', function () {

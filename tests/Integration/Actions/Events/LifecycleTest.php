@@ -59,9 +59,9 @@ describe('Event Activation Action Integration', function () {
             expect($event->name)->toBe('Scheduled Event');
             expect($event->isScheduled())->toBeTrue();
             expect($event->hasFutureDate())->toBeTrue();
-            expect($event->date->format('Y-m-d H:i:s'))->toBe($scheduledDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($event->date)->format('Y-m-d H:i:s'))->toBe($scheduledDate->format('Y-m-d H:i:s'));
             expect($event->venue_id)->toBe($this->venue->id);
-            expect($event->venue->name)->toBe($this->venue->name);
+            expect($event->venue()->firstOrFail()->name)->toBe($this->venue->name);
         });
 
         test('create action handles past date events correctly', function () {
@@ -116,7 +116,7 @@ describe('Event Activation Action Integration', function () {
 
             UpdateAction::run($this->event, $eventData);
 
-            $refreshedEvent = $this->event->fresh();
+            $refreshedEvent = freshModel($this->event);
             expect($refreshedEvent->name)->toBe('Scheduled Event');
             expect($refreshedEvent->isScheduled())->toBeTrue();
             expect($refreshedEvent->hasFutureDate())->toBeTrue();
@@ -139,8 +139,8 @@ describe('Event Activation Action Integration', function () {
 
             UpdateAction::run($this->event, $eventData);
 
-            $refreshedEvent = $this->event->fresh();
-            expect($refreshedEvent->date->format('Y-m-d H:i:s'))->toBe($newDate->format('Y-m-d H:i:s'));
+            $refreshedEvent = freshModel($this->event);
+            expect(requiredDate($refreshedEvent->date)->format('Y-m-d H:i:s'))->toBe($newDate->format('Y-m-d H:i:s'));
             expect($refreshedEvent->hasFutureDate())->toBeTrue();
         });
 
@@ -157,9 +157,9 @@ describe('Event Activation Action Integration', function () {
 
             UpdateAction::run($this->event, $eventData);
 
-            $refreshedEvent = $this->event->fresh();
+            $refreshedEvent = freshModel($this->event);
             expect($refreshedEvent->venue_id)->toBe($newVenue->id);
-            expect($refreshedEvent->venue->name)->toBe($newVenue->name);
+            expect($refreshedEvent->venue()->firstOrFail()->name)->toBe($newVenue->name);
         });
 
         test('update action can remove venue from event', function () {
@@ -174,7 +174,7 @@ describe('Event Activation Action Integration', function () {
 
             UpdateAction::run($this->event, $eventData);
 
-            $refreshedEvent = $this->event->fresh();
+            $refreshedEvent = freshModel($this->event);
             expect($refreshedEvent->venue_id)->toBeNull();
             expect($refreshedEvent->venue)->toBeNull();
         });
@@ -191,7 +191,7 @@ describe('Event Activation Action Integration', function () {
 
             UpdateAction::run($this->event, $eventData);
 
-            $refreshedEvent = $this->event->fresh();
+            $refreshedEvent = freshModel($this->event);
             expect($refreshedEvent->isUnscheduled())->toBeTrue();
             expect($refreshedEvent->date)->toBeNull();
             expect($refreshedEvent->preview)->toBe('Unscheduled again');
@@ -208,7 +208,7 @@ describe('Event Activation Action Integration', function () {
 
             expect(Event::find($this->event->id))->toBeNull();
             expect(Event::onlyTrashed()->find($this->event->id))->not()->toBeNull();
-            expect($this->event->fresh()->deleted_at)->not()->toBeNull();
+            expect(freshModel($this->event)->deleted_at)->not()->toBeNull();
         });
 
         test('restore action recovers deleted event', function () {
@@ -217,8 +217,7 @@ describe('Event Activation Action Integration', function () {
 
             RestoreAction::run($this->event);
 
-            $restoredEvent = Event::find($this->event->id);
-            expect($restoredEvent)->not()->toBeNull();
+            $restoredEvent = Event::findOrFail($this->event->id);
             expect($restoredEvent->name)->toBe('Deletable Event');
             expect($restoredEvent->deleted_at)->toBeNull();
         });
@@ -230,8 +229,8 @@ describe('Event Activation Action Integration', function () {
             DeleteAction::run($this->event);
             RestoreAction::run($this->event);
 
-            $restoredEvent = Event::find($this->event->id);
-            expect($restoredEvent->date->format('Y-m-d H:i:s'))->toBe($originalDate->format('Y-m-d H:i:s'));
+            $restoredEvent = Event::findOrFail($this->event->id);
+            expect(requiredDate($restoredEvent->date)->format('Y-m-d H:i:s'))->toBe(requiredDate($originalDate)->format('Y-m-d H:i:s'));
             expect($restoredEvent->venue_id)->toBe($originalVenueId);
             expect($restoredEvent->isScheduled())->toBeTrue();
         });
@@ -259,7 +258,7 @@ describe('Event Activation Action Integration', function () {
             );
             UpdateAction::run($event, $updateData);
 
-            $refreshedEvent = $event->fresh();
+            $refreshedEvent = $event->refresh();
             expect($refreshedEvent->isScheduled())->toBeTrue();
             expect($refreshedEvent->hasFutureDate())->toBeTrue();
 
@@ -272,7 +271,7 @@ describe('Event Activation Action Integration', function () {
             );
             UpdateAction::run($event, $finalUpdateData);
 
-            $finalEvent = $event->fresh();
+            $finalEvent = $event->refresh();
             expect($finalEvent->name)->toBe('Final Event Name');
             expect($finalEvent->preview)->toBe('Updated preview');
             expect($finalEvent->venue_id)->toBe($this->venue->id);
@@ -339,9 +338,9 @@ describe('Event Activation Action Integration', function () {
             );
             UpdateAction::run($event, $updateData);
 
-            $refreshedEvent = $event->fresh();
+            $refreshedEvent = $event->refresh();
             expect($refreshedEvent->venue_id)->toBe($venue2->id);
-            expect($refreshedEvent->venue->name)->toBe('Venue Two');
+            expect($refreshedEvent->venue()->firstOrFail()->name)->toBe('Venue Two');
             expect($refreshedEvent->preview)->toBe('Changed venue');
 
             // Remove venue entirely
@@ -353,7 +352,7 @@ describe('Event Activation Action Integration', function () {
             );
             UpdateAction::run($event, $finalUpdateData);
 
-            $finalEvent = $event->fresh();
+            $finalEvent = $event->refresh();
             expect($finalEvent->venue_id)->toBeNull();
             expect($finalEvent->venue)->toBeNull();
             expect($finalEvent->isScheduled())->toBeTrue(); // Still scheduled, just no venue
@@ -383,7 +382,7 @@ describe('Event Activation Action Integration', function () {
             );
             UpdateAction::run($event, $updateData);
 
-            $refreshedEvent = $event->fresh();
+            $refreshedEvent = $event->refresh();
             expect($refreshedEvent->hasPastDate())->toBeTrue();
             expect($refreshedEvent->hasFutureDate())->toBeFalse();
             expect($refreshedEvent->isScheduled())->toBeTrue(); // Still scheduled, just in past
@@ -403,12 +402,12 @@ describe('Event Activation Action Integration', function () {
 
             UpdateAction::run($event, $updateData);
 
-            $refreshedEvent = $event->fresh();
+            $refreshedEvent = freshModel($event);
             $refreshedEvent->load('venue');
 
             expect($refreshedEvent->venue)->not()->toBeNull();
-            expect($refreshedEvent->venue->id)->toBe($this->venue->id);
-            expect($refreshedEvent->venue->name)->toBe($this->venue->name);
+            expect($refreshedEvent->venue()->firstOrFail()->id)->toBe($this->venue->id);
+            expect($refreshedEvent->venue()->firstOrFail()->name)->toBe($this->venue->name);
         });
 
         test('multiple venue changes maintain referential integrity', function () {
@@ -426,7 +425,7 @@ describe('Event Activation Action Integration', function () {
                 preview: $event->preview
             );
             UpdateAction::run($event, $updateData1);
-            expect($event->fresh()->venue_id)->toBe($venue2->id);
+            expect(freshModel($event)->venue_id)->toBe($venue2->id);
 
             // Change to venue3
             $updateData2 = new EventData(
@@ -436,12 +435,12 @@ describe('Event Activation Action Integration', function () {
                 preview: $event->preview
             );
             UpdateAction::run($event, $updateData2);
-            expect($event->fresh()->venue_id)->toBe($venue3->id);
+            expect(freshModel($event)->venue_id)->toBe($venue3->id);
 
             // Verify venue relationships work
-            $finalEvent = $event->fresh();
+            $finalEvent = freshModel($event);
             $finalEvent->load('venue');
-            expect($finalEvent->venue->id)->toBe($venue3->id);
+            expect($finalEvent->venue()->firstOrFail()->id)->toBe($venue3->id);
         });
     });
 
@@ -499,7 +498,7 @@ describe('Event Activation Action Integration', function () {
 
             $restoredEvent = Event::query()->whereKey($event->getKey())->firstOrFail();
             expect($restoredEvent->name)->toBe($originalState['name']);
-            expect($restoredEvent->date->format('Y-m-d H:i:s'))->toBe($originalState['date']->format('Y-m-d H:i:s'));
+            expect(requiredDate($restoredEvent->date)->format('Y-m-d H:i:s'))->toBe($originalState['date']->format('Y-m-d H:i:s'));
             expect($restoredEvent->venue_id)->toBe($originalState['venue_id']);
             expect($restoredEvent->preview)->toBe($originalState['preview']);
         });
@@ -546,7 +545,7 @@ describe('Event Activation Action Integration', function () {
             );
             UpdateAction::run($event, $updateData);
 
-            $updatedEvent = $event->fresh();
+            $updatedEvent = $event->refresh();
             expect($updatedEvent->hasPastDate())->toBeTrue();
             expect($updatedEvent->hasFutureDate())->toBeFalse();
         });

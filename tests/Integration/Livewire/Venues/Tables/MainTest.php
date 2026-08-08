@@ -233,7 +233,7 @@ describe('VenuesTable Integration Tests', function () {
 
             // Verify relationship loading doesn't cause N+1 queries
             $venues = Venue::with('events')->get();
-            expect($venues->where('id', $this->venueWithEvents->id)->first()->events)->not->toBeEmpty();
+            expect($venues->where('id', $this->venueWithEvents->id)->firstOrFail()->events)->not->toBeEmpty();
         });
     });
 
@@ -271,7 +271,7 @@ describe('VenuesTable Integration Tests', function () {
             $component->call('delete', $this->activeVenue)
                 ->assertHasNoErrors();
 
-            expect($event->fresh()->venue_id)->toBe($this->activeVenue->id);
+            expect(freshModel($event)->venue_id)->toBe($this->activeVenue->id);
         });
 
         test('restore operation restores event relationships', function () {
@@ -289,11 +289,10 @@ describe('VenuesTable Integration Tests', function () {
             $component->call('restore', $venue->id)
                 ->assertHasNoErrors();
 
-            $restoredVenue = Venue::find($venue->id);
+            $restoredVenue = Venue::findOrFail($venue->id);
             $event->refresh(); // Refresh the event to get latest venue relationship
 
             // Debug the relationship
-            expect($restoredVenue)->not()->toBeNull();
             expect($event->venue_id)->toBe($restoredVenue->id);
             expect($restoredVenue->events()->count())->toBeGreaterThan(0);
         });

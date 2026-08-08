@@ -65,7 +65,7 @@ describe('TitleFactory Unit Tests', function () {
             // Assert
             $title->load('currentActivityPeriod');
             expect($title->currentActivityPeriod)->not->toBeNull();
-            expect($title->currentActivityPeriod->ended_at)->toBeNull();
+            expect($title->currentActivityPeriod)->not->toBeNull()->ended_at->toBeNull();
         });
 
         test('inactive state works correctly', function () {

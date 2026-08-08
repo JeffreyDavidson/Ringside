@@ -157,11 +157,11 @@ describe('User Role Integration Tests', function () {
             // Test authentication state integration with roles
             actingAs($this->administrator);
             expect(auth()->check())->toBeTrue();
-            expect(auth()->user()->isAdministrator())->toBeTrue();
+            expect(requiredModel(auth()->user())->isAdministrator())->toBeTrue();
 
             actingAs($this->basicUser);
             expect(auth()->check())->toBeTrue();
-            expect(auth()->user()->isAdministrator())->toBeFalse();
+            expect(requiredModel(auth()->user())->isAdministrator())->toBeFalse();
         });
     });
 
@@ -184,7 +184,7 @@ describe('User Role Integration Tests', function () {
             expect(Gate::forUser($user)->allows('create', User::class))->toBeTrue();
 
             // Verify in database
-            $userFromDb = User::find($user->id);
+            $userFromDb = User::findOrFail($user->id);
             expect($userFromDb->role)->toBe(Role::Administrator);
             expect($userFromDb->isAdministrator())->toBeTrue();
         });
@@ -207,7 +207,7 @@ describe('User Role Integration Tests', function () {
             expect(Gate::forUser($user)->denies('create', User::class))->toBeTrue();
 
             // Verify in database
-            $userFromDb = User::find($user->id);
+            $userFromDb = User::findOrFail($user->id);
             expect($userFromDb->role)->toBe(Role::Basic);
             expect($userFromDb->isAdministrator())->toBeFalse();
         });
@@ -291,15 +291,15 @@ describe('User Role Integration Tests', function () {
             $admin->delete();
 
             // Role should still be maintained on deleted user
-            $deletedAdmin = User::withTrashed()->find($admin->id);
+            $deletedAdmin = User::withTrashed()->findOrFail($admin->id);
             expect($deletedAdmin->isAdministrator())->toBeTrue();
 
             // Restore user
             $admin->restore();
 
             // Role should still work after restoration
-            expect($admin->fresh()->isAdministrator())->toBeTrue();
-            expect(Gate::forUser($admin->fresh())->allows('create', User::class))->toBeTrue();
+            expect(freshModel($admin)->isAdministrator())->toBeTrue();
+            expect(Gate::forUser(freshModel($admin))->allows('create', User::class))->toBeTrue();
         });
     });
 });

@@ -72,7 +72,7 @@ describe('VenuesTableSeeder Integration Tests', function () {
 
         test('venues have realistic address data', function () {
             // Arrange
-            $venue = Venue::first();
+            $venue = Venue::query()->firstOrFail();
 
             // Assert
             expect($venue->street_address)->not->toBeEmpty();

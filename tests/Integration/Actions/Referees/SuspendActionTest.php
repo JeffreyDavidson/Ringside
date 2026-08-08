@@ -83,7 +83,7 @@ test('it throws exception when referee cannot be suspended', function () {
 
 test('it maintains referee employment after suspension', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
 
@@ -104,10 +104,10 @@ test('it creates suspension record with correct structure', function () {
 
     SuspendAction::run($referee, $suspensionDate);
 
-    $suspension = $referee->fresh()->currentSuspension;
+    $suspension = freshModel($referee)->currentSuspension()->firstOrFail();
 
     expect($suspension)->not->toBeNull();
     expect($suspension->referee_id)->toBe($referee->id);
-    expect($suspension->started_at->toDateTimeString())->toBe($suspensionDate->toDateTimeString());
+    expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe($suspensionDate->toDateTimeString());
     expect($suspension->ended_at)->toBeNull();
 });

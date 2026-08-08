@@ -81,7 +81,7 @@ describe('PreviousManagers Query Building', function () {
         $results = $component->instance()->builder()->get();
 
         expect($results)->toHaveCount(1);
-        expect($results->first()->wrestler_id)->toBe($this->wrestler->id);
+        expect($results->firstOrFail()->wrestler_id)->toBe($this->wrestler->id);
     });
 
     it('only shows relationships that have ended', function () {
@@ -107,8 +107,8 @@ describe('PreviousManagers Query Building', function () {
         $results = $component->instance()->builder()->get();
 
         expect($results)->toHaveCount(1);
-        expect($results->first()->manager_id)->toBe($previousManager->id);
-        expect($results->first()->fired_at)->not->toBeNull();
+        expect($results->firstOrFail()->manager_id)->toBe($previousManager->id);
+        expect($results->firstOrFail()->fired_at)->not->toBeNull();
     });
 
     it('orders by hired_at descending', function () {
@@ -143,9 +143,9 @@ describe('PreviousManagers Query Building', function () {
 
         expect($results)->toHaveCount(3);
         // Should be ordered by hired_at desc (most recent first)
-        expect($results->first()->manager_id)->toBe($manager2->id);
-        expect($results->get(1)->manager_id)->toBe($this->manager->id);
-        expect($results->last()->manager_id)->toBe($manager3->id);
+        expect($results->firstOrFail()->manager_id)->toBe($manager2->id);
+        expect($results->slice(1)->firstOrFail()->manager_id)->toBe($this->manager->id);
+        expect($results->reverse()->firstOrFail()->manager_id)->toBe($manager3->id);
     });
 });
 

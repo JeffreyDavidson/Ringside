@@ -178,7 +178,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is disbanded
-            expect($activeStable->fresh()->isDisbanded())->toBeTrue();
+            expect(freshModel($activeStable)->isDisbanded())->toBeTrue();
         });
 
         test('retire action integration works correctly', function () {
@@ -193,7 +193,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is retired
-            expect($activeStable->fresh()->isRetired())->toBeTrue();
+            expect(freshModel($activeStable)->isRetired())->toBeTrue();
         });
 
         test('unretire action integration works correctly', function () {
@@ -208,7 +208,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is unretired
-            expect($retiredStable->fresh()->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($retiredStable)->isCurrentlyActive())->toBeTrue();
         });
 
         test('establish action integration works correctly', function () {
@@ -223,7 +223,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is established
-            expect($inactiveStable->fresh()->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($inactiveStable)->isCurrentlyActive())->toBeTrue();
         });
 
         test('restore action integration works correctly', function () {
@@ -270,7 +270,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable status unchanged
-            expect($activeStable->fresh()->isActive())->toBeTrue();
+            expect(freshModel($activeStable)->isActive())->toBeTrue();
         });
 
         test('disband action fails for inappropriate stable status', function () {
@@ -284,7 +284,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable status unchanged
-            expect($inactiveStable->fresh()->isInactive())->toBeTrue();
+            expect(freshModel($inactiveStable)->isInactive())->toBeTrue();
         });
 
         test('unretire action fails for non-retired stable', function () {
@@ -298,7 +298,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable status unchanged
-            expect($activeStable->fresh()->isActive())->toBeTrue();
+            expect(freshModel($activeStable)->isActive())->toBeTrue();
         });
 
         test('actions respect stable business constraints', function () {
@@ -312,7 +312,7 @@ describe('StablesTable Component', function () {
             $component->call('disband', $disbandedStable)
                 ->assertRedirect();
 
-            expect($disbandedStable->fresh()->isDisbanded())->toBeTrue();
+            expect(freshModel($disbandedStable)->isDisbanded())->toBeTrue();
         });
     });
 

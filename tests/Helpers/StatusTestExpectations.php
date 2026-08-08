@@ -49,7 +49,7 @@ function expectStatusTransition(Model&Employable $entity, EmploymentStatus $from
  */
 function expectToBeBookable(Wrestler|Referee|TagTeam $entity): void
 {
-    $entity = $entity->fresh();
+    $entity = freshModel($entity);
     expect($entity->isEmployed())->toBeTrue();
     expect($entity->isBookable())->toBeTrue();
     expect($entity->isNotInEmployment())->toBeFalse();
@@ -60,7 +60,7 @@ function expectToBeBookable(Wrestler|Referee|TagTeam $entity): void
  */
 function expectToBeUnavailable(Wrestler|Referee|TagTeam $entity): void
 {
-    $entity = $entity->fresh();
+    $entity = freshModel($entity);
     expect($entity->isBookable())->toBeFalse();
 }
 
@@ -98,10 +98,9 @@ function expectValidRetirementState(Model&Retirable $entity): void
     $entity->refresh();
 
     if ($entity->isRetired()) {
-        $currentRetirement = $entity->currentRetirement()->first();
-        expect($currentRetirement)->not->toBeNull();
-        expect($currentRetirement?->getAttribute('started_at'))->not->toBeNull();
-        expect($currentRetirement?->getAttribute('ended_at'))->toBeNull();
+        $currentRetirement = $entity->currentRetirement()->firstOrFail();
+        expect($currentRetirement->getAttribute('started_at'))->not->toBeNull();
+        expect($currentRetirement->getAttribute('ended_at'))->toBeNull();
     } else {
         expect($entity->currentRetirement()->first())->toBeNull();
     }
@@ -117,10 +116,9 @@ function expectValidInjuryState(Model&Injurable $entity): void
     $entity->refresh();
 
     if ($entity->isInjured()) {
-        $currentInjury = $entity->currentInjury()->first();
-        expect($currentInjury)->not->toBeNull();
-        expect($currentInjury?->getAttribute('started_at'))->not->toBeNull();
-        expect($currentInjury?->getAttribute('ended_at'))->toBeNull();
+        $currentInjury = $entity->currentInjury()->firstOrFail();
+        expect($currentInjury->getAttribute('started_at'))->not->toBeNull();
+        expect($currentInjury->getAttribute('ended_at'))->toBeNull();
     } else {
         expect($entity->currentInjury()->first())->toBeNull();
     }
@@ -136,10 +134,9 @@ function expectValidSuspensionState(Model&Suspendable $entity): void
     $entity->refresh();
 
     if ($entity->isSuspended()) {
-        $currentSuspension = $entity->currentSuspension()->first();
-        expect($currentSuspension)->not->toBeNull();
-        expect($currentSuspension?->getAttribute('started_at'))->not->toBeNull();
-        expect($currentSuspension?->getAttribute('ended_at'))->toBeNull();
+        $currentSuspension = $entity->currentSuspension()->firstOrFail();
+        expect($currentSuspension->getAttribute('started_at'))->not->toBeNull();
+        expect($currentSuspension->getAttribute('ended_at'))->toBeNull();
     } else {
         expect($entity->currentSuspension()->first())->toBeNull();
     }
@@ -188,7 +185,7 @@ function expectTagTeamMembership(Wrestler $wrestler, TagTeam $tagTeam, array $ex
 {
     expect($wrestler->tagTeams()->count())->toBeGreaterThan(0);
 
-    $relationship = $wrestler->tagTeams()->where('tag_team_id', $tagTeam->id)->first();
+    $relationship = $wrestler->tagTeams()->where('tag_team_id', $tagTeam->id)->firstOrFail();
     expect($relationship)->not->toBeNull();
     expect($relationship->pivot->wrestler_id)->toBe($wrestler->id);
     expect($relationship->pivot->tag_team_id)->toBe($tagTeam->id);

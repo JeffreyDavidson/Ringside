@@ -61,7 +61,7 @@ describe('ManagerInjuryFactory Unit Tests', function () {
 
             // Assert
             expect($injury->manager_id)->toBe($manager->id);
-            expect($injury->started_at->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($injury->started_at)->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
             expect($injury->ended_at)->toBeNull();
         });
 
@@ -80,9 +80,9 @@ describe('ManagerInjuryFactory Unit Tests', function () {
 
             // Assert
             expect($injury->manager_id)->toBe($manager->id);
-            expect($injury->started_at->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
-            expect($injury->ended_at->format('Y-m-d H:i:s'))->toBe($clearedDate->format('Y-m-d H:i:s'));
-            expect($injury->ended_at->isAfter($injury->started_at))->toBeTrue();
+            expect(requiredDate($injury->started_at)->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($injury->ended_at)->format('Y-m-d H:i:s'))->toBe($clearedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($injury->ended_at)->isAfter($injury->started_at))->toBeTrue();
         });
     });
 
@@ -110,8 +110,8 @@ describe('ManagerInjuryFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($injury->started_at->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
-            expect($injury->ended_at->format('Y-m-d H:i:s'))->toBe($clearedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($injury->started_at)->format('Y-m-d H:i:s'))->toBe($injuredDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($injury->ended_at)->format('Y-m-d H:i:s'))->toBe($clearedDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -132,7 +132,7 @@ describe('ManagerInjuryFactory Unit Tests', function () {
             // Assert
             expect($injury->started_at)->toBeInstanceOf(Carbon::class);
             if ($injury->ended_at) {
-                expect($injury->ended_at->isAfter($injury->started_at))->toBeTrue();
+                expect(requiredDate($injury->ended_at)->isAfter($injury->started_at))->toBeTrue();
             }
         });
     });

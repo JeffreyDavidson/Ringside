@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use App\Models\Users\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
+use Illuminate\Support\Carbon;
 use Illuminate\Translation\PotentiallyTranslatedString;
 use Illuminate\Translation\Translator;
 
@@ -104,6 +106,57 @@ function reflectionSource(ReflectionClass $reflection): string
     }
 
     return $source;
+}
+
+/**
+ * Return a date that must exist for the tested state.
+ */
+function requiredDate(?Carbon $date): Carbon
+{
+    return $date ?? throw new RuntimeException('Expected the model date to be present.');
+}
+
+/**
+ * Return a model that must exist for the tested state.
+ *
+ * @template TModel of Model
+ *
+ * @param  TModel|null  $model
+ * @return TModel
+ */
+function requiredModel(?Model $model): Model
+{
+    return $model ?? throw new RuntimeException('Expected the model relationship to be present.');
+}
+
+/**
+ * Reload a separate model instance that must still exist.
+ *
+ * @template TModel of Model
+ *
+ * @param  TModel|null  $model
+ * @return TModel
+ */
+function freshModel(?Model $model): Model
+{
+    if ($model === null) {
+        throw new RuntimeException('Expected the model to be present before reloading it.');
+    }
+
+    $freshModel = $model->fresh();
+    if ($freshModel === null) {
+        throw new RuntimeException('Expected the model to exist when reloading it.');
+    }
+
+    return $freshModel;
+}
+
+/**
+ * Return a reflection type that must exist for the tested declaration.
+ */
+function requiredReflectionType(?ReflectionType $type): ReflectionType
+{
+    return $type ?? throw new RuntimeException('Expected the reflected declaration to have a type.');
 }
 
 /*

@@ -96,15 +96,14 @@ test('it handles database transactions correctly', function () {
     expect($manager->isInjured())->toBeTrue();
 
     // Verify injury record integrity
-    $injury = $manager->currentInjury;
-    expect($injury)->not()->toBeNull();
-    expect($injury->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $injury = $manager->currentInjury()->firstOrFail();
+    expect(requiredDate($injury->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($injury->ended_at)->toBeNull();
 });
 
 test('it maintains employment status during injury', function () {
     $manager = Manager::factory()->employed()->create();
-    $employmentId = $manager->currentEmployment->id;
+    $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isInjured())->toBeFalse();
@@ -118,8 +117,7 @@ test('it maintains employment status during injury', function () {
     expect($manager->isInjured())->toBeTrue();
 
     // Employment record should remain unchanged
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
+    $employment = $manager->currentEmployment()->firstOrFail();
     expect($employment->id)->toBe($employmentId);
     expect($employment->ended_at)->toBeNull();
 });

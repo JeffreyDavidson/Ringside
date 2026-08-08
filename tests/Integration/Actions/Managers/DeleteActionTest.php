@@ -27,7 +27,7 @@ test('it soft deletes an unemployed manager', function () {
     expect(Manager::find($manager->id))->toBeNull();
 
     // Can still find with trashed
-    $trashedManager = Manager::withTrashed()->find($manager->id);
+    $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
     expect($trashedManager)->not->toBeNull();
     expect($trashedManager->deleted_at)->not->toBeNull();
 });
@@ -122,7 +122,7 @@ test('it handles deletion with specific date', function () {
 
     DeleteAction::run($manager, $customDeletionDate);
 
-    $trashedManager = Manager::withTrashed()->find($manager->id);
+    $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
     expect($trashedManager->deleted_at)->not->toBeNull();
 
     // Employment should end on the custom date

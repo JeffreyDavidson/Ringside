@@ -100,7 +100,7 @@ test('it maintains transaction boundaries', function () {
 
 test('it maintains referee employment after injury', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
 
@@ -121,10 +121,10 @@ test('it creates injury record with correct structure', function () {
 
     InjureAction::run($referee, $injuryDate);
 
-    $injury = $referee->fresh()->currentInjury;
+    $injury = freshModel($referee)->currentInjury()->firstOrFail();
 
     expect($injury)->not->toBeNull();
     expect($injury->referee_id)->toBe($referee->id);
-    expect($injury->started_at->toDateTimeString())->toBe($injuryDate->toDateTimeString());
+    expect(requiredDate($injury->started_at)->toDateTimeString())->toBe($injuryDate->toDateTimeString());
     expect($injury->ended_at)->toBeNull();
 });

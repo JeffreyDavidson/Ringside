@@ -33,12 +33,12 @@ describe('TagTeam Employment Workflows', function () {
 
             // Initial employ
             EmployAction::run($tagTeam, Carbon::now());
-            $employed = $tagTeam->fresh();
+            $employed = freshModel($tagTeam);
             expect($employed->isEmployed())->toBeTrue();
 
             // Release
             ReleaseAction::run($employed, Carbon::now());
-            $released = $tagTeam->fresh();
+            $released = freshModel($tagTeam);
             expect($released->isReleased())->toBeTrue();
             expect($released->isEmployed())->toBeFalse();
 
@@ -56,13 +56,13 @@ describe('TagTeam Employment Workflows', function () {
 
             // Employ tag team
             EmployAction::run($tagTeam, Carbon::now());
-            $afterEmployment = $tagTeam->fresh();
+            $afterEmployment = freshModel($tagTeam);
             expect($afterEmployment->status)->toBe(EmploymentStatus::Employed);
             expect($afterEmployment->isEmployed())->toBeTrue();
 
             // Release tag team
             ReleaseAction::run($afterEmployment, Carbon::now());
-            $afterRelease = $tagTeam->fresh();
+            $afterRelease = freshModel($tagTeam);
 
             // Verify release status synchronization
             expect($afterRelease->status)->toBe(EmploymentStatus::Released);
@@ -84,7 +84,7 @@ describe('TagTeam Employment Workflows', function () {
             // Current employment
             EmployAction::run($tagTeam, Carbon::now()->subMonths(1));
 
-            $refreshedTagTeam = $tagTeam->fresh();
+            $refreshedTagTeam = freshModel($tagTeam);
             expect($refreshedTagTeam->isEmployed())->toBeTrue();
             expect($refreshedTagTeam->employments()->count())->toBe(3);
             expect($refreshedTagTeam->previousEmployments()->count())->toBe(2);
@@ -99,7 +99,7 @@ describe('TagTeam Employment Workflows', function () {
             EmployAction::run($tagTeam, Carbon::now());
 
             // All changes should be committed together
-            $refreshedTagTeam = $tagTeam->fresh();
+            $refreshedTagTeam = freshModel($tagTeam);
             expect($refreshedTagTeam->isEmployed())->toBeTrue();
             expect($refreshedTagTeam->status)->toBe(EmploymentStatus::Employed);
             expect($refreshedTagTeam->currentEmployment)->not()->toBeNull();
@@ -115,7 +115,7 @@ describe('TagTeam Employment Workflows', function () {
             // For now, just verify normal operation doesn't leave partial state
             EmployAction::run($tagTeam, Carbon::now());
 
-            $refreshedTagTeam = $tagTeam->fresh();
+            $refreshedTagTeam = freshModel($tagTeam);
 
             // Verify all state is consistent - no orphaned records
             if ($refreshedTagTeam->isEmployed()) {
@@ -132,7 +132,7 @@ describe('TagTeam Employment Workflows', function () {
             // Test that employment follows business rules
             EmployAction::run($tagTeam, Carbon::now());
 
-            $refreshedTagTeam = $tagTeam->fresh();
+            $refreshedTagTeam = freshModel($tagTeam);
 
             // Verify business rule compliance
             expect($refreshedTagTeam->isEmployed())->toBeTrue();
@@ -148,7 +148,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // Employ tag team
             EmployAction::run($tagTeam, Carbon::now());
-            $employed = $tagTeam->fresh();
+            $employed = freshModel($tagTeam);
 
             // Employed tag team has different capabilities
             expect($employed->isEmployed())->toBeTrue();
@@ -156,7 +156,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // Release tag team
             ReleaseAction::run($employed, Carbon::now());
-            $released = $tagTeam->fresh();
+            $released = freshModel($tagTeam);
 
             // Released tag team capabilities
             expect($released->isEmployed())->toBeFalse();
@@ -171,12 +171,12 @@ describe('TagTeam Employment Workflows', function () {
 
             EmployAction::run($tagTeam, $futureDate);
 
-            $refreshedTagTeam = $tagTeam->fresh();
+            $refreshedTagTeam = freshModel($tagTeam);
             expect($refreshedTagTeam->status)->toBe(EmploymentStatus::FutureEmployment);
 
             // Future employment won't be current until the date arrives
-            $futureEmployment = $refreshedTagTeam->employments()->latest()->first();
-            expect($futureEmployment->started_at->toDateTimeString())
+            $futureEmployment = $refreshedTagTeam->employments()->latest()->firstOrFail();
+            expect(requiredDate($futureEmployment->started_at)->toDateTimeString())
                 ->toBe($futureDate->toDateTimeString());
         });
 
@@ -185,18 +185,18 @@ describe('TagTeam Employment Workflows', function () {
 
             // Employ tag team
             EmployAction::run($tagTeam, Carbon::now());
-            expect($tagTeam->fresh()->employments()->whereNull('ended_at')->count())->toBe(1);
+            expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(1);
 
             // Multiple release/employ cycles
             ReleaseAction::run($tagTeam, Carbon::now());
-            expect($tagTeam->fresh()->employments()->whereNull('ended_at')->count())->toBe(0);
+            expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(0);
 
             EmployAction::run($tagTeam, Carbon::now());
-            expect($tagTeam->fresh()->employments()->whereNull('ended_at')->count())->toBe(1);
+            expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(1);
 
             // Should maintain single active employment
-            expect($tagTeam->fresh()->employments()->count())->toBe(2); // Total employments
-            expect($tagTeam->fresh()->employments()->whereNull('ended_at')->count())->toBe(1); // Active
+            expect(freshModel($tagTeam)->employments()->count())->toBe(2); // Total employments
+            expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(1); // Active
         });
     });
 });

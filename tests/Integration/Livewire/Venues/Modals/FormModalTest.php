@@ -31,7 +31,7 @@ beforeEach(function () {
         ]));
     });
 
-    $this->state = DB::table('states')->where('name', 'California')->first();
+    $this->state = DB::table('states')->where('name', 'California')->firstOrFail();
 });
 
 describe('Form Modal Initialization', function () {

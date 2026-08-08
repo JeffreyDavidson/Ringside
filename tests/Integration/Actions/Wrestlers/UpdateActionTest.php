@@ -110,7 +110,7 @@ test('it updates wrestler without employing when no employment date', function (
 
 test('it does not re-employ already employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
-    $originalEmployment = $wrestler->currentEmployment;
+    $originalEmployment = $wrestler->currentEmployment()->firstOrFail();
 
     expect($wrestler->isEmployed())->toBeTrue();
 
@@ -132,7 +132,7 @@ test('it does not re-employ already employed wrestler', function () {
 
     // Should still have only the original employment record
     expect($result->employments()->count())->toBe(1);
-    expect($result->currentEmployment->id)->toBe($originalEmployment->id);
+    expect($result->currentEmployment()->firstOrFail()->id)->toBe($originalEmployment->id);
 });
 
 test('it employs managers when wrestler gets employed', function () {
@@ -299,8 +299,8 @@ test('it preserves wrestler id and timestamps', function () {
     $result = UpdateAction::run($wrestler, $updateData);
 
     expect($result->id)->toBe($originalId);
-    expect($result->created_at->timestamp)->toBe($originalCreatedAt->timestamp);
-    expect($result->updated_at->timestamp)->toBeGreaterThanOrEqual($originalCreatedAt->timestamp);
+    expect(requiredDate($result->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp);
+    expect(requiredDate($result->updated_at)->timestamp)->toBeGreaterThanOrEqual(requiredDate($originalCreatedAt)->timestamp);
 });
 
 test('it handles null signature move', function () {

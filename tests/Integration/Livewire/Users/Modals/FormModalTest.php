@@ -171,7 +171,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.password_confirmation', 'password123')
             ->call('save');
 
-        $user = User::where('email', 'john@example.com')->first();
+        $user = User::where('email', 'john@example.com')->firstOrFail();
         expect($user)->not->toBeNull('User should be created but was not found');
         expect(Hash::check('password123', $user->password))->toBeTrue();
     });
@@ -330,7 +330,7 @@ describe('FormModal Role Management', function () {
 
         $component->assertHasNoErrors();
 
-        $user = User::where('email', 'john@example.com')->first();
+        $user = User::where('email', 'john@example.com')->firstOrFail();
         expect($user->role->value)->toBe('administrator');
     });
 

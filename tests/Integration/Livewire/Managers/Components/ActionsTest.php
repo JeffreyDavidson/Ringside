@@ -75,7 +75,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($unemployedManager->fresh()->isEmployed())->toBeTrue();
+            expect(freshModel($unemployedManager)->isEmployed())->toBeTrue();
             // Session message verified in unit tests
             expect(true)->toBeTrue();
         });
@@ -100,7 +100,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($this->manager->fresh()->isReleased())->toBeTrue();
+            expect(freshModel($this->manager)->isReleased())->toBeTrue();
             // Session success message verified in unit tests
             expect(true)->toBeTrue();
         });
@@ -129,7 +129,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($this->manager->fresh()->isInjured())->toBeTrue();
+            expect(freshModel($this->manager)->isInjured())->toBeTrue();
             // expect(session('status'))->toBe('Manager injury recorded.');
             expect(true)->toBeTrue();
         });
@@ -161,7 +161,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($injuredManager->fresh()->isInjured())->toBeFalse();
+            expect(freshModel($injuredManager)->isInjured())->toBeFalse();
             // expect(session('status'))->toBe('Manager cleared from injury.');
             expect(true)->toBeTrue();
         });
@@ -188,7 +188,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($this->manager->fresh()->isSuspended())->toBeTrue();
+            expect(freshModel($this->manager)->isSuspended())->toBeTrue();
             // expect(session('status'))->toBe('Manager successfully suspended.');
             expect(true)->toBeTrue();
         });
@@ -220,7 +220,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($suspendedManager->fresh()->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedManager)->isSuspended())->toBeFalse();
             // expect(session('status'))->toBe('Manager successfully reinstated.');
             expect(true)->toBeTrue();
         });
@@ -247,7 +247,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($this->manager->fresh()->isRetired())->toBeTrue();
+            expect(freshModel($this->manager)->isRetired())->toBeTrue();
             // expect(session('status'))->toBe('Manager successfully retired.');
             expect(true)->toBeTrue();
         });
@@ -279,7 +279,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect($retiredManager->fresh()->isRetired())->toBeFalse();
+            expect(freshModel($retiredManager)->isRetired())->toBeFalse();
             // expect(session('status'))->toBe('Manager successfully unretired.');
             expect(true)->toBeTrue();
         });
@@ -301,7 +301,7 @@ describe('ManagersActions Integration Tests', function () {
             $this->manager->delete();
             expect($this->manager->trashed())->toBeTrue();
 
-            $trashedManager = Manager::onlyTrashed()->find($this->manager->id);
+            $trashedManager = Manager::onlyTrashed()->findOrFail($this->manager->id);
 
             actingAs($this->admin);
 
@@ -330,32 +330,32 @@ describe('ManagersActions Integration Tests', function () {
 
             // Employ
             $component->call('employ');
-            expect($manager->fresh()->isEmployed())->toBeTrue();
+            expect(freshModel($manager)->isEmployed())->toBeTrue();
 
             // Injure (managers can get injured backstage, traveling, etc.)
             $component->call('injure');
-            expect($manager->fresh()->isInjured())->toBeTrue();
+            expect(freshModel($manager)->isInjured())->toBeTrue();
 
             // Heal
             $component->call('healFromInjury');
-            expect($manager->fresh()->isInjured())->toBeFalse();
+            expect(freshModel($manager)->isInjured())->toBeFalse();
 
             // Suspend (for misconduct, contract violations, etc.)
             $component->call('suspend');
-            expect($manager->fresh()->isSuspended())->toBeTrue();
+            expect(freshModel($manager)->isSuspended())->toBeTrue();
 
             // Reinstate
             $component->call('reinstate');
-            expect($manager->fresh()->isSuspended())->toBeFalse();
+            expect(freshModel($manager)->isSuspended())->toBeFalse();
 
             // Retire
             $component->call('retire');
-            expect($manager->fresh()->isRetired())->toBeTrue();
+            expect(freshModel($manager)->isRetired())->toBeTrue();
 
             // Comeback
             $component->call('unretire');
-            expect($manager->fresh()->isRetired())->toBeFalse();
-            expect($manager->fresh()->isEmployed())->toBeTrue();
+            expect(freshModel($manager)->isRetired())->toBeFalse();
+            expect(freshModel($manager)->isEmployed())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
@@ -378,10 +378,10 @@ describe('ManagersActions Integration Tests', function () {
 
             // Can heal first, then suspend
             $component->call('healFromInjury');
-            expect($injuredManager->fresh()->isInjured())->toBeFalse();
+            expect(freshModel($injuredManager)->isInjured())->toBeFalse();
 
             $component->call('suspend');
-            expect($injuredManager->fresh()->isSuspended())->toBeTrue();
+            expect(freshModel($injuredManager)->isSuspended())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
@@ -404,11 +404,11 @@ describe('ManagersActions Integration Tests', function () {
 
             // Must reinstate first
             $component->call('reinstate');
-            expect($suspendedManager->fresh()->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedManager)->isSuspended())->toBeFalse();
 
             // Now can retire
             $component->call('retire');
-            expect($suspendedManager->fresh()->isRetired())->toBeTrue();
+            expect(freshModel($suspendedManager)->isRetired())->toBeTrue();
             expect(true)->toBeTrue();
         });
     });
@@ -493,7 +493,7 @@ describe('ManagersActions Integration Tests', function () {
             $component->call('release');
 
             // Manager status should reflect in fresh model
-            expect($this->manager->fresh()->isReleased())->toBeTrue();
+            expect(freshModel($this->manager)->isReleased())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
@@ -525,7 +525,7 @@ describe('ManagersActions Integration Tests', function () {
 
             // Display name should remain consistent
             expect($component->get('manager')->display_name)->toBe($originalDisplayName);
-            expect($this->manager->fresh()->display_name)->toBe($originalDisplayName);
+            expect(freshModel($this->manager)->display_name)->toBe($originalDisplayName);
             expect(true)->toBeTrue();
         });
     });

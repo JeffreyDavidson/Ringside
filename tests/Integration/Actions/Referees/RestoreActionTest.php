@@ -86,20 +86,20 @@ test('it preserves referee data after restoration', function () {
     expect($referee->id)->toBe($originalId);
     expect($referee->first_name)->toBe('Earl');
     expect($referee->last_name)->toBe('Hebner');
-    expect($referee->created_at->timestamp)->toBe($originalCreatedAt->timestamp);
+    expect(requiredDate($referee->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp);
     expect($referee->deleted_at)->toBeNull();
 });
 
 test('it does not automatically restore employment relationships', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     // End employment and soft delete referee
     $employment->update(['ended_at' => now()]);
     $referee->delete();
 
     expect($referee->trashed())->toBeTrue();
-    expect($employment->fresh()->ended_at)->not->toBeNull();
+    expect(freshModel($employment)->ended_at)->not->toBeNull();
 
     RestoreAction::run($referee);
 
@@ -147,7 +147,7 @@ test('it preserves historical relationships', function () {
 
 test('it allows referee to be re-employed after restoration', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     // End employment and delete referee
     $employment->update(['ended_at' => now()]);

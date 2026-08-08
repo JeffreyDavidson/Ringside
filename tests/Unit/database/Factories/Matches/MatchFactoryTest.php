@@ -143,7 +143,7 @@ describe('MatchFactory', function () {
             $eventMatch = EventMatch::factory()->titleMatch($title)->create();
 
             expect($eventMatch->titles)->toHaveCount(1);
-            expect($eventMatch->titles->first()->id)->toBe($title->id);
+            expect($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
             expect($eventMatch->competitors)->not->toBeEmpty();
             expect($eventMatch->result)->not->toBeNull();
         });
@@ -153,10 +153,10 @@ describe('MatchFactory', function () {
             $eventMatch = EventMatch::factory()->titleDefense($title)->create();
 
             expect($eventMatch->titles)->toHaveCount(1);
-            expect($eventMatch->titles->first()->id)->toBe($title->id);
+            expect($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
 
             // Should have a championship record
-            $championship = TitleChampionship::where('title_id', $title->id)->first();
+            $championship = TitleChampionship::where('title_id', $title->id)->firstOrFail();
             expect($championship)->not->toBeNull();
             expect($championship->champion_type)->toBe(Wrestler::class);
 
@@ -173,10 +173,10 @@ describe('MatchFactory', function () {
             $eventMatch = EventMatch::factory()->titleDefense($title)->create();
 
             expect($eventMatch->titles)->toHaveCount(1);
-            expect($eventMatch->titles->first()->id)->toBe($title->id);
+            expect($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
 
             // Should have a championship record
-            $championship = TitleChampionship::where('title_id', $title->id)->first();
+            $championship = TitleChampionship::where('title_id', $title->id)->firstOrFail();
             expect($championship)->not->toBeNull();
             expect($championship->champion_type)->toBe(TagTeam::class);
 
@@ -271,7 +271,7 @@ describe('MatchFactory', function () {
 
             // Assert
             expect($eventMatch->referees)->toHaveCount(1);
-            expect($eventMatch->referees->first()->id)->toBe($referee->id);
+            expect($eventMatch->referees->firstOrFail()->id)->toBe($referee->id);
         });
 
         test('creates match with complete results including decision', function () {
@@ -321,8 +321,8 @@ describe('MatchFactory', function () {
 
             expect($eventMatch->competitors)->toHaveCount(2);
 
-            $competitor1 = $eventMatch->competitors->where('competitor_id', $wrestler1->id)->first();
-            $competitor2 = $eventMatch->competitors->where('competitor_id', $wrestler2->id)->first();
+            $competitor1 = $eventMatch->competitors->where('competitor_id', $wrestler1->id)->firstOrFail();
+            $competitor2 = $eventMatch->competitors->where('competitor_id', $wrestler2->id)->firstOrFail();
 
             expect($competitor1)->not->toBeNull();
             expect($competitor2)->not->toBeNull();

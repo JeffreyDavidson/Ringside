@@ -58,7 +58,7 @@ describe('StableWrestler Pivot Model', function () {
             expect($this->wrestler->previousStables()->count())->toBe(0);
 
             // Verify pivot data is correct
-            $pivotData = $this->wrestler->stables()->first()->pivot;
+            $pivotData = $this->wrestler->stables()->firstOrFail()->pivot;
             expect(Carbon::parse($pivotData->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
             expect($pivotData->left_at)->toBeNull();
             expect($pivotData->wrestler_id)->toBe($this->wrestler->id);
@@ -83,8 +83,8 @@ describe('StableWrestler Pivot Model', function () {
             ]);
 
             // Verify all relationships exist
-            expect($this->wrestler->currentStable->id)->toBe($this->stable->id);
-            expect($this->secondWrestler->currentStable->id)->toBe($this->stable->id);
+            expect($this->wrestler->currentStable)->not->toBeNull()->id->toBe($this->stable->id);
+            expect($this->secondWrestler->currentStable)->not->toBeNull()->id->toBe($this->stable->id);
 
             // Verify stable has both wrestlers
             expect($this->stable->currentWrestlers()->count())->toBe(2);
@@ -122,13 +122,13 @@ describe('StableWrestler Pivot Model', function () {
             expect($this->wrestler->previousStables()->count())->toBe(1);
 
             // Verify current stable is correct
-            $currentStable = $this->wrestler->currentStable;
+            $currentStable = requiredModel($this->wrestler->currentStable);
             expect($currentStable->id)->toBe($this->secondStable->id);
             expect(Carbon::parse(relatedPivotAttribute($currentStable, 'joined_at'))->format('Y-m-d H:i:s'))->toBe($secondPeriodStart->format('Y-m-d H:i:s'));
             expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
 
             // Verify previous stable is correct
-            $previousStable = $this->wrestler->previousStables()->first();
+            $previousStable = $this->wrestler->previousStables()->firstOrFail();
             expect($previousStable->id)->toBe($this->stable->id);
             expect(Carbon::parse($previousStable->pivot->joined_at)->format('Y-m-d H:i:s'))->toBe($firstPeriodStart->format('Y-m-d H:i:s'));
             expect(Carbon::parse($previousStable->pivot->left_at)->format('Y-m-d H:i:s'))->toBe($firstPeriodEnd->format('Y-m-d H:i:s'));
@@ -159,7 +159,7 @@ describe('StableWrestler Pivot Model', function () {
             expect($this->wrestler->previousStables()->count())->toBe(1);
 
             // Verify pivot data is updated
-            $previousStable = $this->wrestler->previousStables()->first();
+            $previousStable = $this->wrestler->previousStables()->firstOrFail();
             expect(Carbon::parse($previousStable->pivot->left_at)->format('Y-m-d H:i:s'))->toBe($leaveDate->format('Y-m-d H:i:s'));
         });
 
@@ -189,9 +189,8 @@ describe('StableWrestler Pivot Model', function () {
 
             $pivotRecord = StableWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('stable_id', $this->stable->id)
-                ->first();
+                ->firstOrFail();
 
-            expect($pivotRecord)->not()->toBeNull();
             expect($pivotRecord->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotRecord->stable_id)->toBe($this->stable->id);
             expect($pivotRecord->joined_at)->toBeInstanceOf(Carbon::class);
@@ -216,12 +215,12 @@ describe('StableWrestler Pivot Model', function () {
 
             $wrestlerPivot = StableWrestler::where('wrestler_id', $this->wrestler->id)
                 ->where('stable_id', $this->stable->id)
-                ->first();
+                ->firstOrFail();
 
             expect($wrestlerPivot->joined_at)->toBeInstanceOf(Carbon::class);
             expect($wrestlerPivot->left_at)->toBeInstanceOf(Carbon::class);
             expect($wrestlerPivot->joined_at->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
-            expect($wrestlerPivot->left_at->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($wrestlerPivot->left_at)->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -243,9 +242,8 @@ describe('StableWrestler Pivot Model', function () {
         });
 
         test('current stable query returns only active relationship', function () {
-            $currentStable = $this->wrestler->currentStable;
+            $currentStable = requiredModel($this->wrestler->currentStable);
 
-            expect($currentStable)->not()->toBeNull();
             expect($currentStable->id)->toBe($this->secondStable->id);
             expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
         });
@@ -254,8 +252,8 @@ describe('StableWrestler Pivot Model', function () {
             $previousStables = $this->wrestler->previousStables()->get();
 
             expect($previousStables)->toHaveCount(1);
-            expect($previousStables->first()->id)->toBe($this->stable->id);
-            expect(relatedPivotAttribute($previousStables->first(), 'left_at'))->not()->toBeNull();
+            expect($previousStables->firstOrFail()->id)->toBe($this->stable->id);
+            expect(relatedPivotAttribute($previousStables->firstOrFail(), 'left_at'))->not()->toBeNull();
         });
 
         test('all stables query returns complete membership history', function () {

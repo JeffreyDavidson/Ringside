@@ -56,7 +56,7 @@ describe('StableTagTeam Pivot Model', function () {
             expect($this->tagTeam->previousStables()->count())->toBe(0);
 
             // Verify pivot data is correct
-            $pivotData = $this->tagTeam->stables()->first()->pivot;
+            $pivotData = $this->tagTeam->stables()->firstOrFail()->pivot;
             expect(Carbon::parse($pivotData->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
             expect($pivotData->left_at)->toBeNull();
             expect($pivotData->tag_team_id)->toBe($this->tagTeam->id);
@@ -81,8 +81,8 @@ describe('StableTagTeam Pivot Model', function () {
             ]);
 
             // Verify all relationships exist
-            expect($this->tagTeam->currentStable->id)->toBe($this->stable->id);
-            expect($this->secondTagTeam->currentStable->id)->toBe($this->stable->id);
+            expect($this->tagTeam->currentStable)->not->toBeNull()->id->toBe($this->stable->id);
+            expect($this->secondTagTeam->currentStable)->not->toBeNull()->id->toBe($this->stable->id);
 
             // Verify stable has both tag teams
             expect($this->stable->currentTagTeams()->count())->toBe(2);
@@ -120,13 +120,13 @@ describe('StableTagTeam Pivot Model', function () {
             expect($this->tagTeam->previousStables()->count())->toBe(1);
 
             // Verify current stable is correct
-            $currentStable = $this->tagTeam->currentStable;
+            $currentStable = requiredModel($this->tagTeam->currentStable);
             expect($currentStable->id)->toBe($this->secondStable->id);
             expect(Carbon::parse(relatedPivotAttribute($currentStable, 'joined_at'))->format('Y-m-d H:i:s'))->toBe($secondPeriodStart->format('Y-m-d H:i:s'));
             expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
 
             // Verify previous stable is correct
-            $previousStable = $this->tagTeam->previousStables()->first();
+            $previousStable = $this->tagTeam->previousStables()->firstOrFail();
             expect($previousStable->id)->toBe($this->stable->id);
             expect(Carbon::parse($previousStable->pivot->joined_at)->format('Y-m-d H:i:s'))->toBe($firstPeriodStart->format('Y-m-d H:i:s'));
             expect(Carbon::parse($previousStable->pivot->left_at)->format('Y-m-d H:i:s'))->toBe($firstPeriodEnd->format('Y-m-d H:i:s'));
@@ -157,7 +157,7 @@ describe('StableTagTeam Pivot Model', function () {
             expect($this->tagTeam->previousStables()->count())->toBe(1);
 
             // Verify pivot data is updated
-            $previousStable = $this->tagTeam->previousStables()->first();
+            $previousStable = $this->tagTeam->previousStables()->firstOrFail();
             expect(Carbon::parse($previousStable->pivot->left_at)->format('Y-m-d H:i:s'))->toBe($leaveDate->format('Y-m-d H:i:s'));
         });
 
@@ -187,9 +187,8 @@ describe('StableTagTeam Pivot Model', function () {
 
             $pivotRecord = StableTagTeam::where('tag_team_id', $this->tagTeam->id)
                 ->where('stable_id', $this->stable->id)
-                ->first();
+                ->firstOrFail();
 
-            expect($pivotRecord)->not()->toBeNull();
             expect($pivotRecord->tag_team_id)->toBe($this->tagTeam->id);
             expect($pivotRecord->stable_id)->toBe($this->stable->id);
             expect($pivotRecord->joined_at)->toBeInstanceOf(Carbon::class);
@@ -214,12 +213,12 @@ describe('StableTagTeam Pivot Model', function () {
 
             $tagTeamPivot = StableTagTeam::where('tag_team_id', $this->tagTeam->id)
                 ->where('stable_id', $this->stable->id)
-                ->first();
+                ->firstOrFail();
 
             expect($tagTeamPivot->joined_at)->toBeInstanceOf(Carbon::class);
             expect($tagTeamPivot->left_at)->toBeInstanceOf(Carbon::class);
             expect($tagTeamPivot->joined_at->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
-            expect($tagTeamPivot->left_at->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($tagTeamPivot->left_at)->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -241,9 +240,8 @@ describe('StableTagTeam Pivot Model', function () {
         });
 
         test('current stable query returns only active relationship', function () {
-            $currentStable = $this->tagTeam->currentStable;
+            $currentStable = requiredModel($this->tagTeam->currentStable);
 
-            expect($currentStable)->not()->toBeNull();
             expect($currentStable->id)->toBe($this->secondStable->id);
             expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
         });
@@ -252,8 +250,8 @@ describe('StableTagTeam Pivot Model', function () {
             $previousStables = $this->tagTeam->previousStables()->get();
 
             expect($previousStables)->toHaveCount(1);
-            expect($previousStables->first()->id)->toBe($this->stable->id);
-            expect(relatedPivotAttribute($previousStables->first(), 'left_at'))->not()->toBeNull();
+            expect($previousStables->firstOrFail()->id)->toBe($this->stable->id);
+            expect(relatedPivotAttribute($previousStables->firstOrFail(), 'left_at'))->not()->toBeNull();
         });
 
         test('all stables query returns complete membership history', function () {

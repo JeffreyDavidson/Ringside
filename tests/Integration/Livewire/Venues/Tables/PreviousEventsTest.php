@@ -149,8 +149,8 @@ describe('PreviousEventsTable Integration Tests', function () {
             $table->venueId = $this->venue->id;
             $events = $table->builder()->get();
 
-            expect($events->first()->name)->toBe('Upcoming Wrestling Show');
-            expect($events->last()->name)->toBe('Classic Wrestling Event');
+            expect($events->firstOrFail()->name)->toBe('Upcoming Wrestling Show');
+            expect($events->reverse()->firstOrFail()->name)->toBe('Classic Wrestling Event');
         });
 
         test('includes both past and future events in chronological order', function () {
@@ -198,7 +198,7 @@ describe('PreviousEventsTable Integration Tests', function () {
             $component->assertOk();
 
             // Events should display dates in Y-m-d format
-            $expectedDate = $this->recentEvent->date->format('Y-m-d');
+            $expectedDate = requiredDate($this->recentEvent->date)->format('Y-m-d');
             $component->assertSee($expectedDate);
         });
     });
@@ -298,7 +298,7 @@ describe('PreviousEventsTable Integration Tests', function () {
             $events = $table->builder()->get();
 
             expect($events->count())->toBe(3); // Should show 3 events for this venue
-            expect($events->pluck('venue_id')->unique()->first())->toBe($this->venue->id);
+            expect($events->pluck('venue_id')->unique()->firstOrFail())->toBe($this->venue->id);
         });
     });
 

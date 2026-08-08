@@ -122,7 +122,7 @@ describe('Referees FormModal Tests', function () {
 
             expect(Referee::where('first_name', 'Mike')->where('last_name', 'Johnson')->exists())->toBeTrue();
 
-            $referee = Referee::where('first_name', 'Mike')->where('last_name', 'Johnson')->first();
+            $referee = Referee::where('first_name', 'Mike')->where('last_name', 'Johnson')->firstOrFail();
             expect($referee->first_name)->toBe('Mike');
             expect($referee->last_name)->toBe('Johnson');
         });
@@ -135,8 +135,7 @@ describe('Referees FormModal Tests', function () {
                 ->call('save')
                 ->assertHasNoErrors();
 
-            $referee = Referee::where('first_name', 'Simple')->where('last_name', 'Referee')->first();
-            expect($referee)->not()->toBeNull();
+            $referee = Referee::where('first_name', 'Simple')->where('last_name', 'Referee')->firstOrFail();
             expect($referee->firstEmployment)->toBeNull();
         });
 
@@ -384,8 +383,7 @@ describe('Referees FormModal Tests', function () {
                 ->call('save')
                 ->assertHasNoErrors();
 
-            $referee = Referee::where('first_name', 'Employment')->where('last_name', 'Test')->first();
-            expect($referee)->not()->toBeNull();
+            $referee = Referee::where('first_name', 'Employment')->where('last_name', 'Test')->firstOrFail();
             // Note: Employment creation is not handled by the current RefereeForm implementation
         });
 

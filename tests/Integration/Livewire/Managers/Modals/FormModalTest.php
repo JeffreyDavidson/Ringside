@@ -132,7 +132,7 @@ describe('Managers FormModal Tests', function () {
 
             expect(Manager::where('first_name', 'Mike')->where('last_name', 'Johnson')->exists())->toBeTrue();
 
-            $manager = Manager::where('first_name', 'Mike')->where('last_name', 'Johnson')->first();
+            $manager = Manager::where('first_name', 'Mike')->where('last_name', 'Johnson')->firstOrFail();
             expect($manager->first_name)->toBe('Mike');
             expect($manager->last_name)->toBe('Johnson');
         });
@@ -145,8 +145,7 @@ describe('Managers FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $manager = Manager::where('first_name', 'Simple')->where('last_name', 'Manager')->first();
-            expect($manager)->not()->toBeNull();
+            $manager = Manager::where('first_name', 'Simple')->where('last_name', 'Manager')->firstOrFail();
             expect($manager->firstEmployment)->toBeNull();
         });
 
@@ -167,8 +166,7 @@ describe('Managers FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $manager = Manager::where('first_name', "O'Connor")->where('last_name', 'Van Der Berg')->first();
-            expect($manager)->not()->toBeNull();
+            $manager = Manager::where('first_name', "O'Connor")->where('last_name', 'Van Der Berg')->firstOrFail();
             expect($manager->first_name)->toBe("O'Connor");
             expect($manager->last_name)->toBe('Van Der Berg');
         });
@@ -304,9 +302,8 @@ describe('Managers FormModal Tests', function () {
 
                 $manager = Manager::where('first_name', $testCase['first'])
                     ->where('last_name', $testCase['last'])
-                    ->first();
+                    ->firstOrFail();
 
-                expect($manager)->not()->toBeNull("Failed for test case {$index}: {$testCase['first']} {$testCase['last']}");
             }
         });
 
@@ -344,7 +341,6 @@ describe('Managers FormModal Tests', function () {
             if (! $manager) {
                 // If trimming is not implemented, look for the untrimmed version
                 $manager = Manager::where('first_name', '  Trimmed  ')->first();
-                expect($manager)->not()->toBeNull();
             }
         });
     });
@@ -408,9 +404,9 @@ describe('Managers FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $manager = Manager::where('first_name', 'Employment')->where('last_name', 'Test')->first();
+            $manager = Manager::where('first_name', 'Employment')->where('last_name', 'Test')->firstOrFail();
             expect($manager->firstEmployment)->not()->toBeNull();
-            expect($manager->firstEmployment->started_at->toDateString())->toBe('2024-01-01');
+            expect(requiredDate(requiredModel($manager->firstEmployment)->started_at)->toDateString())->toBe('2024-01-01');
         });
 
         test('does not create employment record when date not provided', function () {
@@ -421,7 +417,7 @@ describe('Managers FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $manager = Manager::where('first_name', 'No Employment')->where('last_name', 'Test')->first();
+            $manager = Manager::where('first_name', 'No Employment')->where('last_name', 'Test')->firstOrFail();
             expect($manager->firstEmployment)->toBeNull();
         });
 
@@ -464,9 +460,8 @@ describe('Managers FormModal Tests', function () {
 
                 $manager = Manager::where('first_name', $name['first'])
                     ->where('last_name', $name['last'])
-                    ->first();
+                    ->firstOrFail();
 
-                expect($manager)->not()->toBeNull();
             }
         });
 

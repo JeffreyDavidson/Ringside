@@ -48,7 +48,7 @@ describe('wrestler factory states', function () {
 
         $wrestler->load('currentEmployment');
         expect($wrestler->currentEmployment)->not->toBeNull();
-        expect($wrestler->currentEmployment->ended_at)->toBeNull();
+        expect($wrestler->currentEmployment()->firstOrFail()->ended_at)->toBeNull();
     });
 
     test('wrestler factory can create suspended wrestlers', function () {
@@ -56,7 +56,7 @@ describe('wrestler factory states', function () {
 
         $wrestler->load('currentSuspension');
         expect($wrestler->currentSuspension)->not->toBeNull();
-        expect($wrestler->currentSuspension->ended_at)->toBeNull();
+        expect($wrestler->currentSuspension()->firstOrFail()->ended_at)->toBeNull();
     });
 
     test('wrestler factory can create retired wrestlers', function () {

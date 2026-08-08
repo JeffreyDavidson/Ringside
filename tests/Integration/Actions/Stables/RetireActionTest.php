@@ -55,8 +55,8 @@ test('it records a future retirement date while ending current operations now', 
     $stable->refresh();
 
     expect($stable->isRetired())->toBeTrue();
-    expect($stable->currentRetirement->started_at->toDateTimeString())->toBe($datetime->toDateTimeString());
-    expect($stable->activityPeriods()->latest('id')->first()->ended_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect(requiredDate($stable->currentRetirement()->firstOrFail()->started_at)->toDateTimeString())->toBe($datetime->toDateTimeString());
+    expect(requiredDate($stable->activityPeriods()->latest('id')->firstOrFail()->ended_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 
     foreach ($stable->previousWrestlers as $wrestler) {
         expect(Carbon::parse(relatedPivotAttribute($wrestler, 'left_at'))->toDateTimeString())

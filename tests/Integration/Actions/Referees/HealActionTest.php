@@ -14,7 +14,7 @@ beforeEach(function () {
 
 test('it heals an injured referee', function () {
     $referee = Referee::factory()->employed()->injured()->create();
-    $injury = $referee->currentInjury;
+    $injury = $referee->currentInjury()->firstOrFail();
 
     expect($referee->isInjured())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
@@ -35,7 +35,7 @@ test('it heals an injured referee', function () {
 
 test('it heals referee with specific recovery date', function () {
     $referee = Referee::factory()->employed()->injured()->create();
-    $injury = $referee->currentInjury;
+    $injury = $referee->currentInjury()->firstOrFail();
     $recoveryDate = now()->subDays(2);
 
     HealAction::run($referee, $recoveryDate);
@@ -44,7 +44,7 @@ test('it heals referee with specific recovery date', function () {
     $injury->refresh();
 
     expect($referee->isInjured())->toBeFalse();
-    expect($injury->ended_at->toDateTimeString())->toBe($recoveryDate->toDateTimeString());
+    expect(requiredDate($injury->ended_at)->toDateTimeString())->toBe($recoveryDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_injuries', [
         'id' => $injury->id,
@@ -102,7 +102,7 @@ test('it throws exception when referee cannot be healed', function () {
 
 test('it maintains referee employment status after healing', function () {
     $referee = Referee::factory()->employed()->injured()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isInjured())->toBeTrue();
@@ -120,7 +120,7 @@ test('it maintains referee employment status after healing', function () {
 
 test('it preserves injury history', function () {
     $referee = Referee::factory()->employed()->injured()->create();
-    $injury = $referee->currentInjury;
+    $injury = $referee->currentInjury()->firstOrFail();
     $originalStartedAt = $injury->started_at;
 
     HealAction::run($referee);

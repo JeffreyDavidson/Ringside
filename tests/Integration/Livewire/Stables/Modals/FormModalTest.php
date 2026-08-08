@@ -115,9 +115,9 @@ describe('FormModal Create Operations', function () {
         ]);
 
         // Check activity period was created correctly
-        $stable = Stable::where('name', 'The New World Order')->first();
+        $stable = Stable::where('name', 'The New World Order')->firstOrFail();
         expect($stable->firstActivityPeriod)->not()->toBeNull();
-        expect($stable->firstActivityPeriod->started_at->toDateString())->toBe('2024-01-01');
+        expect(requiredModel($stable->firstActivityPeriod)->started_at->toDateString())->toBe('2024-01-01');
     });
 
     it('validates required fields when creating', function () {
@@ -180,10 +180,10 @@ describe('FormModal Create Operations', function () {
         ]);
 
         // Check activity period was created correctly
-        $stable = Stable::where('name', 'Test Stable')->first();
+        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
         expect($stable->firstActivityPeriod)->not()->toBeNull();
-        expect($stable->firstActivityPeriod->started_at->toDateString())->toBe('2024-01-01');
-        expect($stable->firstActivityPeriod->ended_at->toDateString())->toBe('2024-12-31');
+        expect(requiredDate(requiredModel($stable->firstActivityPeriod)->started_at)->toDateString())->toBe('2024-01-01');
+        expect(requiredDate(requiredModel($stable->firstActivityPeriod)->ended_at)->toDateString())->toBe('2024-12-31');
     });
 });
 
@@ -209,7 +209,7 @@ describe('FormModal Edit Operations', function () {
         ]);
 
         // Check activity period was updated
-        expect($stable->fresh()->firstActivityPeriod->started_at->toDateString())->toBe('2024-01-02');
+        expect(requiredModel(freshModel($stable)->firstActivityPeriod)->started_at->toDateString())->toBe('2024-01-02');
     });
 
     it('loads existing stable data in edit mode', function () {
@@ -280,8 +280,8 @@ describe('FormModal Activity Period Management', function () {
 
         $component->assertHasNoErrors();
 
-        $stable = Stable::where('name', 'Test Stable')->first();
-        expect($stable->firstActivityPeriod->started_at)->toBeInstanceOf(Carbon::class);
+        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
+        expect($stable->firstActivityPeriod)->not->toBeNull()->started_at->toBeInstanceOf(Carbon::class);
     });
 
     it('can set ended_at for disbanded stables', function () {
@@ -294,8 +294,8 @@ describe('FormModal Activity Period Management', function () {
 
         $component->assertHasNoErrors();
 
-        $stable = Stable::where('name', 'Disbanded Stable')->first();
-        expect($stable->firstActivityPeriod->ended_at)->toBeInstanceOf(Carbon::class);
+        $stable = Stable::where('name', 'Disbanded Stable')->firstOrFail();
+        expect($stable->firstActivityPeriod)->not->toBeNull()->ended_at->toBeInstanceOf(Carbon::class);
     });
 
     it('validates ended_at is not before started_at', function () {
@@ -324,7 +324,7 @@ describe('FormModal Member Management', function () {
 
         $component->assertHasNoErrors();
 
-        $stable = Stable::where('name', 'Test Stable')->first();
+        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
         $stable->refresh();
         expect($stable->wrestlers->pluck('id'))->toContain($wrestler1->id);
         expect($stable->wrestlers->pluck('id'))->toContain($wrestler2->id);
@@ -343,7 +343,7 @@ describe('FormModal Member Management', function () {
 
         $component->assertHasNoErrors();
 
-        $stable = Stable::where('name', 'Test Stable')->first();
+        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
         $stable->refresh();
         expect($stable->tagTeams->pluck('id'))->toContain($tagTeam1->id);
         expect($stable->tagTeams->pluck('id'))->toContain($tagTeam2->id);

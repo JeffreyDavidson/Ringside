@@ -59,7 +59,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($unemployedWrestler->fresh()->isEmployed())->toBeTrue();
+            expect(freshModel($unemployedWrestler)->isEmployed())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler successfully employed.');
             expect(true)->toBeTrue();
         });
@@ -84,7 +84,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($this->wrestler->fresh()->isReleased())->toBeTrue();
+            expect(freshModel($this->wrestler)->isReleased())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler successfully released.');
             expect(true)->toBeTrue();
         });
@@ -113,7 +113,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($this->wrestler->fresh()->isInjured())->toBeTrue();
+            expect(freshModel($this->wrestler)->isInjured())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler injury recorded.');
             expect(true)->toBeTrue();
         });
@@ -142,7 +142,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($injuredWrestler->fresh()->isInjured())->toBeFalse();
+            expect(freshModel($injuredWrestler)->isInjured())->toBeFalse();
             // expect(session('status'))->toBe('Wrestler cleared from injury.');
             expect(true)->toBeTrue();
         });
@@ -169,7 +169,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($this->wrestler->fresh()->isSuspended())->toBeTrue();
+            expect(freshModel($this->wrestler)->isSuspended())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler successfully suspended.');
             expect(true)->toBeTrue();
         });
@@ -198,7 +198,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($suspendedWrestler->fresh()->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedWrestler)->isSuspended())->toBeFalse();
             // expect(session('status'))->toBe('Wrestler successfully reinstated.');
             expect(true)->toBeTrue();
         });
@@ -225,7 +225,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($this->wrestler->fresh()->isRetired())->toBeTrue();
+            expect(freshModel($this->wrestler)->isRetired())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler successfully retired.');
             expect(true)->toBeTrue();
         });
@@ -254,7 +254,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect($retiredWrestler->fresh()->isRetired())->toBeFalse();
+            expect(freshModel($retiredWrestler)->isRetired())->toBeFalse();
             // expect(session('status'))->toBe('Wrestler successfully unretired.');
             expect(true)->toBeTrue();
         });
@@ -276,7 +276,7 @@ describe('WrestlersActions Integration Tests', function () {
             $this->wrestler->delete();
             expect($this->wrestler->trashed())->toBeTrue();
 
-            $trashedWrestler = Wrestler::onlyTrashed()->find($this->wrestler->id);
+            $trashedWrestler = Wrestler::onlyTrashed()->findOrFail($this->wrestler->id);
 
             \Pest\Laravel\actingAs($this->admin);
 
@@ -302,31 +302,31 @@ describe('WrestlersActions Integration Tests', function () {
 
             // Employ
             $component->call('employ');
-            expect($wrestler->fresh()->isEmployed())->toBeTrue();
+            expect(freshModel($wrestler)->isEmployed())->toBeTrue();
 
             // Injure
             $component->call('injure');
-            expect($wrestler->fresh()->isInjured())->toBeTrue();
+            expect(freshModel($wrestler)->isInjured())->toBeTrue();
 
             // Heal
             $component->call('healFromInjury');
-            expect($wrestler->fresh()->isInjured())->toBeFalse();
+            expect(freshModel($wrestler)->isInjured())->toBeFalse();
 
             // Suspend
             $component->call('suspend');
-            expect($wrestler->fresh()->isSuspended())->toBeTrue();
+            expect(freshModel($wrestler)->isSuspended())->toBeTrue();
 
             // Reinstate
             $component->call('reinstate');
-            expect($wrestler->fresh()->isSuspended())->toBeFalse();
+            expect(freshModel($wrestler)->isSuspended())->toBeFalse();
 
             // Retire
             $component->call('retire');
-            expect($wrestler->fresh()->isRetired())->toBeTrue();
+            expect(freshModel($wrestler)->isRetired())->toBeTrue();
 
             // Comeback
             $component->call('unretire');
-            expect($wrestler->fresh()->isRetired())->toBeFalse();
+            expect(freshModel($wrestler)->isRetired())->toBeFalse();
             expect(true)->toBeTrue();
         });
 
@@ -348,7 +348,7 @@ describe('WrestlersActions Integration Tests', function () {
 
             // Can heal injured wrestler
             $component->call('healFromInjury');
-            expect($injuredWrestler->fresh()->isInjured())->toBeFalse();
+            expect(freshModel($injuredWrestler)->isInjured())->toBeFalse();
             expect(true)->toBeTrue();
         });
     });
@@ -433,7 +433,7 @@ describe('WrestlersActions Integration Tests', function () {
             $component->call('release');
 
             // Wrestler status should reflect in fresh model
-            expect($this->wrestler->fresh()->isReleased())->toBeTrue();
+            expect(freshModel($this->wrestler)->isReleased())->toBeTrue();
             expect(true)->toBeTrue();
         });
 

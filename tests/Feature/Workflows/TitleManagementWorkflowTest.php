@@ -52,7 +52,7 @@ describe('Title Creation and Setup Workflow', function () {
         // Then: Title should be created in database
         expect(Title::where('name', 'WWE Championship Title')->exists())->toBeTrue();
 
-        $title = Title::where('name', 'WWE Championship Title')->first();
+        $title = Title::where('name', 'WWE Championship Title')->firstOrFail();
         expect($title->name)->toBe('WWE Championship Title');
 
         // And: Should appear in the titles table
@@ -103,7 +103,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be active (check after component execution)
-        expect($title->fresh()->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
 
         // When: Pulling (deactivating) the title
         actingAs($admin);
@@ -113,7 +113,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be inactive
-        expect($title->fresh()->isCurrentlyActive())->toBeFalse();
+        expect(freshModel($title)->isCurrentlyActive())->toBeFalse();
 
         // When: Reinstating the title
         actingAs($admin);
@@ -123,7 +123,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be active again
-        expect($title->fresh()->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
 
         // When: Retiring the title
         actingAs($admin);
@@ -133,7 +133,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be retired
-        expect($title->fresh()->isRetired())->toBeTrue();
+        expect(freshModel($title)->isRetired())->toBeTrue();
 
         // When: Unretiring the title
         actingAs($admin);
@@ -143,7 +143,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should no longer be retired
-        expect($title->fresh()->isRetired())->toBeFalse();
+        expect(freshModel($title)->isRetired())->toBeFalse();
     });
 });
 
@@ -290,7 +290,7 @@ describe('Title Deletion and Restoration Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be soft deleted
-        expect($title->fresh()->trashed())->toBeTrue();
+        expect(freshModel($title)->trashed())->toBeTrue();
         expect(Title::onlyTrashed()->find($title->id))->not->toBeNull();
 
         // When: Restoring the title
@@ -302,7 +302,7 @@ describe('Title Deletion and Restoration Workflow', function () {
 
         // Then: Title should be restored
         expect($title->fresh())->not->toBeNull();
-        expect($title->fresh()->name)->toBe('Test Championship Title');
+        expect(freshModel($title)->name)->toBe('Test Championship Title');
     });
 });
 
@@ -327,7 +327,7 @@ describe('Title Business Rules Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be active
-        expect($title->fresh()->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
 
         // When: Now pulling the active title (should succeed)
         actingAs($admin);
@@ -337,6 +337,6 @@ describe('Title Business Rules Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be inactive
-        expect($title->fresh()->isCurrentlyActive())->toBeFalse();
+        expect(freshModel($title)->isCurrentlyActive())->toBeFalse();
     });
 });

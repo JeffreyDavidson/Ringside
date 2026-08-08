@@ -97,9 +97,8 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify employment record was created
-    $employment = $tagTeam->currentEmployment;
-    expect($employment)->not()->toBeNull();
-    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $employment = $tagTeam->currentEmployment()->firstOrFail();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });
 
@@ -116,9 +115,8 @@ test('it creates new employment period', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // New employment should be current and active
-    $currentEmployment = $tagTeam->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($currentEmployment->ended_at)->toBeNull();
 });
 
@@ -158,9 +156,8 @@ test('it handles multiple employment history correctly', function () {
     expect($tagTeam->employments()->count())->toBe(3);
 
     // New employment should be current
-    $currentEmployment = $tagTeam->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it preserves employment history during new employment', function () {
@@ -209,7 +206,6 @@ test('it handles tag team with complex status history', function () {
     expect($tagTeam->retirements()->count())->toBe(1); // 1 historical
 
     // New employment should be current
-    $currentEmployment = $tagTeam->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });

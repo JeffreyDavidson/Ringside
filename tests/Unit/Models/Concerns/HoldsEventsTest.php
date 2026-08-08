@@ -104,7 +104,7 @@ describe('HoldsEvents Trait Unit Tests', function () {
             $venue->load('previousEvents');
 
             expect($venue->previousEvents)->toHaveCount(1);
-            expect($venue->previousEvents->first()->name)->toBe('Past Event');
+            expect($venue->previousEvents->firstOrFail()->name)->toBe('Past Event');
             expect($venue->previousEvents->pluck('name'))->not->toContain('Future Event');
         });
 
@@ -136,7 +136,7 @@ describe('HoldsEvents Trait Unit Tests', function () {
             $venue->load('previousEvents');
 
             expect($venue->previousEvents)->toHaveCount(1);
-            expect($venue->previousEvents->first()->name)->toBe('Past Event');
+            expect($venue->previousEvents->firstOrFail()->name)->toBe('Past Event');
         });
     });
 

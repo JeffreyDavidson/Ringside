@@ -64,8 +64,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     $manager = Manager::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
-    $currentRetirement = $manager->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
+    $currentRetirement = $manager->currentRetirement()->firstOrFail();
     expect($manager->currentEmployment)->toBeNull();
 
     UnretireAction::run($manager);
@@ -102,7 +101,7 @@ test('it prevents unretiring non-retired manager', function () {
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->retired()->create();
-    $originalRetirementId = $manager->currentRetirement->id;
+    $originalRetirementId = $manager->currentRetirement()->firstOrFail()->id;
 
     UnretireAction::run($manager);
 
@@ -120,9 +119,8 @@ test('it handles database transactions correctly', function () {
     ]);
 
     // Verify new employment record was created
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
-    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $employment = $manager->currentEmployment()->firstOrFail();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });
 
@@ -139,9 +137,8 @@ test('it creates new employment period during unretirement', function () {
     expect($manager->isEmployed())->toBeTrue();
 
     // New employment should be current and active
-    $currentEmployment = $manager->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentEmployment = $manager->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($currentEmployment->ended_at)->toBeNull();
 });
 
@@ -234,7 +231,6 @@ test('it handles manager with complex status history', function () {
     expect($manager->retirements()->count())->toBe(2); // Both historical now
 
     // New employment should be current
-    $currentEmployment = $manager->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentEmployment = $manager->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });

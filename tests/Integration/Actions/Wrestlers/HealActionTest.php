@@ -48,8 +48,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
-    $currentInjury = $wrestler->currentInjury;
-    expect($currentInjury)->not()->toBeNull();
+    $currentInjury = $wrestler->currentInjury()->firstOrFail();
 
     HealAction::run($wrestler);
 

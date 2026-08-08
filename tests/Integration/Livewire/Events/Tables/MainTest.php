@@ -72,7 +72,7 @@ describe('EventsTable Component Integration', function () {
 
             // Verify venue relationship exists
             expect($event->venue)->not()->toBeNull();
-            expect($event->venue->name)->toBe('Test Arena');
+            expect($event->venue()->firstOrFail()->name)->toBe('Test Arena');
 
             actingAs($this->admin);
 
@@ -215,7 +215,7 @@ describe('EventsTable Component Integration', function () {
 
             // Verify event is restored
             expect(Event::find($deletedEvent->id))->not()->toBeNull();
-            expect($deletedEvent->fresh()->deleted_at)->toBeNull();
+            expect(freshModel($deletedEvent)->deleted_at)->toBeNull();
         });
     });
 

@@ -73,7 +73,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->call('openModal');
 
             expect($component->instance()->getWrestlers())->toHaveCount(5);
-            expect(array_key_first($component->instance()->getWrestlers()))->toBe($wrestlers->first()->id);
+            expect(array_key_first($component->instance()->getWrestlers()))->toBe($wrestlers->firstOrFail()->id);
         });
     });
 
@@ -211,13 +211,13 @@ describe('TagTeams FormModal Tests', function () {
 
             expect(TagTeam::where('name', 'New Tag Team')->exists())->toBeTrue();
 
-            $tagTeam = TagTeam::where('name', 'New Tag Team')->first();
+            $tagTeam = TagTeam::where('name', 'New Tag Team')->firstOrFail();
             expect($tagTeam->signature_move)->toBe('Team Finisher');
             expect($tagTeam->currentWrestlers)->toHaveCount(2);
             expect($tagTeam->currentWrestlers->pluck('id')->toArray())->toContain($wrestlerA->id);
             expect($tagTeam->currentWrestlers->pluck('id')->toArray())->toContain($wrestlerB->id);
             expect($tagTeam->currentManagers)->toHaveCount(1);
-            expect($tagTeam->currentManagers->first()->id)->toBe($manager->id);
+            expect($tagTeam->currentManagers->firstOrFail()->id)->toBe($manager->id);
         });
 
         test('creates tag team without optional fields', function () {
@@ -232,8 +232,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $tagTeam = TagTeam::where('name', 'Simple Tag Team')->first();
-            expect($tagTeam)->not()->toBeNull();
+            $tagTeam = TagTeam::where('name', 'Simple Tag Team')->firstOrFail();
             expect($tagTeam->signature_move)->toBeNull();
             expect($tagTeam->currentManagers)->toHaveCount(0);
             expect($tagTeam->firstEmployment)->toBeNull();
@@ -307,7 +306,7 @@ describe('TagTeams FormModal Tests', function () {
             expect($tagTeam->name)->toBe('Updated Team Name');
             expect($tagTeam->signature_move)->toBe('New Team Finisher');
             expect($tagTeam->currentWrestlers->pluck('id')->toArray())->toEqual([$newWrestlerA->id, $newWrestlerB->id]);
-            expect($tagTeam->currentManagers->first()->id)->toBe($manager->id);
+            expect($tagTeam->currentManagers->firstOrFail()->id)->toBe($manager->id);
         });
 
         test('allows name uniqueness bypass for same tag team', function () {
@@ -349,7 +348,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $tagTeam = TagTeam::where('name', 'Relationship Test Team')->first();
+            $tagTeam = TagTeam::where('name', 'Relationship Test Team')->firstOrFail();
             expect($tagTeam->wrestlers)->toHaveCount(2);
             expect($tagTeam->wrestlers->pluck('id')->sort()->values()->toArray())
                 ->toEqual(collect([$wrestlerA->id, $wrestlerB->id])->sort()->values()->toArray());
@@ -413,7 +412,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $tagTeam = TagTeam::where('name', 'Manager Test Team')->first();
+            $tagTeam = TagTeam::where('name', 'Manager Test Team')->firstOrFail();
             expect($tagTeam->managers)->toHaveCount(2);
             expect($tagTeam->managers->pluck('id')->sort()->values()->toArray())
                 ->toEqual(collect([$manager1->id, $manager2->id])->sort()->values()->toArray());
@@ -545,9 +544,9 @@ describe('TagTeams FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $tagTeam = TagTeam::where('name', 'Employment Test Team')->first();
+            $tagTeam = TagTeam::where('name', 'Employment Test Team')->firstOrFail();
             expect($tagTeam->firstEmployment)->not()->toBeNull();
-            expect($tagTeam->firstEmployment->started_at->toDateString())->toBe('2024-01-01');
+            expect(requiredDate(requiredModel($tagTeam->firstEmployment)->started_at)->toDateString())->toBe('2024-01-01');
         });
 
         test('does not create employment record when date not provided', function () {
@@ -562,7 +561,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->call('submitForm')
                 ->assertHasNoErrors();
 
-            $tagTeam = TagTeam::where('name', 'No Employment Test Team')->first();
+            $tagTeam = TagTeam::where('name', 'No Employment Test Team')->firstOrFail();
             expect($tagTeam->firstEmployment)->toBeNull();
         });
     });

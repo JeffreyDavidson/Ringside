@@ -55,7 +55,7 @@ describe('Wrestler Creation Journey', function () {
         // Then: Wrestler should be created in database
         expect(Wrestler::where('name', 'John Cena')->exists())->toBeTrue();
 
-        $wrestler = Wrestler::where('name', 'John Cena')->first();
+        $wrestler = Wrestler::where('name', 'John Cena')->firstOrFail();
         expect($wrestler->hometown)->toBe('West Newbury, MA');
         expect($wrestler->height->toInches())->toBe(73); // 6'1" = 73 inches
         expect($wrestler->weight)->toBe(251);
@@ -112,7 +112,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be employed
-        expect($wrestler->fresh()->isEmployed())->toBeTrue();
+        expect(freshModel($wrestler)->isEmployed())->toBeTrue();
 
         // When: Suspending the employed wrestler
         actingAs($admin);
@@ -122,7 +122,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be suspended
-        expect($wrestler->fresh()->isSuspended())->toBeTrue();
+        expect(freshModel($wrestler)->isSuspended())->toBeTrue();
 
         // When: Reinstating the suspended wrestler
         actingAs($admin);
@@ -132,8 +132,8 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be employed again
-        expect($wrestler->fresh()->isEmployed())->toBeTrue();
-        expect($wrestler->fresh()->isSuspended())->toBeFalse();
+        expect(freshModel($wrestler)->isEmployed())->toBeTrue();
+        expect(freshModel($wrestler)->isSuspended())->toBeFalse();
 
         // When: Retiring the wrestler
         actingAs($admin);
@@ -143,7 +143,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be retired
-        expect($wrestler->fresh()->isRetired())->toBeTrue();
+        expect(freshModel($wrestler)->isRetired())->toBeTrue();
 
         // When: Unretiring the wrestler
         actingAs($admin);
@@ -153,10 +153,10 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should no longer be retired
-        expect($wrestler->fresh()->isRetired())->toBeFalse();
+        expect(freshModel($wrestler)->isRetired())->toBeFalse();
 
         // And: Should have employment history tracking
-        expect($wrestler->fresh()->hasEmploymentHistory())->toBeTrue();
+        expect(freshModel($wrestler)->hasEmploymentHistory())->toBeTrue();
     });
 
     test('wrestler injury management workflow', function () {
@@ -172,7 +172,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be injured
-        expect($wrestler->fresh()->isInjured())->toBeTrue();
+        expect(freshModel($wrestler)->isInjured())->toBeTrue();
 
         // When: Healing the wrestler from injury
         actingAs($admin);
@@ -182,8 +182,8 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should no longer be injured
-        expect($wrestler->fresh()->isInjured())->toBeFalse();
-        expect($wrestler->fresh()->isEmployed())->toBeTrue();
+        expect(freshModel($wrestler)->isInjured())->toBeFalse();
+        expect(freshModel($wrestler)->isEmployed())->toBeTrue();
     });
 });
 
@@ -322,7 +322,7 @@ describe('Wrestler Deletion and Restoration Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be soft deleted
-        expect($wrestler->fresh()->trashed())->toBeTrue();
+        expect(freshModel($wrestler)->trashed())->toBeTrue();
         expect(Wrestler::onlyTrashed()->find($wrestler->id))->not->toBeNull();
 
         // When: Restoring the wrestler
@@ -334,6 +334,6 @@ describe('Wrestler Deletion and Restoration Journey', function () {
 
         // Then: Wrestler should be restored
         expect($wrestler->fresh())->not->toBeNull();
-        expect($wrestler->fresh()->name)->toBe('Test Wrestler');
+        expect(freshModel($wrestler)->name)->toBe('Test Wrestler');
     });
 });
