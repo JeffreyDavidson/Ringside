@@ -6,7 +6,6 @@ use App\Livewire\Titles\Modals\FormModal;
 use App\Livewire\Titles\Tables\Main;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
@@ -26,8 +25,9 @@ describe('Title Creation and Setup Workflow', function () {
             ->assertSeeLivewire(Main::class);
 
         // And: Creating title through modal workflow
-        $modalComponent = Livewire::actingAs($admin)
-            ->test(FormModal::class)
+        actingAs($admin);
+
+        $modalComponent = \Pest\Livewire\livewire(FormModal::class)
             ->call('openModal')
             ->assertSet('isModalOpen', true);
 
@@ -56,8 +56,9 @@ describe('Title Creation and Setup Workflow', function () {
         expect($title->name)->toBe('WWE Championship Title');
 
         // And: Should appear in the titles table
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->assertSee('WWE Championship Title');
     });
 
@@ -66,8 +67,9 @@ describe('Title Creation and Setup Workflow', function () {
         $admin = administrator();
 
         // When: Opening create modal and using dummy data
-        $component = Livewire::actingAs($admin)
-            ->test(FormModal::class)
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(FormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -94,8 +96,9 @@ describe('Title Lifecycle Management Workflow', function () {
         $title = Title::factory()->create(['name' => 'Intercontinental Championship Title']);
 
         // When: Debuting the title
-        $component = Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'debut', $title->id)
             ->assertHasNoErrors();
 
@@ -103,8 +106,9 @@ describe('Title Lifecycle Management Workflow', function () {
         expect($title->fresh()->isCurrentlyActive())->toBeTrue();
 
         // When: Pulling (deactivating) the title
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'pull', $title->id)
             ->assertHasNoErrors();
 
@@ -112,8 +116,9 @@ describe('Title Lifecycle Management Workflow', function () {
         expect($title->fresh()->isCurrentlyActive())->toBeFalse();
 
         // When: Reinstating the title
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'reinstate', $title->id)
             ->assertHasNoErrors();
 
@@ -121,8 +126,9 @@ describe('Title Lifecycle Management Workflow', function () {
         expect($title->fresh()->isCurrentlyActive())->toBeTrue();
 
         // When: Retiring the title
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'retire', $title->id)
             ->assertHasNoErrors();
 
@@ -130,8 +136,9 @@ describe('Title Lifecycle Management Workflow', function () {
         expect($title->fresh()->isRetired())->toBeTrue();
 
         // When: Unretiring the title
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'unretire', $title->id)
             ->assertHasNoErrors();
 
@@ -169,28 +176,32 @@ describe('Title Search and Filtering Workflow', function () {
         $inactiveTitle = Title::factory()->create(['name' => 'ECW Championship Title']);
 
         // When: Searching for specific title
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('search', 'WWE')
             ->assertSee('WWE Championship Title')
             ->assertDontSee('WCW Championship Title')
             ->assertDontSee('ECW Championship Title');
 
         // When: Filtering by active status
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('filterValues.status', 'active')
             ->assertSee('WWE Championship Title');
 
         // When: Filtering by retired status
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('filterValues.status', 'retired')
             ->assertSee('WCW Championship Title');
 
         // When: Clearing filters
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('filterValues.status', '')
             ->set('search', '')
             ->assertSee('WWE Championship Title')
@@ -208,8 +219,9 @@ describe('Title Editing Workflow', function () {
         ]);
 
         // When: Opening edit modal for the title
-        $component = Livewire::actingAs($admin)
-            ->test(FormModal::class)
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(FormModal::class)
             ->call('openModal', $title->id)
             ->assertSet('isModalOpen', true);
 
@@ -228,8 +240,9 @@ describe('Title Editing Workflow', function () {
         expect($title->name)->toBe('Updated Championship Title');
 
         // And: Updated information should appear in table
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->assertSee('Updated Championship Title');
     });
 });
@@ -256,8 +269,9 @@ describe('Championship Reign Workflow', function () {
             ->assertSeeLivewire('titles.tables.previous-title-championships');
 
         // And: Title appears in main titles listing
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->assertSee('United States Championship Title');
     });
 });
@@ -269,8 +283,9 @@ describe('Title Deletion and Restoration Workflow', function () {
         $title = Title::factory()->create(['name' => 'Test Championship Title']);
 
         // When: Deleting the title
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('delete', $title)
             ->assertHasNoErrors();
 
@@ -279,8 +294,9 @@ describe('Title Deletion and Restoration Workflow', function () {
         expect(Title::onlyTrashed()->find($title->id))->not->toBeNull();
 
         // When: Restoring the title
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('restore', $title->id)
             ->assertHasNoErrors();
 
@@ -297,14 +313,16 @@ describe('Title Business Rules Workflow', function () {
         $title = Title::factory()->create(['name' => 'Money in the Bank Title']);
 
         // When: Attempting to pull an inactive title (business rule check)
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'pull', $title->id)
             ->assertHasNoErrors();
 
         // When: Properly debuting title first
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'debut', $title->id)
             ->assertHasNoErrors();
 
@@ -312,8 +330,9 @@ describe('Title Business Rules Workflow', function () {
         expect($title->fresh()->isCurrentlyActive())->toBeTrue();
 
         // When: Now pulling the active title (should succeed)
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleTitleAction', 'pull', $title->id)
             ->assertHasNoErrors();
 

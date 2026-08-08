@@ -6,7 +6,8 @@ use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
 use App\Models\Shared\State;
 use App\Models\Users\User;
-use Livewire\Livewire;
+
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -35,14 +36,14 @@ beforeEach(function () {
 
 describe('Form Modal Initialization', function () {
     it('can mount modal component', function () {
-        $modal = Livewire::test(FormModal::class);
+        $modal = livewire(FormModal::class);
 
         $modal->assertOk();
         $modal->assertViewIs('livewire.venues.modals.form-modal');
     });
 
     it('initializes with empty form for creation', function () {
-        $modal = Livewire::test(FormModal::class);
+        $modal = livewire(FormModal::class);
 
         $modal->assertSet('form.name', '');
         $modal->assertSet('form.street_address', '');
@@ -52,7 +53,7 @@ describe('Form Modal Initialization', function () {
     });
 
     it('can open modal for creating new venue', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal');
 
         $modal->assertSet('isModalOpen', true);
@@ -60,7 +61,7 @@ describe('Form Modal Initialization', function () {
     });
 
     it('can close modal', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->call('closeModal');
 
@@ -78,7 +79,7 @@ describe('Form Modal Editing', function () {
             'zipcode' => '10001',
         ]);
 
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal', $venue->id);
 
         $modal->assertSet('form.name', 'Madison Square Garden');
@@ -97,7 +98,7 @@ describe('Form Modal Editing', function () {
             'zipcode' => '90210',
         ]);
 
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal', $venue->id)
             ->set('form.name', 'Updated Arena')
             ->set('form.street_address', '456 Oak Ave')
@@ -122,7 +123,7 @@ describe('Form Modal Editing', function () {
     it('preserves venue data when validation fails', function () {
         $venue = Venue::factory()->create();
 
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal', $venue->id)
             ->set('form.name', 'Test Venue')
             ->set('form.street_address', '123 Test St')
@@ -141,7 +142,7 @@ describe('Form Modal Editing', function () {
 
 describe('Form Modal Creation', function () {
     it('can create new venue with valid data', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'New Wrestling Arena')
             ->set('form.street_address', '789 Wrestling Way')
@@ -164,7 +165,7 @@ describe('Form Modal Creation', function () {
     });
 
     it('validates required fields', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', '')
             ->set('form.street_address', '')
@@ -185,7 +186,7 @@ describe('Form Modal Creation', function () {
     it('validates venue name uniqueness', function () {
         Venue::factory()->create(['name' => 'Existing Arena']);
 
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Existing Arena')
             ->set('form.street_address', '123 New St')
@@ -198,7 +199,7 @@ describe('Form Modal Creation', function () {
     });
 
     it('validates state exists in database', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Arena')
             ->set('form.street_address', '123 Test St')
@@ -211,7 +212,7 @@ describe('Form Modal Creation', function () {
     });
 
     it('validates zipcode format', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Arena')
             ->set('form.street_address', '123 Test St')
@@ -224,7 +225,7 @@ describe('Form Modal Creation', function () {
     });
 
     it('accepts valid zipcode format', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Valid Arena')
             ->set('form.street_address', '123 Valid St')
@@ -243,7 +244,7 @@ describe('Form Modal Validation', function () {
         $longAddress = str_repeat('a', 256);
         $longCity = str_repeat('a', 256);
 
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', $longName)
             ->set('form.street_address', $longAddress)
@@ -264,7 +265,7 @@ describe('Form Modal Validation', function () {
         $validAddress = str_repeat('a', 255);
         $validCity = str_repeat('a', 255);
 
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', $validName)
             ->set('form.street_address', $validAddress)
@@ -277,7 +278,7 @@ describe('Form Modal Validation', function () {
     });
 
     it('validates zipcode as numeric', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Arena')
             ->set('form.street_address', '123 Test St')
@@ -292,7 +293,7 @@ describe('Form Modal Validation', function () {
 
 describe('Form Modal State Management', function () {
     it('resets form after successful creation', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Arena')
             ->set('form.street_address', '123 Test St')
@@ -310,7 +311,7 @@ describe('Form Modal State Management', function () {
     });
 
     it('preserves form state when validation fails', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Arena')
             ->set('form.street_address', '123 Test St')
@@ -328,7 +329,7 @@ describe('Form Modal State Management', function () {
     });
 
     it('handles modal close during form submission', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Arena')
             ->call('closeModal');
@@ -340,7 +341,7 @@ describe('Form Modal State Management', function () {
 
 describe('Form Modal Dummy Data', function () {
     it('can fill form with dummy data', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -352,7 +353,7 @@ describe('Form Modal Dummy Data', function () {
     });
 
     it('can submit form with dummy data', function () {
-        $modal = Livewire::test(FormModal::class)
+        $modal = livewire(FormModal::class)
             ->call('openModal')
             ->call('fillDummyFields')
             ->call('save');

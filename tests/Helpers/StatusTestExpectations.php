@@ -7,6 +7,8 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use App\Models\Referees\Referee;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -21,6 +23,8 @@ use Illuminate\Support\Carbon;
 
 /**
  * Expect an entity to have a specific employment status.
+ *
+ * @param  Model&Employable<Model, Model>  $entity
  */
 function expectEmploymentStatus(Model&Employable $entity, EmploymentStatus $expectedStatus): void
 {
@@ -30,6 +34,8 @@ function expectEmploymentStatus(Model&Employable $entity, EmploymentStatus $expe
 
 /**
  * Expect an entity to transition from one status to another.
+ *
+ * @param  Model&Employable<Model, Model>  $entity
  */
 function expectStatusTransition(Model&Employable $entity, EmploymentStatus $fromStatus, EmploymentStatus $toStatus): void
 {
@@ -41,7 +47,7 @@ function expectStatusTransition(Model&Employable $entity, EmploymentStatus $from
 /**
  * Expect an entity to be in an active, bookable state.
  */
-function expectToBeBookable($entity): void
+function expectToBeBookable(Wrestler|Referee|TagTeam $entity): void
 {
     $entity = $entity->fresh();
     expect($entity->isEmployed())->toBeTrue();
@@ -52,7 +58,7 @@ function expectToBeBookable($entity): void
 /**
  * Expect an entity to be unavailable for booking.
  */
-function expectToBeUnavailable($entity): void
+function expectToBeUnavailable(Wrestler|Referee|TagTeam $entity): void
 {
     $entity = $entity->fresh();
     expect($entity->isBookable())->toBeFalse();
@@ -60,6 +66,8 @@ function expectToBeUnavailable($entity): void
 
 /**
  * Expect employment lifecycle to be valid.
+ *
+ * @param  Model&Employable<Model, Model>  $entity
  */
 function expectValidEmploymentLifecycle(Model&Employable $entity): void
 {
@@ -82,6 +90,8 @@ function expectValidEmploymentLifecycle(Model&Employable $entity): void
 
 /**
  * Expect retirement state to be consistent.
+ *
+ * @param  Model&Retirable<Model, Model>  $entity
  */
 function expectValidRetirementState(Model&Retirable $entity): void
 {
@@ -99,6 +109,8 @@ function expectValidRetirementState(Model&Retirable $entity): void
 
 /**
  * Expect injury state to be consistent.
+ *
+ * @param  Model&Injurable<Model, Model>  $entity
  */
 function expectValidInjuryState(Model&Injurable $entity): void
 {
@@ -116,6 +128,8 @@ function expectValidInjuryState(Model&Injurable $entity): void
 
 /**
  * Expect suspension state to be consistent.
+ *
+ * @param  Model&Suspendable<Model, Model>  $entity
  */
 function expectValidSuspensionState(Model&Suspendable $entity): void
 {
@@ -133,6 +147,8 @@ function expectValidSuspensionState(Model&Suspendable $entity): void
 
 /**
  * Expect a complete entity state to be valid and consistent.
+ *
+ * @param  Model&Employable<Model, Model>  $entity
  */
 function expectValidEntityState(Model&Employable $entity): void
 {
@@ -153,8 +169,10 @@ function expectValidEntityState(Model&Employable $entity): void
 
 /**
  * Expect relationship counts to match expected values.
+ *
+ * @param  array<string, int>  $expectedCounts
  */
-function expectRelationshipCounts($entity, array $expectedCounts): void
+function expectRelationshipCounts(Model $entity, array $expectedCounts): void
 {
     foreach ($expectedCounts as $relationship => $count) {
         expect($entity->{$relationship}()->count())->toBe($count);
@@ -163,8 +181,10 @@ function expectRelationshipCounts($entity, array $expectedCounts): void
 
 /**
  * Expect tag team membership to be correctly configured.
+ *
+ * @param  array<string, mixed>  $expectedPivotData
  */
-function expectTagTeamMembership($wrestler, $tagTeam, array $expectedPivotData = []): void
+function expectTagTeamMembership(Wrestler $wrestler, TagTeam $tagTeam, array $expectedPivotData = []): void
 {
     expect($wrestler->tagTeams()->count())->toBeGreaterThan(0);
 

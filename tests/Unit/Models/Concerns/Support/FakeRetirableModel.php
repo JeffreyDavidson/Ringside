@@ -13,11 +13,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Fake retirable model for testing IsRetirable trait in isolation.
  * This ensures trait tests are not coupled to real business models.
+ *
+ * @implements Retirable<FakeRetirementModel, self>
  */
 #[Table('fake_retirables')]
 #[Fillable('name')]
 class FakeRetirableModel extends Model implements Retirable
 {
+    /** @use IsRetirable<FakeRetirementModel, self> */
     use IsRetirable;
 
     protected function resolveRetirementModelClass(): string

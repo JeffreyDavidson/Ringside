@@ -10,6 +10,9 @@ use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for TitlesTable Livewire component.
  *
@@ -151,7 +154,9 @@ describe('TitlesTable Component', function () {
             $title = Title::factory()->create(['name' => 'Test Title']);
 
             // Test as administrator (should see all actions)
-            $component = Livewire::actingAs($this->user)->test(Main::class);
+            actingAs($this->user);
+
+            $component = livewire(Main::class);
             $component->assertOk();
             $component->assertSee($title->name);
         });

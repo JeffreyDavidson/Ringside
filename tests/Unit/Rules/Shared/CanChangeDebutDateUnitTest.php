@@ -57,12 +57,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -93,12 +93,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return true;
                 }
@@ -228,17 +228,17 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
 
-                public function getDisplayName()
+                public function getDisplayName(): string
                 {
                     return 'Custom Display Name';
                 }
@@ -266,12 +266,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -299,12 +299,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -334,12 +334,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -367,12 +367,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -458,12 +458,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model1 = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -475,12 +475,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             };
             $model2 = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -506,12 +506,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -564,12 +564,12 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
             // Arrange - Model is active AND was not active on target date (both conditions true for failure)
             $model = new class extends Model
             {
-                public function isCurrentlyActive()
+                public function isCurrentlyActive(): bool
                 {
                     return true;
                 }
 
-                public function wasActiveOn($date = null)
+                public function wasActiveOn(Carbon $date): bool
                 {
                     return false;
                 }

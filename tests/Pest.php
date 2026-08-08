@@ -62,12 +62,12 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function administrator()
+function administrator(): User
 {
     return User::factory()->administrator()->create();
 }
 
-function basicUser()
+function basicUser(): User
 {
     return User::factory()->basicUser()->create();
 }

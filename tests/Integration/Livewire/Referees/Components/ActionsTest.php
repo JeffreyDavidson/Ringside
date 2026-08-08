@@ -7,6 +7,8 @@ use App\Models\Referees\Referee;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 use function Spatie\PestPluginTestTime\testTime;
 
 /**
@@ -39,8 +41,9 @@ describe('RefereesActions Integration Tests', function () {
 
     describe('component initialization', function () {
         test('component loads with referee properly bound', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             expect($component->get('referee')->id)->toBe($this->referee->id);
             expect($component->get('referee')->first_name)->toBe('Test');
@@ -49,8 +52,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('component renders without errors', function () {
-            Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee])
+            actingAs($this->admin);
+
+            livewire(Actions::class, ['referee' => $this->referee])
                 ->assertOk();
             expect(true)->toBeTrue();
         });
@@ -63,8 +67,9 @@ describe('RefereesActions Integration Tests', function () {
                 'last_name' => 'Referee',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $unemployedReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $unemployedReferee]);
 
             $component->call('employ')
                 ->assertHasNoErrors()
@@ -76,8 +81,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('employ action fails for already employed referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('employ');
 
@@ -86,8 +92,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('release action works for employed referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('release')
                 ->assertHasNoErrors()
@@ -101,8 +108,9 @@ describe('RefereesActions Integration Tests', function () {
         test('release action fails for unemployed referee', function () {
             $unemployedReferee = Referee::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $unemployedReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $unemployedReferee]);
 
             $component->call('release');
 
@@ -113,8 +121,9 @@ describe('RefereesActions Integration Tests', function () {
 
     describe('injury and healing actions', function () {
         test('injure action works for healthy employed referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('injure')
                 ->assertHasNoErrors()
@@ -128,8 +137,9 @@ describe('RefereesActions Integration Tests', function () {
         test('injure action fails for already injured referee', function () {
             $injuredReferee = Referee::factory()->injured()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $injuredReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $injuredReferee]);
 
             $component->call('injure');
 
@@ -143,8 +153,9 @@ describe('RefereesActions Integration Tests', function () {
                 'last_name' => 'Referee',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $injuredReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $injuredReferee]);
 
             $component->call('healFromInjury')
                 ->assertHasNoErrors()
@@ -156,8 +167,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('heal action fails for healthy referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('healFromInjury');
 
@@ -168,8 +180,9 @@ describe('RefereesActions Integration Tests', function () {
 
     describe('suspension and reinstatement actions', function () {
         test('suspend action works for employed referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('suspend')
                 ->assertHasNoErrors()
@@ -183,8 +196,9 @@ describe('RefereesActions Integration Tests', function () {
         test('suspend action fails for unemployed referee', function () {
             $unemployedReferee = Referee::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $unemployedReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $unemployedReferee]);
 
             $component->call('suspend');
 
@@ -198,8 +212,9 @@ describe('RefereesActions Integration Tests', function () {
                 'last_name' => 'Referee',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $suspendedReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $suspendedReferee]);
 
             $component->call('reinstate')
                 ->assertHasNoErrors()
@@ -211,8 +226,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('reinstate action fails for non-suspended referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('reinstate');
 
@@ -223,8 +239,9 @@ describe('RefereesActions Integration Tests', function () {
 
     describe('retirement lifecycle actions', function () {
         test('retire action works for employed referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('retire')
                 ->assertHasNoErrors()
@@ -238,8 +255,9 @@ describe('RefereesActions Integration Tests', function () {
         test('retire action fails for unemployed referee', function () {
             $unemployedReferee = Referee::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $unemployedReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $unemployedReferee]);
 
             $component->call('retire');
 
@@ -253,8 +271,9 @@ describe('RefereesActions Integration Tests', function () {
                 'last_name' => 'Referee',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $retiredReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $retiredReferee]);
 
             $component->call('unretire')
                 ->assertHasNoErrors()
@@ -266,8 +285,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('unretire action fails for active referee', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('unretire');
 
@@ -283,8 +303,9 @@ describe('RefereesActions Integration Tests', function () {
 
             $trashedReferee = Referee::onlyTrashed()->find($this->referee->id);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $trashedReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $trashedReferee]);
 
             $component->call('restore')
                 ->assertHasNoErrors()
@@ -303,8 +324,9 @@ describe('RefereesActions Integration Tests', function () {
                 'first_name' => 'Career',
                 'last_name' => 'Official',
             ]);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $referee]);
 
             // Employ
             $component->call('employ');
@@ -342,8 +364,9 @@ describe('RefereesActions Integration Tests', function () {
                 'first_name' => 'Injured',
                 'last_name' => 'Official',
             ]);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $injuredReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $injuredReferee]);
 
             // Referee is employed but injured (not available for matches)
             expect($injuredReferee->isEmployed())->toBeTrue();
@@ -368,8 +391,9 @@ describe('RefereesActions Integration Tests', function () {
                 'first_name' => 'Suspended',
                 'last_name' => 'Official',
             ]);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $suspendedReferee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $suspendedReferee]);
 
             // Suspended referee still employed but cannot officiate
             expect($suspendedReferee->isEmployed())->toBeTrue();
@@ -403,11 +427,13 @@ describe('RefereesActions Integration Tests', function () {
                 'last_name' => 'Official',
             ]);
 
-            $juniorComponent = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $juniorReferee]);
+            actingAs($this->admin);
 
-            $seniorComponent = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $seniorReferee]);
+            $juniorComponent = livewire(Actions::class, ['referee' => $juniorReferee]);
+
+            actingAs($this->admin);
+
+            $seniorComponent = livewire(Actions::class, ['referee' => $seniorReferee]);
 
             // Both can be injured, suspended, etc.
             $juniorComponent->call('injure');
@@ -430,8 +456,9 @@ describe('RefereesActions Integration Tests', function () {
         test('unauthorized user cannot perform actions', function () {
             $guest = User::factory()->create(); // Non-admin user
 
-            $component = Livewire::actingAs($guest)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($guest);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('employ')
                 ->assertForbidden();
@@ -439,8 +466,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('admin can perform all actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             // All action calls should succeed (though business rules may prevent them)
             $component->call('release')
@@ -453,8 +481,9 @@ describe('RefereesActions Integration Tests', function () {
 
     describe('event dispatching and state management', function () {
         test('all successful actions dispatch referee-updated event', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('release')
                 ->assertDispatched('referee-updated');
@@ -468,8 +497,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('failed actions do not dispatch events', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             // Try to employ already employed referee
             $component->call('employ')
@@ -478,8 +508,9 @@ describe('RefereesActions Integration Tests', function () {
         });
 
         test('component state remains consistent after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             expect($component->get('referee')->id)->toBe($this->referee->id);
 
@@ -493,8 +524,9 @@ describe('RefereesActions Integration Tests', function () {
 
     describe('error handling and edge cases', function () {
         test('component handles referee model refresh after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             // Perform action
             $component->call('release');
@@ -509,8 +541,9 @@ describe('RefereesActions Integration Tests', function () {
             $originalLastName = $this->referee->last_name;
             $originalId = $this->referee->id;
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $component->call('injure');
 
@@ -524,8 +557,9 @@ describe('RefereesActions Integration Tests', function () {
             // Ensure referee has virtual column loaded
             $this->referee = $this->referee->fresh();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['referee' => $this->referee]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
 
             $originalFullName = $this->referee->full_name;
 

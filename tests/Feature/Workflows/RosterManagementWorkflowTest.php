@@ -12,7 +12,6 @@ use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
@@ -27,8 +26,9 @@ describe('Manager Assignment Workflow', function () {
         $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Randy Orton']);
 
         // When: Creating a new manager
-        $managerComponent = Livewire::actingAs($admin)
-            ->test(ManagerFormModal::class)
+        actingAs($admin);
+
+        $managerComponent = \Pest\Livewire\livewire(ManagerFormModal::class)
             ->call('openModal')
             ->set('form.first_name', 'Paul')
             ->set('form.last_name', 'Heyman')
@@ -49,8 +49,9 @@ describe('Manager Assignment Workflow', function () {
             ->assertSee('Heyman');
 
         // And: Manager appears in managers table
-        Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(ManagersTable::class)
             ->assertSee('Paul')
             ->assertSee('Heyman');
     });
@@ -61,8 +62,9 @@ describe('Manager Assignment Workflow', function () {
         $manager = Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
 
         // When: Managing employment status
-        Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(ManagersTable::class)
             ->call('handleManagerAction', 'employ', $manager->id)
             ->assertHasNoErrors();
 
@@ -70,8 +72,9 @@ describe('Manager Assignment Workflow', function () {
         expect($manager->fresh()->isEmployed())->toBeTrue();
 
         // When: Suspending manager
-        Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(ManagersTable::class)
             ->call('handleManagerAction', 'suspend', $manager->id)
             ->assertHasNoErrors();
 
@@ -79,8 +82,9 @@ describe('Manager Assignment Workflow', function () {
         expect($manager->fresh()->isSuspended())->toBeTrue();
 
         // When: Reinstating manager
-        Livewire::actingAs($admin)
-            ->test(ManagersTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(ManagersTable::class)
             ->call('handleManagerAction', 'reinstate', $manager->id)
             ->assertHasNoErrors();
 
@@ -99,8 +103,9 @@ describe('Stable Formation and Management Workflow', function () {
         $wrestler3 = Wrestler::factory()->bookable()->create(['name' => 'Chyna']);
 
         // When: Creating a new stable
-        $stableComponent = Livewire::actingAs($admin)
-            ->test(StableFormModal::class)
+        actingAs($admin);
+
+        $stableComponent = \Pest\Livewire\livewire(StableFormModal::class)
             ->call('openModal')
             ->set('form.name', 'D-Generation X')
             ->set('form.debut_date', now()->format('Y-m-d'))
@@ -112,8 +117,9 @@ describe('Stable Formation and Management Workflow', function () {
         $stable = Stable::where('name', 'D-Generation X')->first();
 
         // And: Stable appears in stables table
-        Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(StablesTable::class)
             ->assertSee('D-Generation X');
     });
 
@@ -123,8 +129,9 @@ describe('Stable Formation and Management Workflow', function () {
         $stable = Stable::factory()->withEmployedDefaultMembers()->create(['name' => 'The Shield']);
 
         // When: Establishing the stable
-        Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(StablesTable::class)
             ->call('handleStableAction', 'establish', $stable->id)
             ->assertHasNoErrors();
 
@@ -132,8 +139,9 @@ describe('Stable Formation and Management Workflow', function () {
         expect($stable->fresh()->isCurrentlyActive())->toBeTrue();
 
         // When: Retiring the stable
-        Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(StablesTable::class)
             ->call('handleStableAction', 'retire', $stable->id)
             ->assertHasNoErrors();
 
@@ -144,8 +152,9 @@ describe('Stable Formation and Management Workflow', function () {
         $retiredStable = Stable::factory()->retired()->create(['name' => 'Evolution']);
 
         // When: Unretiring the stable
-        Livewire::actingAs($admin)
-            ->test(StablesTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(StablesTable::class)
             ->call('handleStableAction', 'unretire', $retiredStable->id)
             ->assertHasNoErrors();
 
@@ -162,8 +171,9 @@ describe('Tag Team Formation and Management Workflow', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create(['name' => 'Jeff Hardy']);
 
         // When: Creating a new tag team
-        $tagTeamComponent = Livewire::actingAs($admin)
-            ->test(TagTeamFormModal::class)
+        actingAs($admin);
+
+        $tagTeamComponent = \Pest\Livewire\livewire(TagTeamFormModal::class)
             ->call('openModal')
             ->set('form.name', 'The Hardy Boyz')
             ->set('form.wrestlerA', $wrestler1->id)
@@ -177,8 +187,9 @@ describe('Tag Team Formation and Management Workflow', function () {
         $tagTeam = TagTeam::where('name', 'The Hardy Boyz')->first();
 
         // And: Tag team appears in tag teams table
-        Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(TagTeamsTable::class)
             ->assertSee('The Hardy Boyz');
 
         // When: Viewing tag team details
@@ -197,8 +208,9 @@ describe('Tag Team Formation and Management Workflow', function () {
         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => now()]);
 
         // When: Employing the tag team
-        Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'employ', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -206,8 +218,9 @@ describe('Tag Team Formation and Management Workflow', function () {
         expect($tagTeam->fresh()->isEmployed())->toBeTrue();
 
         // When: Suspending tag team
-        Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'suspend', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -215,8 +228,9 @@ describe('Tag Team Formation and Management Workflow', function () {
         expect($tagTeam->fresh()->isSuspended())->toBeTrue();
 
         // When: Reinstating tag team
-        Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'reinstate', $tagTeam->id)
             ->assertHasNoErrors();
 
@@ -225,8 +239,9 @@ describe('Tag Team Formation and Management Workflow', function () {
         expect($tagTeam->fresh()->isSuspended())->toBeFalse();
 
         // When: Retiring tag team
-        Livewire::actingAs($admin)
-            ->test(TagTeamsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(TagTeamsTable::class)
             ->call('handleTagTeamAction', 'retire', $tagTeam->id)
             ->assertHasNoErrors();
 

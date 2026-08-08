@@ -12,11 +12,14 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Fake model for testing CanBeManaged trait in isolation.
+ *
+ * @implements Manageable<FakeManagerPivotModel, self>
  */
 #[Table('fake_manageable_models')]
 #[Fillable('name')]
 class FakeManageableModel extends Model implements Manageable
 {
+    /** @use CanBeManaged<FakeManagerPivotModel, self> */
     use CanBeManaged;
 
     public function resolveManagersPivotModel(): string

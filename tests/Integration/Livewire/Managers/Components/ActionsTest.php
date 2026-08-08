@@ -7,6 +7,8 @@ use App\Models\Managers\Manager;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 use function Spatie\PestPluginTestTime\testTime;
 
 /**
@@ -39,8 +41,9 @@ describe('ManagersActions Integration Tests', function () {
 
     describe('component initialization', function () {
         test('component loads with manager properly bound', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             expect($component->get('manager')->id)->toBe($this->manager->id);
             expect($component->get('manager')->first_name)->toBe('Test');
@@ -49,8 +52,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('component renders without errors', function () {
-            Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager])
+            actingAs($this->admin);
+
+            livewire(Actions::class, ['manager' => $this->manager])
                 ->assertOk();
             expect(true)->toBeTrue();
         });
@@ -63,8 +67,9 @@ describe('ManagersActions Integration Tests', function () {
                 'last_name' => 'Manager',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $unemployedManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $unemployedManager]);
 
             $component->call('employ')
                 ->assertHasNoErrors()
@@ -76,8 +81,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('employ action fails for already employed manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('employ');
 
@@ -86,8 +92,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('release action works for employed manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('release')
                 ->assertHasNoErrors()
@@ -101,8 +108,9 @@ describe('ManagersActions Integration Tests', function () {
         test('release action fails for unemployed manager', function () {
             $unemployedManager = Manager::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $unemployedManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $unemployedManager]);
 
             $component->call('release');
 
@@ -113,8 +121,9 @@ describe('ManagersActions Integration Tests', function () {
 
     describe('injury and healing actions', function () {
         test('injure action works for healthy employed manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('injure')
                 ->assertHasNoErrors()
@@ -128,8 +137,9 @@ describe('ManagersActions Integration Tests', function () {
         test('injure action fails for already injured manager', function () {
             $injuredManager = Manager::factory()->injured()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $injuredManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $injuredManager]);
 
             $component->call('injure');
 
@@ -143,8 +153,9 @@ describe('ManagersActions Integration Tests', function () {
                 'last_name' => 'Manager',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $injuredManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $injuredManager]);
 
             $component->call('healFromInjury')
                 ->assertHasNoErrors()
@@ -156,8 +167,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('heal action fails for healthy manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('healFromInjury');
 
@@ -168,8 +180,9 @@ describe('ManagersActions Integration Tests', function () {
 
     describe('suspension and reinstatement actions', function () {
         test('suspend action works for employed manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('suspend')
                 ->assertHasNoErrors()
@@ -183,8 +196,9 @@ describe('ManagersActions Integration Tests', function () {
         test('suspend action fails for unemployed manager', function () {
             $unemployedManager = Manager::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $unemployedManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $unemployedManager]);
 
             $component->call('suspend');
 
@@ -198,8 +212,9 @@ describe('ManagersActions Integration Tests', function () {
                 'last_name' => 'Manager',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $suspendedManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $suspendedManager]);
 
             $component->call('reinstate')
                 ->assertHasNoErrors()
@@ -211,8 +226,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('reinstate action fails for non-suspended manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('reinstate');
 
@@ -223,8 +239,9 @@ describe('ManagersActions Integration Tests', function () {
 
     describe('retirement lifecycle actions', function () {
         test('retire action works for employed manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('retire')
                 ->assertHasNoErrors()
@@ -238,8 +255,9 @@ describe('ManagersActions Integration Tests', function () {
         test('retire action fails for unemployed manager', function () {
             $unemployedManager = Manager::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $unemployedManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $unemployedManager]);
 
             $component->call('retire');
 
@@ -253,8 +271,9 @@ describe('ManagersActions Integration Tests', function () {
                 'last_name' => 'Manager',
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $retiredManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $retiredManager]);
 
             $component->call('unretire')
                 ->assertHasNoErrors()
@@ -266,8 +285,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('unretire action fails for active manager', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('unretire');
 
@@ -283,8 +303,9 @@ describe('ManagersActions Integration Tests', function () {
 
             $trashedManager = Manager::onlyTrashed()->find($this->manager->id);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $trashedManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $trashedManager]);
 
             $component->call('restore')
                 ->assertHasNoErrors()
@@ -303,8 +324,9 @@ describe('ManagersActions Integration Tests', function () {
                 'first_name' => 'Career',
                 'last_name' => 'Manager',
             ]);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $manager]);
 
             // Employ
             $component->call('employ');
@@ -342,8 +364,9 @@ describe('ManagersActions Integration Tests', function () {
                 'first_name' => 'Injured',
                 'last_name' => 'Manager',
             ]);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $injuredManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $injuredManager]);
 
             // Manager is employed but injured
             expect($injuredManager->isEmployed())->toBeTrue();
@@ -367,8 +390,9 @@ describe('ManagersActions Integration Tests', function () {
                 'first_name' => 'Suspended',
                 'last_name' => 'Manager',
             ]);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $suspendedManager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $suspendedManager]);
 
             // Suspended manager still employed but cannot perform duties
             expect($suspendedManager->isEmployed())->toBeTrue();
@@ -393,8 +417,9 @@ describe('ManagersActions Integration Tests', function () {
         test('unauthorized user cannot perform actions', function () {
             $guest = User::factory()->create(); // Non-admin user
 
-            $component = Livewire::actingAs($guest)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($guest);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('employ')
                 ->assertForbidden();
@@ -402,8 +427,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('admin can perform all actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             // All action calls should succeed (though business rules may prevent them)
             $component->call('release')
@@ -416,8 +442,9 @@ describe('ManagersActions Integration Tests', function () {
 
     describe('event dispatching and state management', function () {
         test('all successful actions dispatch manager-updated event', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('release')
                 ->assertDispatched('manager-updated');
@@ -431,8 +458,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('failed actions do not dispatch events', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             // Try to employ already employed manager
             $component->call('employ')
@@ -441,8 +469,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('component state remains consistent after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             expect($component->get('manager')->id)->toBe($this->manager->id);
 
@@ -456,8 +485,9 @@ describe('ManagersActions Integration Tests', function () {
 
     describe('error handling and edge cases', function () {
         test('component handles manager model refresh after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             // Perform action
             $component->call('release');
@@ -472,8 +502,9 @@ describe('ManagersActions Integration Tests', function () {
             $originalLastName = $this->manager->last_name;
             $originalId = $this->manager->id;
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $component->call('injure');
 
@@ -484,8 +515,9 @@ describe('ManagersActions Integration Tests', function () {
         });
 
         test('manager display name consistency maintained', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['manager' => $this->manager]);
+            actingAs($this->admin);
+
+            $component = livewire(Actions::class, ['manager' => $this->manager]);
 
             $originalDisplayName = $this->manager->display_name;
 

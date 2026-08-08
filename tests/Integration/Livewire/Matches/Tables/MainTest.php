@@ -8,6 +8,9 @@ use App\Models\Matches\EventMatch;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * @group matches
  * @group integration
@@ -27,8 +30,9 @@ describe('Matches Main Table Component Integration', function () {
                 'match_number' => 1,
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
         });
@@ -39,8 +43,9 @@ describe('Matches Main Table Component Integration', function () {
                 'match_number' => 2,
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Test Event');
@@ -54,8 +59,9 @@ describe('Matches Main Table Component Integration', function () {
             expect($match->event)->not()->toBeNull();
             expect($match->event->name)->toBe('Test Event');
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Test Event');
@@ -66,19 +72,21 @@ describe('Matches Main Table Component Integration', function () {
         test('component requires proper authorization for access', function () {
             $basicUser = User::factory()->create();
 
-            Livewire::actingAs($basicUser)
-                ->test(Main::class)
+            actingAs($basicUser);
+
+            livewire(Main::class)
                 ->assertForbidden();
         });
 
         test('guest users cannot access component', function () {
-            Livewire::test(Main::class)
+            livewire(Main::class)
                 ->assertForbidden();
         });
 
         test('admin can access matches table', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
         });
@@ -90,8 +98,9 @@ describe('Matches Main Table Component Integration', function () {
                 'event_id' => $this->event->id,
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
         });
@@ -103,8 +112,9 @@ describe('Matches Main Table Component Integration', function () {
 
             expect($match->event)->not()->toBeNull();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Test Event');
@@ -117,8 +127,9 @@ describe('Matches Main Table Component Integration', function () {
                 'event_id' => $this->event->id,
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
 

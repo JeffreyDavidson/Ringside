@@ -72,6 +72,8 @@ describe('Policy Before Hook Pattern', function () {
 
 /**
  * Helper function to get public policy methods excluding 'before' and magic methods.
+ *
+ * @return array<int, string>
  */
 function getPublicPolicyMethods(object $policy): array
 {

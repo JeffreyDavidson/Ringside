@@ -9,6 +9,9 @@ use App\Models\Events\Venue;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for VenuesTable Livewire component.
  *
@@ -89,7 +92,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('loads venue data with proper relationships', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Busy Event Arena')
@@ -105,7 +110,9 @@ describe('VenuesTable Integration Tests', function () {
                 'zipcode' => '12345',
             ]);
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Address Display Arena')
@@ -114,7 +121,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('excludes soft deleted venues by default', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Active Test Arena')
@@ -124,7 +133,9 @@ describe('VenuesTable Integration Tests', function () {
 
     describe('search and filtering functionality', function () {
         test('filters venues by name search', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'Active')
                 ->assertSee('Active Test Arena')
@@ -133,7 +144,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('filters venues by city search', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'Event City')
                 ->assertSee('Busy Event Arena')
@@ -142,7 +155,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('filters venues by state search', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'AC')
                 ->assertSee('Active Test Arena')
@@ -150,7 +165,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('search handles partial matches', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'Arena')
                 ->assertSee('Active Test Arena')
@@ -159,7 +176,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('search is case insensitive', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'active')
                 ->assertSee('Active Test Arena');
@@ -169,7 +188,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('empty search shows all venues', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', '')
                 ->assertSee('Active Test Arena')
@@ -180,7 +201,9 @@ describe('VenuesTable Integration Tests', function () {
 
     describe('venue relationship display', function () {
         test('displays venues with event counts', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Busy Event Arena');
@@ -190,7 +213,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('handles venues without events', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Empty Arena');
@@ -199,7 +224,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('loads event relationships efficiently', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Busy Event Arena');
@@ -212,7 +239,9 @@ describe('VenuesTable Integration Tests', function () {
 
     describe('venue management operations', function () {
         test('administrators can delete venues', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('delete', $this->activeVenue)
                 ->assertHasNoErrors();
@@ -222,7 +251,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('administrators can restore deleted venues', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('restore', $this->deletedVenue->id)
                 ->assertHasNoErrors();
@@ -233,7 +264,9 @@ describe('VenuesTable Integration Tests', function () {
         test('delete operation preserves event relationships', function () {
             $event = Event::factory()->atVenue($this->activeVenue)->create();
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('delete', $this->activeVenue)
                 ->assertHasNoErrors();
@@ -249,7 +282,9 @@ describe('VenuesTable Integration Tests', function () {
             // Now delete the venue
             $venue->delete();
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('restore', $venue->id)
                 ->assertHasNoErrors();
@@ -266,19 +301,23 @@ describe('VenuesTable Integration Tests', function () {
 
     describe('authorization and access control', function () {
         test('basic users cannot access venue table', function () {
-            $component = Livewire::actingAs($this->basicUser)->test(Main::class);
+            actingAs($this->basicUser);
+
+            $component = livewire(Main::class);
 
             $component->assertForbidden();
         });
 
         test('guests cannot access venue table', function () {
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component->assertForbidden();
         });
 
         test('administrators have full access to all operations', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
             $component->call('delete', $this->activeVenue)->assertHasNoErrors();
@@ -288,7 +327,9 @@ describe('VenuesTable Integration Tests', function () {
 
     describe('data sorting and ordering', function () {
         test('venues are ordered consistently', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
 
@@ -298,7 +339,9 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('search results maintain proper ordering', function () {
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'Arena')
                 ->assertOk();
@@ -314,7 +357,9 @@ describe('VenuesTable Integration Tests', function () {
             // Create additional venues for testing
             Venue::factory()->count(50)->create();
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
 
@@ -324,7 +369,9 @@ describe('VenuesTable Integration Tests', function () {
         test('search performs efficiently with many venues', function () {
             Venue::factory()->count(25)->create(['name' => 'Search Test Arena']);
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'Search Test')
                 ->assertOk();
@@ -337,7 +384,9 @@ describe('VenuesTable Integration Tests', function () {
             $venueWithManyEvents = Venue::factory()->create();
             Event::factory()->count(10)->atVenue($venueWithManyEvents)->create();
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee($venueWithManyEvents->name);
@@ -353,7 +402,9 @@ describe('VenuesTable Integration Tests', function () {
                 'city' => 'St. Louis',
             ]);
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('O\'Malley\'s Arena & Entertainment Center')
@@ -363,7 +414,9 @@ describe('VenuesTable Integration Tests', function () {
         test('handles empty database gracefully', function () {
             Venue::query()->delete();
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
         });
@@ -377,7 +430,9 @@ describe('VenuesTable Integration Tests', function () {
                 'zipcode' => '12345',
             ]);
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Incomplete Address Arena')
@@ -385,8 +440,12 @@ describe('VenuesTable Integration Tests', function () {
         });
 
         test('handles concurrent operations safely', function () {
-            $component1 = Livewire::actingAs($this->admin)->test(Main::class);
-            $component2 = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component1 = livewire(Main::class);
+            actingAs($this->admin);
+
+            $component2 = livewire(Main::class);
 
             $component1->call('delete', $this->activeVenue)
                 ->assertHasNoErrors();
@@ -406,7 +465,9 @@ describe('VenuesTable Integration Tests', function () {
                 'zipcode' => '12345',
             ]);
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Complete Address Arena')
@@ -423,7 +484,9 @@ describe('VenuesTable Integration Tests', function () {
                 'zipcode' => '54321',
             ]);
 
-            $component = Livewire::actingAs($this->admin)->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('International Arena')

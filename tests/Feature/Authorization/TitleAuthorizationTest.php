@@ -5,7 +5,9 @@ declare(strict_types=1);
 use App\Livewire\Titles\Tables\Main;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
-use Livewire\Livewire;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 /**
  * Feature tests for Title Authorization and Workflows.
@@ -34,21 +36,23 @@ describe('Title Authorization and Workflows', function () {
 
     describe('component access authorization', function () {
         test('admin can access titles table', function () {
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->assertOk()
                 ->assertSee('titles')
                 ->assertSee($this->title->name);
         });
 
         test('basic user cannot access titles table', function () {
-            Livewire::actingAs($this->basicUser)
-                ->test(Main::class)
+            actingAs($this->basicUser);
+
+            livewire(Main::class)
                 ->assertForbidden();
         });
 
         test('guest user cannot access titles table', function () {
-            Livewire::test(Main::class)
+            livewire(Main::class)
                 ->assertForbidden();
         });
     });

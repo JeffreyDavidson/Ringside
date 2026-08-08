@@ -7,6 +7,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Feature tests for TagTeam authorization workflows.
  *
@@ -29,8 +32,9 @@ describe('TagTeam Authorization Feature Tests', function () {
 
     describe('admin user authorization', function () {
         test('admin can access tag teams table component', function () {
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->assertOk();
         });
 
@@ -38,8 +42,9 @@ describe('TagTeam Authorization Feature Tests', function () {
             $tagTeam = TagTeam::factory()->create();
             $deletedTeam = TagTeam::factory()->trashed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Basic CRUD actions that don't involve complex business logic
             $component->call('delete', $tagTeam)->assertHasNoErrors();
@@ -50,8 +55,9 @@ describe('TagTeam Authorization Feature Tests', function () {
 
     describe('basic user authorization', function () {
         test('basic user cannot access tag teams table component', function () {
-            Livewire::actingAs($this->basicUser)
-                ->test(Main::class)
+            actingAs($this->basicUser);
+
+            livewire(Main::class)
                 ->assertForbidden();
         });
 
@@ -59,7 +65,7 @@ describe('TagTeam Authorization Feature Tests', function () {
 
     describe('guest user authorization', function () {
         test('guest user cannot access tag teams table component', function () {
-            Livewire::test(Main::class)
+            livewire(Main::class)
                 ->assertForbidden();
         });
 

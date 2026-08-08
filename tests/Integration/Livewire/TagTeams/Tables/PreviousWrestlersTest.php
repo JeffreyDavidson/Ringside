@@ -8,7 +8,8 @@ use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
-use Livewire\Livewire;
+
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -25,7 +26,7 @@ beforeEach(function () {
 
 describe('Previous Wrestlers Table Component', function () {
     it('can mount with tag team ID', function () {
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertOk();
         $table->assertSet('tagTeamId', $this->tagTeam->id);
@@ -33,7 +34,7 @@ describe('Previous Wrestlers Table Component', function () {
 
     it('throws exception when tag team ID not specified', function () {
         expect(function () {
-            Livewire::test(PreviousWrestlers::class);
+            livewire(PreviousWrestlers::class);
         })->toThrow(Exception::class, "You didn't specify a tag team");
     });
 
@@ -55,7 +56,7 @@ describe('Previous Wrestlers Table Component', function () {
             'left_at' => Carbon::now()->subDays(5),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertSee($this->wrestler->name); // Should see the wrestler who left
 
@@ -89,7 +90,7 @@ describe('Previous Wrestlers Table Component', function () {
             'left_at' => Carbon::now()->subDays(15),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         // Should be ordered by joined_at descending (most recent first)
         $table->assertSee($wrestler1->name) // joined 10 days ago
@@ -117,14 +118,14 @@ describe('Previous Wrestlers Table Component', function () {
             'left_at' => Carbon::now()->subDays(8),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertSee($this->wrestler->name);
         $table->assertDontSee($otherWrestler->name);
     });
 
     it('handles empty previous wrestlers list', function () {
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertOk();
         $table->assertSee('No records found.');
@@ -140,7 +141,7 @@ describe('Previous Wrestlers Table Columns', function () {
             'left_at' => Carbon::now()->subDays(5),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertSee($this->wrestler->name);
         $table->assertSee($this->wrestler->name);
@@ -158,7 +159,7 @@ describe('Previous Wrestlers Table Columns', function () {
             'left_at' => $leftDate,
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertSee($this->wrestler->name);
         $table->assertSee($joinedDate->format('Y-m-d'));
@@ -176,7 +177,7 @@ describe('Previous Wrestlers Table Columns', function () {
         // Delete the wrestler to simulate missing relationship
         $this->wrestler->delete();
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertOk();
         $table->assertSee('Unknown');
@@ -185,14 +186,14 @@ describe('Previous Wrestlers Table Columns', function () {
 
 describe('Previous Wrestlers Table Configuration', function () {
     it('uses correct database table name', function () {
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         // Just verify the component loads correctly
         $table->assertOk();
     });
 
     it('sets correct resource name', function () {
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         // Just verify the component loads correctly
         $table->assertOk();
@@ -206,7 +207,7 @@ describe('Previous Wrestlers Table Configuration', function () {
             'left_at' => Carbon::now()->subDays(5),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         // Just verify the component loads and displays the data
         $table->assertSee($this->wrestler->name);
@@ -231,7 +232,7 @@ describe('Previous Wrestlers Table Business Logic', function () {
             'left_at' => Carbon::now()->subDays(10),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         // Should show both membership periods
         $table->assertSee($this->wrestler->name);
@@ -245,7 +246,7 @@ describe('Previous Wrestlers Table Business Logic', function () {
             'left_at' => Carbon::now()->subDays(5),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertSee($this->wrestler->name);
 
@@ -264,7 +265,7 @@ describe('Previous Wrestlers Table Business Logic', function () {
         // Delete the wrestler
         $this->wrestler->delete();
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         // Should still work but show "Unknown" for the name
         $table->assertOk();
@@ -291,7 +292,7 @@ describe('Previous Wrestlers Table Business Logic', function () {
             'left_at' => Carbon::now()->subDays(90),
         ]);
 
-        $table = Livewire::test(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table = livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id]);
 
         $table->assertSee($recentWrestler->name)
             ->assertSee($oldWrestler->name);

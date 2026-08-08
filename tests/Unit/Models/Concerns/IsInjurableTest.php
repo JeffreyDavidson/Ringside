@@ -27,6 +27,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('provides injuries relationship', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -41,6 +42,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('provides current injury relationship', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -55,6 +57,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('provides previous injuries relationship', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -69,6 +72,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('provides previous injury relationship', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -83,6 +87,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('injuries relationship uses the correct related model', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -98,6 +103,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('currentInjury relationship uses the correct related model', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -115,6 +121,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('can check if model is injured', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -137,6 +144,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('can check if model is not injured', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -159,6 +167,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('can check if model has injuries', function () {
             $modelWithInjuries = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -177,6 +186,7 @@ describe('IsInjurable Trait Unit Tests', function () {
 
             $modelWithoutInjuries = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -202,6 +212,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('uses the model-specific injury resolver', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 protected function resolveInjuryModelClass(): string
@@ -216,6 +227,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('throws if related model does not exist', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
             };
 
@@ -227,6 +239,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('current injury query includes whereNull ended_at', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -244,6 +257,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('previous injuries query includes whereNotNull ended_at', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string
@@ -261,6 +275,7 @@ describe('IsInjurable Trait Unit Tests', function () {
         test('previous injury query includes ofMany constraint', function () {
             $model = new class extends Model implements Injurable
             {
+                /** @use IsInjurable<FakeInjuryModel, self> */
                 use IsInjurable;
 
                 public function resolveInjuryModelClass(): string

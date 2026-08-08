@@ -26,6 +26,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('provides stables relationship', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -39,6 +40,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('provides current stable relationship', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -52,6 +54,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('provides previous stables relationship', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -65,6 +68,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('stables relationship uses the correct related model', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -80,6 +84,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('currentStable relationship uses the correct related model', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -95,6 +100,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('previousStables relationship uses the correct related model', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -112,6 +118,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('resolves to StableMember model by default', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -131,6 +138,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
             $customPivotClass = 'CustomStableMember';
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 protected static ?string $resolvedStablePivotModel = null;
@@ -159,6 +167,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('uses polymorphic stables_members table', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function testGetStablePivotTable(): string
@@ -176,6 +185,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('stables relationship includes pivot data', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -192,6 +202,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('currentStable relationship includes wherePivotNull constraint', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -208,6 +219,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('previousStables relationship includes wherePivot constraints', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string
@@ -224,6 +236,7 @@ describe('CanJoinStables Trait Unit Tests', function () {
         test('all stable relationships use timestamps', function () {
             $model = new class extends Model implements CanBeAStableMember
             {
+                /** @use CanJoinStables<StableWrestler, self> */
                 use CanJoinStables;
 
                 public function resolveStablePivotModel(): string

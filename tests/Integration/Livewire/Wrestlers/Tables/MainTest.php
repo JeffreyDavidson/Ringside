@@ -12,6 +12,9 @@ use App\Models\Wrestlers\WrestlerEmployment;
 use App\Models\Wrestlers\WrestlerInjury;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for Main Livewire component.
  *
@@ -47,7 +50,7 @@ describe('Main Component Integration', function () {
             $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'Wrestler Tag Team']);
             $stable = Stable::factory()->active()->create(['name' => 'Wrestler Stable']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee($employedWrestler->name)
@@ -64,7 +67,7 @@ describe('Main Component Integration', function () {
             $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
             $releasedWrestler = Wrestler::factory()->released()->create(['name' => 'Released Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Employed Wrestler')
@@ -84,7 +87,7 @@ describe('Main Component Integration', function () {
             Wrestler::factory()->create(['name' => 'The Rock']);
             Wrestler::factory()->create(['name' => 'Stone Cold Steve Austin']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test search functionality
             $component
@@ -106,7 +109,7 @@ describe('Main Component Integration', function () {
             $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
             $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test filtering by status (if component supports it)
             $component
@@ -121,7 +124,7 @@ describe('Main Component Integration', function () {
             $employedWrestler = Wrestler::factory()->employed()->create(['name' => 'Active Wrestler']);
             $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render without errors
             $component->assertOk();
@@ -135,7 +138,9 @@ describe('Main Component Integration', function () {
             $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
 
             // Test as administrator (should see all actions)
-            $component = Livewire::actingAs($this->user)->test(Main::class);
+            actingAs($this->user);
+
+            $component = livewire(Main::class);
             $component->assertOk();
             $component->assertSee($wrestler->name);
         });
@@ -146,7 +151,7 @@ describe('Main Component Integration', function () {
             $employedWrestler = Wrestler::factory()->employed()->create(['name' => 'Currently Employed']);
             $unemployedWrestler = Wrestler::factory()->unemployed()->create(['name' => 'Currently Unemployed']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Currently Employed')
@@ -169,7 +174,7 @@ describe('Main Component Integration', function () {
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Wrestler History');
@@ -181,7 +186,7 @@ describe('Main Component Integration', function () {
             $healthyWrestler = Wrestler::factory()->employed()->create(['name' => 'Healthy Wrestler']);
             $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Healthy Wrestler')
@@ -192,7 +197,7 @@ describe('Main Component Integration', function () {
             $activeWrestler = Wrestler::factory()->employed()->create(['name' => 'Active Wrestler']);
             $suspendedWrestler = Wrestler::factory()->suspended()->create(['name' => 'Suspended Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active Wrestler')
@@ -210,7 +215,7 @@ describe('Main Component Integration', function () {
                     'ended_at' => now()->subDays(50),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Injury History');
@@ -221,7 +226,7 @@ describe('Main Component Integration', function () {
         test('displays wrestlers without tag team relationships', function () {
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Singles Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Singles Wrestler');
@@ -237,7 +242,7 @@ describe('Main Component Integration', function () {
                 'left_at' => null,
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Tag Team Wrestler');
@@ -253,7 +258,7 @@ describe('Main Component Integration', function () {
                 'left_at' => null,
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Stable Wrestler');
@@ -270,7 +275,7 @@ describe('Main Component Integration', function () {
             $tagTeams = TagTeam::factory()->count(3)->bookable()->create();
             $stables = Stable::factory()->count(2)->active()->create();
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render efficiently with created data
             $component->assertOk()
@@ -280,7 +285,7 @@ describe('Main Component Integration', function () {
         test('component eager loads necessary relationships', function () {
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Relationship Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertOk()
@@ -292,7 +297,7 @@ describe('Main Component Integration', function () {
         test('component updates when wrestler data changes', function () {
             $wrestler = Wrestler::factory()->create(['name' => 'Original Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Original Wrestler');
 
             // Update wrestler name
@@ -307,7 +312,7 @@ describe('Main Component Integration', function () {
         test('component reflects employment status changes', function () {
             $wrestler = Wrestler::factory()->unemployed()->create(['name' => 'Employment Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Employ the wrestler
             EmployAction::run($wrestler, now());
@@ -320,7 +325,7 @@ describe('Main Component Integration', function () {
         test('component reflects injury status changes', function () {
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Injury Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Injure the wrestler
             InjureAction::run($wrestler, now());
@@ -339,7 +344,7 @@ describe('Main Component Integration', function () {
             // Wrestler is employed but also injured
             InjureAction::run($wrestler, now());
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Complex Wrestler');
@@ -351,7 +356,7 @@ describe('Main Component Integration', function () {
             $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
             $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render and show appropriate actions based on business rules
             $component
@@ -363,7 +368,7 @@ describe('Main Component Integration', function () {
         test('component handles wrestler employment transitions', function () {
             $wrestler = Wrestler::factory()->employed()->create(['name' => 'Transitioning Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Transitioning Wrestler');
 
             // Test that component handles data changes appropriately
@@ -376,7 +381,7 @@ describe('Main Component Integration', function () {
             $unbookableWrestler = Wrestler::factory()->injured()->create(['name' => 'Unbookable Wrestler']);
             $suspendedWrestler = Wrestler::factory()->suspended()->create(['name' => 'Suspended Wrestler']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should show all wrestlers with appropriate status indicators
             $component
@@ -396,7 +401,7 @@ describe('Main Component Integration', function () {
                 'hometown' => 'Test City, TX',
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Big Wrestler')
@@ -411,7 +416,7 @@ describe('Main Component Integration', function () {
                 'signature_move' => 'Stone Cold Stunner',
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Signature Wrestler');
@@ -429,7 +434,7 @@ describe('Main Component Integration', function () {
                     'ended_at' => now()->subYears(3),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Veteran Wrestler')

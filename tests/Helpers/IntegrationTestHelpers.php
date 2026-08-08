@@ -20,6 +20,8 @@ use Illuminate\Support\Carbon;
 
 /**
  * Create a complete employment lifecycle scenario.
+ *
+ * @return array<string, mixed>
  */
 function createEmploymentLifecycleScenario(string $entityType = 'wrestler'): array
 {
@@ -42,6 +44,8 @@ function createEmploymentLifecycleScenario(string $entityType = 'wrestler'): arr
 
 /**
  * Create a championship storyline scenario.
+ *
+ * @return array<string, mixed>
  */
 function createChampionshipStoryline(): array
 {
@@ -67,6 +71,8 @@ function createChampionshipStoryline(): array
 
 /**
  * Create a multi-generational title lineage.
+ *
+ * @return array<string, mixed>
  */
 function createTitleLineage(int $reignCount = 5): array
 {
@@ -97,6 +103,8 @@ function createTitleLineage(int $reignCount = 5): array
 
 /**
  * Create a stable formation and split scenario.
+ *
+ * @return array<string, mixed>
  */
 function createStableLifecycleScenario(): array
 {
@@ -122,6 +130,8 @@ function createStableLifecycleScenario(): array
 
 /**
  * Create an injury storyline with recovery.
+ *
+ * @return array<string, mixed>
  */
 function createInjuryStoryline(): array
 {
@@ -147,6 +157,8 @@ function createInjuryStoryline(): array
 
 /**
  * Create a retirement ceremony scenario.
+ *
+ * @return array<string, mixed>
  */
 function createRetirementCeremonyScenario(): array
 {
@@ -190,6 +202,8 @@ function createRetirementCeremonyScenario(): array
 
 /**
  * Create a tournament bracket scenario.
+ *
+ * @return array<string, mixed>
  */
 function createTournamentScenario(int $participantCount = 8): array
 {
@@ -219,6 +233,8 @@ function createTournamentScenario(int $participantCount = 8): array
 
 /**
  * Create a company merger scenario.
+ *
+ * @return array<string, mixed>
  */
 function createCompanyMergerScenario(): array
 {
@@ -261,6 +277,8 @@ function createCompanyMergerScenario(): array
 
 /**
  * Set up a realistic test database state.
+ *
+ * @return array<string, mixed>
  */
 function setupRealisticTestState(): array
 {
@@ -294,8 +312,10 @@ function setupRealisticTestState(): array
 
 /**
  * Create management relationship with proper pivot data.
+ *
+ * @param  array<string, mixed>  $options
  */
-function createManagementRelationship($wrestler, $manager, array $options = []): void
+function createManagementRelationship(Wrestler $wrestler, Manager $manager, array $options = []): void
 {
     $defaultOptions = [
         'hired_at' => Carbon::now()->subMonths(6),
@@ -310,8 +330,10 @@ function createManagementRelationship($wrestler, $manager, array $options = []):
 
 /**
  * Create tag team membership with proper pivot data.
+ *
+ * @param  array<string, mixed>  $options
  */
-function createTagTeamMembership($wrestler, $tagTeam, array $options = []): void
+function createTagTeamMembership(Wrestler $wrestler, TagTeam $tagTeam, array $options = []): void
 {
     $defaultOptions = [
         'joined_at' => Carbon::now()->subMonths(6),
@@ -327,7 +349,7 @@ function createTagTeamMembership($wrestler, $tagTeam, array $options = []): void
 /**
  * End management relationship by setting fired_at date.
  */
-function endManagementRelationship($wrestler, $manager, ?Carbon $endDate = null): void
+function endManagementRelationship(Wrestler $wrestler, Manager $manager, ?Carbon $endDate = null): void
 {
     $endDate = $endDate ?? Carbon::now();
     $wrestler->managers()->updateExistingPivot($manager->id, [
@@ -339,7 +361,7 @@ function endManagementRelationship($wrestler, $manager, ?Carbon $endDate = null)
 /**
  * End tag team membership by setting left_at date.
  */
-function endTagTeamMembership($wrestler, $tagTeam, ?Carbon $endDate = null): void
+function endTagTeamMembership(Wrestler $wrestler, TagTeam $tagTeam, ?Carbon $endDate = null): void
 {
     $endDate = $endDate ?? Carbon::now();
     $wrestler->tagTeams()->updateExistingPivot($tagTeam->id, [
@@ -350,8 +372,10 @@ function endTagTeamMembership($wrestler, $tagTeam, ?Carbon $endDate = null): voi
 
 /**
  * Create multiple management periods for complex scenarios.
+ *
+ * @param  array<int, array{manager: Manager, hired_at: Carbon, fired_at?: Carbon|null}>  $periods
  */
-function createManagementHistory($wrestler, array $periods): void
+function createManagementHistory(Wrestler $wrestler, array $periods): void
 {
     foreach ($periods as $period) {
         createManagementRelationship($wrestler, $period['manager'], [
@@ -363,8 +387,10 @@ function createManagementHistory($wrestler, array $periods): void
 
 /**
  * Create multiple tag team membership periods for complex scenarios.
+ *
+ * @param  array<int, array{tag_team: TagTeam, joined_at: Carbon, left_at?: Carbon|null}>  $periods
  */
-function createTagTeamHistory($wrestler, array $periods): void
+function createTagTeamHistory(Wrestler $wrestler, array $periods): void
 {
     foreach ($periods as $period) {
         createTagTeamMembership($wrestler, $period['tag_team'], [
@@ -376,8 +402,10 @@ function createTagTeamHistory($wrestler, array $periods): void
 
 /**
  * Create overlapping relationship periods for validation testing.
+ *
+ * @return array<string, Carbon|bool>
  */
-function createOverlappingManagementPeriods($wrestler, $manager1, $manager2): array
+function createOverlappingManagementPeriods(Wrestler $wrestler, Manager $manager1, Manager $manager2): array
 {
     $firstPeriodStart = Carbon::now()->subYear();
     $firstPeriodEnd = Carbon::now()->subMonths(6);
@@ -403,8 +431,10 @@ function createOverlappingManagementPeriods($wrestler, $manager1, $manager2): ar
 
 /**
  * Create complex relationship scenario with multiple periods and partners.
+ *
+ * @return array<string, mixed>
  */
-function createComplexRelationshipScenario($wrestler): array
+function createComplexRelationshipScenario(Wrestler $wrestler): array
 {
     $manager1 = Manager::factory()->employed()->create(['name' => 'First Manager']);
     $manager2 = Manager::factory()->employed()->create(['name' => 'Second Manager']);

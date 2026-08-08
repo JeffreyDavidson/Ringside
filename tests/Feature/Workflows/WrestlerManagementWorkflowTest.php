@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
@@ -25,8 +24,9 @@ describe('Wrestler Creation Journey', function () {
             ->assertSeeLivewire(Main::class);
 
         // And: Creating wrestler through modal workflow
-        $modalComponent = Livewire::actingAs($admin)
-            ->test(FormModal::class)
+        actingAs($admin);
+
+        $modalComponent = \Pest\Livewire\livewire(FormModal::class)
             ->call('openModal') // Open for creation
             ->assertSet('isModalOpen', true);
 
@@ -62,8 +62,9 @@ describe('Wrestler Creation Journey', function () {
         expect($wrestler->signature_move)->toBe('Attitude Adjustment');
 
         // And: Should appear in the wrestlers table
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->assertSee('John Cena')
             ->assertSee('West Newbury, MA');
     });
@@ -73,8 +74,9 @@ describe('Wrestler Creation Journey', function () {
         $admin = administrator();
 
         // When: Opening create modal and using dummy data
-        $component = Livewire::actingAs($admin)
-            ->test(FormModal::class)
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(FormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -103,8 +105,9 @@ describe('Wrestler Employment Status Management Journey', function () {
         $wrestler = Wrestler::factory()->create(['name' => 'Daniel Bryan']);
 
         // When: Employing the wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleWrestlerAction', 'employ', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -112,8 +115,9 @@ describe('Wrestler Employment Status Management Journey', function () {
         expect($wrestler->fresh()->isEmployed())->toBeTrue();
 
         // When: Suspending the employed wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleWrestlerAction', 'suspend', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -121,8 +125,9 @@ describe('Wrestler Employment Status Management Journey', function () {
         expect($wrestler->fresh()->isSuspended())->toBeTrue();
 
         // When: Reinstating the suspended wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleWrestlerAction', 'reinstate', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -131,8 +136,9 @@ describe('Wrestler Employment Status Management Journey', function () {
         expect($wrestler->fresh()->isSuspended())->toBeFalse();
 
         // When: Retiring the wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleWrestlerAction', 'retire', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -140,8 +146,9 @@ describe('Wrestler Employment Status Management Journey', function () {
         expect($wrestler->fresh()->isRetired())->toBeTrue();
 
         // When: Unretiring the wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleWrestlerAction', 'unretire', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -158,8 +165,9 @@ describe('Wrestler Employment Status Management Journey', function () {
         $wrestler = Wrestler::factory()->bookable()->create(['name' => 'CM Punk']);
 
         // When: Injuring the wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleWrestlerAction', 'injure', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -167,8 +175,9 @@ describe('Wrestler Employment Status Management Journey', function () {
         expect($wrestler->fresh()->isInjured())->toBeTrue();
 
         // When: Healing the wrestler from injury
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('handleWrestlerAction', 'heal', $wrestler->id)
             ->assertHasNoErrors();
 
@@ -188,8 +197,9 @@ describe('Wrestler Profile Management Journey', function () {
         ]);
 
         // When: Opening edit modal for the wrestler
-        $component = Livewire::actingAs($admin)
-            ->test(FormModal::class)
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(FormModal::class)
             ->call('openModal', $wrestler->id)
             ->assertSet('isModalOpen', true);
 
@@ -213,8 +223,9 @@ describe('Wrestler Profile Management Journey', function () {
         expect($wrestler->signature_move)->toBe('New Finisher');
 
         // And: Updated information should appear in table
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->assertSee('Updated Name')
             ->assertSee('Updated City, UT');
     });
@@ -261,30 +272,34 @@ describe('Wrestler Search and Filtering Journey', function () {
         $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Mick Foley']);
 
         // When: Searching for specific wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('search', 'John')
             ->assertSee($bookableWrestler->name)
             ->assertDontSee($releasedWrestler->name)
             ->assertDontSee($retiredWrestler->name);
 
         // When: Filtering by employment status
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('filterValues.status', 'employed')
             ->assertSee($bookableWrestler->name)
             ->assertDontSee($releasedWrestler->name);
 
         // When: Filtering by released status
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('filterValues.status', 'released')
             ->assertSee($releasedWrestler->name)
             ->assertDontSee($bookableWrestler->name);
 
         // When: Clearing filters
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->set('filterValues.status', '')
             ->set('search', '')
             ->assertSee($bookableWrestler->name)
@@ -300,8 +315,9 @@ describe('Wrestler Deletion and Restoration Journey', function () {
         $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
 
         // When: Deleting the wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('delete', $wrestler)
             ->assertHasNoErrors();
 
@@ -310,8 +326,9 @@ describe('Wrestler Deletion and Restoration Journey', function () {
         expect(Wrestler::onlyTrashed()->find($wrestler->id))->not->toBeNull();
 
         // When: Restoring the wrestler
-        Livewire::actingAs($admin)
-            ->test(Main::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(Main::class)
             ->call('restore', $wrestler->id)
             ->assertHasNoErrors();
 

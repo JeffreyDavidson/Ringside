@@ -33,6 +33,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('provides managers relationship', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string
@@ -46,6 +47,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('provides currentManagers relationship', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string
@@ -59,6 +61,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('provides previousManagers relationship', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string
@@ -84,6 +87,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('generates correct pivot table name', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string
@@ -108,6 +112,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('managers relationship includes pivot data', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string
@@ -124,6 +129,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('currentManagers relationship includes wherePivotNull constraint', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string
@@ -138,6 +144,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('previousManagers relationship includes wherePivotNotNull constraint', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string
@@ -152,6 +159,7 @@ describe('CanBeManaged Trait Unit Tests', function () {
         test('all manager relationships use timestamps', function () {
             $model = new class extends Model implements Manageable
             {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
                 use CanBeManaged;
 
                 public function resolveManagersPivotModel(): string

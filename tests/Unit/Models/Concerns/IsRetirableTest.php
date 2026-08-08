@@ -29,6 +29,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('provides retirements relationship', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -42,6 +43,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('provides current retirement relationship', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -55,6 +57,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('provides previous retirements relationship', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -68,6 +71,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('provides previous retirement relationship', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -81,6 +85,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('retirements relationship uses the correct related model', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -96,6 +101,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('currentRetirement relationship uses the correct related model', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -113,6 +119,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('can check if model is retired', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -134,6 +141,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('can check if model is not retired', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -155,6 +163,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('can check if model has retirements', function () {
             $modelWith = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -172,6 +181,7 @@ describe('IsRetirable Trait Unit Tests', function () {
             };
             $modelWithout = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -204,6 +214,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('current retirement query includes whereNull ended_at', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -222,6 +233,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('previous retirements query includes whereNotNull ended_at', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -240,6 +252,7 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('previous retirement query includes ofMany constraint', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
                 public function resolveRetirementModelClass(): string
@@ -258,9 +271,10 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('can check if model can be retired', function () {
             $employedModel = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
-                public $status = EmploymentStatus::Employed;
+                public EmploymentStatus $status = EmploymentStatus::Employed;
 
                 public function canBeRetired(): bool
                 {
@@ -270,9 +284,10 @@ describe('IsRetirable Trait Unit Tests', function () {
 
             $retiredModel = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
-                public $status = EmploymentStatus::Retired;
+                public EmploymentStatus $status = EmploymentStatus::Retired;
 
                 public function canBeRetired(): bool
                 {
@@ -287,9 +302,10 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('can check if model can be unretired', function () {
             $retiredModel = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
-                public $status = EmploymentStatus::Retired;
+                public EmploymentStatus $status = EmploymentStatus::Retired;
 
                 public function canBeUnretired(): bool
                 {
@@ -299,9 +315,10 @@ describe('IsRetirable Trait Unit Tests', function () {
 
             $employedModel = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
-                public $status = EmploymentStatus::Employed;
+                public EmploymentStatus $status = EmploymentStatus::Employed;
 
                 public function canBeUnretired(): bool
                 {
@@ -316,9 +333,10 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('can ensure model can be retired', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
-                public $status = EmploymentStatus::Employed;
+                public EmploymentStatus $status = EmploymentStatus::Employed;
 
                 public function canBeRetired(): bool
                 {
@@ -339,9 +357,10 @@ describe('IsRetirable Trait Unit Tests', function () {
         test('can ensure model can be unretired', function () {
             $model = new class extends Model implements Retirable
             {
+                /** @use IsRetirable<FakeRetirementModel, self> */
                 use IsRetirable;
 
-                public $status = EmploymentStatus::Retired;
+                public EmploymentStatus $status = EmploymentStatus::Retired;
 
                 public function canBeUnretired(): bool
                 {

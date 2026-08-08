@@ -13,11 +13,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Fake suspendable model for testing IsSuspendable trait in isolation.
  * This ensures trait tests are not coupled to real business models.
+ *
+ * @implements Suspendable<FakeSuspensionModel, self>
  */
 #[Table('fake_suspendables')]
 #[Fillable('name')]
 class FakeSuspendableModel extends Model implements Suspendable
 {
+    /** @use IsSuspendable<FakeSuspensionModel, self> */
     use IsSuspendable;
 
     protected function resolveSuspensionModelClass(): string

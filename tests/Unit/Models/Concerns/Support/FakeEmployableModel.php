@@ -13,11 +13,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Fake employable model for testing IsEmployable trait in isolation.
  * This ensures trait tests are not coupled to real business models.
+ *
+ * @implements Employable<FakeEmploymentModel, self>
  */
 #[Table('fake_employables')]
 #[Fillable('name')]
 class FakeEmployableModel extends Model implements Employable
 {
+    /** @use IsEmployable<FakeEmploymentModel, self> */
     use IsEmployable;
 
     protected function resolveEmploymentModelClass(): string

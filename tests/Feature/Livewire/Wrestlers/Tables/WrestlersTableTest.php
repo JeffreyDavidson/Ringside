@@ -7,6 +7,9 @@ use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Feature tests for Main Livewire component workflows.
  *
@@ -33,8 +36,9 @@ describe('Main Component Feature Workflows', function () {
         test('complete wrestler employment workflow', function () {
             $wrestler = Wrestler::factory()->released()->create();
 
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->call('handleWrestlerAction', 'employ', $wrestler->id)
                 ->assertHasNoErrors()
                 ->assertSessionMissing('error');
@@ -46,8 +50,9 @@ describe('Main Component Feature Workflows', function () {
         test('complete wrestler release workflow', function () {
             $wrestler = Wrestler::factory()->bookable()->create();
 
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->call('handleWrestlerAction', 'release', $wrestler->id)
                 ->assertHasNoErrors()
                 ->assertSessionMissing('error');
@@ -58,8 +63,9 @@ describe('Main Component Feature Workflows', function () {
         test('complete wrestler retirement workflow', function () {
             $wrestler = Wrestler::factory()->bookable()->create();
 
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->call('handleWrestlerAction', 'retire', $wrestler->id)
                 ->assertHasNoErrors();
 
@@ -69,8 +75,9 @@ describe('Main Component Feature Workflows', function () {
         test('complete wrestler deletion and restoration workflow', function () {
             $wrestler = Wrestler::factory()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Delete workflow
             $component->call('delete', $wrestler)
@@ -98,8 +105,9 @@ describe('Main Component Feature Workflows', function () {
             $wrestler1 = Wrestler::factory()->create(['name' => 'Stone Cold Steve Austin']);
             $wrestler2 = Wrestler::factory()->create(['name' => 'The Rock']);
 
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->assertSee('Stone Cold Steve Austin')
                 ->assertSee('The Rock')
                 ->set('search', 'Stone Cold')
@@ -114,8 +122,9 @@ describe('Main Component Feature Workflows', function () {
             $employedWrestler = Wrestler::factory()->bookable()->create(['name' => 'Active Wrestler']);
             $releasedWrestler = Wrestler::factory()->released()->create(['name' => 'Released Wrestler']);
 
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->assertSee('Active Wrestler')
                 ->assertSee('Released Wrestler')
                 ->set('filterValues.status', 'employed')
@@ -131,8 +140,9 @@ describe('Main Component Feature Workflows', function () {
         test('table handles wrestler actions through delegation', function () {
             $wrestler = Wrestler::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Test that the action delegation works without errors
             $component->call('handleWrestlerAction', 'employ', $wrestler->id)
@@ -147,8 +157,9 @@ describe('Main Component Feature Workflows', function () {
         test('component maintains state during business operations', function () {
             $wrestler = Wrestler::factory()->released()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            $component = livewire(Main::class)
                 ->set('search', 'Test Search')
                 ->set('filterValues.status', 'released');
 
@@ -163,8 +174,9 @@ describe('Main Component Feature Workflows', function () {
         test('component handles concurrent user interactions', function () {
             $wrestler = Wrestler::factory()->bookable()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Simulate multiple rapid interactions
             $component->set('search', 'Test')
@@ -180,8 +192,9 @@ describe('Main Component Feature Workflows', function () {
         test('component provides immediate feedback for successful actions', function () {
             $wrestler = Wrestler::factory()->released()->create();
 
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->call('handleWrestlerAction', 'employ', $wrestler->id)
                 ->assertHasNoErrors()
                 ->assertSessionMissing('error');
@@ -194,8 +207,9 @@ describe('Main Component Feature Workflows', function () {
             $wrestler = Wrestler::factory()->create();
 
             // Test that component doesn't break with operations that might take time
-            Livewire::actingAs($this->admin)
-                ->test(Main::class)
+            actingAs($this->admin);
+
+            livewire(Main::class)
                 ->call('delete', $wrestler)
                 ->call('restore', $wrestler->id)
                 ->assertHasNoErrors();

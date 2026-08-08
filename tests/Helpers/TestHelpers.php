@@ -22,6 +22,8 @@ use Illuminate\Support\Collection;
 
 /**
  * Create a wrestler with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createWrestler(array $attributes = []): Wrestler
 {
@@ -30,6 +32,8 @@ function createWrestler(array $attributes = []): Wrestler
 
 /**
  * Create an employed wrestler for testing availability scenarios.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createEmployedWrestler(array $attributes = []): Wrestler
 {
@@ -38,6 +42,8 @@ function createEmployedWrestler(array $attributes = []): Wrestler
 
 /**
  * Create a bookable wrestler for match testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createBookableWrestler(array $attributes = []): Wrestler
 {
@@ -46,6 +52,8 @@ function createBookableWrestler(array $attributes = []): Wrestler
 
 /**
  * Create a manager with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createManager(array $attributes = []): Manager
 {
@@ -54,6 +62,8 @@ function createManager(array $attributes = []): Manager
 
 /**
  * Create a referee with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createReferee(array $attributes = []): Referee
 {
@@ -62,6 +72,8 @@ function createReferee(array $attributes = []): Referee
 
 /**
  * Create a tag team with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createTagTeam(array $attributes = []): TagTeam
 {
@@ -70,6 +82,8 @@ function createTagTeam(array $attributes = []): TagTeam
 
 /**
  * Create a stable with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createStable(array $attributes = []): Stable
 {
@@ -78,6 +92,8 @@ function createStable(array $attributes = []): Stable
 
 /**
  * Create a title with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createTitle(array $attributes = []): Title
 {
@@ -86,6 +102,8 @@ function createTitle(array $attributes = []): Title
 
 /**
  * Create a venue with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createVenue(array $attributes = []): Venue
 {
@@ -94,6 +112,8 @@ function createVenue(array $attributes = []): Venue
 
 /**
  * Create an event with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createEvent(array $attributes = []): Event
 {
@@ -102,6 +122,8 @@ function createEvent(array $attributes = []): Event
 
 /**
  * Create a match with realistic attributes for testing.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createMatch(array $attributes = []): EventMatch
 {
@@ -110,6 +132,9 @@ function createMatch(array $attributes = []): EventMatch
 
 /**
  * Create a collection of wrestlers for testing bulk operations.
+ *
+ * @param  array<string, mixed>  $attributes
+ * @return Collection<int, Wrestler>
  */
 function createWrestlers(int $count = 5, array $attributes = []): Collection
 {
@@ -118,6 +143,9 @@ function createWrestlers(int $count = 5, array $attributes = []): Collection
 
 /**
  * Create a collection of managers for testing bulk operations.
+ *
+ * @param  array<string, mixed>  $attributes
+ * @return Collection<int, Manager>
  */
 function createManagers(int $count = 5, array $attributes = []): Collection
 {
@@ -126,6 +154,9 @@ function createManagers(int $count = 5, array $attributes = []): Collection
 
 /**
  * Create a collection of referees for testing bulk operations.
+ *
+ * @param  array<string, mixed>  $attributes
+ * @return Collection<int, Referee>
  */
 function createReferees(int $count = 5, array $attributes = []): Collection
 {
@@ -134,6 +165,8 @@ function createReferees(int $count = 5, array $attributes = []): Collection
 
 /**
  * Create a complete roster with wrestlers, managers, referees, tag teams, and stables.
+ *
+ * @return array<string, mixed>
  */
 function createFullRoster(int $size = 10): array
 {
@@ -148,6 +181,8 @@ function createFullRoster(int $size = 10): array
 
 /**
  * Create a complete event with matches and participants.
+ *
+ * @return array<string, mixed>
  */
 function createEventWithMatches(int $matchCount = 3): array
 {
@@ -169,6 +204,8 @@ function createEventWithMatches(int $matchCount = 3): array
 
 /**
  * Create a tag team with wrestlers.
+ *
+ * @return array<string, mixed>
  */
 function createTagTeamWithWrestlers(int $wrestlerCount = 2): array
 {
@@ -189,6 +226,8 @@ function createTagTeamWithWrestlers(int $wrestlerCount = 2): array
 
 /**
  * Create a stable with members.
+ *
+ * @return array<string, mixed>
  */
 function createStableWithMembers(int $wrestlerCount = 3, int $tagTeamCount = 1): array
 {
@@ -217,6 +256,8 @@ function createStableWithMembers(int $wrestlerCount = 3, int $tagTeamCount = 1):
 
 /**
  * Create a wrestler with a manager relationship.
+ *
+ * @return array<string, mixed>
  */
 function createWrestlerWithManager(): array
 {
@@ -235,6 +276,8 @@ function createWrestlerWithManager(): array
 
 /**
  * Create a championship scenario with title and champion.
+ *
+ * @return array<string, mixed>
  */
 function createChampionshipScenario(string $championType = 'wrestler'): array
 {
@@ -266,6 +309,8 @@ function createChampionshipScenario(string $championType = 'wrestler'): array
 
 /**
  * Create an injured wrestler for testing injury scenarios.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createInjuredWrestler(array $attributes = []): Wrestler
 {
@@ -274,6 +319,8 @@ function createInjuredWrestler(array $attributes = []): Wrestler
 
 /**
  * Create a suspended wrestler for testing suspension scenarios.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createSuspendedWrestler(array $attributes = []): Wrestler
 {
@@ -282,6 +329,8 @@ function createSuspendedWrestler(array $attributes = []): Wrestler
 
 /**
  * Create a retired wrestler for testing retirement scenarios.
+ *
+ * @param  array<string, mixed>  $attributes
  */
 function createRetiredWrestler(array $attributes = []): Wrestler
 {
@@ -336,6 +385,8 @@ function wrestlingDate(string $period = 'recent'): Carbon\Carbon
 
 /**
  * Create a realistic wrestling time period (start and end dates).
+ *
+ * @return array{started_at: Carbon\Carbon, ended_at: Carbon\Carbon|null}
  */
 function wrestlingTimePeriod(string $type = 'employment'): array
 {

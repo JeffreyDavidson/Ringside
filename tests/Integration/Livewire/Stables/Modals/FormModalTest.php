@@ -10,7 +10,8 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
-use Livewire\Livewire;
+
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -39,7 +40,7 @@ describe('FormModal Configuration', function () {
 
 describe('FormModal Rendering', function () {
     it('can render in create mode', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertOk();
@@ -48,14 +49,14 @@ describe('FormModal Rendering', function () {
     it('can render in edit mode', function () {
         $stable = Stable::factory()->create();
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable->id);
 
         $component->assertOk();
     });
 
     it('displays correct title in create mode', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertSee('Create Stable');
@@ -64,7 +65,7 @@ describe('FormModal Rendering', function () {
     it('displays correct title in edit mode', function () {
         $stable = Stable::factory()->create(['name' => 'Test Stable']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable->id);
 
         $component->assertSee('Edit Stable');
@@ -73,7 +74,7 @@ describe('FormModal Rendering', function () {
     it('presents wrestlers list for selection', function () {
         $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertSee('Test Wrestler');
@@ -82,7 +83,7 @@ describe('FormModal Rendering', function () {
     it('presents tag teams list for selection', function () {
         $tagTeam = TagTeam::factory()->create(['name' => 'Test Tag Team']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertSee('Test Tag Team');
@@ -91,7 +92,7 @@ describe('FormModal Rendering', function () {
     it('presents managers list for selection', function () {
         $manager = Manager::factory()->create(['first_name' => 'Test', 'last_name' => 'Manager']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertSee('Test Manager');
@@ -100,7 +101,7 @@ describe('FormModal Rendering', function () {
 
 describe('FormModal Create Operations', function () {
     it('can create a new stable with valid data', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'The New World Order')
             ->set('form.started_at', '2024-01-01')
@@ -120,7 +121,7 @@ describe('FormModal Create Operations', function () {
     });
 
     it('validates required fields when creating', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', '')
             ->call('save');
@@ -133,7 +134,7 @@ describe('FormModal Create Operations', function () {
     it('validates stable name uniqueness', function () {
         Stable::factory()->create(['name' => 'Existing Stable']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Existing Stable')
             ->set('form.started_at', '2024-01-01')
@@ -143,7 +144,7 @@ describe('FormModal Create Operations', function () {
     });
 
     it('validates started_at date format', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2023-13-32')
@@ -153,7 +154,7 @@ describe('FormModal Create Operations', function () {
     });
 
     it('validates ended_at is after started_at', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -164,7 +165,7 @@ describe('FormModal Create Operations', function () {
     });
 
     it('can create stable with optional fields', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -193,7 +194,7 @@ describe('FormModal Edit Operations', function () {
         ]);
         $stable->activityPeriods()->create(['started_at' => '2024-01-01']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable->id)
             ->set('form.name', 'Updated Stable')
             ->set('form.started_at', '2024-01-02')
@@ -217,7 +218,7 @@ describe('FormModal Edit Operations', function () {
         ]);
         $stable->activityPeriods()->create(['started_at' => '2024-01-01']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable->id);
 
         $component->assertSet('form.name', 'Test Stable');
@@ -228,7 +229,7 @@ describe('FormModal Edit Operations', function () {
         $stable1 = Stable::factory()->create(['name' => 'Stable One']);
         $stable2 = Stable::factory()->create(['name' => 'Stable Two']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable2->id)
             ->set('form.name', 'Stable One')
             ->call('save');
@@ -242,7 +243,7 @@ describe('FormModal Edit Operations', function () {
         ]);
         $stable->activityPeriods()->create(['started_at' => '2024-01-01']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable->id)
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-02')
@@ -259,7 +260,7 @@ describe('FormModal Edit Operations', function () {
         $wrestler2 = Wrestler::factory()->create();
         $stable->wrestlers()->attach([$wrestler1->id => ['joined_at' => now()], $wrestler2->id => ['joined_at' => now()]]);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable->id)
             ->set('form.started_at', '2025-01-01')
             ->call('save');
@@ -271,7 +272,7 @@ describe('FormModal Edit Operations', function () {
 
 describe('FormModal Activity Period Management', function () {
     it('handles activity periods correctly', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -284,7 +285,7 @@ describe('FormModal Activity Period Management', function () {
     });
 
     it('can set ended_at for disbanded stables', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Disbanded Stable')
             ->set('form.started_at', '2024-01-01')
@@ -298,7 +299,7 @@ describe('FormModal Activity Period Management', function () {
     });
 
     it('validates ended_at is not before started_at', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-06-01')
@@ -314,7 +315,7 @@ describe('FormModal Member Management', function () {
         $wrestler1 = Wrestler::factory()->create();
         $wrestler2 = Wrestler::factory()->create();
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -333,7 +334,7 @@ describe('FormModal Member Management', function () {
         $tagTeam1 = TagTeam::factory()->create();
         $tagTeam2 = TagTeam::factory()->create();
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -349,7 +350,7 @@ describe('FormModal Member Management', function () {
     });
 
     it('validates wrestlers exist when assigning', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -360,7 +361,7 @@ describe('FormModal Member Management', function () {
     });
 
     it('validates tag teams exist when assigning', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -375,7 +376,7 @@ describe('FormModal State Management', function () {
     it('resets form when switching modes', function () {
         $stable = Stable::factory()->create(['name' => 'Test Stable']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $stable->id)
             ->call('openModal');
 
@@ -385,7 +386,7 @@ describe('FormModal State Management', function () {
     });
 
     it('closes modal after successful save', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
@@ -395,7 +396,7 @@ describe('FormModal State Management', function () {
     });
 
     it('keeps modal open when validation fails', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', '')
             ->call('save');

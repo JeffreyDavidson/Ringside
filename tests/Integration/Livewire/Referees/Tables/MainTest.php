@@ -18,6 +18,9 @@ use App\Models\Referees\RefereeRetirement;
 use App\Models\Referees\RefereeSuspension;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for RefereesTable Livewire component.
  *
@@ -47,7 +50,7 @@ describe('RefereesTable Component', function () {
             $event = Event::factory()->create(['name' => 'Test Event']);
             $match = EventMatch::factory()->for($event, 'event')->create();
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee($employedReferee->full_name)
@@ -64,7 +67,7 @@ describe('RefereesTable Component', function () {
             $retiredReferee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
             $releasedReferee = Referee::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Employed Referee')
@@ -83,7 +86,7 @@ describe('RefereesTable Component', function () {
             Referee::factory()->create(['first_name' => 'Dave', 'last_name' => 'Hebner']);
             Referee::factory()->create(['first_name' => 'Mike', 'last_name' => 'Chioda']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test search functionality
             $component
@@ -105,7 +108,7 @@ describe('RefereesTable Component', function () {
             $retiredReferee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
             $injuredReferee = Referee::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test filtering by status (if component supports it)
             $component
@@ -120,7 +123,7 @@ describe('RefereesTable Component', function () {
             $employedReferee = Referee::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Referee']);
             $retiredReferee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render without errors
             $component->assertOk();
@@ -134,7 +137,9 @@ describe('RefereesTable Component', function () {
             $referee = Referee::factory()->create(['first_name' => 'Test', 'last_name' => 'Referee']);
 
             // Test as administrator (should see all actions)
-            $component = Livewire::actingAs($this->user)->test(Main::class);
+            actingAs($this->user);
+
+            $component = livewire(Main::class);
             $component->assertOk();
             $component->assertSee($referee->full_name);
         });
@@ -145,7 +150,7 @@ describe('RefereesTable Component', function () {
             $employedReferee = Referee::factory()->employed()->create(['first_name' => 'Currently', 'last_name' => 'Employed']);
             $unemployedReferee = Referee::factory()->unemployed()->create(['first_name' => 'Currently', 'last_name' => 'Unemployed']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Currently Employed')
@@ -168,7 +173,7 @@ describe('RefereesTable Component', function () {
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Referee History');
@@ -180,7 +185,7 @@ describe('RefereesTable Component', function () {
             $healthyReferee = Referee::factory()->employed()->create(['first_name' => 'Healthy', 'last_name' => 'Referee']);
             $injuredReferee = Referee::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Healthy Referee')
@@ -191,7 +196,7 @@ describe('RefereesTable Component', function () {
             $activeReferee = Referee::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Referee']);
             $suspendedReferee = Referee::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active Referee')
@@ -209,7 +214,7 @@ describe('RefereesTable Component', function () {
                     'ended_at' => now()->subDays(50),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Injury History');
@@ -226,7 +231,7 @@ describe('RefereesTable Component', function () {
                     'ended_at' => now()->subDays(50),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Suspension History');
@@ -237,7 +242,7 @@ describe('RefereesTable Component', function () {
         test('displays referees without match assignments', function () {
             $referee = Referee::factory()->employed()->create(['first_name' => 'Available', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Available Referee');
@@ -251,7 +256,7 @@ describe('RefereesTable Component', function () {
             // Create match referee relationship (if exists in the system)
             // This depends on how matches and referees are connected
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Experienced Referee');
@@ -261,7 +266,7 @@ describe('RefereesTable Component', function () {
             $availableReferee = Referee::factory()->bookable()->create(['first_name' => 'Available', 'last_name' => 'Referee']);
             $unavailableReferee = Referee::factory()->injured()->create(['first_name' => 'Unavailable', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Available Referee')
@@ -279,7 +284,7 @@ describe('RefereesTable Component', function () {
             $events = Event::factory()->count(3)->create();
             $matches = EventMatch::factory()->count(10)->create();
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render efficiently
             $component->assertOk()
@@ -289,7 +294,7 @@ describe('RefereesTable Component', function () {
         test('component eager loads necessary relationships', function () {
             $referee = Referee::factory()->employed()->create(['first_name' => 'Relationship', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertOk()
@@ -301,7 +306,7 @@ describe('RefereesTable Component', function () {
         test('component updates when referee data changes', function () {
             $referee = Referee::factory()->create(['first_name' => 'Original', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Original Referee');
 
             // Update referee name
@@ -316,7 +321,7 @@ describe('RefereesTable Component', function () {
         test('component reflects employment status changes', function () {
             $referee = Referee::factory()->unemployed()->create(['first_name' => 'Employment', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Employ the referee
             EmployAction::run($referee, now());
@@ -329,7 +334,7 @@ describe('RefereesTable Component', function () {
         test('component reflects injury status changes', function () {
             $referee = Referee::factory()->employed()->create(['first_name' => 'Injury', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Injure the referee
             InjureAction::run($referee, now());
@@ -342,7 +347,7 @@ describe('RefereesTable Component', function () {
         test('component reflects healing status changes', function () {
             $referee = Referee::factory()->injured()->create(['first_name' => 'Healing', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Heal the referee
             HealAction::run($referee, now());
@@ -361,7 +366,7 @@ describe('RefereesTable Component', function () {
             // Referee is employed but also injured
             InjureAction::run($referee, now());
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Complex Referee');
@@ -373,7 +378,7 @@ describe('RefereesTable Component', function () {
             $injuredReferee = Referee::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Referee']);
             $retiredReferee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render and show appropriate actions based on business rules
             $component
@@ -387,7 +392,7 @@ describe('RefereesTable Component', function () {
             $unavailableReferee = Referee::factory()->injured()->create(['first_name' => 'Unavailable', 'last_name' => 'Referee']);
             $suspendedReferee = Referee::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should show all referees with appropriate status indicators
             $component
@@ -400,7 +405,7 @@ describe('RefereesTable Component', function () {
         test('component handles referee retirement transitions', function () {
             $referee = Referee::factory()->employed()->create(['first_name' => 'Retiring', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Retiring Referee');
 
             // Retire the referee
@@ -418,7 +423,7 @@ describe('RefereesTable Component', function () {
             $seniorReferee = Referee::factory()->employed()->create(['first_name' => 'Senior', 'last_name' => 'Official']);
             $juniorReferee = Referee::factory()->employed()->create(['first_name' => 'Junior', 'last_name' => 'Official']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Senior Official')
@@ -444,7 +449,7 @@ describe('RefereesTable Component', function () {
                     'ended_at' => now()->subYears(3),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Veteran Referee')
@@ -458,7 +463,7 @@ describe('RefereesTable Component', function () {
 
             // Create referee assignment (if system supports it)
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Assigned Referee');
@@ -470,7 +475,7 @@ describe('RefereesTable Component', function () {
             $hiringReferee = Referee::factory()->unemployed()->create(['first_name' => 'Hiring', 'last_name' => 'Referee']);
             $releasingReferee = Referee::factory()->employed()->create(['first_name' => 'Releasing', 'last_name' => 'Referee']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Hiring Referee')
@@ -504,7 +509,7 @@ describe('RefereesTable Component', function () {
                     'ended_at' => now()->subMonths(6),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Comeback Referee');
@@ -521,7 +526,7 @@ describe('RefereesTable Component', function () {
                     'ended_at' => now()->subMonths(3),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Recovered Referee');
@@ -538,7 +543,7 @@ describe('RefereesTable Component', function () {
                     'ended_at' => now()->subMonths(2),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Reinstated Referee');

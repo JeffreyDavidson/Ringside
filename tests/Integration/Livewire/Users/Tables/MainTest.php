@@ -11,6 +11,9 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for UsersTable Livewire component.
  *
@@ -311,7 +314,9 @@ describe('UsersTable Component', function () {
             $user = User::factory()->create(['first_name' => 'Test', 'last_name' => 'User']);
 
             // Test as administrator (should see all actions)
-            $component = Livewire::actingAs($this->user)->test(Main::class);
+            actingAs($this->user);
+
+            $component = livewire(Main::class);
             $component->assertOk();
             $component->assertSee($user->first_name);
         });
@@ -319,7 +324,9 @@ describe('UsersTable Component', function () {
         test('component handles action availability based on user permissions', function () {
             $testUser = User::factory()->create(['first_name' => 'Action', 'last_name' => 'Test']);
 
-            $component = Livewire::actingAs($this->user)->test(Main::class);
+            actingAs($this->user);
+
+            $component = livewire(Main::class);
 
             // Administrator should see the user
             $component->assertSee('Action Test');
