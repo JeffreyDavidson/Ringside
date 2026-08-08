@@ -94,17 +94,4 @@ describe('TagTeamWrestler Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has tagTeam relationship method', function () {
-            $tagTeamWrestler = new TagTeamWrestler();
-
-            expect(method_exists($tagTeamWrestler, 'tagTeam'))->toBeTrue();
-        });
-
-        test('has wrestler relationship method', function () {
-            $tagTeamWrestler = new TagTeamWrestler();
-
-            expect(method_exists($tagTeamWrestler, 'wrestler'))->toBeTrue();
-        });
-    });
 });

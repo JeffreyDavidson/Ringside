@@ -187,9 +187,6 @@ describe('Builder Concerns Unit Tests', function () {
             expect(class_uses(TagTeamBuilder::class))->toContain(HasRetirementScopes::class);
             expect(class_uses(TitleBuilder::class))->toContain(HasRetirementScopes::class);
 
-            // Verify that methods are available on concrete builders
-            $builder = Wrestler::query();
-            expect(method_exists($builder, 'retired'))->toBeTrue();
         });
 
         test('retired method generates correct query conditions', function () {

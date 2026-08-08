@@ -168,17 +168,6 @@ describe('UserPolicy integration with Gate facade', function () {
 });
 
 describe('UserPolicy method signatures', function () {
-    test('policy class exists and has required methods', function () {
-        expect(class_exists(UserPolicy::class))->toBeTrue();
-        expect(method_exists(UserPolicy::class, 'before'))->toBeTrue();
-        expect(method_exists(UserPolicy::class, 'viewList'))->toBeTrue();
-        expect(method_exists(UserPolicy::class, 'view'))->toBeTrue();
-        expect(method_exists(UserPolicy::class, 'create'))->toBeTrue();
-        expect(method_exists(UserPolicy::class, 'update'))->toBeTrue();
-        expect(method_exists(UserPolicy::class, 'delete'))->toBeTrue();
-        expect(method_exists(UserPolicy::class, 'restore'))->toBeTrue();
-    });
-
     test('before method has correct signature', function () {
         $reflection = new ReflectionMethod(UserPolicy::class, 'before');
 

@@ -172,21 +172,6 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
         });
     });
 
-    describe('date-based availability scopes', function () {
-        test('base class availableOn method signature exists', function () {
-            // Arrange
-            $testDate = now()->addWeek();
-            $builder = Wrestler::query();
-
-            // Act & Assert - Verify the method exists on the base class
-            expect(method_exists($builder, 'availableOn'))->toBeTrue();
-
-            // Note: WrestlerBuilder overrides this method with match-booking logic,
-            // so we test method existence rather than full functionality to avoid
-            // database table dependencies in unit tests.
-        });
-    });
-
     describe('query builder inheritance verification', function () {
         test('query scope methods return correct builder instance', function () {
             // Act

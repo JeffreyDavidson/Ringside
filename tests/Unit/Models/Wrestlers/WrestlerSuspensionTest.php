@@ -87,11 +87,4 @@ describe('WrestlerSuspension Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has wrestler relationship method', function () {
-            $wrestlerSuspension = new WrestlerSuspension();
-
-            expect(method_exists($wrestlerSuspension, 'wrestler'))->toBeTrue();
-        });
-    });
 });

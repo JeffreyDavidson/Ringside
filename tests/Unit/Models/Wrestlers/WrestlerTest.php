@@ -137,11 +137,4 @@ describe('Wrestler Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has isBookable business method', function () {
-            $wrestler = new Wrestler();
-
-            expect(method_exists($wrestler, 'isBookable'))->toBeTrue();
-        });
-    });
 });

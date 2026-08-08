@@ -26,19 +26,6 @@ describe('Actions Basic Functionality', function () {
         expect($component->instance()->wrestler->id)->toBe($this->wrestler->id);
     });
 
-    it('has required action methods', function () {
-        $component = new Actions();
-
-        expect(method_exists($component, 'employ'))->toBeTrue();
-        expect(method_exists($component, 'release'))->toBeTrue();
-        expect(method_exists($component, 'retire'))->toBeTrue();
-        expect(method_exists($component, 'unretire'))->toBeTrue();
-        expect(method_exists($component, 'suspend'))->toBeTrue();
-        expect(method_exists($component, 'reinstate'))->toBeTrue();
-        expect(method_exists($component, 'injure'))->toBeTrue();
-        expect(method_exists($component, 'healFromInjury'))->toBeTrue();
-    });
-
     it('can render successfully', function () {
         $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
 

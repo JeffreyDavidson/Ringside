@@ -68,13 +68,6 @@ describe('Policy Before Hook Pattern', function () {
         }
     });
 
-    test('all policies have before hook method', function () {
-        foreach ($this->policies as $policy) {
-            expect(method_exists($policy, 'before'))
-                ->toBeTrue(get_class($policy).' should have before method');
-        }
-    });
-
 });
 
 /**

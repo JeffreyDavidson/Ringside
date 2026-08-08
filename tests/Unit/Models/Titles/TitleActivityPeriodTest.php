@@ -91,11 +91,4 @@ describe('TitleActivityPeriod Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has title relationship method', function () {
-            $titleActivityPeriod = new TitleActivityPeriod();
-
-            expect(method_exists($titleActivityPeriod, 'title'))->toBeTrue();
-        });
-    });
 });

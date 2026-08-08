@@ -209,9 +209,7 @@ describe('VenueForm Integration Tests', function () {
     });
 
     describe('extra data loading', function () {
-        test('loadExtraData method exists but has minimal implementation', function () {
-            expect(method_exists($this->form, 'loadExtraData'))->toBeTrue();
-
+        test('loadExtraData has a void return type', function () {
             $reflection = new ReflectionMethod($this->form, 'loadExtraData');
             expect(reflectionReturnTypeName($reflection))->toBe('void');
         });

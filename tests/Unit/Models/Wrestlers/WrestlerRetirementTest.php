@@ -91,11 +91,4 @@ describe('WrestlerRetirement Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has wrestler relationship method', function () {
-            $wrestlerRetirement = new WrestlerRetirement();
-
-            expect(method_exists($wrestlerRetirement, 'wrestler'))->toBeTrue();
-        });
-    });
 });

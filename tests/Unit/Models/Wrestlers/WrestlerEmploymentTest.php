@@ -87,11 +87,4 @@ describe('WrestlerEmployment Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has wrestler relationship method', function () {
-            $wrestlerEmployment = new WrestlerEmployment();
-
-            expect(method_exists($wrestlerEmployment, 'wrestler'))->toBeTrue();
-        });
-    });
 });

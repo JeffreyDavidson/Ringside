@@ -92,11 +92,4 @@ describe('TitleStatusChange Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has title relationship method', function () {
-            $titleStatusChange = new TitleStatusChange();
-
-            expect(method_exists($titleStatusChange, 'title'))->toBeTrue();
-        });
-    });
 });

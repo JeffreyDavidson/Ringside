@@ -145,7 +145,6 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
 
                 public $name = 'Test';
             };
-            expect(property_exists($model, 'name'))->toBeTrue();
             expect($model->name)->toBe('Test');
         });
 
@@ -156,7 +155,6 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
 
                 public $full_name = 'Test';
             };
-            expect(property_exists($model, 'full_name'))->toBeTrue();
             expect($model->full_name)->toBe('Test');
         });
 
@@ -169,8 +167,7 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
 
                 public $last_name = 'Doe';
             };
-            expect(property_exists($model, 'first_name'))->toBeTrue();
-            expect(property_exists($model, 'last_name'))->toBeTrue();
+            expect([$model->first_name, $model->last_name])->toBe(['John', 'Doe']);
         });
     });
 

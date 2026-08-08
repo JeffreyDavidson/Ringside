@@ -277,9 +277,6 @@ describe('StablePolicy Unit Tests', function () {
 
             foreach ($methods as [$method, $params]) {
                 $result = $this->policy->$method($this->basicUser, ...$params);
-                expect(is_bool($result))->toBeTrue(
-                    "Method {$method} should return boolean, got ".gettype($result)
-                );
                 expect($result)->toBeFalse(
                     "Basic user should not be authorized for {$method}"
                 );

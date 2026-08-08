@@ -91,11 +91,4 @@ describe('TagTeamSuspension Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has tagTeam relationship method', function () {
-            $tagTeamSuspension = new TagTeamSuspension();
-
-            expect(method_exists($tagTeamSuspension, 'tagTeam'))->toBeTrue();
-        });
-    });
 });

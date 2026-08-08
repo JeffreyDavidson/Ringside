@@ -94,13 +94,4 @@ describe('User Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has required relationship methods', function () {
-            $user = new User();
-
-            expect(method_exists($user, 'isAdministrator'))->toBeTrue();
-            expect(method_exists($user, 'getAvatar'))->toBeTrue();
-            expect(method_exists($user, 'wrestlers'))->toBeTrue();
-        });
-    });
 });

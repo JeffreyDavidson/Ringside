@@ -90,17 +90,4 @@ describe('Event Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has venue relationship method', function () {
-            $event = new Event();
-
-            expect(method_exists($event, 'venue'))->toBeTrue();
-        });
-
-        test('has matches relationship method', function () {
-            $event = new Event();
-
-            expect(method_exists($event, 'matches'))->toBeTrue();
-        });
-    });
 });

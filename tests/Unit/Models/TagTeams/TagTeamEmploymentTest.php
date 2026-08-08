@@ -91,17 +91,4 @@ describe('TagTeamEmployment Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has tagTeam relationship method', function () {
-            $tagTeamEmployment = new TagTeamEmployment();
-
-            expect(method_exists($tagTeamEmployment, 'tagTeam'))->toBeTrue();
-        });
-
-        test('has startedBefore business method', function () {
-            $tagTeamEmployment = new TagTeamEmployment();
-
-            expect(method_exists($tagTeamEmployment, 'startedBefore'))->toBeTrue();
-        });
-    });
 });

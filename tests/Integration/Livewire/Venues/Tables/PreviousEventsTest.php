@@ -229,9 +229,6 @@ describe('PreviousEventsTable Integration Tests', function () {
             $table = new PreviousEvents();
             $reflection = new ReflectionClass($table);
 
-            expect(property_exists($table, 'databaseTableName'))->toBeTrue();
-            expect(property_exists($table, 'resourceName'))->toBeTrue();
-
             $databaseTableNameProperty = $reflection->getProperty('databaseTableName');
             $databaseTableNameProperty->setAccessible(true);
             expect($databaseTableNameProperty->getValue($table))->toBe('events');
@@ -313,7 +310,7 @@ describe('PreviousEventsTable Integration Tests', function () {
             // Create many events for the venue
             Event::factory()->count(50)->create([
                 'venue_id' => $this->venue->id,
-                'date' => now()->subDays(rand(1, 365)),
+                'date' => now()->subDays(random_int(1, 365)),
             ]);
 
             $component = Livewire::actingAs($this->admin)

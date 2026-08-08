@@ -58,7 +58,6 @@ describe('State Model Unit Tests', function () {
         test('has state data rows property', function () {
             $state = new State();
 
-            expect(property_exists($state, 'rows'))->toBeTrue();
             expect($state->rows)->toBeArray();
             expect($state->rows)->not->toBeEmpty();
         });

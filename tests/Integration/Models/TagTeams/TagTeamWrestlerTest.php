@@ -88,13 +88,11 @@ describe('TagTeamWrestler Pivot Model', function () {
             expect($this->wrestler->currentTagTeam->id)->toBe($this->tagTeam->id);
             expect($this->secondWrestler->currentTagTeam->id)->toBe($this->tagTeam->id);
 
-            // Verify tag team has both wrestlers (if the reverse relationship exists)
-            if (method_exists($this->tagTeam, 'currentWrestlers')) {
-                expect($this->tagTeam->currentWrestlers()->count())->toBe(2);
-                expect($this->tagTeam->currentWrestlers->pluck('id'))
-                    ->toContain($this->wrestler->id)
-                    ->toContain($this->secondWrestler->id);
-            }
+            // Verify tag team has both wrestlers
+            expect($this->tagTeam->currentWrestlers()->count())->toBe(2);
+            expect($this->tagTeam->currentWrestlers->pluck('id'))
+                ->toContain($this->wrestler->id)
+                ->toContain($this->secondWrestler->id);
         });
 
         test('wrestler can be part of multiple tag teams across different time periods', function () {
@@ -431,14 +429,12 @@ describe('TagTeamWrestler Pivot Model', function () {
             expect($this->thirdWrestler->isAMemberOfCurrentTagTeam())->toBeTrue();
 
             // Verify tag team evolution
-            if (method_exists($this->tagTeam, 'currentWrestlers')) {
-                $currentMembers = $this->tagTeam->currentWrestlers()->get();
-                expect($currentMembers)->toHaveCount(2);
-                expect($currentMembers->pluck('id'))
-                    ->toContain($this->secondWrestler->id)
-                    ->toContain($this->thirdWrestler->id)
-                    ->not->toContain($this->wrestler->id);
-            }
+            $currentMembers = $this->tagTeam->currentWrestlers()->get();
+            expect($currentMembers)->toHaveCount(2);
+            expect($currentMembers->pluck('id'))
+                ->toContain($this->secondWrestler->id)
+                ->toContain($this->thirdWrestler->id)
+                ->not->toContain($this->wrestler->id);
         });
     });
 

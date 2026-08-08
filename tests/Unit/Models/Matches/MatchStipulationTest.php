@@ -84,25 +84,6 @@ describe('MatchStipulation Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has required relationship methods', function () {
-            $matchStipulation = new MatchStipulation();
-
-            expect(method_exists($matchStipulation, 'eventMatches'))->toBeTrue();
-        });
-
-        test('has business logic helper methods', function () {
-            $matchStipulation = new MatchStipulation();
-
-            expect(method_exists($matchStipulation, 'isStandardMatch'))->toBeTrue();
-            expect(method_exists($matchStipulation, 'requiresSpecialSetup'))->toBeTrue();
-            expect(method_exists($matchStipulation, 'isHardcoreStipulation'))->toBeTrue();
-            expect(method_exists($matchStipulation, 'hasEliminationRules'))->toBeTrue();
-            expect(method_exists($matchStipulation, 'getDisplayName'))->toBeTrue();
-            expect(method_exists($matchStipulation, 'getMatchPreview'))->toBeTrue();
-        });
-    });
-
     describe('model inheritance', function () {
         test('extends eloquent model', function () {
             $matchStipulation = new MatchStipulation();

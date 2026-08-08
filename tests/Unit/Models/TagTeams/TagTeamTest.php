@@ -119,12 +119,4 @@ describe('TagTeam Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has required relationship methods', function () {
-            $tagTeam = new TagTeam();
-
-            expect(method_exists($tagTeam, 'isBookable'))->toBeTrue();
-            expect(method_exists($tagTeam, 'isUnbookable'))->toBeTrue();
-        });
-    });
 });
