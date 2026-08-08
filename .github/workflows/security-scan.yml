@@ -25,10 +25,6 @@ jobs:
     continue-on-error: true
     timeout-minutes: 15
 
-    env:
-      GOPATH: ${{ runner.temp }}/ward-go
-      WARD_HOME: ${{ runner.temp }}/ward-home
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,22 +36,22 @@ jobs:
         with:
           go-version: '1.24.x'
 
+      - name: Configure Ward environment
+        run: |
+          echo "GOPATH=$RUNNER_TEMP/ward-go" >> "$GITHUB_ENV"
+          echo "HOME=$RUNNER_TEMP/ward-home" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/ward-home"
+
       - name: Install Ward
         run: |
           go install github.com/eljakani/ward@v0.4.2
           echo "$GOPATH/bin" >> "$GITHUB_PATH"
 
       - name: Initialize Ward
-        env:
-          HOME: ${{ env.WARD_HOME }}
-        run: |
-          mkdir -p "$HOME"
-          ward init
+        run: ward init
 
       - name: Generate pull request baseline
         if: github.event_name == 'pull_request'
-        env:
-          HOME: ${{ env.WARD_HOME }}
         run: |
           git checkout "${{ github.event.pull_request.base.sha }}"
           ward scan . --output json --update-baseline "$RUNNER_TEMP/ward-baseline.json" || true
@@ -63,8 +59,6 @@ jobs:
 
       - name: Scan pull request changes
         if: github.event_name == 'pull_request'
-        env:
-          HOME: ${{ env.WARD_HOME }}
         run: |
           if [ -f "$RUNNER_TEMP/ward-baseline.json" ]; then
             ward scan . --output json,sarif --baseline "$RUNNER_TEMP/ward-baseline.json" --fail-on high
@@ -74,8 +68,6 @@ jobs:
 
       - name: Run scheduled security scan
         if: github.event_name != 'pull_request'
-        env:
-          HOME: ${{ env.WARD_HOME }}
         run: ward scan . --output json,sarif --fail-on high
 
       - name: Upload Ward reports
