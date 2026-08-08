@@ -15,12 +15,59 @@ namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\IsInjurable;
 use App\Models\Contracts\Injurable;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Mockery;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use JMac\Testing\Double;
 use RuntimeException;
 use Tests\Unit\Models\Concerns\Support\FakeInjuryModel;
+
+/** @extends EloquentBuilder<FakeInjuryModel> */
+final class FakeInjuryBuilder extends EloquentBuilder {}
+
+/** @implements Injurable<FakeInjuryModel, self> */
+final class InjuryStateModel extends Model implements Injurable
+{
+    /** @use IsInjurable<FakeInjuryModel, self> */
+    use IsInjurable;
+
+    public bool $currentInjuryExists = false;
+
+    public bool $injuryExists = false;
+
+    public function resolveInjuryModelClass(): string
+    {
+        return FakeInjuryModel::class;
+    }
+
+    /** @return HasOne<FakeInjuryModel, self> */
+    public function currentInjury(): HasOne
+    {
+        $builder = $this->injuryBuilder($this->currentInjuryExists);
+
+        return new HasOne($builder, new self(), 'entity_id', 'id');
+    }
+
+    /** @return HasMany<FakeInjuryModel, self> */
+    public function injuries(): HasMany
+    {
+        $builder = $this->injuryBuilder($this->injuryExists);
+
+        return new HasMany($builder, new self(), 'entity_id', 'id');
+    }
+
+    private function injuryBuilder(bool $exists): FakeInjuryBuilder
+    {
+        $query = Double::for(QueryBuilder::class);
+        $query->expects('exists')->returns($exists);
+        $builder = new FakeInjuryBuilder($query);
+        $builder->setModel(new FakeInjuryModel());
+
+        return $builder;
+    }
+}
 
 describe('IsInjurable Trait Unit Tests', function () {
     describe('injury relationships', function () {
@@ -119,89 +166,22 @@ describe('IsInjurable Trait Unit Tests', function () {
 
     describe('injury status checks', function () {
         test('can check if model is injured', function () {
-            $model = new class extends Model implements Injurable
-            {
-                /** @use IsInjurable<FakeInjuryModel, self> */
-                use IsInjurable;
-
-                public function resolveInjuryModelClass(): string
-                {
-                    return FakeInjuryModel::class;
-                }
-
-                public function currentInjury(): HasOne
-                {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(true);
-
-                    return $relation;
-                }
-            };
+            $model = new InjuryStateModel();
+            $model->currentInjuryExists = true;
 
             expect($model->isInjured())->toBeTrue();
         });
 
         test('can check if model is not injured', function () {
-            $model = new class extends Model implements Injurable
-            {
-                /** @use IsInjurable<FakeInjuryModel, self> */
-                use IsInjurable;
-
-                public function resolveInjuryModelClass(): string
-                {
-                    return FakeInjuryModel::class;
-                }
-
-                public function currentInjury(): HasOne
-                {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(false);
-
-                    return $relation;
-                }
-            };
+            $model = new InjuryStateModel();
 
             expect($model->isInjured())->toBeFalse();
         });
 
         test('can check if model has injuries', function () {
-            $modelWithInjuries = new class extends Model implements Injurable
-            {
-                /** @use IsInjurable<FakeInjuryModel, self> */
-                use IsInjurable;
-
-                public function resolveInjuryModelClass(): string
-                {
-                    return FakeInjuryModel::class;
-                }
-
-                public function injuries(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(true);
-
-                    return $relation;
-                }
-            };
-
-            $modelWithoutInjuries = new class extends Model implements Injurable
-            {
-                /** @use IsInjurable<FakeInjuryModel, self> */
-                use IsInjurable;
-
-                public function resolveInjuryModelClass(): string
-                {
-                    return FakeInjuryModel::class;
-                }
-
-                public function injuries(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(false);
-
-                    return $relation;
-                }
-            };
+            $modelWithInjuries = new InjuryStateModel();
+            $modelWithInjuries->injuryExists = true;
+            $modelWithoutInjuries = new InjuryStateModel();
 
             expect($modelWithInjuries->hasInjuries())->toBeTrue();
             expect($modelWithoutInjuries->hasInjuries())->toBeFalse();

@@ -21,7 +21,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use JMac\Testing\Double;
-use Mockery;
 use Tests\Unit\Models\Concerns\Support\FakeEmployableModel;
 use Tests\Unit\Models\Concerns\Support\FakeEmploymentModel;
 
@@ -29,27 +28,58 @@ use Tests\Unit\Models\Concerns\Support\FakeEmploymentModel;
 final class FakeEmploymentBuilder extends EloquentBuilder {}
 
 /** @implements Employable<FakeEmploymentModel, self> */
-final class FutureEmploymentStateModel extends Model implements Employable
+final class EmploymentStateModel extends Model implements Employable
 {
     /** @use IsEmployable<FakeEmploymentModel, self> */
     use IsEmployable;
 
     public bool $futureEmploymentExists = false;
 
+    public bool $currentEmploymentExists = false;
+
+    public bool $employmentExists = false;
+
     public function resolveEmploymentModelClass(): string
     {
         return FakeEmploymentModel::class;
     }
 
-    /** @return HasOne<FakeEmploymentModel, $this> */
+    /** @return HasOne<FakeEmploymentModel, self> */
     public function futureEmployment(): HasOne
     {
+        return $this->employmentHasOne($this->futureEmploymentExists);
+    }
+
+    /** @return HasOne<FakeEmploymentModel, self> */
+    public function currentEmployment(): HasOne
+    {
+        return $this->employmentHasOne($this->currentEmploymentExists);
+    }
+
+    /** @return HasMany<FakeEmploymentModel, self> */
+    public function employments(): HasMany
+    {
+        $builder = $this->employmentBuilder($this->employmentExists);
+
+        return new HasMany($builder, new self(), 'entity_id', 'id');
+    }
+
+    /** @return HasOne<FakeEmploymentModel, self> */
+    private function employmentHasOne(bool $exists): HasOne
+    {
+        $builder = $this->employmentBuilder($exists);
+
+        return new HasOne($builder, new self(), 'entity_id', 'id');
+    }
+
+    private function employmentBuilder(bool $exists): FakeEmploymentBuilder
+    {
         $query = Double::for(QueryBuilder::class);
-        $query->expects('exists')->returns($this->futureEmploymentExists);
+        $query->expects('exists')->returns($exists);
         $builder = new FakeEmploymentBuilder($query);
         $builder->setModel(new FakeEmploymentModel());
 
-        return new HasOne($builder, $this, 'entity_id', 'id');
+        return $builder;
     }
 }
 
@@ -174,136 +204,41 @@ describe('IsEmployable Trait Unit Tests', function () {
 
     describe('employment status checks', function () {
         test('can check if model is employed', function () {
-            $model = new class extends Model implements Employable
-            {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
-                use IsEmployable;
+            $model = new EmploymentStateModel();
+            $model->currentEmploymentExists = true;
 
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function currentEmployment(): HasOne
-                {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(true);
-
-                    return $relation;
-                }
-            };
             expect($model->isEmployed())->toBeTrue();
         });
 
         test('can check if model is not employed', function () {
-            $model = new class extends Model implements Employable
-            {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
-                use IsEmployable;
+            $model = new EmploymentStateModel();
 
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function currentEmployment(): HasOne
-                {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(false);
-
-                    return $relation;
-                }
-            };
             expect($model->isEmployed())->toBeFalse();
         });
 
         test('can check if model has employments', function () {
-            $modelWith = new class extends Model implements Employable
-            {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
-                use IsEmployable;
+            $modelWith = new EmploymentStateModel();
+            $modelWith->employmentExists = true;
+            $modelWithout = new EmploymentStateModel();
 
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function employments(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(true);
-
-                    return $relation;
-                }
-            };
-            $modelWithout = new class extends Model implements Employable
-            {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
-                use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function employments(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(false);
-
-                    return $relation;
-                }
-            };
             expect($modelWith->hasEmployments())->toBeTrue();
             expect($modelWithout->hasEmployments())->toBeFalse();
         });
 
         test('can check if model has future employment', function () {
-            $modelWith = new FutureEmploymentStateModel();
+            $modelWith = new EmploymentStateModel();
             $modelWith->futureEmploymentExists = true;
-            $modelWithout = new FutureEmploymentStateModel();
+            $modelWithout = new EmploymentStateModel();
 
             expect($modelWith->hasFutureEmployment())->toBeTrue();
             expect($modelWithout->hasFutureEmployment())->toBeFalse();
         });
 
         test('can check if model has employment history', function () {
-            $modelWith = new class extends Model implements Employable
-            {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
-                use IsEmployable;
+            $modelWith = new EmploymentStateModel();
+            $modelWith->employmentExists = true;
+            $modelWithout = new EmploymentStateModel();
 
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function employments(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(true);
-
-                    return $relation;
-                }
-            };
-            $modelWithout = new class extends Model implements Employable
-            {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
-                use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function employments(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(false);
-
-                    return $relation;
-                }
-            };
             expect($modelWith->hasEmploymentHistory())->toBeTrue();
             expect($modelWithout->hasEmploymentHistory())->toBeFalse();
         });

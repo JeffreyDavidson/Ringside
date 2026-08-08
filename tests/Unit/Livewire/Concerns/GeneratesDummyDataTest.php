@@ -181,7 +181,7 @@ describe('GeneratesDummyData Unit Tests', function () {
     describe('dependency imports', function () {
         test('imports Throwable', function () {
             $reflection = new ReflectionClass(GeneratesDummyData::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use Throwable;');
         });
@@ -263,7 +263,7 @@ describe('GeneratesDummyData Unit Tests', function () {
     describe('population strategy pattern', function () {
         test('implements multiple population strategies', function () {
             $reflection = new ReflectionClass(GeneratesDummyData::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for strategy pattern implementation
             expect($source)->toContain('tryPopulateModelForm');
@@ -273,7 +273,7 @@ describe('GeneratesDummyData Unit Tests', function () {
 
         test('uses graceful degradation', function () {
             $reflection = new ReflectionClass(GeneratesDummyData::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for graceful failure handling
             expect($source)->toContain('// If none work, silently skip');

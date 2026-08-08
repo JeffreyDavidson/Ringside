@@ -83,7 +83,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
     describe('dependency imports', function () {
         test('imports QueryException', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use Illuminate\\Database\\QueryException;');
         });
@@ -92,7 +92,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
     describe('method implementation structure', function () {
         test('handleActivityPeriodCreation contains expected logic', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for expected implementation details
             expect($source)->toContain('if (! empty($this->start_date))');
@@ -104,7 +104,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
     describe('trait dependencies', function () {
         test('expects start_date property', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for property references
             expect($source)->toContain('$this->start_date');
@@ -112,7 +112,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
 
         test('expects formModel property', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for formModel reference
             expect($source)->toContain('$this->formModel');
@@ -180,7 +180,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
     describe('activity period creation pattern', function () {
         test('uses conditional activity period creation', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for conditional creation pattern
             expect($source)->toContain('if (! empty($this->start_date))');
@@ -188,7 +188,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
 
         test('creates activity period with started_at field', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for correct field mapping
             expect($source)->toContain('\'started_at\' => $this->start_date');
@@ -196,7 +196,7 @@ describe('ManagesActivityPeriods Unit Tests', function () {
 
         test('uses activityPeriods relationship', function () {
             $reflection = new ReflectionClass(ManagesActivityPeriods::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for correct relationship usage
             expect($source)->toContain('$this->formModel->activityPeriods()');

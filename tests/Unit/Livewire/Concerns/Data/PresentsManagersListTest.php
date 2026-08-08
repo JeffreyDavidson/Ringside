@@ -67,7 +67,7 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('computed attribute configuration', function () {
         test('Computed attribute has correct parameters', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for Computed attribute configuration
             expect($source)->toContain('#[Computed(cache: true, key: \'managers-list\', seconds: 180)]');
@@ -89,14 +89,14 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('dependency imports', function () {
         test('imports Manager model', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use App\\Models\\Managers\\Manager;');
         });
 
         test('imports Computed attribute', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use Livewire\\Attributes\\Computed;');
         });
@@ -105,7 +105,7 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('method implementation structure', function () {
         test('getManagers uses correct query structure', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for expected query implementation
             expect($source)->toContain('Manager::select(\'id\', \'full_name\')');
@@ -183,7 +183,7 @@ describe('PresentsManagersList Unit Tests', function () {
 
         test('enables caching for performance', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for cache enabled
             expect($source)->toContain('cache: true');
@@ -191,7 +191,7 @@ describe('PresentsManagersList Unit Tests', function () {
 
         test('uses descriptive cache key', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for meaningful cache key
             expect($source)->toContain('key: \'managers-list\'');
@@ -201,7 +201,7 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('query optimization', function () {
         test('selects only required fields', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for field selection optimization
             expect($source)->toContain('select(\'id\', \'full_name\')');
@@ -209,7 +209,7 @@ describe('PresentsManagersList Unit Tests', function () {
 
         test('uses efficient pluck method', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for pluck usage
             expect($source)->toContain('pluck(\'full_name\', \'id\')');

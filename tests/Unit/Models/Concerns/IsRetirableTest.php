@@ -17,12 +17,59 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Contracts\Retirable;
 use Exception;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Mockery;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use JMac\Testing\Double;
 use Tests\Unit\Models\Concerns\Support\FakeRetirableModel;
 use Tests\Unit\Models\Concerns\Support\FakeRetirementModel;
+
+/** @extends EloquentBuilder<FakeRetirementModel> */
+final class FakeRetirementBuilder extends EloquentBuilder {}
+
+/** @implements Retirable<FakeRetirementModel, self> */
+final class RetirementStateModel extends Model implements Retirable
+{
+    /** @use IsRetirable<FakeRetirementModel, self> */
+    use IsRetirable;
+
+    public bool $currentRetirementExists = false;
+
+    public bool $retirementExists = false;
+
+    public function resolveRetirementModelClass(): string
+    {
+        return FakeRetirementModel::class;
+    }
+
+    /** @return HasOne<FakeRetirementModel, self> */
+    public function currentRetirement(): HasOne
+    {
+        $builder = $this->retirementBuilder($this->currentRetirementExists);
+
+        return new HasOne($builder, new self(), 'entity_id', 'id');
+    }
+
+    /** @return HasMany<FakeRetirementModel, self> */
+    public function retirements(): HasMany
+    {
+        $builder = $this->retirementBuilder($this->retirementExists);
+
+        return new HasMany($builder, new self(), 'entity_id', 'id');
+    }
+
+    private function retirementBuilder(bool $exists): FakeRetirementBuilder
+    {
+        $query = Double::for(QueryBuilder::class);
+        $query->expects('exists')->returns($exists);
+        $builder = new FakeRetirementBuilder($query);
+        $builder->setModel(new FakeRetirementModel());
+
+        return $builder;
+    }
+}
 
 describe('IsRetirable Trait Unit Tests', function () {
     describe('retirement relationships', function () {
@@ -117,86 +164,23 @@ describe('IsRetirable Trait Unit Tests', function () {
 
     describe('retirement status checks', function () {
         test('can check if model is retired', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
+            $model = new RetirementStateModel();
+            $model->currentRetirementExists = true;
 
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-
-                public function currentRetirement(): HasOne
-                {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(true);
-
-                    return $relation;
-                }
-            };
             expect($model->isRetired())->toBeTrue();
         });
 
         test('can check if model is not retired', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
+            $model = new RetirementStateModel();
 
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-
-                public function currentRetirement(): HasOne
-                {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(false);
-
-                    return $relation;
-                }
-            };
             expect($model->isRetired())->toBeFalse();
         });
 
         test('can check if model has retirements', function () {
-            $modelWith = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
+            $modelWith = new RetirementStateModel();
+            $modelWith->retirementExists = true;
+            $modelWithout = new RetirementStateModel();
 
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-
-                public function retirements(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(true);
-
-                    return $relation;
-                }
-            };
-            $modelWithout = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-
-                public function retirements(): HasMany
-                {
-                    $relation = Mockery::mock(HasMany::class);
-                    $relation->expects('exists')->andReturn(false);
-
-                    return $relation;
-                }
-            };
             expect($modelWith->hasRetirements())->toBeTrue();
             expect($modelWithout->hasRetirements())->toBeFalse();
         });
