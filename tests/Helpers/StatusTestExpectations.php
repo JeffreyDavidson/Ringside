@@ -221,7 +221,7 @@ function expectCurrentRelationshipsActive(Wrestler $wrestler): void
 
     $currentTagTeam = $wrestler->currentTagTeam;
     if ($currentTagTeam) {
-        expect($currentTagTeam->pivot->left_at)->toBeNull();
+        expect(relatedPivotAttribute($currentTagTeam, 'left_at'))->toBeNull();
     }
 }
 
@@ -237,7 +237,7 @@ function expectPreviousRelationshipsEnded(Wrestler $wrestler): void
 
     $previousTagTeams = $wrestler->previousTagTeams()->get();
     foreach ($previousTagTeams as $tagTeam) {
-        expect($tagTeam->pivot->left_at)->not->toBeNull();
+        expect(relatedPivotAttribute($tagTeam, 'left_at'))->not->toBeNull();
     }
 }
 

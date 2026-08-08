@@ -242,6 +242,14 @@ describe('UsersTable Component', function () {
             $bakerPos = mb_strpos($html, 'Baker');
             $cooperPos = mb_strpos($html, 'Cooper');
 
+            expect($andersonPos)->not->toBeFalse();
+            expect($bakerPos)->not->toBeFalse();
+            expect($cooperPos)->not->toBeFalse();
+
+            if ($andersonPos === false || $bakerPos === false || $cooperPos === false) {
+                return;
+            }
+
             expect($andersonPos)->toBeLessThan($bakerPos);
             expect($bakerPos)->toBeLessThan($cooperPos);
         });

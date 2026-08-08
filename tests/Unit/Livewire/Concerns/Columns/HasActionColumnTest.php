@@ -68,7 +68,7 @@ describe('HasActionColumn Unit Tests', function () {
     describe('dependency imports', function () {
         test('imports Column class', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use App\\Livewire\\Table\\Column;');
         });
@@ -77,7 +77,7 @@ describe('HasActionColumn Unit Tests', function () {
     describe('method implementation structure', function () {
         test('getDefaultActionColumn creates proper column', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for expected implementation details
             expect($source)->toContain('Column::make(__');
@@ -88,7 +88,7 @@ describe('HasActionColumn Unit Tests', function () {
 
         test('uses view component for action column', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for view component usage
             expect($source)->toContain('view(\'components.tables.columns.action-column\'');
@@ -100,7 +100,7 @@ describe('HasActionColumn Unit Tests', function () {
     describe('trait dependencies', function () {
         test('expects routeBasePath property', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for property references
             expect($source)->toContain('$this->routeBasePath');
@@ -108,7 +108,7 @@ describe('HasActionColumn Unit Tests', function () {
 
         test('expects row object with id property', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for row id reference
             expect($source)->toContain('$row->id');
@@ -176,7 +176,7 @@ describe('HasActionColumn Unit Tests', function () {
     describe('laravel livewire tables integration', function () {
         test('uses Column factory method', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for Column::make usage
             expect($source)->toContain('Column::make(');
@@ -184,7 +184,7 @@ describe('HasActionColumn Unit Tests', function () {
 
         test('uses internationalization for actions', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for translation key
             expect($source)->toContain('__');
@@ -193,7 +193,7 @@ describe('HasActionColumn Unit Tests', function () {
 
         test('configures column properly', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for proper column configuration
             expect($source)->toContain('->label(');
@@ -205,7 +205,7 @@ describe('HasActionColumn Unit Tests', function () {
     describe('column configuration pattern', function () {
         test('uses closure for label generation', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for closure pattern
             expect($source)->toContain('fn ($row, Column $column)');
@@ -213,7 +213,7 @@ describe('HasActionColumn Unit Tests', function () {
 
         test('excludes from column selection', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for exclusion from selection
             expect($source)->toContain('excludeFromColumnSelect()');
@@ -221,7 +221,7 @@ describe('HasActionColumn Unit Tests', function () {
 
         test('enables HTML rendering', function () {
             $reflection = new ReflectionClass(HasActionColumn::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for HTML enabled
             expect($source)->toContain('->html()');

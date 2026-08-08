@@ -71,14 +71,14 @@ describe('PresentsTitlesList Unit Tests', function () {
     describe('dependency imports', function () {
         test('imports Title model', function () {
             $reflection = new ReflectionClass(PresentsTitlesList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use App\\Models\\Titles\\Title;');
         });
 
         test('imports Computed attribute', function () {
             $reflection = new ReflectionClass(PresentsTitlesList::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use Livewire\\Attributes\\Computed;');
         });

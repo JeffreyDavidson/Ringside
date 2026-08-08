@@ -58,7 +58,7 @@ describe('ShowTableTrait Unit Tests', function () {
     describe('method implementation structure', function () {
         test('configuringShowTableTrait contains expected method calls', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for expected configuration calls
             expect($source)->toContain('->setPrimaryKey(\'id\')');
@@ -75,7 +75,7 @@ describe('ShowTableTrait Unit Tests', function () {
     describe('configuration pattern', function () {
         test('uses fluent interface pattern', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for method chaining pattern
             expect($source)->toContain('$this->setPrimaryKey(\'id\')');
@@ -86,7 +86,7 @@ describe('ShowTableTrait Unit Tests', function () {
 
         test('references expected properties', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for property references
             expect($source)->toContain('$this->resourceName');
@@ -97,7 +97,7 @@ describe('ShowTableTrait Unit Tests', function () {
     describe('laravel livewire tables integration', function () {
         test('follows Laravel Livewire Tables configuration pattern', function () {
             $reflection = new ReflectionClass(ShowTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for standard table configuration methods
             expect($source)->toContain('setPrimaryKey');

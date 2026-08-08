@@ -58,7 +58,7 @@ describe('ManagesEmployment Unit Tests', function () {
     describe('method implementation structure', function () {
         test('handleEmploymentCreation contains expected logic', function () {
             $reflection = new ReflectionClass(ManagesEmployment::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for expected implementation details
             expect($source)->toContain('if (! empty($this->employment_date))');
@@ -70,7 +70,7 @@ describe('ManagesEmployment Unit Tests', function () {
     describe('trait dependencies', function () {
         test('expects employment_date property', function () {
             $reflection = new ReflectionClass(ManagesEmployment::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for property references
             expect($source)->toContain('$this->employment_date');
@@ -78,7 +78,7 @@ describe('ManagesEmployment Unit Tests', function () {
 
         test('expects formModel property', function () {
             $reflection = new ReflectionClass(ManagesEmployment::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for formModel reference
             expect($source)->toContain('$this->formModel');
@@ -146,7 +146,7 @@ describe('ManagesEmployment Unit Tests', function () {
     describe('employment creation pattern', function () {
         test('uses conditional employment creation', function () {
             $reflection = new ReflectionClass(ManagesEmployment::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for conditional creation pattern
             expect($source)->toContain('if (! empty($this->employment_date))');
@@ -154,7 +154,7 @@ describe('ManagesEmployment Unit Tests', function () {
 
         test('creates employment with started_at field', function () {
             $reflection = new ReflectionClass(ManagesEmployment::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for correct field mapping
             expect($source)->toContain('\'started_at\' => $this->employment_date');

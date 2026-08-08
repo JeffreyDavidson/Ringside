@@ -180,7 +180,7 @@ describe('BaseModal Unit Tests', function () {
     describe('dependency imports', function () {
         test('imports required dependencies', function () {
             $reflection = new ReflectionClass(BaseModal::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for actual imports in BaseModal
             expect($source)->toContain('use Exception;');

@@ -130,7 +130,7 @@ describe('BaseTableTrait Unit Tests', function () {
     describe('dependency imports', function () {
         test('imports required dependencies', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('use App\\Livewire\\Concerns\\Columns\\HasActionColumn;');
             expect($source)->toContain('use App\\Livewire\\Table\\Column;');
@@ -140,7 +140,7 @@ describe('BaseTableTrait Unit Tests', function () {
     describe('method implementation structure', function () {
         test('configuringBaseTableTrait contains expected method calls', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for expected configuration calls
             expect($source)->toContain('->setPrimaryKey(\'id\')');
@@ -153,7 +153,7 @@ describe('BaseTableTrait Unit Tests', function () {
 
         test('appendColumns method structure', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for conditional action column logic
             expect($source)->toContain('$this->showActionColumn');
@@ -164,14 +164,14 @@ describe('BaseTableTrait Unit Tests', function () {
     describe('laravel livewire tables integration', function () {
         test('uses application Livewire table components', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             expect($source)->toContain('App\\Livewire\\Table\\Column');
         });
 
         test('follows Laravel Livewire Tables patterns', function () {
             $reflection = new ReflectionClass(BaseTableTrait::class);
-            $source = file_get_contents($reflection->getFileName());
+            $source = reflectionSource($reflection);
 
             // Check for standard table configuration patterns
             expect($source)->toContain('configuringBaseTableTrait');

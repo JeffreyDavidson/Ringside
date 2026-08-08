@@ -118,7 +118,7 @@ describe('TagTeamWrestler Pivot Model', function () {
             // Verify current tag team is correct
             $currentTagTeam = $this->wrestler->currentTagTeam;
             expect($currentTagTeam->id)->toBe($this->secondTagTeam->id);
-            expect($currentTagTeam->pivot->left_at)->toBeNull();
+            expect(relatedPivotAttribute($currentTagTeam, 'left_at'))->toBeNull();
 
             // Verify previous tag team is correct
             $previousTagTeam = $this->wrestler->previousTagTeams()->first();
@@ -186,7 +186,7 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             expect($currentTagTeam)->not()->toBeNull();
             expect($currentTagTeam->id)->toBe($this->secondTagTeam->id);
-            expect($currentTagTeam->pivot->left_at)->toBeNull();
+            expect(relatedPivotAttribute($currentTagTeam, 'left_at'))->toBeNull();
         });
 
         test('previous tag teams query returns only completed relationships', function () {
@@ -194,7 +194,7 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             expect($previousTagTeams)->toHaveCount(1);
             expect($previousTagTeams->first()->id)->toBe($this->tagTeam->id);
-            expect($previousTagTeams->first()->pivot->left_at)->not()->toBeNull();
+            expect(relatedPivotAttribute($previousTagTeams->first(), 'left_at'))->not()->toBeNull();
         });
 
         test('all tag teams query returns complete relationship history', function () {
@@ -397,12 +397,15 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             // Calculate duration of completed period
             $completedPeriod = $this->wrestler->previousTagTeams()->first();
-            $duration = $completedPeriod->pivot->joined_at->diffInDays($completedPeriod->pivot->left_at);
+            $joinedAt = Carbon::parse(relatedPivotAttribute($completedPeriod, 'joined_at'));
+            $leftAt = Carbon::parse(relatedPivotAttribute($completedPeriod, 'left_at'));
+            $duration = $joinedAt->diffInDays($leftAt);
             expect($duration)->toBeGreaterThan(150); // Approximately 6 months
 
             // Calculate duration of current period
             $currentPeriod = $this->wrestler->currentTagTeam;
-            $currentDuration = $currentPeriod->pivot->joined_at->diffInDays(Carbon::now());
+            $currentJoinedAt = Carbon::parse(relatedPivotAttribute($currentPeriod, 'joined_at'));
+            $currentDuration = $currentJoinedAt->diffInDays(Carbon::now());
             expect($currentDuration)->toBeGreaterThan(80); // Approximately 3 months
         });
 

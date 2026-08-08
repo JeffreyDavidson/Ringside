@@ -63,8 +63,7 @@ describe('Venue Action Integration Tests', function () {
 
             $venue = CreateAction::run($venueData);
 
-            $retrievedVenue = Venue::find($venue->id);
-            expect($retrievedVenue)->not()->toBeNull();
+            $retrievedVenue = Venue::query()->whereKey($venue->getKey())->firstOrFail();
             expect($retrievedVenue->name)->toBe('Database Test Arena');
             expect($retrievedVenue->street_address)->toBe('456 Database Lane');
             expect($retrievedVenue->city)->toBe('Database City');

@@ -84,6 +84,28 @@ function validationFailureCallback(Closure $observer): Closure
     };
 }
 
+/**
+ * Read the source file represented by a reflection class.
+ *
+ * @template T of object
+ *
+ * @param  ReflectionClass<T>  $reflection
+ */
+function reflectionSource(ReflectionClass $reflection): string
+{
+    $filename = $reflection->getFileName();
+    if ($filename === false) {
+        throw new RuntimeException("Unable to resolve the source file for {$reflection->getName()}.");
+    }
+
+    $source = file_get_contents($filename);
+    if ($source === false) {
+        throw new RuntimeException("Unable to read source file {$filename}.");
+    }
+
+    return $source;
+}
+
 /*
 |--------------------------------------------------------------------------
 | Custom Test Helpers
