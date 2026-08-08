@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\Users\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\Users\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -25,10 +25,12 @@ class RegisteredUserController extends Controller
 
     public function store(RegisterUserRequest $request): RedirectResponse
     {
-        $user = User::create([
-            'name' => $request->string('name')->value(),
+        $user = User::query()->create([
+            'first_name' => $request->string('first_name')->value(),
+            'last_name' => $request->string('last_name')->value(),
             'email' => $request->string('email')->value(),
-            'password' => Hash::make($request->string('password')->value()),
+            'password' => $request->string('password')->value(),
+            'role' => Role::Basic,
         ]);
 
         event(new Registered($user));
