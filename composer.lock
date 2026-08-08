@@ -2471,16 +2471,16 @@
         },
         {
             "name": "nesbot/carbon",
-            "version": "3.13.1",
+            "version": "3.13.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "2937ad3d1d2c506fd2bc97d571438a95641f44e2"
+                "reference": "a1c54919f5fff9800cd03c32bd01defd5a4061cb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/2937ad3d1d2c506fd2bc97d571438a95641f44e2",
-                "reference": "2937ad3d1d2c506fd2bc97d571438a95641f44e2",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/a1c54919f5fff9800cd03c32bd01defd5a4061cb",
+                "reference": "a1c54919f5fff9800cd03c32bd01defd5a4061cb",
                 "shasum": ""
             },
             "require": {
@@ -2572,7 +2572,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-09T18:23:49+00:00"
+            "time": "2026-08-08T11:40:35+00:00"
         },
         {
             "name": "nette/schema",
@@ -8243,6 +8243,83 @@
             "time": "2024-11-12T16:29:46+00:00"
         },
         {
+            "name": "composer/semver",
+            "version": "3.4.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/semver.git",
+                "reference": "198166618906cb2de69b95d7d47e5fa8aa1b2b95"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/semver/zipball/198166618906cb2de69b95d7d47e5fa8aa1b2b95",
+                "reference": "198166618906cb2de69b95d7d47e5fa8aa1b2b95",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.3.2 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.11",
+                "symfony/phpunit-bridge": "^3 || ^7"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Composer\\Semver\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nils Adermann",
+                    "email": "naderman@naderman.de",
+                    "homepage": "http://www.naderman.de"
+                },
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be"
+                },
+                {
+                    "name": "Rob Bast",
+                    "email": "rob.bast@gmail.com",
+                    "homepage": "http://robbast.nl"
+                }
+            ],
+            "description": "Semver library that offers utilities, version constraint parsing and validation.",
+            "keywords": [
+                "semantic",
+                "semver",
+                "validation",
+                "versioning"
+            ],
+            "support": {
+                "irc": "ircs://irc.libera.chat:6697/composer",
+                "issues": "https://github.com/composer/semver/issues",
+                "source": "https://github.com/composer/semver/tree/3.4.4"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-08-20T19:15:30+00:00"
+        },
+        {
             "name": "daverandom/libdns",
             "version": "v2.1.0",
             "source": {
@@ -8980,16 +9057,16 @@
         },
         {
             "name": "laravel/boost",
-            "version": "v2.4.6",
+            "version": "v2.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/boost.git",
-                "reference": "c9ea6368c66f7c0e6a9b26706b401de900cdb9ac"
+                "reference": "f5f9297225aba9857d014b3140f55a7c50cb1a92"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/boost/zipball/c9ea6368c66f7c0e6a9b26706b401de900cdb9ac",
-                "reference": "c9ea6368c66f7c0e6a9b26706b401de900cdb9ac",
+                "url": "https://api.github.com/repos/laravel/boost/zipball/f5f9297225aba9857d014b3140f55a7c50cb1a92",
+                "reference": "f5f9297225aba9857d014b3140f55a7c50cb1a92",
                 "shasum": ""
             },
             "require": {
@@ -8998,9 +9075,9 @@
                 "illuminate/contracts": "^11.45.3|^12.41.1|^13.0",
                 "illuminate/routing": "^11.45.3|^12.41.1|^13.0",
                 "illuminate/support": "^11.45.3|^12.41.1|^13.0",
-                "laravel/mcp": "^0.5.1|^0.6.0|^0.7.0",
+                "laravel/mcp": "^0.7.1|^0.8.0|^0.9.0",
                 "laravel/prompts": "^0.3.10",
-                "laravel/roster": "^0.5.0",
+                "laravel/roster": "^1.0.0",
                 "php": "^8.2"
             },
             "require-dev": {
@@ -9042,7 +9119,7 @@
                 "issues": "https://github.com/laravel/boost/issues",
                 "source": "https://github.com/laravel/boost"
             },
-            "time": "2026-04-28T11:52:01+00:00"
+            "time": "2026-08-07T05:46:02+00:00"
         },
         {
             "name": "laravel/breeze",
@@ -9107,16 +9184,16 @@
         },
         {
             "name": "laravel/mcp",
-            "version": "v0.7.0",
+            "version": "v0.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/mcp.git",
-                "reference": "3513b4feca5f1678be4d2261dcfa8e456436d02a"
+                "reference": "2bb70c3662dfc2e2ff55c38a10ddf55bed2443b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/mcp/zipball/3513b4feca5f1678be4d2261dcfa8e456436d02a",
-                "reference": "3513b4feca5f1678be4d2261dcfa8e456436d02a",
+                "url": "https://api.github.com/repos/laravel/mcp/zipball/2bb70c3662dfc2e2ff55c38a10ddf55bed2443b3",
+                "reference": "2bb70c3662dfc2e2ff55c38a10ddf55bed2443b3",
                 "shasum": ""
             },
             "require": {
@@ -9130,7 +9207,8 @@
                 "illuminate/routing": "^11.45.3|^12.41.1|^13.0",
                 "illuminate/support": "^11.45.3|^12.41.1|^13.0",
                 "illuminate/validation": "^11.45.3|^12.41.1|^13.0",
-                "php": "^8.2"
+                "php": "^8.2",
+                "symfony/process": "^7.4.5|^8.0.5"
             },
             "require-dev": {
                 "laravel/pint": "^1.20",
@@ -9143,7 +9221,7 @@
             "extra": {
                 "laravel": {
                     "aliases": {
-                        "Mcp": "Laravel\\Mcp\\Server\\Facades\\Mcp"
+                        "Mcp": "Laravel\\Mcp\\Facades\\Mcp"
                     },
                     "providers": [
                         "Laravel\\Mcp\\Server\\McpServiceProvider"
@@ -9176,7 +9254,7 @@
                 "issues": "https://github.com/laravel/mcp/issues",
                 "source": "https://github.com/laravel/mcp"
             },
-            "time": "2026-04-21T10:23:03+00:00"
+            "time": "2026-08-06T15:59:47+00:00"
         },
         {
             "name": "laravel/pail",
@@ -9415,32 +9493,33 @@
         },
         {
             "name": "laravel/roster",
-            "version": "v0.5.1",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/roster.git",
-                "reference": "5089de7615f72f78e831590ff9d0435fed0102bb"
+                "reference": "89e518bd88ae98ff50f6082f6b517c8d8e8245fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/roster/zipball/5089de7615f72f78e831590ff9d0435fed0102bb",
-                "reference": "5089de7615f72f78e831590ff9d0435fed0102bb",
+                "url": "https://api.github.com/repos/laravel/roster/zipball/89e518bd88ae98ff50f6082f6b517c8d8e8245fa",
+                "reference": "89e518bd88ae98ff50f6082f6b517c8d8e8245fa",
                 "shasum": ""
             },
             "require": {
+                "composer/semver": "^3.0",
                 "illuminate/console": "^11.0|^12.0|^13.0",
                 "illuminate/contracts": "^11.0|^12.0|^13.0",
-                "illuminate/routing": "^11.0|^12.0|^13.0",
                 "illuminate/support": "^11.0|^12.0|^13.0",
                 "php": "^8.2",
                 "symfony/yaml": "^7.2|^8.0"
             },
             "require-dev": {
-                "laravel/pint": "^1.14",
+                "laravel/pint": "^1.29",
                 "mockery/mockery": "^1.6",
                 "orchestra/testbench": "^9.0|^10.0|^11.0",
                 "pestphp/pest": "^3.0|^4.1",
-                "phpstan/phpstan": "^2.0"
+                "phpstan/phpstan": "^2.0",
+                "rector/rector": "^2.0"
             },
             "type": "library",
             "extra": {
@@ -9472,7 +9551,7 @@
                 "issues": "https://github.com/laravel/roster/issues",
                 "source": "https://github.com/laravel/roster"
             },
-            "time": "2026-03-05T07:58:43+00:00"
+            "time": "2026-07-18T17:53:15+00:00"
         },
         {
             "name": "league/uri-components",
