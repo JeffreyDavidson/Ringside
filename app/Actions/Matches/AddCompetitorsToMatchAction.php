@@ -14,6 +14,11 @@ use InvalidArgumentException;
 
 class AddCompetitorsToMatchAction
 {
+    public function __construct(
+        protected AddTagTeamsToMatchAction $addTagTeamsToMatchAction,
+        protected AddWrestlersToMatchAction $addWrestlersToMatchAction,
+    ) {}
+
     /**
      * Add competitors to an event match.
      *
@@ -61,7 +66,7 @@ class AddCompetitorsToMatchAction
     {
         // Add wrestlers to this side
         if (Arr::exists($sideCompetitors, 'wrestlers') && ! empty($sideCompetitors['wrestlers'])) {
-            resolve(AddWrestlersToMatchAction::class)->handle(
+            $this->addWrestlersToMatchAction->handle(
                 $eventMatch,
                 collect((array) Arr::get($sideCompetitors, 'wrestlers')),
                 $sideNumber
@@ -70,7 +75,7 @@ class AddCompetitorsToMatchAction
 
         // Add tag teams to this side
         if (Arr::exists($sideCompetitors, 'tag_teams') && ! empty($sideCompetitors['tag_teams'])) {
-            resolve(AddTagTeamsToMatchAction::class)->handle(
+            $this->addTagTeamsToMatchAction->handle(
                 $eventMatch,
                 collect((array) Arr::get($sideCompetitors, 'tag_teams')),
                 $sideNumber

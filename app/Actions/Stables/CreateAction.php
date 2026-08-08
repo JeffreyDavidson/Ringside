@@ -16,7 +16,9 @@ class CreateAction
      * Create a new create action instance.
      */
     public function __construct(
-        protected EstablishAction $establishAction
+        protected EstablishAction $establishAction,
+        protected StableMembershipService $membershipService,
+        protected StableValidationService $validationService,
     ) {}
 
     /**
@@ -36,9 +38,8 @@ class CreateAction
     {
         return DB::transaction(function () use ($stableData): Stable {
             // Validate business rules before creation
-            $validationService = app(StableValidationService::class);
-            $validationService->validateUniqueName($stableData->getTrimmedName());
-            $validationService->validateMembersAvailable($stableData->members);
+            $this->validationService->validateUniqueName($stableData->getTrimmedName());
+            $this->validationService->validateMembersAvailable($stableData->members);
 
             $stable = Stable::create([
                 'name' => $stableData->getTrimmedName(),
@@ -48,8 +49,7 @@ class CreateAction
             $joinDate = $stableData->getJoinDate();
 
             // Add members using service
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->addMembers($stable, $stableData->members, $joinDate);
+            $this->membershipService->addMembers($stable, $stableData->members, $joinDate);
 
             // Use enhanced DTO method instead of isset check
             if ($stableData->shouldEstablish()) {

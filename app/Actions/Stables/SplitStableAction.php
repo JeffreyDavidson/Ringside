@@ -20,7 +20,9 @@ class SplitStableAction
      * Create a new split stable action instance.
      */
     public function __construct(
-        protected CreateAction $createAction
+        protected CreateAction $createAction,
+        protected StableMembershipService $membershipService,
+        protected StableValidationService $validationService,
     ) {}
 
     /**
@@ -49,8 +51,7 @@ class SplitStableAction
             $this->validateSplitMembers($originalStable, $membersForNewStable);
 
             // Validate name uniqueness using service
-            $validationService = app(StableValidationService::class);
-            $validationService->validateUniqueName(mb_trim($newStableName));
+            $this->validationService->validateUniqueName(mb_trim($newStableName));
 
             // Use enhanced DTO method to filter employed members
             $employedMembers = $membersForNewStable->filterEmployedMembers();
@@ -71,8 +72,7 @@ class SplitStableAction
             $newStable = $this->createAction->handle($stableData);
 
             // Remove transferred members from original stable using service
-            $membershipService = app(StableMembershipService::class);
-            $membershipService->removeMembers($originalStable, $employedMembers, $date);
+            $this->membershipService->removeMembers($originalStable, $employedMembers, $date);
 
             return $newStable;
         });
