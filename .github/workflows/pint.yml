@@ -1,67 +1,42 @@
-name: PHP code style
+name: Code Style
 
 on:
-  pull_request:
-    branches:
-      - development
-      - master
-  workflow_dispatch:
+    pull_request:
+        branches:
+            - development
+            - master
+    workflow_dispatch:
 
 concurrency:
-  group: pint-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  php-code-styling:
-    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+    formatting:
+        name: Pint and Blade Formatting
+        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        timeout-minutes: 15
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
 
-      - name: Setup PHP
-        run: |
-          php_bin_dir="$(brew --prefix php@8.4)/bin"
-          echo "$php_bin_dir" >> "$GITHUB_PATH"
-          "$php_bin_dir/php" -v
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 22
+                  cache: npm
 
-      - name: Install Composer
-        run: |
-          mkdir -p "$RUNNER_TEMP/composer-bin"
-          curl -sS https://getcomposer.org/installer -o "$RUNNER_TEMP/composer-setup.php"
-          php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
-          echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/composer-bin/composer" --version
+            - name: Install Blade formatter dependencies
+              run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: pint-${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: pint-${{ runner.os }}-composer-
-
-      - name: Add token
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: composer config github-oauth.github.com $GITHUB_TOKEN
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
-
-      - name: Install Blade formatter dependencies
-        run: npm ci --ignore-scripts --no-audit --no-fund
-
-      - name: Check PHP code style
-        run: composer test:lint
+            - name: Check PHP and Blade formatting
+              run: composer test:lint

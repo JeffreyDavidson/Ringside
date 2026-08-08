@@ -1,65 +1,40 @@
-name: PHP quality
+name: PHP Quality
 
 on:
-  push:
-    branches:
-      - development
-      - master
-  pull_request:
-    branches:
-      - development
-      - master
+    push:
+        branches:
+            - development
+            - master
+    pull_request:
+        branches:
+            - development
+            - master
 
 concurrency:
-  group: php-quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  php-quality:
-    runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
-    name: Rector and Pest type coverage
+    quality:
+        name: Rector and Pest Type Coverage
+        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        timeout-minutes: 20
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
 
-      - name: Setup PHP
-        run: |
-          php_bin_dir="$(brew --prefix php@8.4)/bin"
-          echo "$php_bin_dir" >> "$GITHUB_PATH"
-          "$php_bin_dir/php" -v
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Composer
-        run: |
-          mkdir -p "$RUNNER_TEMP/composer-bin"
-          curl -sS https://getcomposer.org/installer -o "$RUNNER_TEMP/composer-setup.php"
-          php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
-          echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/composer-bin/composer" --version
+            - name: Check Rector
+              run: composer test:rector
 
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: php-quality-${{ runner.os }}-PHP8.4-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: php-quality-${{ runner.os }}-PHP8.4-composer-
-
-      - name: Add token
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: composer config github-oauth.github.com "$GITHUB_TOKEN"
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
-
-      - name: Check Rector
-        run: composer test:rector
-
-      - name: Check Pest type coverage
-        run: composer test:type-coverage
+            - name: Check Pest type coverage
+              if: always() && !cancelled()
+              run: composer test:type-coverage

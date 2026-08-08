@@ -1,0 +1,49 @@
+name: Setup PHP and Composer
+description: Configure the repository PHP runtime and install Composer dependencies.
+
+inputs:
+    github-token:
+        description: GitHub token used by Composer for API authentication.
+        required: true
+    php-version:
+        description: Homebrew PHP version to use.
+        required: false
+        default: '8.4'
+
+runs:
+    using: composite
+    steps:
+        - name: Configure PHP
+          shell: bash
+          run: |
+              php_bin_dir="$(brew --prefix php@${{ inputs.php-version }})/bin"
+              echo "$php_bin_dir" >> "$GITHUB_PATH"
+              "$php_bin_dir/php" -v
+
+        - name: Install Composer
+          shell: bash
+          run: |
+              mkdir -p "$RUNNER_TEMP/composer-bin"
+              curl --fail --show-error --silent https://getcomposer.org/installer --output "$RUNNER_TEMP/composer-setup.php"
+              php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
+              echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
+              "$RUNNER_TEMP/composer-bin/composer" --version
+
+        - name: Resolve Composer cache directory
+          id: composer-cache
+          shell: bash
+          run: echo "directory=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+        - name: Restore Composer download cache
+          uses: actions/cache@v6
+          with:
+              path: ${{ steps.composer-cache.outputs.directory }}
+              key: composer-${{ runner.os }}-php-${{ inputs.php-version }}-${{ hashFiles('composer.lock') }}
+              restore-keys: |
+                  composer-${{ runner.os }}-php-${{ inputs.php-version }}-
+
+        - name: Install Composer dependencies
+          shell: bash
+          env:
+              COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ inputs.github-token }}"}}'
+          run: composer install --prefer-dist --no-interaction --no-progress
