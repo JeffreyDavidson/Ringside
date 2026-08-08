@@ -49,7 +49,7 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             ]);
             $model->load('currentActivityPeriod');
             expect($model->currentActivityPeriod)->not->toBeNull();
-            expect($model->currentActivityPeriod->ended_at)->toBeNull();
+            expect($model->currentActivityPeriod)->not->toBeNull()->ended_at->toBeNull();
         });
 
         test('model without current activity period returns null', function () {
@@ -75,7 +75,7 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             ]);
             $model->load('futureActivityPeriod');
             expect($model->futureActivityPeriod)->not->toBeNull();
-            expect($model->futureActivityPeriod->started_at->gt(now()))->toBeTrue();
+            expect(requiredModel($model->futureActivityPeriod)->started_at->gt(now()))->toBeTrue();
         });
 
         test('model without future activity period returns null', function () {
@@ -122,7 +122,7 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             ]);
             $model->load('previousActivityPeriod');
             expect($model->previousActivityPeriod)->not->toBeNull();
-            expect($model->previousActivityPeriod->ended_at)->not->toBeNull();
+            expect($model->previousActivityPeriod)->not->toBeNull()->ended_at->not->toBeNull();
         });
     });
 
@@ -146,7 +146,7 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             ]);
             $model->load('firstActivityPeriod');
             expect($model->firstActivityPeriod)->not->toBeNull();
-            expect($model->firstActivityPeriod->id)->toBe($first->id);
+            expect($model->firstActivityPeriod)->not->toBeNull()->id->toBe($first->id);
         });
     });
 
@@ -322,7 +322,7 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             $model->load(['activityPeriods', 'currentActivityPeriod']);
             expect($model->activityPeriods)->toHaveCount(2);
             expect($model->currentActivityPeriod)->not->toBeNull();
-            expect($model->currentActivityPeriod->ended_at)->toBeNull();
+            expect($model->currentActivityPeriod)->not->toBeNull()->ended_at->toBeNull();
         });
 
         test('model can exist without activity periods', function () {

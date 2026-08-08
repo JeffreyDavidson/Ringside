@@ -55,7 +55,7 @@ describe('TagTeamRetirementValidation', function () {
         ]);
 
         // Tag team retirement validation should consider wrestler states
-        $this->strategy->validate($tagTeam->fresh());
+        $this->strategy->validate(freshModel($tagTeam));
         expect(true)->toBeTrue();
     });
 });

@@ -61,7 +61,7 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
 
             // Assert
             expect($employment->wrestler_id)->toBe($wrestler->id);
-            expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($employment->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect($employment->ended_at)->toBeNull();
         });
 
@@ -80,9 +80,9 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
 
             // Assert
             expect($employment->wrestler_id)->toBe($wrestler->id);
-            expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect($employment->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
-            expect($employment->ended_at->isAfter($employment->started_at))->toBeTrue();
+            expect(requiredDate($employment->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($employment->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($employment->ended_at)->isAfter($employment->started_at))->toBeTrue();
         });
     });
 
@@ -110,8 +110,8 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($employment->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect($employment->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($employment->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($employment->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -132,7 +132,7 @@ describe('WrestlerEmploymentFactory Unit Tests', function () {
             // Assert
             expect($employment->started_at)->toBeInstanceOf(Carbon::class);
             if ($employment->ended_at) {
-                expect($employment->ended_at->isAfter($employment->started_at))->toBeTrue();
+                expect(requiredDate($employment->ended_at)->isAfter($employment->started_at))->toBeTrue();
             }
         });
     });

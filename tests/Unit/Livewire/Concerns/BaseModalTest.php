@@ -48,7 +48,7 @@ describe('BaseModal Unit Tests', function () {
             $property = $reflection->getProperty('model');
             expect($property->isProtected())->toBeTrue();
             expect(reflectionTypeName($property))->toBe('Illuminate\\Database\\Eloquent\\Model');
-            expect($property->getType()->allowsNull())->toBeTrue();
+            expect(requiredReflectionType($property->getType())->allowsNull())->toBeTrue();
         });
 
         test('has modelForm property', function () {

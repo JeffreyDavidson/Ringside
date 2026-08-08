@@ -140,9 +140,9 @@ describe('UsersTable Component', function () {
             ]);
 
             // Ensure virtual columns are computed
-            $john->fresh();
-            $jane->fresh();
-            $bob->fresh();
+            freshModel($john);
+            freshModel($jane);
+            freshModel($bob);
 
             $component = testLivewire(Main::class);
 
@@ -277,8 +277,8 @@ describe('UsersTable Component', function () {
             $jane = User::factory()->create(['first_name' => 'SearchExcluded', 'last_name' => 'Fixture']);
 
             // Ensure virtual columns are computed
-            $john->fresh();
-            $jane->fresh();
+            freshModel($john);
+            freshModel($jane);
 
             $component = testLivewire(Main::class);
 

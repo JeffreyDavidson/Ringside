@@ -186,7 +186,7 @@ describe('VenueBuilder Query Scopes', function () {
                 ->get();
 
             expect($venues)->toHaveCount(1);
-            expect($venues->first()->name)->toBe('Mixed Events Venue');
+            expect($venues->firstOrFail()->name)->toBe('Mixed Events Venue');
         });
 
         test('can chain withPastEvents and withFutureEvents', function () {
@@ -196,7 +196,7 @@ describe('VenueBuilder Query Scopes', function () {
                 ->get();
 
             expect($venues)->toHaveCount(1);
-            expect($venues->first()->name)->toBe('Mixed Events Venue');
+            expect($venues->firstOrFail()->name)->toBe('Mixed Events Venue');
         });
 
         test('can chain withoutEvents with ordering', function () {
@@ -208,7 +208,7 @@ describe('VenueBuilder Query Scopes', function () {
                 ->get();
 
             expect($venues)->toHaveCount(2);
-            expect($venues->first()->name)->toBe('Another Empty Venue');
+            expect($venues->firstOrFail()->name)->toBe('Another Empty Venue');
         });
 
         test('can chain all scopes for complex filtering', function () {
@@ -223,7 +223,7 @@ describe('VenueBuilder Query Scopes', function () {
                 ->get();
 
             expect($venues)->toHaveCount(1);
-            expect($venues->first()->name)->toBe('Complex Test Venue');
+            expect($venues->firstOrFail()->name)->toBe('Complex Test Venue');
         });
     });
 

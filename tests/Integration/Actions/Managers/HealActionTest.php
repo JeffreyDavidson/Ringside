@@ -48,8 +48,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
     $manager = Manager::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
-    $currentInjury = $manager->currentInjury;
-    expect($currentInjury)->not()->toBeNull();
+    $currentInjury = $manager->currentInjury()->firstOrFail();
 
     HealAction::run($manager);
 
@@ -77,7 +76,7 @@ test('it prevents healing non-injured manager', function () {
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->injured()->create();
-    $originalInjuryId = $manager->currentInjury->id;
+    $originalInjuryId = $manager->currentInjury()->firstOrFail()->id;
 
     HealAction::run($manager);
 
@@ -112,8 +111,7 @@ test('it maintains employment status during healing', function () {
     expect($manager->isInjured())->toBeFalse();
 
     // Employment record should remain unchanged
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
+    $employment = $manager->currentEmployment()->firstOrFail();
     expect($employment->ended_at)->toBeNull();
 });
 

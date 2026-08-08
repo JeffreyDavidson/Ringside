@@ -123,8 +123,7 @@ test('it ends employment when retiring', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Get the current employment
-    $currentEmployment = $wrestler->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
     RetireAction::run($wrestler);

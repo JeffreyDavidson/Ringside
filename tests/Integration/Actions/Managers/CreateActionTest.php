@@ -55,7 +55,7 @@ test('it creates a manager with employment when employment date is provided', fu
     ]);
 
     // Manager should be marked as employed
-    expect($result->fresh()->isEmployed())->toBeTrue();
+    expect($result->refresh()->isEmployed())->toBeTrue();
 });
 
 test('it creates manager with all optional fields', function () {

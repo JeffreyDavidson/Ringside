@@ -48,8 +48,7 @@ test('it uses StatusTransitionPipeline for release', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $wrestler->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
     ReleaseAction::run($wrestler);

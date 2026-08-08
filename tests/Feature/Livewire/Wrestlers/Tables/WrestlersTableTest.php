@@ -44,7 +44,7 @@ describe('Main Component Feature Workflows', function () {
                 ->assertSessionMissing('error');
 
             // Verify workflow completed successfully
-            expect($wrestler->fresh()->isEmployed())->toBeTrue();
+            expect(freshModel($wrestler)->isEmployed())->toBeTrue();
         });
 
         test('complete wrestler release workflow', function () {
@@ -57,7 +57,7 @@ describe('Main Component Feature Workflows', function () {
                 ->assertHasNoErrors()
                 ->assertSessionMissing('error');
 
-            expect($wrestler->fresh()->isReleased())->toBeTrue();
+            expect(freshModel($wrestler)->isReleased())->toBeTrue();
         });
 
         test('complete wrestler retirement workflow', function () {
@@ -69,7 +69,7 @@ describe('Main Component Feature Workflows', function () {
                 ->call('handleWrestlerAction', 'retire', $wrestler->id)
                 ->assertHasNoErrors();
 
-            expect($wrestler->fresh()->isRetired())->toBeTrue();
+            expect(freshModel($wrestler)->isRetired())->toBeTrue();
         });
 
         test('complete wrestler deletion and restoration workflow', function () {
@@ -84,7 +84,7 @@ describe('Main Component Feature Workflows', function () {
                 ->assertHasNoErrors();
 
             // Verify wrestler is soft deleted
-            $freshWrestler = Wrestler::withTrashed()->find($wrestler->id);
+            $freshWrestler = Wrestler::withTrashed()->findOrFail($wrestler->id);
             expect($freshWrestler)->not->toBeNull();
             expect($freshWrestler->trashed())->toBeTrue();
             expect(Wrestler::find($wrestler->id))->toBeNull(); // Should not be found without withTrashed()
@@ -95,7 +95,7 @@ describe('Main Component Feature Workflows', function () {
                 ->assertHasNoErrors();
 
             // Verify wrestler is restored
-            expect(Wrestler::withTrashed()->find($wrestler->id)->deleted_at)->toBeNull();
+            expect(Wrestler::withTrashed()->findOrFail($wrestler->id)->deleted_at)->toBeNull();
             expect($wrestler->fresh())->not->toBeNull();
         });
     });

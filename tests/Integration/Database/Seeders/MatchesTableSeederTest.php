@@ -115,10 +115,10 @@ describe('MatchesTableSeeder Integration Tests', function () {
 
         test('event matches can load relationships', function () {
             // Arrange
-            $eventMatch = EventMatch::with(['event'])->first();
+            $eventMatch = EventMatch::with(['event'])->firstOrFail();
 
             // Assert
-            expect($eventMatch->event->name)->toBeString();
+            expect($eventMatch->event()->firstOrFail()->name)->toBeString();
             expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
             expect(true)->toBeTrue();
         });

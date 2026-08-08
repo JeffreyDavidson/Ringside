@@ -255,7 +255,7 @@ describe('FormModal Title Championship Integration', function () {
         $component->assertHasNoErrors();
         $component->assertDispatched('matchCreated');
 
-        $match = EventMatch::where('event_id', $this->event->id)->first();
+        $match = EventMatch::where('event_id', $this->event->id)->firstOrFail();
         expect($match->titles->pluck('id'))->toContain($title->id);
     });
 

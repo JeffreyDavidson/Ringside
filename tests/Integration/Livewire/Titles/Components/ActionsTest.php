@@ -64,7 +64,7 @@ describe('Title Debut Actions', function () {
         $component->assertDispatched('title-updated');
 
         // Verify the title status changed through the action
-        expect($title->fresh()->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
     });
 
     it('handles debut for already active title', function () {
@@ -93,7 +93,7 @@ describe('Title Retirement Actions', function () {
         $component->assertDispatched('title-updated');
 
         // Verify the title status changed
-        expect($title->fresh()->isRetired())->toBeTrue();
+        expect(freshModel($title)->isRetired())->toBeTrue();
     });
 
     it('can unretire a retired title successfully', function () {
@@ -108,7 +108,7 @@ describe('Title Retirement Actions', function () {
         $component->assertDispatched('title-updated');
 
         // Verify the title is no longer retired
-        expect($title->fresh()->isRetired())->toBeFalse();
+        expect(freshModel($title)->isRetired())->toBeFalse();
     });
 });
 
@@ -143,7 +143,7 @@ describe('Title Restoration Actions', function () {
         $this->title->delete();
         expect($this->title->trashed())->toBeTrue();
 
-        $trashedTitle = Title::onlyTrashed()->find($this->title->id);
+        $trashedTitle = Title::onlyTrashed()->findOrFail($this->title->id);
 
         actingAs($this->admin);
 
@@ -208,15 +208,15 @@ describe('Title Business Logic Integration', function () {
 
         // Debut the title
         $component->call('debut');
-        expect($title->fresh()->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
 
         // Retire the title
         $component->call('retire');
-        expect($title->fresh()->isRetired())->toBeTrue();
+        expect(freshModel($title)->isRetired())->toBeTrue();
 
         // Unretire the title
         $component->call('unretire');
-        expect($title->fresh()->isRetired())->toBeFalse();
+        expect(freshModel($title)->isRetired())->toBeFalse();
     });
 
     it('maintains title state consistency', function () {

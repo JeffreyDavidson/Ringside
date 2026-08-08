@@ -84,7 +84,7 @@ describe('BaseForm Unit Tests', function () {
             expect($formModelProperty->isProtected())->toBeTrue();
             expect($formModelProperty->hasType())->toBeTrue();
             expect(reflectionTypeName($formModelProperty))->toBe('Illuminate\\Database\\Eloquent\\Model');
-            expect($formModelProperty->getType()->allowsNull())->toBeTrue();
+            expect(requiredReflectionType($formModelProperty->getType())->allowsNull())->toBeTrue();
         });
     });
 

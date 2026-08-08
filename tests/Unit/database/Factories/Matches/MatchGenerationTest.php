@@ -226,8 +226,8 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             expect($match->result->winners)->toHaveCount(1);
             expect($match->result->losers)->toHaveCount(1);
 
-            $firstCompetitor = $match->competitors->first();
-            $winner = $match->result->winners->first();
+            $firstCompetitor = $match->competitors->firstOrFail();
+            $winner = $match->result->winners->firstOrFail();
 
             expect($winner->winner_type)->toBe($firstCompetitor->competitor_type);
             expect($winner->winner_id)->toBe($firstCompetitor->competitor_id);
@@ -244,8 +244,8 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             expect($match->result->winners)->toHaveCount(1);
             expect($match->result->losers)->toHaveCount(2);
 
-            $lastCompetitor = $match->competitors->last();
-            $winner = $match->result->winners->first();
+            $lastCompetitor = $match->competitors->reverse()->firstOrFail();
+            $winner = $match->result->winners->firstOrFail();
 
             expect($winner->winner_type)->toBe($lastCompetitor->competitor_type);
             expect($winner->winner_id)->toBe($lastCompetitor->competitor_id);
@@ -382,7 +382,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             expect($match->result)->not->toBeNull();
 
             // Challenger should win (last competitor strategy)
-            $winner = $match->result->winners->first();
+            $winner = $match->result->winners->firstOrFail();
             expect($winner->winner_id)->toBe($challenger->id);
         });
 

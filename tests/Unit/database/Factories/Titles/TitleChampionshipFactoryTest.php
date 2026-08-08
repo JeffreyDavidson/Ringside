@@ -50,7 +50,7 @@ describe('TitleChampionshipFactory Unit Tests', function () {
 
             // Assert
             expect($championship->won_at->isPast())->toBeTrue();
-            expect($championship->won_at->isAfter(now()->subYear()))->toBeTrue();
+            expect(requiredDate($championship->won_at)->isAfter(now()->subYear()))->toBeTrue();
         });
     });
 
@@ -103,10 +103,10 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($championship->won_at->format('Y-m-d H:i:s'))->toBe($wonDate->format('Y-m-d H:i:s'));
-            expect($championship->lost_at->format('Y-m-d H:i:s'))->toBe($lostDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($championship->won_at)->format('Y-m-d H:i:s'))->toBe($wonDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($championship->lost_at)->format('Y-m-d H:i:s'))->toBe($lostDate->format('Y-m-d H:i:s'));
             expect($championship->lost_match_id)->toBe($lostMatch->id);
-            expect($championship->lost_at->isAfter($championship->won_at))->toBeTrue();
+            expect(requiredDate($championship->lost_at)->isAfter($championship->won_at))->toBeTrue();
         });
     });
 

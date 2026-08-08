@@ -44,7 +44,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
             // Assert
             expect($activityPeriod->started_at)->toBeInstanceOf(\Carbon\Carbon::class);
             expect($activityPeriod->started_at->isPast())->toBeTrue();
-            expect($activityPeriod->started_at->isAfter(now()->subYears(3)))->toBeTrue();
+            expect(requiredDate($activityPeriod->started_at)->isAfter(now()->subYears(3)))->toBeTrue();
             expect($activityPeriod->ended_at)->toBeNull(); // Active by default
         });
     });
@@ -64,7 +64,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
 
             // Assert
             expect($activityPeriod->stable_id)->toBe($stable->id);
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect($activityPeriod->ended_at)->toBeNull();
         });
 
@@ -83,9 +83,9 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
 
             // Assert
             expect($activityPeriod->stable_id)->toBe($stable->id);
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at->isAfter($activityPeriod->started_at))->toBeTrue();
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
         });
     });
 
@@ -113,8 +113,8 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -135,7 +135,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
             // Assert
             expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
             if ($activityPeriod->ended_at) {
-                expect($activityPeriod->ended_at->isAfter($activityPeriod->started_at))->toBeTrue();
+                expect(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
             }
         });
     });

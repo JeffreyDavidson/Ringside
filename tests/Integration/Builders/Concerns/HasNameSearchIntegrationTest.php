@@ -49,16 +49,16 @@ describe('HasNameSearch Integration Tests', function () {
             $results = User::query()->whereNameMatches('John')->get();
 
             expect($results)->toHaveCount(1)
-                ->and($results->first()->first_name)->toBe('John')
-                ->and($results->first()->last_name)->toBe('Smith');
+                ->and($results->firstOrFail()->first_name)->toBe('John')
+                ->and($results->firstOrFail()->last_name)->toBe('Smith');
         });
 
         it('finds exact last name matches', function () {
             $results = User::query()->whereNameMatches('Doe')->get();
 
             expect($results)->toHaveCount(1)
-                ->and($results->first()->first_name)->toBe('Jane')
-                ->and($results->first()->last_name)->toBe('Doe');
+                ->and($results->firstOrFail()->first_name)->toBe('Jane')
+                ->and($results->firstOrFail()->last_name)->toBe('Doe');
         });
 
         it('finds first name with space prefix matches', function () {
@@ -72,8 +72,8 @@ describe('HasNameSearch Integration Tests', function () {
             $results = User::query()->whereNameMatches('Mary Jane')->get();
 
             expect($results)->toHaveCount(1)
-                ->and($results->first()->first_name)->toBe('Mary Jane')
-                ->and($results->first()->last_name)->toBe('Watson');
+                ->and($results->firstOrFail()->first_name)->toBe('Mary Jane')
+                ->and($results->firstOrFail()->last_name)->toBe('Watson');
         });
 
         it('does NOT match substrings that are not word boundaries', function () {
@@ -81,8 +81,8 @@ describe('HasNameSearch Integration Tests', function () {
             $results = User::query()->whereNameMatches('John')->get();
 
             expect($results)->toHaveCount(1)
-                ->and($results->first()->first_name)->toBe('John')
-                ->and($results->first()->last_name)->toBe('Smith');
+                ->and($results->firstOrFail()->first_name)->toBe('John')
+                ->and($results->firstOrFail()->last_name)->toBe('Smith');
 
             // Verify Johnny and Johnson are NOT included
             $names = $results->pluck('first_name', 'last_name')->toArray();
@@ -94,12 +94,12 @@ describe('HasNameSearch Integration Tests', function () {
             $results = User::query()->whereNameMatches('JOHN')->get();
 
             expect($results)->toHaveCount(1)
-                ->and($results->first()->first_name)->toBe('John');
+                ->and($results->firstOrFail()->first_name)->toBe('John');
 
             $results2 = User::query()->whereNameMatches('doe')->get();
 
             expect($results2)->toHaveCount(1)
-                ->and($results2->first()->last_name)->toBe('Doe');
+                ->and($results2->firstOrFail()->last_name)->toBe('Doe');
         });
 
         it('returns empty results for non-matching terms', function () {
@@ -152,7 +152,7 @@ describe('HasNameSearch Integration Tests', function () {
                 ->get();
 
             expect($results)->toHaveCount(1)
-                ->and($results->first()->last_name)->toBe('Smith');
+                ->and($results->firstOrFail()->last_name)->toBe('Smith');
         });
 
         it('works with order by clauses', function () {
@@ -164,9 +164,9 @@ describe('HasNameSearch Integration Tests', function () {
             expect($results)->toHaveCount(3);
 
             // Check ordering: Bob (Johnson), John, Johnny
-            expect($results->get(0)->first_name)->toBe('Bob')
-                ->and($results->get(1)->first_name)->toBe('John')
-                ->and($results->get(2)->first_name)->toBe('Johnny');
+            expect($results->slice(0)->firstOrFail()->first_name)->toBe('Bob')
+                ->and($results->slice(1)->firstOrFail()->first_name)->toBe('John')
+                ->and($results->slice(2)->firstOrFail()->first_name)->toBe('Johnny');
         });
     });
 
@@ -189,7 +189,7 @@ describe('HasNameSearch Integration Tests', function () {
             $results = User::query()->whereNameMatches("O'Connor")->get();
 
             expect($results)->toHaveCount(1)
-                ->and($results->first()->first_name)->toBe("O'Connor");
+                ->and($results->firstOrFail()->first_name)->toBe("O'Connor");
         });
 
         it('handles whitespace in search terms', function () {
@@ -197,7 +197,7 @@ describe('HasNameSearch Integration Tests', function () {
 
             // The method should handle whitespace appropriately
             expect($results)->toHaveCount(1)
-                ->and($results->first()->first_name)->toBe('John');
+                ->and($results->firstOrFail()->first_name)->toBe('John');
         });
     });
 });

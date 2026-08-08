@@ -50,8 +50,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $manager->currentSuspension;
-    expect($currentSuspension)->not()->toBeNull();
+    $currentSuspension = $manager->currentSuspension()->firstOrFail();
 
     ReinstateAction::run($manager);
 
@@ -79,7 +78,7 @@ test('it prevents reinstating non-suspended manager', function () {
 
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
-    $originalSuspensionId = $manager->currentSuspension->id;
+    $originalSuspensionId = $manager->currentSuspension()->firstOrFail()->id;
 
     ReinstateAction::run($manager);
 
@@ -101,7 +100,7 @@ test('it handles database transactions correctly', function () {
 
 test('it maintains employment status during reinstatement', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
-    $employmentId = $manager->currentEmployment->id;
+    $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isSuspended())->toBeTrue();
@@ -115,8 +114,7 @@ test('it maintains employment status during reinstatement', function () {
     expect($manager->isSuspended())->toBeFalse();
 
     // Employment record should remain unchanged
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
+    $employment = $manager->currentEmployment()->firstOrFail();
     expect($employment->id)->toBe($employmentId);
     expect($employment->ended_at)->toBeNull();
 });
@@ -167,8 +165,8 @@ test('it reinstates injured suspended manager', function () {
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();
-    $suspensionId = $manager->currentSuspension->id;
-    $injuryId = $manager->currentInjury->id;
+    $suspensionId = $manager->currentSuspension()->firstOrFail()->id;
+    $injuryId = $manager->currentInjury()->firstOrFail()->id;
 
     ReinstateAction::run($manager);
 

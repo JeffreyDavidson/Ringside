@@ -14,7 +14,7 @@ beforeEach(function () {
 
 test('it retires an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isRetired())->toBeFalse();
@@ -94,7 +94,7 @@ test('it throws exception when referee cannot be retired', function () {
 
 test('it ends employment when retiring', function () {
     $referee = Referee::factory()->employed()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($employment->ended_at)->toBeNull();
 
@@ -111,7 +111,7 @@ test('it ends employment when retiring', function () {
 
 test('it ends suspension before retiring', function () {
     $referee = Referee::factory()->employed()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
     expect($referee->isSuspended())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
@@ -128,7 +128,7 @@ test('it ends suspension before retiring', function () {
 
 test('it ends injury before retiring', function () {
     $referee = Referee::factory()->employed()->injured()->create();
-    $injury = $referee->currentInjury;
+    $injury = $referee->currentInjury()->firstOrFail();
 
     expect($referee->isInjured())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
@@ -149,10 +149,10 @@ test('it creates retirement record with correct structure', function () {
 
     RetireAction::run($referee, $retirementDate);
 
-    $retirement = $referee->fresh()->currentRetirement;
+    $retirement = freshModel($referee)->currentRetirement()->firstOrFail();
 
     expect($retirement)->not->toBeNull();
     expect($retirement->referee_id)->toBe($referee->id);
-    expect($retirement->started_at->toDateTimeString())->toBe($retirementDate->toDateTimeString());
+    expect(requiredDate($retirement->started_at)->toDateTimeString())->toBe($retirementDate->toDateTimeString());
     expect($retirement->ended_at)->toBeNull();
 });

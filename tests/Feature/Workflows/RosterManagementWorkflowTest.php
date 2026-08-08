@@ -38,7 +38,7 @@ describe('Manager Assignment Workflow', function () {
 
         // Then: Manager should be created
         expect(Manager::where('first_name', 'Paul')->where('last_name', 'Heyman')->exists())->toBeTrue();
-        $manager = Manager::where('first_name', 'Paul')->where('last_name', 'Heyman')->first();
+        $manager = Manager::where('first_name', 'Paul')->where('last_name', 'Heyman')->firstOrFail();
 
         // When: Assigning manager to wrestler (assuming this functionality exists)
         // Note: This would depend on the actual implementation of manager assignment
@@ -69,7 +69,7 @@ describe('Manager Assignment Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Manager should be employed
-        expect($manager->fresh()->isEmployed())->toBeTrue();
+        expect(freshModel($manager)->isEmployed())->toBeTrue();
 
         // When: Suspending manager
         actingAs($admin);
@@ -79,7 +79,7 @@ describe('Manager Assignment Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Manager should be suspended
-        expect($manager->fresh()->isSuspended())->toBeTrue();
+        expect(freshModel($manager)->isSuspended())->toBeTrue();
 
         // When: Reinstating manager
         actingAs($admin);
@@ -89,8 +89,8 @@ describe('Manager Assignment Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Manager should be employed again
-        expect($manager->fresh()->isEmployed())->toBeTrue();
-        expect($manager->fresh()->isSuspended())->toBeFalse();
+        expect(freshModel($manager)->isEmployed())->toBeTrue();
+        expect(freshModel($manager)->isSuspended())->toBeFalse();
     });
 });
 
@@ -114,7 +114,7 @@ describe('Stable Formation and Management Workflow', function () {
 
         // Then: Stable should be created
         expect(Stable::where('name', 'D-Generation X')->exists())->toBeTrue();
-        $stable = Stable::where('name', 'D-Generation X')->first();
+        $stable = Stable::where('name', 'D-Generation X')->firstOrFail();
 
         // And: Stable appears in stables table
         actingAs($admin);
@@ -136,7 +136,7 @@ describe('Stable Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Stable should be active
-        expect($stable->fresh()->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($stable)->isCurrentlyActive())->toBeTrue();
 
         // When: Retiring the stable
         actingAs($admin);
@@ -146,7 +146,7 @@ describe('Stable Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Stable should be retired
-        expect($stable->fresh()->isRetired())->toBeTrue();
+        expect(freshModel($stable)->isRetired())->toBeTrue();
 
         // Given: A retired stable with viable former members
         $retiredStable = Stable::factory()->retired()->create(['name' => 'Evolution']);
@@ -159,7 +159,7 @@ describe('Stable Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Stable should no longer be retired
-        expect($retiredStable->fresh()->isRetired())->toBeFalse();
+        expect(freshModel($retiredStable)->isRetired())->toBeFalse();
     });
 });
 
@@ -184,7 +184,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // Then: Tag team should be created
         expect(TagTeam::where('name', 'The Hardy Boyz')->exists())->toBeTrue();
-        $tagTeam = TagTeam::where('name', 'The Hardy Boyz')->first();
+        $tagTeam = TagTeam::where('name', 'The Hardy Boyz')->firstOrFail();
 
         // And: Tag team appears in tag teams table
         actingAs($admin);
@@ -215,7 +215,7 @@ describe('Tag Team Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Tag team should be employed
-        expect($tagTeam->fresh()->isEmployed())->toBeTrue();
+        expect(freshModel($tagTeam)->isEmployed())->toBeTrue();
 
         // When: Suspending tag team
         actingAs($admin);
@@ -225,7 +225,7 @@ describe('Tag Team Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Tag team should be suspended
-        expect($tagTeam->fresh()->isSuspended())->toBeTrue();
+        expect(freshModel($tagTeam)->isSuspended())->toBeTrue();
 
         // When: Reinstating tag team
         actingAs($admin);
@@ -235,8 +235,8 @@ describe('Tag Team Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Tag team should be employed again
-        expect($tagTeam->fresh()->isEmployed())->toBeTrue();
-        expect($tagTeam->fresh()->isSuspended())->toBeFalse();
+        expect(freshModel($tagTeam)->isEmployed())->toBeTrue();
+        expect(freshModel($tagTeam)->isSuspended())->toBeFalse();
 
         // When: Retiring tag team
         actingAs($admin);
@@ -246,7 +246,7 @@ describe('Tag Team Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Tag team should be retired
-        expect($tagTeam->fresh()->isRetired())->toBeTrue();
+        expect(freshModel($tagTeam)->isRetired())->toBeTrue();
     });
 });
 

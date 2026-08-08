@@ -61,7 +61,7 @@ describe('WrestlerSuspensionFactory Unit Tests', function () {
 
             // Assert
             expect($suspension->wrestler_id)->toBe($wrestler->id);
-            expect($suspension->started_at->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($suspension->started_at)->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
             expect($suspension->ended_at)->toBeNull();
         });
 
@@ -80,9 +80,9 @@ describe('WrestlerSuspensionFactory Unit Tests', function () {
 
             // Assert
             expect($suspension->wrestler_id)->toBe($wrestler->id);
-            expect($suspension->started_at->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
-            expect($suspension->ended_at->format('Y-m-d H:i:s'))->toBe($reinstatedDate->format('Y-m-d H:i:s'));
-            expect($suspension->ended_at->isAfter($suspension->started_at))->toBeTrue();
+            expect(requiredDate($suspension->started_at)->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($suspension->ended_at)->format('Y-m-d H:i:s'))->toBe($reinstatedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($suspension->ended_at)->isAfter($suspension->started_at))->toBeTrue();
         });
     });
 
@@ -110,8 +110,8 @@ describe('WrestlerSuspensionFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($suspension->started_at->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
-            expect($suspension->ended_at->format('Y-m-d H:i:s'))->toBe($reinstatedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($suspension->started_at)->format('Y-m-d H:i:s'))->toBe($suspendedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($suspension->ended_at)->format('Y-m-d H:i:s'))->toBe($reinstatedDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -132,7 +132,7 @@ describe('WrestlerSuspensionFactory Unit Tests', function () {
             // Assert
             expect($suspension->started_at)->toBeInstanceOf(Carbon::class);
             if ($suspension->ended_at) {
-                expect($suspension->ended_at->isAfter($suspension->started_at))->toBeTrue();
+                expect(requiredDate($suspension->ended_at)->isAfter($suspension->started_at))->toBeTrue();
             }
         });
     });

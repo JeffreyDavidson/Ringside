@@ -248,7 +248,7 @@ test('it preserves management history during release', function () {
     // Verify the current relationship was ended with release date
     $currentRelationship = $manager->wrestlers()
         ->wherePivot('hired_at', now()->subDays(10)->toDateTimeString())
-        ->first();
+        ->firstOrFail();
 
     expect(relatedPivotAttribute($currentRelationship, 'fired_at'))->toBe(now()->toDateTimeString());
 });

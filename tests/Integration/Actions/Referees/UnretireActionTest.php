@@ -15,7 +15,7 @@ beforeEach(function () {
 
 test('it unretires a retired referee', function () {
     $referee = Referee::factory()->retired()->create();
-    $retirement = $referee->currentRetirement;
+    $retirement = $referee->currentRetirement()->firstOrFail();
 
     expect($referee->isRetired())->toBeTrue();
     expect($referee->isEmployed())->toBeFalse();
@@ -39,7 +39,7 @@ test('it unretires a retired referee', function () {
 
 test('it unretires referee with specific unretirement date', function () {
     $referee = Referee::factory()->retired()->create();
-    $retirement = $referee->currentRetirement;
+    $retirement = $referee->currentRetirement()->firstOrFail();
     $unretiredDate = now()->subDays(3);
 
     UnretireAction::run($referee, $unretiredDate);
@@ -49,7 +49,7 @@ test('it unretires referee with specific unretirement date', function () {
 
     expect($referee->isRetired())->toBeFalse();
     expect($referee->isEmployed())->toBeTrue();
-    expect($retirement->ended_at->toDateTimeString())->toBe($unretiredDate->toDateTimeString());
+    expect(requiredDate($retirement->ended_at)->toDateTimeString())->toBe($unretiredDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_retirements', [
         'id' => $retirement->id,
@@ -120,7 +120,7 @@ test('it throws exception when referee cannot be unretired', function () {
 
 test('it preserves retirement history', function () {
     $referee = Referee::factory()->retired()->create();
-    $retirement = $referee->currentRetirement;
+    $retirement = $referee->currentRetirement()->firstOrFail();
     $originalStartedAt = $retirement->started_at;
 
     UnretireAction::run($referee);
@@ -144,17 +144,17 @@ test('it restores referee employment after unretirement', function () {
     UnretireAction::run($referee);
 
     $referee->refresh();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($employment)->not->toBeNull();
     expect($employment->referee_id)->toBe($referee->id);
-    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });
 
 test('it rolls back retirement changes when employment restoration fails', function () {
     $referee = Referee::factory()->retired()->create();
-    $retirement = $referee->currentRetirement;
+    $retirement = $referee->currentRetirement()->firstOrFail();
 
     RefereeEmployment::creating(function (): void {
         throw new RuntimeException('Employment restoration failed.');

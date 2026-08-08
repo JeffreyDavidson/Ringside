@@ -114,13 +114,12 @@ describe('EventsTableSeeder Integration Tests', function () {
 
             // Assert
             if ($event) {
-                expect($event->venue)->not()->toBeNull();
-                expect($event->venue->name)->toBeString();
+                expect($event->venue)
+                    ->not()->toBeNull()
+                    ->name->toBeString();
             } else {
-                // If no events have venues, that's also valid (all future events)
                 expect(Event::whereNotNull('venue_id')->count())->toBe(0);
             }
-            expect(true)->toBeTrue();
         });
 
         test('seeder creates consistent data', function () {

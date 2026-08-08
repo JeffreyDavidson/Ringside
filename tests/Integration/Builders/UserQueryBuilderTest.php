@@ -46,10 +46,8 @@ describe('UserBuilder Unit Tests', function () {
             $query = User::query();
 
             // Verify the builder returns User models
-            $user = $query->first();
-            if ($user) {
-                expect($user)->toBeInstanceOf(User::class);
-            }
+            $user = $query->firstOrFail();
+            expect($user)->toBeInstanceOf(User::class);
         });
         expect(true)->toBeTrue();
     });
@@ -60,7 +58,7 @@ describe('UserBuilder Unit Tests', function () {
 
             expect($users)->toBeInstanceOf(Collection::class);
             expect($users->count())->toBeGreaterThan(0);
-            expect($users->first())->toBeInstanceOf(User::class);
+            expect($users->firstOrFail())->toBeInstanceOf(User::class);
         });
 
         test('builder can filter by specific attributes', function () {
@@ -107,7 +105,7 @@ describe('UserBuilder Unit Tests', function () {
             $result = User::query()
                 ->where('role', Role::Administrator)
                 ->where('status', UserStatus::Active)
-                ->first();
+                ->firstOrFail();
 
             expect($result)->toBeInstanceOf(User::class);
             expect($result->role)->toBe(Role::Administrator);
@@ -139,7 +137,7 @@ describe('UserBuilder Unit Tests', function () {
 
             // Verify ordering (newest first)
             if ($users->count() > 1) {
-                expect($users->first()->created_at->gte($users->last()->created_at))->toBeTrue();
+                expect(requiredDate($users->firstOrFail()->created_at)->gte(requiredDate($users->reverse()->firstOrFail()->created_at)))->toBeTrue();
             }
         });
         expect(true)->toBeTrue();

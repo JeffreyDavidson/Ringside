@@ -90,8 +90,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
-    $currentRetirement = $wrestler->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
+    $currentRetirement = $wrestler->currentRetirement()->firstOrFail();
     expect($currentRetirement->ended_at)->toBeNull();
 
     UnretireAction::run($wrestler);

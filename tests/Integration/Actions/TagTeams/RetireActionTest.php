@@ -92,8 +92,7 @@ test('it uses StatusTransitionPipeline for retirement', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $tagTeam->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
     expect($tagTeam->currentRetirement)->toBeNull();
 
     RetireAction::run($tagTeam);
@@ -127,7 +126,7 @@ test('it prevents retiring already retired tag team', function () {
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
-    $originalEmploymentId = $tagTeam->currentEmployment->id;
+    $originalEmploymentId = $tagTeam->currentEmployment()->firstOrFail()->id;
 
     RetireAction::run($tagTeam);
 
@@ -145,9 +144,8 @@ test('it handles database transactions correctly', function () {
     ]);
 
     // Verify new retirement record was created
-    $retirement = $tagTeam->currentRetirement;
-    expect($retirement)->not()->toBeNull();
-    expect($retirement->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $retirement = $tagTeam->currentRetirement()->firstOrFail();
+    expect(requiredDate($retirement->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($retirement->ended_at)->toBeNull();
 });
 
@@ -164,9 +162,8 @@ test('it creates new retirement period', function () {
     expect($tagTeam->isRetired())->toBeTrue();
 
     // New retirement should be current and active
-    $currentRetirement = $tagTeam->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
-    expect($currentRetirement->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentRetirement = $tagTeam->currentRetirement()->firstOrFail();
+    expect(requiredDate($currentRetirement->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($currentRetirement->ended_at)->toBeNull();
 });
 
@@ -210,9 +207,8 @@ test('it handles multiple retirement history correctly', function () {
     expect($tagTeam->retirements()->count())->toBe(2);
 
     // New retirement should be current
-    $currentRetirement = $tagTeam->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
-    expect($currentRetirement->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentRetirement = $tagTeam->currentRetirement()->firstOrFail();
+    expect(requiredDate($currentRetirement->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it preserves employment and retirement history', function () {

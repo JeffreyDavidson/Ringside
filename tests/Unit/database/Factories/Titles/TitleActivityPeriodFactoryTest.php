@@ -61,7 +61,7 @@ describe('TitleActivityPeriodFactory Unit Tests', function () {
 
             // Assert
             expect($activityPeriod->title_id)->toBe($title->id);
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect($activityPeriod->ended_at)->toBeNull();
         });
 
@@ -80,9 +80,9 @@ describe('TitleActivityPeriodFactory Unit Tests', function () {
 
             // Assert
             expect($activityPeriod->title_id)->toBe($title->id);
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at->isAfter($activityPeriod->started_at))->toBeTrue();
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
         });
     });
 
@@ -110,8 +110,8 @@ describe('TitleActivityPeriodFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -132,7 +132,7 @@ describe('TitleActivityPeriodFactory Unit Tests', function () {
             // Assert
             expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
             if ($activityPeriod->ended_at) {
-                expect($activityPeriod->ended_at->isAfter($activityPeriod->started_at))->toBeTrue();
+                expect(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
             }
         });
     });

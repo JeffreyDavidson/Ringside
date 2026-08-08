@@ -57,7 +57,7 @@ describe('Matches Main Table Component Integration', function () {
             ]);
 
             expect($match->event)->not()->toBeNull();
-            expect($match->event->name)->toBe('Test Event');
+            expect($match->event()->firstOrFail()->name)->toBe('Test Event');
 
             actingAs($this->admin);
 

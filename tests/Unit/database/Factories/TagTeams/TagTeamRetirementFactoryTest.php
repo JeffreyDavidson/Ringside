@@ -61,7 +61,7 @@ describe('TagTeamRetirementFactory Unit Tests', function () {
 
             // Assert
             expect($retirement->tag_team_id)->toBe($tagTeam->id);
-            expect($retirement->started_at->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($retirement->started_at)->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
             expect($retirement->ended_at)->toBeNull();
         });
 
@@ -80,9 +80,9 @@ describe('TagTeamRetirementFactory Unit Tests', function () {
 
             // Assert
             expect($retirement->tag_team_id)->toBe($tagTeam->id);
-            expect($retirement->started_at->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
-            expect($retirement->ended_at->format('Y-m-d H:i:s'))->toBe($endedDate->format('Y-m-d H:i:s'));
-            expect($retirement->ended_at->isAfter($retirement->started_at))->toBeTrue();
+            expect(requiredDate($retirement->started_at)->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($retirement->ended_at)->format('Y-m-d H:i:s'))->toBe($endedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($retirement->ended_at)->isAfter($retirement->started_at))->toBeTrue();
         });
     });
 
@@ -110,8 +110,8 @@ describe('TagTeamRetirementFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($retirement->started_at->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
-            expect($retirement->ended_at->format('Y-m-d H:i:s'))->toBe($endedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($retirement->started_at)->format('Y-m-d H:i:s'))->toBe($retiredDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($retirement->ended_at)->format('Y-m-d H:i:s'))->toBe($endedDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -132,7 +132,7 @@ describe('TagTeamRetirementFactory Unit Tests', function () {
             // Assert
             expect($retirement->started_at)->toBeInstanceOf(Carbon::class);
             if ($retirement->ended_at) {
-                expect($retirement->ended_at->isAfter($retirement->started_at))->toBeTrue();
+                expect(requiredDate($retirement->ended_at)->isAfter($retirement->started_at))->toBeTrue();
             }
         });
     });

@@ -55,7 +55,7 @@ describe('WrestlerManager Pivot Model', function () {
                 'previousManagers' => 0,
             ]);
 
-            $pivotData = $this->wrestler->managers()->first()->pivot;
+            $pivotData = $this->wrestler->managers()->firstOrFail()->pivot;
             expect($pivotData->hired_at->timestamp)->toBe($hiredDate->timestamp);
             expect($pivotData->fired_at)->toBeNull();
         });
@@ -99,11 +99,11 @@ describe('WrestlerManager Pivot Model', function () {
                 'previousManagers' => 1,
             ]);
 
-            $currentManager = $this->wrestler->currentManagers()->first();
+            $currentManager = $this->wrestler->currentManagers()->firstOrFail();
             expect($currentManager->id)->toBe($this->secondManager->id);
             expectCurrentRelationshipsActive($this->wrestler);
 
-            $previousManager = $this->wrestler->previousManagers()->first();
+            $previousManager = $this->wrestler->previousManagers()->firstOrFail();
             expect($previousManager->id)->toBe($this->manager->id);
             expectPreviousRelationshipsEnded($this->wrestler);
         });
@@ -126,8 +126,8 @@ describe('WrestlerManager Pivot Model', function () {
 
             expectPreviousRelationshipsEnded($this->wrestler);
 
-            $previousManager = $this->wrestler->previousManagers()->first();
-            expect($previousManager->pivot->fired_at->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
+            $previousManager = $this->wrestler->previousManagers()->firstOrFail();
+            expect(requiredDate($previousManager->pivot->fired_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
         });
 
         test('detaching manager completely removes relationship', function () {
@@ -171,16 +171,16 @@ describe('WrestlerManager Pivot Model', function () {
             $currentManagers = $this->wrestler->currentManagers()->get();
 
             expect($currentManagers)->toHaveCount(1);
-            expect($currentManagers->first()->id)->toBe($this->secondManager->id);
-            expect(relatedPivotAttribute($currentManagers->first(), 'fired_at'))->toBeNull();
+            expect($currentManagers->firstOrFail()->id)->toBe($this->secondManager->id);
+            expect(relatedPivotAttribute($currentManagers->firstOrFail(), 'fired_at'))->toBeNull();
         });
 
         test('previous managers query returns only completed relationships', function () {
             $previousManagers = $this->wrestler->previousManagers()->get();
 
             expect($previousManagers)->toHaveCount(1);
-            expect($previousManagers->first()->id)->toBe($this->manager->id);
-            expect(relatedPivotAttribute($previousManagers->first(), 'fired_at'))->not()->toBeNull();
+            expect($previousManagers->firstOrFail()->id)->toBe($this->manager->id);
+            expect(relatedPivotAttribute($previousManagers->firstOrFail(), 'fired_at'))->not()->toBeNull();
         });
 
         test('all managers query returns complete relationship history', function () {
@@ -198,8 +198,8 @@ describe('WrestlerManager Pivot Model', function () {
                 ->orderBy('hired_at', 'asc')
                 ->get();
 
-            expect($managersChronological->first()->id)->toBe($this->manager->id);
-            expect($managersChronological->last()->id)->toBe($this->secondManager->id);
+            expect($managersChronological->firstOrFail()->id)->toBe($this->manager->id);
+            expect($managersChronological->reverse()->firstOrFail()->id)->toBe($this->secondManager->id);
         });
 
         test('can query managers within specific date ranges', function () {
@@ -208,7 +208,7 @@ describe('WrestlerManager Pivot Model', function () {
                 ->get();
 
             expect($recentManagers)->toHaveCount(1);
-            expect($recentManagers->first()->id)->toBe($this->secondManager->id);
+            expect($recentManagers->firstOrFail()->id)->toBe($this->secondManager->id);
         });
     });
 
@@ -218,9 +218,8 @@ describe('WrestlerManager Pivot Model', function () {
 
             $pivotRecord = WrestlerManager::where('wrestler_id', $this->wrestler->id)
                 ->where('manager_id', $this->manager->id)
-                ->first();
+                ->firstOrFail();
 
-            expect($pivotRecord)->not()->toBeNull();
             expect($pivotRecord->wrestler_id)->toBe($this->wrestler->id);
             expect($pivotRecord->manager_id)->toBe($this->manager->id);
             expect($pivotRecord->hired_at)->toBeInstanceOf(Carbon::class);
@@ -232,7 +231,7 @@ describe('WrestlerManager Pivot Model', function () {
 
             $pivotRecord = WrestlerManager::where('wrestler_id', $this->wrestler->id)
                 ->where('manager_id', $this->manager->id)
-                ->first();
+                ->firstOrFail();
 
             // Test pivot relationships
             expect($pivotRecord->wrestler->id)->toBe($this->wrestler->id);
@@ -250,12 +249,12 @@ describe('WrestlerManager Pivot Model', function () {
 
             $pivotRecord = WrestlerManager::where('wrestler_id', $this->wrestler->id)
                 ->where('manager_id', $this->manager->id)
-                ->first();
+                ->firstOrFail();
 
             expect($pivotRecord->hired_at)->toBeInstanceOf(Carbon::class);
             expect($pivotRecord->fired_at)->toBeInstanceOf(Carbon::class);
             expect($pivotRecord->hired_at->format('Y-m-d H:i:s'))->toBe($hiredDate->format('Y-m-d H:i:s'));
-            expect($pivotRecord->fired_at->format('Y-m-d H:i:s'))->toBe($firedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($pivotRecord->fired_at)->format('Y-m-d H:i:s'))->toBe($firedDate->format('Y-m-d H:i:s'));
         });
     });
 
@@ -295,10 +294,10 @@ describe('WrestlerManager Pivot Model', function () {
 
             $pivotRecord = WrestlerManager::where('wrestler_id', $this->wrestler->id)
                 ->where('manager_id', $this->manager->id)
-                ->first();
+                ->firstOrFail();
 
             // Data is stored as-is; validation should happen in business logic
-            expect($pivotRecord->hired_at->greaterThan($pivotRecord->fired_at))->toBeTrue();
+            expect($pivotRecord->hired_at->greaterThan(requiredDate($pivotRecord->fired_at)))->toBeTrue();
         });
     });
 
@@ -329,7 +328,7 @@ describe('WrestlerManager Pivot Model', function () {
             ]);
 
             // Verify current manager is the original manager
-            $currentManager = $this->wrestler->currentManagers()->first();
+            $currentManager = $this->wrestler->currentManagers()->firstOrFail();
             expect($currentManager->id)->toBe($this->manager->id);
 
             // Verify relationship history includes both managers
@@ -353,12 +352,12 @@ describe('WrestlerManager Pivot Model', function () {
             ]);
 
             // Calculate duration of completed period
-            $completedPeriod = $this->wrestler->previousManagers()->first();
+            $completedPeriod = $this->wrestler->previousManagers()->firstOrFail();
             $duration = $completedPeriod->pivot->hired_at->diffInDays($completedPeriod->pivot->fired_at);
             expect($duration)->toBeGreaterThan(150); // Approximately 6 months
 
             // Calculate duration of current period
-            $currentPeriod = $this->wrestler->currentManagers()->first();
+            $currentPeriod = $this->wrestler->currentManagers()->firstOrFail();
             $currentDuration = $currentPeriod->pivot->hired_at->diffInDays(Carbon::now());
             expect($currentDuration)->toBeGreaterThan(80); // Approximately 3 months
         });
@@ -375,7 +374,7 @@ describe('WrestlerManager Pivot Model', function () {
             expect($wrestlers)->toHaveCount(2);
 
             // Verify relationships are loaded
-            $wrestlerWithManager = $wrestlers->firstWhere('id', $this->wrestler->id);
+            $wrestlerWithManager = requiredModel($wrestlers->firstWhere('id', $this->wrestler->id));
             expect($wrestlerWithManager->relationLoaded('currentManagers'))->toBeTrue();
             expect($wrestlerWithManager->currentManagers)->toHaveCount(1);
         });

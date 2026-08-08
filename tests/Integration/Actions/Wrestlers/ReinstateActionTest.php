@@ -69,8 +69,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $wrestler->currentSuspension;
-    expect($currentSuspension)->not()->toBeNull();
+    $currentSuspension = $wrestler->currentSuspension()->firstOrFail();
     expect($currentSuspension->ended_at)->toBeNull();
 
     ReinstateAction::run($wrestler);

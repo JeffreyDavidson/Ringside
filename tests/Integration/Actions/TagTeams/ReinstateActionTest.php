@@ -50,8 +50,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $tagTeam->currentSuspension;
-    expect($currentSuspension)->not()->toBeNull();
+    $currentSuspension = $tagTeam->currentSuspension()->firstOrFail();
 
     ReinstateAction::run($tagTeam);
 
@@ -84,7 +83,7 @@ test('it prevents reinstating unemployed tag team', function () {
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
-    $originalSuspensionId = $tagTeam->currentSuspension->id;
+    $originalSuspensionId = $tagTeam->currentSuspension()->firstOrFail()->id;
 
     ReinstateAction::run($tagTeam);
 
@@ -203,7 +202,7 @@ test('it maintains employment status during reinstatement', function () {
 
     // Employment record should remain active
     expect($tagTeam->currentEmployment)->not()->toBeNull();
-    expect($tagTeam->currentEmployment->ended_at)->toBeNull();
+    expect($tagTeam->currentEmployment()->firstOrFail()->ended_at)->toBeNull();
 });
 
 test('it handles reinstatement with cascade effects', function () {

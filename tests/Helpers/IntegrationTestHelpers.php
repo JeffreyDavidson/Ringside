@@ -97,7 +97,7 @@ function createTitleLineage(int $reignCount = 5): array
         'title' => $title,
         'champions' => $champions,
         'championships' => collect($championships),
-        'current_champion' => $champions->last(),
+        'current_champion' => $champions->reverse()->firstOrFail(),
     ];
 }
 
@@ -212,7 +212,7 @@ function createTournamentScenario(int $participantCount = 8): array
 
     // Create tournament matches (simplified)
     $rounds = ceil(log($participantCount, 2));
-    $winner = $participants->first();
+    $winner = $participants->firstOrFail();
 
     // Winner becomes champion
     $championship = TitleChampionship::factory()
@@ -241,12 +241,12 @@ function createCompanyMergerScenario(): array
     // Company A roster
     $companyAWrestlers = Wrestler::factory()->count(5)->bookable()->create();
     $companyATitle = Title::factory()->active()->create(['name' => 'Company A Championship']);
-    $companyAChampion = $companyAWrestlers->first();
+    $companyAChampion = $companyAWrestlers->firstOrFail();
 
     // Company B roster
     $companyBWrestlers = Wrestler::factory()->count(5)->bookable()->create();
     $companyBTitle = Title::factory()->active()->create(['name' => 'Company B Championship']);
-    $companyBChampion = $companyBWrestlers->first();
+    $companyBChampion = $companyBWrestlers->firstOrFail();
 
     // Create championships
     $championshipA = TitleChampionship::factory()

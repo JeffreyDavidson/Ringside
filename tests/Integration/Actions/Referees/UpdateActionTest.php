@@ -90,7 +90,7 @@ test('it updates referee without employing when no employment date', function ()
 
 test('it does not re-employ already employed referee', function () {
     $referee = Referee::factory()->employed()->create();
-    $originalEmployment = $referee->currentEmployment;
+    $originalEmployment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
 
@@ -109,7 +109,7 @@ test('it does not re-employ already employed referee', function () {
 
     // Should still have only the original employment record
     expect($result->employments()->count())->toBe(1);
-    expect($result->currentEmployment->id)->toBe($originalEmployment->id);
+    expect($result->currentEmployment()->firstOrFail()->id)->toBe($originalEmployment->id);
 });
 
 test('it handles DateHelper date resolution for employment', function () {
@@ -192,7 +192,7 @@ test('it preserves referee id and timestamps', function () {
     $result = UpdateAction::run($referee, $updateData);
 
     expect($result->id)->toBe($originalId);
-    expect($result->created_at->timestamp)->toBe($originalCreatedAt->timestamp);
+    expect(requiredDate($result->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp);
     expect($result->updated_at)->not()->toBeNull();
 });
 
@@ -229,7 +229,7 @@ test('it uses EmployAction for consistent employment handling', function () {
     expect($result->isEmployed())->toBeTrue();
     expect($result->currentEmployment()->exists())->toBeTrue();
 
-    $employment = $result->currentEmployment()->first();
-    expect($employment->started_at->toDateTimeString())->toBe($employmentDate->toDateTimeString());
+    $employment = $result->currentEmployment()->firstOrFail();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe($employmentDate->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });

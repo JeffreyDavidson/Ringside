@@ -73,7 +73,7 @@ describe('EventFactory Unit Tests', function () {
 
             // Assert
             expect($event->venue_id)->toBe($venue->id);
-            expect($event->date->format('Y-m-d H:i:s'))->toBe($date->format('Y-m-d H:i:s'));
+            expect(requiredDate($event->date)->format('Y-m-d H:i:s'))->toBe($date->format('Y-m-d H:i:s'));
         });
 
         test('with preview content works correctly', function () {
@@ -95,8 +95,8 @@ describe('EventFactory Unit Tests', function () {
             $event = Event::factory()->make(['date' => $pastDate]);
 
             // Assert
-            expect($event->date->format('Y-m-d H:i:s'))->toBe($pastDate->format('Y-m-d H:i:s'));
-            expect($event->date->isPast())->toBeTrue();
+            expect(requiredDate($event->date)->format('Y-m-d H:i:s'))->toBe($pastDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($event->date)->isPast())->toBeTrue();
         });
 
         test('future event state works correctly', function () {
@@ -107,8 +107,8 @@ describe('EventFactory Unit Tests', function () {
             $event = Event::factory()->make(['date' => $futureDate]);
 
             // Assert
-            expect($event->date->format('Y-m-d H:i:s'))->toBe($futureDate->format('Y-m-d H:i:s'));
-            expect($event->date->isFuture())->toBeTrue();
+            expect(requiredDate($event->date)->format('Y-m-d H:i:s'))->toBe($futureDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($event->date)->isFuture())->toBeTrue();
         });
     });
 

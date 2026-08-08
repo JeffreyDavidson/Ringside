@@ -232,7 +232,7 @@ describe('TitlesTable Component', function () {
             foreach ($titles as $index => $title) {
                 TitleChampionship::factory()
                     ->for($title, 'title')
-                    ->for($wrestlers[$index], 'champion')
+                    ->for($wrestlers->slice($index)->firstOrFail(), 'champion')
                     ->current()
                     ->create();
             }

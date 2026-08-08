@@ -13,8 +13,8 @@ beforeEach(function () {
     ]);
 
     $wrestlers = $this->tagTeam->wrestlers;
-    $this->wrestlerA = $wrestlers->first();
-    $this->wrestlerB = $wrestlers->last();
+    $this->wrestlerA = $wrestlers->firstOrFail();
+    $this->wrestlerB = $wrestlers->reverse()->firstOrFail();
 });
 
 test('it updates tag team basic information', function () {
@@ -170,7 +170,7 @@ test('it updates timestamps correctly', function () {
     UpdateAction::run($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->updated_at->toDateTimeString())->not()->toBe($originalUpdatedAt->toDateTimeString());
+    expect(requiredDate($this->tagTeam->updated_at)->toDateTimeString())->not()->toBe(requiredDate($originalUpdatedAt)->toDateTimeString());
 });
 
 test('it preserves unmodified attributes', function () {
@@ -191,7 +191,7 @@ test('it preserves unmodified attributes', function () {
 
     expect($this->tagTeam->name)->toBe('Updated Preservation Team');
     expect($this->tagTeam->signature_move)->toBe('Original Move');
-    expect($this->tagTeam->created_at->toDateTimeString())->toBe($originalCreatedAt->toDateTimeString());
+    expect(requiredDate($this->tagTeam->created_at)->toDateTimeString())->toBe(requiredDate($originalCreatedAt)->toDateTimeString());
     expect($this->tagTeam->id)->toBe($originalId);
 });
 

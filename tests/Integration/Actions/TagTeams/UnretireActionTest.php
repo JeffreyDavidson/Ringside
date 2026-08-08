@@ -65,8 +65,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
-    $currentRetirement = $tagTeam->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
+    $currentRetirement = $tagTeam->currentRetirement()->firstOrFail();
     expect($tagTeam->currentEmployment)->toBeNull();
 
     UnretireAction::run($tagTeam);
@@ -123,7 +122,7 @@ test('it prevents unretiring unemployed tag team', function () {
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
-    $originalRetirementId = $tagTeam->currentRetirement->id;
+    $originalRetirementId = $tagTeam->currentRetirement()->firstOrFail()->id;
 
     UnretireAction::run($tagTeam);
 
@@ -141,9 +140,8 @@ test('it handles database transactions correctly', function () {
     ]);
 
     // Verify new employment record was created
-    $employment = $tagTeam->currentEmployment;
-    expect($employment)->not()->toBeNull();
-    expect($employment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $employment = $tagTeam->currentEmployment()->firstOrFail();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });
 
@@ -176,9 +174,8 @@ test('it creates new employment period', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // New employment should be current and active
-    $currentEmployment = $tagTeam->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
-    expect($currentEmployment->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($currentEmployment->ended_at)->toBeNull();
 });
 

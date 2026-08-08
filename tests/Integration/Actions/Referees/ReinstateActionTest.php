@@ -14,7 +14,7 @@ beforeEach(function () {
 
 test('it reinstates a suspended referee', function () {
     $referee = Referee::factory()->employed()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $suspension = $referee->currentSuspension()->firstOrFail();
 
     expect($referee->isSuspended())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
@@ -35,7 +35,7 @@ test('it reinstates a suspended referee', function () {
 
 test('it reinstates referee with specific reinstatement date', function () {
     $referee = Referee::factory()->employed()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $suspension = $referee->currentSuspension()->firstOrFail();
     $reinstatementDate = now()->subDays(1);
 
     ReinstateAction::run($referee, $reinstatementDate);
@@ -44,7 +44,7 @@ test('it reinstates referee with specific reinstatement date', function () {
     $suspension->refresh();
 
     expect($referee->isSuspended())->toBeFalse();
-    expect($suspension->ended_at->toDateTimeString())->toBe($reinstatementDate->toDateTimeString());
+    expect(requiredDate($suspension->ended_at)->toDateTimeString())->toBe($reinstatementDate->toDateTimeString());
 
     $this->assertDatabaseHas('referees_suspensions', [
         'id' => $suspension->id,
@@ -88,7 +88,7 @@ test('it throws exception when referee cannot be reinstated', function () {
 
 test('it maintains referee employment after reinstatement', function () {
     $referee = Referee::factory()->employed()->suspended()->create();
-    $employment = $referee->currentEmployment;
+    $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
     expect($referee->isSuspended())->toBeTrue();
@@ -106,7 +106,7 @@ test('it maintains referee employment after reinstatement', function () {
 
 test('it preserves suspension history', function () {
     $referee = Referee::factory()->employed()->suspended()->create();
-    $suspension = $referee->currentSuspension;
+    $suspension = $referee->currentSuspension()->firstOrFail();
     $originalStartedAt = $suspension->started_at;
 
     ReinstateAction::run($referee);

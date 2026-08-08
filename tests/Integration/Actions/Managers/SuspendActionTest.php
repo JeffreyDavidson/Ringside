@@ -96,15 +96,14 @@ test('it handles database transactions correctly', function () {
     expect($manager->isSuspended())->toBeTrue();
 
     // Verify suspension record integrity
-    $suspension = $manager->currentSuspension;
-    expect($suspension)->not()->toBeNull();
-    expect($suspension->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $suspension = $manager->currentSuspension()->firstOrFail();
+    expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($suspension->ended_at)->toBeNull();
 });
 
 test('it maintains employment status during suspension', function () {
     $manager = Manager::factory()->employed()->create();
-    $employmentId = $manager->currentEmployment->id;
+    $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
@@ -118,8 +117,7 @@ test('it maintains employment status during suspension', function () {
     expect($manager->isSuspended())->toBeTrue();
 
     // Employment record should remain unchanged
-    $employment = $manager->currentEmployment;
-    expect($employment)->not()->toBeNull();
+    $employment = $manager->currentEmployment()->firstOrFail();
     expect($employment->id)->toBe($employmentId);
     expect($employment->ended_at)->toBeNull();
 });

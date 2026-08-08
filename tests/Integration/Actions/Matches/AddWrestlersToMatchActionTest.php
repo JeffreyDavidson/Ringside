@@ -30,8 +30,8 @@ test('it adds a single wrestler to a match', function () {
     ]);
 
     // Match should have the wrestler as competitor
-    expect($match->fresh()->competitors()->count())->toBe(1);
-    expect($match->fresh()->competitors()->first()->competitor_id)->toBe($wrestler->id);
+    expect($match->refresh()->competitors()->count())->toBe(1);
+    expect($match->refresh()->competitors()->firstOrFail()->competitor_id)->toBe($wrestler->id);
 });
 
 test('it adds multiple wrestlers to the same side', function () {
@@ -60,7 +60,7 @@ test('it adds multiple wrestlers to the same side', function () {
     ]);
 
     // Match should have both wrestlers
-    expect($match->fresh()->competitors()->count())->toBe(2);
+    expect($match->refresh()->competitors()->count())->toBe(2);
 });
 
 test('it adds wrestlers to different sides', function () {
@@ -89,7 +89,7 @@ test('it adds wrestlers to different sides', function () {
         'side_number' => 2,
     ]);
 
-    expect($match->fresh()->competitors()->count())->toBe(2);
+    expect($match->refresh()->competitors()->count())->toBe(2);
 });
 
 test('it filters out ineligible wrestlers', function () {
@@ -116,7 +116,7 @@ test('it filters out ineligible wrestlers', function () {
         'competitor_type' => Wrestler::class,
     ]);
 
-    expect($match->fresh()->competitors()->count())->toBe(1);
+    expect($match->refresh()->competitors()->count())->toBe(1);
 });
 
 test('it throws exception when no eligible wrestlers provided', function () {
@@ -153,5 +153,5 @@ test('it handles transaction rollback on failure', function () {
         ->toThrow(InvalidArgumentException::class);
 
     // No competitors should be added due to transaction rollback
-    expect($match->fresh()->competitors()->count())->toBe(0);
+    expect($match->refresh()->competitors()->count())->toBe(0);
 });

@@ -81,7 +81,7 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->currentTagTeams()->count())->toBe($this->transferTagTeams->count());
 
             // Verify original stable has remaining members
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentWrestlers()->count())->toBe($initialWrestlerCount - $this->transferWrestlers->count());
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($initialTagTeamCount - $this->transferTagTeams->count());
         });
@@ -109,7 +109,7 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStableTagTeamIds->sort()->values())->toEqual($transferTagTeamIds->sort()->values());
 
             // Verify members are no longer in original stable
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             foreach ($transferWrestlerIds as $wrestlerId) {
                 expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestlerId)->exists())->toBeFalse();
             }
@@ -146,7 +146,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify original stable memberships were ended properly
             // Check that transferred wrestlers are no longer current members
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             foreach ($this->transferWrestlers as $wrestler) {
                 expect($refreshedOriginal->currentWrestlers()->where('wrestlers.id', $wrestler->id)->exists())->toBeFalse();
             }
@@ -168,7 +168,7 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify all members are preserved across both stables
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             $totalWrestlers = $newStable->currentWrestlers()->count() + $refreshedOriginal->currentWrestlers()->count();
             $totalTagTeams = $newStable->currentTagTeams()->count() + $refreshedOriginal->currentTagTeams()->count();
 
@@ -198,7 +198,7 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->currentTagTeams()->count())->toBe(0);
 
             // Verify original stable retains all tag teams
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
@@ -222,7 +222,7 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->currentTagTeams()->count())->toBe($this->transferTagTeams->count());
 
             // Verify original stable retains all wrestlers
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
         });
 
@@ -242,7 +242,7 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->currentTagTeams()->count())->toBe($this->transferTagTeams->count());
 
             // Verify original stable has remaining members
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count() - $this->transferWrestlers->count());
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count() - $this->transferTagTeams->count());
         });
@@ -262,7 +262,7 @@ describe('SplitStableAction Integration Tests', function () {
             ))->toThrow(CannotBeSplitException::class);
 
             // Verify original stable unchanged
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
@@ -283,7 +283,7 @@ describe('SplitStableAction Integration Tests', function () {
             ))->toThrow(CannotBeSplitException::class);
 
             // Verify original stable still has all members (transaction rolled back)
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
@@ -349,8 +349,8 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->activityPeriods()->count())->toBe(1);
 
             // Verify activity period has correct start date
-            $activityPeriod = $newStable->currentActivityPeriod;
-            expect($activityPeriod->started_at->format('Y-m-d H:i:s'))->toBe($splitDate->format('Y-m-d H:i:s'));
+            $activityPeriod = $newStable->currentActivityPeriod()->firstOrFail();
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($splitDate->format('Y-m-d H:i:s'));
             expect($activityPeriod->ended_at)->toBeNull();
         });
 
@@ -390,7 +390,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify both stables exist and have members
             expect($newStable->currentWrestlers()->count())->toBeGreaterThan(0);
-            expect($this->originalStable->fresh()->currentWrestlers()->count())->toBeGreaterThanOrEqual(0);
+            expect(freshModel($this->originalStable)->currentWrestlers()->count())->toBeGreaterThanOrEqual(0);
         });
 
         test('split handles transaction rollback on constraint violation', function () {
@@ -433,7 +433,7 @@ describe('SplitStableAction Integration Tests', function () {
             // Verify both stables meet minimum requirements
             $newStableMemberCount = $newStable->currentWrestlers()->count() + $newStable->currentTagTeams()->count();
 
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
             $originalMemberCount = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();
 
             // Assume minimum of 1 member required (adjust based on business rules)
@@ -507,7 +507,7 @@ describe('SplitStableAction Integration Tests', function () {
             expect($newStable->isCurrentlyActive())->toBeTrue();
 
             // Verify original stable status is appropriate
-            $refreshedOriginal = $this->originalStable->fresh();
+            $refreshedOriginal = freshModel($this->originalStable);
 
             // If original has members, should remain active; if empty, may become inactive
             $totalRemainingMembers = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();

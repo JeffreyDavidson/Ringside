@@ -90,9 +90,9 @@ describe('TagTeamWrestlerFactory Unit Tests', function () {
             // Assert
             expect($tagTeamWrestler->tag_team_id)->toBe($tagTeam->id);
             expect($tagTeamWrestler->wrestler_id)->toBe($wrestler->id);
-            expect($tagTeamWrestler->joined_at->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
-            expect($tagTeamWrestler->left_at->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
-            expect($tagTeamWrestler->left_at->isAfter($tagTeamWrestler->joined_at))->toBeTrue();
+            expect(requiredDate($tagTeamWrestler->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($tagTeamWrestler->left_at)->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($tagTeamWrestler->left_at)->isAfter(requiredDate($tagTeamWrestler->joined_at)))->toBeTrue();
         });
     });
 
@@ -131,8 +131,8 @@ describe('TagTeamWrestlerFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($tagTeamWrestler->joined_at->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
-            expect($tagTeamWrestler->left_at->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($tagTeamWrestler->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
+            expect(requiredDate($tagTeamWrestler->left_at)->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
         });
     });
 

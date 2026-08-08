@@ -50,8 +50,7 @@ test('it ends employment before deletion', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $wrestler->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $wrestler->currentEmployment()->firstOrFail();
     expect($currentEmployment->ended_at)->toBeNull();
 
     DeleteAction::run($wrestler);
@@ -71,8 +70,7 @@ test('it ends retirement before deletion', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
-    $currentRetirement = $wrestler->currentRetirement;
-    expect($currentRetirement)->not()->toBeNull();
+    $currentRetirement = $wrestler->currentRetirement()->firstOrFail();
     expect($currentRetirement->ended_at)->toBeNull();
 
     DeleteAction::run($wrestler);
@@ -92,8 +90,7 @@ test('it ends suspension before deletion', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
-    $currentSuspension = $wrestler->currentSuspension;
-    expect($currentSuspension)->not()->toBeNull();
+    $currentSuspension = $wrestler->currentSuspension()->firstOrFail();
     expect($currentSuspension->ended_at)->toBeNull();
 
     DeleteAction::run($wrestler);
@@ -113,8 +110,7 @@ test('it ends injury before deletion', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
-    $currentInjury = $wrestler->currentInjury;
-    expect($currentInjury)->not()->toBeNull();
+    $currentInjury = $wrestler->currentInjury()->firstOrFail();
     expect($currentInjury->ended_at)->toBeNull();
 
     DeleteAction::run($wrestler);

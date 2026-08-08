@@ -117,11 +117,11 @@ describe('UsersTableSeeder Integration Tests', function () {
             $basicUsers = User::where('role', Role::Basic)->orderBy('id')->take(5)->get();
 
             // Assert
-            expect($basicUsers[0]->first_name)->toBe('Basic');
-            expect($basicUsers[1]->first_name)->toBe('Second Basic');
-            expect($basicUsers[2]->first_name)->toBe('Third Basic');
-            expect($basicUsers[3]->first_name)->toBe('Fourth Basic');
-            expect($basicUsers[4]->first_name)->toBe('Fifth Basic');
+            expect($basicUsers->slice(0)->firstOrFail()->first_name)->toBe('Basic');
+            expect($basicUsers->slice(1)->firstOrFail()->first_name)->toBe('Second Basic');
+            expect($basicUsers->slice(2)->firstOrFail()->first_name)->toBe('Third Basic');
+            expect($basicUsers->slice(3)->firstOrFail()->first_name)->toBe('Fourth Basic');
+            expect($basicUsers->slice(4)->firstOrFail()->first_name)->toBe('Fifth Basic');
         });
 
         test('basic users have required attributes', function () {

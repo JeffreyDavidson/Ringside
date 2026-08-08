@@ -204,9 +204,8 @@ test('it handles database transactions correctly', function () {
     expect($manager->currentWrestlers)->toHaveCount(0);
 
     // Verify all database changes are consistent
-    $retirement = $manager->currentRetirement;
-    expect($retirement)->not()->toBeNull();
-    expect($retirement->started_at->toDateTimeString())->toBe(now()->toDateTimeString());
+    $retirement = $manager->currentRetirement()->firstOrFail();
+    expect(requiredDate($retirement->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($retirement->ended_at)->toBeNull();
 });
 
@@ -258,7 +257,7 @@ test('it preserves management history during retirement', function () {
     // Verify the current relationship was ended with retirement date
     $currentRelationship = $manager->wrestlers()
         ->wherePivot('hired_at', now()->subDays(10)->toDateTimeString())
-        ->first();
+        ->firstOrFail();
 
     expect(relatedPivotAttribute($currentRelationship, 'fired_at'))->toBe(now()->toDateTimeString());
 });

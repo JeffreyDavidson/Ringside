@@ -27,8 +27,8 @@ test('it adds a single title to a match', function () {
     ]);
 
     // Match should have the title
-    expect($match->fresh()->titles)->toHaveCount(1);
-    expect($match->fresh()->titles->first()->id)->toBe($title->id);
+    expect($match->refresh()->titles)->toHaveCount(1);
+    expect($match->refresh()->titles->firstOrFail()->id)->toBe($title->id);
 });
 
 test('it adds multiple titles to a match', function () {
@@ -52,8 +52,8 @@ test('it adds multiple titles to a match', function () {
     ]);
 
     // Match should have both titles
-    expect($match->fresh()->titles)->toHaveCount(2);
-    expect($match->fresh()->titles->pluck('id'))->toContain($title1->id, $title2->id);
+    expect($match->refresh()->titles)->toHaveCount(2);
+    expect($match->refresh()->titles->pluck('id'))->toContain($title1->id, $title2->id);
 });
 
 test('it filters out inactive titles', function () {
@@ -76,8 +76,8 @@ test('it filters out inactive titles', function () {
         'title_id' => $inactiveTitle->id,
     ]);
 
-    expect($match->fresh()->titles)->toHaveCount(1);
-    expect($match->fresh()->titles->first()->id)->toBe($activeTitle->id);
+    expect($match->refresh()->titles)->toHaveCount(1);
+    expect($match->refresh()->titles->firstOrFail()->id)->toBe($activeTitle->id);
 });
 
 test('it throws exception when no eligible titles provided', function () {
@@ -112,7 +112,7 @@ test('it creates championship match correctly', function () {
     AddTitlesToMatchAction::run($match, $titles);
 
     // Match should be associated with both titles
-    $matchTitles = $match->fresh()->titles;
+    $matchTitles = $match->refresh()->titles;
     expect($matchTitles)->toHaveCount(2);
 
     $titleNames = $matchTitles->pluck('name')->toArray();
@@ -130,7 +130,7 @@ test('it handles transaction consistency', function () {
     AddTitlesToMatchAction::run($match, $titles);
 
     // Both titles should be added atomically
-    expect($match->fresh()->titles)->toHaveCount(2);
+    expect($match->refresh()->titles)->toHaveCount(2);
 
     // Verify both database records exist
     $this->assertDatabaseCount('events_matches_titles', 2);

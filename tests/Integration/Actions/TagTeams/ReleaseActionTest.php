@@ -73,8 +73,7 @@ test('it uses StatusTransitionPipeline for release', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
-    $currentEmployment = $tagTeam->currentEmployment;
-    expect($currentEmployment)->not()->toBeNull();
+    $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
 
     ReleaseAction::run($tagTeam);
 
@@ -102,7 +101,7 @@ test('it prevents releasing unemployed tag team', function () {
 
 test('it handles database transactions correctly', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
-    $originalEmploymentId = $tagTeam->currentEmployment->id;
+    $originalEmploymentId = $tagTeam->currentEmployment()->firstOrFail()->id;
 
     ReleaseAction::run($tagTeam);
 
