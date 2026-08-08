@@ -135,6 +135,7 @@ describe('SplitStableAction Integration Tests', function () {
             // Verify new stable memberships have correct join dates
             $newStableWrestlers = $newStable->wrestlers()->get();
             $newStableTagTeams = $newStable->tagTeams()->get();
+            $membershipCutoff = $splitDate->copy()->subSecond();
 
             foreach ($newStableWrestlers as $wrestler) {
                 $membership = StableWrestler::query()
@@ -142,7 +143,7 @@ describe('SplitStableAction Integration Tests', function () {
                     ->whereBelongsTo($wrestler)
                     ->firstOrFail();
 
-                expect($membership->joined_at->gte($splitDate->subSecond()))->toBeTrue();
+                expect($membership->joined_at->gte($membershipCutoff))->toBeTrue();
             }
 
             foreach ($newStableTagTeams as $tagTeam) {
@@ -151,7 +152,7 @@ describe('SplitStableAction Integration Tests', function () {
                     ->whereBelongsTo($tagTeam, 'tagTeam')
                     ->firstOrFail();
 
-                expect($membership->joined_at->gte($splitDate->subSecond()))->toBeTrue();
+                expect($membership->joined_at->gte($membershipCutoff))->toBeTrue();
             }
 
             // Verify original stable memberships were ended properly

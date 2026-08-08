@@ -138,7 +138,6 @@ describe('VenueForm Integration Tests', function () {
         });
 
         test('getModelData transforms complete venue data correctly', function () {
-            // Set complete test data
             $this->form->name = 'Madison Square Garden';
             $this->form->street_address = '4 Pennsylvania Plaza';
             $this->form->city = 'New York';
@@ -187,7 +186,6 @@ describe('VenueForm Integration Tests', function () {
         test('validates US ZIP code format specifically', function () {
             $rules = $this->form->rulesForTesting();
 
-            // Should enforce exactly 5 digits for US postal codes
             expect($rules['zipcode'])->toContain('digits:5');
         });
 

@@ -217,6 +217,7 @@ function expectCurrentRelationshipsActive(Wrestler $wrestler): void
         $management = WrestlerManager::query()
             ->whereBelongsTo($wrestler)
             ->whereBelongsTo($manager)
+            ->whereNull('fired_at')
             ->firstOrFail();
 
         expect($management->fired_at)->toBeNull();
@@ -227,6 +228,7 @@ function expectCurrentRelationshipsActive(Wrestler $wrestler): void
         $membership = TagTeamWrestler::query()
             ->whereBelongsTo($wrestler)
             ->whereBelongsTo($currentTagTeam, 'tagTeam')
+            ->whereNull('left_at')
             ->firstOrFail();
 
         expect($membership->left_at)->toBeNull();
@@ -243,6 +245,7 @@ function expectPreviousRelationshipsEnded(Wrestler $wrestler): void
         $management = WrestlerManager::query()
             ->whereBelongsTo($wrestler)
             ->whereBelongsTo($manager)
+            ->whereNotNull('fired_at')
             ->firstOrFail();
 
         expect($management->fired_at)->not->toBeNull();
@@ -253,6 +256,7 @@ function expectPreviousRelationshipsEnded(Wrestler $wrestler): void
         $membership = TagTeamWrestler::query()
             ->whereBelongsTo($wrestler)
             ->whereBelongsTo($tagTeam, 'tagTeam')
+            ->whereNotNull('left_at')
             ->firstOrFail();
 
         expect($membership->left_at)->not->toBeNull();
