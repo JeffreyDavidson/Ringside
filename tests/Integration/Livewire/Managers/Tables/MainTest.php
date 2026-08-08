@@ -14,6 +14,9 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for ManagersTable Livewire component.
  *
@@ -50,7 +53,7 @@ describe('ManagersTable Component', function () {
             $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'Managed Tag Team']);
             $stable = Stable::factory()->active()->create(['name' => 'Manager Stable']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active Aaaaaa')
@@ -66,7 +69,7 @@ describe('ManagersTable Component', function () {
             $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
             $releasedManager = Manager::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Employed Manager')
@@ -85,7 +88,7 @@ describe('ManagersTable Component', function () {
             Manager::factory()->create(['first_name' => 'Jimmy', 'last_name' => 'Hart']);
             Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test search functionality
             $component
@@ -107,7 +110,7 @@ describe('ManagersTable Component', function () {
             $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
             $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test filtering by status (if component supports it)
             $component
@@ -122,7 +125,7 @@ describe('ManagersTable Component', function () {
             $employedManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Manager']);
             $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render without errors
             $component->assertOk();
@@ -136,7 +139,9 @@ describe('ManagersTable Component', function () {
             $manager = Manager::factory()->create(['first_name' => 'Test', 'last_name' => 'Manager']);
 
             // Test as administrator (should see all actions)
-            $component = Livewire::actingAs($this->user)->test(Main::class);
+            actingAs($this->user);
+
+            $component = livewire(Main::class);
             $component->assertOk();
             $component->assertSee($manager->full_name);
         });
@@ -147,7 +152,7 @@ describe('ManagersTable Component', function () {
             $employedManager = Manager::factory()->employed()->create(['first_name' => 'Currently', 'last_name' => 'Employed']);
             $unemployedManager = Manager::factory()->unemployed()->create(['first_name' => 'Currently', 'last_name' => 'Unemployed']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Currently Employed')
@@ -170,7 +175,7 @@ describe('ManagersTable Component', function () {
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Manager History');
@@ -182,7 +187,7 @@ describe('ManagersTable Component', function () {
             $healthyManager = Manager::factory()->employed()->create(['first_name' => 'Healthy', 'last_name' => 'Manager']);
             $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Healthy Manager')
@@ -193,7 +198,7 @@ describe('ManagersTable Component', function () {
             $activeManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Manager']);
             $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active Manager')
@@ -211,7 +216,7 @@ describe('ManagersTable Component', function () {
                     'ended_at' => now()->subDays(50),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Injury History');
@@ -222,7 +227,7 @@ describe('ManagersTable Component', function () {
         test('displays managers without wrestler/tag team relationships', function () {
             $manager = Manager::factory()->employed()->create(['first_name' => 'Independent', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Independent Manager');
@@ -238,7 +243,7 @@ describe('ManagersTable Component', function () {
                 'fired_at' => now()->subMonths(1),
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Wrestler Manager');
@@ -256,7 +261,7 @@ describe('ManagersTable Component', function () {
 
             // No stable relationships since managers are no longer direct stable members
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render efficiently with created data
             $component->assertOk()
@@ -266,7 +271,7 @@ describe('ManagersTable Component', function () {
         test('component eager loads necessary relationships', function () {
             $manager = Manager::factory()->employed()->create(['first_name' => 'Relationship', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertOk()
@@ -278,7 +283,7 @@ describe('ManagersTable Component', function () {
         test('component updates when manager data changes', function () {
             $manager = Manager::factory()->create(['first_name' => 'Original', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Original Manager');
 
             // Update manager name
@@ -293,7 +298,7 @@ describe('ManagersTable Component', function () {
         test('component reflects employment status changes', function () {
             $manager = Manager::factory()->unemployed()->create(['first_name' => 'Employment', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Employ the manager
             EmployAction::run($manager, now());
@@ -306,7 +311,7 @@ describe('ManagersTable Component', function () {
         test('component reflects injury status changes', function () {
             $manager = Manager::factory()->employed()->create(['first_name' => 'Injury', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Injure the manager
             InjureAction::run($manager, now());
@@ -325,7 +330,7 @@ describe('ManagersTable Component', function () {
             // Manager is employed but also injured
             InjureAction::run($manager, now());
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Complex Manager');
@@ -337,7 +342,7 @@ describe('ManagersTable Component', function () {
             $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
             $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render and show appropriate actions based on business rules
             $component
@@ -349,7 +354,7 @@ describe('ManagersTable Component', function () {
         test('component handles manager employment transitions', function () {
             $manager = Manager::factory()->employed()->create(['first_name' => 'Transitioning', 'last_name' => 'Manager']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Transitioning Manager');
 
             // Test that component handles data changes appropriately

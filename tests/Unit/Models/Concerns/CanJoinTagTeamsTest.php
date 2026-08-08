@@ -26,6 +26,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('provides tagTeams relationship', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -39,6 +40,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('provides currentTagTeam relationship', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -52,6 +54,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('provides previousTagTeams relationship', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -65,6 +68,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('provides previousTagTeam relationship', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -90,6 +94,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('generates correct pivot table name', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -115,6 +120,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('tagTeams relationship includes pivot data', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -131,6 +137,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('currentTagTeam relationship includes wherePivotNull constraint', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -145,6 +152,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('previousTagTeams relationship includes wherePivotNotNull constraint', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string
@@ -159,6 +167,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
         test('all tag team relationships use timestamps', function () {
             $model = new class extends Model implements CanBeATagTeamMember
             {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
                 use CanJoinTagTeams;
 
                 public function resolveTagTeamPivotModel(): string

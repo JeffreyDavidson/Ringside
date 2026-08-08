@@ -7,6 +7,9 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Title Actions Component Integration Tests
  *
@@ -34,7 +37,7 @@ beforeEach(function () {
 
 describe('Actions Component Initialization', function () {
     it('can mount with title', function () {
-        $component = Livewire::test(Actions::class, ['title' => $this->title]);
+        $component = livewire(Actions::class, ['title' => $this->title]);
 
         $component->assertOk();
         $component->assertSet('title.id', $this->title->id);
@@ -42,7 +45,7 @@ describe('Actions Component Initialization', function () {
     });
 
     it('renders actions component view', function () {
-        $component = Livewire::test(Actions::class, ['title' => $this->title]);
+        $component = livewire(Actions::class, ['title' => $this->title]);
 
         $component->assertViewIs('livewire.titles.components.actions');
     });
@@ -52,8 +55,9 @@ describe('Title Debut Actions', function () {
     it('can debut an undebuted title successfully', function () {
         $title = Title::factory()->undebuted()->create();
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title])
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title])
             ->call('debut');
 
         $component->assertHasNoErrors();
@@ -66,8 +70,9 @@ describe('Title Debut Actions', function () {
     it('handles debut for already active title', function () {
         $title = Title::factory()->active()->create();
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title])
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title])
             ->call('debut');
 
         // Should handle gracefully without errors
@@ -79,8 +84,9 @@ describe('Title Retirement Actions', function () {
     it('can retire an active title successfully', function () {
         $title = Title::factory()->active()->create();
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title])
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title])
             ->call('retire');
 
         $component->assertHasNoErrors();
@@ -93,8 +99,9 @@ describe('Title Retirement Actions', function () {
     it('can unretire a retired title successfully', function () {
         $title = Title::factory()->retired()->create();
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title])
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title])
             ->call('unretire');
 
         $component->assertHasNoErrors();
@@ -109,8 +116,9 @@ describe('Title Activation Actions', function () {
     it('can deactivate (pull) an active title successfully', function () {
         $title = Title::factory()->active()->create();
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title])
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title])
             ->call('deactivate');
 
         $component->assertHasNoErrors();
@@ -120,8 +128,9 @@ describe('Title Activation Actions', function () {
     it('can reinstate an inactive title successfully', function () {
         $title = Title::factory()->inactive()->create();
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title])
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title])
             ->call('reinstate');
 
         $component->assertHasNoErrors();
@@ -136,8 +145,9 @@ describe('Title Restoration Actions', function () {
 
         $trashedTitle = Title::onlyTrashed()->find($this->title->id);
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $trashedTitle])
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $trashedTitle])
             ->call('restore');
 
         $component->assertHasNoErrors();
@@ -154,8 +164,9 @@ describe('Title Actions Authorization', function () {
         $actions = ['debut', 'retire', 'unretire', 'deactivate', 'reinstate', 'restore'];
 
         foreach ($actions as $method) {
-            $component = Livewire::actingAs($user)
-                ->test(Actions::class, ['title' => $this->title]);
+            actingAs($user);
+
+            $component = livewire(Actions::class, ['title' => $this->title]);
 
             $component->call($method)
                 ->assertForbidden();
@@ -167,8 +178,9 @@ describe('Title Actions Event Dispatching', function () {
     it('dispatches title-updated event on successful actions', function () {
         $title = Title::factory()->undebuted()->create();
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title]);
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title]);
 
         $component->call('debut')
             ->assertDispatched('title-updated');
@@ -190,8 +202,9 @@ describe('Title Business Logic Integration', function () {
     it('handles complete title lifecycle', function () {
         // Start with undebuted title
         $title = Title::factory()->undebuted()->create();
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $title]);
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $title]);
 
         // Debut the title
         $component->call('debut');
@@ -210,8 +223,9 @@ describe('Title Business Logic Integration', function () {
         $originalName = $this->title->name;
         $originalId = $this->title->id;
 
-        $component = Livewire::actingAs($this->admin)
-            ->test(Actions::class, ['title' => $this->title]);
+        actingAs($this->admin);
+
+        $component = livewire(Actions::class, ['title' => $this->title]);
 
         $component->call('debut');
 

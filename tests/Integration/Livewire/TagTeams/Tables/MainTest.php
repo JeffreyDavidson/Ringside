@@ -15,6 +15,9 @@ use App\Models\TagTeams\TagTeamSuspension;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for TagTeamsTable Livewire component.
  *
@@ -49,7 +52,7 @@ describe('TagTeamsTable Component', function () {
             $wrestler1 = Wrestler::factory()->bookable()->create(['name' => 'Team Member One']);
             $wrestler2 = Wrestler::factory()->bookable()->create(['name' => 'Team Member Two']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee($employedTagTeam->name)
@@ -65,7 +68,7 @@ describe('TagTeamsTable Component', function () {
             $releasedTagTeam = TagTeam::factory()->released()->create(['name' => 'Released Tag Team']);
             $unemployedTagTeam = TagTeam::factory()->unemployed()->create(['name' => 'Unemployed Tag Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Employed Tag Team')
@@ -84,7 +87,7 @@ describe('TagTeamsTable Component', function () {
             TagTeam::factory()->create(['name' => 'The Dudley Boyz']);
             TagTeam::factory()->create(['name' => 'New Age Outlaws']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test search functionality
             $component
@@ -106,7 +109,7 @@ describe('TagTeamsTable Component', function () {
             $retiredTagTeam = TagTeam::factory()->retired()->create(['name' => 'Retired Tag Team']);
             $suspendedTagTeam = TagTeam::factory()->suspended()->create(['name' => 'Suspended Tag Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Test filtering by status (if component supports it)
             $component
@@ -121,7 +124,7 @@ describe('TagTeamsTable Component', function () {
             $employedTagTeam = TagTeam::factory()->employed()->create(['name' => 'Active Tag Team']);
             $retiredTagTeam = TagTeam::factory()->retired()->create(['name' => 'Retired Tag Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render without errors
             $component->assertOk();
@@ -135,7 +138,9 @@ describe('TagTeamsTable Component', function () {
             $tagTeam = TagTeam::factory()->create(['name' => 'Test Tag Team']);
 
             // Test as administrator (should see all actions)
-            $component = Livewire::actingAs($this->user)->test(Main::class);
+            actingAs($this->user);
+
+            $component = livewire(Main::class);
             $component->assertOk();
             $component->assertSee($tagTeam->name);
         });
@@ -146,7 +151,7 @@ describe('TagTeamsTable Component', function () {
             $employedTagTeam = TagTeam::factory()->employed()->create(['name' => 'Currently Employed']);
             $unemployedTagTeam = TagTeam::factory()->unemployed()->create(['name' => 'Currently Unemployed']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Currently Employed')
@@ -169,7 +174,7 @@ describe('TagTeamsTable Component', function () {
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Team History');
@@ -181,7 +186,7 @@ describe('TagTeamsTable Component', function () {
             $activeTagTeam = TagTeam::factory()->employed()->create(['name' => 'Active Tag Team']);
             $retiredTagTeam = TagTeam::factory()->retired()->create(['name' => 'Retired Tag Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active Tag Team')
@@ -192,7 +197,7 @@ describe('TagTeamsTable Component', function () {
             $activeTagTeam = TagTeam::factory()->employed()->create(['name' => 'Active Tag Team']);
             $suspendedTagTeam = TagTeam::factory()->suspended()->create(['name' => 'Suspended Tag Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active Tag Team')
@@ -210,7 +215,7 @@ describe('TagTeamsTable Component', function () {
                     'ended_at' => now()->subDays(50),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Retirement History');
@@ -227,7 +232,7 @@ describe('TagTeamsTable Component', function () {
                     'ended_at' => now()->subDays(50),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Suspension History');
@@ -238,7 +243,7 @@ describe('TagTeamsTable Component', function () {
         test('displays tag teams without wrestler partnerships', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create(['name' => 'Independent Tag Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Independent Tag Team');
@@ -260,7 +265,7 @@ describe('TagTeamsTable Component', function () {
                 'left_at' => null,
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Partner Tag Team');
@@ -283,7 +288,7 @@ describe('TagTeamsTable Component', function () {
                 'left_at' => null,
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Former Partner Team');
@@ -299,7 +304,7 @@ describe('TagTeamsTable Component', function () {
             $tagTeams = TagTeam::factory()->count(5)->employed()->create();
             $wrestlers = Wrestler::factory()->count(10)->bookable()->create();
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render efficiently with created data
             $component->assertOk()
@@ -309,7 +314,7 @@ describe('TagTeamsTable Component', function () {
         test('component eager loads necessary relationships', function () {
             $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Relationship Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertOk()
@@ -321,7 +326,7 @@ describe('TagTeamsTable Component', function () {
         test('component updates when tag team data changes', function () {
             $tagTeam = TagTeam::factory()->create(['name' => 'Original Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Original Team');
 
             // Update tag team name
@@ -336,7 +341,7 @@ describe('TagTeamsTable Component', function () {
         test('component reflects employment status changes', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create(['name' => 'Employment Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Employ the tag team
             EmployAction::run($tagTeam, now());
@@ -349,7 +354,7 @@ describe('TagTeamsTable Component', function () {
         test('component reflects suspension status changes', function () {
             $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Suspension Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Suspend the tag team
             SuspendAction::run($tagTeam, now());
@@ -362,7 +367,7 @@ describe('TagTeamsTable Component', function () {
         test('component reflects retirement status changes', function () {
             $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Retirement Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Retire the tag team
             RetireAction::run($tagTeam, now());
@@ -381,7 +386,7 @@ describe('TagTeamsTable Component', function () {
             // Tag team is employed but also suspended
             SuspendAction::run($tagTeam, now());
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Complex Team');
@@ -393,7 +398,7 @@ describe('TagTeamsTable Component', function () {
             $suspendedTagTeam = TagTeam::factory()->suspended()->create(['name' => 'Suspended Team']);
             $retiredTagTeam = TagTeam::factory()->retired()->create(['name' => 'Retired Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render and show appropriate actions based on business rules
             $component
@@ -405,7 +410,7 @@ describe('TagTeamsTable Component', function () {
         test('component handles tag team employment transitions', function () {
             $tagTeam = TagTeam::factory()->employed()->create(['name' => 'Transitioning Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Transitioning Team');
 
             // Test that component handles data changes appropriately
@@ -418,7 +423,7 @@ describe('TagTeamsTable Component', function () {
             $unbookableTagTeam = TagTeam::factory()->suspended()->create(['name' => 'Unbookable Team']);
             $retiredTagTeam = TagTeam::factory()->retired()->create(['name' => 'Retired Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Component should show all tag teams with appropriate status indicators
             $component
@@ -436,7 +441,7 @@ describe('TagTeamsTable Component', function () {
                 'signature_move' => 'Poetry in Motion',
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Signature Team');
@@ -454,7 +459,7 @@ describe('TagTeamsTable Component', function () {
                     'ended_at' => now()->subYears(3),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Veteran Team')
@@ -479,7 +484,7 @@ describe('TagTeamsTable Component', function () {
             $wrestler2->tagTeams()->attach($tripleTeam->id, ['joined_at' => now()->subMonths(3)]);
             $wrestler3->tagTeams()->attach($tripleTeam->id, ['joined_at' => now()->subMonths(3)]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Dual Team')
@@ -492,7 +497,7 @@ describe('TagTeamsTable Component', function () {
             $formingTeam = TagTeam::factory()->unemployed()->create(['name' => 'Forming Team']);
             $dissolvingTeam = TagTeam::factory()->employed()->create(['name' => 'Dissolving Team']);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Forming Team')
@@ -526,7 +531,7 @@ describe('TagTeamsTable Component', function () {
                     'ended_at' => now()->subMonths(6),
                 ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Reunited Team');
@@ -555,7 +560,7 @@ describe('TagTeamsTable Component', function () {
                 'left_at' => null,
             ]);
 
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Evolving Team');

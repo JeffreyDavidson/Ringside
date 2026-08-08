@@ -27,6 +27,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('provides suspensions relationship', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -40,6 +41,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('provides current suspension relationship', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -53,6 +55,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('provides previous suspensions relationship', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -66,6 +69,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('provides previous suspension relationship', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -79,6 +83,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('suspensions relationship uses the correct related model', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -94,6 +99,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('currentSuspension relationship uses the correct related model', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -111,6 +117,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('can check if model is suspended', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -132,6 +139,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('can check if model is not suspended', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -153,6 +161,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('can check if model has suspensions', function () {
             $modelWith = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -170,6 +179,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
             };
             $modelWithout = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string
@@ -202,6 +212,7 @@ describe('IsSuspendable Trait Unit Tests', function () {
         test('current suspension query includes whereNull ended_at', function () {
             $model = new class extends Model implements Suspendable
             {
+                /** @use IsSuspendable<FakeSuspensionModel, self> */
                 use IsSuspendable;
 
                 public function resolveSuspensionModelClass(): string

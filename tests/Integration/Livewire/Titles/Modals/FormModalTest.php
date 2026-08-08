@@ -7,7 +7,8 @@ use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
-use Livewire\Livewire;
+
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -36,7 +37,7 @@ describe('FormModal Configuration', function () {
 
 describe('FormModal Rendering', function () {
     it('can render in create mode', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertOk();
@@ -45,14 +46,14 @@ describe('FormModal Rendering', function () {
     it('can render in edit mode', function () {
         $title = Title::factory()->create();
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id);
 
         $component->assertOk();
     });
 
     it('displays correct title in create mode', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertSee('Create Title');
@@ -61,7 +62,7 @@ describe('FormModal Rendering', function () {
     it('displays correct title in edit mode', function () {
         $title = Title::factory()->create(['name' => 'Test Championship Title']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id);
 
         $component->assertSee('Edit Title');
@@ -70,7 +71,7 @@ describe('FormModal Rendering', function () {
 
 describe('FormModal Create Operations', function () {
     it('can create a new title with valid data', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'New Championship Title')
             ->set('form.type', 'singles')
@@ -87,7 +88,7 @@ describe('FormModal Create Operations', function () {
     });
 
     it('validates required fields when creating', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', '')
             ->set('form.type', '')
@@ -102,7 +103,7 @@ describe('FormModal Create Operations', function () {
     it('validates title name uniqueness', function () {
         Title::factory()->create(['name' => 'Existing Championship Title']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Existing Championship Title')
             ->set('form.type', 'singles')
@@ -113,7 +114,7 @@ describe('FormModal Create Operations', function () {
     });
 
     it('validates title type enum values', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Championship Title')
             ->set('form.type', 'InvalidType')
@@ -123,7 +124,7 @@ describe('FormModal Create Operations', function () {
     });
 
     it('validates start_date date format', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Championship Title')
             ->set('form.type', 'singles')
@@ -141,7 +142,7 @@ describe('FormModal Edit Operations', function () {
             'type' => 'singles',
         ]);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id)
             ->set('form.name', 'Updated Championship Title')
             ->set('form.type', 'tag-team')
@@ -163,7 +164,7 @@ describe('FormModal Edit Operations', function () {
             'type' => 'singles',
         ]);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id);
 
         $component->assertSet('form.name', 'Test Championship Title');
@@ -174,7 +175,7 @@ describe('FormModal Edit Operations', function () {
         $title1 = Title::factory()->create(['name' => 'Championship One Title']);
         $title2 = Title::factory()->create(['name' => 'Championship Two Title']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title2->id)
             ->set('form.name', 'Championship One Title')
             ->call('save');
@@ -188,7 +189,7 @@ describe('FormModal Edit Operations', function () {
             'type' => 'singles',
         ]);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id)
             ->set('form.name', 'Test Championship Title')
             ->set('form.type', 'tag-team')
@@ -203,7 +204,7 @@ describe('FormModal State Management', function () {
     it('resets form when switching modes', function () {
         $title = Title::factory()->create(['name' => 'Test Championship Title']);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id)
             ->call('openModal');
 
@@ -212,7 +213,7 @@ describe('FormModal State Management', function () {
     });
 
     it('closes modal after successful save', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'New Championship Title')
             ->set('form.type', 'singles')
@@ -223,7 +224,7 @@ describe('FormModal State Management', function () {
     });
 
     it('keeps modal open when validation fails', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', '')
             ->call('save');
@@ -234,7 +235,7 @@ describe('FormModal State Management', function () {
 
 describe('FormModal Business Logic', function () {
     it('handles title activation periods correctly', function () {
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'New Championship Title')
             ->set('form.type', 'singles')
@@ -250,7 +251,7 @@ describe('FormModal Business Logic', function () {
     it('validates debut date change rules', function () {
         $title = Title::factory()->withActivationPeriod()->create();
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id)
             ->set('form.start_date', '2025-01-01')
             ->call('save');
@@ -264,7 +265,7 @@ describe('FormModal Authorization', function () {
     it('requires authentication', function () {
         auth()->logout();
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertForbidden();
@@ -274,7 +275,7 @@ describe('FormModal Authorization', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $component = Livewire::test(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal');
 
         $component->assertForbidden();

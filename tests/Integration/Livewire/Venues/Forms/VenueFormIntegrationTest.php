@@ -56,7 +56,12 @@ describe('VenueForm Integration Tests', function () {
             expect($rules['name'])->toContain('max:255');
 
             // Should contain Rule::unique validation for venues table
-            $hasUniqueRule = collect($rules['name'])->contains(function ($rule) {
+            $nameRules = $rules['name'];
+            if (! is_array($nameRules)) {
+                throw new UnexpectedValueException('Venue name rules must be an array.');
+            }
+
+            $hasUniqueRule = collect($nameRules)->contains(function ($rule) {
                 return $rule instanceof Unique;
             });
             expect($hasUniqueRule)->toBeTrue();
@@ -87,7 +92,12 @@ describe('VenueForm Integration Tests', function () {
             expect($rules['state'])->toContain('string');
 
             // Should validate against states table
-            $hasExistsRule = collect($rules['state'])->contains(function ($rule) {
+            $stateRules = $rules['state'];
+            if (! is_array($stateRules)) {
+                throw new UnexpectedValueException('Venue state rules must be an array.');
+            }
+
+            $hasExistsRule = collect($stateRules)->contains(function ($rule) {
                 return $rule instanceof Exists;
             });
             expect($hasExistsRule)->toBeTrue();
@@ -157,7 +167,12 @@ describe('VenueForm Integration Tests', function () {
             $rules = $reflection->invoke($this->form);
 
             // Check that unique rule is configured for venues table
-            $uniqueRule = collect($rules['name'])->first(function ($rule) {
+            $nameRules = $rules['name'];
+            if (! is_array($nameRules)) {
+                throw new UnexpectedValueException('Venue name rules must be an array.');
+            }
+
+            $uniqueRule = collect($nameRules)->first(function ($rule) {
                 return $rule instanceof Unique;
             });
 
@@ -179,7 +194,12 @@ describe('VenueForm Integration Tests', function () {
             $rules = $reflection->invoke($this->form);
 
             // Should validate that state exists in states table
-            $existsRule = collect($rules['state'])->first(function ($rule) {
+            $stateRules = $rules['state'];
+            if (! is_array($stateRules)) {
+                throw new UnexpectedValueException('Venue state rules must be an array.');
+            }
+
+            $existsRule = collect($stateRules)->first(function ($rule) {
                 return $rule instanceof Exists;
             });
 

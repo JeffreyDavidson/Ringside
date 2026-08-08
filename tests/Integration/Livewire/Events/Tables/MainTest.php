@@ -9,6 +9,9 @@ use App\Models\Events\Venue;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for EventsTable Livewire component.
  *
@@ -36,8 +39,9 @@ describe('EventsTable Component Integration', function () {
             $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Draft Event']);
             $pastEvent = Event::factory()->past()->atVenue($this->venue)->create(['name' => 'Royal Rumble']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee($scheduledEvent->name)
@@ -53,8 +57,9 @@ describe('EventsTable Component Integration', function () {
             $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
             $pastEvent = Event::factory()->past()->create(['name' => 'Past Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Scheduled Event')
@@ -69,8 +74,9 @@ describe('EventsTable Component Integration', function () {
             expect($event->venue)->not()->toBeNull();
             expect($event->venue->name)->toBe('Test Arena');
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Venue Event')
@@ -81,8 +87,9 @@ describe('EventsTable Component Integration', function () {
             $futureEvent = Event::factory()->scheduled()->create(['name' => 'Future Event']);
             $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'No Date Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Future Event')
@@ -94,8 +101,9 @@ describe('EventsTable Component Integration', function () {
             $eventWithVenue = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'Venue Event']);
             $eventWithoutVenue = Event::factory()->scheduled()->create(['name' => 'No Venue Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Venue Event')
@@ -111,8 +119,9 @@ describe('EventsTable Component Integration', function () {
             $summerSlam = Event::factory()->scheduled()->create(['name' => 'SummerSlam 2024']);
             $royalRumble = Event::factory()->scheduled()->create(['name' => 'Royal Rumble']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Test search for "WrestleMania"
             $component->set('search', 'WrestleMania')
@@ -132,8 +141,9 @@ describe('EventsTable Component Integration', function () {
             $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
             $pastEvent = Event::factory()->past()->create(['name' => 'Past Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Initially should see all events
             $component->assertSee('Scheduled Event')
@@ -152,8 +162,9 @@ describe('EventsTable Component Integration', function () {
             $event2 = Event::factory()->scheduled()->atVenue($venue2)->create(['name' => 'Event at Venue Two']);
             $event3 = Event::factory()->scheduled()->create(['name' => 'Event with No Venue']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Event at Venue One')
@@ -165,8 +176,9 @@ describe('EventsTable Component Integration', function () {
             $earlyEvent = Event::factory()->scheduledOn('2024-01-15')->create(['name' => 'Early Event']);
             $lateEvent = Event::factory()->scheduledOn('2024-12-15')->create(['name' => 'Late Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Early Event')
@@ -178,8 +190,9 @@ describe('EventsTable Component Integration', function () {
         test('delete action integration works correctly', function () {
             $event = Event::factory()->unscheduled()->create(['name' => 'Deletable Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('delete', $event)
                 ->assertHasNoErrors();
@@ -192,8 +205,9 @@ describe('EventsTable Component Integration', function () {
         test('restore action integration works correctly', function () {
             $deletedEvent = Event::factory()->trashed()->create(['name' => 'Deleted Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('restore', $deletedEvent->id)
                 ->assertHasNoErrors()
@@ -209,8 +223,9 @@ describe('EventsTable Component Integration', function () {
         test('delete action works for appropriate event status', function () {
             $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('delete', $unscheduledEvent)
                 ->assertHasNoErrors();
@@ -222,8 +237,9 @@ describe('EventsTable Component Integration', function () {
         test('restore action works for deleted events', function () {
             $deletedEvent = Event::factory()->trashed()->create(['name' => 'Deleted Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('restore', $deletedEvent->id)
                 ->assertHasNoErrors()
@@ -237,13 +253,14 @@ describe('EventsTable Component Integration', function () {
         test('component requires proper authorization for access', function () {
             $basicUser = User::factory()->create();
 
-            Livewire::actingAs($basicUser)
-                ->test(Main::class)
+            actingAs($basicUser);
+
+            livewire(Main::class)
                 ->assertForbidden();
         });
 
         test('guest users cannot access component', function () {
-            Livewire::test(Main::class)
+            livewire(Main::class)
                 ->assertForbidden();
         });
 
@@ -251,8 +268,9 @@ describe('EventsTable Component Integration', function () {
             $event = Event::factory()->unscheduled()->create();
             $deletedEvent = Event::factory()->trashed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // All actions should be available to admin
             $component->call('delete', $event)->assertHasNoErrors();
@@ -266,8 +284,9 @@ describe('EventsTable Component Integration', function () {
             Event::factory()->count(10)->unscheduled()->create();
             Event::factory()->count(5)->past()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
         });
@@ -278,8 +297,9 @@ describe('EventsTable Component Integration', function () {
             // Ensure venue relationship exists for eager loading test
             expect($event->venue)->not()->toBeNull();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Test Event')
@@ -292,8 +312,9 @@ describe('EventsTable Component Integration', function () {
             Event::factory()->count(10)->unscheduled()->create();
             Event::factory()->count(5)->past()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
 
@@ -316,8 +337,9 @@ describe('EventsTable Component Integration', function () {
             // Simulate venue change by updating the event
             $event->update(['venue_id' => $venue2->id]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Venue Change Event')
@@ -330,8 +352,9 @@ describe('EventsTable Component Integration', function () {
             // Simulate scheduling the event
             $event->update(['date' => now()->addMonths(2)]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Scheduling Event');
@@ -343,8 +366,9 @@ describe('EventsTable Component Integration', function () {
             // Verify event is originally scheduled
             expect($event->isScheduled())->toBeTrue();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Date Change Event');
@@ -362,8 +386,9 @@ describe('EventsTable Component Integration', function () {
             // Event with neither date nor venue
             $draftEvent = Event::factory()->unscheduled()->create(['name' => 'Draft Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Complete Event')
@@ -378,16 +403,18 @@ describe('EventsTable Component Integration', function () {
         test('component maintains state through action calls', function () {
             $event = Event::factory()->unscheduled()->create(['name' => 'State Test Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Perform action and verify component state updates
             $component->call('delete', $event)
                 ->assertHasNoErrors();
 
             // Component should reflect the change after refresh
-            $refreshComponent = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $refreshComponent = livewire(Main::class);
 
             $refreshComponent->assertOk()
                 ->assertDontSee('State Test Event');
@@ -397,8 +424,9 @@ describe('EventsTable Component Integration', function () {
             $event1 = Event::factory()->unscheduled()->create(['name' => 'Event One']);
             $event2 = Event::factory()->unscheduled()->create(['name' => 'Event Two']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Perform multiple actions
             $component->call('delete', $event1)
@@ -419,8 +447,9 @@ describe('EventsTable Component Integration', function () {
             $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
             $pastEvent = Event::factory()->past()->create(['name' => 'Past Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // All events should be visible in the correct order
             $component->assertOk()
@@ -435,8 +464,9 @@ describe('EventsTable Component Integration', function () {
             $eventWithVenue = Event::factory()->scheduled()->atVenue($venue)->create(['name' => 'Venue Event']);
             $eventWithoutVenue = Event::factory()->scheduled()->create(['name' => 'No Venue Event']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Venue Event')
@@ -450,8 +480,9 @@ describe('EventsTable Component Integration', function () {
         test('filtering works with special characters in event names', function () {
             $specialEvent = Event::factory()->scheduled()->create(['name' => 'Event: The "Ultimate" Test']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'Ultimate')
                 ->assertSee('Event: The "Ultimate" Test');
@@ -460,8 +491,9 @@ describe('EventsTable Component Integration', function () {
         test('filtering works with international characters', function () {
             $internationalEvent = Event::factory()->scheduled()->create(['name' => 'Wrestle Mania']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->set('search', 'Wrestle')
                 ->assertSee('Wrestle Mania');
@@ -471,8 +503,9 @@ describe('EventsTable Component Integration', function () {
             $event1 = Event::factory()->scheduled()->create(['name' => 'Event One']);
             $event2 = Event::factory()->scheduled()->create(['name' => 'Event Two']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Empty search should show all events
             $component->set('search', '')

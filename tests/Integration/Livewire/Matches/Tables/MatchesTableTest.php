@@ -11,7 +11,8 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
+
+use function Pest\Livewire\livewire;
 
 /**
  * @group matches
@@ -28,7 +29,7 @@ describe('MatchesTable Rendering', function () {
     it('can render matches table', function () {
         $event = Event::factory()->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     })->group('matches', 'integration', 'livewire', 'tables', 'rendering');
 
@@ -39,7 +40,7 @@ describe('MatchesTable Rendering', function () {
             ->state(['match_type' => MatchType::Singles])
             ->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles');
     });
 
@@ -52,7 +53,7 @@ describe('MatchesTable Rendering', function () {
         $match->wrestlers()->attach($wrestler1, ['side_number' => 1]);
         $match->wrestlers()->attach($wrestler2, ['side_number' => 2]);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('John Cena')
             ->assertSee('The Rock');
     });
@@ -64,7 +65,7 @@ describe('MatchesTable Rendering', function () {
 
         $match->referees()->attach($referee);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Earl Hebner');
     });
 
@@ -75,7 +76,7 @@ describe('MatchesTable Rendering', function () {
 
         $match->titles()->attach($title);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('WWE Championship');
     });
 });
@@ -87,7 +88,7 @@ describe('MatchesTable Search and Filtering', function () {
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->set('search', 'Singles')
             ->assertSee('Singles')
             ->assertDontSee('Tag Team');
@@ -100,7 +101,7 @@ describe('MatchesTable Search and Filtering', function () {
         EventMatch::factory()->for($event1)->state(['match_type' => MatchType::Singles])->create();
         EventMatch::factory()->for($event2)->state(['match_type' => MatchType::TagTeam])->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event1->id])
+        livewire(MatchesTable::class, ['eventId' => $event1->id])
             ->assertSee('Singles')
             ->assertDontSee('Tag Team');
     });
@@ -111,7 +112,7 @@ describe('MatchesTable Search and Filtering', function () {
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles')
             ->assertSee('Tag Team');
     });
@@ -127,7 +128,7 @@ describe('MatchesTable Search and Filtering', function () {
         $match1->wrestlers()->attach($wrestler1, ['side_number' => 1]);
         $match2->wrestlers()->attach($wrestler2, ['side_number' => 1]);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Stone Cold')
             ->assertSee('The Rock');
     });
@@ -146,7 +147,7 @@ describe('MatchesTable Complex Relationships', function () {
         $match->wrestlers()->attach($wrestler2, ['side_number' => 2]);
         $match->tagTeams()->attach($tagTeam, ['side_number' => 3]);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Wrestler One')
             ->assertSee('Wrestler Two')
             ->assertSee('Tag Team');
@@ -162,7 +163,7 @@ describe('MatchesTable Complex Relationships', function () {
         $match->titles()->attach($title1);
         $match->titles()->attach($title2);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('World Championship')
             ->assertSee('Tag Team Championship');
     });
@@ -177,7 +178,7 @@ describe('MatchesTable Complex Relationships', function () {
         $match->referees()->attach($referee1);
         $match->referees()->attach($referee2);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Referee One')
             ->assertSee('Referee Two');
     });
@@ -186,7 +187,7 @@ describe('MatchesTable Complex Relationships', function () {
         $event = Event::factory()->create();
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles');
     });
 
@@ -197,7 +198,7 @@ describe('MatchesTable Complex Relationships', function () {
         $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
         $match->wrestlers()->attach($wrestler, ['side_number' => 1]);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Test Wrestler')
             ->assertSee('Test Wrestler');
     });
@@ -223,7 +224,7 @@ describe('MatchesTable Performance', function () {
             $match->referees()->attach($referees[$index % 5]);
         }
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     });
 
@@ -239,7 +240,7 @@ describe('MatchesTable Performance', function () {
         $match->referees()->attach($referee);
         $match->titles()->attach($title);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk()
             ->assertSee('Test Wrestler')
             ->assertSee('Test Referee')
@@ -252,7 +253,7 @@ describe('MatchesTable Pagination', function () {
         $event = Event::factory()->create();
         EventMatch::factory()->for($event)->count(25)->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     });
 
@@ -262,7 +263,7 @@ describe('MatchesTable Pagination', function () {
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->count(15)->create();
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->count(15)->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->set('search', 'Singles')
             ->assertSee('Singles')
             ->assertDontSee('Tag Team');
@@ -276,7 +277,7 @@ describe('MatchesTable Sorting', function () {
         $matchA = EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
         $matchZ = EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSeeInOrder(['Singles', 'Tag Team']);
     });
 
@@ -286,7 +287,7 @@ describe('MatchesTable Sorting', function () {
         $match1 = EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create(['match_number' => 1]);
         $match2 = EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create(['match_number' => 2]);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles')
             ->assertSee('Tag Team');
     });
@@ -297,7 +298,7 @@ describe('MatchesTable Actions', function () {
         $event = Event::factory()->create();
         $match = EventMatch::factory()->for($event)->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertOk();
     });
 
@@ -305,7 +306,7 @@ describe('MatchesTable Actions', function () {
         $event = Event::factory()->create();
         $match = EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
 
-        $component = Livewire::test(MatchesTable::class, ['eventId' => $event->id]);
+        $component = livewire(MatchesTable::class, ['eventId' => $event->id]);
         $component->assertOk();
         $component->assertSee('Singles');
     });
@@ -319,7 +320,7 @@ describe('MatchesTable Event Integration', function () {
         EventMatch::factory()->for($event1)->state(['match_type' => MatchType::Singles])->create();
         EventMatch::factory()->for($event2)->state(['match_type' => MatchType::TagTeam])->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event1->id])
+        livewire(MatchesTable::class, ['eventId' => $event1->id])
             ->assertSee('Singles')
             ->assertDontSee('Tag Team');
     });
@@ -330,7 +331,7 @@ describe('MatchesTable Event Integration', function () {
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::Singles])->create();
         EventMatch::factory()->for($event)->state(['match_type' => MatchType::TagTeam])->create();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles')
             ->assertSee('Tag Team');
     });
@@ -341,7 +342,7 @@ describe('MatchesTable Authorization', function () {
         $event = Event::factory()->create();
         auth()->logout();
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertForbidden();
     });
 
@@ -350,7 +351,7 @@ describe('MatchesTable Authorization', function () {
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        Livewire::test(MatchesTable::class, ['eventId' => $event->id])
+        livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertForbidden();
     });
 });

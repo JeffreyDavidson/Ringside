@@ -52,12 +52,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -89,12 +89,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return true;
                 }
@@ -182,12 +182,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -215,12 +215,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -250,12 +250,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -283,12 +283,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -374,12 +374,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model1 = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -391,12 +391,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             };
             $model2 = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }
@@ -422,12 +422,12 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
             // Arrange
             $model = new class extends Model
             {
-                public function isEmployed()
+                public function isEmployed(): bool
                 {
                     return true;
                 }
 
-                public function employedOn($date = null)
+                public function employedOn(Carbon $date): bool
                 {
                     return false;
                 }

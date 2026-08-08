@@ -6,7 +6,8 @@ use App\Enums\MatchType;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Users\User;
-use Livewire\Livewire;
+
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -16,14 +17,14 @@ beforeEach(function () {
 
 describe('Dynamic Match Type UI', function () {
     it('shows helper text when no match type is selected', function () {
-        $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal');
 
         $component->assertSee('Select a match type to configure competitors');
     });
 
     it('dynamically updates UI for Singles match', function () {
-        $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Singles);
 
@@ -34,7 +35,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Tag Team match', function () {
-        $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::TagTeam);
 
@@ -44,7 +45,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Triple Threat match', function () {
-        $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::TripleThreat);
 
@@ -56,7 +57,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Fatal Four Way match', function () {
-        $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Fatal4Way);
 
@@ -68,7 +69,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('dynamically updates UI for Battle Royal match', function () {
-        $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::BattleRoyal);
 
@@ -79,7 +80,7 @@ describe('Dynamic Match Type UI', function () {
     });
 
     it('clears competitor data when match type changes', function () {
-        $component = Livewire::test(FormModal::class, ['eventId' => $this->event->id])
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Singles)
             ->set('form.matchType', MatchType::TagTeam);

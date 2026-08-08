@@ -10,7 +10,6 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
@@ -48,8 +47,9 @@ describe('Venue Creation and Setup Workflow', function () {
             ->assertSeeLivewire(VenuesTable::class);
 
         // And: Creating venue through modal workflow
-        $modalComponent = Livewire::actingAs($admin)
-            ->test(VenueFormModal::class)
+        actingAs($admin);
+
+        $modalComponent = \Pest\Livewire\livewire(VenueFormModal::class)
             ->call('openModal')
             ->assertSet('isModalOpen', true);
 
@@ -83,8 +83,9 @@ describe('Venue Creation and Setup Workflow', function () {
         expect($venue->zipcode)->toBe('10001');
 
         // And: Should appear in the venues table
-        Livewire::actingAs($admin)
-            ->test(VenuesTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(VenuesTable::class)
             ->assertSee('Madison Square Garden');
     });
 
@@ -93,8 +94,9 @@ describe('Venue Creation and Setup Workflow', function () {
         $admin = administrator();
 
         // When: Opening create modal and using dummy data
-        $component = Livewire::actingAs($admin)
-            ->test(VenueFormModal::class)
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(VenueFormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -139,8 +141,9 @@ describe('Event Creation and Scheduling Workflow', function () {
             ->assertSeeLivewire(EventsTable::class);
 
         // And: Creating event through modal workflow
-        $modalComponent = Livewire::actingAs($admin)
-            ->test(EventFormModal::class)
+        actingAs($admin);
+
+        $modalComponent = \Pest\Livewire\livewire(EventFormModal::class)
             ->call('openModal')
             ->assertSet('isModalOpen', true);
 
@@ -169,8 +172,9 @@ describe('Event Creation and Scheduling Workflow', function () {
         expect($event->venue_id)->toBe($venue->id);
 
         // And: Should appear in the events table
-        Livewire::actingAs($admin)
-            ->test(EventsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(EventsTable::class)
             ->assertSee('WrestleMania 40')
             ->assertSee('Allstate Arena');
     });
@@ -180,8 +184,9 @@ describe('Event Creation and Scheduling Workflow', function () {
         $admin = administrator();
 
         // When: Opening create modal and using dummy data
-        $component = Livewire::actingAs($admin)
-            ->test(EventFormModal::class)
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(EventFormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -244,8 +249,9 @@ describe('Event Search and Filtering Workflow', function () {
         ]);
 
         // When: Testing search functionality exists
-        $component = Livewire::actingAs($admin)
-            ->test(EventsTable::class);
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(EventsTable::class);
 
         // Verify the component loads successfully
         expect($component)->not->toBeNull();
@@ -269,8 +275,9 @@ describe('Event Editing Workflow', function () {
         ]);
 
         // When: Testing the EventFormModal with model editing
-        $component = Livewire::actingAs($admin)
-            ->test(EventFormModal::class, ['modelId' => $event->id]);
+        actingAs($admin);
+
+        $component = \Pest\Livewire\livewire(EventFormModal::class, ['modelId' => $event->id]);
 
         // Then: Form should be populated with existing data
         expect($component->get('form.name'))->toBe('Original Event');
@@ -343,8 +350,9 @@ describe('Event Deletion and Restoration Workflow', function () {
         ]);
 
         // When: Deleting the event
-        Livewire::actingAs($admin)
-            ->test(EventsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(EventsTable::class)
             ->call('delete', $event)
             ->assertHasNoErrors();
 
@@ -353,8 +361,9 @@ describe('Event Deletion and Restoration Workflow', function () {
         expect(Event::onlyTrashed()->find($event->id))->not->toBeNull();
 
         // When: Restoring the event
-        Livewire::actingAs($admin)
-            ->test(EventsTable::class)
+        actingAs($admin);
+
+        \Pest\Livewire\livewire(EventsTable::class)
             ->call('restore', $event->id)
             ->assertHasNoErrors();
 

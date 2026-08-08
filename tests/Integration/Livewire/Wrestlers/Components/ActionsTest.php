@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
-use Livewire\Livewire;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -30,8 +29,9 @@ describe('WrestlersActions Integration Tests', function () {
 
     describe('component initialization', function () {
         test('component loads with wrestler properly bound', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             expect($component->get('wrestler')->id)->toBe($this->wrestler->id);
             expect($component->get('wrestler')->name)->toBe('Test Wrestler');
@@ -39,8 +39,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('component renders without errors', function () {
-            Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler])
+            \Pest\Laravel\actingAs($this->admin);
+
+            \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler])
                 ->assertOk();
             expect(true)->toBeTrue();
         });
@@ -50,8 +51,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('employ action works for unemployed wrestler', function () {
             $unemployedWrestler = Wrestler::factory()->unemployed()->create(['name' => 'Unemployed Wrestler']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $unemployedWrestler]);
 
             $component->call('employ')
                 ->assertHasNoErrors()
@@ -63,8 +65,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('employ action fails for already employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('employ');
 
@@ -73,8 +76,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('release action works for employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('release')
                 ->assertHasNoErrors()
@@ -88,8 +92,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('release action fails for unemployed wrestler', function () {
             $unemployedWrestler = Wrestler::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $unemployedWrestler]);
 
             $component->call('release');
 
@@ -100,8 +105,9 @@ describe('WrestlersActions Integration Tests', function () {
 
     describe('injury and healing actions', function () {
         test('injure action works for healthy employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('injure')
                 ->assertHasNoErrors()
@@ -115,8 +121,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('injure action fails for already injured wrestler', function () {
             $injuredWrestler = Wrestler::factory()->injured()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $injuredWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $injuredWrestler]);
 
             $component->call('injure');
 
@@ -127,8 +134,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('heal action works for injured wrestler', function () {
             $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $injuredWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $injuredWrestler]);
 
             $component->call('healFromInjury')
                 ->assertHasNoErrors()
@@ -140,8 +148,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('heal action fails for healthy wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('healFromInjury');
 
@@ -152,8 +161,9 @@ describe('WrestlersActions Integration Tests', function () {
 
     describe('suspension and reinstatement actions', function () {
         test('suspend action works for employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('suspend')
                 ->assertHasNoErrors()
@@ -167,8 +177,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('suspend action fails for unemployed wrestler', function () {
             $unemployedWrestler = Wrestler::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $unemployedWrestler]);
 
             $component->call('suspend');
 
@@ -179,8 +190,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('reinstate action works for suspended wrestler', function () {
             $suspendedWrestler = Wrestler::factory()->suspended()->create(['name' => 'Suspended Wrestler']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $suspendedWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $suspendedWrestler]);
 
             $component->call('reinstate')
                 ->assertHasNoErrors()
@@ -192,8 +204,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('reinstate action fails for non-suspended wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('reinstate');
 
@@ -204,8 +217,9 @@ describe('WrestlersActions Integration Tests', function () {
 
     describe('retirement lifecycle actions', function () {
         test('retire action works for employed wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('retire')
                 ->assertHasNoErrors()
@@ -219,8 +233,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('retire action fails for unemployed wrestler', function () {
             $unemployedWrestler = Wrestler::factory()->unemployed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $unemployedWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $unemployedWrestler]);
 
             $component->call('retire');
 
@@ -231,8 +246,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('unretire action works for retired wrestler', function () {
             $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $retiredWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $retiredWrestler]);
 
             $component->call('unretire')
                 ->assertHasNoErrors()
@@ -244,8 +260,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('unretire action fails for active wrestler', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('unretire');
 
@@ -261,8 +278,9 @@ describe('WrestlersActions Integration Tests', function () {
 
             $trashedWrestler = Wrestler::onlyTrashed()->find($this->wrestler->id);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $trashedWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $trashedWrestler]);
 
             $component->call('restore')
                 ->assertHasNoErrors()
@@ -278,8 +296,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('wrestler can transition through complete career lifecycle', function () {
             // Start unemployed
             $wrestler = Wrestler::factory()->unemployed()->create(['name' => 'Career Wrestler']);
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $wrestler]);
 
             // Employ
             $component->call('employ');
@@ -313,8 +332,9 @@ describe('WrestlersActions Integration Tests', function () {
 
         test('action availability changes based on current status', function () {
             $injuredWrestler = Wrestler::factory()->injured()->create();
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $injuredWrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $injuredWrestler]);
 
             // Cannot employ injured wrestler
             $component->call('employ');
@@ -337,8 +357,9 @@ describe('WrestlersActions Integration Tests', function () {
         test('unauthorized user cannot perform actions', function () {
             $guest = User::factory()->create(); // Non-admin user
 
-            $component = Livewire::actingAs($guest)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($guest);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('employ')
                 ->assertForbidden();
@@ -346,8 +367,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('admin can perform all actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             // All action calls should succeed (though business rules may prevent them)
             $component->call('release')
@@ -360,8 +382,9 @@ describe('WrestlersActions Integration Tests', function () {
 
     describe('event dispatching and state management', function () {
         test('all successful actions dispatch wrestler-updated event', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('release')
                 ->assertDispatched('wrestler-updated');
@@ -375,8 +398,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('failed actions do not dispatch events', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             // Try to employ already employed wrestler
             $component->call('employ')
@@ -385,8 +409,9 @@ describe('WrestlersActions Integration Tests', function () {
         });
 
         test('component state remains consistent after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             expect($component->get('wrestler')->id)->toBe($this->wrestler->id);
 
@@ -400,8 +425,9 @@ describe('WrestlersActions Integration Tests', function () {
 
     describe('error handling and edge cases', function () {
         test('component handles wrestler model refresh after actions', function () {
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             // Perform action
             $component->call('release');
@@ -415,8 +441,9 @@ describe('WrestlersActions Integration Tests', function () {
             $originalName = $this->wrestler->name;
             $originalId = $this->wrestler->id;
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Actions::class, ['wrestler' => $this->wrestler]);
+            \Pest\Laravel\actingAs($this->admin);
+
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
             $component->call('injure');
 

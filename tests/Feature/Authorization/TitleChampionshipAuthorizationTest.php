@@ -7,6 +7,9 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Feature tests for Title Championship Authorization.
  *
@@ -95,8 +98,9 @@ describe('Title Championship Authorization', function () {
     describe('Livewire component authorization', function () {
         test('admin can access title championships table component', function () {
             // Arrange & Act
-            $component = Livewire::actingAs($this->admin)
-                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+            actingAs($this->admin);
+
+            $component = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
 
             // Assert
             $component->assertOk();
@@ -104,8 +108,9 @@ describe('Title Championship Authorization', function () {
 
         test('basic user cannot access title championships table component', function () {
             // Arrange & Act
-            $component = Livewire::actingAs($this->basicUser)
-                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+            actingAs($this->basicUser);
+
+            $component = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
 
             // Assert
             $component->assertForbidden();
@@ -113,7 +118,7 @@ describe('Title Championship Authorization', function () {
 
         test('guest user cannot access title championships table component', function () {
             // Act
-            $component = Livewire::test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+            $component = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
 
             // Assert
             $component->assertForbidden();
@@ -129,8 +134,9 @@ describe('Title Championship Authorization', function () {
                 ->get(route('titles.show', $this->title));
             $httpResponse->assertOk();
 
-            $livewireComponent = Livewire::actingAs($this->admin)
-                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+            actingAs($this->admin);
+
+            $livewireComponent = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
             $livewireComponent->assertOk();
 
             // Basic user should be forbidden from both
@@ -138,8 +144,9 @@ describe('Title Championship Authorization', function () {
                 ->get(route('titles.show', $this->title));
             $httpResponse->assertForbidden();
 
-            $livewireComponent = Livewire::actingAs($this->basicUser)
-                ->test(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+            actingAs($this->basicUser);
+
+            $livewireComponent = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
             $livewireComponent->assertForbidden();
         });
     });

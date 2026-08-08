@@ -10,6 +10,9 @@ use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for StablesTable Livewire component.
  *
@@ -36,8 +39,9 @@ describe('StablesTable Component', function () {
             $retiredStable = Stable::factory()->retired()->create(['name' => 'D-Generation X']);
             $inactiveStable = Stable::factory()->inactive()->create(['name' => 'The New World Order']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee($activeStable->name)
@@ -53,8 +57,9 @@ describe('StablesTable Component', function () {
             $disbandedStable = Stable::factory()->disbanded()->create(['name' => 'Disbanded Stable']);
             $retiredStable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Active Stable')
@@ -68,8 +73,9 @@ describe('StablesTable Component', function () {
             // Verify activity period exists
             expect($stable->currentActivityPeriod)->not()->toBeNull();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Test Stable');
@@ -94,8 +100,9 @@ describe('StablesTable Component', function () {
                 'updated_at' => now(),
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('The Stable');
@@ -108,8 +115,9 @@ describe('StablesTable Component', function () {
             $nwo = Stable::factory()->active()->create(['name' => 'New World Order']);
             $dx = Stable::factory()->active()->create(['name' => 'D-Generation X']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Test search for "Horsemen"
             $component->set('search', 'Horsemen')
@@ -129,8 +137,9 @@ describe('StablesTable Component', function () {
             $retiredStable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
             $disbandedStable = Stable::factory()->disbanded()->create(['name' => 'Disbanded Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Initially should see all stables
             $component->assertSee('Active Stable')
@@ -146,8 +155,9 @@ describe('StablesTable Component', function () {
             $oldStable = Stable::factory()->active()->create(['name' => 'Old Stable']);
             $newStable = Stable::factory()->active()->create(['name' => 'New Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Old Stable')
@@ -159,8 +169,9 @@ describe('StablesTable Component', function () {
         test('disband action integration works correctly', function () {
             $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('disband', $activeStable)
                 ->assertHasNoErrors()
@@ -173,8 +184,9 @@ describe('StablesTable Component', function () {
         test('retire action integration works correctly', function () {
             $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('retire', $activeStable)
                 ->assertHasNoErrors()
@@ -187,8 +199,9 @@ describe('StablesTable Component', function () {
         test('unretire action integration works correctly', function () {
             $retiredStable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('unretire', $retiredStable)
                 ->assertHasNoErrors()
@@ -201,8 +214,9 @@ describe('StablesTable Component', function () {
         test('establish action integration works correctly', function () {
             $inactiveStable = Stable::factory()->inactive()->create(['name' => 'Inactive Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('establish', $inactiveStable)
                 ->assertHasNoErrors()
@@ -215,8 +229,9 @@ describe('StablesTable Component', function () {
         test('restore action integration works correctly', function () {
             $deletedStable = Stable::factory()->retired()->trashed()->create(['name' => 'Deleted Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('restore', $deletedStable->id)
                 ->assertHasNoErrors()
@@ -230,8 +245,9 @@ describe('StablesTable Component', function () {
         test('delete action integration works correctly', function () {
             $stable = Stable::factory()->inactive()->create(['name' => 'Test Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('delete', $stable)
                 ->assertHasNoErrors();
@@ -246,8 +262,9 @@ describe('StablesTable Component', function () {
         test('establish action fails for inappropriate stable status', function () {
             $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('establish', $activeStable)
                 ->assertRedirect();
@@ -259,8 +276,9 @@ describe('StablesTable Component', function () {
         test('disband action fails for inappropriate stable status', function () {
             $inactiveStable = Stable::factory()->inactive()->create(['name' => 'Inactive Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('disband', $inactiveStable)
                 ->assertRedirect();
@@ -272,8 +290,9 @@ describe('StablesTable Component', function () {
         test('unretire action fails for non-retired stable', function () {
             $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->call('unretire', $activeStable)
                 ->assertRedirect();
@@ -285,8 +304,9 @@ describe('StablesTable Component', function () {
         test('actions respect stable business constraints', function () {
             $disbandedStable = Stable::factory()->disbanded()->create(['name' => 'Disbanded Stable']);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Disband should fail for already disbanded stable
             $component->call('disband', $disbandedStable)
@@ -300,8 +320,9 @@ describe('StablesTable Component', function () {
         test('component requires proper authorization for access', function () {
             $basicUser = User::factory()->create();
 
-            Livewire::actingAs($basicUser)
-                ->test(Main::class)
+            actingAs($basicUser);
+
+            livewire(Main::class)
                 ->assertForbidden();
         });
 
@@ -316,8 +337,9 @@ describe('StablesTable Component', function () {
             $retiredStable = Stable::factory()->retired()->create();
             $deletedStable = Stable::factory()->trashed()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // All actions should be available to admin
             $component->call('establish', $inactiveStable)->assertHasNoErrors();
@@ -334,8 +356,9 @@ describe('StablesTable Component', function () {
             Stable::factory()->count(10)->retired()->create();
             Stable::factory()->count(5)->disbanded()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
         });
@@ -346,8 +369,9 @@ describe('StablesTable Component', function () {
             // Ensure activity period exists for eager loading test
             expect($stable->currentActivityPeriod)->not()->toBeNull();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Test Stable');
@@ -359,8 +383,9 @@ describe('StablesTable Component', function () {
             Stable::factory()->count(10)->inactive()->create();
             Stable::factory()->count(5)->retired()->create();
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk();
 
@@ -383,8 +408,9 @@ describe('StablesTable Component', function () {
             $wrestler2->stables()->attach($stable->id, ['joined_at' => now()->subMonths(5), 'created_at' => now(), 'updated_at' => now()]);
             $tagTeam->stables()->attach($stable->id, ['joined_at' => now()->subMonths(4), 'created_at' => now(), 'updated_at' => now()]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Mixed Stable');
@@ -410,8 +436,9 @@ describe('StablesTable Component', function () {
                 'updated_at' => now(),
             ]);
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Evolving Stable');
@@ -423,8 +450,9 @@ describe('StablesTable Component', function () {
             // This stable would have been disbanded and reunited
             // The factory should handle creating the appropriate activity periods
 
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Reunited Stable');

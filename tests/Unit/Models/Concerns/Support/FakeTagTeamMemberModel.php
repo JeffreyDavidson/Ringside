@@ -13,11 +13,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Fake model for testing CanJoinTagTeams trait in isolation.
  * This ensures trait tests are not coupled to real business models.
+ *
+ * @implements CanBeATagTeamMember<FakeTagTeamPivotModel, self>
  */
 #[Table('fake_tag_team_members')]
 #[Fillable('name')]
 class FakeTagTeamMemberModel extends Model implements CanBeATagTeamMember
 {
+    /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
     use CanJoinTagTeams;
 
     /**

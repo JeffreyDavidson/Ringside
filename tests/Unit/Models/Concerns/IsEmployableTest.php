@@ -25,11 +25,40 @@ use Mockery;
 use Tests\Unit\Models\Concerns\Support\FakeEmployableModel;
 use Tests\Unit\Models\Concerns\Support\FakeEmploymentModel;
 
+/** @extends EloquentBuilder<FakeEmploymentModel> */
+final class FakeEmploymentBuilder extends EloquentBuilder {}
+
+/** @implements Employable<FakeEmploymentModel, self> */
+final class FutureEmploymentStateModel extends Model implements Employable
+{
+    /** @use IsEmployable<FakeEmploymentModel, self> */
+    use IsEmployable;
+
+    public bool $futureEmploymentExists = false;
+
+    public function resolveEmploymentModelClass(): string
+    {
+        return FakeEmploymentModel::class;
+    }
+
+    /** @return HasOne<FakeEmploymentModel, $this> */
+    public function futureEmployment(): HasOne
+    {
+        $query = Double::for(QueryBuilder::class);
+        $query->expects('exists')->returns($this->futureEmploymentExists);
+        $builder = new FakeEmploymentBuilder($query);
+        $builder->setModel(new FakeEmploymentModel());
+
+        return new HasOne($builder, $this, 'entity_id', 'id');
+    }
+}
+
 describe('IsEmployable Trait Unit Tests', function () {
     describe('employment relationships', function () {
         test('provides employments relationship', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -43,6 +72,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('provides current employment relationship', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -56,6 +86,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('provides future employment relationship', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -69,6 +100,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('provides previous employments relationship', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -82,6 +114,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('provides previous employment relationship', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -95,6 +128,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('provides first employment relationship', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -108,6 +142,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('employments relationship uses the correct related model', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -123,6 +158,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('currentEmployment relationship uses the correct related model', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -140,6 +176,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('can check if model is employed', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -161,6 +198,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('can check if model is not employed', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -182,6 +220,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('can check if model has employments', function () {
             $modelWith = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -199,6 +238,7 @@ describe('IsEmployable Trait Unit Tests', function () {
             };
             $modelWithout = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -219,44 +259,10 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
 
         test('can check if model has future employment', function () {
-            $modelWith = new class extends Model implements Employable
-            {
-                use IsEmployable;
+            $modelWith = new FutureEmploymentStateModel();
+            $modelWith->futureEmploymentExists = true;
+            $modelWithout = new FutureEmploymentStateModel();
 
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function futureEmployment(): HasOne
-                {
-                    $query = Double::for(QueryBuilder::class);
-                    $query->expects('exists')->returns(true);
-                    $builder = new EloquentBuilder($query);
-                    $builder->setModel(new FakeEmploymentModel());
-
-                    return new HasOne($builder, $this, 'entity_id', 'id');
-                }
-            };
-            $modelWithout = new class extends Model implements Employable
-            {
-                use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
-
-                public function futureEmployment(): HasOne
-                {
-                    $query = Double::for(QueryBuilder::class);
-                    $query->expects('exists')->returns(false);
-                    $builder = new EloquentBuilder($query);
-                    $builder->setModel(new FakeEmploymentModel());
-
-                    return new HasOne($builder, $this, 'entity_id', 'id');
-                }
-            };
             expect($modelWith->hasFutureEmployment())->toBeTrue();
             expect($modelWithout->hasFutureEmployment())->toBeFalse();
         });
@@ -264,6 +270,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('can check if model has employment history', function () {
             $modelWith = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -281,6 +288,7 @@ describe('IsEmployable Trait Unit Tests', function () {
             };
             $modelWithout = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -313,6 +321,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('current employment query includes whereNull ended_at', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -331,6 +340,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('future employment query includes whereNull ended_at and started_at > now', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -353,6 +363,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('previous employments query includes whereNotNull ended_at', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -371,6 +382,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('previous employment query includes ofMany constraint', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string
@@ -387,6 +399,7 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('first employment query includes ofMany constraint', function () {
             $model = new class extends Model implements Employable
             {
+                /** @use IsEmployable<FakeEmploymentModel, self> */
                 use IsEmployable;
 
                 public function resolveEmploymentModelClass(): string

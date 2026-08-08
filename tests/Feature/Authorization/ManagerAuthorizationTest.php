@@ -7,6 +7,9 @@ use App\Models\Managers\Manager;
 use App\Models\Users\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
 /**
  * Feature tests for Manager Authorization.
  *
@@ -98,8 +101,9 @@ describe('Manager Authorization', function () {
     describe('Livewire component authorization', function () {
         test('admin can access managers table component', function () {
             // Arrange & Act
-            $component = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $component = livewire(Main::class);
 
             // Assert
             $component->assertOk()
@@ -108,8 +112,9 @@ describe('Manager Authorization', function () {
 
         test('basic user cannot access managers table component', function () {
             // Arrange & Act
-            $component = Livewire::actingAs($this->basicUser)
-                ->test(Main::class);
+            actingAs($this->basicUser);
+
+            $component = livewire(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -117,7 +122,7 @@ describe('Manager Authorization', function () {
 
         test('guest user cannot access managers table component', function () {
             // Act
-            $component = Livewire::test(Main::class);
+            $component = livewire(Main::class);
 
             // Assert
             $component->assertForbidden();
@@ -133,8 +138,9 @@ describe('Manager Authorization', function () {
                 ->get(route('managers.index'));
             $httpResponse->assertOk();
 
-            $livewireComponent = Livewire::actingAs($this->admin)
-                ->test(Main::class);
+            actingAs($this->admin);
+
+            $livewireComponent = livewire(Main::class);
             $livewireComponent->assertOk();
 
             // Basic user should be forbidden from both
@@ -142,8 +148,9 @@ describe('Manager Authorization', function () {
                 ->get(route('managers.index'));
             $httpResponse->assertForbidden();
 
-            $livewireComponent = Livewire::actingAs($this->basicUser)
-                ->test(Main::class);
+            actingAs($this->basicUser);
+
+            $livewireComponent = livewire(Main::class);
             $livewireComponent->assertForbidden();
         });
 

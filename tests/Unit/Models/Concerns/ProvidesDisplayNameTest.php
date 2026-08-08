@@ -25,7 +25,7 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $name = 'Test Name';
+                public ?string $name = 'Test Name';
             };
             expect($model->getDisplayName())->toBe('Test Name');
         });
@@ -35,7 +35,7 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $full_name = 'Full Test Name';
+                public ?string $full_name = 'Full Test Name';
             };
             expect($model->getDisplayName())->toBe('Full Test Name');
         });
@@ -45,9 +45,9 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $first_name = 'John';
+                public ?string $first_name = 'John';
 
-                public $last_name = 'Doe';
+                public ?string $last_name = 'Doe';
             };
             expect($model->getDisplayName())->toBe('John Doe');
         });
@@ -57,9 +57,9 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $first_name = '';
+                public ?string $first_name = '';
 
-                public $last_name = '';
+                public ?string $last_name = '';
             };
             expect($model->getDisplayName())->toBe('');
         });
@@ -79,7 +79,7 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $name = 'Test Name';
+                public ?string $name = 'Test Name';
             };
             expect($model->displayName())->toBeInstanceOf(Attribute::class);
         });
@@ -89,7 +89,7 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $name = 'Test Name';
+                public ?string $name = 'Test Name';
             };
             expect($model->displayName())->toBeInstanceOf(Attribute::class);
         });
@@ -101,9 +101,9 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $name = 'Primary Name';
+                public ?string $name = 'Primary Name';
 
-                public $full_name = 'Secondary Name';
+                public ?string $full_name = 'Secondary Name';
             };
             expect($model->getDisplayName())->toBe('Primary Name');
         });
@@ -113,11 +113,11 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $name = 'Primary Name';
+                public ?string $name = 'Primary Name';
 
-                public $first_name = 'John';
+                public ?string $first_name = 'John';
 
-                public $last_name = 'Doe';
+                public ?string $last_name = 'Doe';
             };
             expect($model->getDisplayName())->toBe('Primary Name');
         });
@@ -127,11 +127,11 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $full_name = 'Secondary Name';
+                public ?string $full_name = 'Secondary Name';
 
-                public $first_name = 'John';
+                public ?string $first_name = 'John';
 
-                public $last_name = 'Doe';
+                public ?string $last_name = 'Doe';
             };
             expect($model->getDisplayName())->toBe('Secondary Name');
         });
@@ -143,7 +143,7 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $name = 'Test';
+                public ?string $name = 'Test';
             };
             expect($model->name)->toBe('Test');
         });
@@ -153,7 +153,7 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $full_name = 'Test';
+                public ?string $full_name = 'Test';
             };
             expect($model->full_name)->toBe('Test');
         });
@@ -163,9 +163,9 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $first_name = 'John';
+                public ?string $first_name = 'John';
 
-                public $last_name = 'Doe';
+                public ?string $last_name = 'Doe';
             };
             expect([$model->first_name, $model->last_name])->toBe(['John', 'Doe']);
         });
@@ -185,13 +185,13 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             {
                 use ProvidesDisplayName;
 
-                public $name = null;
+                public ?string $name = null;
 
-                public $full_name = null;
+                public ?string $full_name = null;
 
-                public $first_name = null;
+                public ?string $first_name = null;
 
-                public $last_name = null;
+                public ?string $last_name = null;
             };
             expect(fn () => $model->getDisplayName())->toThrow(LogicException::class);
         });
