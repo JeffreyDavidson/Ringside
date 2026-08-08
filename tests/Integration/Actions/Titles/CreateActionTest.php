@@ -16,7 +16,7 @@ beforeEach(function () {
 test('it creates a title', function () {
     $data = new TitleData('Example Title', TitleType::Singles, null);
 
-    $result = CreateAction::run($data);
+    $result = CreateAction::make()->handle($data);
 
     expect($result)->toBeInstanceOf(Title::class);
     expect($result->name)->toBe('Example Title');
@@ -28,7 +28,7 @@ test('it activates a title if activation date is filled in request', function ()
     $datetime = now();
     $data = new TitleData('Example Title', TitleType::Singles, $datetime);
 
-    $result = CreateAction::run($data);
+    $result = CreateAction::make()->handle($data);
 
     expect($result)->toBeInstanceOf(Title::class);
     expect($result->name)->toBe('Example Title');

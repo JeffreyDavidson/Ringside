@@ -9,9 +9,10 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
+use App\Models\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
 /**
@@ -213,12 +214,22 @@ function expectCurrentRelationshipsActive(Wrestler $wrestler): void
 {
     $currentManagers = $wrestler->currentManagers()->get();
     foreach ($currentManagers as $manager) {
-        expect(relatedPivotAttribute($manager, 'fired_at'))->toBeNull();
+        $management = WrestlerManager::query()
+            ->whereBelongsTo($wrestler)
+            ->whereBelongsTo($manager)
+            ->firstOrFail();
+
+        expect($management->fired_at)->toBeNull();
     }
 
     $currentTagTeam = $wrestler->currentTagTeam;
     if ($currentTagTeam) {
-        expect(relatedPivotAttribute($currentTagTeam, 'left_at'))->toBeNull();
+        $membership = TagTeamWrestler::query()
+            ->whereBelongsTo($wrestler)
+            ->whereBelongsTo($currentTagTeam, 'tagTeam')
+            ->firstOrFail();
+
+        expect($membership->left_at)->toBeNull();
     }
 }
 
@@ -229,20 +240,21 @@ function expectPreviousRelationshipsEnded(Wrestler $wrestler): void
 {
     $previousManagers = $wrestler->previousManagers()->get();
     foreach ($previousManagers as $manager) {
-        expect(relatedPivotAttribute($manager, 'fired_at'))->not->toBeNull();
+        $management = WrestlerManager::query()
+            ->whereBelongsTo($wrestler)
+            ->whereBelongsTo($manager)
+            ->firstOrFail();
+
+        expect($management->fired_at)->not->toBeNull();
     }
 
     $previousTagTeams = $wrestler->previousTagTeams()->get();
     foreach ($previousTagTeams as $tagTeam) {
-        expect(relatedPivotAttribute($tagTeam, 'left_at'))->not->toBeNull();
+        $membership = TagTeamWrestler::query()
+            ->whereBelongsTo($wrestler)
+            ->whereBelongsTo($tagTeam, 'tagTeam')
+            ->firstOrFail();
+
+        expect($membership->left_at)->not->toBeNull();
     }
-}
-
-function relatedPivotAttribute(Model $model, string $attribute): mixed
-{
-    $pivot = $model->getRelation('pivot');
-
-    expect($pivot)->toBeInstanceOf(Pivot::class);
-
-    return $pivot instanceof Pivot ? $pivot->getAttribute($attribute) : null;
 }

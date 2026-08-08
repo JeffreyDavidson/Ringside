@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\TagTeams\CreateAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
 
 test('it creates a new tag team', function () {
@@ -19,9 +20,8 @@ test('it creates a new tag team', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = CreateAction::run($data);
+    $tagTeam = CreateAction::make()->handle($data);
 
-    expect($tagTeam)->not()->toBeNull();
     expect($tagTeam->name)->toBe('The Test Team');
     expect($tagTeam->signature_move)->toBe('Double Suplex');
 
@@ -44,9 +44,8 @@ test('it creates tag team with minimal data', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = CreateAction::run($data);
+    $tagTeam = CreateAction::make()->handle($data);
 
-    expect($tagTeam)->not()->toBeNull();
     expect($tagTeam->name)->toBe('Minimal Team');
     expect($tagTeam->signature_move)->toBeNull();
 
@@ -68,7 +67,7 @@ test('it creates partnerships for both wrestlers', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = CreateAction::run($data);
+    $tagTeam = CreateAction::make()->handle($data);
 
     // Verify partnerships were created
     $this->assertDatabaseHas('tag_teams_wrestlers', [
@@ -98,7 +97,7 @@ test('it handles database transactions correctly', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = CreateAction::run($data);
+    $tagTeam = CreateAction::make()->handle($data);
 
     expect($tagTeam->exists)->toBeTrue();
     expect($tagTeam->wrestlers()->count())->toBe(2);
@@ -120,7 +119,7 @@ test('it prevents creating tag team with same wrestler twice', function () {
         wrestlerB: $wrestler,
     );
 
-    expect(fn () => CreateAction::run($data))
+    expect(fn () => CreateAction::make()->handle($data))
         ->toThrow(Exception::class);
 });
 
@@ -133,7 +132,7 @@ test('it prevents creating tag team with missing wrestlers', function () {
         wrestlerB: null,
     );
 
-    expect(fn () => CreateAction::run($data))
+    expect(fn () => CreateAction::make()->handle($data))
         ->toThrow(Exception::class);
 });
 
@@ -149,7 +148,7 @@ test('it validates required name', function () {
         wrestlerB: $wrestlerB,
     );
 
-    expect(fn () => CreateAction::run($data))
+    expect(fn () => CreateAction::make()->handle($data))
         ->toThrow(Exception::class);
 });
 
@@ -165,7 +164,7 @@ test('it creates tag team with all optional fields', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = CreateAction::run($data);
+    $tagTeam = CreateAction::make()->handle($data);
 
     expect($tagTeam->name)->toBe('Full Data Team');
     expect($tagTeam->signature_move)->toBe('Ultimate Finisher');
@@ -186,7 +185,7 @@ test('it handles unique name validation', function () {
         wrestlerB: $wrestlerB,
     );
 
-    expect(fn () => CreateAction::run($data))
+    expect(fn () => CreateAction::make()->handle($data))
         ->toThrow(Exception::class);
 });
 
@@ -202,12 +201,17 @@ test('it creates partnerships with correct timestamps', function () {
         wrestlerB: $wrestlerB,
     );
 
-    $tagTeam = CreateAction::run($data);
+    $tagTeam = CreateAction::make()->handle($data);
 
     // Check partnerships have current timestamp
     $partnerships = $tagTeam->wrestlers()->get();
     foreach ($partnerships as $wrestler) {
-        expect($wrestler->pivot->joined_at)->not()->toBeNull();
-        expect($wrestler->pivot->left_at)->toBeNull();
+        $membership = TagTeamWrestler::query()
+            ->whereBelongsTo($tagTeam, 'tagTeam')
+            ->whereBelongsTo($wrestler)
+            ->firstOrFail();
+
+        expect($membership->joined_at)->not->toBeNull();
+        expect($membership->left_at)->toBeNull();
     }
 });

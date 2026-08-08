@@ -118,7 +118,11 @@ describe('TagTeamWrestler Pivot Model', function () {
             // Verify current tag team is correct
             $currentTagTeam = requiredModel($this->wrestler->currentTagTeam);
             expect($currentTagTeam->id)->toBe($this->secondTagTeam->id);
-            expect(relatedPivotAttribute($currentTagTeam, 'left_at'))->toBeNull();
+            $currentMembership = TagTeamWrestler::query()
+                ->whereBelongsTo($currentTagTeam, 'tagTeam')
+                ->whereBelongsTo($this->wrestler)
+                ->firstOrFail();
+            expect($currentMembership->left_at)->toBeNull();
 
             // Verify previous tag team is correct
             $previousTagTeam = $this->wrestler->previousTagTeams()->firstOrFail();
@@ -185,7 +189,11 @@ describe('TagTeamWrestler Pivot Model', function () {
             $currentTagTeam = requiredModel($this->wrestler->currentTagTeam);
 
             expect($currentTagTeam->id)->toBe($this->secondTagTeam->id);
-            expect(relatedPivotAttribute($currentTagTeam, 'left_at'))->toBeNull();
+            $membership = TagTeamWrestler::query()
+                ->whereBelongsTo($currentTagTeam, 'tagTeam')
+                ->whereBelongsTo($this->wrestler)
+                ->firstOrFail();
+            expect($membership->left_at)->toBeNull();
         });
 
         test('previous tag teams query returns only completed relationships', function () {
@@ -193,7 +201,11 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             expect($previousTagTeams)->toHaveCount(1);
             expect($previousTagTeams->firstOrFail()->id)->toBe($this->tagTeam->id);
-            expect(relatedPivotAttribute($previousTagTeams->firstOrFail(), 'left_at'))->not()->toBeNull();
+            $membership = TagTeamWrestler::query()
+                ->whereBelongsTo($this->tagTeam, 'tagTeam')
+                ->whereBelongsTo($this->wrestler)
+                ->firstOrFail();
+            expect($membership->left_at)->not->toBeNull();
         });
 
         test('all tag teams query returns complete relationship history', function () {
@@ -396,15 +408,20 @@ describe('TagTeamWrestler Pivot Model', function () {
 
             // Calculate duration of completed period
             $completedPeriod = $this->wrestler->previousTagTeams()->firstOrFail();
-            $joinedAt = Carbon::parse(relatedPivotAttribute($completedPeriod, 'joined_at'));
-            $leftAt = Carbon::parse(relatedPivotAttribute($completedPeriod, 'left_at'));
-            $duration = $joinedAt->diffInDays($leftAt);
+            $completedMembership = TagTeamWrestler::query()
+                ->whereBelongsTo($completedPeriod, 'tagTeam')
+                ->whereBelongsTo($this->wrestler)
+                ->firstOrFail();
+            $duration = $completedMembership->joined_at->diffInDays(requiredDate($completedMembership->left_at));
             expect($duration)->toBeGreaterThan(150); // Approximately 6 months
 
             // Calculate duration of current period
             $currentPeriod = requiredModel($this->wrestler->currentTagTeam);
-            $currentJoinedAt = Carbon::parse(relatedPivotAttribute($currentPeriod, 'joined_at'));
-            $currentDuration = $currentJoinedAt->diffInDays(Carbon::now());
+            $currentMembership = TagTeamWrestler::query()
+                ->whereBelongsTo($currentPeriod, 'tagTeam')
+                ->whereBelongsTo($this->wrestler)
+                ->firstOrFail();
+            $currentDuration = $currentMembership->joined_at->diffInDays(Carbon::now());
             expect($currentDuration)->toBeGreaterThan(80); // Approximately 3 months
         });
 

@@ -6,6 +6,7 @@ use App\Actions\Managers\ReleaseAction;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Models\Wrestlers\WrestlerManager;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -246,11 +247,12 @@ test('it preserves management history during release', function () {
     expect($manager->currentWrestlers)->toHaveCount(0); // Current ended
 
     // Verify the current relationship was ended with release date
-    $currentRelationship = $manager->wrestlers()
-        ->wherePivot('hired_at', now()->subDays(10)->toDateTimeString())
+    $currentRelationship = WrestlerManager::query()
+        ->whereBelongsTo($manager)
+        ->where('hired_at', now()->subDays(10))
         ->firstOrFail();
 
-    expect(relatedPivotAttribute($currentRelationship, 'fired_at'))->toBe(now()->toDateTimeString());
+    expect(requiredDate($currentRelationship->fired_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 });
 
 test('it handles manager with no management relationships', function () {

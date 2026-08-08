@@ -122,8 +122,12 @@ describe('StableTagTeam Pivot Model', function () {
             // Verify current stable is correct
             $currentStable = requiredModel($this->tagTeam->currentStable);
             expect($currentStable->id)->toBe($this->secondStable->id);
-            expect(Carbon::parse(relatedPivotAttribute($currentStable, 'joined_at'))->format('Y-m-d H:i:s'))->toBe($secondPeriodStart->format('Y-m-d H:i:s'));
-            expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
+            $currentMembership = StableTagTeam::query()
+                ->whereBelongsTo($currentStable)
+                ->whereBelongsTo($this->tagTeam, 'tagTeam')
+                ->firstOrFail();
+            expect($currentMembership->joined_at->format('Y-m-d H:i:s'))->toBe($secondPeriodStart->format('Y-m-d H:i:s'));
+            expect($currentMembership->left_at)->toBeNull();
 
             // Verify previous stable is correct
             $previousStable = $this->tagTeam->previousStables()->firstOrFail();
@@ -243,7 +247,11 @@ describe('StableTagTeam Pivot Model', function () {
             $currentStable = requiredModel($this->tagTeam->currentStable);
 
             expect($currentStable->id)->toBe($this->secondStable->id);
-            expect(relatedPivotAttribute($currentStable, 'left_at'))->toBeNull();
+            $membership = StableTagTeam::query()
+                ->whereBelongsTo($currentStable)
+                ->whereBelongsTo($this->tagTeam, 'tagTeam')
+                ->firstOrFail();
+            expect($membership->left_at)->toBeNull();
         });
 
         test('previous stables query returns only completed relationships', function () {
@@ -251,7 +259,11 @@ describe('StableTagTeam Pivot Model', function () {
 
             expect($previousStables)->toHaveCount(1);
             expect($previousStables->firstOrFail()->id)->toBe($this->stable->id);
-            expect(relatedPivotAttribute($previousStables->firstOrFail(), 'left_at'))->not()->toBeNull();
+            $membership = StableTagTeam::query()
+                ->whereBelongsTo($this->stable)
+                ->whereBelongsTo($this->tagTeam, 'tagTeam')
+                ->firstOrFail();
+            expect($membership->left_at)->not->toBeNull();
         });
 
         test('all stables query returns complete membership history', function () {
