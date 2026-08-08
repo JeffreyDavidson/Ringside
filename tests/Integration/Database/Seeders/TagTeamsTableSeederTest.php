@@ -61,7 +61,7 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect(mb_strlen($tagTeam->name))->toBeGreaterThan(5);
+                expect(str_word_count($tagTeam->name))->toBeGreaterThanOrEqual(2);
                 expect($tagTeam->name)->not->toContain('Test');
             }
         });

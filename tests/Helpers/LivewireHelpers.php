@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Livewire\Component;
 use Livewire\Features\SupportTesting\Testable;
+use Livewire\LivewireManager;
 
 /**
  * Preserve the concrete Livewire component type for static analysis.
@@ -16,5 +17,5 @@ use Livewire\Features\SupportTesting\Testable;
  */
 function testLivewire(string $component, array $params = []): Testable
 {
-    return Pest\Livewire\livewire($component, $params);
+    return resolve(LivewireManager::class)->test(new $component(), $params);
 }

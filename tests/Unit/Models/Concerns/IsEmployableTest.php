@@ -15,9 +15,11 @@ namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\IsEmployable;
 use App\Models\Contracts\Employable;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Mockery;
 use Tests\Unit\Models\Concerns\Support\FakeEmployableModel;
 use Tests\Unit\Models\Concerns\Support\FakeEmploymentModel;
@@ -227,10 +229,13 @@ describe('IsEmployable Trait Unit Tests', function () {
 
                 public function futureEmployment(): HasOne
                 {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(true);
+                    $query = Mockery::mock(QueryBuilder::class);
+                    $query->shouldIgnoreMissing();
+                    $query->expects('exists')->andReturn(true);
+                    $builder = new EloquentBuilder($query);
+                    $builder->setModel(new FakeEmploymentModel());
 
-                    return $relation;
+                    return new HasOne($builder, $this, 'entity_id', 'id');
                 }
             };
             $modelWithout = new class extends Model implements Employable
@@ -244,10 +249,13 @@ describe('IsEmployable Trait Unit Tests', function () {
 
                 public function futureEmployment(): HasOne
                 {
-                    $relation = Mockery::mock(HasOne::class);
-                    $relation->expects('exists')->andReturn(false);
+                    $query = Mockery::mock(QueryBuilder::class);
+                    $query->shouldIgnoreMissing();
+                    $query->expects('exists')->andReturn(false);
+                    $builder = new EloquentBuilder($query);
+                    $builder->setModel(new FakeEmploymentModel());
 
-                    return $relation;
+                    return new HasOne($builder, $this, 'entity_id', 'id');
                 }
             };
             expect($modelWith->hasFutureEmployment())->toBeTrue();
