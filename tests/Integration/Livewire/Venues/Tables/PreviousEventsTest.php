@@ -310,7 +310,7 @@ describe('PreviousEventsTable Integration Tests', function () {
             // Create many events for the venue
             Event::factory()->count(50)->create([
                 'venue_id' => $this->venue->id,
-                'date' => now()->subDays(rand(1, 365)),
+                'date' => now()->subDays(random_int(1, 365)),
             ]);
 
             $component = Livewire::actingAs($this->admin)
