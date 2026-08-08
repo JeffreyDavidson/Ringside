@@ -1,7 +1,7 @@
 <div>
     {{-- Before wrapper (configurable area for page header / add buttons) --}}
     @if ($beforeWrapperView)
-        @include($beforeWrapperView)
+        <x-dynamic-component :component="$beforeWrapperView" />
     @endif
 
     {{-- Card wrapper --}}

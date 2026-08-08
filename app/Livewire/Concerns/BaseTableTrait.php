@@ -34,7 +34,7 @@ trait BaseTableTrait
             ->setFiltersStatus(true);
 
         $this->setConfigurableAreas([
-            'before-wrapper' => 'components.'.$this->routeBasePath.'.index.table-pre',
+            'before-wrapper' => $this->routeBasePath.'.index.table-pre',
         ]);
 
         $this->setSearchAttributes();
