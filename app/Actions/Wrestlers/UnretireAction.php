@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\WrestlerUnretirementCascadeStrategy;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -14,7 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
-    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+    public function __construct(
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly EmployAction $employ,
+    ) {}
 
     /**
      * Unretire a wrestler and return them to active competition.
@@ -27,9 +29,6 @@ class UnretireAction
      * - Makes the wrestler available for new career opportunities
      * - Preserves all historical retirement records
      *
-     * ARCHITECTURAL PATTERN:
-     * Uses a selected WrestlerUnretirementCascadeStrategy for employment follow-up.
-     *
      * @param  Wrestler  $wrestler  The wrestler to unretire
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)
      * @param  bool  $employImmediately  Whether to employ the wrestler immediately (default: true)
@@ -41,13 +40,12 @@ class UnretireAction
 
         $unretirementDate = DateHelper::resolveDate($unretirementDate);
 
-        $cascade = $employImmediately
-            ? WrestlerUnretirementCascadeStrategy::withEmployment()
-            : WrestlerUnretirementCascadeStrategy::withoutEmployment();
-
-        DB::transaction(function () use ($wrestler, $unretirementDate, $cascade): void {
+        DB::transaction(function () use ($wrestler, $unretirementDate, $employImmediately): void {
             $this->retirementPeriods->end($wrestler, $unretirementDate);
-            $cascade($wrestler, $unretirementDate, 'unretire');
+
+            if ($employImmediately) {
+                $this->employ->handle($wrestler, $unretirementDate);
+            }
         });
     }
 }
