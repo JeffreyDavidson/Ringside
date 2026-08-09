@@ -8,6 +8,7 @@ This directory contains comprehensive project documentation and development tool
 System architecture documentation, patterns, and design decisions including:
 - Core patterns and relationships
 - Domain-driven design guidelines  
+- Lifecycle operation boundaries
 - Livewire component standards
 - Business rules and enum usage
 
