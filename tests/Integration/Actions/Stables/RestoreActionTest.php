@@ -45,3 +45,14 @@ test('it rejects an active stable with the same name', function () {
     expect(fn () => resolve(RestoreAction::class)->handle($stable))
         ->toThrow(CannotBeRestoredException::class);
 });
+
+test('it restores a stable after the conflicting stable is deleted', function () {
+    $stable = Stable::factory()->create();
+    $stable->delete();
+    $conflictingStable = Stable::factory()->create(['name' => $stable->name]);
+    $conflictingStable->delete();
+
+    resolve(RestoreAction::class)->handle($stable);
+
+    expect($stable->refresh()->trashed())->toBeFalse();
+});

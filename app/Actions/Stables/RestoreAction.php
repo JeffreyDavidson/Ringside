@@ -20,9 +20,8 @@ class RestoreAction
      */
     public function handle(Stable $stable): void
     {
-        $stable->ensureCanBeRestored();
-
         DB::transaction(function () use ($stable): void {
+            $stable->ensureCanBeRestored();
             $stable->restore();
         });
     }

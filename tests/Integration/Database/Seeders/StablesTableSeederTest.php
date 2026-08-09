@@ -90,15 +90,8 @@ describe('StablesTableSeeder Integration Tests', function () {
             }
         });
 
-        test('seeder creates consistent data', function () {
-            // Arrange
-            $initialCount = Stable::count();
-
-            // Act
-            Artisan::call('db:seed', ['--class' => 'StablesTableSeeder']);
-
-            // Assert - Should maintain or increase count
-            expect(Stable::count())->toBeGreaterThanOrEqual($initialCount);
+        test('seeder creates the expected number of stables', function () {
+            expect(Stable::count())->toBe(27);
         });
     });
 });
