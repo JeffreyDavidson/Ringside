@@ -13,8 +13,8 @@ use InvalidArgumentException;
 /**
  * Unified status transition pipeline for wrestling promotion entities.
  *
- * This pipeline provides a consistent approach to the remaining status changes (release,
- * retirement, deletion, and unretirement) while allowing for entity-specific validation
+ * This pipeline provides a consistent approach to the remaining status changes (release
+ * and deletion) while allowing for entity-specific validation
  * and cascading behaviors.
  *
  * DESIGN PATTERN:
@@ -28,7 +28,6 @@ use InvalidArgumentException;
  *
  * SUPPORTED TRANSITIONS:
  * - Release (from employed to released)
- * - Retirement (from active to retired)
  */
 class StatusTransitionPipeline
 {
@@ -65,14 +64,6 @@ class StatusTransitionPipeline
     }
 
     /**
-     * Create a retirement transition pipeline.
-     */
-    public static function retire(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'retire', $date);
-    }
-
-    /**
      * Create a deletion transition pipeline.
      *
      * This handles status cleanup before entity deletion, ending any active
@@ -81,17 +72,6 @@ class StatusTransitionPipeline
     public static function delete(Model $entity, ?Carbon $date = null): self
     {
         return new self($entity, 'delete', $date);
-    }
-
-    /**
-     * Create an unretire transition pipeline.
-     *
-     * This handles coming out of retirement by ending the current retirement
-     * record and updating status to unemployed.
-     */
-    public static function unretire(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'unretire', $date);
     }
 
     /**
@@ -174,9 +154,7 @@ class StatusTransitionPipeline
     {
         return match ($this->transition) {
             'release' => 'ensureCanBeReleased',
-            'retire' => 'ensureCanBeRetired',
             'delete' => 'ensureCanBeDeleted',
-            'unretire' => 'ensureCanBeUnretired',
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
     }
@@ -189,9 +167,7 @@ class StatusTransitionPipeline
         // Execute the main transition using direct Eloquent operations
         match ($this->transition) {
             'release' => $this->createRelease(),
-            'retire' => $this->createRetirement(),
             'delete' => $this->createDeletion(),
-            'unretire' => $this->endRetirement(),
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
     }
@@ -220,40 +196,6 @@ class StatusTransitionPipeline
                 'ended_at' => $this->effectiveDate,
             ]);
         }
-    }
-
-    /**
-     * Create retirement record using direct Eloquent operations.
-     */
-    protected function createRetirement(): void
-    {
-        // End any active employment so the entity is no longer "employed" once retired.
-        if (method_exists($this->entity, 'isEmployed') && $this->entity->isEmployed()) {
-            $employmentTable = $this->getTableName('employments');
-            $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
-                'ended_at' => $this->effectiveDate,
-            ]);
-        }
-
-        if (method_exists($this->entity, 'isSuspended') && $this->entity->isSuspended()) {
-            $suspensionTable = $this->getTableName('suspensions');
-            $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
-                'ended_at' => $this->effectiveDate,
-            ]);
-        }
-
-        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
-            $injuryTable = $this->getTableName('injuries');
-            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
-                'ended_at' => $this->effectiveDate,
-            ]);
-        }
-
-        $table = $this->getTableName('retirements');
-        $this->entity->{$table}()->create([
-            'started_at' => $this->effectiveDate,
-            'ended_at' => null,
-        ]);
     }
 
     /**
@@ -295,7 +237,7 @@ class StatusTransitionPipeline
     }
 
     /**
-     * End retirement using direct Eloquent operations.
+     * End retirement as part of the multi-dimension deletion transition.
      */
     protected function endRetirement(): void
     {

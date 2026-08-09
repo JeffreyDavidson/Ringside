@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Exceptions\Titles\CannotBeRetiredException;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
+    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+
     /**
      * Retire a title and permanently end its championship lineage.
      *
@@ -47,8 +50,7 @@ class RetireAction
                 $currentChampionship->update(['lost_at' => $retirementDate]);
             }
 
-            // Create the retirement record to permanently end the title's lineage
-            $title->retirements()->create(['started_at' => $retirementDate]);
+            $this->retirementPeriods->start($title, $retirementDate);
         });
     }
 }

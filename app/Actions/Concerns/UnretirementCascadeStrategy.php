@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Actions\Managers\UnretireAction as UnretireManagerAction;
 use App\Actions\TagTeams\EmployAction as EmployTagTeamAction;
+use App\Actions\Wrestlers\UnretireAction as UnretireWrestlerAction;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -65,9 +67,7 @@ class UnretirementCascadeStrategy
             // Attempt to unretire each retired wrestler
             foreach ($retiredWrestlers as $wrestler) {
                 try {
-                    // Note: This would need to use the wrestler's UnretireAction
-                    // For now, we'll end the retirement directly
-                    $wrestler->retirements()->whereNull('ended_at')->update(['ended_at' => $date]);
+                    resolve(UnretireWrestlerAction::class)->handle($wrestler, $date, false);
                 } catch (Exception $e) {
                     // Gracefully handle failures - continue with other members
                     // Individual wrestler unretirement failure should not stop team unretirement
@@ -106,9 +106,7 @@ class UnretirementCascadeStrategy
             // Attempt to unretire each retired manager
             foreach ($retiredManagers as $manager) {
                 try {
-                    // Note: This would need to use the manager's UnretireAction
-                    // For now, we'll end the retirement directly
-                    $manager->retirements()->whereNull('ended_at')->update(['ended_at' => $date]);
+                    resolve(UnretireManagerAction::class)->handle($manager, $date, false);
                 } catch (Exception $e) {
                     // Gracefully handle failures - continue with other members
                     // Individual manager unretirement failure should not stop team unretirement

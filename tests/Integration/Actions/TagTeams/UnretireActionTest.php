@@ -61,7 +61,7 @@ test('it unretires tag team with specific unretirement date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for unretirement', function () {
+test('it persists the unretirement lifecycle', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
@@ -72,7 +72,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
 
     $tagTeam->refresh();
 
-    // Verify retirement ended and employment created through pipeline
+    // Verify retirement ended and employment was created
     expect($tagTeam->currentRetirement)->toBeNull();
     expect($tagTeam->currentEmployment)->not()->toBeNull();
     expect($tagTeam->isRetired())->toBeFalse();
@@ -262,7 +262,7 @@ test('it handles unretirement with cascade effects', function () {
 
     $tagTeam->refresh();
 
-    // Verify the action used StatusTransitionPipeline with appropriate cascade
+    // Verify the selected cascade preserved the expected lifecycle state
     expect($tagTeam->isRetired())->toBeFalse();
     expect($tagTeam->isEmployed())->toBeTrue();
 

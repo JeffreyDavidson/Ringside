@@ -63,7 +63,7 @@ test('it unretires referee with specific unretirement date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for consistent unretirement', function () {
+test('it persists the unretirement lifecycle', function () {
     $referee = Referee::factory()->retired()->create();
 
     expect($referee->isRetired())->toBeTrue();

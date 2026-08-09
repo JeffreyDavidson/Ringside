@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Exception;
@@ -13,7 +14,10 @@ use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
-    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+    ) {}
 
     /**
      * Employ a referee.
@@ -36,7 +40,7 @@ class EmployAction
 
         DB::transaction(function () use ($referee, $employmentDate): void {
             if ($referee->isRetired()) {
-                $referee->currentRetirement()->update(['ended_at' => $employmentDate]);
+                $this->retirementPeriods->end($referee, $employmentDate);
             }
 
             $this->employmentPeriods->start($referee, $employmentDate);
