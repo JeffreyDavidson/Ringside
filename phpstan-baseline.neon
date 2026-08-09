@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to private method exists\(\) of parent class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\<Illuminate\\Database\\Eloquent\\Model,Illuminate\\Database\\Eloquent\\Model,Illuminate\\Database\\Eloquent\\Relations\\Pivot,string\>\.$#'
-			identifier: method.private
-			count: 1
-			path: app/Actions/Concerns/RestoreCascadeStrategy.php
-
-		-
 			message: '#^Access to an undefined property App\\Enums\\MatchType\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1

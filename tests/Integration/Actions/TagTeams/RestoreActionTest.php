@@ -107,8 +107,10 @@ test('it restores tag team with partnership history', function () {
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeFalse();
 
-    // Partnership history should be preserved
-    expect($tagTeam->wrestlers()->count())->toBe(1);
+    // Partnership history should be preserved without reuniting former members
+    expect($tagTeam->wrestlers)->toHaveCount(1)
+        ->and($tagTeam->previousWrestlers)->toHaveCount(1)
+        ->and($tagTeam->currentWrestlers)->toBeEmpty();
 });
 
 test('it restores tag team to unemployed state', function () {
