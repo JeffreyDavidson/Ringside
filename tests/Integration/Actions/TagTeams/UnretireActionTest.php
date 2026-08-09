@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\UnretireAction;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -35,6 +36,49 @@ test('it unretires a retired tag team', function () {
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
+});
+
+test('it unretires and employs current members by default', function () {
+    $tagTeam = TagTeam::factory()->retired()->create();
+    $manager = Manager::factory()->retired()->create();
+    $wrestlers = $tagTeam->currentWrestlers()->get();
+
+    $tagTeam->managers()->attach($manager, ['hired_at' => now()->subMonth()]);
+
+    resolve(UnretireAction::class)
+        ->handle($tagTeam);
+
+    foreach ($wrestlers as $wrestler) {
+        $wrestler->refresh();
+
+        expect($wrestler->isRetired())->toBeFalse()
+            ->and($wrestler->isEmployed())->toBeTrue();
+    }
+
+    $manager->refresh();
+
+    expect($manager->isRetired())->toBeFalse()
+        ->and($manager->isEmployed())->toBeTrue();
+});
+
+test('it can unretire the tag team without unretiring or employing its members', function () {
+    $tagTeam = TagTeam::factory()->retired()->create();
+    $wrestlers = $tagTeam->currentWrestlers()->get();
+
+    resolve(UnretireAction::class)
+        ->handle($tagTeam, unretireMembers: false, employImmediately: false);
+
+    $tagTeam->refresh();
+
+    expect($tagTeam->isRetired())->toBeFalse()
+        ->and($tagTeam->isEmployed())->toBeFalse();
+
+    foreach ($wrestlers as $wrestler) {
+        $wrestler->refresh();
+
+        expect($wrestler->isRetired())->toBeTrue()
+            ->and($wrestler->isEmployed())->toBeFalse();
+    }
 });
 
 test('it unretires tag team with specific unretirement date', function () {
@@ -279,7 +323,6 @@ test('it handles unretirement with cascade effects', function () {
         'ended_at' => null,
     ]);
 
-    // Note: Cascade effects would be tested in cascade strategy tests
 });
 
 test('it transitions from retired to employed seamlessly', function () {
