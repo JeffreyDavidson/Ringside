@@ -18,10 +18,12 @@ test('it employs unemployed managers for each manageable roster type', function 
     $tagTeam = TagTeam::factory()->create();
     $wrestlerManager = Manager::factory()->create();
     $tagTeamManager = Manager::factory()->create();
+    $futureManager = Manager::factory()->withFutureEmployment()->create();
     $employmentDate = now()->subDay();
 
     $wrestler->managers()->attach($wrestlerManager, ['hired_at' => now()->subMonth()]);
     $tagTeam->managers()->attach($tagTeamManager, ['hired_at' => now()->subMonth()]);
+    $tagTeam->managers()->attach($futureManager, ['hired_at' => now()->subMonth()]);
 
     $action = resolve(EmployCurrentManagersAction::class);
     $action->handle($wrestler, $employmentDate);
@@ -29,9 +31,12 @@ test('it employs unemployed managers for each manageable roster type', function 
 
     $wrestlerManager->refresh();
     $tagTeamManager->refresh();
+    $futureManager->refresh();
 
     expect($wrestlerManager->isEmployed())->toBeTrue()
-        ->and($tagTeamManager->isEmployed())->toBeTrue();
+        ->and($tagTeamManager->isEmployed())->toBeTrue()
+        ->and($futureManager->isEmployed())->toBeFalse()
+        ->and($futureManager->hasFutureEmployment())->toBeTrue();
 
     $this->assertDatabaseHas('managers_employments', [
         'manager_id' => $wrestlerManager->id,

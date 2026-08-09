@@ -17,7 +17,7 @@ class EmployCurrentWrestlersAction
     {
         $wrestlers = $tagTeam->currentWrestlers()
             ->get()
-            ->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed());
+            ->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed() && ! $wrestler->hasFutureEmployment());
 
         foreach ($wrestlers as $wrestler) {
             $this->employWrestler->handle($wrestler, $employmentDate);
