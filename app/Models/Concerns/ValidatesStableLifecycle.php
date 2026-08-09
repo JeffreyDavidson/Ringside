@@ -337,7 +337,6 @@ trait ValidatesStableLifecycle
      * Checks business rules for stable restoration:
      * - Must be soft deleted (trashed)
      * - Name must not conflict with existing active stables
-     * - Should have available former members for viable restoration
      *
      * @return bool True if the stable can be restored, false otherwise
      */
@@ -347,7 +346,6 @@ trait ValidatesStableLifecycle
             return false;
         }
 
-        // Check for name conflicts with existing active stables
         $nameConflict = static::where('name', $this->name)
             ->whereNull('deleted_at')
             ->exists();
@@ -356,26 +354,20 @@ trait ValidatesStableLifecycle
             return false;
         }
 
-        // Basic restoration is possible if no conflicts
         return true;
     }
 
     /**
      * Ensure the stable can be restored from soft deletion, throwing an exception if not.
      *
-     * Validates that the stable is in a valid state for restoration while checking
-     * for business rule violations and member availability for reunion storylines.
-     *
-     * @param  bool  $requireFormerMembers  Whether to require available former members
      * @throws CannotBeRestoredException When restoration is not allowed
      */
-    public function ensureCanBeRestored(bool $requireFormerMembers = true): void
+    public function ensureCanBeRestored(): void
     {
         if (! $this->trashed()) {
             throw CannotBeRestoredException::notDeleted($this);
         }
 
-        // Check for name conflicts with existing active stables
         $conflictingStable = static::where('name', $this->name)
             ->whereNull('deleted_at')
             ->first();
@@ -383,38 +375,6 @@ trait ValidatesStableLifecycle
         if ($conflictingStable) {
             throw CannotBeRestoredException::nameConflict($this, $conflictingStable->name);
         }
-
-        if ($requireFormerMembers) {
-            // Check if former members are available for restoration
-            $availableFormerMembers = $this->getAvailableFormerMembers();
-
-            if ($availableFormerMembers->isEmpty()) {
-                throw CannotBeRestoredException::noAvailableFormerMembers($this);
-            }
-
-            // Check minimum member count for viable restoration
-            $minimumMembers = static::MIN_MEMBERS_COUNT ?? 2;
-            if ($availableFormerMembers->count() < $minimumMembers) {
-                throw CannotBeRestoredException::insufficientFormerMembers(
-                    $this,
-                    $availableFormerMembers->count(),
-                    $minimumMembers
-                );
-            }
-
-            // Check if key former members are available
-            $unavailableKeyMembers = $this->getUnavailableKeyFormerMembers();
-            if ($unavailableKeyMembers->isNotEmpty()) {
-                $memberNames = $unavailableKeyMembers->pluck('name')->join(', ');
-                throw CannotBeRestoredException::keyMembersUnavailable($this, $memberNames);
-            }
-        }
-
-        // Additional business rule validations could be added here:
-        // - Storyline conflicts with current active stables
-        // - Administrative authorization requirements
-        // - Event timing conflicts
-        // - Member commitment conflicts
     }
 
     /**
@@ -665,7 +625,7 @@ trait ValidatesStableLifecycle
             }
 
             // Check minimum member count for viable unretirement
-            $minimumMembers = static::MIN_MEMBERS_COUNT ?? 2;
+            $minimumMembers = static::MIN_MEMBERS_COUNT;
             if ($availableFormerMembers->count() < $minimumMembers) {
                 throw CannotBeUnretiredException::insufficientFormerMembers(
                     $this,

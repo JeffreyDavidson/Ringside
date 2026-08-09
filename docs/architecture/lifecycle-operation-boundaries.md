@@ -88,6 +88,8 @@ Tag-team reinstatement mirrors that boundary through `ReinstateCurrentMembersAct
 
 Stable unretirement changes only the stable's retirement and activity state. It does not infer which former wrestlers or tag teams should be unretired because the application does not record whether an individual retirement was caused by the stable. Those member transitions remain explicit operations.
 
+Stable restoration only restores the soft-deleted record and preserves its historical state. Reunion and activation remain explicit subsequent operations, so restoration does not depend on current former-member availability.
+
 ### Transition policies
 
 A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.
