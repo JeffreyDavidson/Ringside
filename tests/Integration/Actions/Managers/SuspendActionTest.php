@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\SuspendAction;
+use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -122,18 +123,19 @@ test('it maintains employment status during suspension', function () {
     expect($employment->ended_at)->toBeNull();
 });
 
-test('it suspends injured manager', function () {
+test('it prevents suspending an injured manager', function () {
     $manager = Manager::factory()->employed()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
 
-    resolve(SuspendAction::class)->handle($manager);
+    expect(fn () => resolve(SuspendAction::class)->handle($manager))
+        ->toThrow(CannotBeSuspendedException::class);
 
     $manager->refresh();
 
     expect($manager->isInjured())->toBeTrue();
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->isSuspended())->toBeFalse();
     expect($manager->isEmployed())->toBeTrue();
 });
 

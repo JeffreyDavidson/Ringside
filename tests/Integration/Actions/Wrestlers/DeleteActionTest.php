@@ -175,8 +175,8 @@ test('it handles DateHelper date resolution', function () {
     ]);
 });
 
-test('it handles complex wrestler with multiple statuses', function () {
-    // Create wrestler with employment, suspension, and injury
+test('it deletes a legacy wrestler record with active suspension and injury periods', function () {
+    // This invalid state predates mutual-exclusion validation and cannot be created through current actions.
     $wrestler = Wrestler::factory()->employed()->create();
 
     $wrestler->suspensions()->create([

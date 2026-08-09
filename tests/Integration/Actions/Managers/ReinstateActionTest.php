@@ -155,11 +155,11 @@ test('it handles multiple suspensions correctly', function () {
     expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
 });
 
-test('it reinstates injured suspended manager', function () {
-    // This would be an invalid state, but test the business rule
+test('it repairs a legacy manager record with active suspension and injury periods', function () {
+    // This invalid state predates mutual-exclusion validation and cannot be created through current actions.
     $manager = Manager::factory()->employed()->suspended()->create();
 
-    // Manually create injury (this shouldn't be possible in normal flow)
+    // Manually create the conflicting legacy period to verify recovery behavior.
     $manager->injuries()->create(['started_at' => now()->subDay(), 'ended_at' => null]);
     $manager->refresh();
 

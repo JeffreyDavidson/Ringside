@@ -81,6 +81,18 @@ test('it throws exception when referee cannot be injured', function () {
         ->toThrow(CannotBeInjuredException::class);
 });
 
+test('it prevents injuring a suspended referee', function () {
+    $referee = Referee::factory()->suspended()->create();
+
+    expect(fn () => resolve(InjureAction::class)->handle($referee))
+        ->toThrow(CannotBeInjuredException::class);
+
+    $referee->refresh();
+
+    expect($referee->isSuspended())->toBeTrue()
+        ->and($referee->isInjured())->toBeFalse();
+});
+
 test('it maintains transaction boundaries', function () {
     $referee = Referee::factory()->employed()->create();
 

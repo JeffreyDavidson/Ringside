@@ -81,6 +81,18 @@ test('it throws exception when referee cannot be suspended', function () {
         ->toThrow(CannotBeSuspendedException::class);
 });
 
+test('it prevents suspending an injured referee', function () {
+    $referee = Referee::factory()->injured()->create();
+
+    expect(fn () => resolve(SuspendAction::class)->handle($referee))
+        ->toThrow(CannotBeSuspendedException::class);
+
+    $referee->refresh();
+
+    expect($referee->isInjured())->toBeTrue()
+        ->and($referee->isSuspended())->toBeFalse();
+});
+
 test('it maintains referee employment after suspension', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();

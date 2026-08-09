@@ -22,7 +22,7 @@ Roster lifecycle data is not one mutually exclusive state machine. It contains m
 - Injury records describe medical availability.
 - Deletion describes record lifecycle and cleanup.
 
-For example, an employed wrestler may also be injured or suspended. A single universal status enum or state machine must not erase those independent facts.
+For example, an employed wrestler may also be injured or suspended. Active injury and suspension periods are mutually exclusive: a roster member must be healed before suspension and reinstated before injury. A single universal status enum or state machine must not erase the underlying lifecycle histories.
 
 An explicit state machine may still be appropriate for an individual dimension when its transition graph provides clear value. That decision must be made separately for each lifecycle dimension.
 

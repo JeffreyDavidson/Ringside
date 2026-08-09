@@ -6,6 +6,8 @@ namespace App\Models\Concerns;
 
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Models\Contracts\Employable;
+use App\Models\Contracts\Suspendable;
 
 /**
  * Provides injury validation functionality for models.
@@ -38,6 +40,7 @@ trait ValidatesInjury
      * - Must not be released
      * - Must not be retired
      * - Must not have future employment scheduled
+     * - Must not be suspended
      * - Must not already be injured
      *
      * @return bool True if the model can be injured, false otherwise
@@ -56,6 +59,7 @@ trait ValidatesInjury
         return ! $this->isNotInEmployment()
             && ! $this->isRetired()
             && ! $this->hasFutureEmployment()
+            && ! ($this instanceof Suspendable && $this->isSuspended())
             && ! $this->isInjured();
     }
 
@@ -89,6 +93,10 @@ trait ValidatesInjury
 
         if ($this->hasFutureEmployment()) {
             throw CannotBeInjuredException::hasFutureEmployment($this);
+        }
+
+        if ($this instanceof Employable && $this instanceof Suspendable && $this->isSuspended()) {
+            throw CannotBeInjuredException::suspended($this);
         }
 
         if ($this->isInjured()) {
