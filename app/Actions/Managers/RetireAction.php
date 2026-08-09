@@ -28,17 +28,12 @@ class RetireAction
      * Retire a manager and end their management career.
      *
      * This handles the complete manager retirement workflow with cascading effects:
-     * - Uses StatusTransitionPipeline for consistent retirement handling
      * - Validates the manager can be retired (currently employed/active)
      * - Uses ManagerRetirementCascadeStrategy to end management relationships
-     * - Ends suspension, injury, and employment through pipeline
-     * - Creates retirement record to formally end their management career
+     * - Ends suspension, injury, and employment through lifecycle period managers
+     * - Starts a retirement period to formally end their management career
      * - Makes the manager unavailable for future talent management
      * - Preserves all historical records and relationships
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline with cascade strategies for comprehensive
-     * retirement handling, following the same pattern as other entity types.
      *
      * @param  Manager  $manager  The manager to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)

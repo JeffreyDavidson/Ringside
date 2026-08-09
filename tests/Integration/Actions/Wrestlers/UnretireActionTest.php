@@ -86,7 +86,7 @@ test('it unretires wrestler with specific date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for unretirement', function () {
+test('it persists the unretirement lifecycle', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
@@ -97,7 +97,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
 
     $wrestler->refresh();
 
-    // Verify retirement ended through pipeline
+    // Verify retirement period was ended
     expect($wrestler->currentRetirement)->toBeNull();
     expect($wrestler->isRetired())->toBeFalse();
 

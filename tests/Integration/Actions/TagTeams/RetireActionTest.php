@@ -88,7 +88,7 @@ test('it retires suspended tag team', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for retirement', function () {
+test('it persists the retirement lifecycle', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
@@ -99,7 +99,7 @@ test('it uses StatusTransitionPipeline for retirement', function () {
 
     $tagTeam->refresh();
 
-    // Verify employment ended and retirement created through pipeline
+    // Verify employment ended and retirement period was created
     expect($tagTeam->currentEmployment)->toBeNull();
     expect($tagTeam->currentRetirement)->not()->toBeNull();
     expect($tagTeam->isRetired())->toBeTrue();

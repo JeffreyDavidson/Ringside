@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -54,7 +53,6 @@ class RetireAction
                 }
 
                 $this->employmentPeriods->end($referee, $retirementDate);
-                $referee->update(['status' => EmploymentStatus::Retired]);
             }
 
             $this->retirementPeriods->start($referee, $retirementDate);

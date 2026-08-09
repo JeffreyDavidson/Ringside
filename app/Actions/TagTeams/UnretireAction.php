@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Concerns\UnretirementCascadeStrategy;
-use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\TagTeams\TagTeam;
@@ -32,9 +31,8 @@ class UnretireAction
      * - Graceful error handling - individual member failures don't stop team unretirement
      *
      * ARCHITECTURAL PATTERN:
-     * Uses UnretirementCascadeStrategy for consistent relationship management.
-     * Note: This doesn't use StatusTransitionPipeline as unretirement involves ending
-     * retirement rather than starting a new status transition.
+     * Uses RetirementPeriodManager for persistence and UnretirementCascadeStrategy
+     * for relationship management and optional employment.
      *
      * @param  TagTeam  $tagTeam  The tag team to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
@@ -56,9 +54,6 @@ class UnretireAction
 
         DB::transaction(function () use ($tagTeam, $unretiredDate, $unretirePartners, $employImmediately): void {
             $this->retirementPeriods->end($tagTeam, $unretiredDate);
-
-            // Update status to unemployed (no longer retired, but not employed)
-            $tagTeam->update(['status' => EmploymentStatus::Unemployed]);
 
             // Handle member unretirement using cascade strategy
             UnretirementCascadeStrategy::conditionalMembers($unretirePartners)($tagTeam, $unretiredDate, 'unretire');

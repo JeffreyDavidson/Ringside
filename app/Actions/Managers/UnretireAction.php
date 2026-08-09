@@ -23,19 +23,14 @@ class UnretireAction
      * Unretire a retired manager and return them to active talent management.
      *
      * This handles the complete manager unretirement workflow:
-     * - Uses StatusTransitionPipeline for consistent unretirement handling
      * - Validates the manager can be unretired (currently retired)
-     * - Ends the current retirement period with the specified date
-     * - Creates a new employment record starting from the unretirement date
-     * - Restores the manager to available status for wrestler and tag team assignments
+     * - Ends the current retirement period through RetirementPeriodManager
+     * - Optionally starts a new employment period from the unretirement date
      * - Preserves all historical retirement and employment records
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
      *
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
+     * @param  bool  $employImmediately  Whether to employ the manager immediately
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null, bool $employImmediately = true): void

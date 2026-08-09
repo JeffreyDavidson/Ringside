@@ -21,16 +21,14 @@ class UnretireAction
      *
      * This handles the complete wrestler comeback workflow with flexible employment options:
      * - Validates the wrestler can come out of retirement (business rule compliance)
-     * - Uses StatusTransitionPipeline to end the current retirement period
-     * - Updates status to unemployed (no longer retired, but not employed)
+     * - Ends the current retirement period through RetirementPeriodManager
      * - Optionally employs the wrestler immediately or leaves unemployed for manual employment
      * - Restores the wrestler to available status for match bookings
      * - Makes the wrestler available for new career opportunities
      * - Preserves all historical retirement records
      *
      * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status transition handling and
-     * EmployAction for employment when requested.
+     * Uses a selected WrestlerUnretirementCascadeStrategy for employment follow-up.
      *
      * @param  Wrestler  $wrestler  The wrestler to unretire
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)

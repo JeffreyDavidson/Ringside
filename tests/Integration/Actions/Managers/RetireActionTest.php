@@ -150,7 +150,7 @@ test('it ends management relationships with cascade strategy', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline with cascade strategy', function () {
+test('it persists retirement and applies the cascade strategy', function () {
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
 
@@ -164,7 +164,7 @@ test('it uses StatusTransitionPipeline with cascade strategy', function () {
 
     $manager->refresh();
 
-    // Verify retirement created through pipeline
+    // Verify retirement period was created
     expect($manager->currentRetirement)->not()->toBeNull();
     expect($manager->isRetired())->toBeTrue();
 

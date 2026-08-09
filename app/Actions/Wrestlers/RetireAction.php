@@ -27,18 +27,13 @@ class RetireAction
     /**
      * Retire a wrestler and end their career.
      *
-     * This handles the complete wrestler retirement workflow using StatusTransitionPipeline:
-     * - Validates the wrestler can be retired through pipeline validation
-     * - Uses StatusTransitionPipeline to properly handle retirement status transition
-     * - Automatically ends employment, suspension, and injury through pipeline
+     * This handles the complete wrestler retirement workflow:
+     * - Validates the wrestler can be retired
+     * - Ends employment, suspension, and injury through lifecycle period managers
      * - Cascades to end all professional relationships (partnerships, memberships, etc.)
-     * - Creates retirement record and updates status through pipeline
+     * - Starts a retirement period
      * - Makes the wrestler permanently unavailable for competition
-     * - Maintains transaction boundaries and error handling through pipeline
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline with WrestlerRetirementCascadeStrategy for consistency
-     * with other entity retirement operations and comprehensive relationship management.
+     * - Preserves the operation's transaction boundary
      *
      * @param  Wrestler  $wrestler  The wrestler to retire
      * @param  Carbon|null  $retirementDate  The retirement start date (defaults to now)

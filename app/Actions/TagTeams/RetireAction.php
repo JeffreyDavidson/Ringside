@@ -25,19 +25,14 @@ class RetireAction
     /**
      * Retire a tag team and end their partnership.
      *
-     * This handles the complete tag team retirement workflow using StatusTransitionPipeline:
+     * This handles the complete tag team retirement workflow:
      * - Validates the tag team can be retired (business rule compliance)
-     * - Uses StatusTransitionPipeline to properly handle retirement status transition
-     * - Automatically ends employment and suspension through pipeline
+     * - Ends employment and suspension through lifecycle period managers
      * - Optionally cascades retirement to available partners and managers
-     * - Creates retirement record and updates status through pipeline
+     * - Starts a retirement period
      * - Makes the tag team permanently unavailable for competition
      * - Preserves all historical records and championship lineage
      * - Individual members may continue their careers independently
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline with RetirementCascadeStrategy for consistency
-     * with other entity status transitions and flexible cascade behavior.
      *
      * @param  TagTeam  $tagTeam  The tag team to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)

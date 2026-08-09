@@ -60,7 +60,7 @@ test('it unretires manager with specific unretirement date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for unretirement', function () {
+test('it persists the unretirement lifecycle', function () {
     $manager = Manager::factory()->retired()->create();
 
     // Get current retirement to verify it gets ended
@@ -71,7 +71,7 @@ test('it uses StatusTransitionPipeline for unretirement', function () {
 
     $manager->refresh();
 
-    // Verify retirement ended and employment created through pipeline
+    // Verify retirement ended and employment was created
     expect($manager->currentRetirement)->toBeNull();
     expect($manager->currentEmployment)->not()->toBeNull();
     expect($manager->isRetired())->toBeFalse();
