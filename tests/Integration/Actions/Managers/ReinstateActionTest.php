@@ -62,7 +62,7 @@ test('it reinstates manager with specific reinstatement date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for reinstatement', function () {
+test('it persists the reinstatement lifecycle', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
 
     // Get current suspension to verify it gets ended
@@ -72,7 +72,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
 
     $manager->refresh();
 
-    // Verify suspension ended through pipeline
+    // Verify suspension period was ended
     expect($manager->currentSuspension)->toBeNull();
     expect($manager->isSuspended())->toBeFalse();
 

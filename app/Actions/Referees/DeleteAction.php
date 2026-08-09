@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Lifecycle\DeletionPeriodCloser;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -12,24 +12,21 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
+    public function __construct(private readonly DeletionPeriodCloser $periods) {}
+
     /**
      * Delete a referee.
      *
      * This handles the complete deletion workflow with business impact:
      *
      * EMPLOYMENT IMPACT:
-     * - Uses StatusTransitionPipeline.delete() to end all active statuses
-     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Ends active employment, retirement, suspension, and injury periods
      * - Preserves referee employment history for administrative records
      *
      * MATCH OFFICIATING IMPACT:
      * - Removes referee from active match assignments
      * - Preserves historical match officiating records
      * - No impact on past match results or statistics
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other referee actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the referee record
@@ -41,15 +38,10 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        if (method_exists($referee, 'ensureCanBeDeleted')) {
-            $referee->ensureCanBeDeleted();
-        }
-
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($referee, $deletionDate): void {
-            // Handle referee status cleanup using StatusTransitionPipeline
-            StatusTransitionPipeline::delete($referee, $deletionDate)->execute();
+            $this->periods->close($referee, $deletionDate);
 
             // Soft delete the referee record
             $referee->delete();

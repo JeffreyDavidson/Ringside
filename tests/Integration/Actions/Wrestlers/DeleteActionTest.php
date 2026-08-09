@@ -126,7 +126,7 @@ test('it ends injury before deletion', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline with cascade strategies', function () {
+test('it closes lifecycle periods and applies relationship cascades', function () {
     // Create employed wrestler with managers
     $wrestler = Wrestler::factory()->employed()->create();
     $manager = Manager::factory()->create();
@@ -145,7 +145,7 @@ test('it uses StatusTransitionPipeline with cascade strategies', function () {
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeTrue();
 
-    // Verify employment ended through pipeline
+    // Verify employment period was ended
     $this->assertDatabaseHas('wrestlers_employments', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),

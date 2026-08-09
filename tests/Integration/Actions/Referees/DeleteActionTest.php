@@ -40,13 +40,13 @@ test('it soft deletes referee with specific deletion date', function () {
     expect($referee->trashed())->toBeTrue();
 
     // Note: Laravel soft deletes use current timestamp, so we can't directly test custom dates
-    // The custom date would be used for ending relationships via StatusTransitionPipeline
+    // The custom date is used to close active lifecycle periods
     $this->assertSoftDeleted('referees', [
         'id' => $referee->id,
     ]);
 });
 
-test('it ends employment before deletion using StatusTransitionPipeline', function () {
+test('it ends employment before deletion', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 

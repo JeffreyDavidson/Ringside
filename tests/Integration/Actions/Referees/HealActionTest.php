@@ -52,7 +52,7 @@ test('it heals referee with specific recovery date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for consistent healing', function () {
+test('it persists the healing lifecycle', function () {
     $referee = Referee::factory()->employed()->injured()->create();
 
     expect($referee->isInjured())->toBeTrue();
@@ -61,7 +61,7 @@ test('it uses StatusTransitionPipeline for consistent healing', function () {
 
     $referee->refresh();
 
-    // StatusTransitionPipeline should have handled the healing consistently
+    // Verify the injury period was closed consistently
     expect($referee->isInjured())->toBeFalse();
     expect($referee->isEmployed())->toBeTrue(); // Should remain employed after healing
 });

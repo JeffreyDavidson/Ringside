@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Actions\Concerns\Cascades\ManagerDeletionCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Lifecycle\DeletionPeriodCloser;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
+    public function __construct(private readonly DeletionPeriodCloser $periods) {}
+
     /**
      * Delete a manager.
      *
@@ -24,13 +26,8 @@ class DeleteAction
      * - No impact on past management records or statistics
      *
      * EMPLOYMENT IMPACT:
-     * - Uses StatusTransitionPipeline.delete() to end all active statuses
-     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Ends active employment, retirement, suspension, and injury periods
      * - Preserves manager employment history for administrative records
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the manager record
@@ -45,10 +42,8 @@ class DeleteAction
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($manager, $deletionDate): void {
-            // Handle manager status cleanup using StatusTransitionPipeline with cascade strategy
-            StatusTransitionPipeline::delete($manager, $deletionDate)
-                ->withCascade(ManagerDeletionCascadeStrategy::comprehensive())
-                ->execute();
+            $this->periods->close($manager, $deletionDate);
+            ManagerDeletionCascadeStrategy::comprehensive()($manager, $deletionDate);
 
             // Soft delete the manager record
             $manager->delete();

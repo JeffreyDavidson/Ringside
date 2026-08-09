@@ -105,7 +105,7 @@ Shared lifecycle mechanics must not resolve high-level actions or workflows dyna
 
 The existing concrete classes under `app/Actions/{Domain}` are the active application boundary and should be preserved during the initial refactor.
 
-`StatusTransitionPipeline` currently combines:
+The removed `StatusTransitionPipeline` combined:
 
 - dynamic transition selection;
 - dynamic validation discovery;
@@ -113,9 +113,9 @@ The existing concrete classes under `app/Actions/{Domain}` are the active applic
 - transaction ownership;
 - arbitrary cascade callbacks.
 
-Although active and widely used, it behaves as a generic transition executor rather than a composable pipeline. Its responsibilities should be separated by lifecycle dimension without changing behavior.
+It behaved as a generic transition executor rather than a composable pipeline, so its responsibilities were separated by lifecycle dimension without changing behavior.
 
-Injury creation and explicit healing persistence have been extracted to the typed `InjuryPeriodManager`. Suspension creation and explicit reinstatement persistence similarly use the typed `SuspensionPeriodManager`, employment persistence uses the typed `EmploymentPeriodManager`, and retirement persistence uses the typed `RetirementPeriodManager`. Concrete entity actions retain validation and effective-date resolution, then delegate only starting or ending the relevant lifecycle record. Tag-team actions also retain transaction ownership around their member cascades, and cascade collaborators invoke each related entity's complete typed action. The managers accept the relevant lifecycle contract and do not own validation, transaction orchestration, cascade behavior, or dynamic capability discovery. Release actions coordinate the relevant typed period managers directly while retaining their entity-specific cascades. The obsolete injury, healing, suspension, reinstatement, employment, retirement, unretirement, and release transition-string branches have been removed from `StatusTransitionPipeline`. Deletion still closes lifecycle periods inside the existing pipeline until that operation receives its own structural review.
+Injury creation and explicit healing persistence use the typed `InjuryPeriodManager`. Suspension creation and explicit reinstatement persistence similarly use the typed `SuspensionPeriodManager`, employment persistence uses the typed `EmploymentPeriodManager`, and retirement persistence uses the typed `RetirementPeriodManager`. Concrete entity actions retain validation and effective-date resolution, then delegate only starting or ending the relevant lifecycle record. Tag-team actions also retain transaction ownership around their member cascades, and cascade collaborators invoke each related entity's complete typed action. The managers accept the relevant lifecycle contract and do not own validation, transaction orchestration, cascade behavior, or dynamic capability discovery. Release actions coordinate the relevant typed period managers directly while retaining their entity-specific cascades. Deletion actions use `DeletionPeriodCloser` to close active lifecycle dimensions while retaining transaction ownership and entity-specific relationship cleanup. With every transition migrated, `StatusTransitionPipeline` has been removed.
 
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
@@ -136,7 +136,7 @@ The migration must remain behavior-preserving and proceed in small pull requests
 1. Add characterization tests for lifecycle record mutations, effective dates, cascades, and transaction rollback. (Completed.)
 2. Confirm whether the isolated generalized classes have any dynamic runtime consumers. (Completed.)
 3. Remove unused generalized abstractions independently of the active transition path. (Completed.)
-4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time. (In progress: injury/healing, suspension/reinstatement, employment, retirement/unretirement, and release completed.)
+4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time. (Completed.)
 5. Keep concrete entity actions as the public entry points while moving only shared mechanics behind them.
 6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it.
 7. Review the eligibility rules for each lifecycle dimension separately.

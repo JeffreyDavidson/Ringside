@@ -55,7 +55,7 @@ docs: update conventional commits guidelines
 
 refactor(managers): remove relationship-specific actions for consistency
 
-test(tag-teams): add comprehensive StatusTransitionPipeline testing
+test(tag-teams): add comprehensive lifecycle transition coverage
 
 style: fix code formatting issues in Actions components
 

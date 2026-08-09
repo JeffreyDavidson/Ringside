@@ -25,8 +25,6 @@ class RestoreAction
      *
      * ARCHITECTURAL PATTERN:
      * Uses RestoreCascadeStrategy for consistent relationship management during restoration.
-     * Note: This doesn't use StatusTransitionPipeline as restoration is not a status transition
-     * but a record recovery operation.
      *
      * @param  TagTeam  $tagTeam  The soft-deleted tag team to restore
      * @param  bool  $forceReunite  Whether to force wrestlers out of current teams (default: false)

@@ -44,7 +44,7 @@ test('it heals manager with specific recovery date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for healing', function () {
+test('it persists the healing lifecycle', function () {
     $manager = Manager::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
@@ -54,7 +54,7 @@ test('it uses StatusTransitionPipeline for healing', function () {
 
     $manager->refresh();
 
-    // Verify injury ended through pipeline
+    // Verify injury period was ended
     expect($manager->currentInjury)->toBeNull();
     expect($manager->isInjured())->toBeFalse();
 

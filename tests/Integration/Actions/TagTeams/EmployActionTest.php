@@ -56,7 +56,7 @@ test('it prevents employing retired tag team directly', function () {
         ->toThrow(Exception::class);
 });
 
-test('it uses StatusTransitionPipeline for employment', function () {
+test('it persists the employment lifecycle', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
 
     expect($tagTeam->currentEmployment)->toBeNull();
@@ -65,7 +65,7 @@ test('it uses StatusTransitionPipeline for employment', function () {
 
     $tagTeam->refresh();
 
-    // Verify employment created through pipeline
+    // Verify employment period was created
     expect($tagTeam->currentEmployment)->not()->toBeNull();
     expect($tagTeam->isEmployed())->toBeTrue();
 

@@ -33,8 +33,8 @@ use Illuminate\Support\Carbon;
  * Strategy pattern - each method returns a callable strategy that can be used
  * for post-unretirement relationship management.
  *
- * Note: Unretirement is not a typical StatusTransitionPipeline operation as it
- * involves ending retirement rather than starting a new status.
+ * Unretirement ends an active retirement period before applying its selected
+ * relationship and employment follow-up behavior.
  */
 class UnretirementCascadeStrategy
 {

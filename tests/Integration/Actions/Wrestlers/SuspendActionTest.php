@@ -62,7 +62,7 @@ test('it suspends a wrestler without suspension notes', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for suspension', function () {
+test('it persists the suspension lifecycle', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentSuspension)->toBeNull();
@@ -71,7 +71,7 @@ test('it uses StatusTransitionPipeline for suspension', function () {
 
     $wrestler->refresh();
 
-    // Verify suspension created through pipeline
+    // Verify suspension period was created
     expect($wrestler->currentSuspension)->not()->toBeNull();
     expect($wrestler->isSuspended())->toBeTrue();
 

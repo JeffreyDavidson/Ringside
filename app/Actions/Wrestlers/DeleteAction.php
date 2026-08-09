@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Actions\Concerns\WrestlerDeletionCascadeStrategy;
+use App\Lifecycle\DeletionPeriodCloser;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Exception;
@@ -14,14 +14,15 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
+    public function __construct(private readonly DeletionPeriodCloser $periods) {}
+
     /**
      * Delete a wrestler.
      *
      * This handles the complete deletion workflow with business impact:
      *
      * EMPLOYMENT IMPACT:
-     * - Uses StatusTransitionPipeline.delete() to end all active statuses
-     * - Automatically handles employment, retirement, suspension, and injury ending
+     * - Ends active employment, retirement, suspension, and injury periods
      * - Preserves wrestler employment history for administrative records
      *
      * RELATIONSHIP IMPACT:
@@ -30,11 +31,6 @@ class DeleteAction
      * - Ends stable memberships (stables continue with remaining members)
      * - Terminates management contracts (managers may manage other talent)
      * - Vacates any held championships (titles become available)
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling and cascade
-     * strategies for relationship cleanup, following the same pattern as other
-     * wrestler actions.
      *
      * OTHER CLEANUP:
      * - Soft deletes the wrestler record
@@ -46,17 +42,11 @@ class DeleteAction
             throw new Exception("Wrestler '{$wrestler->name}' is already deleted.");
         }
 
-        if (method_exists($wrestler, 'ensureCanBeDeleted')) {
-            $wrestler->ensureCanBeDeleted();
-        }
-
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($wrestler, $deletionDate): void {
-            // Handle wrestler status and relationship cleanup using StatusTransitionPipeline
-            StatusTransitionPipeline::delete($wrestler, $deletionDate)
-                ->withCascade(WrestlerDeletionCascadeStrategy::endAllRelationships())
-                ->execute();
+            $this->periods->close($wrestler, $deletionDate);
+            WrestlerDeletionCascadeStrategy::endAllRelationships()($wrestler, $deletionDate, 'delete');
 
             // Soft delete the wrestler record
             $wrestler->delete();
