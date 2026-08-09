@@ -5,21 +5,24 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Concerns\EmploymentCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
+    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+
     /**
-     * Employ a tag team using the StatusTransitionPipeline.
+     * Employ a tag team and its eligible members.
      *
-     * This handles the complete tag team employment workflow using the StatusTransitionPipeline:
+     * This handles the complete tag team employment workflow:
      * - Validates the tag team can be employed (not retired, not already employed)
      * - Ends retirement if currently retired
-     * - Creates an employment record for the tag team
+     * - Creates the employment record through the shared lifecycle component
      * - Employs all current wrestlers through cascading
      * - Employs all current managers through cascading
      * - Makes the tag team available for match bookings and championships
@@ -30,11 +33,18 @@ class EmployAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
+        $tagTeam->ensureCanBeEmployed();
+
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
-        StatusTransitionPipeline::employ($tagTeam, $employmentDate)
-            ->withCascade(EmploymentCascadeStrategy::wrestlers())
-            ->withCascade(EmploymentCascadeStrategy::managers())
-            ->execute();
+        DB::transaction(function () use ($tagTeam, $employmentDate): void {
+            if ($tagTeam->isRetired()) {
+                $tagTeam->currentRetirement()->update(['ended_at' => $employmentDate]);
+            }
+
+            $this->employmentPeriods->start($tagTeam, $employmentDate);
+            EmploymentCascadeStrategy::wrestlers()($tagTeam, $employmentDate, 'employ');
+            EmploymentCascadeStrategy::managers()($tagTeam, $employmentDate, 'employ');
+        });
     }
 }

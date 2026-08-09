@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\EmploymentCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
 use App\Services\TagTeamMembershipService;
@@ -19,7 +17,8 @@ class CreateAction
      */
     public function __construct(
         protected TagTeamValidationService $validationService,
-        protected TagTeamMembershipService $membershipService
+        protected TagTeamMembershipService $membershipService,
+        protected EmployAction $employAction,
     ) {}
 
     /**
@@ -29,7 +28,7 @@ class CreateAction
      * - Validates all business rules and data integrity constraints
      * - Creates the tag team record with validated information
      * - Adds founding partners and managers through membership service
-     * - Handles employment workflows through StatusTransitionPipeline
+     * - Handles employment through the tag-team employment action
      * - Ensures consistent data integrity and business rule compliance
      *
      * @param  TagTeamData  $tagTeamData  The data transfer object containing tag team information
@@ -61,10 +60,7 @@ class CreateAction
 
             // Handle employment through StatusTransitionPipeline if requested
             if ($tagTeamData->employment_date) {
-                StatusTransitionPipeline::employ($tagTeam, $tagTeamData->employment_date)
-                    ->withCascade(EmploymentCascadeStrategy::wrestlers())
-                    ->withCascade(EmploymentCascadeStrategy::managers())
-                    ->execute();
+                $this->employAction->handle($tagTeam, $tagTeamData->employment_date);
             }
 
             return $tagTeam;

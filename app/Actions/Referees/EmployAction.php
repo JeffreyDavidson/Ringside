@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Referees\Referee;
+use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
+    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+
     /**
      * Employ a referee.
      *
-     * This handles the complete referee employment workflow using the StatusTransitionPipeline:
+     * This handles the complete referee employment workflow:
      * - Validates the referee can be employed (not retired, not already employed)
      * - Ends retirement if currently retired
-     * - Creates an employment record with the specified start date
+     * - Creates the employment record through the shared lifecycle component
      * - Makes the referee available for match officiating assignments
      *
      * @param  Referee  $referee  The referee to employ
@@ -26,6 +30,16 @@ class EmployAction
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void
     {
-        StatusTransitionPipeline::employ($referee, $employmentDate)->execute();
+        $referee->ensureCanBeEmployed();
+
+        $employmentDate = DateHelper::resolveDate($employmentDate);
+
+        DB::transaction(function () use ($referee, $employmentDate): void {
+            if ($referee->isRetired()) {
+                $referee->currentRetirement()->update(['ended_at' => $employmentDate]);
+            }
+
+            $this->employmentPeriods->start($referee, $employmentDate);
+        });
     }
 }
