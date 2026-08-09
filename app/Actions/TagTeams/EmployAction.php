@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\EmploymentCascadeStrategy;
+use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\TagTeams\TagTeam;
@@ -18,6 +18,8 @@ class EmployAction
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly EmployCurrentWrestlersAction $employCurrentWrestlers,
+        private readonly EmployCurrentManagersAction $employCurrentManagers,
     ) {}
 
     /**
@@ -47,8 +49,8 @@ class EmployAction
             }
 
             $this->employmentPeriods->start($tagTeam, $employmentDate);
-            EmploymentCascadeStrategy::wrestlers()($tagTeam, $employmentDate, 'employ');
-            EmploymentCascadeStrategy::managers()($tagTeam, $employmentDate, 'employ');
+            $this->employCurrentWrestlers->handle($tagTeam, $employmentDate);
+            $this->employCurrentManagers->handle($tagTeam, $employmentDate);
         });
     }
 }
