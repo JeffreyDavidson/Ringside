@@ -222,5 +222,4 @@ test('it handles reinstatement with cascade effects', function () {
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    // Note: Cascade effects would be tested in cascade strategy tests
 });
