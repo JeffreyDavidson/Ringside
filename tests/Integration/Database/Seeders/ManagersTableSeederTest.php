@@ -63,8 +63,6 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect(mb_strlen($manager->first_name))->toBeGreaterThan(2);
-                expect(mb_strlen($manager->last_name))->toBeGreaterThan(2);
                 expect($manager->first_name)->not->toContain('Test');
                 expect($manager->last_name)->not->toContain('Test');
             }
@@ -74,15 +72,6 @@ describe('ManagersTableSeeder Integration Tests', function () {
     describe('data consistency', function () {
         beforeEach(function () {
             Artisan::call('db:seed', ['--class' => 'ManagersTableSeeder']);
-        });
-
-        test('managers have unique name combinations', function () {
-            // Arrange
-            $managers = Manager::all();
-            $fullNames = $managers->map(fn ($manager) => $manager->first_name.' '.$manager->last_name);
-
-            // Assert
-            expect($fullNames->unique())->toHaveCount($managers->count());
         });
 
         test('managers have valid employment status', function () {

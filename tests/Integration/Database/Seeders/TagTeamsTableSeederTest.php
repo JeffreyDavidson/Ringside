@@ -72,16 +72,12 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'TagTeamsTableSeeder']);
         });
 
-        test('tag teams have mostly unique names with realistic duplicates', function () {
+        test('all tag teams have unique names', function () {
             // Arrange
             $tagTeams = TagTeam::all();
-            $totalCount = $tagTeams->count();
-            $uniqueCount = $tagTeams->pluck('name')->unique()->count();
-            $duplicatePercentage = (($totalCount - $uniqueCount) / $totalCount) * 100;
 
-            // Assert - Allow up to 5% duplicates (realistic for faker-generated data)
-            expect($duplicatePercentage)->toBeLessThan(5);
-            expect($uniqueCount)->toBeGreaterThan($totalCount * 0.95); // At least 95% unique
+            // Assert
+            expect($tagTeams->pluck('name')->unique())->toHaveCount($tagTeams->count());
         });
 
         test('tag teams have valid employment status', function () {
