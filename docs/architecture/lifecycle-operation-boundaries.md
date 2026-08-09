@@ -86,6 +86,8 @@ Tag-team suspension delegates eligible current wrestler and manager transitions 
 
 Tag-team reinstatement mirrors that boundary through `ReinstateCurrentMembersAction`, which invokes complete typed reinstatement actions only for suspended current wrestlers and managers. The coordinating tag-team action retains validation, suspension-period persistence, date handling, and transaction ownership.
 
+Stable unretirement changes only the stable's retirement and activity state. It does not infer which former wrestlers or tag teams should be unretired because the application does not record whether an individual retirement was caused by the stable. Those member transitions remain explicit operations.
+
 ### Transition policies
 
 A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.

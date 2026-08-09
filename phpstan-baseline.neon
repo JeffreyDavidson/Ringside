@@ -19,18 +19,6 @@ parameters:
 			path: app/Actions/Stables/MergeStablesAction.php
 
 		-
-			message: '#^Cannot access property \$id on class\-string\|object\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Actions/Stables/UnretireAction.php
-
-		-
-			message: '#^Cannot access property \$name on class\-string\|object\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: app/Actions/Stables/UnretireAction.php
-
-		-
 			message: '#^Parameter \#2 \$wrestlers of method App\\Services\\TagTeamMembershipService\:\:addFoundingMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Database\\Eloquent\\Collection given\.$#'
 			identifier: argument.type
 			count: 1

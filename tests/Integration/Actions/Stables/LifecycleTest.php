@@ -12,6 +12,8 @@ use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**
@@ -195,6 +197,29 @@ describe('Stable Activation Action Integration', function () {
             $refreshedStable = freshModel($this->retiredStable);
             expect($refreshedStable->activityPeriods()->count())->toBe($originalPeriodCount);
             expect($refreshedStable->isInactive())->toBeTrue();
+        });
+
+        test('unretire action preserves former members retirement state', function () {
+            $retiredWrestler = Wrestler::factory()->retired()->create();
+            $retiredTagTeam = TagTeam::factory()->retired()->create();
+
+            $this->retiredStable->wrestlers()->attach($retiredWrestler, [
+                'joined_at' => now()->subMonth(),
+                'left_at' => now()->subWeek(),
+            ]);
+            $this->retiredStable->tagTeams()->attach($retiredTagTeam, [
+                'joined_at' => now()->subMonth(),
+                'left_at' => now()->subWeek(),
+            ]);
+
+            resolve(UnretireAction::class)->handle(
+                $this->retiredStable,
+                establishImmediately: false,
+                requireFormerMembers: false,
+            );
+
+            expect($retiredWrestler->refresh()->isRetired())->toBeTrue()
+                ->and($retiredTagTeam->refresh()->isRetired())->toBeTrue();
         });
     });
 
