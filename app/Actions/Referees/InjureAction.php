@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 class InjureAction
 {
+    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+
     /**
      * Record a referee injury.
      *
      * This handles the complete referee injury workflow:
      * - Validates the referee can be injured (currently employed, not already injured)
-     * - Creates an injury record with the specified start date
+     * - Creates the injury period through the shared lifecycle component
      * - Removes the referee from active match officiating duties
      * - Maintains employment status while marking as unavailable due to injury
      *
@@ -30,6 +33,6 @@ class InjureAction
 
         $injureDate = DateHelper::resolveDate($injureDate);
 
-        $referee->injuries()->create(['started_at' => $injureDate]);
+        $this->injuryPeriods->start($referee, $injureDate);
     }
 }

@@ -4,27 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 class InjureAction
 {
+    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+
     /**
      * Record a manager injury.
      *
      * This handles the complete manager injury workflow:
-     * - Uses StatusTransitionPipeline for consistent injury handling
      * - Validates the manager can be injured (currently employed, not already injured)
-     * - Creates an injury record with the specified start date
+     * - Creates the injury period through the shared lifecycle component
      * - Temporarily removes the manager from active wrestler/tag team management duties
      * - Maintains employment status while marking as unavailable due to injury
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
      *
      * @param  Manager  $manager  The manager to mark as injured
      * @param  Carbon|null  $injureDate  The injury date (defaults to now)
@@ -36,7 +33,6 @@ class InjureAction
 
         $injureDate = DateHelper::resolveDate($injureDate);
 
-        // Use StatusTransitionPipeline for consistent injury handling
-        StatusTransitionPipeline::injure($manager, $injureDate)->execute();
+        $this->injuryPeriods->start($manager, $injureDate);
     }
 }
