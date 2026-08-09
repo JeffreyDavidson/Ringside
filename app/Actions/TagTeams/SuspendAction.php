@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\SuspensionCascadeStrategy;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
@@ -13,7 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
-    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly SuspendCurrentMembersAction $suspendCurrentMembers,
+    ) {}
 
     /**
      * Suspend a tag team.
@@ -37,7 +39,7 @@ class SuspendAction
 
         DB::transaction(function () use ($tagTeam, $suspensionDate): void {
             $this->suspensionPeriods->start($tagTeam, $suspensionDate);
-            SuspensionCascadeStrategy::allMembers()($tagTeam, $suspensionDate, 'suspend');
+            $this->suspendCurrentMembers->handle($tagTeam, $suspensionDate);
         });
     }
 }
