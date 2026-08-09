@@ -175,47 +175,6 @@ test('it handles DateHelper date resolution', function () {
     ]);
 });
 
-test('it handles complex wrestler with multiple statuses', function () {
-    // Create wrestler with employment, suspension, and injury
-    $wrestler = Wrestler::factory()->employed()->create();
-
-    $wrestler->suspensions()->create([
-        'started_at' => now()->subDays(10),
-        'ended_at' => null,
-        'notes' => 'Test suspension',
-    ]);
-
-    $wrestler->injuries()->create([
-        'started_at' => now()->subDays(5),
-        'ended_at' => null,
-    ]);
-
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
-
-    resolve(DeleteAction::class)->handle($wrestler);
-
-    $wrestler->refresh();
-    expect($wrestler->trashed())->toBeTrue();
-
-    // All active statuses should be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-});
-
 test('it prevents deleting already deleted wrestler', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestler->delete(); // Soft delete

@@ -235,22 +235,24 @@ describe('Wrestler Employment Workflows', function () {
             resolve(EmployAction::class)->handle($wrestler, Carbon::now());
             $employed = freshModel($wrestler);
 
-            // Injury and suspension are orthogonal states.
+            // Injury and suspension are mutually exclusive availability states.
             resolve(InjureAction::class)->handle($employed, Carbon::now());
             $injured = freshModel($wrestler);
-            expect($injured->canBeSuspended())->toBeTrue();
+            expect($injured->canBeSuspended())->toBeFalse();
             expect($injured->isEmployed())->toBeTrue();
             expect($injured->isInjured())->toBeTrue();
 
-            resolve(SuspendAction::class)->handle($injured, Carbon::now());
-            $injuredAndSuspended = freshModel($wrestler);
-            expect($injuredAndSuspended->canBeInjured())->toBeFalse();
-            expect($injuredAndSuspended->isEmployed())->toBeTrue();
-            expect($injuredAndSuspended->isInjured())->toBeTrue();
-            expect($injuredAndSuspended->isSuspended())->toBeTrue();
+            resolve(HealAction::class)->handle($injured, Carbon::now());
+            $healed = freshModel($wrestler);
+            resolve(SuspendAction::class)->handle($healed, Carbon::now());
+            $suspended = freshModel($wrestler);
+            expect($suspended->canBeInjured())->toBeFalse();
+            expect($suspended->isEmployed())->toBeTrue();
+            expect($suspended->isInjured())->toBeFalse();
+            expect($suspended->isSuspended())->toBeTrue();
 
             // Reinstate, then test retired wrestler cannot be employed
-            resolve(ReinstateAction::class)->handle($injuredAndSuspended, Carbon::now());
+            resolve(ReinstateAction::class)->handle($suspended, Carbon::now());
             $reinstated = freshModel($wrestler);
             expect($reinstated->isSuspended())->toBeFalse();
             expect($reinstated->isInjured())->toBeFalse();

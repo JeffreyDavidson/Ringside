@@ -6,6 +6,8 @@ namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Models\Contracts\Employable;
+use App\Models\Contracts\Injurable;
 use App\Models\Contracts\SuspensionValidationStrategy;
 use Illuminate\Database\Eloquent\Model;
 
@@ -39,6 +41,10 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
 
         if (method_exists($entity, 'hasFutureEmployment') && $entity->hasFutureEmployment()) {
             throw CannotBeSuspendedException::hasFutureEmployment($entity);
+        }
+
+        if ($entity instanceof Employable && $entity instanceof Injurable && $entity->isInjured()) {
+            throw CannotBeSuspendedException::injured($entity);
         }
 
         if (method_exists($entity, 'isSuspended') && $entity->isSuspended()) {

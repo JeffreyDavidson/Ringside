@@ -57,6 +57,16 @@ describe('wrestler factory states', function () {
         $wrestler->load('currentSuspension');
         expect($wrestler->currentSuspension)->not->toBeNull();
         expect($wrestler->currentSuspension()->firstOrFail()->ended_at)->toBeNull();
+        expect($wrestler->isEmployed())->toBeTrue();
+        expect($wrestler->employments()->whereNull('ended_at')->count())->toBe(1);
+    });
+
+    test('wrestler factory can create injured wrestlers', function () {
+        $wrestler = Wrestler::factory()->injured()->create();
+
+        expect($wrestler->isInjured())->toBeTrue();
+        expect($wrestler->isEmployed())->toBeTrue();
+        expect($wrestler->employments()->whereNull('ended_at')->count())->toBe(1);
     });
 
     test('wrestler factory can create retired wrestlers', function () {

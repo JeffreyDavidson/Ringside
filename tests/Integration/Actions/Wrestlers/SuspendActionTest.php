@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\SuspendAction;
+use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -161,7 +162,7 @@ test('it prevents suspending unemployed wrestler', function () {
         ->toThrow(Exception::class);
 });
 
-test('it suspends injured employed wrestler', function () {
+test('it prevents suspending an injured wrestler', function () {
     // Create employed wrestler who then gets injured
     $wrestler = Wrestler::factory()->employed()->create();
     $wrestler->injuries()->create([
@@ -172,11 +173,12 @@ test('it suspends injured employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    resolve(SuspendAction::class)->handle($wrestler);
+    expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
+        ->toThrow(CannotBeSuspendedException::class);
 
     $wrestler->refresh();
 
     expect($wrestler->isInjured())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->isSuspended())->toBeFalse();
     expect($wrestler->isEmployed())->toBeTrue();
 });

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\InjureAction;
+use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -122,18 +123,19 @@ test('it maintains employment status during injury', function () {
     expect($employment->ended_at)->toBeNull();
 });
 
-test('it injures suspended manager', function () {
+test('it prevents injuring a suspended manager', function () {
     $manager = Manager::factory()->employed()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isInjured())->toBeFalse();
 
-    resolve(InjureAction::class)->handle($manager);
+    expect(fn () => resolve(InjureAction::class)->handle($manager))
+        ->toThrow(CannotBeInjuredException::class);
 
     $manager->refresh();
 
     expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->isInjured())->toBeFalse();
     expect($manager->isEmployed())->toBeTrue();
 });
 

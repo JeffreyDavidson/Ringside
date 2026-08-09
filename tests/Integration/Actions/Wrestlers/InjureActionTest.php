@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\InjureAction;
+use App\Exceptions\Roster\CannotBeInjuredException;
 use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -140,18 +141,19 @@ test('it prevents injuring unemployed wrestler', function () {
         ->toThrow(Exception::class);
 });
 
-test('it injures suspended wrestler', function () {
+test('it prevents injuring a suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    resolve(InjureAction::class)->handle($wrestler);
+    expect(fn () => resolve(InjureAction::class)->handle($wrestler))
+        ->toThrow(CannotBeInjuredException::class);
 
     $wrestler->refresh();
 
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->isEmployed())->toBeTrue();
 });
 

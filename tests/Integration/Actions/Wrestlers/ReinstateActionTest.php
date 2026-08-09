@@ -103,34 +103,6 @@ test('it handles DateHelper date resolution', function () {
     ]);
 });
 
-test('it reinstates wrestler with both suspension and injury', function () {
-    // Create employed wrestler, then suspend and injure them
-    $wrestler = Wrestler::factory()->employed()->create();
-
-    $wrestler->suspensions()->create([
-        'started_at' => now()->subDays(10),
-        'ended_at' => null,
-        'notes' => 'Suspended for violation',
-    ]);
-
-    $wrestler->injuries()->create([
-        'started_at' => now()->subDays(5),
-        'ended_at' => null,
-    ]);
-
-    expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeTrue(); // Still employed despite suspension/injury
-
-    resolve(ReinstateAction::class)->handle($wrestler);
-
-    $wrestler->refresh();
-
-    expect($wrestler->isSuspended())->toBeFalse();
-    expect($wrestler->isInjured())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeTrue();
-});
-
 test('it handles multiple suspension records correctly', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 

@@ -66,6 +66,22 @@ describe('RefereeFactory Unit Tests', function () {
             // Assert
             expect($referee->status)->toBe(EmploymentStatus::Employed);
         });
+
+        test('suspended state creates exactly one active employment', function () {
+            $referee = Referee::factory()->suspended()->create();
+
+            expect($referee->isSuspended())->toBeTrue();
+            expect($referee->isEmployed())->toBeTrue();
+            expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
+        });
+
+        test('injured state creates exactly one active employment', function () {
+            $referee = Referee::factory()->injured()->create();
+
+            expect($referee->isInjured())->toBeTrue();
+            expect($referee->isEmployed())->toBeTrue();
+            expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
+        });
     });
 
     describe('factory customization', function () {
