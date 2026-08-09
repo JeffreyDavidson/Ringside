@@ -331,7 +331,7 @@ High-value Ringside candidates:
 ### P1 — High-value hardening
 
 1. **INF-56-P1-A: Add service and domain collaboration integration tests**
-   - `StableLifecycleService`, `StableMembershipService`, `StableValidationService`
+   - `StableMembershipService`, `StableValidationService`
    - `TagTeamLifecycleService`, `TagTeamMembershipService`, `TagTeamValidationService`
    - `WrestlerManagerAssignmentService`
    - `ErrorMessageMappingService`
