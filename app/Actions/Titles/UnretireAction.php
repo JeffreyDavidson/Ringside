@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Exceptions\Titles\CannotBeUnretiredException;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
+    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+
     /**
      * Unretire a retired title and make it available for future competition.
      *
@@ -33,10 +36,7 @@ class UnretireAction
         $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($title, $unretiredDate): void {
-            $currentRetirement = $title->currentRetirement()->first();
-            if ($currentRetirement) {
-                $currentRetirement->update(['ended_at' => $unretiredDate]);
-            }
+            $this->retirementPeriods->end($title, $unretiredDate);
         });
     }
 }

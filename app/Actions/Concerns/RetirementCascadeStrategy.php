@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Actions\Managers\RetireAction as RetireManagerAction;
+use App\Actions\Wrestlers\RetireAction as RetireWrestlerAction;
 use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
@@ -57,7 +59,7 @@ class RetirementCascadeStrategy
 
             // Retire each eligible wrestler
             foreach ($eligibleWrestlers as $wrestler) {
-                StatusTransitionPipeline::retire($wrestler, $date)->execute();
+                resolve(RetireWrestlerAction::class)->handle($wrestler, $date);
             }
         };
     }
@@ -90,7 +92,7 @@ class RetirementCascadeStrategy
 
             // Retire each eligible manager
             foreach ($eligibleManagers as $manager) {
-                StatusTransitionPipeline::retire($manager, $date)->execute();
+                resolve(RetireManagerAction::class)->handle($manager, $date);
             }
         };
     }

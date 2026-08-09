@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Exception;
@@ -13,7 +14,10 @@ use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
-    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+    ) {}
 
     /**
      * Employ a manager.
@@ -36,7 +40,7 @@ class EmployAction
 
         DB::transaction(function () use ($manager, $startDate): void {
             if ($manager->isRetired()) {
-                $manager->currentRetirement()->update(['ended_at' => $startDate]);
+                $this->retirementPeriods->end($manager, $startDate);
             }
 
             $this->employmentPeriods->start($manager, $startDate);

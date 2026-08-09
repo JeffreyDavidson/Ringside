@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Actions\Concerns\WrestlerUnretirementCascadeStrategy;
 use App\Exceptions\Roster\CannotBeUnretiredException;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
+    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+
     /**
      * Unretire a wrestler and return them to active competition.
      *
@@ -44,8 +47,9 @@ class UnretireAction
             ? WrestlerUnretirementCascadeStrategy::withEmployment()
             : WrestlerUnretirementCascadeStrategy::withoutEmployment();
 
-        StatusTransitionPipeline::unretire($wrestler, $unretirementDate)
-            ->withCascade($cascade)
-            ->execute();
+        DB::transaction(function () use ($wrestler, $unretirementDate, $cascade): void {
+            $this->retirementPeriods->end($wrestler, $unretirementDate);
+            $cascade($wrestler, $unretirementDate, 'unretire');
+        });
     }
 }

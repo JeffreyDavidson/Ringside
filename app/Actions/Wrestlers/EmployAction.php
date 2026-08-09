@@ -6,6 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Actions\Concerns\EmploymentCascadeStrategy;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Exception;
@@ -14,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
-    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+    ) {}
 
     /**
      * Employ a wrestler and activate their career.
@@ -38,7 +42,7 @@ class EmployAction
 
         DB::transaction(function () use ($wrestler, $employmentDate): void {
             if ($wrestler->isRetired()) {
-                $wrestler->currentRetirement()->update(['ended_at' => $employmentDate]);
+                $this->retirementPeriods->end($wrestler, $employmentDate);
             }
 
             $this->employmentPeriods->start($wrestler, $employmentDate);

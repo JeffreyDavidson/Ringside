@@ -9,6 +9,7 @@ use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,8 @@ class RetireAction
         protected TagTeamsRetireAction $tagTeamsRetireAction,
         protected ManagersRetireAction $managersRetireAction,
         protected EndActivityPeriodAction $endActivityPeriodAction,
-        protected RemoveStableMembersAction $removeStableMembersAction
+        protected RemoveStableMembersAction $removeStableMembersAction,
+        protected RetirementPeriodManager $retirementPeriods,
     ) {}
 
     /**
@@ -85,11 +87,7 @@ class RetireAction
             // Remove all current members using injected Action
             $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
 
-            // Create retirement record directly
-            $stable->retirements()->create([
-                'started_at' => $retirementDate,
-                'ended_at' => null,
-            ]);
+            $this->retirementPeriods->start($stable, $retirementDate);
 
             // Update status to retired
             $stable->update(['status' => StableStatus::Retired]);

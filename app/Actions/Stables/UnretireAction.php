@@ -9,6 +9,7 @@ use App\Actions\TagTeams\UnretireAction as TagTeamsUnretireAction;
 use App\Actions\Wrestlers\UnretireAction as WrestlersUnretireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Stables\Stable;
 use Exception;
 use Illuminate\Support\Carbon;
@@ -25,7 +26,8 @@ class UnretireAction
         protected WrestlersUnretireAction $wrestlersUnretireAction,
         protected TagTeamsUnretireAction $tagTeamsUnretireAction,
         protected ManagersUnretireAction $managersUnretireAction,
-        protected EstablishAction $establishAction
+        protected EstablishAction $establishAction,
+        protected RetirementPeriodManager $retirementPeriods,
     ) {}
 
     /**
@@ -61,14 +63,7 @@ class UnretireAction
         $failureCount = 0;
 
         DB::transaction(function () use ($stable, $unretiredDate, $unretireMembers, $establishImmediately, &$successCount, &$failureCount): void {
-            // End the current retirement record directly
-            $currentRetirement = $stable->retirements()
-                ->whereNull('ended_at')
-                ->first();
-
-            if ($currentRetirement) {
-                $currentRetirement->update(['ended_at' => $unretiredDate]);
-            }
+            $this->retirementPeriods->end($stable, $unretiredDate);
 
             // Attempt to unretire available former members
             if ($unretireMembers) {

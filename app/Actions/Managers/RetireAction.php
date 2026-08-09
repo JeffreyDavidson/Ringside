@@ -5,14 +5,25 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Actions\Concerns\Cascades\ManagerRetirementCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\InjuryPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+    ) {}
+
     /**
      * Retire a manager and end their management career.
      *
@@ -39,9 +50,19 @@ class RetireAction
 
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
-        // Use StatusTransitionPipeline with cascade strategy for comprehensive retirement handling
-        StatusTransitionPipeline::retire($manager, $retirementDate)
-            ->withCascade(ManagerRetirementCascadeStrategy::comprehensive())
-            ->execute();
+        DB::transaction(function () use ($manager, $retirementDate): void {
+            if ($manager->isEmployed()) {
+                $this->employmentPeriods->end($manager, $retirementDate);
+            }
+
+            if ($manager->isSuspended()) {
+                $this->suspensionPeriods->end($manager, $retirementDate);
+            } elseif ($manager->isInjured()) {
+                $this->injuryPeriods->end($manager, $retirementDate);
+            }
+
+            $this->retirementPeriods->start($manager, $retirementDate);
+            ManagerRetirementCascadeStrategy::comprehensive()($manager, $retirementDate);
+        });
     }
 }

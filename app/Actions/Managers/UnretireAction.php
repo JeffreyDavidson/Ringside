@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
-    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+    ) {}
 
     /**
      * Unretire a retired manager and return them to active talent management.
@@ -34,17 +38,18 @@ class UnretireAction
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
      */
-    public function handle(Manager $manager, ?Carbon $unretiredDate = null): void
+    public function handle(Manager $manager, ?Carbon $unretiredDate = null, bool $employImmediately = true): void
     {
         $manager->ensureCanBeUnretired();
 
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
-        // Use StatusTransitionPipeline for consistent unretirement handling
-        StatusTransitionPipeline::unretire($manager, $unretiredDate)->execute();
+        DB::transaction(function () use ($manager, $unretiredDate, $employImmediately): void {
+            $this->retirementPeriods->end($manager, $unretiredDate);
 
-        // Restart employment from the unretirement date so the manager is
-        // available for wrestler/tag team assignments again.
-        $this->employmentPeriods->start($manager, $unretiredDate);
+            if ($employImmediately) {
+                $this->employmentPeriods->start($manager, $unretiredDate);
+            }
+        });
     }
 }

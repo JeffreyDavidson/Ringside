@@ -53,34 +53,3 @@ test('it ends active employment and injury periods when released', function () {
         'ended_at' => $effectiveDate->toDateTimeString(),
     ]);
 });
-
-test('it ends employment and creates a retirement period atomically', function () {
-    $wrestler = Wrestler::factory()->employed()->create();
-    $effectiveDate = now()->subDay();
-
-    StatusTransitionPipeline::retire($wrestler, $effectiveDate)
-        ->execute();
-
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => $effectiveDate->toDateTimeString(),
-    ]);
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => $effectiveDate->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-});
-
-test('it ends an active retirement period when unretired', function () {
-    $wrestler = Wrestler::factory()->retired()->create();
-    $effectiveDate = now()->subDay();
-
-    StatusTransitionPipeline::unretire($wrestler, $effectiveDate)
-        ->execute();
-
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => $effectiveDate->toDateTimeString(),
-    ]);
-});

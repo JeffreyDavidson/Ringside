@@ -6,6 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Concerns\EmploymentCascadeStrategy;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Exception;
@@ -14,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
-    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+    ) {}
 
     /**
      * Employ a tag team and its eligible members.
@@ -39,7 +43,7 @@ class EmployAction
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
             if ($tagTeam->isRetired()) {
-                $tagTeam->currentRetirement()->update(['ended_at' => $employmentDate]);
+                $this->retirementPeriods->end($tagTeam, $employmentDate);
             }
 
             $this->employmentPeriods->start($tagTeam, $employmentDate);

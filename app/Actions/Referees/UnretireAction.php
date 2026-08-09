@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -14,7 +14,10 @@ use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
-    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+    ) {}
 
     /**
      * Unretire a retired referee and return them to active officiating.
@@ -42,8 +45,7 @@ class UnretireAction
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
-            StatusTransitionPipeline::unretire($referee, $unretiredDate)->execute();
-
+            $this->retirementPeriods->end($referee, $unretiredDate);
             $this->employmentPeriods->start($referee, $unretiredDate);
         });
     }

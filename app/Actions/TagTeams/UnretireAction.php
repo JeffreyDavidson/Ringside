@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Concerns\UnretirementCascadeStrategy;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
+use App\Lifecycle\RetirementPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
+    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+
     /**
      * Unretire a retired tag team and return them to active competition.
      *
@@ -52,8 +55,7 @@ class UnretireAction
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($tagTeam, $unretiredDate, $unretirePartners, $employImmediately): void {
-            // End the current retirement record
-            $tagTeam->retirements()->whereNull('ended_at')->update(['ended_at' => $unretiredDate]);
+            $this->retirementPeriods->end($tagTeam, $unretiredDate);
 
             // Update status to unemployed (no longer retired, but not employed)
             $tagTeam->update(['status' => EmploymentStatus::Unemployed]);

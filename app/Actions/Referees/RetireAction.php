@@ -6,6 +6,10 @@ namespace App\Actions\Referees;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\InjuryPeriodManager;
+use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -13,6 +17,13 @@ use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+    ) {}
+
     /**
      * Retire a referee and end their officiating career.
      *
@@ -35,30 +46,18 @@ class RetireAction
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($referee, $retirementDate): void {
-            // Handle referee status - only employed referees can have suspension/injury to end
             if ($referee->isEmployed()) {
-                // End suspension or injury if active (employed referee cannot be both)
                 if ($referee->isSuspended()) {
-                    $currentSuspension = $referee->currentSuspension()->first();
-                    if ($currentSuspension) {
-                        $currentSuspension->update(['ended_at' => $retirementDate]);
-                    }
+                    $this->suspensionPeriods->end($referee, $retirementDate);
                 } elseif ($referee->isInjured()) {
-                    $currentInjury = $referee->currentInjury()->first();
-                    if ($currentInjury) {
-                        $currentInjury->update(['ended_at' => $retirementDate->toDateTimeString()]);
-                    }
+                    $this->injuryPeriods->end($referee, $retirementDate);
                 }
 
-                // End employment
-                $currentEmployment = $referee->currentEmployment()->first();
-                if ($currentEmployment) {
-                    $currentEmployment->update(['ended_at' => $retirementDate]);
-                    $referee->update(['status' => EmploymentStatus::Retired]);
-                }
+                $this->employmentPeriods->end($referee, $retirementDate);
+                $referee->update(['status' => EmploymentStatus::Retired]);
             }
 
-            $referee->retirements()->create(['started_at' => $retirementDate]);
+            $this->retirementPeriods->start($referee, $retirementDate);
         });
     }
 }
