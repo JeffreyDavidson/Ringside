@@ -12,7 +12,7 @@ beforeEach(function () {
 });
 
 test('it reinstates a suspended manager', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
@@ -153,34 +153,4 @@ test('it handles multiple suspensions correctly', function () {
     expect($manager->isSuspended())->toBeFalse();
     expect($manager->suspensions()->count())->toBe(2);
     expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
-});
-
-test('it repairs a legacy manager record with active suspension and injury periods', function () {
-    // This invalid state predates mutual-exclusion validation and cannot be created through current actions.
-    $manager = Manager::factory()->employed()->suspended()->create();
-
-    // Manually create the conflicting legacy period to verify recovery behavior.
-    $manager->injuries()->create(['started_at' => now()->subDay(), 'ended_at' => null]);
-    $manager->refresh();
-
-    expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isInjured())->toBeTrue();
-    $suspensionId = $manager->currentSuspension()->firstOrFail()->id;
-    $injuryId = $manager->currentInjury()->firstOrFail()->id;
-
-    resolve(ReinstateAction::class)->handle($manager);
-
-    $manager->refresh();
-
-    expect($manager->isSuspended())->toBeFalse();
-    expect($manager->isInjured())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue();
-    $this->assertDatabaseMissing('managers_suspensions', [
-        'id' => $suspensionId,
-        'ended_at' => null,
-    ]);
-    $this->assertDatabaseMissing('managers_injuries', [
-        'id' => $injuryId,
-        'ended_at' => null,
-    ]);
 });

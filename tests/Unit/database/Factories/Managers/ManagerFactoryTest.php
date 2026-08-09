@@ -94,6 +94,22 @@ describe('ManagerFactory Unit Tests', function () {
             // Assert
             expect($manager->status)->toBe(EmploymentStatus::FutureEmployment);
         });
+
+        test('suspended state creates exactly one active employment', function () {
+            $manager = Manager::factory()->suspended()->create();
+
+            expect($manager->isSuspended())->toBeTrue();
+            expect($manager->isEmployed())->toBeTrue();
+            expect($manager->employments()->whereNull('ended_at')->count())->toBe(1);
+        });
+
+        test('injured state creates exactly one active employment', function () {
+            $manager = Manager::factory()->injured()->create();
+
+            expect($manager->isInjured())->toBeTrue();
+            expect($manager->isEmployed())->toBeTrue();
+            expect($manager->employments()->whereNull('ended_at')->count())->toBe(1);
+        });
     });
 
     describe('factory customization', function () {

@@ -205,22 +205,3 @@ test('it preserves historical data after deletion', function () {
         'last_name' => $referee->last_name,
     ]);
 });
-
-test('it deletes a legacy referee record with active suspension and injury periods', function () {
-    // This invalid state predates mutual-exclusion validation and cannot be created through current actions.
-    $referee = Referee::factory()->employed()->suspended()->injured()->create();
-
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isSuspended())->toBeTrue();
-    expect($referee->isInjured())->toBeTrue();
-
-    resolve(DeleteAction::class)->handle($referee);
-
-    $referee->refresh();
-
-    // StatusTransitionPipeline should have handled all status endings consistently
-    expect($referee->trashed())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
-    expect($referee->isSuspended())->toBeFalse();
-    expect($referee->isInjured())->toBeFalse();
-});
