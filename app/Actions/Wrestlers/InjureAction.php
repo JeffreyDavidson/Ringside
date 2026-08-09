@@ -4,27 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 class InjureAction
 {
+    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+
     /**
      * Injure a wrestler and make them unavailable for competition.
      *
-     * This handles the complete wrestler injury workflow using StatusTransitionPipeline:
-     * - Validates the wrestler can be injured through pipeline validation
-     * - Uses StatusTransitionPipeline to properly create injury record
-     * - Maintains transaction boundaries and error handling through pipeline
+     * This handles the complete wrestler injury workflow:
+     * - Validates the wrestler can be injured
+     * - Creates the injury period through the shared lifecycle component
      * - Makes the wrestler unavailable for match bookings
      * - May affect tag team bookability if wrestler is in a team
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistency with other entity injury operations
-     * and proper status transition management.
      *
      * @param  Wrestler  $wrestler  The wrestler to injure
      * @param  Carbon|null  $injuryDate  The injury start date (defaults to now)
@@ -36,6 +33,6 @@ class InjureAction
 
         $injuryDate = DateHelper::resolveDate($injuryDate);
 
-        StatusTransitionPipeline::injure($wrestler, $injuryDate)->execute();
+        $this->injuryPeriods->start($wrestler, $injuryDate);
     }
 }

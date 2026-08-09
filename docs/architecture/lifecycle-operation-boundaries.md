@@ -113,6 +113,8 @@ The existing concrete classes under `app/Actions/{Domain}` are the active applic
 
 Although active and widely used, it behaves as a generic transition executor rather than a composable pipeline. Its responsibilities should be separated by lifecycle dimension without changing behavior.
 
+Injury creation and explicit healing persistence have been extracted to the typed `InjuryPeriodManager`. Concrete wrestler, manager, and referee actions retain injury and healing validation and effective-date resolution, then delegate only starting or ending the injury record. The manager accepts the `Injurable` contract and does not own validation, transaction orchestration, cascade behavior, or dynamic capability discovery. The obsolete `injure` and `heal` transition-string branches have been removed from `StatusTransitionPipeline`. Multi-dimension operations such as release, retirement, reinstatement, and deletion still close injury periods inside the existing pipeline until those operations receive their own structural review.
+
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;
@@ -132,7 +134,7 @@ The migration must remain behavior-preserving and proceed in small pull requests
 1. Add characterization tests for lifecycle record mutations, effective dates, cascades, and transaction rollback. (Completed.)
 2. Confirm whether the isolated generalized classes have any dynamic runtime consumers. (Completed.)
 3. Remove unused generalized abstractions independently of the active transition path. (Completed.)
-4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time.
+4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time. (In progress: injury creation and explicit healing completed.)
 5. Keep concrete entity actions as the public entry points while moving only shared mechanics behind them.
 6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it.
 7. Review the eligibility rules for each lifecycle dimension separately.

@@ -4,28 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
+use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 class HealAction
 {
+    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+
     /**
      * Heal a referee from injury and return them to active officiating.
      *
      * This handles the complete injury recovery workflow:
-     * - Uses StatusTransitionPipeline for consistent injury healing
      * - Validates the referee can be healed from injury (currently injured)
-     * - Ends the current injury period with the specified recovery date
+     * - Ends the injury period through the shared lifecycle component
      * - Restores the referee to active officiating status
      * - Makes the referee available for match assignments again
      * - Preserves injury history for medical and administrative records
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other referee actions.
      *
      * @param  Referee  $referee  The injured referee to heal
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
@@ -37,7 +34,6 @@ class HealAction
 
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
-        // Use StatusTransitionPipeline for consistent injury healing
-        StatusTransitionPipeline::heal($referee, $recoveryDate)->execute();
+        $this->injuryPeriods->end($referee, $recoveryDate);
     }
 }

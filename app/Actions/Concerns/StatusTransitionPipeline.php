@@ -13,8 +13,8 @@ use InvalidArgumentException;
 /**
  * Unified status transition pipeline for wrestling promotion entities.
  *
- * This pipeline provides a consistent approach to status changes (employment, suspension,
- * retirement, injury) across all entity types while allowing for entity-specific validation
+ * This pipeline provides a consistent approach to the remaining status changes (employment,
+ * suspension, and retirement) while allowing for entity-specific validation
  * and cascading behaviors.
  *
  * DESIGN PATTERN:
@@ -31,8 +31,7 @@ use InvalidArgumentException;
  * - Suspension (from employed to suspended)
  * - Release (from employed to released)
  * - Retirement (from active to retired)
- * - Injury (from healthy to injured)
- * - Recovery/Reinstatement (from suspended/injured back to active)
+ * - Reinstatement (from suspended or injured back to active)
  */
 class StatusTransitionPipeline
 {
@@ -95,14 +94,6 @@ class StatusTransitionPipeline
     }
 
     /**
-     * Create an injury transition pipeline.
-     */
-    public static function injure(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'injure', $date);
-    }
-
-    /**
      * Create a reinstatement transition pipeline.
      */
     public static function reinstate(Model $entity, ?Carbon $date = null): self
@@ -119,16 +110,6 @@ class StatusTransitionPipeline
     public static function delete(Model $entity, ?Carbon $date = null): self
     {
         return new self($entity, 'delete', $date);
-    }
-
-    /**
-     * Create a heal transition pipeline.
-     *
-     * This handles recovery from injury by ending the current injury record.
-     */
-    public static function heal(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'heal', $date);
     }
 
     /**
@@ -235,10 +216,8 @@ class StatusTransitionPipeline
             'suspend' => 'ensureCanBeSuspended',
             'release' => 'ensureCanBeReleased',
             'retire' => 'ensureCanBeRetired',
-            'injure' => 'ensureCanBeInjured',
             'reinstate' => 'ensureCanBeReinstated',
             'delete' => 'ensureCanBeDeleted',
-            'heal' => 'ensureCanBeHealed',
             'unretire' => 'ensureCanBeUnretired',
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
@@ -258,10 +237,8 @@ class StatusTransitionPipeline
             'suspend' => $this->createSuspension(),
             'release' => $this->createRelease(),
             'retire' => $this->createRetirement(),
-            'injure' => $this->createInjury(),
             'reinstate' => $this->createReinstatement(),
             'delete' => $this->createDeletion(),
-            'heal' => $this->createHeal(),
             'unretire' => $this->endRetirement(),
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
@@ -371,18 +348,6 @@ class StatusTransitionPipeline
     }
 
     /**
-     * Create injury record using direct Eloquent operations.
-     */
-    protected function createInjury(): void
-    {
-        $table = $this->getTableName('injuries');
-        $this->entity->{$table}()->create([
-            'started_at' => $this->effectiveDate,
-            'ended_at' => null,
-        ]);
-    }
-
-    /**
      * Create reinstatement record using direct Eloquent operations.
      */
     protected function createReinstatement(): void
@@ -433,23 +398,6 @@ class StatusTransitionPipeline
         }
 
         // End injury if active
-        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
-            $injuryTable = $this->getTableName('injuries');
-            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
-                'ended_at' => $this->effectiveDate,
-            ]);
-        }
-    }
-
-    /**
-     * Handle heal transition by ending the current injury.
-     *
-     * This ends the active injury record, allowing the entity to return to
-     * active competition or duties.
-     */
-    protected function createHeal(): void
-    {
-        // End current injury if active
         if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
             $injuryTable = $this->getTableName('injuries');
             $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
