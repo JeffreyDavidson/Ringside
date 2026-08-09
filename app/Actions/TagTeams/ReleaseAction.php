@@ -5,29 +5,31 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Concerns\ReleaseCascadeStrategy;
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeReleasedException;
+use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReleaseAction
 {
+    public function __construct(
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+    ) {}
+
     /**
      * Release a tag team from employment and end all current relationships.
      *
-     * This handles the complete tag team release workflow using StatusTransitionPipeline:
+     * This handles the complete tag team release workflow:
      * - Validates the tag team can be released (currently employed)
-     * - Uses StatusTransitionPipeline to properly handle employment termination
-     * - Automatically ends suspension if active through pipeline
+     * - Ends employment and suspension through lifecycle period managers
      * - Cascades to end wrestler partnerships (wrestlers become free agents)
      * - Cascades to end manager relationships (managers remain available)
      * - Maintains all historical records for tracking purposes
      * - Individual members retain employment status and may form new partnerships
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline with ReleaseCascadeStrategy for consistency
-     * with other entity status transitions and proper relationship management.
      *
      * @param  TagTeam  $tagTeam  The tag team to release
      * @param  Carbon|null  $releaseDate  The release date (defaults to now)
@@ -35,10 +37,18 @@ class ReleaseAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
+        $tagTeam->ensureCanBeReleased();
+
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
-        StatusTransitionPipeline::release($tagTeam, $releaseDate)
-            ->withCascade(ReleaseCascadeStrategy::endAllRelationships())
-            ->execute();
+        DB::transaction(function () use ($tagTeam, $releaseDate): void {
+            $this->employmentPeriods->end($tagTeam, $releaseDate);
+
+            if ($tagTeam->isSuspended()) {
+                $this->suspensionPeriods->end($tagTeam, $releaseDate);
+            }
+
+            ReleaseCascadeStrategy::endAllRelationships()($tagTeam, $releaseDate, 'release');
+        });
     }
 }

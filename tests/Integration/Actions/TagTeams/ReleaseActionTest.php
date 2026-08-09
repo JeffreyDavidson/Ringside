@@ -69,7 +69,7 @@ test('it releases suspended tag team', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for release', function () {
+test('it persists the release lifecycle', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
@@ -79,7 +79,7 @@ test('it uses StatusTransitionPipeline for release', function () {
 
     $tagTeam->refresh();
 
-    // Verify employment ended through pipeline
+    // Verify employment period was ended
     expect($tagTeam->currentEmployment)->toBeNull();
     expect($tagTeam->isEmployed())->toBeFalse();
 
@@ -222,7 +222,7 @@ test('it uses ReleaseCascadeStrategy for comprehensive cleanup', function () {
 
     $tagTeam->refresh();
 
-    // Verify the action used StatusTransitionPipeline with cascade
+    // Verify the action applied the relationship cascade
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Employment should be ended

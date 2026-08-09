@@ -135,7 +135,7 @@ test('it ends management relationships with cascade strategy', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline with cascade strategy', function () {
+test('it persists release and applies the cascade strategy', function () {
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
 
@@ -149,7 +149,7 @@ test('it uses StatusTransitionPipeline with cascade strategy', function () {
 
     $manager->refresh();
 
-    // Verify release status through pipeline
+    // Verify the release lifecycle state
     expect($manager->isReleased())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 

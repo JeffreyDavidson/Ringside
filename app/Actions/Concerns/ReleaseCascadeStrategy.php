@@ -24,9 +24,8 @@ use Illuminate\Support\Carbon;
  * - Individual members retain their employment status and can form new partnerships
  * - This is different from retirement where members might also retire
  *
- * DESIGN PATTERN:
- * Strategy pattern - each method returns a callable strategy that can be used
- * with StatusTransitionPipeline.withCascade().
+ * Each method returns a callable strategy that a release action can invoke within
+ * its transaction.
  */
 class ReleaseCascadeStrategy
 {

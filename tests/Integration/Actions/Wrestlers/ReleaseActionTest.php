@@ -44,7 +44,7 @@ test('it releases wrestler with specific release date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for release', function () {
+test('it persists the release lifecycle', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Get current employment to verify it gets ended
@@ -55,7 +55,7 @@ test('it uses StatusTransitionPipeline for release', function () {
 
     $wrestler->refresh();
 
-    // Verify employment ended through pipeline
+    // Verify employment period was ended
     expect($wrestler->currentEmployment)->toBeNull();
     expect($wrestler->isEmployed())->toBeFalse();
 
