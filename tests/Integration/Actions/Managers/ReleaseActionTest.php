@@ -101,7 +101,7 @@ test('it releases injured manager and ends injury', function () {
     ]);
 });
 
-test('it ends management relationships with cascade strategy', function () {
+test('it ends current management relationships', function () {
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
     $tagTeam = TagTeam::factory()->create();
@@ -135,7 +135,7 @@ test('it ends management relationships with cascade strategy', function () {
     ]);
 });
 
-test('it persists release and applies the cascade strategy', function () {
+test('it persists release and ends current relationships', function () {
     $manager = Manager::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
 

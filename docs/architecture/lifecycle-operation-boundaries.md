@@ -66,6 +66,14 @@ Examples include employing a tag team's members, ending a wrestler's professiona
 
 Callables may be replaced incrementally. A cascade must not hide unsupported model operations behind `method_exists()` checks when a domain contract can express the requirement.
 
+### Relationship cleanup
+
+Ending an entity's own current relationships is a typed domain action, not a configurable cascade strategy. The manager, tag-team, and wrestler domains each expose an `EndCurrentRelationshipsAction` whose `handle()` method accepts the concrete entity and effective date.
+
+These actions update only active relationship records and preserve historical rows. They do not validate lifecycle eligibility, resolve dates, own transactions, mutate lifecycle periods, or invoke high-level actions. The coordinating retire, release, or delete action owns those responsibilities.
+
+Relationship cleanup remains distinct from a true related-entity cascade. A cascade may invoke another entity's complete typed lifecycle action when the related entity must undergo its own business transition; relationship cleanup only dates the current relationship records.
+
 ### Transition policies
 
 A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.
@@ -127,7 +135,7 @@ The following generalized classes were confirmed to have no production, configur
 - `UnifiedSuspendAction`;
 - the generalized `MemberCollectionManager` and `StableMembershipOrchestrator` cluster.
 
-The existing cascade strategy classes contain useful shared behavior. Their callable-based APIs are an implementation concern to improve incrementally, not a reason to duplicate their behavior across actions.
+The remaining cascade strategy classes contain useful related-entity behavior. Their callable-based APIs are an implementation concern to improve incrementally, not a reason to duplicate their behavior across actions.
 
 ## Migration Sequence
 
@@ -138,7 +146,7 @@ The migration must remain behavior-preserving and proceed in small pull requests
 3. Remove unused generalized abstractions independently of the active transition path. (Completed.)
 4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time. (Completed.)
 5. Keep concrete entity actions as the public entry points while moving only shared mechanics behind them.
-6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it.
+6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it. (Current manager, tag-team, and wrestler relationship cleanup completed.)
 7. Review the eligibility rules for each lifecycle dimension separately.
 8. Introduce a state machine only for a dimension whose reviewed transition graph benefits from one.
 

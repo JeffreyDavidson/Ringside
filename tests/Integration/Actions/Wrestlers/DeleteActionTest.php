@@ -151,7 +151,7 @@ test('it closes lifecycle periods and applies relationship cascades', function (
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    // Verify manager relationship ended through cascade strategy
+    // Verify the current manager relationship ended
     $this->assertDatabaseHas('wrestlers_managers', [
         'wrestler_id' => $wrestler->id,
         'manager_id' => $manager->id,

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\Cascades\ManagerReleaseCascadeStrategy;
 use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -20,6 +19,7 @@ class ReleaseAction
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
     /**
@@ -27,7 +27,7 @@ class ReleaseAction
      *
      * This handles the complete manager release workflow with cascading effects:
      * - Validates the manager can be released (currently employed)
-     * - Uses ManagerReleaseCascadeStrategy to end management relationships
+     * - Ends current management relationships through a typed domain action
      * - Ends suspension, injury, and employment through lifecycle period managers
      * - Maintains all historical records for tracking purposes
      *
@@ -50,7 +50,7 @@ class ReleaseAction
                 $this->injuryPeriods->end($manager, $releaseDate);
             }
 
-            ManagerReleaseCascadeStrategy::comprehensive()($manager, $releaseDate);
+            $this->endCurrentRelationships->handle($manager, $releaseDate);
         });
     }
 }

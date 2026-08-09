@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
+    public function __construct(private readonly EndCurrentRelationshipsAction $endCurrentRelationships) {}
+
     /**
      * Delete a tag team.
      *
@@ -53,19 +53,7 @@ class DeleteAction
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
-            // End current wrestler partnerships (wrestlers continue as singles)
-            $tagTeam->currentWrestlers->each(function (Wrestler $wrestler) use ($tagTeam, $deletionDate) {
-                $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [
-                    'left_at' => $deletionDate,
-                ]);
-            });
-
-            // End current manager relationships
-            $tagTeam->currentManagers->each(function (Manager $manager) use ($tagTeam, $deletionDate) {
-                $tagTeam->managers()->updateExistingPivot($manager->id, [
-                    'fired_at' => $deletionDate,
-                ]);
-            });
+            $this->endCurrentRelationships->handle($tagTeam, $deletionDate);
 
             // Soft delete the tag team record
             $tagTeam->delete();

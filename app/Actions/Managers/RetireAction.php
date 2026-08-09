@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\Cascades\ManagerRetirementCascadeStrategy;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -22,6 +21,7 @@ class RetireAction
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
     /**
@@ -29,7 +29,7 @@ class RetireAction
      *
      * This handles the complete manager retirement workflow with cascading effects:
      * - Validates the manager can be retired (currently employed/active)
-     * - Uses ManagerRetirementCascadeStrategy to end management relationships
+     * - Ends current management relationships through a typed domain action
      * - Ends suspension, injury, and employment through lifecycle period managers
      * - Starts a retirement period to formally end their management career
      * - Makes the manager unavailable for future talent management
@@ -57,7 +57,7 @@ class RetireAction
             }
 
             $this->retirementPeriods->start($manager, $retirementDate);
-            ManagerRetirementCascadeStrategy::comprehensive()($manager, $retirementDate);
+            $this->endCurrentRelationships->handle($manager, $retirementDate);
         });
     }
 }
