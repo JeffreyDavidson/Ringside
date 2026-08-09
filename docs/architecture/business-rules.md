@@ -9,6 +9,7 @@ This business rules guide has been split into focused, semantically named docume
 - [Derived Rules](derived-rules.md)
 - [Stable Membership](stable-membership.md)
 - [Employment Status](employment-status.md)
+- [Lifecycle Operation Boundaries](lifecycle-operation-boundaries.md)
 - [Model Attributes](model-attributes.md)
 - [Interface Architecture](interface-architecture.md)
 
