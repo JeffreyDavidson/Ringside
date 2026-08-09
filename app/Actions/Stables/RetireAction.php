@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Actions\Managers\RetireAction as ManagersRetireAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Enums\Stables\StableStatus;
@@ -22,7 +21,6 @@ class RetireAction
     public function __construct(
         protected WrestlersRetireAction $wrestlersRetireAction,
         protected TagTeamsRetireAction $tagTeamsRetireAction,
-        protected ManagersRetireAction $managersRetireAction,
         protected EndActivityPeriodAction $endActivityPeriodAction,
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected RetirementPeriodManager $retirementPeriods,
@@ -31,19 +29,14 @@ class RetireAction
     /**
      * Retire a stable and end its operations.
      *
-     * This handles the complete stable retirement workflow with flexible options:
+     * This handles the complete stable retirement workflow:
      * - Validates the stable can be retired (business rule compliance)
-     * - Basic retirement: Ends stable operations, members become free agents
-     * - With member retirement: Also retires available members simultaneously
-     * - Forced retirement: Overrides business rule conflicts (admin use)
-     * - Ends current wrestler memberships (wrestlers may continue as singles/other stables)
-     * - Ends current tag team memberships (tag teams may continue independently)
-     * - Ends current manager relationships (managers may continue with other talent)
-     * - Ends debut period if currently active
-     * - Creates retirement record with optional reason metadata
+     * - Retires eligible current wrestlers and tag teams
+     * - Ends current wrestler and tag team memberships
+     * - Ends the activity period if currently active
+     * - Creates the retirement record
      * - Makes the stable permanently unavailable for storylines
-     * - Preserves all historical records and championship lineage
-     * - Individual members may continue their careers independently
+     * - Preserves historical activity and membership records
      *
      * @param  Stable  $stable  The stable to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
