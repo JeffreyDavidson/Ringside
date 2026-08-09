@@ -1555,18 +1555,6 @@ parameters:
 			path: app/Providers/AppServiceProvider.php
 
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: mixed, Closure\(App\\Models\\TagTeams\\TagTeam\)\: mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Services/StableMembershipService.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: mixed, Closure\(App\\Models\\Wrestlers\\Wrestler\)\: mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Services/StableMembershipService.php
-
-		-
 			message: '#^Method App\\Services\\StableValidationService\:\:validateSplitMembers\(\) has parameter \$membersForNewStable with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
