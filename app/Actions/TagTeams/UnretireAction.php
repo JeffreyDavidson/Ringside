@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\UnretirementCascadeStrategy;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\TagTeams\TagTeam;
@@ -14,29 +13,29 @@ use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
-    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+    public function __construct(
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly UnretireCurrentMembersAction $unretireCurrentMembers,
+        private readonly EmployAction $employ,
+    ) {}
 
     /**
      * Unretire a retired tag team and return them to active competition.
      *
-     * This handles the complete tag team comeback workflow using cascade strategies:
+     * This handles the complete tag team comeback workflow:
      * - Validates the tag team can come out of retirement (business rule compliance)
      * - Ends the current retirement period with the specified date
-     * - Uses UnretirementCascadeStrategy for consistent member unretirement
-     * - Optionally employs the team immediately through employment cascade
+     * - Optionally unretires eligible current members through a typed action
+     * - Optionally employs the team immediately through its employment action
      * - Flexible partner requirements for different unretirement scenarios
      * - Restores the tag team to available status for match bookings
      * - Makes the team available for championship opportunities again
      * - Preserves all historical retirement and partnership records
      * - Graceful error handling - individual member failures don't stop team unretirement
      *
-     * ARCHITECTURAL PATTERN:
-     * Uses RetirementPeriodManager for persistence and UnretirementCascadeStrategy
-     * for relationship management and optional employment.
-     *
      * @param  TagTeam  $tagTeam  The tag team to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
-     * @param  bool  $unretirePartners  Whether to unretire available partners (default: true)
+     * @param  bool  $unretireMembers  Whether to unretire eligible current members (default: true)
      * @param  bool  $employImmediately  Whether to employ the team immediately (default: true)
      * @param  bool  $requireAvailablePartners  Whether to require available partners (default: true)
      * @throws CannotBeUnretiredException When tag team cannot be unretired due to business rules
@@ -44,7 +43,7 @@ class UnretireAction
     public function handle(
         TagTeam $tagTeam,
         ?Carbon $unretiredDate = null,
-        bool $unretirePartners = true,
+        bool $unretireMembers = true,
         bool $employImmediately = true,
         bool $requireAvailablePartners = true
     ): void {
@@ -52,14 +51,16 @@ class UnretireAction
 
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
-        DB::transaction(function () use ($tagTeam, $unretiredDate, $unretirePartners, $employImmediately): void {
+        DB::transaction(function () use ($tagTeam, $unretiredDate, $unretireMembers, $employImmediately): void {
             $this->retirementPeriods->end($tagTeam, $unretiredDate);
 
-            // Handle member unretirement using cascade strategy
-            UnretirementCascadeStrategy::conditionalMembers($unretirePartners)($tagTeam, $unretiredDate, 'unretire');
+            if ($unretireMembers) {
+                $this->unretireCurrentMembers->handle($tagTeam, $unretiredDate);
+            }
 
-            // Handle immediate employment using cascade strategy
-            UnretirementCascadeStrategy::employmentFollowup($employImmediately)($tagTeam, $unretiredDate, 'unretire');
+            if ($employImmediately && ! $tagTeam->isEmployed() && $tagTeam->currentWrestlers()->exists()) {
+                $this->employ->handle($tagTeam, $unretiredDate);
+            }
         });
     }
 }

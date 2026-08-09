@@ -7,18 +7,6 @@ parameters:
 			path: app/Actions/Concerns/RestoreCascadeStrategy.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentManagers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Actions/Concerns/UnretirementCascadeStrategy.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentWrestlers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Actions/Concerns/UnretirementCascadeStrategy.php
-
-		-
 			message: '#^Access to an undefined property App\\Enums\\MatchType\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1

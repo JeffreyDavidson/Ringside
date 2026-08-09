@@ -76,6 +76,8 @@ Relationship cleanup remains distinct from a true related-entity cascade. A casc
 
 Tag-team retirement demonstrates this distinction. `RetireCurrentMembersAction` receives a concrete tag team and retirement date, identifies eligible current wrestlers and managers, and invokes each member's complete typed retirement action. The coordinating tag-team retirement action decides whether member retirement was requested and owns the surrounding transaction.
 
+Tag-team unretirement follows the same boundary through `UnretireCurrentMembersAction`. It attempts each retired current member's complete typed unretirement independently, preserving the established rule that one member's failure does not prevent other eligible members or the team from returning. Optional immediate team employment remains an explicit decision in the coordinating tag-team action and delegates to the existing employment action.
+
 ### Transition policies
 
 A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.
@@ -148,7 +150,7 @@ The migration must remain behavior-preserving and proceed in small pull requests
 3. Remove unused generalized abstractions independently of the active transition path. (Completed.)
 4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time. (Completed.)
 5. Keep concrete entity actions as the public entry points while moving only shared mechanics behind them.
-6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it. (Current relationship cleanup and tag-team retirement completed.)
+6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it. (Current relationship cleanup plus tag-team retirement and unretirement completed.)
 7. Review the eligibility rules for each lifecycle dimension separately.
 8. Introduce a state machine only for a dimension whose reviewed transition graph benefits from one.
 
