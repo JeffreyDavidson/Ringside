@@ -13,7 +13,7 @@ beforeEach(function () {
 });
 
 test('it reinstates a suspended referee', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
     expect($referee->isSuspended())->toBeTrue();
@@ -30,6 +30,21 @@ test('it reinstates a suspended referee', function () {
     $this->assertDatabaseHas('referees_suspensions', [
         'id' => $suspension->id,
         'ended_at' => now()->toDateTimeString(),
+    ]);
+});
+
+test('it prevents reinstating an injured referee', function () {
+    $referee = Referee::factory()->injured()->create();
+    $injuryId = $referee->currentInjury()->firstOrFail()->id;
+
+    expect(fn () => resolve(ReinstateAction::class)->handle($referee))
+        ->toThrow(CannotBeReinstatedException::class);
+
+    $referee->refresh();
+    expect($referee->isInjured())->toBeTrue();
+    $this->assertDatabaseHas('referees_injuries', [
+        'id' => $injuryId,
+        'ended_at' => null,
     ]);
 });
 

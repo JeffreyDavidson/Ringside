@@ -24,6 +24,8 @@ Roster lifecycle data is not one mutually exclusive state machine. It contains m
 
 For example, an employed wrestler may also be injured or suspended. Active injury and suspension periods are mutually exclusive: a roster member must be healed before suspension and reinstated before injury. A single universal status enum or state machine must not erase the underlying lifecycle histories.
 
+Recovery operations are also distinct. Healing ends an injury period, while reinstatement ends a suspension period. An injured roster member cannot be reinstated as a substitute for medical clearance.
+
 An explicit state machine may still be appropriate for an individual dimension when its transition graph provides clear value. That decision must be made separately for each lifecycle dimension.
 
 ## Responsibility Boundaries

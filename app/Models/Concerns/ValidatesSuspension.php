@@ -97,7 +97,8 @@ trait ValidatesSuspension
      * - Must not have future employment
      * - Must not be retired
      * - Must not be bookable
-     * - Must be suspended or injured
+     * - Must be suspended
+     * - Injured roster members must be healed instead
      *
      * @return bool True if the model can be reinstated, false otherwise
      *
@@ -112,9 +113,7 @@ trait ValidatesSuspension
      */
     public function canBeReinstated(): bool
     {
-        $type = RosterMemberType::fromModel($this);
         $isSuspended = $this instanceof Suspendable && $this->isSuspended();
-        $isInjured = $type->canBeInjured() && $this instanceof Injurable && $this->isInjured();
         $isBookable = $this instanceof Bookable && $this->isBookable();
 
         return ! $this->isNotInEmployment()
@@ -122,7 +121,7 @@ trait ValidatesSuspension
             && ! $this->hasFutureEmployment()
             && ! $this->isRetired()
             && ! $isBookable
-            && ($isSuspended || $isInjured);
+            && $isSuspended;
     }
 
     /**
@@ -142,11 +141,13 @@ trait ValidatesSuspension
      */
     public function ensureCanBeReinstated(): void
     {
-        $type = RosterMemberType::fromModel($this);
         $isSuspended = $this instanceof Suspendable && $this->isSuspended();
-        $isInjured = $type->canBeInjured() && $this instanceof Injurable && $this->isInjured();
 
-        if (! $isSuspended && ! $isInjured) {
+        if ($this instanceof Injurable && $this->isInjured()) {
+            throw CannotBeReinstatedException::injured($this);
+        }
+
+        if (! $isSuspended) {
             throw CannotBeReinstatedException::available($this);
         }
 

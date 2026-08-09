@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\ReinstateAction;
+use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -27,6 +28,21 @@ test('it reinstates a suspended manager', function () {
     $this->assertDatabaseHas('managers_suspensions', [
         'manager_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
+    ]);
+});
+
+test('it prevents reinstating an injured manager', function () {
+    $manager = Manager::factory()->injured()->create();
+    $injuryId = $manager->currentInjury()->firstOrFail()->id;
+
+    expect(fn () => resolve(ReinstateAction::class)->handle($manager))
+        ->toThrow(CannotBeReinstatedException::class);
+
+    $manager->refresh();
+    expect($manager->isInjured())->toBeTrue();
+    $this->assertDatabaseHas('managers_injuries', [
+        'id' => $injuryId,
+        'ended_at' => null,
     ]);
 });
 

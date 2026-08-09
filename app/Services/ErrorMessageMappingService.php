@@ -8,11 +8,12 @@ use App\Exceptions\Data\CannotBeRestoredException;
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\CannotBeEmployedException;
 use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Exceptions\Roster\CannotBeReinstatedException as RosterCannotBeReinstatedException;
 use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotBeReinstatedException;
 use Throwable;
 
 /**
@@ -40,7 +41,7 @@ class ErrorMessageMappingService
             CannotBeRetiredException::class => self::mapRetirementException($exceptionMessage),
             CannotBeUnretiredException::class => self::mapUnretirementException($exceptionMessage),
             CannotBeSuspendedException::class => self::mapSuspensionException($exceptionMessage),
-            CannotBeReinstatedException::class => self::mapReinstatementException($exceptionMessage),
+            RosterCannotBeReinstatedException::class => self::mapReinstatementException($exceptionMessage),
             CannotBeInjuredException::class => self::mapInjuryException($exceptionMessage),
             CannotBeClearedFromInjuryException::class => self::mapHealingException($exceptionMessage),
             CannotBeRestoredException::class => self::mapRestorationException($exceptionMessage),
@@ -64,7 +65,7 @@ class ErrorMessageMappingService
             CannotBeRetiredException::class => self::mapRefereeRetirementException($exceptionMessage),
             CannotBeUnretiredException::class => self::mapRefereeUnretirementException($exceptionMessage),
             CannotBeSuspendedException::class => self::mapRefereeSuspensionException($exceptionMessage),
-            CannotBeReinstatedException::class => self::mapRefereeReinstatementException($exceptionMessage),
+            RosterCannotBeReinstatedException::class => self::mapRefereeReinstatementException($exceptionMessage),
             CannotBeInjuredException::class => self::mapRefereeInjuryException($exceptionMessage),
             CannotBeClearedFromInjuryException::class => self::mapRefereeHealingException($exceptionMessage),
             CannotBeRestoredException::class => self::mapRefereeRestorationException($exceptionMessage),
@@ -88,7 +89,7 @@ class ErrorMessageMappingService
             CannotBeRetiredException::class => self::mapManagerRetirementException($exceptionMessage),
             CannotBeUnretiredException::class => self::mapManagerUnretirementException($exceptionMessage),
             CannotBeSuspendedException::class => self::mapManagerSuspensionException($exceptionMessage),
-            CannotBeReinstatedException::class => self::mapManagerReinstatementException($exceptionMessage),
+            RosterCannotBeReinstatedException::class => self::mapManagerReinstatementException($exceptionMessage),
             CannotBeInjuredException::class => self::mapManagerInjuryException($exceptionMessage),
             CannotBeClearedFromInjuryException::class => self::mapManagerHealingException($exceptionMessage),
             CannotBeRestoredException::class => self::mapManagerRestorationException($exceptionMessage),
@@ -112,7 +113,7 @@ class ErrorMessageMappingService
             CannotBeRetiredException::class => self::mapTagTeamRetirementException($exceptionMessage),
             CannotBeUnretiredException::class => self::mapTagTeamUnretirementException($exceptionMessage),
             CannotBeSuspendedException::class => self::mapTagTeamSuspensionException($exceptionMessage),
-            CannotBeReinstatedException::class => self::mapTagTeamReinstatementException($exceptionMessage),
+            TagTeamCannotBeReinstatedException::class => self::mapTagTeamReinstatementException($exceptionMessage),
             CannotBeRestoredException::class => self::mapTagTeamRestorationException($exceptionMessage),
             default => 'tag-teams.errors.general_error',
         };
@@ -195,8 +196,12 @@ class ErrorMessageMappingService
      */
     private static function mapReinstatementException(string $message): string
     {
-        if (str_contains($message, 'not suspended') && str_contains($message, 'not injured')) {
-            return 'wrestlers.errors.not_suspended_or_injured';
+        if (str_contains($message, 'injured')) {
+            return 'wrestlers.errors.cannot_reinstate_injured';
+        }
+
+        if (str_contains($message, 'not suspended') || str_contains($message, 'already available')) {
+            return 'wrestlers.errors.not_suspended';
         }
 
         return 'wrestlers.errors.cannot_reinstate';
@@ -319,7 +324,11 @@ class ErrorMessageMappingService
      */
     private static function mapRefereeReinstatementException(string $message): string
     {
-        if (str_contains($message, 'not suspended')) {
+        if (str_contains($message, 'injured')) {
+            return 'referees.errors.cannot_reinstate_injured';
+        }
+
+        if (str_contains($message, 'not suspended') || str_contains($message, 'already available')) {
             return 'referees.errors.not_suspended';
         }
 
@@ -463,7 +472,7 @@ class ErrorMessageMappingService
      */
     private static function mapManagerReinstatementException(string $message): string
     {
-        if (str_contains($message, 'not suspended')) {
+        if (str_contains($message, 'not suspended') || str_contains($message, 'already available')) {
             return 'managers.errors.not_suspended';
         }
 

@@ -985,18 +985,6 @@ parameters:
 			path: app/Livewire/Managers/Tables/Main.php
 
 		-
-			message: '#^Call to method getMessage\(\) on an unknown class App\\Exceptions\\Status\\CannotBeReinstatedException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/Managers/Tables/Main.php
-
-		-
-			message: '#^Caught class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/Managers/Tables/Main.php
-
-		-
 			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -1067,18 +1055,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Livewire/Matches/Tables/MatchesTable.php
-
-		-
-			message: '#^Call to method getMessage\(\) on an unknown class App\\Exceptions\\Status\\CannotBeReinstatedException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/Referees/Tables/Main.php
-
-		-
-			message: '#^Caught class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/Referees/Tables/Main.php
 
 		-
 			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
@@ -1211,18 +1187,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Livewire/TagTeams/Components/Actions.php
-
-		-
-			message: '#^Call to method getMessage\(\) on an unknown class App\\Exceptions\\Status\\CannotBeReinstatedException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/TagTeams/Tables/Main.php
-
-		-
-			message: '#^Caught class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/TagTeams/Tables/Main.php
 
 		-
 			message: '#^Return type \(App\\Builders\\Roster\\TagTeamBuilder\<App\\Models\\TagTeams\\TagTeam\>\) of method App\\Livewire\\TagTeams\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
@@ -1661,12 +1625,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: app/Providers/AppServiceProvider.php
-
-		-
-			message: '#^Class App\\Exceptions\\Status\\CannotBeReinstatedException not found\.$#'
-			identifier: class.notFound
-			count: 4
-			path: app/Services/ErrorMessageMappingService.php
 
 		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\|string\)\: mixed, Closure\(App\\Models\\TagTeams\\TagTeam\)\: mixed given\.$#'
