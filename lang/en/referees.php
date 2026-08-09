@@ -39,6 +39,7 @@ return [
         'cannot_suspend_unemployed' => 'Only employed referees can be suspended.',
         'cannot_reinstate' => 'Unable to reinstate this referee.',
         'not_suspended' => 'This referee is not currently suspended.',
+        'cannot_reinstate_injured' => 'Injured referees must be healed instead of reinstated.',
         'cannot_injure' => 'Unable to record injury for this referee.',
         'already_injured' => 'This referee is already injured.',
         'cannot_injure_unemployed' => 'Only employed referees can be injured.',

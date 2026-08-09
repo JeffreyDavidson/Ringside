@@ -18,7 +18,7 @@ use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Exceptions\Roster\CannotBeUnretiredException;
-use App\Exceptions\Status\CannotBeReinstatedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;

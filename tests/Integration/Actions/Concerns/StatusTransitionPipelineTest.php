@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -115,16 +116,16 @@ test('it ends an active suspension period when reinstated', function () {
     ]);
 });
 
-test('it ends an active injury period when reinstated', function () {
+test('it rejects reinstating an injured roster member', function () {
     $wrestler = Wrestler::factory()->injured()->create();
-    $effectiveDate = now()->subDay();
+    $injuryId = $wrestler->currentInjury()->firstOrFail()->id;
 
-    StatusTransitionPipeline::reinstate($wrestler, $effectiveDate)
-        ->execute();
+    expect(fn () => StatusTransitionPipeline::reinstate($wrestler)->execute())
+        ->toThrow(CannotBeReinstatedException::class);
 
     $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => $effectiveDate->toDateTimeString(),
+        'id' => $injuryId,
+        'ended_at' => null,
     ]);
 });
 

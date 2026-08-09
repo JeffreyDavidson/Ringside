@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\ReinstateAction;
+use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -30,22 +31,24 @@ test('it reinstates a suspended wrestler', function () {
     ]);
 });
 
-test('it reinstates an injured wrestler', function () {
+test('it prevents reinstating an injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
+    $injuryId = $wrestler->currentInjury()->firstOrFail()->id;
 
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    resolve(ReinstateAction::class)->handle($wrestler);
+    expect(fn () => resolve(ReinstateAction::class)->handle($wrestler))
+        ->toThrow(CannotBeReinstatedException::class);
 
     $wrestler->refresh();
 
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
     $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => now()->toDateTimeString(),
+        'id' => $injuryId,
+        'ended_at' => null,
     ]);
 });
 
@@ -141,7 +144,7 @@ test('it handles multiple suspension records correctly', function () {
     ]);
 });
 
-test('it prevents reinstating non-suspended non-injured wrestler', function () {
+test('it prevents reinstating an available wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->isSuspended())->toBeFalse();

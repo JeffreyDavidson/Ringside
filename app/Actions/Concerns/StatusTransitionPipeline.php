@@ -31,7 +31,7 @@ use InvalidArgumentException;
  * - Suspension (from employed to suspended)
  * - Release (from employed to released)
  * - Retirement (from active to retired)
- * - Reinstatement (from suspended or injured back to active)
+ * - Reinstatement (from suspended back to active)
  */
 class StatusTransitionPipeline
 {
@@ -352,20 +352,12 @@ class StatusTransitionPipeline
      */
     protected function createReinstatement(): void
     {
-        // End current suspension/injury (injuries only apply to entities that
-        // can be injured — wrestlers, managers, referees — not tag teams).
+        // End the current suspension.
         $suspensionTable = $this->getTableName('suspensions');
-        $injuryTable = $this->getTableName('injuries');
 
         $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
             'ended_at' => $this->effectiveDate,
         ]);
-
-        if (method_exists($this->entity, $injuryTable)) {
-            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
-                'ended_at' => $this->effectiveDate,
-            ]);
-        }
     }
 
     /**

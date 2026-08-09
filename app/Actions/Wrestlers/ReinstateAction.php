@@ -17,7 +17,7 @@ class ReinstateAction
      *
      * This handles the complete wrestler reinstatement workflow using StatusTransitionPipeline:
      * - Validates the wrestler can be reinstated through pipeline validation
-     * - Uses StatusTransitionPipeline to properly end suspension and injury status
+     * - Uses StatusTransitionPipeline to end the suspension period
      * - Maintains transaction boundaries and error handling through pipeline
      * - Makes the wrestler available for new employment opportunities
      *
