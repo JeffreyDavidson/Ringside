@@ -13,9 +13,8 @@ use InvalidArgumentException;
 /**
  * Unified status transition pipeline for wrestling promotion entities.
  *
- * This pipeline provides a consistent approach to the remaining status changes (release
- * and deletion) while allowing for entity-specific validation
- * and cascading behaviors.
+ * This pipeline provides a consistent approach to deletion while allowing for
+ * entity-specific validation and cascading behaviors.
  *
  * DESIGN PATTERN:
  * Uses Strategy pattern for entity-specific validation and cascading behaviors.
@@ -27,7 +26,7 @@ use InvalidArgumentException;
  * a wrestler should employ their managers).
  *
  * SUPPORTED TRANSITIONS:
- * - Release (from employed to released)
+ * - Deletion
  */
 class StatusTransitionPipeline
 {
@@ -53,14 +52,6 @@ class StatusTransitionPipeline
         $this->entity = $entity;
         $this->transition = $transition;
         $this->effectiveDate = $this->getEffectiveDate($date);
-    }
-
-    /**
-     * Create a release transition pipeline.
-     */
-    public static function release(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'release', $date);
     }
 
     /**
@@ -153,7 +144,6 @@ class StatusTransitionPipeline
     protected function getDefaultValidationMethod(): string
     {
         return match ($this->transition) {
-            'release' => 'ensureCanBeReleased',
             'delete' => 'ensureCanBeDeleted',
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
@@ -166,36 +156,9 @@ class StatusTransitionPipeline
     {
         // Execute the main transition using direct Eloquent operations
         match ($this->transition) {
-            'release' => $this->createRelease(),
             'delete' => $this->createDeletion(),
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
-    }
-
-    /**
-     * Create release record using direct Eloquent operations.
-     */
-    protected function createRelease(): void
-    {
-        // End current employment
-        $employmentTable = $this->getTableName('employments');
-        $this->entity->{$employmentTable}()->whereNull('ended_at')->update([
-            'ended_at' => $this->effectiveDate,
-        ]);
-
-        if (method_exists($this->entity, 'isSuspended') && $this->entity->isSuspended()) {
-            $suspensionTable = $this->getTableName('suspensions');
-            $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
-                'ended_at' => $this->effectiveDate,
-            ]);
-        }
-
-        if (method_exists($this->entity, 'isInjured') && $this->entity->isInjured()) {
-            $injuryTable = $this->getTableName('injuries');
-            $this->entity->{$injuryTable}()->whereNull('ended_at')->update([
-                'ended_at' => $this->effectiveDate,
-            ]);
-        }
     }
 
     /**

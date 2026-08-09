@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -26,8 +25,7 @@ class DeleteAction
      * - No impact on individual wrestler/manager employment status
      *
      * EMPLOYMENT IMPACT:
-     * - Uses StatusTransitionPipeline to properly release employed tag teams
-     * - Automatically handles suspension ending through pipeline
+     * - Deletion validation rejects employed or suspended tag teams
      * - Retired tag teams remain retired (no artificial status changes)
      * - Does not affect individual member employment (they continue careers)
      * - Preserves tag team employment history for administrative records
@@ -55,14 +53,6 @@ class DeleteAction
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
-            // Handle tag team status using StatusTransitionPipeline
-            if ($tagTeam->isEmployed()) {
-                // Use pipeline to properly handle release (ends employment and suspension)
-                StatusTransitionPipeline::release($tagTeam, $deletionDate)->execute();
-            }
-            // Note: Retired tag teams remain retired - no status change needed
-            // Retirement is their natural end state, no artificial reactivation required
-
             // End current wrestler partnerships (wrestlers continue as singles)
             $tagTeam->currentWrestlers->each(function (Wrestler $wrestler) use ($tagTeam, $deletionDate) {
                 $tagTeam->wrestlers()->updateExistingPivot($wrestler->id, [

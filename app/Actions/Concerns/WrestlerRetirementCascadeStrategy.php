@@ -23,9 +23,8 @@ use Illuminate\Support\Carbon;
  * - Championships are vacated (titles become available)
  * - All professional relationships end but historical records are preserved
  *
- * DESIGN PATTERN:
- * Strategy pattern - each method returns a callable strategy that can be used
- * with StatusTransitionPipeline.withCascade().
+ * Each method returns a callable strategy that a retirement or release action can
+ * invoke within its transaction.
  */
 class WrestlerRetirementCascadeStrategy
 {
