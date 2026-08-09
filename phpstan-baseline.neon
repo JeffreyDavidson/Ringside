@@ -1315,12 +1315,6 @@ parameters:
 			path: app/Models/Stables/Stable.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 2
-			path: app/Models/Stables/Stable.php
-
-		-
 			message: '#^Method App\\Models\\Stables\\Stable\:\:getAvailableFormerMembers\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
