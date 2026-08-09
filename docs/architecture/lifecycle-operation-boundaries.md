@@ -113,7 +113,7 @@ The existing concrete classes under `app/Actions/{Domain}` are the active applic
 
 Although active and widely used, it behaves as a generic transition executor rather than a composable pipeline. Its responsibilities should be separated by lifecycle dimension without changing behavior.
 
-The following generalized classes currently appear isolated from production entry points and should be treated as removal candidates, not foundations for the target architecture:
+The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;
 - `UnifiedEmployAction`;
@@ -123,17 +123,15 @@ The following generalized classes currently appear isolated from production entr
 - `UnifiedSuspendAction`;
 - the generalized `MemberCollectionManager` and `StableMembershipOrchestrator` cluster.
 
-Before removal, each candidate must be checked for container resolution, configuration references, tests, console entry points, and other dynamic usage.
-
 The existing cascade strategy classes contain useful shared behavior. Their callable-based APIs are an implementation concern to improve incrementally, not a reason to duplicate their behavior across actions.
 
 ## Migration Sequence
 
 The migration must remain behavior-preserving and proceed in small pull requests:
 
-1. Add characterization tests for lifecycle record mutations, effective dates, cascades, and transaction rollback.
-2. Confirm whether the isolated generalized classes have any dynamic runtime consumers.
-3. Remove unused generalized abstractions independently of the active transition path.
+1. Add characterization tests for lifecycle record mutations, effective dates, cascades, and transaction rollback. (Completed.)
+2. Confirm whether the isolated generalized classes have any dynamic runtime consumers. (Completed.)
+3. Remove unused generalized abstractions independently of the active transition path. (Completed.)
 4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time.
 5. Keep concrete entity actions as the public entry points while moving only shared mechanics behind them.
 6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it.
