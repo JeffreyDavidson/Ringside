@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Actions\Managers\ReinstateAction as ReinstateManagerAction;
+use App\Actions\Wrestlers\ReinstateAction as ReinstateWrestlerAction;
 use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
@@ -20,9 +22,7 @@ use Illuminate\Support\Carbon;
  * When a tag team is reinstated from suspension, their suspended wrestlers and
  * managers should also be reinstated to restore the complete team unit.
  *
- * DESIGN PATTERN:
- * Strategy pattern - each method returns a callable strategy that can be used
- * with StatusTransitionPipeline.withCascade().
+ * Each method returns a callable strategy for tag-team reinstatement orchestration.
  */
 class ReinstatementCascadeStrategy
 {
@@ -51,7 +51,7 @@ class ReinstatementCascadeStrategy
 
             // Reinstate each suspended wrestler
             foreach ($suspendedWrestlers as $wrestler) {
-                StatusTransitionPipeline::reinstate($wrestler, $date)->execute();
+                resolve(ReinstateWrestlerAction::class)->handle($wrestler, $date);
             }
         };
     }
@@ -81,7 +81,7 @@ class ReinstatementCascadeStrategy
 
             // Reinstate each suspended manager
             foreach ($suspendedManagers as $manager) {
-                StatusTransitionPipeline::reinstate($manager, $date)->execute();
+                resolve(ReinstateManagerAction::class)->handle($manager, $date);
             }
         };
     }

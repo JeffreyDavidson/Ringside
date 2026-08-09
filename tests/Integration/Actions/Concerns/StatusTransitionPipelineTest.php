@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Actions\Concerns\StatusTransitionPipeline;
-use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -22,20 +21,6 @@ test('it creates an employment period on the effective date', function () {
         ->execute();
 
     $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => $effectiveDate->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-});
-
-test('it creates a suspension period on the effective date', function () {
-    $wrestler = Wrestler::factory()->employed()->create();
-    $effectiveDate = now()->subDays(3);
-
-    StatusTransitionPipeline::suspend($wrestler, $effectiveDate)
-        ->execute();
-
-    $this->assertDatabaseHas('wrestlers_suspensions', [
         'wrestler_id' => $wrestler->id,
         'started_at' => $effectiveDate->toDateTimeString(),
         'ended_at' => null,
@@ -99,32 +84,6 @@ test('it ends employment and creates a retirement period atomically', function (
     $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'started_at' => $effectiveDate->toDateTimeString(),
-        'ended_at' => null,
-    ]);
-});
-
-test('it ends an active suspension period when reinstated', function () {
-    $wrestler = Wrestler::factory()->suspended()->create();
-    $effectiveDate = now()->subDay();
-
-    StatusTransitionPipeline::reinstate($wrestler, $effectiveDate)
-        ->execute();
-
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
-        'ended_at' => $effectiveDate->toDateTimeString(),
-    ]);
-});
-
-test('it rejects reinstating an injured roster member', function () {
-    $wrestler = Wrestler::factory()->injured()->create();
-    $injuryId = $wrestler->currentInjury()->firstOrFail()->id;
-
-    expect(fn () => StatusTransitionPipeline::reinstate($wrestler)->execute())
-        ->toThrow(CannotBeReinstatedException::class);
-
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'id' => $injuryId,
         'ended_at' => null,
     ]);
 });

@@ -14,7 +14,7 @@ use InvalidArgumentException;
  * Unified status transition pipeline for wrestling promotion entities.
  *
  * This pipeline provides a consistent approach to the remaining status changes (employment,
- * suspension, and retirement) while allowing for entity-specific validation
+ * release, retirement, deletion, and unretirement) while allowing for entity-specific validation
  * and cascading behaviors.
  *
  * DESIGN PATTERN:
@@ -28,10 +28,8 @@ use InvalidArgumentException;
  *
  * SUPPORTED TRANSITIONS:
  * - Employment (from unemployed to employed)
- * - Suspension (from employed to suspended)
  * - Release (from employed to released)
  * - Retirement (from active to retired)
- * - Reinstatement (from suspended back to active)
  */
 class StatusTransitionPipeline
 {
@@ -48,8 +46,6 @@ class StatusTransitionPipeline
 
     /** @var array<int, mixed> */
     protected array $validationStrategies = [];
-
-    protected ?string $notes = null;
 
     /**
      * Create a new status transition pipeline instance.
@@ -70,14 +66,6 @@ class StatusTransitionPipeline
     }
 
     /**
-     * Create a suspension transition pipeline.
-     */
-    public static function suspend(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'suspend', $date);
-    }
-
-    /**
      * Create a release transition pipeline.
      */
     public static function release(Model $entity, ?Carbon $date = null): self
@@ -91,14 +79,6 @@ class StatusTransitionPipeline
     public static function retire(Model $entity, ?Carbon $date = null): self
     {
         return new self($entity, 'retire', $date);
-    }
-
-    /**
-     * Create a reinstatement transition pipeline.
-     */
-    public static function reinstate(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'reinstate', $date);
     }
 
     /**
@@ -145,16 +125,6 @@ class StatusTransitionPipeline
     public function withValidation(callable $validator): self
     {
         $this->validationStrategies[] = $validator;
-
-        return $this;
-    }
-
-    /**
-     * Add notes to the status transition.
-     */
-    public function withNotes(string $notes): self
-    {
-        $this->notes = $notes;
 
         return $this;
     }
@@ -213,10 +183,8 @@ class StatusTransitionPipeline
     {
         return match ($this->transition) {
             'employ' => 'ensureCanBeEmployed',
-            'suspend' => 'ensureCanBeSuspended',
             'release' => 'ensureCanBeReleased',
             'retire' => 'ensureCanBeRetired',
-            'reinstate' => 'ensureCanBeReinstated',
             'delete' => 'ensureCanBeDeleted',
             'unretire' => 'ensureCanBeUnretired',
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
@@ -234,10 +202,8 @@ class StatusTransitionPipeline
         // Execute the main transition using direct Eloquent operations
         match ($this->transition) {
             'employ' => $this->createEmployment(),
-            'suspend' => $this->createSuspension(),
             'release' => $this->createRelease(),
             'retire' => $this->createRetirement(),
-            'reinstate' => $this->createReinstatement(),
             'delete' => $this->createDeletion(),
             'unretire' => $this->endRetirement(),
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
@@ -267,24 +233,6 @@ class StatusTransitionPipeline
             'started_at' => $this->effectiveDate,
             'ended_at' => null,
         ]);
-    }
-
-    /**
-     * Create suspension record using direct Eloquent operations.
-     */
-    protected function createSuspension(): void
-    {
-        $table = $this->getTableName('suspensions');
-        $data = [
-            'started_at' => $this->effectiveDate,
-            'ended_at' => null,
-        ];
-
-        if ($this->notes) {
-            $data['notes'] = $this->notes;
-        }
-
-        $this->entity->{$table}()->create($data);
     }
 
     /**
@@ -344,19 +292,6 @@ class StatusTransitionPipeline
         $this->entity->{$table}()->create([
             'started_at' => $this->effectiveDate,
             'ended_at' => null,
-        ]);
-    }
-
-    /**
-     * Create reinstatement record using direct Eloquent operations.
-     */
-    protected function createReinstatement(): void
-    {
-        // End the current suspension.
-        $suspensionTable = $this->getTableName('suspensions');
-
-        $this->entity->{$suspensionTable}()->whereNull('ended_at')->update([
-            'ended_at' => $this->effectiveDate,
         ]);
     }
 

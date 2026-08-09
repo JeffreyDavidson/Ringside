@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 class SuspendAction
 {
+    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+
     /**
      * Suspend a referee.
      *
@@ -30,6 +33,6 @@ class SuspendAction
 
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
-        $referee->suspensions()->create(['started_at' => $suspensionDate]);
+        $this->suspensionPeriods->start($referee, $suspensionDate);
     }
 }

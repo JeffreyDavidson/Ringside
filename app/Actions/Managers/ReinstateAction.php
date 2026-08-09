@@ -4,27 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 final class ReinstateAction
 {
+    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+
     /**
      * Reinstate a suspended manager.
      *
      * This handles the complete manager reinstatement workflow:
-     * - Uses StatusTransitionPipeline for consistent reinstatement handling
      * - Validates the manager can be reinstated (currently suspended)
-     * - Ends the current suspension period with the specified date
+     * - Ends the current suspension period through the shared lifecycle component
      * - Restores the manager to active management duties
      * - Makes the manager available for wrestler/tag team assignments
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistent status handling, following the same
-     * pattern as other manager actions.
      *
      * @param  Manager  $manager  The manager to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
@@ -36,7 +33,6 @@ final class ReinstateAction
 
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        // Use StatusTransitionPipeline for consistent reinstatement handling
-        StatusTransitionPipeline::reinstate($manager, $reinstatementDate)->execute();
+        $this->suspensionPeriods->end($manager, $reinstatementDate);
     }
 }

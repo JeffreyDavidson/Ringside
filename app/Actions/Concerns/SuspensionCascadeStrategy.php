@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Actions\Managers\SuspendAction as SuspendManagerAction;
+use App\Actions\Wrestlers\SuspendAction as SuspendWrestlerAction;
 use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
@@ -21,9 +23,7 @@ use Illuminate\Support\Carbon;
  * suspended to maintain team suspension integrity. Only employed, non-suspended
  * members are affected to avoid duplicate suspensions.
  *
- * DESIGN PATTERN:
- * Strategy pattern - each method returns a callable strategy that can be used
- * with StatusTransitionPipeline.withCascade().
+ * Each method returns a callable strategy for tag-team suspension orchestration.
  */
 class SuspensionCascadeStrategy
 {
@@ -55,7 +55,7 @@ class SuspensionCascadeStrategy
 
             // Suspend each eligible wrestler
             foreach ($eligibleWrestlers as $wrestler) {
-                StatusTransitionPipeline::suspend($wrestler, $date)->execute();
+                resolve(SuspendWrestlerAction::class)->handle($wrestler, $date);
             }
         };
     }
@@ -88,7 +88,7 @@ class SuspensionCascadeStrategy
 
             // Suspend each eligible manager
             foreach ($eligibleManagers as $manager) {
-                StatusTransitionPipeline::suspend($manager, $date)->execute();
+                resolve(SuspendManagerAction::class)->handle($manager, $date);
             }
         };
     }

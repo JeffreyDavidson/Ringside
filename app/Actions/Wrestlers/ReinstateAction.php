@@ -4,26 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 class ReinstateAction
 {
+    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+
     /**
      * Reinstate a wrestler and make them available for employment.
      *
-     * This handles the complete wrestler reinstatement workflow using StatusTransitionPipeline:
-     * - Validates the wrestler can be reinstated through pipeline validation
-     * - Uses StatusTransitionPipeline to end the suspension period
-     * - Maintains transaction boundaries and error handling through pipeline
+     * This handles the complete wrestler reinstatement workflow:
+     * - Validates the wrestler can be reinstated
+     * - Ends the suspension period through the shared lifecycle component
      * - Makes the wrestler available for new employment opportunities
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses StatusTransitionPipeline for consistency with other entity reinstatement operations
-     * and proper status transition management.
      *
      * @param  Wrestler  $wrestler  The wrestler to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
@@ -35,6 +32,6 @@ class ReinstateAction
 
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        StatusTransitionPipeline::reinstate($wrestler, $reinstatementDate)->execute();
+        $this->suspensionPeriods->end($wrestler, $reinstatementDate);
     }
 }
