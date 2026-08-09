@@ -15,7 +15,7 @@ class WrestlersTableSeeder extends Seeder
         $uniqueName = function () use (&$sequence): array {
             $sequence++;
 
-            return ['name' => fake()->name()." {$sequence}"];
+            return ['name' => "Seeded Wrestler {$sequence}"];
         };
 
         Wrestler::factory()->count(100)->bookable()->state($uniqueName)->create();

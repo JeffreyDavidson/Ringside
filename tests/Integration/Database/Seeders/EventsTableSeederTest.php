@@ -93,6 +93,14 @@ describe('EventsTableSeeder Integration Tests', function () {
             Artisan::call('db:seed', ['--class' => 'EventsTableSeeder']);
         });
 
+        test('all events have unique names', function () {
+            // Arrange
+            $events = Event::all();
+
+            // Assert
+            expect($events->pluck('name')->unique())->toHaveCount($events->count());
+        });
+
         test('events have valid venue associations', function () {
             // Arrange
             $events = Event::take(10)->get();
