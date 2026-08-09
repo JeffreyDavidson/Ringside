@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\RetireAction;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -35,6 +37,44 @@ test('it retires an employed tag team', function () {
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
+});
+
+test('it retires eligible current members by default', function () {
+    $tagTeam = TagTeam::factory()->employed()->create();
+    $wrestler = Wrestler::factory()->employed()->create();
+    $manager = Manager::factory()->employed()->create();
+
+    $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => now()->subMonth()]);
+    $tagTeam->managers()->attach($manager, ['hired_at' => now()->subMonth()]);
+
+    resolve(RetireAction::class)
+        ->handle($tagTeam);
+
+    $wrestler->refresh();
+    $manager->refresh();
+
+    expect($wrestler->isRetired())->toBeTrue()
+        ->and($manager->isRetired())->toBeTrue();
+});
+
+test('it can retire the tag team without retiring its members', function () {
+    $tagTeam = TagTeam::factory()->employed()->create();
+    $wrestler = Wrestler::factory()->employed()->create();
+    $manager = Manager::factory()->employed()->create();
+
+    $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => now()->subMonth()]);
+    $tagTeam->managers()->attach($manager, ['hired_at' => now()->subMonth()]);
+
+    resolve(RetireAction::class)
+        ->handle($tagTeam, retireMembers: false);
+
+    $tagTeam->refresh();
+    $wrestler->refresh();
+    $manager->refresh();
+
+    expect($tagTeam->isRetired())->toBeTrue()
+        ->and($wrestler->isRetired())->toBeFalse()
+        ->and($manager->isRetired())->toBeFalse();
 });
 
 test('it retires tag team with specific retirement date', function () {

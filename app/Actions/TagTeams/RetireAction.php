@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\RetirementCascadeStrategy;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
@@ -20,6 +19,7 @@ class RetireAction
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly RetireCurrentMembersAction $retireCurrentMembers,
     ) {}
 
     /**
@@ -36,16 +36,16 @@ class RetireAction
      *
      * @param  TagTeam  $tagTeam  The tag team to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     * @param  bool  $retirePartners  Whether to retire available partners (default: true)
+     * @param  bool  $retireMembers  Whether to retire eligible current members (default: true)
      * @throws CannotBeRetiredException When tag team cannot be retired due to business rules
      */
-    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retirePartners = true): void
+    public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retireMembers = true): void
     {
         $tagTeam->ensureCanBeRetired();
 
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
-        DB::transaction(function () use ($tagTeam, $retirementDate, $retirePartners): void {
+        DB::transaction(function () use ($tagTeam, $retirementDate, $retireMembers): void {
             if ($tagTeam->isEmployed()) {
                 $this->employmentPeriods->end($tagTeam, $retirementDate);
             }
@@ -55,7 +55,9 @@ class RetireAction
             }
 
             $this->retirementPeriods->start($tagTeam, $retirementDate);
-            RetirementCascadeStrategy::conditionalMembers($retirePartners)($tagTeam, $retirementDate, 'retire');
+            if ($retireMembers) {
+                $this->retireCurrentMembers->handle($tagTeam, $retirementDate);
+            }
         });
     }
 }
