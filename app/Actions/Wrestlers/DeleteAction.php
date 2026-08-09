@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\WrestlerDeletionCascadeStrategy;
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
@@ -14,7 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly DeletionPeriodCloser $periods) {}
+    public function __construct(
+        private readonly DeletionPeriodCloser $periods,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+    ) {}
 
     /**
      * Delete a wrestler.
@@ -26,7 +28,7 @@ class DeleteAction
      * - Preserves wrestler employment history for administrative records
      *
      * RELATIONSHIP IMPACT:
-     * - Uses WrestlerDeletionCascadeStrategy to end all professional relationships
+     * - Ends all current professional relationships through a typed domain action
      * - Removes wrestler from current tag teams (teams may need new members)
      * - Ends stable memberships (stables continue with remaining members)
      * - Terminates management contracts (managers may manage other talent)
@@ -46,7 +48,7 @@ class DeleteAction
 
         DB::transaction(function () use ($wrestler, $deletionDate): void {
             $this->periods->close($wrestler, $deletionDate);
-            WrestlerDeletionCascadeStrategy::endAllRelationships()($wrestler, $deletionDate, 'delete');
+            $this->endCurrentRelationships->handle($wrestler, $deletionDate);
 
             // Soft delete the wrestler record
             $wrestler->delete();

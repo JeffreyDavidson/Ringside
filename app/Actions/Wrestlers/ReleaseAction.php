@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\WrestlerRetirementCascadeStrategy;
 use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -20,6 +19,7 @@ class ReleaseAction
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
     /**
@@ -28,7 +28,7 @@ class ReleaseAction
      * This handles the complete wrestler release workflow:
      * - Validates the wrestler can be released
      * - Ends employment, suspension, and injury through lifecycle period managers
-     * - Cascades to end all professional relationships (same as retirement pattern)
+     * - Ends all current professional relationships through a typed domain action
      * - Maintains all historical records for tracking purposes
      * - Preserves the operation's transaction boundary
      *
@@ -51,7 +51,7 @@ class ReleaseAction
                 $this->injuryPeriods->end($wrestler, $releaseDate);
             }
 
-            WrestlerRetirementCascadeStrategy::endAllRelationships()($wrestler, $releaseDate, 'release');
+            $this->endCurrentRelationships->handle($wrestler, $releaseDate);
         });
     }
 }

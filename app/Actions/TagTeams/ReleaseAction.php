@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\ReleaseCascadeStrategy;
 use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
@@ -18,6 +17,7 @@ class ReleaseAction
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
     /**
@@ -26,8 +26,8 @@ class ReleaseAction
      * This handles the complete tag team release workflow:
      * - Validates the tag team can be released (currently employed)
      * - Ends employment and suspension through lifecycle period managers
-     * - Cascades to end wrestler partnerships (wrestlers become free agents)
-     * - Cascades to end manager relationships (managers remain available)
+     * - Ends current wrestler partnerships (wrestlers become free agents)
+     * - Ends current manager relationships (managers remain available)
      * - Maintains all historical records for tracking purposes
      * - Individual members retain employment status and may form new partnerships
      *
@@ -48,7 +48,7 @@ class ReleaseAction
                 $this->suspensionPeriods->end($tagTeam, $releaseDate);
             }
 
-            ReleaseCascadeStrategy::endAllRelationships()($tagTeam, $releaseDate, 'release');
+            $this->endCurrentRelationships->handle($tagTeam, $releaseDate);
         });
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\WrestlerRetirementCascadeStrategy;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -22,6 +21,7 @@ class RetireAction
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
     /**
@@ -30,7 +30,7 @@ class RetireAction
      * This handles the complete wrestler retirement workflow:
      * - Validates the wrestler can be retired
      * - Ends employment, suspension, and injury through lifecycle period managers
-     * - Cascades to end all professional relationships (partnerships, memberships, etc.)
+     * - Ends all current professional relationships through a typed domain action
      * - Starts a retirement period
      * - Makes the wrestler permanently unavailable for competition
      * - Preserves the operation's transaction boundary
@@ -57,7 +57,7 @@ class RetireAction
             }
 
             $this->retirementPeriods->start($wrestler, $retirementDate);
-            WrestlerRetirementCascadeStrategy::endAllRelationships()($wrestler, $retirementDate, 'retire');
+            $this->endCurrentRelationships->handle($wrestler, $retirementDate);
         });
     }
 }

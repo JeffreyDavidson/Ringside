@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\Cascades\ManagerDeletionCascadeStrategy;
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
@@ -13,7 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly DeletionPeriodCloser $periods) {}
+    public function __construct(
+        private readonly DeletionPeriodCloser $periods,
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+    ) {}
 
     /**
      * Delete a manager.
@@ -43,7 +45,7 @@ class DeleteAction
 
         DB::transaction(function () use ($manager, $deletionDate): void {
             $this->periods->close($manager, $deletionDate);
-            ManagerDeletionCascadeStrategy::comprehensive()($manager, $deletionDate);
+            $this->endCurrentRelationships->handle($manager, $deletionDate);
 
             // Soft delete the manager record
             $manager->delete();

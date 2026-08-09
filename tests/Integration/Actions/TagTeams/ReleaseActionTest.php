@@ -215,7 +215,7 @@ test('it handles release with cascade to partners and managers', function () {
     // Note: Cascade effects on partners/managers would be tested in cascade strategy tests
 });
 
-test('it uses ReleaseCascadeStrategy for comprehensive cleanup', function () {
+test('it ends all current relationships', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
