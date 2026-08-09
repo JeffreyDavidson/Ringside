@@ -259,5 +259,4 @@ test('it handles suspension with cascade effects', function () {
         'ended_at' => null,
     ]);
 
-    // Note: Cascade effects would be tested in cascade strategy tests
 });
