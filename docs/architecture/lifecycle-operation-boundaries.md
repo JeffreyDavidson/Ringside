@@ -80,6 +80,8 @@ Tag-team unretirement follows the same boundary through `UnretireCurrentMembersA
 
 Wrestler unretirement does not require a cascade collaborator merely to choose whether employment follows. The wrestler action owns that explicit option and calls its typed employment action directly when requested.
 
+Employment cascades use explicit capability and domain collaborators. Both tag teams and wrestlers delegate current-manager employment to `Managers\EmployCurrentManagersAction`, which accepts the existing `Manageable` contract. Tag teams separately delegate current-wrestler employment to `TagTeams\EmployCurrentWrestlersAction`. Each collaborator invokes complete typed employment actions only for currently unemployed related entities.
+
 ### Transition policies
 
 A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Actions\Concerns\EmploymentCascadeStrategy;
+use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -18,6 +18,7 @@ class EmployAction
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly EmployCurrentManagersAction $employCurrentManagers,
     ) {}
 
     /**
@@ -46,7 +47,7 @@ class EmployAction
             }
 
             $this->employmentPeriods->start($wrestler, $employmentDate);
-            EmploymentCascadeStrategy::managers()($wrestler, $employmentDate, 'employ');
+            $this->employCurrentManagers->handle($wrestler, $employmentDate);
         });
     }
 }
