@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentManagers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Actions/Concerns/ReleaseCascadeStrategy.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentWrestlers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Actions/Concerns/ReleaseCascadeStrategy.php
-
-		-
 			message: '#^Call to private method exists\(\) of parent class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\<Illuminate\\Database\\Eloquent\\Model,Illuminate\\Database\\Eloquent\\Model,Illuminate\\Database\\Eloquent\\Relations\\Pivot,string\>\.$#'
 			identifier: method.private
 			count: 1
@@ -29,54 +17,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Actions/Concerns/UnretirementCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''currentChampionships'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''managers'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''stables'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''tagTeams'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerDeletionCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''currentChampionships'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''managers'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''stables'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''tagTeams'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Actions/Concerns/WrestlerRetirementCascadeStrategy.php
 
 		-
 			message: '#^Access to an undefined property App\\Enums\\MatchType\:\:\$id\.$#'
