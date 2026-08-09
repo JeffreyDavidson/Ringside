@@ -6,12 +6,15 @@ namespace App\Actions\Managers;
 
 use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Exceptions\Roster\CannotBeUnretiredException;
+use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 
 class UnretireAction
 {
+    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+
     /**
      * Unretire a retired manager and return them to active talent management.
      *
@@ -42,9 +45,6 @@ class UnretireAction
 
         // Restart employment from the unretirement date so the manager is
         // available for wrestler/tag team assignments again.
-        $manager->employments()->create([
-            'started_at' => $unretiredDate,
-            'ended_at' => null,
-        ]);
+        $this->employmentPeriods->start($manager, $unretiredDate);
     }
 }

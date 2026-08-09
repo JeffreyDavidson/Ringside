@@ -4,27 +4,11 @@ declare(strict_types=1);
 
 use App\Actions\Concerns\StatusTransitionPipeline;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
-});
-
-test('it creates an employment period on the effective date', function () {
-    $wrestler = Wrestler::factory()->unemployed()->create();
-    $effectiveDate = now()->subDays(10);
-
-    StatusTransitionPipeline::employ($wrestler, $effectiveDate)
-        ->execute();
-
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
-        'started_at' => $effectiveDate->toDateTimeString(),
-        'ended_at' => null,
-    ]);
 });
 
 test('it ends active employment and suspension periods when released', function () {
@@ -98,21 +82,5 @@ test('it ends an active retirement period when unretired', function () {
     $this->assertDatabaseHas('wrestlers_retirements', [
         'wrestler_id' => $wrestler->id,
         'ended_at' => $effectiveDate->toDateTimeString(),
-    ]);
-});
-
-test('it rolls back the primary transition when a cascade fails', function () {
-    $wrestler = Wrestler::factory()->unemployed()->create();
-
-    $transition = StatusTransitionPipeline::employ($wrestler)
-        ->withCascade(function (Model $entity, Carbon $date, string $name): void {
-            throw new RuntimeException('Cascade failed.');
-        });
-
-    expect(fn () => $transition->execute())
-        ->toThrow(RuntimeException::class, 'Cascade failed.');
-
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
     ]);
 });

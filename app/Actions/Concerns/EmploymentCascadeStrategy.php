@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
-use App\Models\Contracts\Employable;
+use App\Actions\Managers\EmployAction as EmployManagerAction;
+use App\Actions\Wrestlers\EmployAction as EmployWrestlerAction;
 use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -23,9 +23,7 @@ use Illuminate\Support\Carbon;
  * talent. When a wrestler or tag team gets employed, their managers should also be
  * employed if they aren't already.
  *
- * DESIGN PATTERN:
- * Strategy pattern - each method returns a callable strategy that can be used
- * with StatusTransitionPipeline.withCascade().
+ * Each method returns a callable strategy for employment orchestration.
  */
 class EmploymentCascadeStrategy
 {
@@ -52,7 +50,7 @@ class EmploymentCascadeStrategy
                 ->filter(fn (Manager $manager) => ! $manager->isEmployed());
 
             foreach ($unemployedManagers as $manager) {
-                StatusTransitionPipeline::employ($manager, $date)->execute();
+                resolve(EmployManagerAction::class)->handle($manager, $date);
             }
         };
     }
@@ -80,135 +78,7 @@ class EmploymentCascadeStrategy
                 ->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed());
 
             foreach ($unemployedWrestlers as $wrestler) {
-                StatusTransitionPipeline::employ($wrestler, $date)->execute();
-            }
-        };
-    }
-
-    /**
-     * Strategy to employ all unemployed tag teams of the entity (for stables).
-     *
-     * @return callable Strategy function for tag team employment cascade
-     */
-    public static function tagTeams(): callable
-    {
-        return function (Model $entity, Carbon $date, string $transition): void {
-            // Only cascade on employment transitions
-            if ($transition !== 'employ') {
-                return;
-            }
-
-            // Check if entity has tag team relationships (stables)
-            if (! method_exists($entity, 'currentTagTeams')) {
-                return;
-            }
-
-            $unemployedTagTeams = $entity->currentTagTeams()
-                ->get()
-                ->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isEmployed());
-
-            foreach ($unemployedTagTeams as $tagTeam) {
-                StatusTransitionPipeline::employ($tagTeam, $date)
-                    ->withCascade(self::wrestlers())
-                    ->withCascade(self::managers())
-                    ->execute();
-            }
-        };
-    }
-
-    /**
-     * Combined strategy to employ all unemployed members (wrestlers, tag teams, managers).
-     * Useful for stable employment that needs to cascade to all member types.
-     *
-     * @return callable Strategy function for complete member employment cascade
-     */
-    public static function allMembers(): callable
-    {
-        return function (Model $entity, Carbon $date, string $transition): void {
-            // Only cascade on employment transitions
-            if ($transition !== 'employ') {
-                return;
-            }
-
-            // Prevent infinite recursion by tracking executed entities
-            static $executed = [];
-            $entityKey = get_class($entity).':'.$entity->getKey();
-
-            if (in_array($entityKey, $executed)) {
-                return;
-            }
-            $executed[] = $entityKey;
-
-            // Employ wrestlers first (they may have managers)
-            if (method_exists($entity, 'currentWrestlers')) {
-                $unemployedWrestlers = $entity->currentWrestlers()
-                    ->get()
-                    ->filter(fn (Wrestler $wrestler) => ! $wrestler->isEmployed());
-
-                foreach ($unemployedWrestlers as $wrestler) {
-                    StatusTransitionPipeline::employ($wrestler, $date)
-                        ->withCascade(self::managers())
-                        ->execute();
-                }
-            }
-
-            // Employ tag teams (they may have wrestlers and managers)
-            if (method_exists($entity, 'currentTagTeams')) {
-                $unemployedTagTeams = $entity->currentTagTeams()
-                    ->get()
-                    ->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isEmployed());
-
-                foreach ($unemployedTagTeams as $tagTeam) {
-                    StatusTransitionPipeline::employ($tagTeam, $date)
-                        ->withCascade(self::wrestlers())
-                        ->withCascade(self::managers())
-                        ->execute();
-                }
-            }
-
-            // Employ managers last (they don't cascade to anyone)
-            if (method_exists($entity, 'currentManagers')) {
-                $unemployedManagers = $entity->currentManagers()
-                    ->get()
-                    ->filter(fn (Manager $manager) => ! $manager->isEmployed());
-
-                foreach ($unemployedManagers as $manager) {
-                    StatusTransitionPipeline::employ($manager, $date)->execute();
-                }
-            }
-
-            // Clear the executed list for this cascade chain
-            $executed = [];
-        };
-    }
-
-    /**
-     * Custom cascade strategy builder for specific employment patterns.
-     *
-     * @param  array<int, string>  $relationships  Array of relationship method names to cascade
-     * @return callable Custom strategy function
-     */
-    public static function custom(array $relationships): callable
-    {
-        return function (Model $entity, Carbon $date, string $transition) use ($relationships): void {
-            // Only cascade on employment transitions
-            if ($transition !== 'employ') {
-                return;
-            }
-
-            foreach ($relationships as $relationship) {
-                if (! method_exists($entity, $relationship)) {
-                    continue;
-                }
-
-                $unemployedEntities = $entity->{$relationship}
-                    ->filter(function (Model $relatedEntity): bool {
-                        return $relatedEntity instanceof Employable && ! $relatedEntity->isEmployed();
-                    });
-
-                foreach ($unemployedEntities as $relatedEntity) {
-                    StatusTransitionPipeline::employ($relatedEntity, $date)->execute();
-                }
+                resolve(EmployWrestlerAction::class)->handle($wrestler, $date);
             }
         };
     }

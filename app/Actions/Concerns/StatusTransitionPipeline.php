@@ -13,8 +13,8 @@ use InvalidArgumentException;
 /**
  * Unified status transition pipeline for wrestling promotion entities.
  *
- * This pipeline provides a consistent approach to the remaining status changes (employment,
- * release, retirement, deletion, and unretirement) while allowing for entity-specific validation
+ * This pipeline provides a consistent approach to the remaining status changes (release,
+ * retirement, deletion, and unretirement) while allowing for entity-specific validation
  * and cascading behaviors.
  *
  * DESIGN PATTERN:
@@ -27,7 +27,6 @@ use InvalidArgumentException;
  * a wrestler should employ their managers).
  *
  * SUPPORTED TRANSITIONS:
- * - Employment (from unemployed to employed)
  * - Release (from employed to released)
  * - Retirement (from active to retired)
  */
@@ -55,14 +54,6 @@ class StatusTransitionPipeline
         $this->entity = $entity;
         $this->transition = $transition;
         $this->effectiveDate = $this->getEffectiveDate($date);
-    }
-
-    /**
-     * Create an employment transition pipeline.
-     */
-    public static function employ(Model $entity, ?Carbon $date = null): self
-    {
-        return new self($entity, 'employ', $date);
     }
 
     /**
@@ -182,7 +173,6 @@ class StatusTransitionPipeline
     protected function getDefaultValidationMethod(): string
     {
         return match ($this->transition) {
-            'employ' => 'ensureCanBeEmployed',
             'release' => 'ensureCanBeReleased',
             'retire' => 'ensureCanBeRetired',
             'delete' => 'ensureCanBeDeleted',
@@ -196,43 +186,14 @@ class StatusTransitionPipeline
      */
     protected function executeCoreTransition(): void
     {
-        // Handle transitions that require ending existing status
-        $this->handleStatusEnding();
-
         // Execute the main transition using direct Eloquent operations
         match ($this->transition) {
-            'employ' => $this->createEmployment(),
             'release' => $this->createRelease(),
             'retire' => $this->createRetirement(),
             'delete' => $this->createDeletion(),
             'unretire' => $this->endRetirement(),
             default => throw new InvalidArgumentException("Unknown transition: {$this->transition}")
         };
-    }
-
-    /**
-     * Handle ending existing status before new transition (e.g., end retirement before employment).
-     */
-    protected function handleStatusEnding(): void
-    {
-        // Employment requires ending retirement
-        if ($this->transition === 'employ' && method_exists($this->entity, 'isRetired') && $this->entity->isRetired()) {
-            $this->endRetirement();
-        }
-
-        // Add other status ending logic as needed
-    }
-
-    /**
-     * Create employment record using direct Eloquent operations.
-     */
-    protected function createEmployment(): void
-    {
-        $table = $this->getTableName('employments');
-        $this->entity->{$table}()->create([
-            'started_at' => $this->effectiveDate,
-            'ended_at' => null,
-        ]);
     }
 
     /**

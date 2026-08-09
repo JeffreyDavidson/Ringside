@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Concerns;
 
+use App\Actions\TagTeams\EmployAction as EmployTagTeamAction;
 use App\Models\Managers\Manager;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -177,20 +179,15 @@ class UnretirementCascadeStrategy
                 return;
             }
 
-            // Check if entity can be employed
-            if (! method_exists($entity, 'isEmployed') || $entity->isEmployed()) {
+            if (! $entity instanceof TagTeam || $entity->isEmployed()) {
                 return;
             }
 
-            if (method_exists($entity, 'currentWrestlers') && $entity->currentWrestlers->isEmpty()) {
+            if ($entity->currentWrestlers->isEmpty()) {
                 return;
             }
 
-            // Employ the entity using StatusTransitionPipeline
-            StatusTransitionPipeline::employ($entity, $date)
-                ->withCascade(EmploymentCascadeStrategy::wrestlers())
-                ->withCascade(EmploymentCascadeStrategy::managers())
-                ->execute();
+            resolve(EmployTagTeamAction::class)->handle($entity, $date);
         };
     }
 }

@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Actions\Concerns\StatusTransitionPipeline;
+use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Managers\Manager;
+use App\Support\DateHelper;
 use Exception;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
+    public function __construct(private readonly EmploymentPeriodManager $employmentPeriods) {}
+
     /**
      * Employ a manager.
      *
-     * This handles the complete manager employment workflow using the StatusTransitionPipeline:
+     * This handles the complete manager employment workflow:
      * - Validates the manager can be employed (not retired, not already employed)
      * - Ends retirement if currently retired
-     * - Creates an employment record with the specified start date
+     * - Creates the employment record through the shared lifecycle component
      * - Makes the manager available for talent management assignments
      *
      * @param  Manager  $manager  The manager to employ
@@ -28,6 +32,14 @@ class EmployAction
     {
         $manager->ensureCanBeEmployed();
 
-        StatusTransitionPipeline::employ($manager, $startDate)->execute();
+        $startDate = DateHelper::resolveDate($startDate);
+
+        DB::transaction(function () use ($manager, $startDate): void {
+            if ($manager->isRetired()) {
+                $manager->currentRetirement()->update(['ended_at' => $startDate]);
+            }
+
+            $this->employmentPeriods->start($manager, $startDate);
+        });
     }
 }
