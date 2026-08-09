@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Actions\Concerns\ReinstatementCascadeStrategy;
 use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\TagTeams\TagTeam;
@@ -14,7 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class ReinstateAction
 {
-    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly ReinstateCurrentMembersAction $reinstateCurrentMembers,
+    ) {}
 
     /**
      * Reinstate a suspended tag team.
@@ -38,7 +40,7 @@ class ReinstateAction
 
         DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
             $this->suspensionPeriods->end($tagTeam, $reinstatementDate);
-            ReinstatementCascadeStrategy::allMembers()($tagTeam, $reinstatementDate, 'reinstate');
+            $this->reinstateCurrentMembers->handle($tagTeam, $reinstatementDate);
         });
     }
 }
