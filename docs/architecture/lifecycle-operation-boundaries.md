@@ -78,6 +78,8 @@ Tag-team retirement demonstrates this distinction. `RetireCurrentMembersAction` 
 
 Tag-team unretirement follows the same boundary through `UnretireCurrentMembersAction`. It attempts each retired current member's complete typed unretirement independently, preserving the established rule that one member's failure does not prevent other eligible members or the team from returning. Optional immediate team employment remains an explicit decision in the coordinating tag-team action and delegates to the existing employment action.
 
+Wrestler unretirement does not require a cascade collaborator merely to choose whether employment follows. The wrestler action owns that explicit option and calls its typed employment action directly when requested.
+
 ### Transition policies
 
 A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.
