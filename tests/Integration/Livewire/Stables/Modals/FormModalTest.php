@@ -143,6 +143,20 @@ describe('FormModal Create Operations', function () {
         $component->assertHasErrors(['form.name']);
     });
 
+    it('allows reusing a deleted stable name', function () {
+        $stable = Stable::factory()->create(['name' => 'Existing Stable']);
+        $stable->delete();
+
+        $component = livewire(FormModal::class)
+            ->call('openModal')
+            ->set('form.name', 'Existing Stable')
+            ->set('form.started_at', '2024-01-01')
+            ->call('save');
+
+        $component->assertHasNoErrors();
+        $component->assertDispatched('form-submitted');
+    });
+
     it('validates started_at date format', function () {
         $component = livewire(FormModal::class)
             ->call('openModal')
