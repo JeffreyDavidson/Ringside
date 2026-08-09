@@ -24,9 +24,8 @@ use Illuminate\Support\Carbon;
  * - Sometimes only the partnership ends while members continue independently
  * - Managers may retire with their teams or continue managing other talent
  *
- * DESIGN PATTERN:
- * Strategy pattern - each method returns a callable strategy that can be used
- * with StatusTransitionPipeline.withCascade().
+ * Each method returns a callable strategy that a retirement action can invoke
+ * within its transaction.
  */
 class RetirementCascadeStrategy
 {

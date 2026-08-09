@@ -12,8 +12,7 @@ use Illuminate\Support\Carbon;
  * Restore cascade strategies for automatic relationship-based actions during restoration.
  *
  * This class provides strategies for handling relationships when a soft-deleted entity
- * is restored. The restore operation is unique in that it doesn't follow the typical
- * StatusTransitionPipeline pattern since it's not a status transition but a record restoration.
+ * is restored.
  *
  * BUSINESS CONTEXT:
  * When a tag team is restored from soft deletion:

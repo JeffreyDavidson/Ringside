@@ -47,7 +47,7 @@ test('it injures wrestler with specific injury date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for injury', function () {
+test('it persists the injury lifecycle', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentInjury)->toBeNull();
@@ -56,7 +56,7 @@ test('it uses StatusTransitionPipeline for injury', function () {
 
     $wrestler->refresh();
 
-    // Verify injury created through pipeline
+    // Verify injury period was created
     expect($wrestler->currentInjury)->not()->toBeNull();
     expect($wrestler->isInjured())->toBeTrue();
 

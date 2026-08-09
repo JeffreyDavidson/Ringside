@@ -32,8 +32,7 @@ class CreateAction
      *
      * ARCHITECTURAL PATTERN:
      * Uses dedicated services (EmployAction, WrestlerManagerAssignmentService) for consistent
-     * handling instead of manual database operations. This ensures proper StatusTransitionPipeline
-     * usage and cascade behavior.
+     * handling instead of manual database operations.
      *
      * @param  WrestlerData  $wrestlerData  The data transfer object containing wrestler information
      * @return Wrestler The newly created wrestler instance

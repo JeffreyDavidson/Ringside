@@ -117,7 +117,7 @@ test('it handles database transactions correctly', function () {
     expect($employment->ended_at)->toBeNull();
 });
 
-test('it uses StatusTransitionPipeline for consistent status handling', function () {
+test('it persists the employment lifecycle', function () {
     $manager = Manager::factory()->create();
 
     resolve(EmployAction::class)->handle($manager);

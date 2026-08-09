@@ -47,7 +47,7 @@ test('it suspends manager with specific suspension date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for suspension', function () {
+test('it persists the suspension lifecycle', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentSuspension)->toBeNull();
@@ -56,7 +56,7 @@ test('it uses StatusTransitionPipeline for suspension', function () {
 
     $manager->refresh();
 
-    // Verify suspension was created through pipeline
+    // Verify suspension period was created
     expect($manager->currentSuspension)->not()->toBeNull();
     expect($manager->isSuspended())->toBeTrue();
 

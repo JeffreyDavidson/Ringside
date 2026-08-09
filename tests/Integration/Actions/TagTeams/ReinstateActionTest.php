@@ -46,7 +46,7 @@ test('it reinstates tag team with specific reinstatement date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for reinstatement', function () {
+test('it persists the reinstatement lifecycle', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
@@ -56,7 +56,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
 
     $tagTeam->refresh();
 
-    // Verify suspension ended through pipeline
+    // Verify suspension period was ended
     expect($tagTeam->currentSuspension)->toBeNull();
     expect($tagTeam->isSuspended())->toBeFalse();
     expect($tagTeam->isEmployed())->toBeTrue();
@@ -212,7 +212,7 @@ test('it handles reinstatement with cascade effects', function () {
 
     $tagTeam->refresh();
 
-    // Verify the action used StatusTransitionPipeline
+    // Verify the action persisted the expected lifecycle state
     expect($tagTeam->isSuspended())->toBeFalse();
     expect($tagTeam->isEmployed())->toBeTrue();
 

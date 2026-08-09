@@ -68,7 +68,7 @@ test('it reinstates wrestler with specific reinstatement date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for reinstatement', function () {
+test('it persists the reinstatement lifecycle', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
@@ -79,7 +79,7 @@ test('it uses StatusTransitionPipeline for reinstatement', function () {
 
     $wrestler->refresh();
 
-    // Verify suspension ended through pipeline
+    // Verify suspension period was ended
     expect($wrestler->currentSuspension)->toBeNull();
     expect($wrestler->isSuspended())->toBeFalse();
 

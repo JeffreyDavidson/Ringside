@@ -47,7 +47,7 @@ test('it injures manager with specific injury date', function () {
     ]);
 });
 
-test('it uses StatusTransitionPipeline for injury', function () {
+test('it persists the injury lifecycle', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentInjury)->toBeNull();
@@ -56,7 +56,7 @@ test('it uses StatusTransitionPipeline for injury', function () {
 
     $manager->refresh();
 
-    // Verify injury was created through pipeline
+    // Verify injury period was created
     expect($manager->currentInjury)->not()->toBeNull();
     expect($manager->isInjured())->toBeTrue();
 

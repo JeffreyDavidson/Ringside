@@ -58,7 +58,7 @@ class CreateAction
                 false // Don't employ through membership service - handle separately if needed
             );
 
-            // Handle employment through StatusTransitionPipeline if requested
+            // Handle employment through the typed action when requested
             if ($tagTeamData->employment_date) {
                 $this->employAction->handle($tagTeam, $tagTeamData->employment_date);
             }
