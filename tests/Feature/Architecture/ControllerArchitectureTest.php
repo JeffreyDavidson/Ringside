@@ -6,8 +6,6 @@ use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
-use ReflectionClass;
-use ReflectionMethod;
 
 /**
  * @return list<class-string>
@@ -106,13 +104,13 @@ test('domain resource routes are named and authorized at the route', function ()
 
         $routeCount++;
         [, $method] = explode('@', $route->getActionName(), 2);
-        $middleware = $route->gatherMiddleware();
+        $middleware = $route->middleware();
 
         expect($route->getName())
             ->not->toBeNull()
             ->toEndWith(".{$method}")
             ->and(collect($middleware)->contains(
-                fn (mixed $value): bool => is_string($value) && str_starts_with($value, 'can:'),
+                fn (string $value): bool => str_starts_with($value, 'can:'),
             ))
             ->toBeTrue();
     }
