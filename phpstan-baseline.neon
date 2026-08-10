@@ -1285,36 +1285,6 @@ parameters:
 			path: app/Models/Titles/TitleChampionship.php
 
 		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:hasFutureEmployment\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:released\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:retired\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:suspended\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:unemployed\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$first_name\.$#'
 			identifier: property.notFound
 			count: 1

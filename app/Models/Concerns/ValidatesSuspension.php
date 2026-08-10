@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Enums\Shared\RosterMemberType;
 use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Exceptions\Roster\CannotBeSuspendedException;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Suspendable;
-use App\Models\Contracts\SuspensionValidationStrategy;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
+use App\Models\Validation\Strategies\IndividualSuspensionValidation;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
+use LogicException;
 
 /**
  * Provides suspension validation functionality for models.
@@ -85,7 +87,13 @@ trait ValidatesSuspension
      */
     public function ensureCanBeSuspended(): void
     {
-        app($this->getSuspensionValidationStrategy())->validate($this);
+        if ($this instanceof Wrestler || $this instanceof Manager || $this instanceof Referee) {
+            (new IndividualSuspensionValidation())->validate($this);
+
+            return;
+        }
+
+        throw new LogicException(sprintf('%s does not support shared suspension validation.', static::class));
     }
 
     /**
@@ -166,19 +174,5 @@ trait ValidatesSuspension
         if ($this instanceof Bookable && $this->isBookable()) {
             throw CannotBeReinstatedException::bookable($this);
         }
-    }
-
-    /**
-     * Get the appropriate suspension validation strategy for this entity.
-     *
-     * Determines which validation strategy to use based on the entity type.
-     * TagTeams require complex validation of their wrestlers, while individual
-     * entities use standard validation.
-     *
-     * @return class-string<SuspensionValidationStrategy> The strategy class name
-     */
-    protected function getSuspensionValidationStrategy(): string
-    {
-        return RosterMemberType::fromModel($this)->getSuspensionValidationStrategy();
     }
 }

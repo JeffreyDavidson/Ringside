@@ -9,9 +9,6 @@ use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
-use App\Models\Validation\Strategies\IndividualSuspensionValidation;
-use App\Models\Validation\Strategies\StableSuspensionValidation;
-use App\Models\Validation\Strategies\TagTeamSuspensionValidation;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
@@ -276,32 +273,6 @@ enum RosterMemberType: string
             self::TAG_TEAM => TagTeam::class,
             self::TITLE => Title::class,
             self::STABLE => Stable::class,
-        };
-    }
-
-    /**
-     * Get the appropriate validation strategy for suspension operations.
-     *
-     * Returns the class name for the validation strategy that should be used
-     * when validating suspension operations for this roster member type.
-     *
-     * @return class-string The validation strategy class name
-     *
-     * @example
-     * ```php
-     * $strategy = RosterMemberType::WRESTLER->getSuspensionValidationStrategy();
-     * // Returns: IndividualSuspensionValidation::class
-     *
-     * $strategy = RosterMemberType::TAG_TEAM->getSuspensionValidationStrategy();
-     * // Returns: TagTeamSuspensionValidation::class
-     * ```
-     */
-    public function getSuspensionValidationStrategy(): string
-    {
-        return match ($this) {
-            self::TAG_TEAM, self::TITLE => TagTeamSuspensionValidation::class,
-            self::STABLE => StableSuspensionValidation::class,
-            self::WRESTLER, self::MANAGER, self::REFEREE => IndividualSuspensionValidation::class,
         };
     }
 
