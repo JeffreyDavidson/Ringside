@@ -13,10 +13,8 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
@@ -48,15 +46,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Builder::macro('orderByNullsLast', function (Expression|string $column, string $direction = 'asc') {
-            /** @var Builder $this */
-            $builder = $this;
-            $column = $builder->getGrammar()->wrap($column);
-            $direction = mb_strtolower($direction) === 'asc' ? 'asc' : 'desc';
-
-            return $builder->orderByRaw("{$column} IS NULL {$direction}, {$column} {$direction}");
-        });
-
         /** @param array<string> $parameters */
         Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters): string {
             /** @var string $values */
