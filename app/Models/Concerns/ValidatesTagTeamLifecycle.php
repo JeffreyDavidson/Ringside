@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
-use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
-use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Models\Wrestlers\Wrestler;
 use Exception;
@@ -118,106 +116,6 @@ trait ValidatesTagTeamLifecycle
         // if (! $this->hasRetirementAuthorization()) {
         //     throw CannotBeRetiredException::insufficientAuthorization($this, 'management');
         // }
-    }
-
-    /**
-     * Determine if the tag team can be suspended.
-     *
-     * Checks business rules for tag team suspension:
-     * - Must be currently employed
-     * - Must not already be suspended
-     * - Should validate disciplinary requirements
-     *
-     * @return bool True if the tag team can be suspended, false otherwise
-     */
-    public function canBeSuspended(): bool
-    {
-        if (! $this->isEmployed()) {
-            return false;
-        }
-
-        if ($this->isSuspended()) {
-            return false;
-        }
-
-        // Basic suspension is possible if employed and not already suspended
-        return true;
-    }
-
-    /**
-     * Ensure the tag team can be suspended, throwing an exception if not.
-     *
-     * Validates that the tag team is in a valid state for suspension while checking
-     * for business rule violations including employment status, existing suspensions,
-     * and administrative requirements.
-     *
-     * @throws CannotBeSuspendedException When suspension is not allowed
-     */
-    public function ensureCanBeSuspended(): void
-    {
-        if (! $this->isEmployed()) {
-            throw CannotBeSuspendedException::notEmployed($this);
-        }
-
-        if ($this->isSuspended()) {
-            throw CannotBeSuspendedException::alreadySuspended($this);
-        }
-
-        // Additional business rule validations could be added here:
-        // - Check for disciplinary authorization requirements
-        // - Check for active championship obligations
-        // - Check for scheduled match conflicts
-        // - Check for storyline impact considerations
-    }
-
-    /**
-     * Determine if the tag team can be reinstated.
-     *
-     * Checks business rules for tag team reinstatement:
-     * - Must be currently suspended
-     * - Must still be employed
-     * - Should validate reinstatement authorization
-     *
-     * @return bool True if the tag team can be reinstated, false otherwise
-     */
-    public function canBeReinstated(): bool
-    {
-        if (! $this->isSuspended()) {
-            return false;
-        }
-
-        if (! $this->isEmployed()) {
-            return false;
-        }
-
-        // Basic reinstatement is possible if suspended and employed
-        return true;
-    }
-
-    /**
-     * Ensure the tag team can be reinstated, throwing an exception if not.
-     *
-     * Validates that the tag team is in a valid state for reinstatement while checking
-     * for business rule violations including suspension status, employment status,
-     * and authorization requirements.
-     *
-     * @throws CannotBeReinstatedException When reinstatement is not allowed
-     */
-    public function ensureCanBeReinstated(): void
-    {
-        if (! $this->isSuspended()) {
-            throw CannotBeReinstatedException::notSuspended($this);
-        }
-
-        if (! $this->isEmployed()) {
-            throw CannotBeReinstatedException::notEmployed($this);
-        }
-
-        // Additional business rule validations could be added here:
-        // - Check for reinstatement authorization requirements
-        // - Check for disciplinary clearance
-        // - Check for administrative approval
-        // - Check for partner availability after suspension period
     }
 
     /**
