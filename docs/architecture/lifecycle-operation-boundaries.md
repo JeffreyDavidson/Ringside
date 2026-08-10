@@ -151,6 +151,8 @@ Suspension eligibility follows the same typed boundary. Shared individual valida
 
 Tag-team lifecycle validation uses the concrete `Wrestler` models returned by its current-wrestler relationship. It must not probe for speculative capabilities with `method_exists()`. Current wrestler employment remains valid when employing the team, while an injured current wrestler remains unavailable for tag-team unretirement. Any future exclusivity rule must be introduced as an explicit reviewed domain rule with real model behavior and tests.
 
+Tag-team employment eligibility is isolated in `ValidatesTagTeamEmployment`. The concern owns only the model-level `canBeEmployed()` and `ensureCanBeEmployed()` rules; the employment Action continues to own orchestration and persistence. Other tag-team lifecycle dimensions remain separate and will be extracted independently.
+
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;
