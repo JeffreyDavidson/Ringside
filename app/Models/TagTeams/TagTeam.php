@@ -14,6 +14,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesTagTeamWrestlers;
+use App\Models\Concerns\ValidatesTagTeamEmployment;
 use App\Models\Concerns\ValidatesTagTeamLifecycle;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
@@ -148,6 +149,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     use ProvidesTagTeamWrestlers;
 
     use SoftDeletes;
+    use ValidatesTagTeamEmployment;
     use ValidatesTagTeamLifecycle;
 
     /**

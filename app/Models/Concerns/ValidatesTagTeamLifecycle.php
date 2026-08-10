@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
-use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
@@ -46,69 +45,6 @@ use Exception;
  */
 trait ValidatesTagTeamLifecycle
 {
-    /**
-     * Determine if the tag team can be employed.
-     *
-     * Checks business rules for tag team employment:
-     * - Must not already be employed
-     * - Must not be retired (requires unretirement first)
-     * - Partners must be available and employable
-     * - Must meet promotion standards
-     *
-     * @return bool True if the tag team can be employed, false otherwise
-     */
-    public function canBeEmployed(): bool
-    {
-        if ($this->isEmployed()) {
-            return false;
-        }
-
-        if ($this->isRetired()) {
-            return false;
-        }
-
-        // Check if current partners are available for employment
-        $currentPartners = $this->currentWrestlers;
-        if ($currentPartners->isEmpty()) {
-            return false;
-        }
-
-        // Basic employment is possible
-        return true;
-    }
-
-    /**
-     * Ensure the tag team can be employed, throwing an exception if not.
-     *
-     * Validates that the tag team is in a valid state for employment while checking
-     * for business rule violations including partner availability, standards compliance,
-     * and administrative requirements.
-     *
-     * @throws CannotBeEmployedException When employment is not allowed
-     */
-    public function ensureCanBeEmployed(): void
-    {
-        if ($this->isEmployed()) {
-            throw CannotBeEmployedException::alreadyEmployed($this);
-        }
-
-        if ($this->isRetired()) {
-            throw CannotBeEmployedException::retired($this);
-        }
-
-        // Check partner availability
-        $currentPartners = $this->currentWrestlers;
-        if ($currentPartners->isEmpty()) {
-            throw CannotBeEmployedException::partnersUnavailable($this, 'No current partners available');
-        }
-
-        // Additional business rule validations could be added here:
-        // - Check promotion employment standards
-        // - Check roster limits
-        // - Check authorization requirements
-        // - Check disciplinary issues
-    }
-
     /**
      * Determine if the tag team can be retired.
      *
