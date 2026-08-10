@@ -8,11 +8,7 @@ use App\Models\Matches\EventMatch;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * Provides match relationships for models that officiate matches.
- *
- * This trait implements the BookableOfficial interface for models
- * that officiate matches through the events_matches_referees pivot table.
- * It's designed to be used by officials like referees.
+ * Provides match relationships for officials.
  */
 trait OfficiatesMatches
 {

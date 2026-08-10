@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Models\Contracts\HasTagTeamWrestlers;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -12,25 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * Trait for tag teams that have wrestler members.
- *
- * This trait provides functionality for managing wrestler memberships in tag teams,
- * including current and former wrestler relationships. It handles the many-to-many
- * relationship between tag teams and wrestlers through a pivot model.
- *
  * @template TModel of Model The tag team model using this trait
- *
- * @phpstan-require-implements HasTagTeamWrestlers<TModel, TagTeamWrestler>
- *
- * @see HasTagTeamWrestlers
- *
- * @example
- * ```php
- * class TagTeam extends Model implements HasTagTeamWrestlers
- * {
- *     use ProvidesTagTeamWrestlers;
- * }
- * ```
  */
 trait ProvidesTagTeamWrestlers
 {

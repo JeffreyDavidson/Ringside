@@ -15,11 +15,10 @@ use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesTagTeamWrestlers;
 use App\Models\Concerns\ValidatesTagTeamLifecycle;
-use App\Models\Contracts\BookableCompetitor;
+use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\HasTagTeamWrestlers;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
@@ -42,11 +41,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
- * @implements BookableCompetitor<static>
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableTagTeam, static>
  * @implements Employable<TagTeamEmployment, static>
- * @implements HasTagTeamWrestlers<static, TagTeamWrestler>
  * @implements Manageable<TagTeamManager, static>
  * @implements Retirable<TagTeamRetirement, static>
  * @implements Suspendable<TagTeamSuspension, static>
@@ -122,7 +119,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(TagTeamFactory::class)]
 #[UseEloquentBuilder(TagTeamBuilder::class)]
-class TagTeam extends Model implements BookableCompetitor, CanBeAStableMember, CanBeChampion, Employable, HasTagTeamWrestlers, Manageable, Retirable, Suspendable
+class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, Suspendable
 {
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;

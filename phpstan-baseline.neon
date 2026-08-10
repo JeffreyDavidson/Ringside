@@ -1195,18 +1195,6 @@ parameters:
 			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionships.php
 
 		-
-			message: '#^Type \$this\(App\\Models\\Contracts\\BookableCompetitor\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\) in generic type Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\<App\\Models\\Matches\\EventMatch, \$this\(App\\Models\\Contracts\\BookableCompetitor\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\), App\\Models\\Matches\\MatchCompetitor, string\> in PHPDoc tag @return is not subtype of template type TDeclaringModel of Illuminate\\Database\\Eloquent\\Model of class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\.$#'
-			identifier: generics.notSubtype
-			count: 2
-			path: app/Models/Contracts/BookableCompetitor.php
-
-		-
-			message: '#^Type \$this\(App\\Models\\Contracts\\BookableOfficial\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\) in generic type Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\<App\\Models\\Matches\\EventMatch, \$this\(App\\Models\\Contracts\\BookableOfficial\<TDeclaringModel of Illuminate\\Database\\Eloquent\\Model\>\), Illuminate\\Database\\Eloquent\\Relations\\Pivot, string\> in PHPDoc tag @return is not subtype of template type TDeclaringModel of Illuminate\\Database\\Eloquent\\Model of class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\.$#'
-			identifier: generics.notSubtype
-			count: 2
-			path: app/Models/Contracts/BookableOfficial.php
-
-		-
 			message: '#^PHPDoc tag @throws with type App\\Exceptions\\Status\\CannotBeRetiredException is not subtype of Throwable$#'
 			identifier: throws.notThrowable
 			count: 1

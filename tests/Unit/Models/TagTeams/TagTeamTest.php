@@ -17,7 +17,6 @@ use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\HasTagTeamWrestlers;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
@@ -95,7 +94,6 @@ describe('TagTeam Model Unit Tests', function () {
             expect(TagTeam::class)->toImplement(CanBeAStableMember::class);
             expect(TagTeam::class)->toImplement(CanBeChampion::class);
             expect(TagTeam::class)->toImplement(Employable::class);
-            expect(TagTeam::class)->toImplement(HasTagTeamWrestlers::class);
             expect(TagTeam::class)->toImplement(Manageable::class);
             expect(TagTeam::class)->toImplement(Retirable::class);
             expect(TagTeam::class)->toImplement(Suspendable::class);
