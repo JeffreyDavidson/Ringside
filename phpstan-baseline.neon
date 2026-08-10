@@ -1457,9 +1457,3 @@ parameters:
 			identifier: throws.notThrowable
 			count: 1
 			path: app/Models/Wrestlers/Wrestler.php
-
-		-
-			message: '#^PHPDoc tag @var for variable \$this contains generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany but does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Providers/AppServiceProvider.php

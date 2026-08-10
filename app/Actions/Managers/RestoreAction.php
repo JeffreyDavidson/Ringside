@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Models\Managers\Manager;
+use App\Services\ManagerAssignmentService;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
+    public function __construct(private readonly ManagerAssignmentService $managerAssignments) {}
+
     /**
      * Restore a soft-deleted manager.
      *
@@ -31,8 +34,7 @@ class RestoreAction
             $restorationDate = now();
 
             $manager->employments()->whereNull('ended_at')->update(['ended_at' => $restorationDate]);
-            $manager->removeFromCurrentWrestlers($restorationDate);
-            $manager->removeFromCurrentTagTeams($restorationDate);
+            $this->managerAssignments->endCurrentAssignments($manager, $restorationDate);
         });
     }
 }
