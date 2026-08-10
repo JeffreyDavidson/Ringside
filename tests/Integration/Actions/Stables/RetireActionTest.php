@@ -63,6 +63,7 @@ test('it records a future retirement date while ending current operations now', 
         $membership = StableWrestler::query()
             ->whereBelongsTo($stable)
             ->whereBelongsTo($wrestler)
+            ->latest('id')
             ->firstOrFail();
 
         expect(requiredDate($membership->left_at)->toDateTimeString())
@@ -73,6 +74,7 @@ test('it records a future retirement date while ending current operations now', 
         $membership = StableTagTeam::query()
             ->whereBelongsTo($stable)
             ->whereBelongsTo($tagTeam, 'tagTeam')
+            ->latest('id')
             ->firstOrFail();
 
         expect(requiredDate($membership->left_at)->toDateTimeString())

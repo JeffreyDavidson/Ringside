@@ -61,6 +61,10 @@ class RetireAction
             // Retire current members who are available
             $membersToRetire = $stable->getMembersToRetire();
 
+            // End stable memberships before member retirement workflows close
+            // their remaining current relationships at the retirement date.
+            $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
+
             if ($membersToRetire->wrestlers) {
                 foreach ($membersToRetire->wrestlers as $wrestler) {
                     if ($wrestler->canBeRetired()) {
@@ -76,9 +80,6 @@ class RetireAction
                     }
                 }
             }
-
-            // Remove all current members using injected Action
-            $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
 
             $this->retirementPeriods->start($stable, $retirementDate);
 
