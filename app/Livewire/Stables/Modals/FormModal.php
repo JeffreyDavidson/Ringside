@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Modals;
 
+use App\Actions\Stables\CreateAction;
+use App\Actions\Stables\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
@@ -25,6 +27,16 @@ class FormModal extends BaseFormModal
     use PresentsWrestlersList;
 
     public CreateEditForm $form;
+
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    {
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
+    }
 
     protected function getFormClass(): string
     {
@@ -56,6 +68,21 @@ class FormModal extends BaseFormModal
         }
 
         return 'Create Stable';
+    }
+
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if (! $this->form->isCreating()) {
+            $this->updateAction->handle($this->form->stable(), $this->form->toData());
+
+            return true;
+        }
+
+        $this->createAction->handle($this->form->toData());
+
+        return true;
     }
 
     public function render(): View

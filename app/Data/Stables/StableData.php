@@ -15,6 +15,7 @@ readonly class StableData
         public string $name,
         public ?Carbon $start_date,
         public StableMembershipData $members,
+        public ?Carbon $end_date = null,
     ) {}
 
     /**

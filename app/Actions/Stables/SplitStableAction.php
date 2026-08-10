@@ -9,7 +9,6 @@ use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
-use App\Services\StableValidationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -22,7 +21,6 @@ class SplitStableAction
     public function __construct(
         protected CreateAction $createAction,
         protected StableMembershipService $membershipService,
-        protected StableValidationService $validationService,
     ) {}
 
     /**
@@ -49,9 +47,6 @@ class SplitStableAction
 
             // Validate split member distribution
             $this->validateSplitMembers($originalStable, $membersForNewStable);
-
-            // Validate name uniqueness using service
-            $this->validationService->validateUniqueName(mb_trim($newStableName));
 
             // Use enhanced DTO method to filter employed members
             $employedMembers = $membersForNewStable->filterEmployedMembers();

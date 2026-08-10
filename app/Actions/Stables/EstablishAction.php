@@ -6,6 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Stables\Stable;
+use App\Models\Stables\StableActivityPeriod;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -22,19 +23,26 @@ class EstablishAction
      *
      * @param  Stable  $stable  The stable to establish
      * @param  Carbon|null  $activationDate  The establishment date (defaults to now)
+     * @param  Carbon|null  $endDate  The date the stable stopped being active
      * @throws CannotBeEstablishedException When stable cannot be established due to business rules
      */
-    public function handle(Stable $stable, ?Carbon $activationDate = null): void
-    {
+    public function handle(
+        Stable $stable,
+        ?Carbon $activationDate = null,
+        ?Carbon $endDate = null,
+    ): StableActivityPeriod {
         $stable->ensureCanBeEstablished();
 
         $activationDate = $activationDate ?? now();
 
-        DB::transaction(function () use ($stable, $activationDate): void {
-            $stable->activityPeriods()->updateOrCreate(
+        return DB::transaction(
+            fn (): StableActivityPeriod => $stable->activityPeriods()->updateOrCreate(
                 ['ended_at' => null],
-                ['started_at' => $activationDate->toDateTimeString()]
-            );
-        });
+                [
+                    'started_at' => $activationDate->toDateTimeString(),
+                    'ended_at' => $endDate?->toDateTimeString(),
+                ]
+            )
+        );
     }
 }

@@ -1531,12 +1531,6 @@ parameters:
 			path: app/Providers/AppServiceProvider.php
 
 		-
-			message: '#^Method App\\Services\\StableValidationService\:\:validateSplitMembers\(\) has parameter \$membersForNewStable with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Services/StableValidationService.php
-
-		-
 			message: '#^Parameter \#1 \$members of method App\\Services\\TagTeamMembershipService\:\:employMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\|App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Support\\Collection\<\(int\|string\), App\\Models\\Managers\\Manager\> given\.$#'
 			identifier: argument.type
 			count: 1

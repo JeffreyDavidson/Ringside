@@ -7,7 +7,6 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
-use App\Services\StableValidationService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -18,7 +17,6 @@ class UpdateAction
     public function __construct(
         protected EstablishAction $establishAction,
         protected StableMembershipService $membershipService,
-        protected StableValidationService $validationService,
     ) {}
 
     /**
@@ -37,18 +35,25 @@ class UpdateAction
     public function handle(Stable $stable, StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stable, $stableData): Stable {
-            // Validate business rules before updating
-            $this->validationService->validateUniqueName($stableData->getTrimmedName(), $stable);
-            $this->validationService->validateMembersAvailable($stableData->members);
-
             $stable->update([
                 'name' => $stableData->getTrimmedName(),
             ]);
 
-            // Use enhanced DTO method and centralized validation
             if ($stableData->hasStartDate()) {
-                $this->validationService->validateEstablishmentDateChange($stable);
-                $this->establishAction->handle($stable, $stableData->start_date);
+                $activityPeriod = $stable->firstActivityPeriod()->first();
+
+                if ($activityPeriod) {
+                    $activityPeriod->update([
+                        'started_at' => $stableData->start_date,
+                        'ended_at' => $stableData->end_date,
+                    ]);
+                } else {
+                    $this->establishAction->handle(
+                        $stable,
+                        $stableData->start_date,
+                        $stableData->end_date,
+                    );
+                }
             }
 
             // Update stable membership using service
