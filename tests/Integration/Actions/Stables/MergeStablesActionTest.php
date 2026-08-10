@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\MergeStablesAction;
+use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Models\Stables\Stable;
 
 it('moves current members to the primary stable and preserves secondary history', function () {
@@ -31,7 +32,31 @@ it('moves current members to the primary stable and preserves secondary history'
         ->and($secondaryStable->previousWrestlers()->pluck('wrestlers.id')->all())
         ->toEqualCanonicalizing($secondaryWrestlers->modelKeys())
         ->and($secondaryStable->previousTagTeams()->pluck('tag_teams.id')->all())
-        ->toEqualCanonicalizing($secondaryTagTeams->modelKeys());
+        ->toEqualCanonicalizing($secondaryTagTeams->modelKeys())
+        ->and($secondaryStable->currentActivityPeriod()->exists())
+        ->toBeFalse()
+        ->and(requiredDate($secondaryStable->previousActivityPeriods()->firstOrFail()->ended_at)->format('Y-m-d H:i:s'))
+        ->toBe($mergeDate->format('Y-m-d H:i:s'));
 
     $this->assertSoftDeleted($secondaryStable);
+});
+
+it('rejects unavailable secondary members without changing either stable', function () {
+    $primaryStable = Stable::factory()->active()->create();
+    $secondaryStable = Stable::factory()->active()->create();
+    $secondaryWrestler = $secondaryStable->currentWrestlers()->firstOrFail();
+    $secondaryWrestler->suspensions()->create(['started_at' => now()]);
+    $primaryMemberCount = $primaryStable->getCurrentMemberCount();
+    $secondaryMemberCount = $secondaryStable->getCurrentMemberCount();
+
+    expect(fn () => resolve(MergeStablesAction::class)->handle(
+        $primaryStable,
+        $secondaryStable,
+        now(),
+    ))->toThrow(CannotBeMergedException::class);
+
+    expect($primaryStable->getCurrentMemberCount())->toBe($primaryMemberCount)
+        ->and($secondaryStable->getCurrentMemberCount())->toBe($secondaryMemberCount)
+        ->and($secondaryStable->currentActivityPeriod()->exists())->toBeTrue()
+        ->and($secondaryStable->trashed())->toBeFalse();
 });

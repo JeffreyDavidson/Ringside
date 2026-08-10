@@ -194,7 +194,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Split with only wrestlers
             $membersForSplit = new StableMembershipData(
-                wrestlers: $this->transferWrestlers,
+                wrestlers: $this->wrestlers->take(3),
             );
 
             $newStable = resolve(SplitStableAction::class)->handle(
@@ -205,7 +205,7 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify new stable has only wrestlers
-            expect($newStable->currentWrestlers()->count())->toBe($this->transferWrestlers->count());
+            expect($newStable->currentWrestlers()->count())->toBe(3);
             expect($newStable->currentTagTeams()->count())->toBe(0);
 
             // Verify original stable retains all tag teams
@@ -218,7 +218,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Split with only tag teams
             $membersForSplit = new StableMembershipData(
-                tagTeams: $this->transferTagTeams,
+                tagTeams: $this->tagTeams,
             );
 
             $newStable = resolve(SplitStableAction::class)->handle(
@@ -230,7 +230,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify new stable has only tag teams
             expect($newStable->currentWrestlers()->count())->toBe(0);
-            expect($newStable->currentTagTeams()->count())->toBe($this->transferTagTeams->count());
+            expect($newStable->currentTagTeams()->count())->toBe(2);
 
             // Verify original stable retains all wrestlers
             $refreshedOriginal = freshModel($this->originalStable);
@@ -299,31 +299,68 @@ describe('SplitStableAction Integration Tests', function () {
             expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
-        test('split validates member availability before transfer', function () {
-            // Create unemployed wrestler
-            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
-
-            $splitDate = Carbon::now();
-
-            // Try to split with unemployed wrestler
-            $transferWrestlers = $this->transferWrestlers->push($unemployedWrestler);
-
-            // Execute split - should handle unemployed members appropriately
+        test('split rejects selected members outside the original stable', function () {
+            $outsider = Wrestler::factory()->bookable()->create();
             $membersForSplit = new StableMembershipData(
-                wrestlers: $transferWrestlers,
+                wrestlers: $this->transferWrestlers->push($outsider),
                 tagTeams: $this->transferTagTeams,
             );
 
-            $newStable = resolve(SplitStableAction::class)->handle(
+            expect(fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $membersForSplit,
+                now(),
+            ))->toThrow(CannotBeSplitException::class);
+
+            expect(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
+        });
+
+        test('split rejects a new stable below the canonical minimum headcount', function () {
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->wrestlers->take(2),
+            );
+
+            expect(fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $membersForSplit,
+                now(),
+            ))->toThrow(CannotBeSplitException::class);
+        });
+
+        test('split rejects an original stable below the canonical minimum headcount', function () {
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->wrestlers,
+                tagTeams: $this->tagTeams->take(1),
+            );
+
+            expect(fn () => resolve(SplitStableAction::class)->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $membersForSplit,
+                now(),
+            ))->toThrow(CannotBeSplitException::class);
+        });
+
+        test('split rejects unavailable members instead of silently dropping them', function () {
+            $splitDate = Carbon::now();
+            $unavailableWrestler = $this->transferWrestlers->firstOrFail();
+            $unavailableWrestler->currentEmployment()->update(['ended_at' => $splitDate]);
+
+            $membersForSplit = new StableMembershipData(
+                wrestlers: $this->transferWrestlers,
+                tagTeams: $this->transferTagTeams,
+            );
+
+            expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,
                 $this->newStableName,
                 $membersForSplit,
                 $splitDate
-            );
+            ))->toThrow(CannotBeSplitException::class);
 
-            // Verify unemployed wrestler was not transferred (or handled per business rules)
-            $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('wrestlers.id');
-            expect($newStableWrestlerIds->contains($unemployedWrestler->id))->toBeFalse();
+            expect(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
         });
 
         test('split validates stable status before execution', function () {
@@ -447,9 +484,8 @@ describe('SplitStableAction Integration Tests', function () {
             $refreshedOriginal = freshModel($this->originalStable);
             $originalMemberCount = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();
 
-            // Assume minimum of 1 member required (adjust based on business rules)
-            expect($newStableMemberCount)->toBeGreaterThanOrEqual(1);
-            expect($originalMemberCount)->toBeGreaterThanOrEqual(0); // Original can be empty after split
+            expect($newStableMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);
+            expect($originalMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);
         });
 
         test('split validates member employment status', function () {

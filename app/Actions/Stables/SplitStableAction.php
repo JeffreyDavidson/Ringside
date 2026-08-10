@@ -11,7 +11,6 @@ use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class SplitStableAction
 {
@@ -45,31 +44,17 @@ class SplitStableAction
             // Validate stable can be split using model validation
             $originalStable->ensureCanBeSplit();
 
-            // Validate split member distribution
             $this->validateSplitMembers($originalStable, $membersForNewStable);
 
-            // Use enhanced DTO method to filter employed members
-            $employedMembers = $membersForNewStable->filterEmployedMembers();
-
-            // Validate the filtered members are still viable
-            if ($employedMembers->isEmpty()) {
-                throw new InvalidArgumentException('Cannot split stable: no employed members available for new stable.');
-            }
-
-            // Create StableData for the new stable
             $stableData = new StableData(
                 name: mb_trim($newStableName),
                 start_date: $date,
-                members: $employedMembers
+                members: $membersForNewStable
             );
 
-            // Use injected CreateAction to create and establish the new stable with members
-            $newStable = $this->createAction->handle($stableData);
+            $this->membershipService->removeMembers($originalStable, $membersForNewStable, $date);
 
-            // Remove transferred members from original stable using service
-            $this->membershipService->removeMembers($originalStable, $employedMembers, $date);
-
-            return $newStable;
+            return $this->createAction->handle($stableData);
         });
     }
 
@@ -86,12 +71,35 @@ class SplitStableAction
             throw CannotBeSplitException::noMembersToMove();
         }
 
-        $totalMembersBeingSplit = $membersForNewStable->getTotalMemberCount();
-        $totalCurrentMembers = $originalStable->currentWrestlers->count() + $originalStable->currentTagTeams->count();
-        $remainingMembers = $totalCurrentMembers - $totalMembersBeingSplit;
+        $currentMembers = $originalStable->getCurrentMembersData();
+        $nonMemberNames = [
+            ...$membersForNewStable->wrestlers?->diff($currentMembers->wrestlers ?? [])->pluck('name')->all() ?? [],
+            ...$membersForNewStable->tagTeams?->diff($currentMembers->tagTeams ?? [])->pluck('name')->all() ?? [],
+        ];
 
-        if ($remainingMembers === 0) {
+        if ($nonMemberNames !== []) {
+            throw CannotBeSplitException::membersDoNotBelongToStable($nonMemberNames);
+        }
+
+        $unavailableMemberNames = $membersForNewStable->getUnavailableMemberNames();
+
+        if ($unavailableMemberNames !== []) {
+            throw CannotBeSplitException::membersUnavailable($unavailableMemberNames);
+        }
+
+        $newStableMemberCount = $membersForNewStable->getTotalMemberCount();
+        $remainingMemberCount = $currentMembers->getTotalMemberCount() - $newStableMemberCount;
+
+        if ($remainingMemberCount === 0) {
             throw CannotBeSplitException::allMembersMoving();
+        }
+
+        if ($newStableMemberCount < Stable::MIN_MEMBERS_COUNT) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('new', $newStableMemberCount, Stable::MIN_MEMBERS_COUNT);
+        }
+
+        if ($remainingMemberCount < Stable::MIN_MEMBERS_COUNT) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('original', $remainingMemberCount, Stable::MIN_MEMBERS_COUNT);
         }
     }
 }

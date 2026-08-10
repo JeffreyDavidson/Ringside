@@ -96,6 +96,16 @@ final class CannotBeMergedException extends BaseBusinessException
     }
 
     /**
+     * One or more secondary members are unavailable for the primary stable.
+     *
+     * @param  array<int, string>  $memberNames
+     */
+    public static function membersUnavailable(array $memberNames): static
+    {
+        return new self('Cannot merge stables: these secondary stable members are unavailable: '.implode(', ', $memberNames).'.');
+    }
+
+    /**
      * Stables cannot be merged due to conflicting storylines.
      *
      * @param  Stable  $primaryStable  The primary stable

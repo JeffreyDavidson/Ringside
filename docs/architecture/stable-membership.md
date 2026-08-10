@@ -18,6 +18,9 @@ Stable membership defines how wrestlers and tag teams can belong to stables.
 - **Member Availability**: New memberships require employed members who are not suspended; injured wrestlers cannot join
 - **Employment Timing**: A member's employment must begin on or before the stable membership period
 - **Unformed Stables**: A stable may be created without members and assembled before establishment
+- **Minimum Size**: An active stable requires a headcount of at least three; an individual wrestler counts as one and a tag team counts as two
+- **Split Integrity**: A split moves only available current members, and both resulting active stables must meet the minimum size
+- **Merge Integrity**: A merge rejects unavailable secondary members, preserves their membership history, and ends the secondary stable's activity period before soft deletion
 
 ### Membership Management
 - **Add Members**: Add wrestlers or tag teams to stables
