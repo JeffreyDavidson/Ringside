@@ -19,6 +19,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Livewire,Http/Requests,Actions,Services}/** | .ai/rules/requests-actions-services.md |
 | app/Http/Requests/** | .ai/rules/requests.md |
 | routes/**, routes/web.php | .ai/rules/routes.md |
+| app/Rules/** | .ai/rules/rules.md |
 | app/Services/** | .ai/rules/services.md |
 | tests/** | .ai/rules/tests.md |
 | tests/Unit/** | .ai/rules/unit.md |

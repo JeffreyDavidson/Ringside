@@ -422,6 +422,34 @@ describe('FormModal Member Management', function () {
         $this->assertDatabaseMissing('stables', ['name' => 'Test Stable']);
     });
 
+    it('rejects an injured wrestler', function () {
+        $wrestler = Wrestler::factory()->injured()->create();
+
+        $component = livewire(FormModal::class)
+            ->call('openModal')
+            ->set('form.name', 'Test Stable')
+            ->set('form.wrestlers', [$wrestler->id])
+            ->call('save');
+
+        $component->assertHasErrors(['form.wrestlers.0']);
+        $this->assertDatabaseMissing('stables', ['name' => 'Test Stable']);
+    });
+
+    it('rejects a wrestler represented by a selected tag team', function () {
+        $tagTeam = TagTeam::factory()->employed()->create();
+        $wrestler = $tagTeam->currentWrestlers()->firstOrFail();
+
+        $component = livewire(FormModal::class)
+            ->call('openModal')
+            ->set('form.name', 'Test Stable')
+            ->set('form.wrestlers', [$wrestler->id])
+            ->set('form.tag_teams', [$tagTeam->id])
+            ->call('save');
+
+        $component->assertHasErrors(['form.wrestlers.0']);
+        $this->assertDatabaseMissing('stables', ['name' => 'Test Stable']);
+    });
+
     it('validates wrestlers exist when assigning', function () {
         $component = livewire(FormModal::class)
             ->call('openModal')

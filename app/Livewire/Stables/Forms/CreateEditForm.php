@@ -11,8 +11,9 @@ use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeDebutDate;
-use App\Rules\TagTeams\CanJoinStable as TagTeamCanJoinStable;
-use App\Rules\Wrestlers\CanJoinStable as WrestlerCanJoinStable;
+use App\Rules\Stables\CanJoinStable;
+use App\Rules\Wrestlers\IsNotInjured;
+use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -215,14 +216,16 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 'exists:wrestlers,id',
-                new WrestlerCanJoinStable($this->modelId, $stableStartDate, collect($this->tag_teams)),
+                new CanJoinStable(Wrestler::class, $this->modelId, $stableStartDate),
+                new IsNotInjured(),
+                new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
             ],
             'tag_teams' => ['nullable', 'array'],
             'tag_teams.*' => [
                 'bail',
                 'integer',
                 'exists:tag_teams,id',
-                new TagTeamCanJoinStable($this->modelId, $stableStartDate),
+                new CanJoinStable(TagTeam::class, $this->modelId, $stableStartDate),
             ],
         ];
 
