@@ -3,18 +3,21 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\DeleteAction;
+use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 
 test('it soft deletes a tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->trashed())->toBeFalse();
+    expect($tagTeam->trashed())->toBeFalse()
+        ->and($tagTeam->canBeDeleted())->toBeTrue();
 
     resolve(DeleteAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->trashed())->toBeTrue();
+    expect($tagTeam->trashed())->toBeTrue()
+        ->and($tagTeam->canBeDeleted())->toBeFalse();
 
     // Verify soft delete in database
     $this->assertSoftDeleted('tag_teams', [
@@ -39,16 +42,17 @@ test('it prevents deleting employed tag team', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
-    expect($tagTeam->isRetired())->toBeTrue();
+    expect($tagTeam->isRetired())->toBeTrue()
+        ->and($tagTeam->canBeDeleted())->toBeFalse();
 
     expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting suspended tag team', function () {
@@ -57,7 +61,7 @@ test('it prevents deleting suspended tag team', function () {
     expect($tagTeam->isSuspended())->toBeTrue();
 
     expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -132,7 +136,7 @@ test('it prevents deleting already deleted tag team', function () {
 
     // Attempting to delete again should fail
     expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it uses appropriate business rules for deletion', function () {

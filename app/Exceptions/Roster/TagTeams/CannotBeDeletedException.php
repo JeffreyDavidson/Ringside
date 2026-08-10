@@ -46,6 +46,20 @@ use App\Models\TagTeams\TagTeam;
  */
 class CannotBeDeletedException extends BaseBusinessException
 {
+    public static function alreadyDeleted(TagTeam $tagTeam): static
+    {
+        $context = self::formatModelContext($tagTeam);
+
+        return new static("{$context} cannot be deleted because it is already deleted.");
+    }
+
+    public static function stillRetired(TagTeam $tagTeam): static
+    {
+        $context = self::formatModelContext($tagTeam);
+
+        return new static("{$context} cannot be deleted because it is retired. Unretire the tag team before deletion.");
+    }
+
     /**
      * Create exception for attempting to delete an employed tag team.
      *

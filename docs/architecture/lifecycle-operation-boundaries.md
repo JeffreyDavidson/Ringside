@@ -159,6 +159,8 @@ Tag-team retirement eligibility is isolated in `ValidatesTagTeamRetirement`. Ret
 
 Tag-team release eligibility is isolated in `ValidatesTagTeamRelease`. The concern owns the requirement that a team be employed before release; the Action continues to own employment and suspension period closure, dates, transactions, and relationship cleanup.
 
+Tag-team deletion eligibility is isolated in `ValidatesTagTeamDeletion`. Deletion and restoration remain paired as opposite transitions of the soft-deletion lifecycle dimension. The concern owns inactive-state and active-name-conflict rules; the Actions continue to own transactions, soft deletion, restoration, and relationship cleanup. The former catch-all `ValidatesTagTeamLifecycle` concern has been removed now that each lifecycle dimension has a dedicated boundary.
+
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;
