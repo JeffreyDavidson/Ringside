@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Modals;
 
+use App\Actions\TagTeams\CreateAction;
+use App\Actions\TagTeams\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
@@ -24,6 +26,16 @@ class FormModal extends BaseFormModal
     use PresentsWrestlersList;
 
     public CreateEditForm $form;
+
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    {
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
+    }
 
     protected function getFormClass(): string
     {
@@ -53,6 +65,21 @@ class FormModal extends BaseFormModal
             'wrestlerA' => fn () => $wrestlerA->id,
             'wrestlerB' => fn () => $wrestlerB->id,
         ];
+    }
+
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if (! $this->form->isCreating()) {
+            $this->updateAction->handle($this->form->tagTeam(), $this->form->toData());
+
+            return true;
+        }
+
+        $this->createAction->handle($this->form->toData());
+
+        return true;
     }
 
     public function render(): View

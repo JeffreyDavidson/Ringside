@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Forms;
 
+use App\Data\TagTeams\TagTeamData;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesEmployment;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
+use App\Rules\Wrestlers\CanJoinTagTeam;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 /**
@@ -30,7 +34,6 @@ use Illuminate\Validation\Rule;
  * @extends BaseForm<CreateEditForm, TagTeam>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesEmployment For employment tracking capabilities
  * @see CanChangeEmploymentDate For custom validation rules
  *
  * @property string $name Tag team's official name
@@ -42,8 +45,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesEmployment;
-
     /**
      * The model instance being edited, or null for new tag team creation.
      *
@@ -106,8 +107,7 @@ class CreateEditForm extends BaseForm
     /**
      * Employment start date for contract and career tracking.
      *
-     * Managed through ManagesEmployment trait for consistent employment
-     * tracking across all personnel types. String to prevent auto-casting.
+     * String to prevent Livewire from automatically casting the submitted date.
      *
      * @var string|null Employment start date (string to prevent auto-casting issues)
      */
@@ -127,9 +127,6 @@ class CreateEditForm extends BaseForm
      * Wrestler Relationships:
      * - Loads current wrestler assignments
      * - Handles relationship changes and updates
-     *
-     *
-     * @see ManagesEmployment::$start_date For employment date handling
      */
     public function loadExtraData(): void
     {
@@ -154,91 +151,21 @@ class CreateEditForm extends BaseForm
         $this->managers = $this->formModel->currentManagers->pluck('id')->toArray();
     }
 
-    /**
-     * Store the tag team data with relationship handling.
-     */
-    public function store(): bool
+    public function toData(): TagTeamData
     {
-        $this->validate();
-
-        $wasCreating = $this->isCreating();
-        $result = $this->storeModel();
-
-        if ($result) {
-            if ($wasCreating) {
-                $this->handlePostCreationTasks();
-            } else {
-                // Handle edit mode updates
-                $this->updateWrestlerRelationships();
-                $this->updateManagerRelationships();
-                if ($this->employment_date) {
-                    $this->handleEmploymentCreation();
-                }
-            }
-        }
-
-        return $result;
+        return new TagTeamData(
+            name: $this->name,
+            signature_move: $this->signature_move ?: null,
+            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+            wrestlerA: Wrestler::query()->findOrFail($this->wrestlerA),
+            wrestlerB: Wrestler::query()->findOrFail($this->wrestlerB),
+            managers: Manager::query()->whereKey($this->managers)->get(),
+        );
     }
 
-    /**
-     * Handle additional tasks after tag team creation.
-     *
-     * Manages wrestler relationship synchronization and employment setup
-     * for new tag teams. Called automatically by the store pattern trait.
-     */
-    protected function handlePostCreationTasks(): void
+    public function tagTeam(): TagTeam
     {
-        // Create employment record for new tag teams with start dates
-        if ($this->employment_date) {
-            $this->handleEmploymentCreation();
-        }
-
-        // Handle wrestler relationships
-        if ($this->formModel instanceof TagTeam) {
-            $this->updateWrestlerRelationships();
-            $this->updateManagerRelationships();
-        }
-    }
-
-    /**
-     * Update wrestler relationships for the tag team.
-     *
-     * Manages the many-to-many relationship between the tag team and
-     * its wrestler members. Ensures proper relationship synchronization.
-     */
-    private function updateWrestlerRelationships(): void
-    {
-        if (! $this->formModel instanceof TagTeam) {
-            return;
-        }
-
-        $wrestlerIds = array_filter([$this->wrestlerA, $this->wrestlerB]);
-        $this->formModel->wrestlers()->sync($wrestlerIds);
-    }
-
-    /**
-     * Update manager relationships for the tag team.
-     *
-     * Manages the many-to-many relationship between the tag team and
-     * its assigned managers. Ensures proper relationship synchronization.
-     */
-    private function updateManagerRelationships(): void
-    {
-        if (! $this->formModel instanceof TagTeam) {
-            return;
-        }
-
-        // Prepare sync data with required hired_at timestamp
-        $syncData = [];
-        foreach ($this->managers as $managerId) {
-            $syncData[$managerId] = [
-                'hired_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        $this->formModel->managers()->sync($syncData);
+        return TagTeam::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -300,8 +227,8 @@ class CreateEditForm extends BaseForm
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')->ignore($this->modelId)],
             'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('tag_teams', 'signature_move')->ignore($this->modelId)],
-            'wrestlerA' => ['required', 'integer', 'exists:wrestlers,id'],
-            'wrestlerB' => ['required', 'integer', 'exists:wrestlers,id', 'different:wrestlerA'],
+            'wrestlerA' => ['bail', 'required', 'integer', 'exists:wrestlers,id', new CanJoinTagTeam($this->modelId)],
+            'wrestlerB' => ['bail', 'required', 'integer', 'exists:wrestlers,id', 'different:wrestlerA', new CanJoinTagTeam($this->modelId)],
             'managers' => ['array'],
             'managers.*' => ['integer', 'exists:managers,id'],
             'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],

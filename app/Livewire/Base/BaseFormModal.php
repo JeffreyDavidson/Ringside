@@ -274,7 +274,7 @@ abstract class BaseFormModal extends BaseModal
             $this->form->setModel($this->model);
         }
 
-        $result = $this->form->store();
+        $result = $this->storeForm();
 
         if ($result) {
             $this->dispatch('refreshDatatable');
@@ -284,6 +284,17 @@ abstract class BaseFormModal extends BaseModal
         }
 
         return $result;
+    }
+
+    /**
+     * Persist the form through its default storage workflow.
+     *
+     * Specialized modals may override this hook to delegate persistence to
+     * application actions while retaining the shared modal submission flow.
+     */
+    protected function storeForm(): bool
+    {
+        return $this->form->store();
     }
 
     /**

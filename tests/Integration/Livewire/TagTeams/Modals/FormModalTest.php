@@ -160,6 +160,45 @@ describe('TagTeams FormModal Tests', function () {
                 ->assertHasErrors(['form.wrestlerB' => 'different']);
         });
 
+        test('validates wrestlers are not active members of another tag team', function () {
+            $unavailableWrestler = Wrestler::factory()->onCurrentTagTeam()->create();
+            $availableWrestler = Wrestler::factory()->create();
+
+            testLivewire(FormModal::class)
+                ->call('openModal')
+                ->set('form.name', 'Test Team')
+                ->set('form.wrestlerA', $unavailableWrestler->id)
+                ->set('form.wrestlerB', $availableWrestler->id)
+                ->call('submitForm')
+                ->assertHasErrors(['form.wrestlerA']);
+        });
+
+        test('validates injured wrestlers cannot join a tag team', function () {
+            $injuredWrestler = Wrestler::factory()->injured()->create();
+            $availableWrestler = Wrestler::factory()->create();
+
+            testLivewire(FormModal::class)
+                ->call('openModal')
+                ->set('form.name', 'Test Team')
+                ->set('form.wrestlerA', $injuredWrestler->id)
+                ->set('form.wrestlerB', $availableWrestler->id)
+                ->call('submitForm')
+                ->assertHasErrors(['form.wrestlerA']);
+        });
+
+        test('validates suspended wrestlers cannot join a tag team', function () {
+            $suspendedWrestler = Wrestler::factory()->suspended()->create();
+            $availableWrestler = Wrestler::factory()->create();
+
+            testLivewire(FormModal::class)
+                ->call('openModal')
+                ->set('form.name', 'Test Team')
+                ->set('form.wrestlerA', $suspendedWrestler->id)
+                ->set('form.wrestlerB', $availableWrestler->id)
+                ->call('submitForm')
+                ->assertHasErrors(['form.wrestlerA']);
+        });
+
         test('validates managers exist when provided', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
@@ -371,18 +410,20 @@ describe('TagTeams FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $tagTeam->refresh();
-            expect($tagTeam->wrestlers->pluck('id')->sort()->values()->toArray())
+            expect($tagTeam->currentWrestlers->pluck('id')->sort()->values()->toArray())
                 ->toEqual(collect([$newWrestlerA->id, $newWrestlerB->id])->sort()->values()->toArray());
         });
 
-        test('removes previous wrestler relationships when updating', function () {
+        test('preserves previous wrestler relationships when updating', function () {
             $originalWrestlerA = Wrestler::factory()->create();
             $originalWrestlerB = Wrestler::factory()->create();
             $newWrestlerA = Wrestler::factory()->create();
             $newWrestlerB = Wrestler::factory()->create();
 
             $tagTeam = TagTeam::factory()->create();
-            $tagTeam->wrestlers()->sync([$originalWrestlerA->id, $originalWrestlerB->id]);
+            $tagTeam->wrestlers()->attach([$originalWrestlerA->id, $originalWrestlerB->id], [
+                'joined_at' => now()->subYear(),
+            ]);
 
             testLivewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
@@ -391,8 +432,12 @@ describe('TagTeams FormModal Tests', function () {
                 ->call('submitForm');
 
             $tagTeam->refresh();
-            expect($tagTeam->wrestlers->pluck('id')->toArray())->not->toContain($originalWrestlerA->id);
-            expect($tagTeam->wrestlers->pluck('id')->toArray())->not->toContain($originalWrestlerB->id);
+
+            expect($tagTeam->currentWrestlers->pluck('id'))
+                ->toContain($newWrestlerA->id, $newWrestlerB->id)
+                ->not->toContain($originalWrestlerA->id, $originalWrestlerB->id)
+                ->and($tagTeam->previousWrestlers->pluck('id'))
+                ->toContain($originalWrestlerA->id, $originalWrestlerB->id);
         });
     });
 
@@ -418,6 +463,34 @@ describe('TagTeams FormModal Tests', function () {
                 ->toEqual(collect([$manager1->id, $manager2->id])->sort()->values()->toArray());
         });
 
+        test('preserves previous manager relationships when updating', function () {
+            $wrestlerA = Wrestler::factory()->create();
+            $wrestlerB = Wrestler::factory()->create();
+            $previousManager = Manager::factory()->create();
+            $newManager = Manager::factory()->create();
+            $tagTeam = TagTeam::factory()->create();
+            $tagTeam->wrestlers()->attach([$wrestlerA->id, $wrestlerB->id], [
+                'joined_at' => now()->subYear(),
+            ]);
+            $tagTeam->managers()->attach($previousManager->id, [
+                'hired_at' => now()->subYear(),
+            ]);
+
+            testLivewire(FormModal::class)
+                ->call('openModal', $tagTeam->id)
+                ->set('form.managers', [$newManager->id])
+                ->call('submitForm')
+                ->assertHasNoErrors();
+
+            $tagTeam->refresh();
+
+            expect($tagTeam->currentManagers->pluck('id'))
+                ->toContain($newManager->id)
+                ->not->toContain($previousManager->id)
+                ->and($tagTeam->previousManagers->pluck('id'))
+                ->toContain($previousManager->id);
+        });
+
         test('updates manager relationships on edit', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
@@ -435,8 +508,8 @@ describe('TagTeams FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $tagTeam->refresh();
-            expect($tagTeam->managers->pluck('id')->toArray())->toEqual([$newManager->id]);
-            expect($tagTeam->managers->pluck('id')->toArray())->not->toContain($originalManager->id);
+            expect($tagTeam->currentManagers->pluck('id')->toArray())->toEqual([$newManager->id]);
+            expect($tagTeam->previousManagers->pluck('id')->toArray())->toContain($originalManager->id);
         });
 
         test('handles empty manager array correctly', function () {
@@ -455,7 +528,8 @@ describe('TagTeams FormModal Tests', function () {
                 ->assertHasNoErrors();
 
             $tagTeam->refresh();
-            expect($tagTeam->managers)->toHaveCount(0);
+            expect($tagTeam->currentManagers)->toHaveCount(0)
+                ->and($tagTeam->previousManagers)->toHaveCount(1);
         });
     });
 
