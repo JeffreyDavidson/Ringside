@@ -5,68 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
-use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use Exception;
 
 /** Provides validation for the remaining tag-team lifecycle operations. */
 trait ValidatesTagTeamLifecycle
 {
-    /**
-     * Determine if the tag team can be released.
-     *
-     * Checks business rules for tag team release:
-     * - Must be currently employed
-     * - Should validate contractual obligations
-     * - Should check for championship commitments
-     *
-     * @return bool True if the tag team can be released, false otherwise
-     */
-    public function canBeReleased(): bool
-    {
-        if (! $this->isEmployed()) {
-            return false;
-        }
-
-        // Basic release is possible if employed
-        return true;
-    }
-
-    /**
-     * Ensure the tag team can be released, throwing an exception if not.
-     *
-     * Validates that the tag team is in a valid state for release while checking
-     * for business rule violations including employment status, contractual obligations,
-     * and championship commitments.
-     *
-     * @throws CannotBeReleasedException When release is not allowed
-     */
-    public function ensureCanBeReleased(): void
-    {
-        if (! $this->isEmployed()) {
-            throw CannotBeReleasedException::notEmployed($this);
-        }
-
-        // Additional business rule validations could be added here:
-        // - Check for championship obligations
-        // if ($this->hasCurrentChampionshipObligations()) {
-        //     $championships = $this->getCurrentChampionshipDetails();
-        //     throw CannotBeReleasedException::hasChampionshipObligations($this, $championships);
-        // }
-
-        // - Check for contractual obligations
-        // if ($this->hasUnfulfilledContractualObligations()) {
-        //     $obligations = $this->getContractualObligationDetails();
-        //     throw CannotBeReleasedException::contractualObligations($this, $obligations);
-        // }
-
-        // - Check for scheduled match commitments
-        // if ($this->hasScheduledMatches()) {
-        //     $matches = $this->getScheduledMatchDetails();
-        //     throw CannotBeReleasedException::hasScheduledMatches($this, $matches);
-        // }
-    }
-
     /**
      * Determine if the tag team can be deleted (soft deleted).
      *

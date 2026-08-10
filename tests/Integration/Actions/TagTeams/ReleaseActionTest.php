@@ -14,12 +14,14 @@ beforeEach(function () {
 test('it releases an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->isEmployed())->toBeTrue()
+        ->and($tagTeam->canBeReleased())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->isEmployed())->toBeFalse()
+        ->and($tagTeam->canBeReleased())->toBeFalse();
 
     // Verify employment record was ended
     $this->assertDatabaseHas('tag_teams_employments', [
