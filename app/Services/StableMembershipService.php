@@ -6,73 +6,24 @@ namespace App\Services;
 
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
-/**
- * Service for managing stable membership operations.
- *
- * Centralizes the business logic for adding, removing, and transferring
- * stable members (wrestlers and tag teams) with proper date tracking
- * and business rule validation.
- */
 class StableMembershipService
 {
-    /**
-     * Add members to a stable.
-     *
-     * @param  Stable  $stable  The stable to add members to
-     * @param  StableMembershipData  $members  The members to add
-     * @param  Carbon  $date  The date they joined
-     */
     public function addMembers(Stable $stable, StableMembershipData $members, Carbon $date): void
     {
-        // Add wrestlers
-        if ($members->wrestlers?->isNotEmpty()) {
-            foreach ($members->wrestlers as $wrestler) {
-                $stable->wrestlers()->attach($wrestler->id, [
-                    'joined_at' => $date,
-                    'left_at' => null,
-                ]);
-            }
-        }
-
-        // Add tag teams
-        if ($members->tagTeams?->isNotEmpty()) {
-            foreach ($members->tagTeams as $tagTeam) {
-                $stable->tagTeams()->attach($tagTeam->id, [
-                    'joined_at' => $date,
-                    'left_at' => null,
-                ]);
-            }
-        }
+        $this->addMembersToRelationship($stable->wrestlers(), $members->wrestlers, $date);
+        $this->addMembersToRelationship($stable->tagTeams(), $members->tagTeams, $date);
     }
 
-    /**
-     * Remove members from a stable.
-     *
-     * @param  Stable  $stable  The stable to remove members from
-     * @param  StableMembershipData  $members  The members to remove
-     * @param  Carbon  $date  The date they left
-     */
     public function removeMembers(Stable $stable, StableMembershipData $members, Carbon $date): void
     {
-        // Remove wrestlers
-        if ($members->wrestlers?->isNotEmpty()) {
-            foreach ($members->wrestlers as $wrestler) {
-                $stable->wrestlers()->updateExistingPivot($wrestler->id, [
-                    'left_at' => $date,
-                ]);
-            }
-        }
-
-        // Remove tag teams
-        if ($members->tagTeams?->isNotEmpty()) {
-            foreach ($members->tagTeams as $tagTeam) {
-                $stable->tagTeams()->updateExistingPivot($tagTeam->id, [
-                    'left_at' => $date,
-                ]);
-            }
-        }
+        $this->removeMembersFromRelationship($stable->wrestlers(), $members->wrestlers, $date);
+        $this->removeMembersFromRelationship($stable->tagTeams(), $members->tagTeams, $date);
     }
 
     /**
@@ -112,46 +63,80 @@ class StableMembershipService
         $this->transferMembers($fromStable, $toStable, $allMembers, $date);
     }
 
-    /**
-     * Update stable membership by comparing current vs desired members.
-     *
-     * This is used for stable updates where we need to add new members
-     * and remove former members based on collection differences.
-     *
-     * @param  Stable  $stable  The stable to update
-     * @param  StableMembershipData  $newMembers  The desired members
-     * @param  Carbon  $date  The date of the membership changes
-     */
     public function updateMembership(Stable $stable, StableMembershipData $newMembers, Carbon $date): void
     {
-        // Update wrestlers
-        if ($newMembers->wrestlers !== null) {
-            $currentWrestlers = $stable->currentWrestlers;
-            $formerWrestlers = $currentWrestlers->diff($newMembers->wrestlers);
-            $addedWrestlers = $newMembers->wrestlers->diff($currentWrestlers);
+        $this->synchronizeRelationship(
+            $stable->wrestlers(),
+            $stable->currentWrestlers,
+            $newMembers->wrestlers,
+            $date,
+        );
+        $this->synchronizeRelationship(
+            $stable->tagTeams(),
+            $stable->currentTagTeams,
+            $newMembers->tagTeams,
+            $date,
+        );
+    }
 
-            if ($formerWrestlers->isNotEmpty()) {
-                $this->removeMembers($stable, new StableMembershipData(wrestlers: $formerWrestlers), $date);
-            }
-
-            if ($addedWrestlers->isNotEmpty()) {
-                $this->addMembers($stable, new StableMembershipData(wrestlers: $addedWrestlers), $date);
-            }
+    /**
+     * @template TRelatedModel of Model
+     * @template TPivotModel of Pivot
+     *
+     * @param  BelongsToMany<TRelatedModel, Stable, TPivotModel>  $relationship
+     * @param  Collection<int, TRelatedModel>|null  $members
+     */
+    private function addMembersToRelationship(BelongsToMany $relationship, ?Collection $members, Carbon $date): void
+    {
+        if ($members === null || $members->isEmpty()) {
+            return;
         }
 
-        // Update tag teams
-        if ($newMembers->tagTeams !== null) {
-            $currentTagTeams = $stable->currentTagTeams;
-            $formerTagTeams = $currentTagTeams->diff($newMembers->tagTeams);
-            $addedTagTeams = $newMembers->tagTeams->diff($currentTagTeams);
+        $relationship->attach($members->modelKeys(), [
+            'joined_at' => $date,
+            'left_at' => null,
+        ]);
+    }
 
-            if ($formerTagTeams->isNotEmpty()) {
-                $this->removeMembers($stable, new StableMembershipData(tagTeams: $formerTagTeams), $date);
-            }
-
-            if ($addedTagTeams->isNotEmpty()) {
-                $this->addMembers($stable, new StableMembershipData(tagTeams: $addedTagTeams), $date);
-            }
+    /**
+     * @template TRelatedModel of Model
+     * @template TPivotModel of Pivot
+     *
+     * @param  BelongsToMany<TRelatedModel, Stable, TPivotModel>  $relationship
+     * @param  Collection<int, TRelatedModel>|null  $members
+     */
+    private function removeMembersFromRelationship(BelongsToMany $relationship, ?Collection $members, Carbon $date): void
+    {
+        if ($members === null || $members->isEmpty()) {
+            return;
         }
+
+        foreach ($members as $member) {
+            $relationship->updateExistingPivot($member->getKey(), [
+                'left_at' => $date,
+            ]);
+        }
+    }
+
+    /**
+     * @template TRelatedModel of Model
+     * @template TPivotModel of Pivot
+     *
+     * @param  BelongsToMany<TRelatedModel, Stable, TPivotModel>  $relationship
+     * @param  Collection<int, TRelatedModel>  $currentMembers
+     * @param  Collection<int, TRelatedModel>|null  $desiredMembers
+     */
+    private function synchronizeRelationship(
+        BelongsToMany $relationship,
+        Collection $currentMembers,
+        ?Collection $desiredMembers,
+        Carbon $date,
+    ): void {
+        if ($desiredMembers === null) {
+            return;
+        }
+
+        $this->removeMembersFromRelationship($relationship, $currentMembers->diff($desiredMembers), $date);
+        $this->addMembersToRelationship($relationship, $desiredMembers->diff($currentMembers), $date);
     }
 }
