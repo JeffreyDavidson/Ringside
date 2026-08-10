@@ -6,37 +6,17 @@ namespace App\Actions\Wrestlers;
 
 use App\Data\Wrestlers\WrestlerData;
 use App\Models\Wrestlers\Wrestler;
-use App\Services\WrestlerManagerAssignmentService;
+use App\Services\ManagerAssignmentService;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
-    /**
-     * Create a new wrestler create action instance.
-     */
     public function __construct(
         protected EmployAction $employAction,
-        protected WrestlerManagerAssignmentService $managerAssignmentService
+        protected ManagerAssignmentService $managerAssignmentService
     ) {}
 
-    /**
-     * Create a new wrestler and establish their career.
-     *
-     * This handles the complete wrestler creation workflow:
-     * - Creates the wrestler record with personal and professional details
-     * - Uses EmployAction for consistent employment handling if employment_date provided
-     * - Uses WrestlerManagerAssignmentService for consistent manager assignment
-     * - Establishes the wrestler as available for match bookings and storylines
-     * - Handles all relationship dependencies and employment cascades
-     *
-     * ARCHITECTURAL PATTERN:
-     * Uses dedicated services (EmployAction, WrestlerManagerAssignmentService) for consistent
-     * handling instead of manual database operations.
-     *
-     * @param  WrestlerData  $wrestlerData  The data transfer object containing wrestler information
-     * @return Wrestler The newly created wrestler instance
-     */
     public function handle(WrestlerData $wrestlerData): Wrestler
     {
         return DB::transaction(function () use ($wrestlerData): Wrestler {
@@ -48,18 +28,14 @@ class CreateAction
                 'signature_move' => $wrestlerData->signature_move,
             ]);
 
-            // Handle manager assignment using dedicated service
             if ($wrestlerData->hasManagers()) {
-                $datetime = DateHelper::resolveDate($wrestlerData->employment_date);
-
-                $this->managerAssignmentService->assignManagersToWrestler(
+                $this->managerAssignmentService->assign(
                     $wrestler,
                     $wrestlerData->managers,
-                    $datetime
+                    DateHelper::resolveDate($wrestlerData->employment_date),
                 );
             }
 
-            // Handle wrestler employment using EmployAction for consistency
             if (isset($wrestlerData->employment_date)) {
                 $this->employAction->handle($wrestler, $wrestlerData->employment_date);
             }

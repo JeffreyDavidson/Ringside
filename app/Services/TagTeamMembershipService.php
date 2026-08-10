@@ -14,6 +14,8 @@ use Illuminate\Support\Carbon;
 
 class TagTeamMembershipService
 {
+    public function __construct(private ManagerAssignmentService $managerAssignments) {}
+
     public function establishMembership(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
         $this->addMembersToRelationship(
@@ -23,13 +25,7 @@ class TagTeamMembershipService
             'joined_at',
             'left_at',
         );
-        $this->addMembersToRelationship(
-            $tagTeam->managers(),
-            $members->managers,
-            $date,
-            'hired_at',
-            'fired_at',
-        );
+        $this->managerAssignments->assign($tagTeam, $members->managers, $date);
     }
 
     public function updateMembership(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
@@ -42,14 +38,7 @@ class TagTeamMembershipService
             'joined_at',
             'left_at',
         );
-        $this->synchronizeRelationship(
-            $tagTeam->managers(),
-            $tagTeam->currentManagers,
-            $members->managers,
-            $date,
-            'hired_at',
-            'fired_at',
-        );
+        $this->managerAssignments->synchronize($tagTeam, $members->managers, $date);
     }
 
     /**
