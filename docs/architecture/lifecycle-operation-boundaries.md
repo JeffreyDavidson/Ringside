@@ -147,6 +147,8 @@ Injury creation and explicit healing persistence use the typed `InjuryPeriodMana
 
 Retirement eligibility no longer uses an operation-name string or a generic `Model` validation contract. Shared individual validation accepts only wrestlers, managers, and referees, while title validation accepts only titles. Tag teams and stables retain their established typed lifecycle validation. This keeps eligibility rules explicit without introducing a strategy contract that cannot express each validator's supported model type.
 
+Suspension eligibility follows the same typed boundary. Shared individual validation accepts only wrestlers, managers, and referees. Tag teams retain their established lifecycle validation, while stables and titles do not support suspension. The unused generic suspension contract and tag-team and stable strategy classes were removed rather than preserving unreachable dispatch paths.
+
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;

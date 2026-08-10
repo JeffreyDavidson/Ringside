@@ -6,10 +6,9 @@ namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeSuspendedException;
-use App\Models\Contracts\Employable;
-use App\Models\Contracts\Injurable;
-use App\Models\Contracts\SuspensionValidationStrategy;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
+use App\Models\Wrestlers\Wrestler;
 
 /**
  * Suspension validation strategy for individual entities.
@@ -17,15 +16,14 @@ use Illuminate\Database\Eloquent\Model;
  * This strategy handles suspension validation for individual entities like
  * Wrestlers, Managers, and Referees.
  */
-class IndividualSuspensionValidation implements SuspensionValidationStrategy
+class IndividualSuspensionValidation
 {
     /**
      * Validate that an individual entity can be suspended.
      *
-     * @param  Model  $entity  The individual entity to validate
      * @throws CannotBeSuspendedException When suspension is not allowed
      */
-    public function validate(Model $entity): void
+    public function validate(Wrestler|Manager|Referee $entity): void
     {
         if ($this->isUnemployed($entity)) {
             throw CannotBeSuspendedException::unemployed($entity);
@@ -35,19 +33,19 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
             throw CannotBeSuspendedException::released($entity);
         }
 
-        if (method_exists($entity, 'isRetired') && $entity->isRetired()) {
+        if ($entity->isRetired()) {
             throw CannotBeSuspendedException::retired($entity);
         }
 
-        if (method_exists($entity, 'hasFutureEmployment') && $entity->hasFutureEmployment()) {
+        if ($entity->hasFutureEmployment()) {
             throw CannotBeSuspendedException::hasFutureEmployment($entity);
         }
 
-        if ($entity instanceof Employable && $entity instanceof Injurable && $entity->isInjured()) {
+        if ($entity->isInjured()) {
             throw CannotBeSuspendedException::injured($entity);
         }
 
-        if (method_exists($entity, 'isSuspended') && $entity->isSuspended()) {
+        if ($entity->isSuspended()) {
             throw CannotBeSuspendedException::suspended($entity);
         }
 
@@ -55,23 +53,17 @@ class IndividualSuspensionValidation implements SuspensionValidationStrategy
 
     /**
      * Check if the entity is unemployed.
-     *
-     * @param  Model  $entity  The entity to check
-     * @return bool True if unemployed, false otherwise
      */
-    private function isUnemployed(Model $entity): bool
+    private function isUnemployed(Wrestler|Manager|Referee $entity): bool
     {
-        return method_exists($entity, 'hasStatus') ? $entity->hasStatus(EmploymentStatus::Unemployed) : false;
+        return $entity->hasStatus(EmploymentStatus::Unemployed);
     }
 
     /**
      * Check if the entity is released.
-     *
-     * @param  Model  $entity  The entity to check
-     * @return bool True if released, false otherwise
      */
-    private function isReleased(Model $entity): bool
+    private function isReleased(Wrestler|Manager|Referee $entity): bool
     {
-        return method_exists($entity, 'hasStatus') ? $entity->hasStatus(EmploymentStatus::Released) : false;
+        return $entity->hasStatus(EmploymentStatus::Released);
     }
 }
