@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Data\Wrestlers\WrestlerData;
+use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
+use Illuminate\Database\Eloquent\Collection;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -132,4 +134,47 @@ test('it handles height conversion correctly', function () {
     expect($result->height->feet)->toBe(5);
     expect($result->height->inches)->toBe(11);
     expect($result->height->toInches())->toBe(71); // 5'11" = 71 inches
+});
+
+test('it assigns managers without employing them when the wrestler is not employed', function () {
+    $managers = Manager::factory()->count(2)->create();
+
+    $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
+        name: 'Managed Wrestler',
+        height: 72,
+        weight: 225,
+        hometown: 'Test City',
+        signature_move: null,
+        employment_date: null,
+        managers: $managers,
+    ));
+
+    expect($wrestler->currentManagers()->pluck('managers.id')->all())
+        ->toEqualCanonicalizing($managers->modelKeys())
+        ->and($managers->every(fn (Manager $manager): bool => ! $manager->isEmployed()))
+        ->toBeTrue();
+});
+
+test('it employs assigned managers through the wrestler employment cascade', function () {
+    $manager = Manager::factory()->create();
+    $employmentDate = now()->subDay();
+
+    $wrestler = resolve(CreateAction::class)->handle(new WrestlerData(
+        name: 'Employed Managed Wrestler',
+        height: 72,
+        weight: 225,
+        hometown: 'Test City',
+        signature_move: null,
+        employment_date: $employmentDate,
+        managers: new Collection([$manager]),
+    ));
+
+    expect($wrestler->isEmployed())->toBeTrue()
+        ->and($manager->isEmployed())->toBeTrue();
+
+    $this->assertDatabaseHas('managers_employments', [
+        'manager_id' => $manager->id,
+        'started_at' => $employmentDate->toDateTimeString(),
+        'ended_at' => null,
+    ]);
 });
