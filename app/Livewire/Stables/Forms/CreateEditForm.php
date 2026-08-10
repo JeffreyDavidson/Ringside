@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Forms;
 
+use App\Data\Stables\StableData;
+use App\Data\Stables\StableMembershipData;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesActivityPeriods;
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeDebutDate;
+use App\Rules\TagTeams\CanJoinStable as TagTeamCanJoinStable;
+use App\Rules\Wrestlers\CanJoinStable as WrestlerCanJoinStable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -40,8 +45,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesActivityPeriods;
-
     /**
      * The model instance being edited, or null for new stable creation.
      *
@@ -96,32 +99,6 @@ class CreateEditForm extends BaseForm
     public array $tag_teams = [];
 
     /**
-     * Accessor for trait compatibility - ManagesActivityPeriods expects start_date.
-     */
-    protected function getStartDateAttribute(): ?string
-    {
-        return $this->started_at;
-    }
-
-    /**
-     * Handle activity period creation when creating a new model.
-     * Override the trait method to use our property names.
-     */
-    protected function handleActivityPeriodCreation(): void
-    {
-        if (! empty($this->started_at)) {
-            $data = ['started_at' => $this->started_at];
-
-            // Include end date if provided
-            if (! empty($this->ended_at)) {
-                $data['ended_at'] = $this->ended_at;
-            }
-
-            $this->formModel->activityPeriods()->create($data);
-        }
-    }
-
-    /**
      * Load additional data when editing existing stable records.
      *
      * Handles activation period data loading for edit operations,
@@ -148,81 +125,26 @@ class CreateEditForm extends BaseForm
         // Load activation dates from first activity period relationship
         $this->started_at = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
         $this->ended_at = $this->formModel->firstActivityPeriod?->ended_at?->toDateString();
+        $this->wrestlers = $this->formModel->currentWrestlers->modelKeys();
+        $this->tag_teams = $this->formModel->currentTagTeams->modelKeys();
     }
 
-    /**
-     * Store the stable data with activity period handling.
-     */
-    public function store(): bool
+    public function toData(): StableData
     {
-        $this->validate();
-
-        $wasCreating = $this->isCreating();
-        $result = $this->storeModel();
-
-        if ($result) {
-            if ($wasCreating) {
-                $this->handlePostCreationTasks();
-            } else {
-                $this->handlePostUpdateTasks();
-            }
-        }
-
-        return $result;
+        return new StableData(
+            name: $this->name,
+            start_date: $this->started_at ? Carbon::parse($this->started_at) : null,
+            members: new StableMembershipData(
+                wrestlers: Wrestler::query()->whereKey($this->wrestlers)->get(),
+                tagTeams: TagTeam::query()->whereKey($this->tag_teams)->get(),
+            ),
+            end_date: $this->ended_at ? Carbon::parse($this->ended_at) : null,
+        );
     }
 
-    /**
-     * Handle additional tasks after stable creation.
-     *
-     * Creates activation record for new stables with start dates.
-     * Called automatically by the store pattern trait.
-     */
-    protected function handlePostCreationTasks(): void
+    public function stable(): Stable
     {
-        // Create activation record for new stables with start dates
-        if ($this->started_at) {
-            $this->handleActivityPeriodCreation();
-        }
-
-        // Handle member assignments
-        $this->handleMemberAssignments();
-    }
-
-    /**
-     * Handle additional tasks after stable update.
-     */
-    protected function handlePostUpdateTasks(): void
-    {
-        // Update the first activity period if dates changed
-        if ($this->started_at && $this->formModel->firstActivityPeriod) {
-            $updateData = ['started_at' => $this->started_at];
-            if ($this->ended_at) {
-                $updateData['ended_at'] = $this->ended_at;
-            }
-            $this->formModel->firstActivityPeriod()->update($updateData);
-        }
-    }
-
-    /**
-     * Handle assigning wrestlers and tag teams to the stable.
-     */
-    protected function handleMemberAssignments(): void
-    {
-        if (! empty($this->wrestlers)) {
-            $wrestlerData = [];
-            foreach ($this->wrestlers as $wrestlerId) {
-                $wrestlerData[$wrestlerId] = ['joined_at' => $this->started_at ?? now()];
-            }
-            $this->formModel->wrestlers()->attach($wrestlerData);
-        }
-
-        if (! empty($this->tag_teams)) {
-            $tagTeamData = [];
-            foreach ($this->tag_teams as $tagTeamId) {
-                $tagTeamData[$tagTeamId] = ['joined_at' => $this->started_at ?? now()];
-            }
-            $this->formModel->tagTeams()->attach($tagTeamData);
-        }
+        return Stable::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -277,6 +199,8 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
+        $stableStartDate = $this->parseStartDate();
+
         $rules = [
             'name' => [
                 'required',
@@ -287,9 +211,19 @@ class CreateEditForm extends BaseForm
             'started_at' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
             'ended_at' => ['nullable', 'date'],
             'wrestlers' => ['nullable', 'array'],
-            'wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            'wrestlers.*' => [
+                'bail',
+                'integer',
+                'exists:wrestlers,id',
+                new WrestlerCanJoinStable($this->modelId, $stableStartDate, collect($this->tag_teams)),
+            ],
             'tag_teams' => ['nullable', 'array'],
-            'tag_teams.*' => ['integer', 'exists:tag_teams,id'],
+            'tag_teams.*' => [
+                'bail',
+                'integer',
+                'exists:tag_teams,id',
+                new TagTeamCanJoinStable($this->modelId, $stableStartDate),
+            ],
         ];
 
         // Add validation that ended_at is after started_at if both are provided
@@ -298,6 +232,15 @@ class CreateEditForm extends BaseForm
         }
 
         return $rules;
+    }
+
+    private function parseStartDate(): ?Carbon
+    {
+        if ($this->started_at === null || strtotime($this->started_at) === false) {
+            return null;
+        }
+
+        return Carbon::parse($this->started_at);
     }
 
     /**

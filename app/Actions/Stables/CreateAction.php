@@ -7,7 +7,6 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
-use App\Services\StableValidationService;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -18,7 +17,6 @@ class CreateAction
     public function __construct(
         protected EstablishAction $establishAction,
         protected StableMembershipService $membershipService,
-        protected StableValidationService $validationService,
     ) {}
 
     /**
@@ -37,11 +35,7 @@ class CreateAction
     public function handle(StableData $stableData): Stable
     {
         return DB::transaction(function () use ($stableData): Stable {
-            // Validate business rules before creation
-            $this->validationService->validateUniqueName($stableData->getTrimmedName());
-            $this->validationService->validateMembersAvailable($stableData->members);
-
-            $stable = Stable::create([
+            $stable = Stable::query()->create([
                 'name' => $stableData->getTrimmedName(),
             ]);
 
@@ -54,6 +48,12 @@ class CreateAction
             // Use enhanced DTO method instead of isset check
             if ($stableData->shouldEstablish()) {
                 $this->establishAction->handle($stable, $stableData->start_date);
+
+                if ($stableData->end_date) {
+                    $stable->currentActivityPeriod()->update([
+                        'ended_at' => $stableData->end_date,
+                    ]);
+                }
             }
 
             return $stable;

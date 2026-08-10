@@ -16,7 +16,7 @@ class CanJoinStable implements ValidationRule
      * @param  Collection<int, int>  $tagTeamIds
      */
     public function __construct(
-        private bool $isNewStable = false,
+        private ?int $stableId = null,
         private ?Carbon $stableStartDate = null,
         private Collection $tagTeamIds = new Collection()
     ) {}
@@ -25,6 +25,13 @@ class CanJoinStable implements ValidationRule
     {
         /** @var Wrestler $wrestler */
         $wrestler = Wrestler::findOrFail($value);
+
+        if ($this->stableId !== null && $wrestler->stables()
+            ->whereKey($this->stableId)
+            ->wherePivotNull('left_at')
+            ->exists()) {
+            return;
+        }
 
         // Common validations for both new and existing stables
         if ($wrestler->isSuspended()) {
@@ -39,22 +46,14 @@ class CanJoinStable implements ValidationRule
             return;
         }
 
-        // Check if already in a stable
-        if ($wrestler->currentStable()->first() !== null) {
-            $message = $this->isNewStable
-                ? 'This wrestler is already a member of a stable.'
-                : 'This wrestler already belongs to a current stable.';
-            $fail($message);
+        if (! $wrestler->isEmployed()) {
+            $fail("{$wrestler->name} is not employed and cannot join the stable.");
 
             return;
         }
 
-        // Employment date validation for existing stables
-        if (! $this->isNewStable &&
-            $this->stableStartDate &&
-            $wrestler->isEmployed() &&
-            method_exists($wrestler, 'employedBefore') &&
-            ! $wrestler->employedBefore($this->stableStartDate)) {
+        if ($this->stableStartDate &&
+            ! $wrestler->employmentStartedBefore($this->stableStartDate)) {
             $fail("{$wrestler->name} cannot have an employment start date after stable's start date.");
 
             return;
@@ -64,10 +63,7 @@ class CanJoinStable implements ValidationRule
         if ($this->tagTeamIds->isNotEmpty()) {
             $currentTagTeam = $wrestler->currentTagTeam()->first();
             if ($currentTagTeam && $this->tagTeamIds->contains($currentTagTeam->getKey())) {
-                $message = $this->isNewStable
-                    ? 'This wrestler is already a member of a stable through their tag team.'
-                    : 'A wrestler in a tag team already belongs to a current stable.';
-                $fail($message);
+                $fail('This wrestler is already represented in the stable through their tag team.');
             }
         }
     }
