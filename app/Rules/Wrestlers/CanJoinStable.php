@@ -33,6 +33,14 @@ class CanJoinStable implements ValidationRule
             return;
         }
 
+        $currentStable = $wrestler->currentStable()->first();
+
+        if ($currentStable) {
+            $fail("{$wrestler->name} already belongs to {$currentStable->name} and cannot join another stable.");
+
+            return;
+        }
+
         // Common validations for both new and existing stables
         if ($wrestler->isSuspended()) {
             $fail("{$wrestler->name} is suspended and cannot join the stable.");

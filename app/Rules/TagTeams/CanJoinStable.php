@@ -27,6 +27,14 @@ class CanJoinStable implements ValidationRule
             return;
         }
 
+        $currentStable = $tagTeam->currentStable()->first();
+
+        if ($currentStable) {
+            $fail("{$tagTeam->name} already belongs to {$currentStable->name} and cannot join another stable.");
+
+            return;
+        }
+
         // Check if suspended
         if ($tagTeam->isSuspended()) {
             $fail("{$tagTeam->name} is suspended and cannot join the stable.");

@@ -363,7 +363,7 @@ describe('FormModal Member Management', function () {
         expect($stable->tagTeams->pluck('id'))->toContain($tagTeam2->id);
     });
 
-    it('allows a wrestler to belong to multiple stables', function () {
+    it('rejects a wrestler who currently belongs to another stable', function () {
         $wrestler = Wrestler::factory()->bookable()->create();
         $existingStable = Stable::factory()->create();
         $existingStable->wrestlers()->attach($wrestler, ['joined_at' => now()]);
@@ -374,13 +374,23 @@ describe('FormModal Member Management', function () {
             ->set('form.wrestlers', [$wrestler->id])
             ->call('save');
 
-        $component->assertHasNoErrors();
+        $component->assertHasErrors(['form.wrestlers.0']);
+        $this->assertDatabaseMissing('stables', ['name' => 'Another Stable']);
+    });
 
-        $newStable = Stable::query()->where('name', 'Another Stable')->firstOrFail();
+    it('rejects a tag team that currently belongs to another stable', function () {
+        $tagTeam = TagTeam::factory()->employed()->create();
+        $existingStable = Stable::factory()->create();
+        $existingStable->tagTeams()->attach($tagTeam, ['joined_at' => now()]);
 
-        expect($wrestler->stables()->pluck('stables.id'))
-            ->toContain($existingStable->id)
-            ->toContain($newStable->id);
+        $component = livewire(FormModal::class)
+            ->call('openModal')
+            ->set('form.name', 'Another Stable')
+            ->set('form.tag_teams', [$tagTeam->id])
+            ->call('save');
+
+        $component->assertHasErrors(['form.tag_teams.0']);
+        $this->assertDatabaseMissing('stables', ['name' => 'Another Stable']);
     });
 
     it('preserves existing members when editing stable details', function () {
