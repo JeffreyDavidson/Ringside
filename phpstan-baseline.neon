@@ -1195,18 +1195,6 @@ parameters:
 			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionships.php
 
 		-
-			message: '#^PHPDoc tag @throws with type App\\Exceptions\\Status\\CannotBeRetiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Contracts/RetirementValidationStrategy.php
-
-		-
-			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Managers\\Manager\) and ''trashed'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Models/Managers/Manager.php
-
-		-
 			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
 			identifier: throws.notThrowable
 			count: 1
@@ -1229,12 +1217,6 @@ parameters:
 			identifier: nullCoalesce.variable
 			count: 1
 			path: app/Models/Managers/Manager.php
-
-		-
-			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Referees\\Referee\) and ''trashed'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Models/Referees/Referee.php
 
 		-
 			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
@@ -1285,12 +1267,6 @@ parameters:
 			path: app/Models/Titles/Title.php
 
 		-
-			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Titles\\Title\) and ''trashed'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Models/Titles/Title.php
-
-		-
 			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
 			identifier: throws.notThrowable
 			count: 1
@@ -1307,24 +1283,6 @@ parameters:
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Models/Titles/TitleChampionship.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:alreadyRetired\(\) expects App\\Models\\Contracts\\Employable\|App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:hasFutureEmployment\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:unemployed\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/IndividualRetirementValidation.php
 
 		-
 			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeSuspendedException\:\:hasFutureEmployment\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
@@ -1357,66 +1315,6 @@ parameters:
 			path: app/Models/Validation/Strategies/IndividualSuspensionValidation.php
 
 		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:alreadyRetired\(\) expects App\\Models\\Contracts\\Employable\|App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/StableRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$stable of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:hasFutureEstablishment\(\) expects App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/StableRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$stable of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:unactivated\(\) expects App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/StableRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:alreadyRetired\(\) expects App\\Models\\Contracts\\Employable\|App\\Models\\Stables\\Stable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:hasFutureEmployment\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$entity of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:unemployed\(\) expects App\\Models\\Contracts\\Employable, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:noActiveWrestlers\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:wrestlerCannotBeRetired\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:wrestlerInjured\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
-			message: '#^Parameter \#1 \$tagTeam of static method App\\Exceptions\\Roster\\CannotBeRetiredException\:\:wrestlerSuspended\(\) expects App\\Models\\TagTeams\\TagTeam, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Validation/Strategies/TagTeamRetirementValidation.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$first_name\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1425,12 +1323,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$last_name\.$#'
 			identifier: property.notFound
-			count: 1
-			path: app/Models/Wrestlers/Wrestler.php
-
-		-
-			message: '#^Call to function method_exists\(\) with \$this\(App\\Models\\Wrestlers\\Wrestler\) and ''trashed'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/Models/Wrestlers/Wrestler.php
 
