@@ -75,9 +75,9 @@ class StableMembershipService
         }
 
         foreach ($members as $member) {
-            $relationship->updateExistingPivot($member->getKey(), [
-                'left_at' => $date,
-            ]);
+            $relationship->newPivotStatementForId($member->getKey())
+                ->whereNull('left_at')
+                ->update(['left_at' => $date]);
         }
     }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Models\Wrestlers\WrestlerManager;
 use App\Services\ManagerAssignmentService;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -103,4 +104,36 @@ it('accepts an empty manager collection', function () {
     );
 
     expect($wrestler->managers()->exists())->toBeFalse();
+});
+
+it('preserves each manager assignment when a manager is reassigned', function () {
+    $wrestler = Wrestler::factory()->create();
+    $manager = Manager::factory()->create();
+    $managers = new Collection([$manager]);
+    $noManagers = new Collection();
+    $firstHiredAt = now()->subDays(4)->startOfSecond();
+    $firstFiredAt = now()->subDays(3)->startOfSecond();
+    $secondHiredAt = now()->subDays(2)->startOfSecond();
+    $secondFiredAt = now()->subDay()->startOfSecond();
+    $service = resolve(ManagerAssignmentService::class);
+
+    $service->assign($wrestler, $managers, $firstHiredAt);
+    $service->synchronize($wrestler, $noManagers, $firstFiredAt);
+    $service->assign($wrestler, $managers, $secondHiredAt);
+    $service->synchronize($wrestler, $noManagers, $secondFiredAt);
+
+    $assignments = WrestlerManager::query()
+        ->whereBelongsTo($wrestler)
+        ->whereBelongsTo($manager)
+        ->orderBy('hired_at')
+        ->get();
+    $firstAssignment = $assignments->firstOrFail();
+    $secondAssignment = $assignments->skip(1)->firstOrFail();
+
+    expect($assignments)->toHaveCount(2)
+        ->and($firstAssignment->hired_at->equalTo($firstHiredAt))->toBeTrue()
+        ->and($firstAssignment->fired_at?->equalTo($firstFiredAt))->toBeTrue()
+        ->and($secondAssignment->hired_at->equalTo($secondHiredAt))->toBeTrue()
+        ->and($secondAssignment->fired_at?->equalTo($secondFiredAt))->toBeTrue()
+        ->and($wrestler->currentManagers()->exists())->toBeFalse();
 });

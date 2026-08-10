@@ -31,8 +31,8 @@ class RetireAction
      *
      * This handles the complete stable retirement workflow:
      * - Validates the stable can be retired (business rule compliance)
-     * - Retires eligible current wrestlers and tag teams
-     * - Ends current wrestler and tag team memberships
+     * - Ends current wrestler and tag team memberships at the operational date
+     * - Retires eligible former members and closes their remaining relationships at the retirement date
      * - Ends the activity period if currently active
      * - Creates the retirement record
      * - Makes the stable permanently unavailable for storylines
@@ -61,6 +61,8 @@ class RetireAction
             // Retire current members who are available
             $membersToRetire = $stable->getMembersToRetire();
 
+            $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
+
             if ($membersToRetire->wrestlers) {
                 foreach ($membersToRetire->wrestlers as $wrestler) {
                     if ($wrestler->canBeRetired()) {
@@ -76,9 +78,6 @@ class RetireAction
                     }
                 }
             }
-
-            // Remove all current members using injected Action
-            $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
 
             $this->retirementPeriods->start($stable, $retirementDate);
 
