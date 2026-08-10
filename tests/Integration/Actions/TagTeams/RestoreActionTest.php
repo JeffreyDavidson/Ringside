@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\RestoreAction;
+use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 
@@ -12,12 +13,14 @@ test('it restores a soft-deleted tag team', function () {
 
     // First delete the tag team
     $tagTeam->delete();
-    expect($tagTeam->trashed())->toBeTrue();
+    expect($tagTeam->trashed())->toBeTrue()
+        ->and($tagTeam->canBeRestored())->toBeTrue();
 
     resolve(RestoreAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->trashed())->toBeFalse();
+    expect($tagTeam->trashed())->toBeFalse()
+        ->and($tagTeam->canBeRestored())->toBeFalse();
     expect($tagTeam->name)->toBe($originalName);
 
     // Verify restoration in database
@@ -49,10 +52,23 @@ test('it handles database transactions correctly', function () {
 test('it prevents restoring non-deleted tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->trashed())->toBeFalse();
+    expect($tagTeam->trashed())->toBeFalse()
+        ->and($tagTeam->canBeRestored())->toBeFalse();
 
     expect(fn () => resolve(RestoreAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
+});
+
+test('it prevents restoring a tag team whose name belongs to an employed team', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $tagTeam->delete();
+
+    TagTeam::factory()->employed()->create(['name' => $tagTeam->name]);
+
+    expect($tagTeam->canBeRestored())->toBeFalse();
+
+    expect(fn () => resolve(RestoreAction::class)->handle($tagTeam))
+        ->toThrow(CannotBeRestoredException::class);
 });
 
 test('it restores tag team with historical data intact', function () {
