@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Data;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,7 +42,7 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is not deleted and cannot be restored.");
+        return self::forReason(BusinessRuleReason::NotDeleted, "{$context} is not deleted and cannot be restored.");
     }
 
     /**

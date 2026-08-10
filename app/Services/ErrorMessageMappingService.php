@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\BusinessRuleReason;
+use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Data\CannotBeRestoredException;
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\CannotBeEmployedException;
 use App\Exceptions\Roster\CannotBeInjuredException;
-use App\Exceptions\Roster\CannotBeReinstatedException as RosterCannotBeReinstatedException;
+use App\Exceptions\Roster\CannotBeReinstatedException;
 use App\Exceptions\Roster\CannotBeReleasedException;
 use App\Exceptions\Roster\CannotBeRetiredException;
 use App\Exceptions\Roster\CannotBeSuspendedException;
@@ -16,622 +18,140 @@ use App\Exceptions\Roster\CannotBeUnretiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotBeReinstatedException;
 use Throwable;
 
-/**
- * Service to map technical exceptions to user-friendly error messages.
- *
- * This service provides a centralized way to convert detailed business
- * exception messages into user-friendly error messages while preserving
- * the technical details for logging and debugging purposes.
- */
-class ErrorMessageMappingService
+final class ErrorMessageMappingService
 {
-    /**
-     * Map a wrestler-related exception to a user-friendly error message key.
-     *
-     * @param  Throwable  $exception  The exception to map
-     * @return string Language file key for user-friendly error message
-     */
     public static function mapWrestlerException(Throwable $exception): string
     {
-        $exceptionMessage = $exception->getMessage();
-
-        return match (get_class($exception)) {
-            CannotBeEmployedException::class => self::mapEmploymentException($exceptionMessage),
-            CannotBeReleasedException::class => self::mapReleaseException($exceptionMessage),
-            CannotBeRetiredException::class => self::mapRetirementException($exceptionMessage),
-            CannotBeUnretiredException::class => self::mapUnretirementException($exceptionMessage),
-            CannotBeSuspendedException::class => self::mapSuspensionException($exceptionMessage),
-            RosterCannotBeReinstatedException::class => self::mapReinstatementException($exceptionMessage),
-            CannotBeInjuredException::class => self::mapInjuryException($exceptionMessage),
-            CannotBeClearedFromInjuryException::class => self::mapHealingException($exceptionMessage),
-            CannotBeRestoredException::class => self::mapRestorationException($exceptionMessage),
-            default => 'wrestlers.errors.general_error',
-        };
+        return self::map($exception, 'wrestlers');
     }
 
-    /**
-     * Map a referee-related exception to a user-friendly error message key.
-     *
-     * @param  Throwable  $exception  The exception to map
-     * @return string Language file key for user-friendly error message
-     */
     public static function mapRefereeException(Throwable $exception): string
     {
-        $exceptionMessage = $exception->getMessage();
-
-        return match (get_class($exception)) {
-            CannotBeEmployedException::class => self::mapRefereeEmploymentException($exceptionMessage),
-            CannotBeReleasedException::class => self::mapRefereeReleaseException($exceptionMessage),
-            CannotBeRetiredException::class => self::mapRefereeRetirementException($exceptionMessage),
-            CannotBeUnretiredException::class => self::mapRefereeUnretirementException($exceptionMessage),
-            CannotBeSuspendedException::class => self::mapRefereeSuspensionException($exceptionMessage),
-            RosterCannotBeReinstatedException::class => self::mapRefereeReinstatementException($exceptionMessage),
-            CannotBeInjuredException::class => self::mapRefereeInjuryException($exceptionMessage),
-            CannotBeClearedFromInjuryException::class => self::mapRefereeHealingException($exceptionMessage),
-            CannotBeRestoredException::class => self::mapRefereeRestorationException($exceptionMessage),
-            default => 'referees.errors.general_error',
-        };
+        return self::map($exception, 'referees');
     }
 
-    /**
-     * Map a manager-related exception to a user-friendly error message key.
-     *
-     * @param  Throwable  $exception  The exception to map
-     * @return string Language file key for user-friendly error message
-     */
     public static function mapManagerException(Throwable $exception): string
     {
-        $exceptionMessage = $exception->getMessage();
-
-        return match (get_class($exception)) {
-            CannotBeEmployedException::class => self::mapManagerEmploymentException($exceptionMessage),
-            CannotBeReleasedException::class => self::mapManagerReleaseException($exceptionMessage),
-            CannotBeRetiredException::class => self::mapManagerRetirementException($exceptionMessage),
-            CannotBeUnretiredException::class => self::mapManagerUnretirementException($exceptionMessage),
-            CannotBeSuspendedException::class => self::mapManagerSuspensionException($exceptionMessage),
-            RosterCannotBeReinstatedException::class => self::mapManagerReinstatementException($exceptionMessage),
-            CannotBeInjuredException::class => self::mapManagerInjuryException($exceptionMessage),
-            CannotBeClearedFromInjuryException::class => self::mapManagerHealingException($exceptionMessage),
-            CannotBeRestoredException::class => self::mapManagerRestorationException($exceptionMessage),
-            default => 'managers.errors.general_error',
-        };
+        return self::map($exception, 'managers');
     }
 
-    /**
-     * Map a tag team-related exception to a user-friendly error message key.
-     *
-     * @param  Throwable  $exception  The exception to map
-     * @return string Language file key for user-friendly error message
-     */
     public static function mapTagTeamException(Throwable $exception): string
     {
-        $exceptionMessage = $exception->getMessage();
+        return self::map($exception, 'tag-teams');
+    }
 
-        return match (get_class($exception)) {
-            CannotBeEmployedException::class => self::mapTagTeamEmploymentException($exceptionMessage),
-            CannotBeReleasedException::class => self::mapTagTeamReleaseException($exceptionMessage),
-            CannotBeRetiredException::class => self::mapTagTeamRetirementException($exceptionMessage),
-            CannotBeUnretiredException::class => self::mapTagTeamUnretirementException($exceptionMessage),
-            CannotBeSuspendedException::class => self::mapTagTeamSuspensionException($exceptionMessage),
-            TagTeamCannotBeReinstatedException::class => self::mapTagTeamReinstatementException($exceptionMessage),
-            CannotBeRestoredException::class => self::mapTagTeamRestorationException($exceptionMessage),
-            default => 'tag-teams.errors.general_error',
+    private static function map(Throwable $exception, string $entity): string
+    {
+        $reason = $exception instanceof BaseBusinessException
+            ? $exception->reason()
+            : BusinessRuleReason::General;
+
+        $key = match ($exception::class) {
+            CannotBeEmployedException::class => self::employmentKey($reason, $entity),
+            CannotBeReleasedException::class => self::releaseKey($reason, $entity),
+            CannotBeRetiredException::class => self::retirementKey($reason, $entity),
+            CannotBeUnretiredException::class => self::unretirementKey($reason),
+            CannotBeSuspendedException::class => self::suspensionKey($reason, $entity),
+            CannotBeReinstatedException::class,
+            TagTeamCannotBeReinstatedException::class => self::reinstatementKey($reason),
+            CannotBeInjuredException::class => self::injuryKey($reason, $entity),
+            CannotBeClearedFromInjuryException::class => self::healingKey($reason),
+            CannotBeRestoredException::class => self::restorationKey($reason),
+            default => 'general_error',
+        };
+
+        return "{$entity}.errors.{$key}";
+    }
+
+    private static function employmentKey(BusinessRuleReason $reason, string $entity): string
+    {
+        return match ($reason) {
+            BusinessRuleReason::AlreadyEmployed => 'already_employed',
+            BusinessRuleReason::Suspended => 'cannot_employ_suspended',
+            BusinessRuleReason::Retired => 'cannot_employ_retired',
+            BusinessRuleReason::Injured => $entity === 'managers' ? 'cannot_employ_injured' : 'cannot_employ',
+            default => 'cannot_employ',
         };
     }
 
-    /**
-     * Map employment-specific exception messages to user-friendly keys.
-     */
-    private static function mapEmploymentException(string $message): string
+    private static function releaseKey(BusinessRuleReason $reason, string $entity): string
     {
-        if (str_contains($message, 'already employed')) {
-            return 'wrestlers.errors.already_employed';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'wrestlers.errors.cannot_employ_suspended';
-        }
-
-        if (str_contains($message, 'retired')) {
-            return 'wrestlers.errors.cannot_employ_retired';
-        }
-
-        return 'wrestlers.errors.cannot_employ';
+        return match ($reason) {
+            BusinessRuleReason::Unemployed => 'not_employed',
+            BusinessRuleReason::Suspended => in_array($entity, ['managers', 'tag-teams'], true)
+                ? 'cannot_release_suspended'
+                : 'cannot_release',
+            default => 'cannot_release',
+        };
     }
 
-    /**
-     * Map release-specific exception messages to user-friendly keys.
-     */
-    private static function mapReleaseException(string $message): string
+    private static function retirementKey(BusinessRuleReason $reason, string $entity): string
     {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'wrestlers.errors.not_employed';
-        }
-
-        return 'wrestlers.errors.cannot_release';
+        return match ($reason) {
+            BusinessRuleReason::Unemployed => 'cannot_retire_unemployed',
+            BusinessRuleReason::AlreadyRetired => 'already_retired',
+            BusinessRuleReason::Suspended => in_array($entity, ['managers', 'tag-teams'], true)
+                ? 'cannot_retire_suspended'
+                : 'cannot_retire',
+            default => 'cannot_retire',
+        };
     }
 
-    /**
-     * Map retirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapRetirementException(string $message): string
+    private static function unretirementKey(BusinessRuleReason $reason): string
     {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'wrestlers.errors.cannot_retire_unemployed';
-        }
-
-        if (str_contains($message, 'already retired')) {
-            return 'wrestlers.errors.already_retired';
-        }
-
-        return 'wrestlers.errors.cannot_retire';
+        return $reason === BusinessRuleReason::NotRetired
+            ? 'not_retired'
+            : 'cannot_unretire';
     }
 
-    /**
-     * Map unretirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapUnretirementException(string $message): string
+    private static function suspensionKey(BusinessRuleReason $reason, string $entity): string
     {
-        if (str_contains($message, 'not retired')) {
-            return 'wrestlers.errors.not_retired';
-        }
-
-        return 'wrestlers.errors.cannot_unretire';
+        return match ($reason) {
+            BusinessRuleReason::AlreadySuspended => 'already_suspended',
+            BusinessRuleReason::Unemployed => match ($entity) {
+                'managers', 'tag-teams' => 'not_employed_suspend',
+                'referees' => 'cannot_suspend_unemployed',
+                default => 'cannot_suspend',
+            },
+            BusinessRuleReason::Injured => $entity === 'managers' ? 'cannot_suspend_injured' : 'cannot_suspend',
+            default => 'cannot_suspend',
+        };
     }
 
-    /**
-     * Map suspension-specific exception messages to user-friendly keys.
-     */
-    private static function mapSuspensionException(string $message): string
+    private static function reinstatementKey(BusinessRuleReason $reason): string
     {
-        if (str_contains($message, 'already suspended')) {
-            return 'wrestlers.errors.already_suspended';
-        }
-
-        return 'wrestlers.errors.cannot_suspend';
+        return match ($reason) {
+            BusinessRuleReason::NotSuspended => 'not_suspended',
+            BusinessRuleReason::Injured => 'cannot_reinstate_injured',
+            default => 'cannot_reinstate',
+        };
     }
 
-    /**
-     * Map reinstatement-specific exception messages to user-friendly keys.
-     */
-    private static function mapReinstatementException(string $message): string
+    private static function injuryKey(BusinessRuleReason $reason, string $entity): string
     {
-        if (str_contains($message, 'injured')) {
-            return 'wrestlers.errors.cannot_reinstate_injured';
-        }
-
-        if (str_contains($message, 'not suspended') || str_contains($message, 'already available')) {
-            return 'wrestlers.errors.not_suspended';
-        }
-
-        return 'wrestlers.errors.cannot_reinstate';
+        return match ($reason) {
+            BusinessRuleReason::AlreadyInjured => 'already_injured',
+            BusinessRuleReason::Unemployed => match ($entity) {
+                'managers' => 'not_employed_injure',
+                'referees' => 'cannot_injure_unemployed',
+                default => 'cannot_injure',
+            },
+            BusinessRuleReason::Suspended => $entity === 'managers' ? 'cannot_injure_suspended' : 'cannot_injure',
+            default => 'cannot_injure',
+        };
     }
 
-    /**
-     * Map injury-specific exception messages to user-friendly keys.
-     */
-    private static function mapInjuryException(string $message): string
+    private static function healingKey(BusinessRuleReason $reason): string
     {
-        if (str_contains($message, 'already injured')) {
-            return 'wrestlers.errors.already_injured';
-        }
-
-        return 'wrestlers.errors.cannot_injure';
+        return $reason === BusinessRuleReason::NotInjured
+            ? 'not_injured'
+            : 'cannot_heal';
     }
 
-    /**
-     * Map healing-specific exception messages to user-friendly keys.
-     */
-    private static function mapHealingException(string $message): string
+    private static function restorationKey(BusinessRuleReason $reason): string
     {
-        if (str_contains($message, 'not injured')) {
-            return 'wrestlers.errors.not_injured';
-        }
-
-        return 'wrestlers.errors.cannot_heal';
-    }
-
-    /**
-     * Map restoration-specific exception messages to user-friendly keys.
-     */
-    private static function mapRestorationException(string $message): string
-    {
-        if (str_contains($message, 'not deleted')) {
-            return 'wrestlers.errors.not_deleted';
-        }
-
-        return 'wrestlers.errors.cannot_restore';
-    }
-
-    /**
-     * Map referee employment-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeEmploymentException(string $message): string
-    {
-        if (str_contains($message, 'already employed')) {
-            return 'referees.errors.already_employed';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'referees.errors.cannot_employ_suspended';
-        }
-
-        if (str_contains($message, 'retired')) {
-            return 'referees.errors.cannot_employ_retired';
-        }
-
-        return 'referees.errors.cannot_employ';
-    }
-
-    /**
-     * Map referee release-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeReleaseException(string $message): string
-    {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'referees.errors.not_employed';
-        }
-
-        return 'referees.errors.cannot_release';
-    }
-
-    /**
-     * Map referee retirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeRetirementException(string $message): string
-    {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'referees.errors.cannot_retire_unemployed';
-        }
-
-        if (str_contains($message, 'already retired')) {
-            return 'referees.errors.already_retired';
-        }
-
-        return 'referees.errors.cannot_retire';
-    }
-
-    /**
-     * Map referee unretirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeUnretirementException(string $message): string
-    {
-        if (str_contains($message, 'not retired')) {
-            return 'referees.errors.not_retired';
-        }
-
-        return 'referees.errors.cannot_unretire';
-    }
-
-    /**
-     * Map referee suspension-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeSuspensionException(string $message): string
-    {
-        if (str_contains($message, 'already suspended')) {
-            return 'referees.errors.already_suspended';
-        }
-
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'referees.errors.cannot_suspend_unemployed';
-        }
-
-        return 'referees.errors.cannot_suspend';
-    }
-
-    /**
-     * Map referee reinstatement-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeReinstatementException(string $message): string
-    {
-        if (str_contains($message, 'injured')) {
-            return 'referees.errors.cannot_reinstate_injured';
-        }
-
-        if (str_contains($message, 'not suspended') || str_contains($message, 'already available')) {
-            return 'referees.errors.not_suspended';
-        }
-
-        return 'referees.errors.cannot_reinstate';
-    }
-
-    /**
-     * Map referee injury-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeInjuryException(string $message): string
-    {
-        if (str_contains($message, 'already injured')) {
-            return 'referees.errors.already_injured';
-        }
-
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'referees.errors.cannot_injure_unemployed';
-        }
-
-        return 'referees.errors.cannot_injure';
-    }
-
-    /**
-     * Map referee healing-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeHealingException(string $message): string
-    {
-        if (str_contains($message, 'not injured')) {
-            return 'referees.errors.not_injured';
-        }
-
-        return 'referees.errors.cannot_heal';
-    }
-
-    /**
-     * Map referee restoration-specific exception messages to user-friendly keys.
-     */
-    private static function mapRefereeRestorationException(string $message): string
-    {
-        if (str_contains($message, 'not deleted')) {
-            return 'referees.errors.not_deleted';
-        }
-
-        return 'referees.errors.cannot_restore';
-    }
-
-    /**
-     * Map manager employment-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerEmploymentException(string $message): string
-    {
-        if (str_contains($message, 'already employed')) {
-            return 'managers.errors.already_employed';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'managers.errors.cannot_employ_suspended';
-        }
-
-        if (str_contains($message, 'retired')) {
-            return 'managers.errors.cannot_employ_retired';
-        }
-
-        if (str_contains($message, 'injured')) {
-            return 'managers.errors.cannot_employ_injured';
-        }
-
-        return 'managers.errors.cannot_employ';
-    }
-
-    /**
-     * Map manager release-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerReleaseException(string $message): string
-    {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'managers.errors.not_employed';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'managers.errors.cannot_release_suspended';
-        }
-
-        return 'managers.errors.cannot_release';
-    }
-
-    /**
-     * Map manager retirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerRetirementException(string $message): string
-    {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'managers.errors.cannot_retire_unemployed';
-        }
-
-        if (str_contains($message, 'already retired')) {
-            return 'managers.errors.already_retired';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'managers.errors.cannot_retire_suspended';
-        }
-
-        return 'managers.errors.cannot_retire';
-    }
-
-    /**
-     * Map manager unretirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerUnretirementException(string $message): string
-    {
-        if (str_contains($message, 'not retired')) {
-            return 'managers.errors.not_retired';
-        }
-
-        return 'managers.errors.cannot_unretire';
-    }
-
-    /**
-     * Map manager suspension-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerSuspensionException(string $message): string
-    {
-        if (str_contains($message, 'already suspended')) {
-            return 'managers.errors.already_suspended';
-        }
-
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'managers.errors.not_employed_suspend';
-        }
-
-        if (str_contains($message, 'injured')) {
-            return 'managers.errors.cannot_suspend_injured';
-        }
-
-        return 'managers.errors.cannot_suspend';
-    }
-
-    /**
-     * Map manager reinstatement-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerReinstatementException(string $message): string
-    {
-        if (str_contains($message, 'not suspended') || str_contains($message, 'already available')) {
-            return 'managers.errors.not_suspended';
-        }
-
-        if (str_contains($message, 'injured')) {
-            return 'managers.errors.cannot_reinstate_injured';
-        }
-
-        return 'managers.errors.cannot_reinstate';
-    }
-
-    /**
-     * Map manager injury-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerInjuryException(string $message): string
-    {
-        if (str_contains($message, 'already injured')) {
-            return 'managers.errors.already_injured';
-        }
-
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'managers.errors.not_employed_injure';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'managers.errors.cannot_injure_suspended';
-        }
-
-        return 'managers.errors.cannot_injure';
-    }
-
-    /**
-     * Map manager healing-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerHealingException(string $message): string
-    {
-        if (str_contains($message, 'not injured')) {
-            return 'managers.errors.not_injured';
-        }
-
-        return 'managers.errors.cannot_heal';
-    }
-
-    /**
-     * Map manager restoration-specific exception messages to user-friendly keys.
-     */
-    private static function mapManagerRestorationException(string $message): string
-    {
-        if (str_contains($message, 'not deleted')) {
-            return 'managers.errors.not_deleted';
-        }
-
-        return 'managers.errors.cannot_restore';
-    }
-
-    /**
-     * Map tag team employment-specific exception messages to user-friendly keys.
-     */
-    private static function mapTagTeamEmploymentException(string $message): string
-    {
-        if (str_contains($message, 'already employed')) {
-            return 'tag-teams.errors.already_employed';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'tag-teams.errors.cannot_employ_suspended';
-        }
-
-        if (str_contains($message, 'retired')) {
-            return 'tag-teams.errors.cannot_employ_retired';
-        }
-
-        return 'tag-teams.errors.cannot_employ';
-    }
-
-    /**
-     * Map tag team release-specific exception messages to user-friendly keys.
-     */
-    private static function mapTagTeamReleaseException(string $message): string
-    {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'tag-teams.errors.not_employed';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'tag-teams.errors.cannot_release_suspended';
-        }
-
-        return 'tag-teams.errors.cannot_release';
-    }
-
-    /**
-     * Map tag team retirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapTagTeamRetirementException(string $message): string
-    {
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'tag-teams.errors.cannot_retire_unemployed';
-        }
-
-        if (str_contains($message, 'already retired')) {
-            return 'tag-teams.errors.already_retired';
-        }
-
-        if (str_contains($message, 'suspended')) {
-            return 'tag-teams.errors.cannot_retire_suspended';
-        }
-
-        return 'tag-teams.errors.cannot_retire';
-    }
-
-    /**
-     * Map tag team unretirement-specific exception messages to user-friendly keys.
-     */
-    private static function mapTagTeamUnretirementException(string $message): string
-    {
-        if (str_contains($message, 'not retired')) {
-            return 'tag-teams.errors.not_retired';
-        }
-
-        return 'tag-teams.errors.cannot_unretire';
-    }
-
-    /**
-     * Map tag team suspension-specific exception messages to user-friendly keys.
-     */
-    private static function mapTagTeamSuspensionException(string $message): string
-    {
-        if (str_contains($message, 'already suspended')) {
-            return 'tag-teams.errors.already_suspended';
-        }
-
-        if (str_contains($message, 'unemployed') || str_contains($message, 'not employed')) {
-            return 'tag-teams.errors.not_employed_suspend';
-        }
-
-        return 'tag-teams.errors.cannot_suspend';
-    }
-
-    /**
-     * Map tag team reinstatement-specific exception messages to user-friendly keys.
-     */
-    private static function mapTagTeamReinstatementException(string $message): string
-    {
-        if (str_contains($message, 'not suspended')) {
-            return 'tag-teams.errors.not_suspended';
-        }
-
-        return 'tag-teams.errors.cannot_reinstate';
-    }
-
-    /**
-     * Map tag team restoration-specific exception messages to user-friendly keys.
-     */
-    private static function mapTagTeamRestorationException(string $message): string
-    {
-        if (str_contains($message, 'not deleted')) {
-            return 'tag-teams.errors.not_deleted';
-        }
-
-        return 'tag-teams.errors.cannot_restore';
+        return $reason === BusinessRuleReason::NotDeleted
+            ? 'not_deleted'
+            : 'cannot_restore';
     }
 }

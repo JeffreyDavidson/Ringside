@@ -619,12 +619,6 @@ parameters:
 			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
 
 		-
-			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:notSuspended\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Exceptions/Roster/TagTeams/CannotBeReinstatedException.php
-
-		-
 			message: '#^Method App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\:\:partnersUnavailable\(\) should return static\(App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\) but returns App\\Exceptions\\Roster\\TagTeams\\CannotBeReinstatedException\.$#'
 			identifier: return.type
 			count: 1

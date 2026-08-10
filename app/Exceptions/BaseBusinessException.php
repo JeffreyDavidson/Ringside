@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
+use App\Enums\BusinessRuleReason;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
+use Throwable;
 
 /**
  * Base class for all business logic exceptions in the wrestling promotion management system.
@@ -191,6 +193,25 @@ use Illuminate\Support\Carbon;
  */
 abstract class BaseBusinessException extends Exception
 {
+    final public function __construct(
+        string $message = '',
+        int $code = 0,
+        ?Throwable $previous = null,
+        private readonly BusinessRuleReason $reason = BusinessRuleReason::General,
+    ) {
+        parent::__construct($message, $code, $previous);
+    }
+
+    public function reason(): BusinessRuleReason
+    {
+        return $this->reason;
+    }
+
+    protected static function forReason(BusinessRuleReason $reason, string $message): static
+    {
+        return new static($message, reason: $reason);
+    }
+
     /**
      * Build consistent entity context for error messages.
      *

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
 use App\Models\Stables\Stable;
@@ -44,7 +45,7 @@ final class CannotBeRetiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is currently unemployed and cannot be retired.");
+        return self::forReason(BusinessRuleReason::Unemployed, "{$context} is currently unemployed and cannot be retired.");
     }
 
     /**
@@ -56,7 +57,7 @@ final class CannotBeRetiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is already retired and cannot be retired again.");
+        return self::forReason(BusinessRuleReason::AlreadyRetired, "{$context} is already retired and cannot be retired again.");
     }
 
     /**
@@ -144,7 +145,7 @@ final class CannotBeRetiredException extends BaseBusinessException
         $tagTeamContext = self::formatModelContext($tagTeam);
         $wrestlerContext = self::formatModelContext($wrestler);
 
-        return new self("{$tagTeamContext} cannot be retired because {$wrestlerContext} is currently suspended.");
+        return self::forReason(BusinessRuleReason::Suspended, "{$tagTeamContext} cannot be retired because {$wrestlerContext} is currently suspended.");
     }
 
     /**

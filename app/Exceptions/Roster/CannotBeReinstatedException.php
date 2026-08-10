@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
 
@@ -109,7 +110,7 @@ final class CannotBeReinstatedException extends BaseBusinessException
         $context = self::formatModelContext($entity);
         $injury = $injuryDetails ? " ({$injuryDetails})" : '';
 
-        return new static("{$context} is injured{$injury} and cannot be reinstated until medically cleared.");
+        return self::forReason(BusinessRuleReason::Injured, "{$context} is injured{$injury} and cannot be reinstated until medically cleared.");
     }
 
     /**
@@ -121,7 +122,7 @@ final class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} is already available and does not need reinstatement.");
+        return self::forReason(BusinessRuleReason::NotSuspended, "{$context} is already available and does not need reinstatement.");
     }
 
     /**
