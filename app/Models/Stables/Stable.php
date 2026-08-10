@@ -110,12 +110,7 @@ use Tests\Unit\Models\Stables\StableTest;
 class Stable extends Model implements Debutable, HasActivityPeriodsContract, Retirable
 {
     /** @use HasActivityPeriods<StableActivityPeriod, static> */
-    use HasActivityPeriods {
-        HasActivityPeriods::isCurrentlyActive insteadof HasStatusHistory;
-        HasActivityPeriods::isNotCurrentlyActive insteadof HasStatusHistory;
-        HasActivityPeriods::isUnactivated insteadof HasStatusHistory;
-        HasActivityPeriods::isInactive insteadof HasStatusHistory;
-    }
+    use HasActivityPeriods;
 
     /** @use HasFactory<StableFactory> */
     use HasFactory;
