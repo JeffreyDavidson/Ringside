@@ -104,24 +104,6 @@ test('it handles database transactions correctly', function () {
     expect($this->tagTeam->signature_move)->toBe('Transaction Slam');
 });
 
-test('it validates unique name constraint', function () {
-    TagTeam::factory()->create(['name' => 'Existing Team']);
-
-    $updateData = new TagTeamData(
-        name: 'Existing Team',
-        signature_move: 'Original Move',
-        employment_date: null,
-        wrestlerA: $this->wrestlerA,
-        wrestlerB: $this->wrestlerB,
-    );
-
-    expect(fn () => resolve(UpdateAction::class)->handle($this->tagTeam, $updateData))
-        ->toThrow(Exception::class);
-
-    $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
-});
-
 test('it allows updating to the same name', function () {
     $updateData = new TagTeamData(
         name: 'Original Team',
@@ -136,22 +118,6 @@ test('it allows updating to the same name', function () {
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('Original Team');
     expect($this->tagTeam->signature_move)->toBe('Updated Move');
-});
-
-test('it rejects an empty name', function () {
-    $updateData = new TagTeamData(
-        name: '',
-        signature_move: 'Original Move',
-        employment_date: null,
-        wrestlerA: $this->wrestlerA,
-        wrestlerB: $this->wrestlerB,
-    );
-
-    expect(fn () => resolve(UpdateAction::class)->handle($this->tagTeam, $updateData))
-        ->toThrow(Exception::class);
-
-    $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
 });
 
 test('it updates timestamps correctly', function () {

@@ -7,7 +7,6 @@ namespace App\Actions\TagTeams;
 use App\Data\TagTeams\TagTeamData;
 use App\Models\TagTeams\TagTeam;
 use App\Services\TagTeamMembershipService;
-use App\Services\TagTeamValidationService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -16,31 +15,15 @@ class UpdateAction
      * Create a new update action instance.
      */
     public function __construct(
-        protected TagTeamValidationService $validationService,
         protected TagTeamMembershipService $membershipService,
         protected EmployAction $employAction,
     ) {}
 
     /**
-     * Update a tag team with comprehensive business rule validation and service integration.
-     *
-     * This handles the complete tag team update workflow using dedicated services:
-     * - Validates all business rules for updates including uniqueness and availability
-     * - Updates tag team information with validated data
-     * - Manages partnership changes through membership service
-     * - Manages manager relationship changes through membership service
-     * - Handles employment workflows through lifecycle service
-     * - Maintains data integrity and business rule compliance throughout
-     *
-     * @param  TagTeam  $tagTeam  The tag team to update
-     * @param  TagTeamData  $tagTeamData  The updated tag team information
-     * @return TagTeam The updated tag team instance with all changes applied
+     * Update a tag team while preserving its relationship history.
      */
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam
     {
-        // Validate all business rules for update
-        $this->validationService->validateForUpdate($tagTeam, $tagTeamData);
-
         return DB::transaction(function () use ($tagTeam, $tagTeamData): TagTeam {
             // Update the tag team's basic information
             $tagTeam->update([

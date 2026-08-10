@@ -176,18 +176,6 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     }
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => EmploymentStatus::class,
-        ];
-    }
-
-    /**
      * Remove manager from all current wrestler relationships.
      *
      * Terminates all active wrestler management relationships by setting

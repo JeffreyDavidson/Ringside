@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Unit tests for Manager model structure and configuration.
  *
  * UNIT TEST SCOPE:
- * - Model attribute configuration (fillable, casts, defaults)
+ * - Model attribute configuration (fillable and defaults)
  * - Custom builder class verification
  * - Trait integration verification
  *
@@ -44,13 +44,6 @@ describe('Manager Model Unit Tests', function () {
                 'first_name',
                 'last_name',
             ]);
-        });
-
-        test('has correct casts configuration', function () {
-            $manager = new Manager();
-            $casts = $manager->getCasts();
-
-            expect($casts['status'])->toBe(EmploymentStatus::class);
         });
 
         test('has custom eloquent builder', function () {

@@ -27,7 +27,7 @@ class StableFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str(fake()->words(2, true))->title()->value(),
+            'name' => str(fake()->unique()->words(2, true))->title()->value(),
             // Status is now computed from activity periods and retirement state
         ];
     }
