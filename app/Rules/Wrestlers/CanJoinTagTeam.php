@@ -28,13 +28,14 @@ class CanJoinTagTeam implements ValidationRule
             return;
         }
 
-        $currentTagTeam = $wrestler->currentTagTeam();
+        $currentTagTeams = $wrestler->tagTeams()
+            ->wherePivotNull('left_at');
 
         if ($this->tagTeamId !== null) {
-            $currentTagTeam->whereKeyNot($this->tagTeamId);
+            $currentTagTeams->where('tag_teams.id', '!=', $this->tagTeamId);
         }
 
-        if ($currentTagTeam->exists()) {
+        if ($currentTagTeams->exists()) {
             $fail('This wrestler is already a member of another tag team.');
         }
     }

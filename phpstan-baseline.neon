@@ -1553,15 +1553,3 @@ parameters:
 			identifier: argument.type
 			count: 3
 			path: app/Services/TagTeamMembershipService.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Managers\\Manager\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Services/TagTeamValidationService.php
-
-		-
-			message: '#^Call to function method_exists\(\) with App\\Models\\Wrestlers\\Wrestler and ''isInjured'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/Services/TagTeamValidationService.php
