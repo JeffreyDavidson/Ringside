@@ -9,11 +9,7 @@ use App\Models\Matches\MatchCompetitor;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
- * Provides match relationships for models that can be booked as competitors.
- *
- * This trait implements the BookableCompetitor interface for competitor models
- * that participate in matches through the event_match_competitors pivot table.
- * It's designed to be used by models like Wrestler and TagTeam.
+ * Provides polymorphic match relationships for competitors.
  */
 trait IsBookableCompetitor
 {
