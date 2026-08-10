@@ -7,12 +7,6 @@ parameters:
 			path: app/Actions/Matches/AddMatchForEventAction.php
 
 		-
-			message: '#^Parameter \#1 \$otherStable of method App\\Models\\Stables\\Stable\:\:ensureCanBeMergedWith\(\) expects App\\Models\\Concerns\\Stable, App\\Models\\Stables\\Stable given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Actions/Stables/MergeStablesAction.php
-
-		-
 			message: '#^PHPDoc tag @throws with type App\\Actions\\Titles\\CannotBeDeactivatedException is not subtype of Throwable$#'
 			identifier: throws.notThrowable
 			count: 1
@@ -1279,24 +1273,6 @@ parameters:
 			path: app/Models/Referees/Referee.php
 
 		-
-			message: '#^Access to property \$id on an unknown class App\\Models\\Concerns\\Stable\.$#'
-			identifier: class.notFound
-			count: 2
-			path: app/Models/Stables/Stable.php
-
-		-
-			message: '#^Call to method isCurrentlyActive\(\) on an unknown class App\\Models\\Concerns\\Stable\.$#'
-			identifier: class.notFound
-			count: 2
-			path: app/Models/Stables/Stable.php
-
-		-
-			message: '#^Call to method isRetired\(\) on an unknown class App\\Models\\Concerns\\Stable\.$#'
-			identifier: class.notFound
-			count: 2
-			path: app/Models/Stables/Stable.php
-
-		-
 			message: '#^Method App\\Models\\Stables\\Stable\:\:getAvailableFormerMembers\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
@@ -1306,30 +1282,6 @@ parameters:
 			message: '#^Method App\\Models\\Stables\\Stable\:\:getUnavailableKeyFormerMembers\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
-			path: app/Models/Stables/Stable.php
-
-		-
-			message: '#^Parameter \#1 \$secondaryStable of static method App\\Exceptions\\Roster\\Stables\\CannotBeMergedException\:\:secondaryNotActive\(\) expects App\\Models\\Stables\\Stable, App\\Models\\Concerns\\Stable given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Stables/Stable.php
-
-		-
-			message: '#^Parameter \#1 \$secondaryStable of static method App\\Exceptions\\Roster\\Stables\\CannotBeMergedException\:\:secondaryRetired\(\) expects App\\Models\\Stables\\Stable, App\\Models\\Concerns\\Stable given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Stables/Stable.php
-
-		-
-			message: '#^Parameter \$otherStable of method App\\Models\\Stables\\Stable\:\:canBeMergedWith\(\) has invalid type App\\Models\\Concerns\\Stable\.$#'
-			identifier: class.notFound
-			count: 2
-			path: app/Models/Stables/Stable.php
-
-		-
-			message: '#^Parameter \$otherStable of method App\\Models\\Stables\\Stable\:\:ensureCanBeMergedWith\(\) has invalid type App\\Models\\Concerns\\Stable\.$#'
-			identifier: class.notFound
-			count: 2
 			path: app/Models/Stables/Stable.php
 
 		-

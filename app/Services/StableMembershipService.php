@@ -26,43 +26,6 @@ class StableMembershipService
         $this->removeMembersFromRelationship($stable->tagTeams(), $members->tagTeams, $date);
     }
 
-    /**
-     * Transfer specific members from one stable to another.
-     *
-     * This handles the complete transfer process: removing members from the
-     * source stable and adding them to the destination stable on the same date.
-     *
-     * @param  Stable  $fromStable  The stable to transfer members from
-     * @param  Stable  $toStable  The stable to transfer members to
-     * @param  StableMembershipData  $members  The members to transfer
-     * @param  Carbon  $date  The date of the transfer
-     */
-    public function transferMembers(Stable $fromStable, Stable $toStable, StableMembershipData $members, Carbon $date): void
-    {
-        $this->removeMembers($fromStable, $members, $date);
-        $this->addMembers($toStable, $members, $date);
-    }
-
-    /**
-     * Transfer all members from one stable to another.
-     *
-     * This is typically used for stable merges where all members of one
-     * stable are moved to another stable.
-     *
-     * @param  Stable  $fromStable  The stable to transfer all members from
-     * @param  Stable  $toStable  The stable to transfer all members to
-     * @param  Carbon  $date  The date of the transfer
-     */
-    public function transferAllMembers(Stable $fromStable, Stable $toStable, Carbon $date): void
-    {
-        $allMembers = new StableMembershipData(
-            wrestlers: $fromStable->currentWrestlers,
-            tagTeams: $fromStable->currentTagTeams
-        );
-
-        $this->transferMembers($fromStable, $toStable, $allMembers, $date);
-    }
-
     public function updateMembership(Stable $stable, StableMembershipData $newMembers, Carbon $date): void
     {
         $this->synchronizeRelationship(
