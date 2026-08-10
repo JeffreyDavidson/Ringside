@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\HasMatches;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesInjury;
@@ -20,6 +20,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Referees\Referee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -70,7 +71,7 @@ describe('Referee Model Unit Tests', function () {
     describe('trait integration', function () {
         test('uses all required traits', function () {
             expect(class_uses(Referee::class))->toContain(HasFactory::class);
-            expect(class_uses(Referee::class))->toContain(HasMatches::class);
+            expect(class_uses(Referee::class))->toContain(OfficiatesMatches::class);
             expect(class_uses(Referee::class))->toContain(IsEmployable::class);
             expect(class_uses(Referee::class))->toContain(IsInjurable::class);
             expect(class_uses(Referee::class))->toContain(IsRetirable::class);
@@ -109,12 +110,19 @@ describe('Referee Model Unit Tests', function () {
         });
     });
 
-    describe('business logic methods', function () {
-        test('has required relationship methods', function () {
+    describe('match relationships', function () {
+        test('officiates matches through the referee pivot', function () {
             $referee = new Referee();
 
-            // Referee model has standard Eloquent relationships but no custom business methods
-            expect($referee)->toBeInstanceOf(Referee::class);
+            $matches = $referee->matches();
+            $previousMatches = $referee->previousMatches();
+
+            expect($matches)
+                ->toBeInstanceOf(BelongsToMany::class)
+                ->and($matches->getTable())
+                ->toBe('events_matches_referees')
+                ->and($previousMatches)
+                ->toBeInstanceOf(BelongsToMany::class);
         });
     });
 });
