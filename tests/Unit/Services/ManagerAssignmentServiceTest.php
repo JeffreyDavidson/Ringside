@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerManager;
 use App\Services\ManagerAssignmentService;
@@ -136,4 +137,53 @@ it('preserves each manager assignment when a manager is reassigned', function ()
         ->and($secondAssignment->hired_at->equalTo($secondHiredAt))->toBeTrue()
         ->and($secondAssignment->fired_at?->equalTo($secondFiredAt))->toBeTrue()
         ->and($wrestler->currentManagers()->exists())->toBeFalse();
+});
+
+it("ends only a manager's current wrestler and tag team assignments", function () {
+    $manager = Manager::factory()->create();
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+    $historicalEnd = now()->subDays(2)->startOfSecond();
+    $assignmentEnd = now()->startOfSecond();
+
+    $manager->wrestlers()->attach($wrestler, [
+        'hired_at' => now()->subDays(4),
+        'fired_at' => $historicalEnd,
+    ]);
+    $manager->wrestlers()->attach($wrestler, [
+        'hired_at' => now()->subDay(),
+        'fired_at' => null,
+    ]);
+    $manager->tagTeams()->attach($tagTeam, [
+        'hired_at' => now()->subDays(4),
+        'fired_at' => $historicalEnd,
+    ]);
+    $manager->tagTeams()->attach($tagTeam, [
+        'hired_at' => now()->subDay(),
+        'fired_at' => null,
+    ]);
+
+    resolve(ManagerAssignmentService::class)->endCurrentAssignments($manager, $assignmentEnd);
+
+    $wrestlerAssignments = WrestlerManager::query()
+        ->whereBelongsTo($manager)
+        ->whereBelongsTo($wrestler)
+        ->oldest('hired_at')
+        ->get();
+    $tagTeamAssignments = TagTeamManager::query()
+        ->whereBelongsTo($manager)
+        ->whereBelongsTo($tagTeam, 'tagTeam')
+        ->oldest('hired_at')
+        ->get();
+    $historicalWrestlerAssignment = $wrestlerAssignments->firstOrFail();
+    $endedWrestlerAssignment = $wrestlerAssignments->skip(1)->firstOrFail();
+    $historicalTagTeamAssignment = $tagTeamAssignments->firstOrFail();
+    $endedTagTeamAssignment = $tagTeamAssignments->skip(1)->firstOrFail();
+
+    expect($historicalWrestlerAssignment->fired_at?->equalTo($historicalEnd))->toBeTrue()
+        ->and($endedWrestlerAssignment->fired_at?->equalTo($assignmentEnd))->toBeTrue()
+        ->and($historicalTagTeamAssignment->fired_at?->equalTo($historicalEnd))->toBeTrue()
+        ->and($endedTagTeamAssignment->fired_at?->equalTo($assignmentEnd))->toBeTrue()
+        ->and($manager->currentWrestlers()->exists())->toBeFalse()
+        ->and($manager->currentTagTeams()->exists())->toBeFalse();
 });

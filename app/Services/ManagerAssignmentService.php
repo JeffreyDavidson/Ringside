@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Contracts\Manageable;
 use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 
 class ManagerAssignmentService
@@ -47,5 +48,21 @@ class ManagerAssignmentService
         }
 
         $this->assign($manageable, $managers->diff($currentManagers), $date);
+    }
+
+    public function endCurrentAssignments(Manager $manager, Carbon $date): void
+    {
+        $this->endCurrentRelationship($manager->wrestlers(), $date);
+        $this->endCurrentRelationship($manager->tagTeams(), $date);
+    }
+
+    /**
+     * @param  BelongsToMany<*, *>  $relationship
+     */
+    private function endCurrentRelationship(BelongsToMany $relationship, Carbon $date): void
+    {
+        $relationship->newPivotQuery()
+            ->whereNull('fired_at')
+            ->update(['fired_at' => $date]);
     }
 }
