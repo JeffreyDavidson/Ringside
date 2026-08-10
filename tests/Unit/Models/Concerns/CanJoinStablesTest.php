@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 dataset('stable members', [
-    'wrestler' => [new Wrestler()],
-    'tag team' => [new TagTeam()],
+    'wrestler' => [fn (): Wrestler => Wrestler::factory()->make()],
+    'tag team' => [fn (): TagTeam => TagTeam::factory()->make()],
 ]);
 
 dataset('stable relationship configurations', [
-    'wrestler' => [new Wrestler(), 'stables_wrestlers', 'wrestler_id', StableWrestler::class],
-    'tag team' => [new TagTeam(), 'stables_tag_teams', 'tag_team_id', StableTagTeam::class],
+    'wrestler' => [fn (): Wrestler => Wrestler::factory()->make(), 'stables_wrestlers', 'wrestler_id', StableWrestler::class],
+    'tag team' => [fn (): TagTeam => TagTeam::factory()->make(), 'stables_tag_teams', 'tag_team_id', StableTagTeam::class],
 ]);
 
 it('defines all stable relationships', function (Wrestler|TagTeam $member) {
@@ -48,7 +48,7 @@ it('uses the configured stable membership table and pivot model', function (
     expect($relationship->getTable())->toBe($table)
         ->and($relationship->getForeignPivotKeyName())->toBe($foreignKey)
         ->and($pivot)->toBeInstanceOf(Pivot::class)
-        ->and($pivot)->toBeInstanceOf($pivotClass);
+        ->and($pivot::class)->toBe($pivotClass);
 })->with('stable relationship configurations');
 
 it('includes stable membership dates and timestamps', function (Wrestler|TagTeam $member) {
@@ -62,9 +62,12 @@ it('filters current and previous stable memberships by the departure date', func
 ) {
     $qualifiedDepartureColumn = "\"{$table}\".\"left_at\"";
 
-    expect($member->currentStable()->toRawSql())->toContain("{$qualifiedDepartureColumn} is null")
-        ->and($member->previousStables()->toRawSql())->toContain("{$qualifiedDepartureColumn} is not null");
+    $currentStableQuery = $member->currentStable()->getQuery()->getQuery();
+    $previousStablesQuery = $member->previousStables()->getQuery()->getQuery();
+
+    expect($currentStableQuery->toRawSql())->toContain("{$qualifiedDepartureColumn} is null")
+        ->and($previousStablesQuery->toRawSql())->toContain("{$qualifiedDepartureColumn} is not null");
 })->with([
-    'wrestler' => [new Wrestler(), 'stables_wrestlers'],
-    'tag team' => [new TagTeam(), 'stables_tag_teams'],
+    'wrestler' => [fn (): Wrestler => Wrestler::factory()->make(), 'stables_wrestlers'],
+    'tag team' => [fn (): TagTeam => TagTeam::factory()->make(), 'stables_tag_teams'],
 ]);
