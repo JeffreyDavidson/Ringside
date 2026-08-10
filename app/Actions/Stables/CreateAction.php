@@ -47,13 +47,11 @@ class CreateAction
 
             // Use enhanced DTO method instead of isset check
             if ($stableData->shouldEstablish()) {
-                $this->establishAction->handle($stable, $stableData->start_date);
-
-                if ($stableData->end_date) {
-                    $stable->currentActivityPeriod()->update([
-                        'ended_at' => $stableData->end_date,
-                    ]);
-                }
+                $this->establishAction->handle(
+                    $stable,
+                    $stableData->start_date,
+                    $stableData->end_date,
+                );
             }
 
             return $stable;

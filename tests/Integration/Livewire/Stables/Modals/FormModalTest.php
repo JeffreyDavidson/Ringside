@@ -199,6 +199,26 @@ describe('FormModal Create Operations', function () {
         expect(requiredDate(requiredModel($stable->firstActivityPeriod)->started_at)->toDateString())->toBe('2024-01-01');
         expect(requiredDate(requiredModel($stable->firstActivityPeriod)->ended_at)->toDateString())->toBe('2024-12-31');
     });
+
+    it('preserves an end date when creating a future stable activity period', function () {
+        $startDate = now()->addYear();
+        $endDate = $startDate->copy()->addYear();
+
+        $component = livewire(FormModal::class)
+            ->call('openModal')
+            ->set('form.name', 'Future Stable')
+            ->set('form.started_at', $startDate->toDateString())
+            ->set('form.ended_at', $endDate->toDateString())
+            ->call('save');
+
+        $component->assertHasNoErrors();
+
+        $stable = Stable::where('name', 'Future Stable')->firstOrFail();
+        $activityPeriod = requiredModel($stable->firstActivityPeriod);
+
+        expect($activityPeriod->started_at->toDateString())->toBe($startDate->toDateString())
+            ->and(requiredDate($activityPeriod->ended_at)->toDateString())->toBe($endDate->toDateString());
+    });
 });
 
 describe('FormModal Edit Operations', function () {
@@ -224,6 +244,25 @@ describe('FormModal Edit Operations', function () {
 
         // Check activity period was updated
         expect(requiredModel(freshModel($stable)->firstActivityPeriod)->started_at->toDateString())->toBe('2024-01-02');
+    });
+
+    it('preserves an end date when establishing an existing stable in the future', function () {
+        $stable = Stable::factory()->create(['name' => 'Unestablished Stable']);
+        $startDate = now()->addYear();
+        $endDate = $startDate->copy()->addYear();
+
+        $component = livewire(FormModal::class)
+            ->call('openModal', $stable->id)
+            ->set('form.started_at', $startDate->toDateString())
+            ->set('form.ended_at', $endDate->toDateString())
+            ->call('save');
+
+        $component->assertHasNoErrors();
+
+        $activityPeriod = requiredModel(freshModel($stable)->firstActivityPeriod);
+
+        expect($activityPeriod->started_at->toDateString())->toBe($startDate->toDateString())
+            ->and(requiredDate($activityPeriod->ended_at)->toDateString())->toBe($endDate->toDateString());
     });
 
     it('loads existing stable data in edit mode', function () {
@@ -448,6 +487,21 @@ describe('FormModal Member Management', function () {
 
         $component->assertHasErrors(['form.wrestlers.0']);
         $this->assertDatabaseMissing('stables', ['name' => 'Test Stable']);
+    });
+
+    it('rejects an existing stable wrestler represented by a newly selected tag team', function () {
+        $tagTeam = TagTeam::factory()->employed()->create();
+        $wrestler = $tagTeam->currentWrestlers()->firstOrFail();
+        $stable = Stable::factory()->create();
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => now()]);
+
+        $component = livewire(FormModal::class)
+            ->call('openModal', $stable->id)
+            ->set('form.tag_teams', [$tagTeam->id])
+            ->call('save');
+
+        $component->assertHasErrors(['form.wrestlers.0']);
+        expect(freshModel($stable)->currentTagTeams()->exists())->toBeFalse();
     });
 
     it('validates wrestlers exist when assigning', function () {

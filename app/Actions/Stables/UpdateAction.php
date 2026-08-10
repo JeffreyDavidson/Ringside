@@ -48,7 +48,11 @@ class UpdateAction
                         'ended_at' => $stableData->end_date,
                     ]);
                 } else {
-                    $this->establishAction->handle($stable, $stableData->start_date);
+                    $this->establishAction->handle(
+                        $stable,
+                        $stableData->start_date,
+                        $stableData->end_date,
+                    );
                 }
             }
 
