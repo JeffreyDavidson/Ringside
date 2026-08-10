@@ -273,8 +273,18 @@ describe('UsersTable Component', function () {
 
     describe('component state management', function () {
         test('component maintains state between interactions', function () {
-            $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
-            $jane = User::factory()->create(['first_name' => 'SearchExcluded', 'last_name' => 'Fixture']);
+            $john = User::factory()->create([
+                'first_name' => 'John',
+                'last_name' => 'Doe',
+                'email' => 'included@example.com',
+                'phone_number' => '1111111111',
+            ]);
+            $jane = User::factory()->create([
+                'first_name' => 'SearchExcluded',
+                'last_name' => 'Fixture',
+                'email' => 'excluded@example.com',
+                'phone_number' => '2222222222',
+            ]);
 
             // Ensure virtual columns are computed
             freshModel($john);
