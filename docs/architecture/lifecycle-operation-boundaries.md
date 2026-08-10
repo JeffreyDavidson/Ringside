@@ -149,6 +149,8 @@ Retirement eligibility no longer uses an operation-name string or a generic `Mod
 
 Suspension eligibility follows the same typed boundary. Shared individual validation accepts only wrestlers, managers, and referees. Tag teams retain their established lifecycle validation, while stables and titles do not support suspension. The unused generic suspension contract and tag-team and stable strategy classes were removed rather than preserving unreachable dispatch paths.
 
+Tag-team lifecycle validation uses the concrete `Wrestler` models returned by its current-wrestler relationship. It must not probe for speculative capabilities with `method_exists()`. Current wrestler employment remains valid when employing the team, while an injured current wrestler remains unavailable for tag-team unretirement. Any future exclusivity rule must be introduced as an explicit reviewed domain rule with real model behavior and tests.
+
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;

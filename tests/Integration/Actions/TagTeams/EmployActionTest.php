@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\EmployAction;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -27,6 +28,17 @@ test('it employs an unemployed tag team', function () {
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
+});
+
+test('it employs a tag team whose current wrestlers are already employed', function () {
+    $wrestlers = Wrestler::factory()->employed()->count(2)->create();
+    $tagTeam = TagTeam::factory()
+        ->withCurrentWrestlers($wrestlers)
+        ->create();
+
+    resolve(EmployAction::class)->handle($tagTeam);
+
+    expect($tagTeam->refresh()->isEmployed())->toBeTrue();
 });
 
 test('it employs tag team with specific employment date', function () {
