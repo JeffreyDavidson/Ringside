@@ -33,7 +33,8 @@ test('it preserves historical activity without reuniting the stable', function (
 test('it rejects a stable that is not deleted', function () {
     $stable = Stable::factory()->create();
 
-    expect(fn () => resolve(RestoreAction::class)->handle($stable))
+    expect($stable->canBeRestored())->toBeFalse()
+        ->and(fn () => resolve(RestoreAction::class)->handle($stable))
         ->toThrow(CannotBeRestoredException::class);
 });
 
@@ -42,7 +43,8 @@ test('it rejects an active stable with the same name', function () {
     $stable->delete();
     Stable::factory()->active()->create(['name' => $stable->name]);
 
-    expect(fn () => resolve(RestoreAction::class)->handle($stable))
+    expect($stable->canBeRestored())->toBeFalse()
+        ->and(fn () => resolve(RestoreAction::class)->handle($stable))
         ->toThrow(CannotBeRestoredException::class);
 });
 

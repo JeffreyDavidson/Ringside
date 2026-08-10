@@ -35,6 +35,13 @@ use App\Models\Stables\Stable;
  */
 final class CannotBeDeletedException extends BaseBusinessException
 {
+    public static function alreadyDeleted(Stable $stable): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new self("{$context} cannot be deleted because it is already deleted.");
+    }
+
     /**
      * Stable is currently active and should be disbanded before deletion.
      *

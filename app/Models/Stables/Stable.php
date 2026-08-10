@@ -13,7 +13,9 @@ use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ValidatesStableActivity;
+use App\Models\Concerns\ValidatesStableDeletion;
 use App\Models\Concerns\ValidatesStableLifecycle;
+use App\Models\Concerns\ValidatesStableRetirement;
 use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
@@ -128,7 +130,9 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
 
     use SoftDeletes;
     use ValidatesStableActivity;
+    use ValidatesStableDeletion;
     use ValidatesStableLifecycle;
+    use ValidatesStableRetirement;
 
     /**
      * The minimum number of members allowed on a tag team.

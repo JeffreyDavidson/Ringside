@@ -5,67 +5,23 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Models\Stables\Stable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
     /**
-     * Create a new delete action instance.
-     */
-    public function __construct(
-        protected EndActivityPeriodAction $endActivityPeriodAction,
-        protected RemoveStableMembersAction $removeStableMembersAction
-    ) {}
-
-    /**
      * Delete a stable.
      *
-     * This handles the complete deletion workflow with business impact:
-     *
-     * MEMBERSHIP IMPACT:
-     * - Ends all current wrestler memberships (wrestlers become available as singles)
-     * - Ends all current tag team memberships (tag teams continue independently)
-     * - Manager associations automatically end when wrestler/tag team memberships end
-     * - Preserves membership history for reporting and record-keeping
-     * - No impact on individual member careers (they continue independently)
-     *
-     * STATUS IMPACT:
-     * - Ends stable debut period if active
-     * - Does not affect individual member status (they maintain their employment/retirement status)
-     * - Preserves stable debut history for administrative records
-     *
-     * OTHER CLEANUP:
-     * - Soft deletes the stable record
-     * - Allows for future restoration if needed
-     * - Maintains referential integrity with historical data
+     * The stable must already be inactive and have no current members. Those
+     * transitions remain explicit operations so deletion only changes record state.
      *
      * @param  Stable  $stable  The stable to delete
-     * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
      */
-    public function handle(Stable $stable, ?Carbon $deletionDate = null): void
+    public function handle(Stable $stable): void
     {
         $stable->ensureCanBeDeleted();
 
-        $deletionDate = $deletionDate ?? now();
-
-        DB::transaction(function () use ($stable, $deletionDate): void {
-            // Handle stable status - debuted stables need debut period ended using injected action
-            if ($stable->hasDebuted()) {
-                $this->endActivityPeriodAction->handle($stable, $deletionDate);
-            }
-
-            // End all current memberships using enhanced model method and injected action
-            $currentMembers = $stable->getCurrentMembersData();
-
-            if ($currentMembers->isNotEmpty()) {
-                $this->removeStableMembersAction->handle($stable, $currentMembers, $deletionDate);
-            }
-
-            // Manager associations automatically end when wrestler/tag team memberships end
-            // No direct manager removal needed since managers are associated through wrestlers/tag teams
-
-            // Soft delete the stable record
+        DB::transaction(function () use ($stable): void {
             $stable->delete();
         });
     }
