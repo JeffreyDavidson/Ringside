@@ -157,6 +157,8 @@ Tag-team suspension eligibility is isolated in `ValidatesTagTeamSuspension`. Sus
 
 Tag-team retirement eligibility is isolated in `ValidatesTagTeamRetirement`. Retirement and unretirement remain paired as opposite transitions of one lifecycle dimension. The concern owns employment, name-conflict, partner-count, and partner-availability rules; the Actions continue to own retirement-period persistence, dates, transactions, and member cascades.
 
+Tag-team release eligibility is isolated in `ValidatesTagTeamRelease`. The concern owns the requirement that a team be employed before release; the Action continues to own employment and suspension period closure, dates, transactions, and relationship cleanup.
+
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;
