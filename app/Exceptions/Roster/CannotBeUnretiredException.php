@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
 use App\Models\Stables\Stable;
@@ -42,7 +43,7 @@ final class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is not currently retired and cannot be unretired.");
+        return self::forReason(BusinessRuleReason::NotRetired, "{$context} is not currently retired and cannot be unretired.");
     }
 
     /**

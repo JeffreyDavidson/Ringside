@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
 
@@ -47,7 +48,7 @@ final class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is unemployed and cannot be suspended.");
+        return self::forReason(BusinessRuleReason::Unemployed, "{$context} is unemployed and cannot be suspended.");
     }
 
     /**
@@ -97,7 +98,7 @@ final class CannotBeSuspendedException extends BaseBusinessException
         $context = self::formatModelContext($entity);
         $reason = $currentSuspensionReason ? " ({$currentSuspensionReason})" : '';
 
-        return new static("{$context} is already suspended{$reason}.");
+        return self::forReason(BusinessRuleReason::AlreadySuspended, "{$context} is already suspended{$reason}.");
     }
 
     /**
@@ -111,7 +112,7 @@ final class CannotBeSuspendedException extends BaseBusinessException
         $context = self::formatModelContext($entity);
         $injury = $injuryDetails ? " ({$injuryDetails})" : '';
 
-        return new static("{$context} is injured{$injury} and cannot be suspended.");
+        return self::forReason(BusinessRuleReason::Injured, "{$context} is injured{$injury} and cannot be suspended.");
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
 
@@ -41,7 +42,7 @@ final class CannotBeEmployedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is already employed and cannot be re-employed.");
+        return self::forReason(BusinessRuleReason::AlreadyEmployed, "{$context} is already employed and cannot be re-employed.");
     }
 
     /**
@@ -53,7 +54,7 @@ final class CannotBeEmployedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} is retired and cannot be employed.");
+        return self::forReason(BusinessRuleReason::Retired, "{$context} is retired and cannot be employed.");
     }
 
     /**
@@ -67,7 +68,7 @@ final class CannotBeEmployedException extends BaseBusinessException
         $context = self::formatModelContext($entity);
         $reason = $suspensionReason ? " ({$suspensionReason})" : '';
 
-        return new static("{$context} is currently suspended{$reason} and cannot be employed.");
+        return self::forReason(BusinessRuleReason::Suspended, "{$context} is currently suspended{$reason} and cannot be employed.");
     }
 
     /**

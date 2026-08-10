@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
 
@@ -47,7 +48,7 @@ final class CannotBeReleasedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is unemployed and cannot be released.");
+        return self::forReason(BusinessRuleReason::Unemployed, "{$context} is unemployed and cannot be released.");
     }
 
     /**

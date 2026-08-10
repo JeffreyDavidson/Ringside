@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
 
@@ -52,7 +53,7 @@ class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} cannot be reinstated because it is not currently suspended. Only suspended tag teams can be reinstated to active competition.");
+        return self::forReason(BusinessRuleReason::NotSuspended, "{$context} cannot be reinstated because it is not currently suspended. Only suspended tag teams can be reinstated to active competition.");
     }
 
     /**

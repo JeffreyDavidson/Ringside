@@ -11,6 +11,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Http/Controllers/** | .ai/rules/controllers.md |
 | app/Data/** | .ai/rules/data.md |
 | app/Enums/** | .ai/rules/enums.md |
+| app/Exceptions/** | .ai/rules/exceptions.md |
 | tests/Feature/** | .ai/rules/feature.md |
 | tests/Integration/** | .ai/rules/integration.md |
 | app/Livewire/** | .ai/rules/livewire.md |

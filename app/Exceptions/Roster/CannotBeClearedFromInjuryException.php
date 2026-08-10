@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
 
@@ -46,7 +47,7 @@ final class CannotBeClearedFromInjuryException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new self("{$context} is not currently injured and cannot be cleared from injury.");
+        return self::forReason(BusinessRuleReason::NotInjured, "{$context} is not currently injured and cannot be cleared from injury.");
     }
 
     /**
