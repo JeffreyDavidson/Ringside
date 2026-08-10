@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
@@ -34,16 +35,15 @@ class MergeStablesAction
         Carbon $date
     ): void {
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
-            // Validate merge compatibility using model validation
             $primaryStable->ensureCanBeMergedWith($secondaryStable);
 
-            // Use injected service to transfer all members from secondary to primary stable
-            $this->membershipService->transferAllMembers($secondaryStable, $primaryStable, $date);
+            $members = new StableMembershipData(
+                wrestlers: $secondaryStable->currentWrestlers,
+                tagTeams: $secondaryStable->currentTagTeams,
+            );
 
-            // Note: Managers are not direct stable members and are automatically
-            // transferred through their wrestlers/tag teams associations
-
-            // Delete the secondary stable after successful transfers
+            $this->membershipService->removeMembers($secondaryStable, $members, $date);
+            $this->membershipService->addMembers($primaryStable, $members, $date);
             $secondaryStable->delete();
         });
     }

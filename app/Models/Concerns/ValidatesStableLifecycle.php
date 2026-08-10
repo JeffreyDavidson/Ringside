@@ -12,6 +12,7 @@ use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
+use App\Models\Stables\Stable;
 use Illuminate\Support\Collection;
 
 /**

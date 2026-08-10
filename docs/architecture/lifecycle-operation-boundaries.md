@@ -84,6 +84,8 @@ Employment cascades use explicit capability and domain collaborators. Both tag t
 
 Membership persistence remains separate from employment orchestration. `ManagerAssignmentService` establishes and synchronizes manager relationships for any model implementing `Manageable`, dates assignments that have ended, and preserves their historical pivot rows. `TagTeamMembershipService` owns the corresponding tag-team wrestler relationships and delegates manager persistence to that shared service. Eligibility is validated before the Action receives its data, while wrestler and tag-team Actions coordinate typed employment cascades when an employment date is supplied.
 
+Stable membership persistence follows the same boundary. `StableMembershipService` adds, ends, and synchronizes wrestler and tag-team membership records while preserving history. `MergeStablesAction` owns the merge workflow and composes those persistence operations inside its transaction before deleting the secondary stable.
+
 Tag-team suspension delegates eligible current wrestler and manager transitions to `SuspendCurrentMembersAction`. The collaborator invokes each member's complete typed suspension action, while the tag-team action retains its own validation, suspension-period persistence, effective-date handling, and transaction boundary.
 
 Tag-team reinstatement mirrors that boundary through `ReinstateCurrentMembersAction`, which invokes complete typed reinstatement actions only for suspended current wrestlers and managers. The coordinating tag-team action retains validation, suspension-period persistence, date handling, and transaction ownership.
