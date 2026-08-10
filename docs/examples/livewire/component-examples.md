@@ -653,7 +653,6 @@ Actions component with conditional visibility and confirmation:
 
 namespace App\Livewire\Events\Components;
 
-use App\Livewire\Components\BaseActions;
 use App\Models\Events\Event;
 use Livewire\Component;
 
