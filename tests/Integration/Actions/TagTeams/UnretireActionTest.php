@@ -54,6 +54,27 @@ test('it prevents unretiring a tag team with an injured current wrestler', funct
         ['joined_at' => now()->subDays(2), 'left_at' => null],
     );
 
+    expect($tagTeam->canBeUnretired())->toBeFalse();
+
+    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
+        ->toThrow(CannotBeUnretiredException::class);
+});
+
+test('it prevents unretiring a tag team without enough current wrestlers', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $wrestler = Wrestler::factory()->create();
+
+    $tagTeam->retirements()->create([
+        'started_at' => now()->subDay(),
+        'ended_at' => null,
+    ]);
+    $tagTeam->wrestlers()->attach($wrestler, [
+        'joined_at' => now()->subDays(2),
+        'left_at' => null,
+    ]);
+
+    expect($tagTeam->canBeUnretired())->toBeFalse();
+
     expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
         ->toThrow(CannotBeUnretiredException::class);
 });
@@ -153,6 +174,8 @@ test('it unretires without auto-employing when no current wrestlers are availabl
     $tagTeam->refresh();
     expect($tagTeam->isRetired())->toBeTrue();
     expect($tagTeam->currentWrestlers)->toBeEmpty();
+    expect($tagTeam->canBeUnretired())->toBeFalse()
+        ->and($tagTeam->canBeUnretired(requireAvailablePartners: false))->toBeTrue();
 
     resolve(UnretireAction::class)->handle($tagTeam, requireAvailablePartners: false);
 
