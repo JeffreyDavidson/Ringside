@@ -12,6 +12,7 @@ use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
+use App\Models\Wrestlers\Wrestler;
 use Exception;
 
 /**
@@ -72,15 +73,6 @@ trait ValidatesTagTeamLifecycle
             return false;
         }
 
-        // Check if any partner has conflicting employment
-        $conflictedPartners = $currentPartners->filter(function ($wrestler) {
-            return $wrestler->isEmployed() && method_exists($wrestler, 'hasExclusivityConflicts') && $wrestler->hasExclusivityConflicts();
-        });
-
-        if ($conflictedPartners->isNotEmpty()) {
-            return false;
-        }
-
         // Basic employment is possible
         return true;
     }
@@ -108,16 +100,6 @@ trait ValidatesTagTeamLifecycle
         $currentPartners = $this->currentWrestlers;
         if ($currentPartners->isEmpty()) {
             throw CannotBeEmployedException::partnersUnavailable($this, 'No current partners available');
-        }
-
-        // Check for partner employment conflicts
-        $conflictedPartners = $currentPartners->filter(function ($wrestler) {
-            return $wrestler->isEmployed() && method_exists($wrestler, 'hasExclusivityConflicts') && $wrestler->hasExclusivityConflicts();
-        });
-
-        if ($conflictedPartners->isNotEmpty()) {
-            $partnerNames = $conflictedPartners->pluck('name')->join(', ');
-            throw CannotBeEmployedException::partnerEmploymentConflicts($this, $partnerNames);
         }
 
         // Additional business rule validations could be added here:
@@ -590,9 +572,9 @@ trait ValidatesTagTeamLifecycle
             }
 
             // Check if key partners are available
-            $unavailablePartners = $currentPartners->filter(function ($wrestler) {
-                return (method_exists($wrestler, 'hasExclusivityConflicts') && $wrestler->hasExclusivityConflicts()) || $wrestler->isInjured();
-            });
+            $unavailablePartners = $currentPartners->filter(
+                fn (Wrestler $wrestler): bool => $wrestler->isInjured()
+            );
 
             if ($unavailablePartners->isNotEmpty()) {
                 $partnerNames = $unavailablePartners->pluck('name')->join(', ');

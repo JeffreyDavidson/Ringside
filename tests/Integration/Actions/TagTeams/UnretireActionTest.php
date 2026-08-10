@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\UnretireAction;
+use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -36,6 +38,24 @@ test('it unretires a retired tag team', function () {
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
+});
+
+test('it prevents unretiring a tag team with an injured current wrestler', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $wrestlers = Wrestler::factory()->employed()->count(1)->create();
+    $injuredWrestler = Wrestler::factory()->injured()->create();
+
+    $tagTeam->retirements()->create([
+        'started_at' => now()->subDay(),
+        'ended_at' => null,
+    ]);
+    $tagTeam->wrestlers()->attach(
+        $wrestlers->push($injuredWrestler),
+        ['joined_at' => now()->subDays(2), 'left_at' => null],
+    );
+
+    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
+        ->toThrow(CannotBeUnretiredException::class);
 });
 
 test('it unretires and employs current members by default', function () {
