@@ -161,6 +161,8 @@ Tag-team release eligibility is isolated in `ValidatesTagTeamRelease`. The conce
 
 Tag-team deletion eligibility is isolated in `ValidatesTagTeamDeletion`. Deletion and restoration remain paired as opposite transitions of the soft-deletion lifecycle dimension. The concern owns inactive-state and active-name-conflict rules; the Actions continue to own transactions, soft deletion, restoration, and relationship cleanup. The former catch-all `ValidatesTagTeamLifecycle` concern has been removed now that each lifecycle dimension has a dedicated boundary.
 
+Stable activity eligibility is isolated in `ValidatesStableActivity`. Establishment is the first activity transition and is available only to a stable with no activity history. Disbandment closes a current activity period, while reunion opens a later period for a previously active stable that satisfies the existing former-member availability rules. The concern keeps each boolean predicate aligned with its throwing guard and reports reunion failures through `CannotBeReunitedException`. `StartActivityPeriodAction` owns the shared open-period mutation used by establishment, reunion, and optional immediate activity after unretirement; the coordinating typed Actions retain transition validation, dates, membership consequences, and transactions.
+
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 
 - `ActionPipeline`;

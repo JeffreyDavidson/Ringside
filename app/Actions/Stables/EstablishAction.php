@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class EstablishAction
 {
+    public function __construct(
+        protected StartActivityPeriodAction $startActivityPeriodAction,
+    ) {}
+
     /**
      * Establish a stable and make it active.
      *
@@ -36,13 +40,15 @@ class EstablishAction
         $activationDate = $activationDate ?? now();
 
         return DB::transaction(
-            fn (): StableActivityPeriod => $stable->activityPeriods()->updateOrCreate(
-                ['ended_at' => null],
-                [
-                    'started_at' => $activationDate->toDateTimeString(),
-                    'ended_at' => $endDate?->toDateTimeString(),
-                ]
-            )
+            function () use ($stable, $activationDate, $endDate): StableActivityPeriod {
+                $activityPeriod = $this->startActivityPeriodAction->handle($stable, $activationDate);
+
+                if ($endDate) {
+                    $activityPeriod->update(['ended_at' => $endDate]);
+                }
+
+                return $activityPeriod;
+            }
         );
     }
 }

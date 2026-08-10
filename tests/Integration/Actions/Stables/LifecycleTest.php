@@ -10,6 +10,7 @@ use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -311,7 +312,7 @@ describe('Stable Activation Action Integration', function () {
             $activeStable = Stable::factory()->active()->create();
 
             expect(fn () => resolve(ReuniteAction::class)->handle($activeStable, Carbon::now()))
-                ->toThrow(CannotBeEstablishedException::class);
+                ->toThrow(CannotBeReunitedException::class);
         });
 
         test('retire action works from active or disbanded status', function () {

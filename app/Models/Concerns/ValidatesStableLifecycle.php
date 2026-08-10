@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
-use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
-use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
@@ -18,8 +16,7 @@ use Illuminate\Support\Collection;
 /**
  * Provides stable lifecycle validation functionality for Stable models.
  *
- * This trait adds validation methods for stable-specific lifecycle transitions including
- * establishment (first-time activation), disbandment, and reuniting.
+ * This trait adds validation methods for stable lifecycle dimensions other than activity.
  *
  * @see HasActivityPeriods For core activation functionality
  *
@@ -32,152 +29,21 @@ use Illuminate\Support\Collection;
  *
  * // Usage:
  * $stable = Stable::find(1);
- * $stable->ensureCanBeEstablished();  // For first-time activation
- * $stable->ensureCanBeDisbanded();    // For disbandment
  * $stable->ensureCanBeDeleted();      // For soft deletion
  * $stable->ensureCanBeSplit();        // For splitting into two stables
  * $stable->ensureCanBeMerged($other); // For merging with another stable
  * $stable->ensureCanBeRestored();     // For restoration from soft deletion
  * $stable->ensureCanBeRetired();      // For retirement validation
  * $stable->ensureCanBeUnretired();    // For unretirement validation
- * $stable->canBeEstablished();        // Returns boolean for establishment
  * $stable->canBeDeleted();            // Returns boolean for deletion
  * $stable->canBeSplit();              // Returns boolean for splitting
  * $stable->canBeRestored();           // Returns boolean for restoration
  * $stable->canBeRetired();            // Returns boolean for retirement
  * $stable->canBeUnretired();          // Returns boolean for unretirement
- * $stable->isDisbanded();             // Returns boolean if disbanded
  * ```
  */
 trait ValidatesStableLifecycle
 {
-    /**
-     * Determine if the stable can be established (first-time activation).
-     *
-     * Checks business rules to determine if establishment is allowed:
-     * - Must not already be active
-     * - Must not be retired
-     *
-     * @return bool True if the stable can be established, false otherwise
-     */
-    public function canBeEstablished(): bool
-    {
-        return ! $this->isCurrentlyActive() && ! $this->isRetired();
-    }
-
-    /**
-     * Ensure the stable can be established, throwing an exception if not.
-     *
-     * @throws CannotBeEstablishedException When establishment is not allowed
-     */
-    public function ensureCanBeEstablished(): void
-    {
-        if ($this->isCurrentlyActive()) {
-            throw CannotBeEstablishedException::established($this);
-        }
-
-        if ($this->isRetired()) {
-            throw CannotBeEstablishedException::retired($this);
-        }
-    }
-
-    /**
-     * Determine if the stable can be disbanded.
-     *
-     * Checks business rules for disbandment:
-     * - Must not be unactivated (never been activated)
-     * - Must not already be disbanded
-     * - Must not have future activation
-     * - Must not be retired
-     *
-     * @return bool True if the stable can be disbanded, false otherwise
-     */
-    public function canBeDisbanded(): bool
-    {
-        return $this->hasActivityPeriods()
-            && $this->isCurrentlyActive()
-            && ! $this->hasFutureActivation()
-            && ! $this->isRetired();
-    }
-
-    /**
-     * Ensure the stable can be disbanded, throwing an exception if not.
-     *
-     * @throws CannotBeDisbandedException When disbandment is not allowed
-     */
-    public function ensureCanBeDisbanded(): void
-    {
-        if (! $this->hasActivityPeriods()) {
-            throw CannotBeDisbandedException::unactivated($this);
-        }
-
-        if (! $this->isCurrentlyActive()) {
-            throw CannotBeDisbandedException::disbanded($this);
-        }
-
-        if ($this->hasFutureActivation()) {
-            throw CannotBeDisbandedException::hasFutureActivation($this);
-        }
-
-        if ($this->isRetired()) {
-            throw CannotBeDisbandedException::retired($this);
-        }
-    }
-
-    /**
-     * Determine if the stable can be reunited (reactivated after disbandment).
-     *
-     * Checks business rules to determine if reuniting is allowed:
-     * - Must have previous activity periods (has been active before)
-     * - Must not currently be active
-     * - Must not be retired
-     *
-     * @return bool True if the stable can be reunited, false otherwise
-     */
-    public function canBeReunited(): bool
-    {
-        return $this->hasActivityPeriods()
-            && ! $this->isCurrentlyActive()
-            && ! $this->isRetired();
-    }
-
-    /**
-     * Ensure the stable can be reunited, throwing an exception if not.
-     *
-     * @throws CannotBeEstablishedException When reuniting is not allowed
-     */
-    public function ensureCanBeReunited(): void
-    {
-        if (! $this->hasActivityPeriods()) {
-            throw CannotBeEstablishedException::established($this);
-        }
-
-        if ($this->isCurrentlyActive()) {
-            throw CannotBeEstablishedException::established($this);
-        }
-
-        if ($this->isRetired()) {
-            throw CannotBeEstablishedException::retired($this);
-        }
-
-        // Check if enough former members are available for reunion
-        $availableFormerMembers = $this->getAvailableFormerMembers();
-        if ($availableFormerMembers->count() < static::MIN_MEMBERS_COUNT) {
-            throw CannotBeEstablishedException::insufficientFormerMembers(
-                $this,
-                static::MIN_MEMBERS_COUNT,
-                $availableFormerMembers->count()
-            );
-        }
-
-        // Check if key former members are available (not retired, injured, or employed elsewhere)
-        $unavailableKeyMembers = $this->getUnavailableKeyFormerMembers();
-        if ($unavailableKeyMembers->isNotEmpty()) {
-            $memberNames = $unavailableKeyMembers->pluck('name')->join(', ');
-            throw CannotBeEstablishedException::keyFormerMembersUnavailable($this, $memberNames);
-        }
-    }
-
     /**
      * Determine if the stable can be soft deleted.
      *
@@ -376,18 +242,6 @@ trait ValidatesStableLifecycle
         if ($conflictingStable) {
             throw CannotBeRestoredException::nameConflict($this, $conflictingStable->name);
         }
-    }
-
-    /**
-     * Check if the stable is disbanded.
-     *
-     * A stable is considered disbanded if it has activity periods but is currently inactive.
-     *
-     * @return bool True if the stable is disbanded, false otherwise
-     */
-    public function isDisbanded(): bool
-    {
-        return $this->hasActivityPeriods() && $this->isInactive();
     }
 
     /**
