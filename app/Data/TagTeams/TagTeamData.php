@@ -20,8 +20,8 @@ readonly class TagTeamData
         public string $name,
         public ?string $signature_move,
         public ?Carbon $employment_date,
-        public ?Wrestler $wrestlerA,
-        public ?Wrestler $wrestlerB,
+        public Wrestler $wrestlerA,
+        public Wrestler $wrestlerB,
         public ?Collection $managers = null,
     ) {}
 

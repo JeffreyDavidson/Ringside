@@ -34,16 +34,12 @@ class CreateAction
             // Get membership data
             $membershipData = $tagTeamData->getMembershipData();
 
-            // Add founding members through membership service
-            $this->membershipService->addFoundingMembers(
+            $this->membershipService->establishMembership(
                 $tagTeam,
-                $membershipData->getWrestlers(),
-                $membershipData->getManagers(),
+                $membershipData,
                 $tagTeamData->getJoinDate(),
-                false // Don't employ through membership service - handle separately if needed
             );
 
-            // Handle employment through the typed action when requested
             if ($tagTeamData->employment_date) {
                 $this->employAction->handle($tagTeam, $tagTeamData->employment_date);
             }

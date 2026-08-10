@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\CreateAction;
 use App\Data\TagTeams\TagTeamData;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 
 test('it creates a new tag team', function () {
     $wrestlerA = Wrestler::factory()->create();
@@ -107,17 +109,20 @@ test('it handles database transactions correctly', function () {
     expect($wrestlers->contains($wrestlerB))->toBeTrue();
 });
 
-test('it prevents creating tag team with missing wrestlers', function () {
+test('it receives validated wrestlers in its data', function () {
+    $wrestlerA = Wrestler::factory()->create();
+    $wrestlerB = Wrestler::factory()->create();
+
     $data = new TagTeamData(
         name: 'Invalid Team',
         signature_move: null,
         employment_date: null,
-        wrestlerA: null,
-        wrestlerB: null,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
     );
 
-    expect(fn () => resolve(CreateAction::class)->handle($data))
-        ->toThrow(Exception::class);
+    expect($data->wrestlerA)->toBe($wrestlerA)
+        ->and($data->wrestlerB)->toBe($wrestlerB);
 });
 
 test('it creates tag team with all optional fields', function () {
@@ -164,4 +169,25 @@ test('it creates partnerships with correct timestamps', function () {
         expect($membership->joined_at)->not->toBeNull();
         expect($membership->left_at)->toBeNull();
     }
+});
+
+test('it employs the tag team and its founding members', function () {
+    $wrestlerA = Wrestler::factory()->create();
+    $wrestlerB = Wrestler::factory()->create();
+    $manager = Manager::factory()->create();
+    $employmentDate = now()->subDay();
+
+    $tagTeam = resolve(CreateAction::class)->handle(new TagTeamData(
+        name: 'Employed Team',
+        signature_move: null,
+        employment_date: $employmentDate,
+        wrestlerA: $wrestlerA,
+        wrestlerB: $wrestlerB,
+        managers: new Collection([$manager]),
+    ));
+
+    expect($tagTeam->isEmployed())->toBeTrue()
+        ->and($wrestlerA->isEmployed())->toBeTrue()
+        ->and($wrestlerB->isEmployed())->toBeTrue()
+        ->and($manager->isEmployed())->toBeTrue();
 });

@@ -13,18 +13,6 @@ parameters:
 			path: app/Actions/Stables/MergeStablesAction.php
 
 		-
-			message: '#^Parameter \#2 \$wrestlers of method App\\Services\\TagTeamMembershipService\:\:addFoundingMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Database\\Eloquent\\Collection given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Actions/TagTeams/CreateAction.php
-
-		-
-			message: '#^Parameter \#3 \$managers of method App\\Services\\TagTeamMembershipService\:\:addFoundingMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\>\|null, Illuminate\\Database\\Eloquent\\Collection given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Actions/TagTeams/CreateAction.php
-
-		-
 			message: '#^PHPDoc tag @throws with type App\\Actions\\Titles\\CannotBeDeactivatedException is not subtype of Throwable$#'
 			identifier: throws.notThrowable
 			count: 1
@@ -1529,21 +1517,3 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: app/Providers/AppServiceProvider.php
-
-		-
-			message: '#^Parameter \#1 \$members of method App\\Services\\TagTeamMembershipService\:\:employMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\|App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Support\\Collection\<\(int\|string\), App\\Models\\Managers\\Manager\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Services/TagTeamMembershipService.php
-
-		-
-			message: '#^Parameter \#1 \$members of method App\\Services\\TagTeamMembershipService\:\:employMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\|App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Services/TagTeamMembershipService.php
-
-		-
-			message: '#^Parameter \#1 \$members of method App\\Services\\TagTeamMembershipService\:\:employMembers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\|App\\Models\\Wrestlers\\Wrestler\>, Illuminate\\Support\\Collection\<int, App\\Models\\Wrestlers\\Wrestler\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: app/Services/TagTeamMembershipService.php

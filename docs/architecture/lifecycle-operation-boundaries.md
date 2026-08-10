@@ -82,6 +82,8 @@ Wrestler unretirement does not require a cascade collaborator merely to choose w
 
 Employment cascades use explicit capability and domain collaborators. Both tag teams and wrestlers delegate current-manager employment to `Managers\EmployCurrentManagersAction`, which accepts the existing `Manageable` contract. Tag teams separately delegate current-wrestler employment to `TagTeams\EmployCurrentWrestlersAction`. Each collaborator invokes complete typed employment actions only for currently unemployed related entities.
 
+Tag-team membership persistence remains separate from employment orchestration. `TagTeamMembershipService` establishes and synchronizes current wrestler and manager relationships, dates relationships that have ended, and preserves their historical pivot rows. Eligibility is validated before the Action receives its data, while `CreateAction` and `UpdateAction` explicitly coordinate the typed employment cascades when an employment date is supplied.
+
 Tag-team suspension delegates eligible current wrestler and manager transitions to `SuspendCurrentMembersAction`. The collaborator invokes each member's complete typed suspension action, while the tag-team action retains its own validation, suspension-period persistence, effective-date handling, and transaction boundary.
 
 Tag-team reinstatement mirrors that boundary through `ReinstateCurrentMembersAction`, which invokes complete typed reinstatement actions only for suspended current wrestlers and managers. The coordinating tag-team action retains validation, suspension-period persistence, date handling, and transaction ownership.

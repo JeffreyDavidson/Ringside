@@ -30,12 +30,10 @@ readonly class TagTeamMembershipData
     /**
      * Create membership data from individual wrestler properties.
      */
-    public static function fromWrestlers(?Wrestler $wrestlerA, ?Wrestler $wrestlerB, ?Collection $managers = null): self
+    public static function fromWrestlers(Wrestler $wrestlerA, Wrestler $wrestlerB, ?Collection $managers = null): self
     {
-        $wrestlers = new Collection(array_filter([$wrestlerA, $wrestlerB]));
-
         return new self(
-            wrestlers: $wrestlers->isNotEmpty() ? $wrestlers : null,
+            wrestlers: new Collection([$wrestlerA, $wrestlerB]),
             managers: $managers
         );
     }

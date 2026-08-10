@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UpdateAction;
 use App\Data\TagTeams\TagTeamData;
+use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 
 beforeEach(function () {
     $this->tagTeam = TagTeam::factory()->employed()->create([
@@ -192,4 +195,23 @@ test('it handles special characters in updates', function () {
     $this->tagTeam->refresh();
     expect($this->tagTeam->name)->toBe('The "Elite" & Dangerous Team');
     expect($this->tagTeam->signature_move)->toBe('The \'Ultimate\' Slam (TM)');
+});
+
+test('it employs newly assigned members when the tag team is employed', function () {
+    $newWrestler = Wrestler::factory()->create();
+    $newManager = Manager::factory()->create();
+
+    resolve(UpdateAction::class)->handle($this->tagTeam, new TagTeamData(
+        name: $this->tagTeam->name,
+        signature_move: $this->tagTeam->signature_move,
+        employment_date: now(),
+        wrestlerA: $this->wrestlerA,
+        wrestlerB: $newWrestler,
+        managers: new Collection([$newManager]),
+    ));
+
+    expect($newWrestler->isEmployed())->toBeTrue()
+        ->and($newManager->isEmployed())->toBeTrue()
+        ->and($this->tagTeam->currentWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeFalse()
+        ->and($this->tagTeam->previousWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeTrue();
 });
