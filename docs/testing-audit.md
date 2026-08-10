@@ -332,7 +332,7 @@ High-value Ringside candidates:
 
 1. **INF-56-P1-A: Add service and domain collaboration integration tests**
    - `StableMembershipService`, `StableValidationService`
-   - `TagTeamLifecycleService`, `TagTeamMembershipService`, `TagTeamValidationService`
+   - `TagTeamMembershipService`, `TagTeamValidationService`
    - `WrestlerManagerAssignmentService`
    - `ErrorMessageMappingService`
 
