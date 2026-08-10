@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\TagTeamMembershipService;
 use Illuminate\Database\Eloquent\Collection;
@@ -107,4 +108,50 @@ it('leaves an omitted membership group unchanged', function () {
     );
 
     expect($this->tagTeam->currentManagers()->whereKey($manager->id)->exists())->toBeTrue();
+});
+
+it('preserves each wrestler membership when a wrestler rejoins', function () {
+    $wrestler = Wrestler::factory()->create();
+    $wrestlers = new Collection([$wrestler]);
+    $noWrestlers = new Collection();
+    $firstJoinedAt = now()->subDays(4)->startOfSecond();
+    $firstLeftAt = now()->subDays(3)->startOfSecond();
+    $secondJoinedAt = now()->subDays(2)->startOfSecond();
+    $secondLeftAt = now()->subDay()->startOfSecond();
+
+    $this->service->establishMembership(
+        $this->tagTeam,
+        new TagTeamMembershipData(wrestlers: $wrestlers),
+        $firstJoinedAt,
+    );
+    $this->service->updateMembership(
+        $this->tagTeam,
+        new TagTeamMembershipData(wrestlers: $noWrestlers),
+        $firstLeftAt,
+    );
+    $this->service->establishMembership(
+        $this->tagTeam,
+        new TagTeamMembershipData(wrestlers: $wrestlers),
+        $secondJoinedAt,
+    );
+    $this->service->updateMembership(
+        $this->tagTeam,
+        new TagTeamMembershipData(wrestlers: $noWrestlers),
+        $secondLeftAt,
+    );
+
+    $memberships = TagTeamWrestler::query()
+        ->whereBelongsTo($this->tagTeam, 'tagTeam')
+        ->whereBelongsTo($wrestler)
+        ->orderBy('joined_at')
+        ->get();
+    $firstMembership = $memberships->firstOrFail();
+    $secondMembership = $memberships->skip(1)->firstOrFail();
+
+    expect($memberships)->toHaveCount(2)
+        ->and($firstMembership->joined_at->equalTo($firstJoinedAt))->toBeTrue()
+        ->and($firstMembership->left_at?->equalTo($firstLeftAt))->toBeTrue()
+        ->and($secondMembership->joined_at->equalTo($secondJoinedAt))->toBeTrue()
+        ->and($secondMembership->left_at?->equalTo($secondLeftAt))->toBeTrue()
+        ->and($this->tagTeam->currentWrestlers()->exists())->toBeFalse();
 });

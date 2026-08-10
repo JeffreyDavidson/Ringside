@@ -40,9 +40,10 @@ class ManagerAssignmentService
         $currentManagers = $manageable->currentManagers()->get();
 
         foreach ($currentManagers->diff($managers) as $manager) {
-            $manageable->managers()->updateExistingPivot($manager->getKey(), [
-                'fired_at' => $date,
-            ]);
+            $manageable->managers()
+                ->newPivotStatementForId($manager->getKey())
+                ->whereNull('fired_at')
+                ->update(['fired_at' => $date]);
         }
 
         $this->assign($manageable, $managers->diff($currentManagers), $date);

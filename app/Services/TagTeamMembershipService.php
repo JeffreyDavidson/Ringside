@@ -86,9 +86,9 @@ class TagTeamMembershipService
         }
 
         foreach ($currentMembers->diff($desiredMembers) as $member) {
-            $relationship->updateExistingPivot($member->getKey(), [
-                $endedAtColumn => $date,
-            ]);
+            $relationship->newPivotStatementForId($member->getKey())
+                ->whereNull($endedAtColumn)
+                ->update([$endedAtColumn => $date]);
         }
 
         $this->addMembersToRelationship(

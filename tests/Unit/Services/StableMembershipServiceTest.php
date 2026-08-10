@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\StableMembershipService;
@@ -93,4 +95,50 @@ it('synchronizes changed groups while leaving omitted groups untouched', functio
         ->toEqualCanonicalizing([$retainedWrestler->id, $addedWrestler->id])
         ->and($this->stable->previousWrestlers()->whereKey($removedWrestler->id)->exists())->toBeTrue()
         ->and($this->stable->currentTagTeams()->whereKey($tagTeam->id)->exists())->toBeTrue();
+});
+
+it('preserves each membership period when members rejoin a stable', function () {
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+    $members = new StableMembershipData(
+        wrestlers: new Collection([$wrestler]),
+        tagTeams: new Collection([$tagTeam]),
+    );
+    $firstJoinedAt = now()->subDays(4)->startOfSecond();
+    $firstLeftAt = now()->subDays(3)->startOfSecond();
+    $secondJoinedAt = now()->subDays(2)->startOfSecond();
+    $secondLeftAt = now()->subDay()->startOfSecond();
+
+    $this->service->addMembers($this->stable, $members, $firstJoinedAt);
+    $this->service->removeMembers($this->stable, $members, $firstLeftAt);
+    $this->service->addMembers($this->stable, $members, $secondJoinedAt);
+    $this->service->removeMembers($this->stable, $members, $secondLeftAt);
+
+    $wrestlerMemberships = StableWrestler::query()
+        ->whereBelongsTo($this->stable)
+        ->whereBelongsTo($wrestler)
+        ->orderBy('joined_at')
+        ->get();
+    $tagTeamMemberships = StableTagTeam::query()
+        ->whereBelongsTo($this->stable)
+        ->whereBelongsTo($tagTeam, 'tagTeam')
+        ->orderBy('joined_at')
+        ->get();
+    $firstWrestlerMembership = $wrestlerMemberships->firstOrFail();
+    $secondWrestlerMembership = $wrestlerMemberships->skip(1)->firstOrFail();
+    $firstTagTeamMembership = $tagTeamMemberships->firstOrFail();
+    $secondTagTeamMembership = $tagTeamMemberships->skip(1)->firstOrFail();
+
+    expect($wrestlerMemberships)->toHaveCount(2)
+        ->and($firstWrestlerMembership->joined_at->equalTo($firstJoinedAt))->toBeTrue()
+        ->and($firstWrestlerMembership->left_at?->equalTo($firstLeftAt))->toBeTrue()
+        ->and($secondWrestlerMembership->joined_at->equalTo($secondJoinedAt))->toBeTrue()
+        ->and($secondWrestlerMembership->left_at?->equalTo($secondLeftAt))->toBeTrue()
+        ->and($tagTeamMemberships)->toHaveCount(2)
+        ->and($firstTagTeamMembership->joined_at->equalTo($firstJoinedAt))->toBeTrue()
+        ->and($firstTagTeamMembership->left_at?->equalTo($firstLeftAt))->toBeTrue()
+        ->and($secondTagTeamMembership->joined_at->equalTo($secondJoinedAt))->toBeTrue()
+        ->and($secondTagTeamMembership->left_at?->equalTo($secondLeftAt))->toBeTrue()
+        ->and($this->stable->currentWrestlers()->exists())->toBeFalse()
+        ->and($this->stable->currentTagTeams()->exists())->toBeFalse();
 });
