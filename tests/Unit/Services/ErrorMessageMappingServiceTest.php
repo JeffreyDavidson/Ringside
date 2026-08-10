@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BusinessRuleReason;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\CannotBeEmployedException;
 use App\Exceptions\Roster\CannotBeInjuredException;
@@ -12,7 +13,6 @@ use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotB
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\ErrorMessageMappingService;
-use RuntimeException;
 
 test('it maps roster failures from stable reasons instead of message text', function () {
     $wrestler = new Wrestler(['name' => 'Test Wrestler']);
@@ -63,6 +63,8 @@ test('it maps tag team reinstatement failures from a stable reason', function ()
 });
 
 test('it uses a general message for unknown exceptions', function () {
-    expect(ErrorMessageMappingService::mapWrestlerException(new RuntimeException('unexpected wording')))
+    $exception = InvalidMatchConfigurationException::invalidCompetitorCount(1, 'singles');
+
+    expect(ErrorMessageMappingService::mapWrestlerException($exception))
         ->toBe('wrestlers.errors.general_error');
 });
