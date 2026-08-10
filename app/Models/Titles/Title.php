@@ -105,12 +105,7 @@ use Illuminate\Support\Carbon;
 class Title extends Model implements Debutable, HasActivityPeriodsContract, HasDisplayName, Retirable
 {
     /** @use HasActivityPeriods<TitleActivityPeriod, static> */
-    use HasActivityPeriods {
-        HasActivityPeriods::isCurrentlyActive insteadof HasStatusHistory;
-        HasActivityPeriods::isNotCurrentlyActive insteadof HasStatusHistory;
-        HasActivityPeriods::isUnactivated insteadof HasStatusHistory;
-        HasActivityPeriods::isInactive insteadof HasStatusHistory;
-    }
+    use HasActivityPeriods;
 
     use HasChampionships;
 
