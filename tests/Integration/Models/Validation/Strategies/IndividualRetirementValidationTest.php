@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
 use App\Models\Validation\Strategies\IndividualRetirementValidation;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Integration tests for IndividualRetirementValidation strategy.
@@ -33,80 +33,37 @@ describe('IndividualRetirementValidation', function () {
         }
         expect(true)->toBeTrue();
     })->with([
-        // Can retire: employed entities in various states
-        ['employed', true],        // Changed from 'bookable' to 'employed'
+        ['employed', true],
         ['suspended', true],
         ['injured', true],
         ['released', true],
-
-        // Cannot retire: invalid employment states
         ['unemployed', false],
         ['withFutureEmployment', false],
         ['retired', false],
     ]);
 
-    describe('edge cases', function () {
-        test('handles entities without hasFutureEmployment method', function () {
-            $mockEntity = new class extends Model
-            {
-                public function hasStatus(EmploymentStatus $status): bool
-                {
-                    return false;
-                }
+    describe('supported individual models', function () {
+        test('validates managers', function () {
+            $manager = Manager::factory()->employed()->create();
 
-                public function isRetired(): bool
-                {
-                    return false;
-                }
+            $this->strategy->validate($manager);
 
-                // Note: hasFutureEmployment method intentionally missing
-            };
-
-            // Should handle missing hasFutureEmployment method gracefully
-            $this->strategy->validate($mockEntity);
-            expect(true)->toBeTrue();
+            expect($manager->isEmployed())->toBeTrue();
         });
 
-        test('handles entities without isRetired method', function () {
-            $mockEntity = new class extends Model
-            {
-                public function hasStatus(EmploymentStatus $status): bool
-                {
-                    return false;
-                }
+        test('validates referees', function () {
+            $referee = Referee::factory()->employed()->create();
 
-                public function hasFutureEmployment(): bool
-                {
-                    return false;
-                }
+            $this->strategy->validate($referee);
 
-                // Note: isRetired method intentionally missing
-            };
-
-            // Should handle missing isRetired method gracefully
-            $this->strategy->validate($mockEntity);
-            expect(true)->toBeTrue();
+            expect($referee->isEmployed())->toBeTrue();
         });
 
-        test('handles entities without hasStatus method', function () {
-            $mockEntity = new class extends Model
-            {
-                public function isRetired(): bool
-                {
-                    return false;
-                }
+        test('rejects managers with future employment', function () {
+            $manager = Manager::factory()->withFutureEmployment()->create();
 
-                public function hasFutureEmployment(): bool
-                {
-                    return false;
-                }
-
-                // Note: hasStatus method intentionally missing
-            };
-
-            // Should handle missing hasStatus method gracefully
-            $this->strategy->validate($mockEntity);
-            expect(true)->toBeTrue();
+            expect(fn () => $this->strategy->validate($manager))
+                ->toThrow(CannotBeRetiredException::class);
         });
     });
 });

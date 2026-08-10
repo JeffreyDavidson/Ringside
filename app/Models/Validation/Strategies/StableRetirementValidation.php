@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Validation\Strategies;
 
 use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Models\Contracts\RetirementValidationStrategy;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Stables\Stable;
 
 /**
  * Retirement validation strategy for stable entities.
@@ -14,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * This strategy handles retirement validation for stables that have complex
  * activation periods and member relationships.
  */
-class StableRetirementValidation implements RetirementValidationStrategy
+class StableRetirementValidation
 {
     /**
      * Validate that a stable can be retired.
@@ -24,32 +23,28 @@ class StableRetirementValidation implements RetirementValidationStrategy
      * - Must not have future activation scheduled
      * - Must not already be retired
      *
-     * @param  Model  $stable  The stable entity to validate
      * @throws CannotBeRetiredException When retirement is not allowed
      */
-    public function validate(Model $stable): void
+    public function validate(Stable $stable): void
     {
         if ($this->isUnactivated($stable)) {
             throw CannotBeRetiredException::unactivated($stable);
         }
 
-        if (method_exists($stable, 'hasFutureEstablishment') && $stable->hasFutureEstablishment()) {
+        if ($stable->hasFutureEstablishment()) {
             throw CannotBeRetiredException::hasFutureEstablishment($stable);
         }
 
-        if (method_exists($stable, 'isRetired') && $stable->isRetired()) {
+        if ($stable->isRetired()) {
             throw CannotBeRetiredException::alreadyRetired($stable);
         }
     }
 
     /**
      * Check if the stable is unactivated (never been active).
-     *
-     * @param  Model  $stable  The stable to check
-     * @return bool True if unactivated, false otherwise
      */
-    private function isUnactivated(Model $stable): bool
+    private function isUnactivated(Stable $stable): bool
     {
-        return method_exists($stable, 'hasActivityPeriods') && ! $stable->hasActivityPeriods();
+        return ! $stable->hasActivityPeriods();
     }
 }

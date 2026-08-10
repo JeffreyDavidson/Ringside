@@ -9,13 +9,9 @@ use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
-use App\Models\Validation\Strategies\IndividualRetirementValidation;
 use App\Models\Validation\Strategies\IndividualSuspensionValidation;
-use App\Models\Validation\Strategies\StableRetirementValidation;
 use App\Models\Validation\Strategies\StableSuspensionValidation;
-use App\Models\Validation\Strategies\TagTeamRetirementValidation;
 use App\Models\Validation\Strategies\TagTeamSuspensionValidation;
-use App\Models\Validation\Strategies\TitleRetirementValidation;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
@@ -310,33 +306,6 @@ enum RosterMemberType: string
     }
 
     /**
-     * Get the appropriate validation strategy for retirement operations.
-     *
-     * Returns the class name for the validation strategy that should be used
-     * when validating retirement operations for this roster member type.
-     *
-     * @return class-string The validation strategy class name
-     *
-     * @example
-     * ```php
-     * $strategy = RosterMemberType::WRESTLER->getRetirementValidationStrategy();
-     * // Returns: IndividualRetirementValidation::class
-     *
-     * $strategy = RosterMemberType::TAG_TEAM->getRetirementValidationStrategy();
-     * // Returns: TagTeamRetirementValidation::class
-     * ```
-     */
-    public function getRetirementValidationStrategy(): string
-    {
-        return match ($this) {
-            self::TAG_TEAM => TagTeamRetirementValidation::class,
-            self::TITLE => TitleRetirementValidation::class,
-            self::STABLE => StableRetirementValidation::class,
-            self::WRESTLER, self::MANAGER, self::REFEREE => IndividualRetirementValidation::class,
-        };
-    }
-
-    /**
      * Get all roster member types that are individuals.
      *
      * @return array<self> Array of individual roster member types
@@ -439,37 +408,6 @@ enum RosterMemberType: string
             'employed' => $type->canBeEmployed(),
             'retired' => $type->canBeRetired(),
             default => false,
-        };
-    }
-
-    /**
-     * Get validation strategy class for a specific operation type.
-     *
-     * This method centralizes strategy selection logic and can be extended
-     * for additional operation types beyond suspension and retirement.
-     *
-     * @param  Model  $model  The model to get strategy for
-     * @param  string  $operation  The operation type ('suspension', 'retirement')
-     * @throws InvalidArgumentException If the operation type is not supported
-     * @return class-string The validation strategy class name
-     *
-     * @example
-     * ```php
-     * $strategy = RosterMemberType::getValidationStrategy($wrestler, 'suspension');
-     * // Returns: IndividualSuspensionValidation::class
-     *
-     * $strategy = RosterMemberType::getValidationStrategy($tagTeam, 'retirement');
-     * // Returns: TagTeamRetirementValidation::class
-     * ```
-     */
-    public static function getValidationStrategy(Model $model, string $operation): string
-    {
-        $type = self::fromModel($model);
-
-        return match ($operation) {
-            'suspension' => $type->getSuspensionValidationStrategy(),
-            'retirement' => $type->getRetirementValidationStrategy(),
-            default => throw new InvalidArgumentException("Unsupported operation type: {$operation}"),
         };
     }
 }

@@ -6,8 +6,9 @@ namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Models\Contracts\RetirementValidationStrategy;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
+use App\Models\Wrestlers\Wrestler;
 
 /**
  * Retirement validation strategy for individual entities.
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  * $strategy->validate($wrestler);
  * ```
  */
-class IndividualRetirementValidation implements RetirementValidationStrategy
+class IndividualRetirementValidation
 {
     /**
      * Validate that an individual entity can be retired.
@@ -35,37 +36,28 @@ class IndividualRetirementValidation implements RetirementValidationStrategy
      * Note: Released entities CAN be retired - this is a valid business workflow
      * where an entity is first released from employment, then later retired.
      *
-     * @param  Model  $entity  The individual entity to validate
      * @throws CannotBeRetiredException When retirement is not allowed
      */
-    public function validate(Model $entity): void
+    public function validate(Wrestler|Manager|Referee $entity): void
     {
         if ($this->isUnemployed($entity)) {
             throw CannotBeRetiredException::unemployed($entity);
         }
 
-        // Note: Released entities CAN be retired - removing this restriction
-        // if ($this->isReleased($entity)) {
-        //     throw CannotBeRetiredException::released($entity);
-        // }
-
-        if (method_exists($entity, 'hasFutureEmployment') && $entity->hasFutureEmployment()) {
+        if ($entity->hasFutureEmployment()) {
             throw CannotBeRetiredException::hasFutureEmployment($entity);
         }
 
-        if (method_exists($entity, 'isRetired') && $entity->isRetired()) {
+        if ($entity->isRetired()) {
             throw CannotBeRetiredException::alreadyRetired($entity);
         }
     }
 
     /**
      * Check if the entity is unemployed.
-     *
-     * @param  Model  $entity  The entity to check
-     * @return bool True if unemployed, false otherwise
      */
-    private function isUnemployed(Model $entity): bool
+    private function isUnemployed(Wrestler|Manager|Referee $entity): bool
     {
-        return method_exists($entity, 'hasStatus') ? $entity->hasStatus(EmploymentStatus::Unemployed) : false;
+        return $entity->hasStatus(EmploymentStatus::Unemployed);
     }
 }

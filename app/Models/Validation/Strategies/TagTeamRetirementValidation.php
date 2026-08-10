@@ -6,8 +6,7 @@ namespace App\Models\Validation\Strategies;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Models\Contracts\RetirementValidationStrategy;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\TagTeams\TagTeam;
 
 /**
  * Retirement validation strategy for TagTeam entities.
@@ -22,7 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * $strategy->validate($tagTeam);
  * ```
  */
-class TagTeamRetirementValidation implements RetirementValidationStrategy
+class TagTeamRetirementValidation
 {
     /**
      * Validate that a TagTeam can be retired.
@@ -32,35 +31,30 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
      * - Validates all current wrestlers can be retired
      * - Ensures no wrestlers are injured or suspended
      *
-     * @param  Model  $tagTeam  The TagTeam entity to validate
      * @throws CannotBeRetiredException When retirement is not allowed
      */
-    public function validate(Model $tagTeam): void
+    public function validate(TagTeam $tagTeam): void
     {
-        // Standard TagTeam validation
         $this->validateTagTeamStatus($tagTeam);
-
-        // Complex validation: check current wrestlers
         $this->validateCurrentWrestlers($tagTeam);
     }
 
     /**
      * Validate the TagTeam's own status for retirement.
      *
-     * @param  Model  $tagTeam  The TagTeam to validate
      * @throws CannotBeRetiredException When TagTeam status prevents retirement
      */
-    private function validateTagTeamStatus(Model $tagTeam): void
+    private function validateTagTeamStatus(TagTeam $tagTeam): void
     {
         if ($this->isUnemployed($tagTeam)) {
             throw CannotBeRetiredException::unemployed($tagTeam);
         }
 
-        if (method_exists($tagTeam, 'hasFutureEmployment') && $tagTeam->hasFutureEmployment()) {
+        if ($tagTeam->hasFutureEmployment()) {
             throw CannotBeRetiredException::hasFutureEmployment($tagTeam);
         }
 
-        if (method_exists($tagTeam, 'isRetired') && $tagTeam->isRetired()) {
+        if ($tagTeam->isRetired()) {
             throw CannotBeRetiredException::alreadyRetired($tagTeam);
         }
     }
@@ -71,30 +65,26 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
      * This is the complex TagTeam-specific logic that checks each wrestler's
      * status to ensure the entire tag team can be retired properly.
      *
-     * @param  Model  $tagTeam  The TagTeam to validate
      * @throws CannotBeRetiredException When wrestlers prevent TagTeam retirement
      */
-    private function validateCurrentWrestlers(Model $tagTeam): void
+    private function validateCurrentWrestlers(TagTeam $tagTeam): void
     {
-        $currentWrestlers = method_exists($tagTeam, 'currentWrestlers') ? $tagTeam->currentWrestlers()->get() : collect();
+        $currentWrestlers = $tagTeam->currentWrestlers()->get();
 
         if ($currentWrestlers->isEmpty()) {
             throw CannotBeRetiredException::noActiveWrestlers($tagTeam);
         }
 
         foreach ($currentWrestlers as $wrestler) {
-            // Check if wrestler is in a state that prevents retirement
-            if (method_exists($wrestler, 'isInjured') && $wrestler->isInjured()) {
+            if ($wrestler->isInjured()) {
                 throw CannotBeRetiredException::wrestlerInjured($tagTeam, $wrestler);
             }
 
-            if (method_exists($wrestler, 'isSuspended') && $wrestler->isSuspended()) {
+            if ($wrestler->isSuspended()) {
                 throw CannotBeRetiredException::wrestlerSuspended($tagTeam, $wrestler);
             }
 
-            // Ensure the wrestler themselves can be retired
-            // This prevents cascading retirement issues
-            if (method_exists($wrestler, 'canBeRetired') && ! $wrestler->canBeRetired()) {
+            if (! $wrestler->canBeRetired()) {
                 throw CannotBeRetiredException::wrestlerCannotBeRetired($tagTeam, $wrestler);
             }
         }
@@ -102,12 +92,9 @@ class TagTeamRetirementValidation implements RetirementValidationStrategy
 
     /**
      * Check if the TagTeam is unemployed.
-     *
-     * @param  Model  $tagTeam  The TagTeam to check
-     * @return bool True if unemployed, false otherwise
      */
-    private function isUnemployed(Model $tagTeam): bool
+    private function isUnemployed(TagTeam $tagTeam): bool
     {
-        return method_exists($tagTeam, 'hasStatus') ? $tagTeam->hasStatus(EmploymentStatus::Unemployed) : false;
+        return $tagTeam->hasStatus(EmploymentStatus::Unemployed);
     }
 }

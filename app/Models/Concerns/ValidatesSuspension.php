@@ -179,6 +179,6 @@ trait ValidatesSuspension
      */
     protected function getSuspensionValidationStrategy(): string
     {
-        return RosterMemberType::getValidationStrategy($this, 'suspension');
+        return RosterMemberType::fromModel($this)->getSuspensionValidationStrategy();
     }
 }
