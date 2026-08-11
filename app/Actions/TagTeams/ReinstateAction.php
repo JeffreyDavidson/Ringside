@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;

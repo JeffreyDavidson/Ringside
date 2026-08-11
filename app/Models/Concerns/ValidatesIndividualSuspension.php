@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\CannotBeReinstatedException;
-use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Models\Contracts\Bookable;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;

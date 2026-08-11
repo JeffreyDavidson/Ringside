@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Exceptions\Roster\CannotBeEmployedException;
-use App\Exceptions\Roster\CannotBeReleasedException;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
+use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 
 /**
  * Provides employment validation functionality for models.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\Roster\CannotBeEmployedException;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Models\Wrestlers\Wrestler;
 
 test('keeps the employment predicate aligned with its guard', function (string $factoryState, bool $canBeEmployed) {

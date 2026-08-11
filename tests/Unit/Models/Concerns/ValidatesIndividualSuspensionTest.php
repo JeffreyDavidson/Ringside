@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 
 test('reinstatement predicate matches its guard for an injured suspended wrestler', function () {

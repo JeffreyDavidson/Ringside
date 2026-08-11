@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\SuspendAction;
-use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Models\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;

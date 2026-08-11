@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Exceptions\Roster;
+namespace App\Exceptions\Roster\Individuals;
 
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;

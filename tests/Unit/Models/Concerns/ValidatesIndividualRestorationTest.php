@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\Data\CannotBeRestoredException;
+use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\Wrestlers\Wrestler;

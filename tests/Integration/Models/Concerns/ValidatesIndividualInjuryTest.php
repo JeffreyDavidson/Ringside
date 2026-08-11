@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
-use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Models\Wrestlers\Wrestler;
 
 describe('individual injury validation', function () {

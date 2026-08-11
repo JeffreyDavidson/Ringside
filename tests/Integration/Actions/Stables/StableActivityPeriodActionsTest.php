@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Stables\EndActivityPeriodAction;
 use App\Actions\Stables\StartActivityPeriodAction;
-use App\Exceptions\BusinessRules\InvalidDateRangeException;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\RetireAction;
-use App\Exceptions\Roster\CannotBeRetiredException;
+use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Models\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;

@@ -8,7 +8,7 @@ use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
 
-class CannotBeReinstatedException extends BaseBusinessException
+final class CannotBeReinstatedException extends BaseBusinessException
 {
     public static function notSuspended(TagTeam $tagTeam): static
     {

@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Exceptions\Roster\CannotBeRetiredException;
-use App\Exceptions\Roster\CannotBeUnretiredException;
+use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\Wrestlers\Wrestler;
