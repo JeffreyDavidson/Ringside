@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 use App\Exceptions\BaseBusinessException;
+use PhpParser\Node\Stmt\Catch_;
+use PhpParser\NodeFinder;
+use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor\NameResolver;
+use PhpParser\ParserFactory;
 
 arch('business exceptions use the shared exception foundation')
     ->expect('App\Exceptions')
@@ -67,12 +72,36 @@ test('application code does not directly construct generic exceptions', function
 });
 
 test('Livewire table actions do not catch generic exception types', function () {
+    $genericCatchTypes = function (string $contents): array {
+        $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
+        $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
+        $catchClauses = (new NodeFinder())->findInstanceOf($resolvedStatements, Catch_::class);
+
+        return collect($catchClauses)
+            ->flatMap(fn (Catch_ $catchClause): array => $catchClause->types)
+            ->map(fn ($type): string => $type->toString())
+            ->intersect([Exception::class, Throwable::class])
+            ->values()
+            ->all();
+    };
+
+    expect($genericCatchTypes(<<<'PHP'
+        <?php
+
+        use Exception as GenericException;
+
+        try {
+            // Execute an operation.
+        } catch (GenericException) {
+            // Handle the exception.
+        }
+        PHP))->toBe([Exception::class]);
+
     $violations = collect(glob(app_path('Livewire/*/Tables/Main.php')) ?: [])
-        ->filter(function (string $filename): bool {
+        ->filter(function (string $filename) use ($genericCatchTypes): bool {
             $contents = file_get_contents($filename);
 
-            return $contents !== false
-                && preg_match('/catch\s*\(\s*(?:\\\\?Exception|\\\\?Throwable)\b/', $contents) === 1;
+            return $contents !== false && $genericCatchTypes($contents) !== [];
         })
         ->map(fn (string $filename): string => str($filename)->after(app_path().DIRECTORY_SEPARATOR)->toString())
         ->values()
