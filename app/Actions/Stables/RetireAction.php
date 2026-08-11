@@ -44,24 +44,25 @@ class RetireAction
      */
     public function handle(Stable $stable, ?Carbon $retirementDate = null): void
     {
-        $stable->ensureCanBeRetired();
-
         $retirementDate = $retirementDate ?? now();
         $operationalDate = $retirementDate->isFuture() ? now() : $retirementDate;
 
         DB::transaction(function () use ($stable, $retirementDate, $operationalDate): void {
-            // End activity if currently active using injected Action
-            if ($stable->isCurrentlyActive()) {
-                $this->endActivityPeriodAction->handle($stable, $operationalDate);
+            $lockedStable = Stable::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
+
+            $lockedStable->ensureCanBeRetired();
+
+            if ($lockedStable->isCurrentlyActive()) {
+                $this->endActivityPeriodAction->handle($lockedStable, $operationalDate);
             }
 
-            // Get current members using enhanced model method
-            $currentMembers = $stable->getCurrentMembersData();
+            $currentMembers = $lockedStable->getCurrentMembersData();
+            $membersToRetire = $lockedStable->getMembersToRetire();
 
-            // Retire current members who are available
-            $membersToRetire = $stable->getMembersToRetire();
-
-            $this->removeStableMembersAction->handle($stable, $currentMembers, $operationalDate);
+            $this->removeStableMembersAction->handle($lockedStable, $currentMembers, $operationalDate);
 
             if ($membersToRetire->wrestlers) {
                 foreach ($membersToRetire->wrestlers as $wrestler) {
@@ -79,10 +80,9 @@ class RetireAction
                 }
             }
 
-            $this->retirementPeriods->start($stable, $retirementDate);
+            $this->retirementPeriods->start($lockedStable, $retirementDate);
 
-            // Update status to retired
-            $stable->update(['status' => StableStatus::Retired]);
+            $lockedStable->update(['status' => StableStatus::Retired]);
         });
     }
 }

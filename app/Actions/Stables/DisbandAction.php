@@ -35,17 +35,23 @@ class DisbandAction
      */
     public function handle(Stable $stable, ?Carbon $disbandDate = null): void
     {
-        $stable->ensureCanBeDisbanded();
-
         $disbandDate = $disbandDate ?? now();
 
         DB::transaction(function () use ($stable, $disbandDate): void {
-            // End current activity period using injected action
-            $this->endActivityPeriodAction->handle($stable, $disbandDate);
+            $lockedStable = Stable::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
 
-            // End all current member tenures using enhanced model method and injected action
-            if ($stable->hasCurrentMembers()) {
-                $this->removeStableMembersAction->handle($stable, $stable->getCurrentMembersData(), $disbandDate);
+            $lockedStable->ensureCanBeDisbanded();
+            $this->endActivityPeriodAction->handle($lockedStable, $disbandDate);
+
+            if ($lockedStable->hasCurrentMembers()) {
+                $this->removeStableMembersAction->handle(
+                    $lockedStable,
+                    $lockedStable->getCurrentMembersData(),
+                    $disbandDate,
+                );
             }
         });
     }

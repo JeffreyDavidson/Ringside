@@ -36,8 +36,6 @@ class EstablishAction
         ?Carbon $activationDate = null,
         ?Carbon $endDate = null,
     ): StableActivityPeriod {
-        $stable->ensureCanBeEstablished();
-
         $activationDate = $activationDate ?? now();
 
         if ($endDate?->lt($activationDate)) {
@@ -46,7 +44,14 @@ class EstablishAction
 
         return DB::transaction(
             function () use ($stable, $activationDate, $endDate): StableActivityPeriod {
-                $activityPeriod = $this->startActivityPeriodAction->handle($stable, $activationDate);
+                $lockedStable = Stable::query()
+                    ->withTrashed()
+                    ->lockForUpdate()
+                    ->findOrFail($stable->getKey());
+
+                $lockedStable->ensureCanBeEstablished();
+
+                $activityPeriod = $this->startActivityPeriodAction->handle($lockedStable, $activationDate);
 
                 if ($endDate) {
                     $activityPeriod->update(['ended_at' => $endDate]);

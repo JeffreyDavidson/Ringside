@@ -33,12 +33,16 @@ class ReuniteAction
      */
     public function handle(Stable $stable, ?Carbon $reuniteDate = null): void
     {
-        $stable->ensureCanBeReunited();
-
         $reuniteDate ??= now();
 
-        DB::transaction(
-            fn () => $this->startActivityPeriodAction->handle($stable, $reuniteDate),
-        );
+        DB::transaction(function () use ($stable, $reuniteDate): void {
+            $lockedStable = Stable::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
+
+            $lockedStable->ensureCanBeReunited();
+            $this->startActivityPeriodAction->handle($lockedStable, $reuniteDate);
+        });
     }
 }

@@ -14,5 +14,5 @@ Implement individual application operations as focused Action classes with a pub
 ## Inject action collaborators
 Acquire Action and service collaborators through constructor injection inside application operations.
 
-## Idempotent lifecycle periods
-Create the current lifecycle or activity period through relationship updateOrCreate(), identifying the open record with ended_at => null.
+## Lock lifecycle period transitions
+Acquire the owning model row lock inside a transaction before validating and mutating lifecycle periods. Start operations create a new period only when no open period exists; reject an existing open period instead of rewriting it. End operations require an open period and must reject an end date before its start.

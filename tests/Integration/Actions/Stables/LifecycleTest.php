@@ -107,6 +107,21 @@ describe('Stable Activation Action Integration', function () {
             expect($refreshedStable->status)->toBe(StableStatus::Inactive);
             expect($refreshedStable->isDisbanded())->toBeTrue();
         });
+
+        test('disband action rolls back when the end date precedes the activity period', function () {
+            $currentActivityPeriod = $this->activeStable->currentActivityPeriod()->firstOrFail();
+            $currentMemberCount = $this->activeStable->getCurrentMembersData()->getTotalMemberCount();
+
+            expect(fn () => resolve(DisbandAction::class)->handle(
+                $this->activeStable,
+                $currentActivityPeriod->started_at->copy()->subSecond(),
+            ))->toThrow(InvalidDateRangeException::class);
+
+            $refreshedStable = freshModel($this->activeStable);
+
+            expect($refreshedStable->isCurrentlyActive())->toBeTrue()
+                ->and($refreshedStable->getCurrentMembersData()->getTotalMemberCount())->toBe($currentMemberCount);
+        });
     });
 
     describe('reunite action workflow', function () {

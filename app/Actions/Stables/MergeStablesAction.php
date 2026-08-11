@@ -37,11 +37,25 @@ class MergeStablesAction
         Carbon $date
     ): void {
         DB::transaction(function () use ($primaryStable, $secondaryStable, $date): void {
-            $primaryStable->ensureCanBeMergedWith($secondaryStable);
+            [$firstStable, $secondStable] = $primaryStable->getKey() < $secondaryStable->getKey()
+                ? [$primaryStable, $secondaryStable]
+                : [$secondaryStable, $primaryStable];
+
+            $firstLockedStable = Stable::query()->lockForUpdate()->findOrFail($firstStable->getKey());
+            $secondLockedStable = Stable::query()->lockForUpdate()->findOrFail($secondStable->getKey());
+
+            $lockedPrimaryStable = $firstLockedStable->is($primaryStable)
+                ? $firstLockedStable
+                : $secondLockedStable;
+            $lockedSecondaryStable = $firstLockedStable->is($secondaryStable)
+                ? $firstLockedStable
+                : $secondLockedStable;
+
+            $lockedPrimaryStable->ensureCanBeMergedWith($lockedSecondaryStable);
 
             $members = new StableMembershipData(
-                wrestlers: $secondaryStable->currentWrestlers,
-                tagTeams: $secondaryStable->currentTagTeams,
+                wrestlers: $lockedSecondaryStable->currentWrestlers,
+                tagTeams: $lockedSecondaryStable->currentTagTeams,
             );
 
             $unavailableMemberNames = $members->getUnavailableMemberNames();
@@ -50,10 +64,10 @@ class MergeStablesAction
                 throw CannotBeMergedException::membersUnavailable($unavailableMemberNames);
             }
 
-            $this->membershipService->removeMembers($secondaryStable, $members, $date);
-            $this->membershipService->addMembers($primaryStable, $members, $date);
-            $this->endActivityPeriodAction->handle($secondaryStable, $date);
-            $secondaryStable->delete();
+            $this->membershipService->removeMembers($lockedSecondaryStable, $members, $date);
+            $this->membershipService->addMembers($lockedPrimaryStable, $members, $date);
+            $this->endActivityPeriodAction->handle($lockedSecondaryStable, $date);
+            $lockedSecondaryStable->delete();
         });
     }
 }

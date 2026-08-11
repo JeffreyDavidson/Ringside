@@ -45,17 +45,21 @@ class UnretireAction
         bool $establishImmediately = true,
         bool $requireFormerMembers = true
     ): void {
-        $stable->ensureCanBeUnretired($requireFormerMembers);
-
         $unretiredDate = $unretiredDate ?? now();
 
-        DB::transaction(function () use ($stable, $unretiredDate, $establishImmediately): void {
-            $this->retirementPeriods->end($stable, $unretiredDate);
+        DB::transaction(function () use ($stable, $unretiredDate, $establishImmediately, $requireFormerMembers): void {
+            $lockedStable = Stable::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
 
-            $stable->update(['status' => StableStatus::Inactive]);
+            $lockedStable->ensureCanBeUnretired($requireFormerMembers);
+            $this->retirementPeriods->end($lockedStable, $unretiredDate);
+
+            $lockedStable->update(['status' => StableStatus::Inactive]);
 
             if ($establishImmediately) {
-                $this->startActivityPeriodAction->handle($stable, $unretiredDate);
+                $this->startActivityPeriodAction->handle($lockedStable, $unretiredDate);
             }
         });
     }
