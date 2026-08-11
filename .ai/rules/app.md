@@ -16,3 +16,6 @@ Organize application code by technical responsibility at the top level, then by 
 
 ## Use date helpers for the current date
 Use now() and today() for the current timestamp or date. Use Carbon constructors for parsing or constructing explicit date values.
+
+## Classify exception boundaries by failure source
+Use typed BaseBusinessException subclasses for domain-rule rejections. Use LogicException for impossible programmer or configuration states, including missing convention-derived model classes and invalid trait hosts. Reserve InvalidArgumentException for invalid values supplied by a caller; do not directly construct generic Exception.

@@ -12,6 +12,8 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use LogicException;
+use Tests\Unit\Models\Concerns\Support\UnsupportedStableMemberModel;
 
 dataset('stable members', [
     'wrestler' => [fn (): Wrestler => Wrestler::factory()->make()],
@@ -22,6 +24,13 @@ dataset('stable relationship configurations', [
     'wrestler' => [fn (): Wrestler => Wrestler::factory()->make(), 'stables_wrestlers', 'wrestler_id', StableWrestler::class],
     'tag team' => [fn (): TagTeam => TagTeam::factory()->make(), 'stables_tag_teams', 'tag_team_id', StableTagTeam::class],
 ]);
+
+it('reports unsupported trait hosts as logic errors', function () {
+    $member = new UnsupportedStableMemberModel();
+
+    expect(fn () => $member->stables())
+        ->toThrow(LogicException::class, 'Unsupported stable member type');
+});
 
 it('defines all stable relationships', function (Wrestler|TagTeam $member) {
     $stables = $member->stables();

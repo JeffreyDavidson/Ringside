@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use RuntimeException;
+use LogicException;
 
 /**
  * Provides generic model class resolution functionality for Eloquent model relationships.
@@ -47,7 +47,7 @@ trait ResolvesRelatedModels
      * it will resolve to 'WrestlerEmployment' in the same namespace.
      *
      * @param  string  $suffix  The suffix to append to the base model name (e.g., 'Employment', 'Retirement')
-     * @throws RuntimeException If the resolved model class doesn't exist
+     * @throws LogicException If the resolved model class doesn't exist
      * @return string The fully qualified class name of the resolved model
      *
      * @example
@@ -70,7 +70,7 @@ trait ResolvesRelatedModels
      * Perform the actual model class resolution.
      *
      * @param  string  $suffix  The suffix to append to the base model name
-     * @throws RuntimeException If the resolved model class doesn't exist
+     * @throws LogicException If the resolved model class doesn't exist
      * @return string The fully qualified class name of the resolved model
      */
     private function performModelResolution(string $suffix): string
@@ -97,7 +97,7 @@ trait ResolvesRelatedModels
 
         // Validate that the resolved class exists
         if (! class_exists($resolvedClass)) {
-            throw new RuntimeException(
+            throw new LogicException(
                 "Related model [{$resolvedClass}] not found for [{$declaringClass}] with suffix [{$suffix}]. ".
                 'Ensure the class exists or override the domain-specific resolver method.'
             );
@@ -118,7 +118,7 @@ trait ResolvesRelatedModels
             $this->resolveRelatedModelClass($suffix);
 
             return true;
-        } catch (RuntimeException) {
+        } catch (LogicException) {
             return false;
         }
     }

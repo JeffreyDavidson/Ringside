@@ -25,6 +25,7 @@ use App\Models\Concerns\CanBeManaged;
 use App\Models\Contracts\Manageable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use LogicException;
 use Tests\Unit\Models\Concerns\Support\FakeManageableModel;
 use Tests\Unit\Models\Concerns\Support\FakeManagerPivotModel;
 
@@ -74,6 +75,22 @@ describe('CanBeManaged Trait Unit Tests', function () {
     });
 
     describe('manager pivot model resolution', function () {
+        test('reports missing convention-based pivot models as logic errors', function () {
+            $model = new class extends Model implements Manageable
+            {
+                /** @use CanBeManaged<FakeManagerPivotModel, self> */
+                use CanBeManaged;
+
+                public function resolvePivotModel(): string
+                {
+                    return $this->resolveManagersPivotModel();
+                }
+            };
+
+            expect(fn () => $model->resolvePivotModel())
+                ->toThrow(LogicException::class, 'Related pivot model');
+        });
+
         test('can fake manager pivot model class', function () {
             FakeManageableModel::fakeManagerPivotModel(FakeManagerPivotModel::class);
             $model = new FakeManageableModel();
