@@ -20,6 +20,7 @@ use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
+use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
@@ -31,7 +32,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Referees\Referee;
-use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -226,7 +226,7 @@ class Main extends BaseTable
 
         try {
             resolve(RestoreAction::class)->handle($referee);
-        } catch (Exception $e) {
+        } catch (CannotBeRestoredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
