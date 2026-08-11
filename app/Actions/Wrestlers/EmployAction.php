@@ -6,7 +6,6 @@ namespace App\Actions\Wrestlers;
 
 use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Exception;
@@ -17,7 +16,6 @@ class EmployAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
         private readonly EmployCurrentManagersAction $employCurrentManagers,
     ) {}
 
@@ -42,10 +40,6 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($wrestler, $employmentDate): void {
-            if ($wrestler->isRetired()) {
-                $this->retirementPeriods->end($wrestler, $employmentDate);
-            }
-
             $this->employmentPeriods->start($wrestler, $employmentDate);
             $this->employCurrentManagers->handle($wrestler, $employmentDate);
         });

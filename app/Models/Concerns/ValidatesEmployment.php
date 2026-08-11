@@ -61,17 +61,13 @@ trait ValidatesEmployment
      */
     public function canBeEmployed(): bool
     {
-        // Cannot employ if already employed
-        if ($this->isEmployed()) {
+        try {
+            $this->ensureCanBeEmployed();
+
+            return true;
+        } catch (CannotBeEmployedException) {
             return false;
         }
-
-        // Cannot employ if currently retired (need to end retirement first)
-        if ($this->isRetired()) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -94,8 +90,13 @@ trait ValidatesEmployment
         if ($this->isEmployed()) {
             throw CannotBeEmployedException::employed($this);
         }
+
         if ($this->hasFutureEmployment()) {
-            throw CannotBeEmployedException::employed($this);
+            throw CannotBeEmployedException::hasFutureEmployment($this);
+        }
+
+        if ($this->isRetired()) {
+            throw CannotBeEmployedException::retired($this);
         }
     }
 

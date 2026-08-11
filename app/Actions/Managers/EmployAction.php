@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Exception;
@@ -16,7 +15,6 @@ class EmployAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
     ) {}
 
     /**
@@ -24,7 +22,6 @@ class EmployAction
      *
      * This handles the complete manager employment workflow:
      * - Validates the manager can be employed (not retired, not already employed)
-     * - Ends retirement if currently retired
      * - Creates the employment record through the shared lifecycle component
      * - Makes the manager available for talent management assignments
      *
@@ -39,10 +36,6 @@ class EmployAction
         $startDate = DateHelper::resolveDate($startDate);
 
         DB::transaction(function () use ($manager, $startDate): void {
-            if ($manager->isRetired()) {
-                $this->retirementPeriods->end($manager, $startDate);
-            }
-
             $this->employmentPeriods->start($manager, $startDate);
         });
     }

@@ -7,6 +7,9 @@ namespace App\Exceptions\Roster;
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
+use App\Models\Wrestlers\Wrestler;
 
 /**
  * Exception thrown when a roster member cannot be employed due to business rule violations.
@@ -55,6 +58,13 @@ final class CannotBeEmployedException extends BaseBusinessException
         $context = self::formatModelContext($entity);
 
         return self::forReason(BusinessRuleReason::Retired, "{$context} is retired and cannot be employed.");
+    }
+
+    public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
+    {
+        $context = self::formatModelContext($entity);
+
+        return new self("{$context} already has future employment scheduled and cannot be employed again.");
     }
 
     /**

@@ -80,6 +80,8 @@ Tag-team unretirement follows the same boundary through `UnretireCurrentMembersA
 
 Wrestler unretirement does not require a cascade collaborator merely to choose whether employment follows. The wrestler action owns that explicit option and calls its typed employment action directly when requested.
 
+Employment does not implicitly end retirement. Wrestlers, managers, and referees must first pass through their explicit unretirement action before they can be employed. Individual employment predicates delegate to the same typed guards used by their actions, including current employment, future employment, and retirement checks.
+
 Employment cascades use explicit capability and domain collaborators. Both tag teams and wrestlers delegate current-manager employment to `Managers\EmployCurrentManagersAction`, which accepts the existing `Manageable` contract. Tag teams separately delegate current-wrestler employment to `TagTeams\EmployCurrentWrestlersAction`. Each collaborator invokes complete typed employment actions only for currently unemployed related entities.
 
 Membership persistence remains separate from employment orchestration. `ManagerAssignmentService` establishes and synchronizes manager relationships for any model implementing `Manageable`, dates assignments that have ended, and preserves their historical pivot rows. `TagTeamMembershipService` owns the corresponding tag-team wrestler relationships and delegates manager persistence to that shared service. Eligibility is validated before the Action receives its data, while wrestler and tag-team Actions coordinate typed employment cascades when an employment date is supplied.

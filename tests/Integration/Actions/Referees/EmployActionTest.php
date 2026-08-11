@@ -66,31 +66,26 @@ test('it prevents re-employing injured referee', function () {
         ->toThrow(CannotBeEmployedException::class);
 });
 
-test('it employs retired referee and ends retirement', function () {
+test('it rejects employing a retired referee without changing retirement', function () {
     $referee = Referee::factory()->retired()->create();
     $retirement = $referee->currentRetirement()->firstOrFail();
 
     expect($referee->isRetired())->toBeTrue();
     expect($referee->isEmployed())->toBeFalse();
 
-    resolve(EmployAction::class)->handle($referee);
+    expect(fn () => resolve(EmployAction::class)->handle($referee))
+        ->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
     $retirement->refresh();
 
-    expect($referee->isEmployed())->toBeTrue();
-    expect($referee->isRetired())->toBeFalse();
+    expect($referee->isEmployed())->toBeFalse()
+        ->and($referee->isRetired())->toBeTrue()
+        ->and($retirement->ended_at)->toBeNull();
 
-    // Retirement should be ended
-    $this->assertDatabaseHas('referees_retirements', [
-        'id' => $retirement->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
-
-    // Employment should be created
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseMissing('referees_employments', [
         'referee_id' => $referee->id,
-        'started_at' => now()->toDateTimeString(),
+        'ended_at' => null,
     ]);
 });
 

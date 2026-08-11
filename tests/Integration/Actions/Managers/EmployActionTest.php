@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
+use App\Exceptions\Roster\CannotBeEmployedException;
 use App\Models\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -44,28 +45,25 @@ test('it employs manager with specific employment date', function () {
     ]);
 });
 
-test('it employs retired manager and ends retirement', function () {
+test('it rejects employing a retired manager without changing retirement', function () {
     $manager = Manager::factory()->retired()->create();
+    $retirement = $manager->currentRetirement()->firstOrFail();
 
     expect($manager->isRetired())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 
-    resolve(EmployAction::class)->handle($manager);
+    expect(fn () => resolve(EmployAction::class)->handle($manager))
+        ->toThrow(CannotBeEmployedException::class);
 
     $manager->refresh();
-    expect($manager->isEmployed())->toBeTrue();
-    expect($manager->isRetired())->toBeFalse();
+    $retirement->refresh();
 
-    // Retirement should be ended
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
-        'ended_at' => now()->toDateTimeString(),
-    ]);
+    expect($manager->isEmployed())->toBeFalse()
+        ->and($manager->isRetired())->toBeTrue()
+        ->and($retirement->ended_at)->toBeNull();
 
-    // Employment should be created
-    $this->assertDatabaseHas('managers_employments', [
+    $this->assertDatabaseMissing('managers_employments', [
         'manager_id' => $manager->id,
-        'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 });
