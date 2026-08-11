@@ -9,6 +9,7 @@ use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class InjureAction
 {
@@ -29,10 +30,17 @@ class InjureAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $injuryDate = null): void
     {
-        $wrestler->ensureCanBeInjured();
-
         $injuryDate = DateHelper::resolveDate($injuryDate);
 
-        $this->injuryPeriods->start($wrestler, $injuryDate);
+        DB::transaction(function () use ($wrestler, $injuryDate): void {
+            $lockedWrestler = Wrestler::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($wrestler->getKey());
+
+            $lockedWrestler->ensureCanBeInjured();
+
+            $this->injuryPeriods->start($lockedWrestler, $injuryDate);
+        });
     }
 }
