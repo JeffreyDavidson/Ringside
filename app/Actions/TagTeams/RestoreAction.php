@@ -12,7 +12,7 @@ class RestoreAction
     /**
      * Restore a soft-deleted tag team.
      *
-     * This handles the complete tag team restoration workflow with cascade strategies:
+     * This handles the complete tag team restoration workflow:
      * - Validates the tag team can be restored (soft-deleted, no name conflicts)
      * - Restores the soft-deleted tag team record
      * - Makes the tag team available for future employment and competition

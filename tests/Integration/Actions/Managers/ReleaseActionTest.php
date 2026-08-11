@@ -117,7 +117,6 @@ test('it ends current management relationships', function () {
 
     $manager->refresh();
 
-    // Management relationships should be ended by cascade strategy
     expect($manager->currentWrestlers)->toHaveCount(0);
     expect($manager->currentTagTeams)->toHaveCount(0);
 
@@ -153,7 +152,6 @@ test('it persists release and ends current relationships', function () {
     expect($manager->isReleased())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 
-    // Verify cascade strategy ended relationships
     expect($manager->currentWrestlers)->toHaveCount(0);
 });
 
