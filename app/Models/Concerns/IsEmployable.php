@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
-use RuntimeException;
+use LogicException;
 
 /**
  * Adds employment-related behavior to a model.
@@ -418,7 +418,7 @@ trait IsEmployable
      * conventions. For example, if the parent model is 'Wrestler', it will look for
      * a 'WrestlerEmployment' model class.
      *
-     * @throws RuntimeException If the resolved model class doesn't exist
+     * @throws LogicException If the resolved model class doesn't exist
      * @return class-string<TEmployment> The fully qualified class name of the employment model
      *
      * @example

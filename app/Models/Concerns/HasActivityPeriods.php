@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
-use RuntimeException;
+use LogicException;
 
 /**
  * @template TActivityPeriod of Model The activity period model class (e.g., TitleActivityPeriod)
@@ -204,7 +204,7 @@ trait HasActivityPeriods
     }
 
     /**
-     * @throws RuntimeException
+     * @throws LogicException
      * @return class-string<TActivityPeriod>
      */
     protected function resolveActivityPeriodModelClass(): string
