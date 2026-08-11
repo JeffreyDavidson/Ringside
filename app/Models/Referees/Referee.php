@@ -13,9 +13,9 @@ use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
+use App\Models\Concerns\ValidatesIndividualInjury;
 use App\Models\Concerns\ValidatesIndividualRetirement;
 use App\Models\Concerns\ValidatesIndividualSuspension;
-use App\Models\Concerns\ValidatesInjury;
 use App\Models\Concerns\ValidatesRestoration;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\Employable;
@@ -121,9 +121,9 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     use ProvidesDisplayName;
     use SoftDeletes;
     use ValidatesEmployment;
+    use ValidatesIndividualInjury;
     use ValidatesIndividualRetirement;
     use ValidatesIndividualSuspension;
-    use ValidatesInjury;
     use ValidatesRestoration;
 
     /**
