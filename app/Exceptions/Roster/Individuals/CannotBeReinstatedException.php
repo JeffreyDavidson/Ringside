@@ -33,13 +33,6 @@ final class CannotBeReinstatedException extends BaseBusinessException
         return new static("{$context} has not been officially employed and cannot be reinstated.");
     }
 
-    public static function bookable(Wrestler|Manager|Referee $entity): static
-    {
-        $context = self::formatModelContext($entity);
-
-        return new static("{$context} is already bookable and does not need reinstatement.");
-    }
-
     public static function injured(Wrestler|Manager|Referee $entity, ?string $injuryDetails = null): static
     {
         $context = self::formatModelContext($entity);
