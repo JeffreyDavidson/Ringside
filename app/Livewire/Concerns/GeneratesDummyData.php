@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns;
 
 use DateTime;
-use Throwable;
+use LogicException;
 
 /**
  * Trait for generating dummy data in Livewire forms and modals.
@@ -83,88 +83,19 @@ trait GeneratesDummyData
      */
     private function populateField(string $field, mixed $value): void
     {
-        // Strategy 1: Try modelForm property (for some form patterns)
-        if ($this->tryPopulateModelForm($field, $value)) {
+        if (isset($this->form) && property_exists($this->form, $field)) {
+            $this->form->{$field} = $value;
+
             return;
         }
 
-        // Strategy 2: Try direct property assignment
-        if ($this->tryPopulateDirectProperty($field, $value)) {
+        if (property_exists($this, $field)) {
+            $this->{$field} = $value;
+
             return;
         }
 
-        // Strategy 3: Try form property (for BaseFormModal pattern)
-        if ($this->tryPopulateFormProperty($field, $value)) {
-            return;
-        }
-
-        // If none work, silently skip (graceful degradation)
-    }
-
-    /**
-     * Try to populate via modelForm property.
-     *
-     * @param  string  $field  Field name
-     * @param  mixed  $value  Value to set
-     * @return bool True if successful
-     */
-    private function tryPopulateModelForm(string $field, mixed $value): bool
-    {
-        try {
-            if (isset($this->modelForm)) {
-                $this->modelForm->{$field} = $value;
-
-                return true;
-            }
-        } catch (Throwable) {
-            // Ignore and try next strategy
-        }
-
-        return false;
-    }
-
-    /**
-     * Try to populate via direct property.
-     *
-     * @param  string  $field  Field name
-     * @param  mixed  $value  Value to set
-     * @return bool True if successful
-     */
-    private function tryPopulateDirectProperty(string $field, mixed $value): bool
-    {
-        try {
-            if (property_exists($this, $field)) {
-                $this->{$field} = $value;
-
-                return true;
-            }
-        } catch (Throwable) {
-            // Ignore and try next strategy
-        }
-
-        return false;
-    }
-
-    /**
-     * Try to populate via form property (BaseFormModal pattern).
-     *
-     * @param  string  $field  Field name
-     * @param  mixed  $value  Value to set
-     * @return bool True if successful
-     */
-    private function tryPopulateFormProperty(string $field, mixed $value): bool
-    {
-        try {
-            if (isset($this->form)) {
-                $this->form->{$field} = $value;
-
-                return true;
-            }
-        } catch (Throwable) {
-            // Ignore - no more strategies
-        }
-
-        return false;
+        throw new LogicException("Dummy data field [{$field}] is not defined on the form or component.");
     }
 
     /**
@@ -408,7 +339,7 @@ trait GeneratesDummyData
      * ```php
      * // Common usage in FormModal getDummyDataFields()
      * 'start_date' => fn () => $this->generateOptionalStartDate(),
-     * 'employment_date' => fn () => $this->generateOptionalStartDate('Y-m-d', 0.7),
+     * 'employment_date' => fn () => $this->generateOptionalEmploymentDate(0.7),
      * ```
      */
     protected function generateOptionalStartDate(
@@ -423,5 +354,13 @@ trait GeneratesDummyData
         }
 
         return null;
+    }
+
+    /**
+     * Generate an optional date for an employment field.
+     */
+    protected function generateOptionalEmploymentDate(float $probability = 0.8): ?string
+    {
+        return $this->generateOptionalStartDate('Y-m-d', $probability);
     }
 }

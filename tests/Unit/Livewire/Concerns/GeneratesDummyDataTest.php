@@ -72,30 +72,6 @@ describe('GeneratesDummyData Unit Tests', function () {
             expect(reflectionTypeName($parameters[1]))->toBe('mixed');
         });
 
-        test('has strategy methods', function () {
-            $reflection = new ReflectionClass(GeneratesDummyData::class);
-
-            $strategyMethods = [
-                'tryPopulateModelForm',
-                'tryPopulateDirectProperty',
-                'tryPopulateFormProperty',
-            ];
-
-            foreach ($strategyMethods as $methodName) {
-                expect($reflection->hasMethod($methodName))->toBeTrue();
-
-                $method = $reflection->getMethod($methodName);
-                expect($method->isPrivate())->toBeTrue();
-                expect(reflectionReturnTypeName($method))->toBe('bool');
-                expect($method->getNumberOfParameters())->toBe(2);
-
-                $parameters = $method->getParameters();
-                expect($parameters[0]->getName())->toBe('field');
-                expect(reflectionTypeName($parameters[0]))->toBe('string');
-                expect($parameters[1]->getName())->toBe('value');
-                expect(reflectionTypeName($parameters[1]))->toBe('mixed');
-            }
-        });
     });
 
     describe('protected generator method signatures', function () {
@@ -179,11 +155,11 @@ describe('GeneratesDummyData Unit Tests', function () {
     });
 
     describe('dependency imports', function () {
-        test('imports Throwable', function () {
+        test('imports LogicException', function () {
             $reflection = new ReflectionClass(GeneratesDummyData::class);
             $source = reflectionSource($reflection);
 
-            expect($source)->toContain('use Throwable;');
+            expect($source)->toContain('use LogicException;');
         });
     });
 
@@ -246,7 +222,7 @@ describe('GeneratesDummyData Unit Tests', function () {
 
             expect($publicMethods)->toHaveCount(1); // fillDummyFields
             expect(count($protectedMethods))->toBeGreaterThan(5); // generators + abstract
-            expect(count($privateMethods))->toBeGreaterThan(3); // population strategies
+            expect($privateMethods)->toHaveCount(1); // populateField
         });
 
         test('has no properties', function () {
@@ -260,24 +236,76 @@ describe('GeneratesDummyData Unit Tests', function () {
         });
     });
 
-    describe('population strategy pattern', function () {
-        test('implements multiple population strategies', function () {
-            $reflection = new ReflectionClass(GeneratesDummyData::class);
-            $source = reflectionSource($reflection);
+    describe('field population', function () {
+        test('populates fields directly on a form', function () {
+            $form = new class
+            {
+                use GeneratesDummyData;
 
-            // Check for strategy pattern implementation
-            expect($source)->toContain('tryPopulateModelForm');
-            expect($source)->toContain('tryPopulateDirectProperty');
-            expect($source)->toContain('tryPopulateFormProperty');
+                public string $name = '';
+
+                protected function getDummyDataFields(): array
+                {
+                    return ['name' => 'Test Name'];
+                }
+            };
+
+            $form->fillDummyFields();
+
+            expect($form->name)->toBe('Test Name');
         });
 
-        test('uses graceful degradation', function () {
-            $reflection = new ReflectionClass(GeneratesDummyData::class);
-            $source = reflectionSource($reflection);
+        test('populates fields on a nested form object', function () {
+            $nestedForm = new class
+            {
+                public string $name = '';
+            };
+            $component = new class($nestedForm)
+            {
+                use GeneratesDummyData;
 
-            // Check for graceful failure handling
-            expect($source)->toContain('// If none work, silently skip');
-            expect($source)->toContain('catch (Throwable)');
+                public function __construct(public object $form) {}
+
+                protected function getDummyDataFields(): array
+                {
+                    return ['name' => 'Test Name'];
+                }
+            };
+
+            $component->fillDummyFields();
+
+            expect($nestedForm->name)->toBe('Test Name');
+        });
+
+        test('propagates invalid field configuration', function () {
+            $form = new class
+            {
+                use GeneratesDummyData;
+
+                protected function getDummyDataFields(): array
+                {
+                    return ['missing' => 'Test Name'];
+                }
+            };
+
+            expect(fn () => $form->fillDummyFields())
+                ->toThrow(LogicException::class, 'Dummy data field [missing] is not defined');
+        });
+
+        test('propagates invalid generated value types', function () {
+            $form = new class
+            {
+                use GeneratesDummyData;
+
+                public int $count = 0;
+
+                protected function getDummyDataFields(): array
+                {
+                    return ['count' => 'invalid'];
+                }
+            };
+
+            expect(fn () => $form->fillDummyFields())->toThrow(TypeError::class);
         });
     });
 

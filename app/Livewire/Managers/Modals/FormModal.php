@@ -48,7 +48,7 @@ class FormModal extends BaseFormModal
         return [
             'first_name' => fn () => fake()->firstName(),
             'last_name' => fn () => fake()->lastName(),
-            'start_date' => fn () => $this->generateOptionalStartDate(),
+            'employment_date' => fn () => $this->generateOptionalEmploymentDate(),
         ];
     }
 
