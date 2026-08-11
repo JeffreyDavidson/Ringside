@@ -21,6 +21,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Http/Requests/** | .ai/rules/requests.md |
 | routes/**, routes/web.php | .ai/rules/routes.md |
 | app/Rules/** | .ai/rules/rules.md |
+| app/Exceptions/Scheduling/** | .ai/rules/scheduling.md |
 | app/Services/** | .ai/rules/services.md |
 | tests/** | .ai/rules/tests.md |
 | tests/Unit/** | .ai/rules/unit.md |
