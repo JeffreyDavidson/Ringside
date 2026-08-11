@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
  * The action follows these business rules:
  * - Always updates the wrestler's basic information first
  * - Uses EmployAction for consistent employment handling when employment_date is provided
- * - Automatically employs managers through EmployAction cascade strategies
+ * - Automatically employs managers through EmployAction's typed collaborator
  * - Uses DateHelper for consistent date handling
  * - Maintains employment history through proper action coordination
  */
@@ -38,7 +38,7 @@ class UpdateAction
      * This handles the complete update workflow:
      * - Updates wrestler's basic information using DateHelper for consistent date handling
      * - Uses EmployAction for consistent employment creation when employment_date provided
-     * - Automatically employs managers through EmployAction cascade strategies
+     * - Automatically employs managers through EmployAction's typed collaborator
      * - Maintains transaction boundaries for data consistency
      */
     public function handle(Wrestler $wrestler, WrestlerData $wrestlerData): Wrestler

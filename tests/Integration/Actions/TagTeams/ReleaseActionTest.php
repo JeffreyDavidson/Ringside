@@ -213,8 +213,6 @@ test('it handles release with cascade to partners and managers', function () {
         'tag_team_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
-
-    // Note: Cascade effects on partners/managers would be tested in cascade strategy tests
 });
 
 test('it ends all current relationships', function () {

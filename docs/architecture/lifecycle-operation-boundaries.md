@@ -183,7 +183,7 @@ The following generalized classes were confirmed to have no production, configur
 - `UnifiedSuspendAction`;
 - the generalized `MemberCollectionManager` and `StableMembershipOrchestrator` cluster.
 
-The remaining cascade strategy classes contain useful related-entity behavior. Their callable-based APIs are an implementation concern to improve incrementally, not a reason to duplicate their behavior across actions.
+Related-entity cascades use typed Actions and collaborators. The remaining classes under `App\Models\Validation\Strategies` are lifecycle eligibility validators rather than cascade infrastructure and must be reviewed within their individual lifecycle dimensions.
 
 ## Migration Sequence
 
@@ -194,7 +194,7 @@ The migration must remain behavior-preserving and proceed in small pull requests
 3. Remove unused generalized abstractions independently of the active transition path. (Completed.)
 4. Extract one shared lifecycle dimension from `StatusTransitionPipeline` at a time. (Completed.)
 5. Keep concrete entity actions as the public entry points while moving only shared mechanics behind them.
-6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it. (Current relationship cleanup plus tag-team retirement and unretirement completed.)
+6. Replace callable cascades with typed collaborators where the existing reuse and complexity justify it. (Completed.)
 7. Review the eligibility rules for each lifecycle dimension separately.
 8. Introduce a state machine only for a dimension whose reviewed transition graph benefits from one.
 

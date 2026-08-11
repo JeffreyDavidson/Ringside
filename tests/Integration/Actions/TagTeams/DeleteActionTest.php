@@ -102,9 +102,6 @@ test('it handles cascade deletion of relationships', function () {
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeTrue();
-
-    // Note: Cascade behavior would be tested in cascade strategy tests
-    // This tests that the action completes successfully with relationships
 });
 
 test('it preserves historical data during deletion', function () {
