@@ -13,3 +13,6 @@ Define application model-backed foreign keys with foreignIdFor(Model::class), su
 
 ## Forward-only migrations
 Write forward-only migrations with an up() method and no down() method. Correct deployed schema changes with a new migration.
+
+## Enforce exclusive open periods in the database
+For lifecycle history where an owner may have only one open period, enforce that invariant with a database unique index in addition to Action-level locking. Use a filtered unique index on the owner key where ended_at is null; for MySQL or MariaDB, use a generated nullable owner key with a unique index.
