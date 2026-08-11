@@ -8,11 +8,16 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddWrestlersToMatchAction
 {
+    public function __construct(
+        protected MatchAssignmentConflictService $conflictService,
+    ) {}
+
     /**
      * Add wrestlers to an event match.
      *
@@ -58,6 +63,8 @@ class AddWrestlersToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleWrestlers, $sideNumber): void {
+            $this->conflictService->ensureWrestlersCanBeAssigned($eventMatch, $eligibleWrestlers);
+
             // Add each eligible wrestler to the specified side
             $eligibleWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $sideNumber) {
                 $eventMatch->competitors()->create([

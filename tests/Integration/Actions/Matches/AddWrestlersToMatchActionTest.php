@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
 
@@ -156,4 +158,42 @@ test('it handles transaction rollback on failure', function () {
 
     // No competitors should be added due to transaction rollback
     expect($match->refresh()->competitors()->count())->toBe(0);
+});
+
+test('it rejects a wrestler booked on another event at the same time', function () {
+    $eventDate = now()->addWeek();
+    $existingEvent = Event::factory()->create(['date' => $eventDate]);
+    $targetEvent = Event::factory()->create(['date' => $eventDate]);
+    $existingMatch = EventMatch::factory()->forEvent($existingEvent)->create();
+    $targetMatch = EventMatch::factory()->forEvent($targetEvent)->create();
+    $wrestler = Wrestler::factory()->bookable()->create();
+
+    $existingMatch->competitors()->create([
+        'competitor_id' => $wrestler->id,
+        'competitor_type' => Wrestler::class,
+        'side_number' => 1,
+    ]);
+
+    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($targetMatch, collect([$wrestler]), 1))
+        ->toThrow(SchedulingConflictException::class, "Wrestler [{$wrestler->name}] is already booked at this event time.");
+
+    expect($targetMatch->competitors()->count())->toBe(0);
+});
+
+test('it allows a wrestler booked at a different event time', function () {
+    $existingEvent = Event::factory()->create(['date' => now()->addWeek()]);
+    $targetEvent = Event::factory()->create(['date' => now()->addWeek()->addHour()]);
+    $existingMatch = EventMatch::factory()->forEvent($existingEvent)->create();
+    $targetMatch = EventMatch::factory()->forEvent($targetEvent)->create();
+    $wrestler = Wrestler::factory()->bookable()->create();
+
+    $existingMatch->competitors()->create([
+        'competitor_id' => $wrestler->id,
+        'competitor_type' => Wrestler::class,
+        'side_number' => 1,
+    ]);
+
+    resolve(AddWrestlersToMatchAction::class)->handle($targetMatch, collect([$wrestler]), 1);
+
+    expect($targetMatch->competitors()->count())->toBe(1);
 });

@@ -31,6 +31,17 @@ The match system handles complex wrestling match scenarios with flexible competi
 
 Match configuration and participant availability are separate failure boundaries. `InvalidMatchConfigurationException` describes an incomplete or structurally invalid match, such as missing referees, missing competitors, insufficient populated sides, or an invalid side number. `EntityNotAvailableException` describes a wrestler, tag team, referee, or title whose current state prevents assignment. `SchedulingConflictException` is reserved for an actual collision between bookings, times, or resources and must not substitute for either boundary.
 
+## Event Card Scheduling
+
+Match assignments observe these collision rules:
+
+- A wrestler, tag team, or title may be assigned only once on an event card.
+- A wrestler, tag team, or title may not be assigned to different events scheduled for the same exact date and time.
+- A referee may officiate multiple matches on one event card, but may not officiate matches on different events scheduled for the same exact date and time.
+- An unscheduled event still prevents duplicate assignments within its own card. Its missing date does not conflict with other unscheduled events.
+
+Assignment actions lock the affected event rows and enforce these rules inside their database transactions. This serializes assignment commands that use the application boundary. The schema cannot enforce overlapping match windows because individual matches do not currently have their own start and end times.
+
 ## Winner/Loser System
 
 ### Multiple Winners and Losers

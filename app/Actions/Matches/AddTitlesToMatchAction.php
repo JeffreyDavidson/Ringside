@@ -7,11 +7,16 @@ namespace App\Actions\Matches;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
+use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddTitlesToMatchAction
 {
+    public function __construct(
+        protected MatchAssignmentConflictService $conflictService,
+    ) {}
+
     /**
      * Add titles to an event match.
      *
@@ -53,6 +58,8 @@ class AddTitlesToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleTitles): void {
+            $this->conflictService->ensureTitlesCanBeAssigned($eventMatch, $eligibleTitles);
+
             // Add each eligible title as championship stakes
             $eligibleTitles->each(function (Title $title) use ($eventMatch) {
                 $eventMatch->titles()->attach($title->id);
