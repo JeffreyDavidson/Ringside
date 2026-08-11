@@ -9,7 +9,13 @@ use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
+use App\Exceptions\Roster\TagTeams\CannotBeEmployedException as TagTeamCannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotBeReinstatedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReleasedException as TagTeamCannotBeReleasedException;
+use App\Exceptions\Roster\TagTeams\CannotBeRestoredException as TagTeamCannotBeRestoredException;
+use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRetiredException;
+use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
+use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\ErrorMessageMappingService;
@@ -69,6 +75,29 @@ test('it maps tag team reinstatement failures from a stable reason', function ()
     expect($exception->reason())->toBe(BusinessRuleReason::NotSuspended)
         ->and(ErrorMessageMappingService::mapTagTeamException($exception))
         ->toBe('tag-teams.errors.not_suspended');
+});
+
+test('it maps tag team lifecycle failures from stable reasons', function () {
+    $tagTeam = new TagTeam(['name' => 'Test Team']);
+
+    expect(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeEmployedException::alreadyEmployed($tagTeam)))
+        ->toBe('tag-teams.errors.already_employed')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeEmployedException::retired($tagTeam)))
+        ->toBe('tag-teams.errors.cannot_employ_retired')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeReleasedException::notEmployed($tagTeam)))
+        ->toBe('tag-teams.errors.not_employed')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeRetiredException::notEmployed($tagTeam)))
+        ->toBe('tag-teams.errors.cannot_retire_unemployed')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeRetiredException::alreadyRetired($tagTeam)))
+        ->toBe('tag-teams.errors.already_retired')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeUnretiredException::notRetired($tagTeam)))
+        ->toBe('tag-teams.errors.not_retired')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeSuspendedException::notEmployed($tagTeam)))
+        ->toBe('tag-teams.errors.not_employed_suspend')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeSuspendedException::alreadySuspended($tagTeam)))
+        ->toBe('tag-teams.errors.already_suspended')
+        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeRestoredException::notDeleted($tagTeam)))
+        ->toBe('tag-teams.errors.not_deleted');
 });
 
 test('it uses a general message for unknown exceptions', function () {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
 
@@ -13,7 +14,7 @@ final class CannotBeUnretiredException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} is not retired and cannot be unretired.");
+        return self::forReason(BusinessRuleReason::NotRetired, "{$context} is not retired and cannot be unretired.");
     }
 
     public static function nameConflict(TagTeam $tagTeam, string $conflictingTeamName): static

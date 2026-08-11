@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
 
@@ -13,14 +14,14 @@ final class CannotBeEmployedException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} is already employed.");
+        return self::forReason(BusinessRuleReason::AlreadyEmployed, "{$context} is already employed.");
     }
 
     public static function retired(TagTeam $tagTeam): static
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} is retired and cannot be employed. Consider unretirement first.");
+        return self::forReason(BusinessRuleReason::Retired, "{$context} is retired and cannot be employed. Consider unretirement first.");
     }
 
     public static function partnersUnavailable(TagTeam $tagTeam, string $unavailablePartners): static

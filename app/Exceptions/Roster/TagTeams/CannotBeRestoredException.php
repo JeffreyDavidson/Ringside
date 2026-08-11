@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Roster\TagTeams;
 
+use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
 
@@ -13,7 +14,7 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new self("{$context} cannot be restored because it is not deleted. Only soft-deleted tag teams can be restored to active status.");
+        return self::forReason(BusinessRuleReason::NotDeleted, "{$context} cannot be restored because it is not deleted. Only soft-deleted tag teams can be restored to active status.");
     }
 
     public static function nameConflict(TagTeam $tagTeam, string $conflictingName): static
