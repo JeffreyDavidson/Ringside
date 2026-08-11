@@ -15,6 +15,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | tests/Feature/** | .ai/rules/feature.md |
 | tests/Integration/** | .ai/rules/integration.md |
 | app/Livewire/** | .ai/rules/livewire.md |
+| app/{Actions/Matches,Exceptions/Matches,Exceptions/Scheduling}/** | .ai/rules/matches-exceptions-scheduling.md |
 | database/migrations/** | .ai/rules/migrations.md |
 | app/Models/** | .ai/rules/models.md |
 | app/{Livewire,Http/Requests,Actions,Services}/** | .ai/rules/requests-actions-services.md |
