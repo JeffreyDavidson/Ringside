@@ -14,10 +14,10 @@ use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
+use App\Models\Concerns\ValidatesIndividualSuspension;
 use App\Models\Concerns\ValidatesInjury;
 use App\Models\Concerns\ValidatesRestoration;
 use App\Models\Concerns\ValidatesRetirement;
-use App\Models\Concerns\ValidatesSuspension;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
@@ -130,10 +130,10 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     use ProvidesDisplayName;
     use SoftDeletes;
     use ValidatesEmployment;
+    use ValidatesIndividualSuspension;
     use ValidatesInjury;
     use ValidatesRestoration;
     use ValidatesRetirement;
-    use ValidatesSuspension;
 
     /**
      * Get the computed status attribute.
