@@ -30,6 +30,7 @@ class EstablishAction
      * @param  Carbon|null  $activationDate  The establishment date (defaults to now)
      * @param  Carbon|null  $endDate  The date the stable stopped being active
      * @throws CannotBeEstablishedException When stable cannot be established due to business rules
+     * @throws InvalidDateRangeException When the end date precedes the activation date
      */
     public function handle(
         Stable $stable,

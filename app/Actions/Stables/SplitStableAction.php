@@ -32,6 +32,7 @@ class SplitStableAction
      * @param  string  $newStableName  Name for the new stable
      * @param  StableMembershipData  $membersForNewStable  Members to move to new stable
      * @param  Carbon  $date  The date when the split operation occurs
+     * @throws CannotBeSplitException When the stable or selected members cannot be split
      * @return Stable The newly created stable
      */
     public function handle(
