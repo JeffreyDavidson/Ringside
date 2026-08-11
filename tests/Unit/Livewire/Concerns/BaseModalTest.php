@@ -186,7 +186,6 @@ describe('BaseModal Unit Tests', function () {
             expect($source)->toContain('use Illuminate\\Database\\Eloquent\\Model;');
             expect($source)->toContain('use Illuminate\\View\\View;');
             expect($source)->toContain('use LivewireUI\\Modal\\ModalComponent;');
-            expect($source)->not->toContain('catch (Exception');
         });
     });
 

@@ -259,12 +259,12 @@ abstract class BaseForm extends Form
      *
      * The method provides several layers of safety:
      * 1. Checks if the model exists (handles creation mode gracefully)
-     * 2. Verifies the requested field exists on the model
+     * 2. Accesses the requested field directly so field access failures propagate
      * 3. Handles null field values with appropriate fallbacks
      * 4. Converts values to strings for display purposes
      *
      * @param  string  $fieldName  The name of the model field to extract
-     * @return string The field value as a string, or 'Unknown' if unavailable
+     * @return string The field value as a string, or 'Unknown' when the model or value is null
      *
      * @example
      * ```php
