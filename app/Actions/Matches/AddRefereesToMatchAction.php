@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class AddRefereesToMatchAction
 {
@@ -49,7 +49,7 @@ class AddRefereesToMatchAction
 
         // Validate we have referees to add after filtering
         if ($eligibleReferees->isEmpty()) {
-            throw new InvalidArgumentException('No eligible referees provided for match assignment');
+            throw EntityNotAvailableException::forMatchAssignment('referees');
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleReferees): void {

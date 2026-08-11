@@ -27,6 +27,10 @@ The match system handles complex wrestling match scenarios with flexible competi
 - **Gauntlet**: Can be wrestlers, tag teams, or mixed
 - **Rationale**: These match types support flexible competitor configurations
 
+## Match Assignment Failures
+
+Match configuration and participant availability are separate failure boundaries. `InvalidMatchConfigurationException` describes an incomplete or structurally invalid match, such as missing referees, missing competitors, insufficient populated sides, or an invalid side number. `EntityNotAvailableException` describes a wrestler, tag team, referee, or title whose current state prevents assignment. `SchedulingConflictException` is reserved for an actual collision between bookings, times, or resources and must not substitute for either boundary.
+
 ## Winner/Loser System
 
 ### Multiple Winners and Losers

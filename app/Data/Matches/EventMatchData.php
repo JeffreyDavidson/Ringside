@@ -19,7 +19,7 @@ readonly class EventMatchData
      *
      * @param  EloquentCollection<int, Referee>  $referees
      * @param  EloquentCollection<int, Title>  $titles
-     * @param  Collection<"wrestlers"|"tag_teams", array<int, Wrestler|TagTeam>>  $competitors
+     * @param  Collection<string, covariant array<int, Wrestler|TagTeam>>  $competitors
      */
     public function __construct(
         public MatchType $matchType,
