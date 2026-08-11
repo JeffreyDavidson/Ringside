@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Matches\AddCompetitorsToMatchAction;
 use App\Actions\Matches\AddTagTeamsToMatchAction;
 use App\Actions\Matches\AddWrestlersToMatchAction;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -60,4 +61,17 @@ test('it adds tag team competitors to a match', function () {
 
     $addTagTeamsAction->verify();
     $addWrestlersAction->unused();
+});
+
+test('it rejects competitor assignments with fewer than two populated sides', function () {
+    $eventMatch = EventMatch::factory()->create();
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $competitors = collect([
+        1 => [
+            'wrestlers' => [$wrestler],
+        ],
+    ]);
+
+    expect(fn () => resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors))
+        ->toThrow(InvalidMatchConfigurationException::class, 'A match must have competitors assigned to at least 2 sides.');
 });

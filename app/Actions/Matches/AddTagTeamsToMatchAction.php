@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class AddTagTeamsToMatchAction
 {
@@ -50,12 +51,12 @@ class AddTagTeamsToMatchAction
 
         // Validate we have tag teams to add after filtering
         if ($eligibleTagTeams->isEmpty()) {
-            throw new InvalidArgumentException('No eligible tag teams provided for match assignment');
+            throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
 
         // Validate side number is reasonable for match structure
         if ($sideNumber < 1) {
-            throw new InvalidArgumentException('Side number must be positive');
+            throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleTagTeams, $sideNumber): void {

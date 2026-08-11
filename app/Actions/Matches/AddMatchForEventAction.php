@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Data\Matches\EventMatchData;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class AddMatchForEventAction
 {
@@ -58,11 +58,6 @@ class AddMatchForEventAction
      */
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch
     {
-        // Validate event can accept new matches
-        if (! $this->isEventEligibleForMatches($event)) {
-            throw new InvalidArgumentException('Event cannot accept new matches at this time');
-        }
-
         // Validate match data completeness
         $this->validateMatchData($eventMatchData);
 
@@ -98,7 +93,7 @@ class AddMatchForEventAction
     /**
      * Transform competitors from type-grouped to side-grouped structure.
      *
-     * @param  Collection<"wrestlers"|"tag_teams", array<int, Wrestler|TagTeam>>  $competitors
+     * @param  Collection<string, covariant array<int, Wrestler|TagTeam>>  $competitors
      * @return Collection<int, array<string, array<int, Wrestler|TagTeam>>>
      */
     private function transformCompetitorsStructure(Collection $competitors): Collection
@@ -119,35 +114,21 @@ class AddMatchForEventAction
     }
 
     /**
-     * Validate that an event can accept new matches.
-     *
-     * @param  Event  $event  The event to validate
-     * @return bool True if the event can accept matches
-     */
-    private function isEventEligibleForMatches(Event $event): bool
-    {
-        // Basic checks - event should be scheduled and not completed
-        // More complex validation would check event status, date constraints, etc.
-        // Could validate $event->status and $event->date for eligibility
-        return true;
-    }
-
-    /**
      * Validate match data for completeness and business rules.
      *
      * @param  EventMatchData  $eventMatchData  The match data to validate
-     * @throws InvalidArgumentException When validation fails
+     * @throws InvalidMatchConfigurationException When validation fails
      */
     private function validateMatchData(EventMatchData $eventMatchData): void
     {
         // Ensure we have competitors for the match
         if ($eventMatchData->competitors->isEmpty()) {
-            throw new InvalidArgumentException('Match must have competitors assigned');
+            throw InvalidMatchConfigurationException::missingCompetitors();
         }
 
         // Ensure we have at least one referee
         if ($eventMatchData->referees->isEmpty()) {
-            throw new InvalidArgumentException('Match must have at least one referee assigned');
+            throw InvalidMatchConfigurationException::missingReferees();
         }
 
         // Additional validation could include:

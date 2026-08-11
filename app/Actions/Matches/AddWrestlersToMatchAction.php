@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class AddWrestlersToMatchAction
 {
@@ -48,12 +49,12 @@ class AddWrestlersToMatchAction
 
         // Validate we have wrestlers to add after filtering
         if ($eligibleWrestlers->isEmpty()) {
-            throw new InvalidArgumentException('No eligible wrestlers provided for match assignment');
+            throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }
 
         // Validate side number is reasonable for match structure
         if ($sideNumber < 1) {
-            throw new InvalidArgumentException('Side number must be positive');
+            throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleWrestlers, $sideNumber): void {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class AddTitlesToMatchAction
 {
@@ -49,7 +49,7 @@ class AddTitlesToMatchAction
 
         // Validate we have titles to add after filtering
         if ($eligibleTitles->isEmpty()) {
-            throw new InvalidArgumentException('No eligible titles provided for championship match');
+            throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleTitles): void {

@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddWrestlersToMatchAction;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
 
@@ -127,7 +129,7 @@ test('it throws exception when no eligible wrestlers provided', function () {
     $sideNumber = 1;
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber))
-        ->toThrow(InvalidArgumentException::class, 'No eligible wrestlers provided for match assignment');
+        ->toThrow(EntityNotAvailableException::class, 'No eligible wrestlers were provided for match assignment.');
 });
 
 test('it throws exception when side number is invalid', function () {
@@ -138,7 +140,7 @@ test('it throws exception when side number is invalid', function () {
     $invalidSideNumber = 0;
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $invalidSideNumber))
-        ->toThrow(InvalidArgumentException::class, 'Side number must be positive');
+        ->toThrow(InvalidMatchConfigurationException::class, 'Match side number [0] must be positive.');
 });
 
 test('it handles transaction rollback on failure', function () {
@@ -150,7 +152,7 @@ test('it handles transaction rollback on failure', function () {
     $invalidSideNumber = -1;
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $invalidSideNumber))
-        ->toThrow(InvalidArgumentException::class);
+        ->toThrow(InvalidMatchConfigurationException::class);
 
     // No competitors should be added due to transaction rollback
     expect($match->refresh()->competitors()->count())->toBe(0);

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddTitlesToMatchAction;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 
@@ -87,7 +88,7 @@ test('it throws exception when no eligible titles provided', function () {
     $titles = collect([$inactiveTitle]);
 
     expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
-        ->toThrow(InvalidArgumentException::class, 'No eligible titles provided for championship match');
+        ->toThrow(EntityNotAvailableException::class, 'No eligible titles were provided for match assignment.');
 });
 
 test('it handles empty collection', function () {
@@ -95,7 +96,7 @@ test('it handles empty collection', function () {
     $titles = Title::query()->whereKey([])->get();
 
     expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
-        ->toThrow(InvalidArgumentException::class, 'No eligible titles provided for championship match');
+        ->toThrow(EntityNotAvailableException::class, 'No eligible titles were provided for match assignment.');
 });
 
 test('it creates championship match correctly', function () {

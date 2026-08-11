@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 
 class AddCompetitorsToMatchAction
 {
@@ -44,7 +44,7 @@ class AddCompetitorsToMatchAction
         // Validate competitor distribution before processing
         $competitorArray = $competitors->toArray();
         if (! $this->validateCompetitorDistribution($competitorArray)) {
-            throw new InvalidArgumentException('Match must have at least 2 sides with competitors');
+            throw InvalidMatchConfigurationException::insufficientSides(2);
         }
 
         DB::transaction(function () use ($eventMatch, $competitors): void {
