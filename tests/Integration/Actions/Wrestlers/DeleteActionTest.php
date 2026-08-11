@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\DeleteAction;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 
@@ -182,7 +183,7 @@ test('it prevents deleting already deleted wrestler', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     expect(fn () => resolve(DeleteAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it maintains relationship history integrity', function () {

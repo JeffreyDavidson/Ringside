@@ -7,7 +7,6 @@ namespace App\Actions\Wrestlers;
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
-use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -40,9 +39,7 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        if ($wrestler->trashed()) {
-            throw new Exception("Wrestler '{$wrestler->name}' is already deleted.");
-        }
+        $wrestler->ensureCanBeDeleted();
 
         $deletionDate = DateHelper::resolveDate($deletionDate);
 

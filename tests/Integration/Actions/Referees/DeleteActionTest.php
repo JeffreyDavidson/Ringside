@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\DeleteAction;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Models\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -28,6 +29,14 @@ test('it soft deletes an unemployed referee', function () {
         'first_name' => $referee->first_name,
         'last_name' => $referee->last_name,
     ]);
+});
+
+test('it rejects deleting an already deleted referee', function () {
+    $referee = Referee::factory()->create();
+    $referee->delete();
+
+    expect(fn () => resolve(DeleteAction::class)->handle($referee))
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it soft deletes referee with specific deletion date', function () {
