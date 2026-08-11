@@ -8,13 +8,14 @@ use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Roster\StableBuilder;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Stables\StableStatus;
+use App\Models\Concerns\FindsAvailableStableFormerMembers;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ValidatesStableActivity;
 use App\Models\Concerns\ValidatesStableDeletion;
-use App\Models\Concerns\ValidatesStableLifecycle;
+use App\Models\Concerns\ValidatesStableRestructuring;
 use App\Models\Concerns\ValidatesStableRetirement;
 use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
@@ -112,6 +113,8 @@ use Tests\Unit\Models\Stables\StableTest;
 #[UseEloquentBuilder(StableBuilder::class)]
 class Stable extends Model implements Debutable, HasActivityPeriodsContract, Retirable
 {
+    use FindsAvailableStableFormerMembers;
+
     /** @use HasActivityPeriods<StableActivityPeriod, static> */
     use HasActivityPeriods;
 
@@ -131,7 +134,7 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
     use SoftDeletes;
     use ValidatesStableActivity;
     use ValidatesStableDeletion;
-    use ValidatesStableLifecycle;
+    use ValidatesStableRestructuring;
     use ValidatesStableRetirement;
 
     /**

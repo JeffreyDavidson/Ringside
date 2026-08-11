@@ -1243,18 +1243,6 @@ parameters:
 			path: app/Models/Referees/Referee.php
 
 		-
-			message: '#^Method App\\Models\\Stables\\Stable\:\:getAvailableFormerMembers\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Stables/Stable.php
-
-		-
-			message: '#^Method App\\Models\\Stables\\Stable\:\:getUnavailableKeyFormerMembers\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Stables/Stable.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Titles\\Title\:\:\$first_name\.$#'
 			identifier: property.notFound
 			count: 1
