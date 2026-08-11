@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
-use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +27,7 @@ class EmployAction
      *
      * @param  Referee  $referee  The referee to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     * @throws Exception When referee cannot be employed due to business rules
+     * @throws CannotBeEmployedException When the referee cannot be employed
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void
     {
