@@ -33,7 +33,7 @@ test('it rejects starting a second open activity period', function () {
 
 test('it ends the open activity period', function () {
     $stable = Stable::factory()->active()->create();
-    $endedAt = now();
+    $endedAt = now()->startOfSecond();
 
     resolve(EndActivityPeriodAction::class)->handle($stable, $endedAt);
 
