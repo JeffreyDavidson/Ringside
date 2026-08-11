@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Matches\AddTitlesToMatchAction;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 
@@ -135,4 +137,18 @@ test('it handles transaction consistency', function () {
 
     // Verify both database records exist
     $this->assertDatabaseCount('events_matches_titles', 2);
+});
+
+test('it rejects a title already assigned on the event card', function () {
+    $event = Event::factory()->scheduled()->create();
+    $existingMatch = EventMatch::factory()->forEvent($event)->create();
+    $targetMatch = EventMatch::factory()->forEvent($event)->create();
+    $title = Title::factory()->active()->create();
+
+    $existingMatch->titles()->attach($title);
+
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($targetMatch, collect([$title])))
+        ->toThrow(SchedulingConflictException::class, "Title [{$title->name}] is already assigned at this event time.");
+
+    expect($targetMatch->titles()->count())->toBe(0);
 });

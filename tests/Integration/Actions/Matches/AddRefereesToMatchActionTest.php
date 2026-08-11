@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Matches\AddRefereesToMatchAction;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Exceptions\Scheduling\SchedulingConflictException;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 
@@ -13,4 +15,33 @@ test('it rejects match assignment when no referee is available', function () {
 
     expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($match, $referees))
         ->toThrow(EntityNotAvailableException::class, 'No eligible referees were provided for match assignment.');
+});
+
+test('it allows a referee to officiate multiple matches on one event card', function () {
+    $event = Event::factory()->scheduled()->create();
+    $existingMatch = EventMatch::factory()->forEvent($event)->create();
+    $targetMatch = EventMatch::factory()->forEvent($event)->create();
+    $referee = Referee::factory()->bookable()->create();
+
+    $existingMatch->referees()->attach($referee);
+
+    resolve(AddRefereesToMatchAction::class)->handle($targetMatch, $referee->newCollection([$referee]));
+
+    expect($targetMatch->referees()->whereKey($referee->id)->exists())->toBeTrue();
+});
+
+test('it rejects a referee assigned to another event at the same time', function () {
+    $eventDate = now()->addWeek();
+    $existingEvent = Event::factory()->create(['date' => $eventDate]);
+    $targetEvent = Event::factory()->create(['date' => $eventDate]);
+    $existingMatch = EventMatch::factory()->forEvent($existingEvent)->create();
+    $targetMatch = EventMatch::factory()->forEvent($targetEvent)->create();
+    $referee = Referee::factory()->bookable()->create();
+
+    $existingMatch->referees()->attach($referee);
+
+    expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($targetMatch, $referee->newCollection([$referee])))
+        ->toThrow(SchedulingConflictException::class, "Referee [{$referee->getDisplayName()}] is already assigned to another event at this time.");
+
+    expect($targetMatch->referees()->count())->toBe(0);
 });

@@ -8,11 +8,16 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
+use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddTagTeamsToMatchAction
 {
+    public function __construct(
+        protected MatchAssignmentConflictService $conflictService,
+    ) {}
+
     /**
      * Add tag teams to an event match.
      *
@@ -60,10 +65,13 @@ class AddTagTeamsToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleTagTeams, $sideNumber): void {
+            $this->conflictService->ensureTagTeamsCanBeAssigned($eventMatch, $eligibleTagTeams);
+
             // Add each eligible tag team to the specified side
             $eligibleTagTeams->each(function (TagTeam $tagTeam) use ($eventMatch, $sideNumber) {
                 $eventMatch->competitors()->create([
-                    'tag_team_id' => $tagTeam->id,
+                    'competitor_id' => $tagTeam->id,
+                    'competitor_type' => TagTeam::class,
                     'side_number' => $sideNumber,
                 ]);
             });

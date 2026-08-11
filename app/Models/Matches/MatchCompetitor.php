@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
@@ -44,6 +45,14 @@ class MatchCompetitor extends MorphPivot
 {
     /** @use HasFactory<MatchCompetitorFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<EventMatch, $this>
+     */
+    public function eventMatch(): BelongsTo
+    {
+        return $this->belongsTo(EventMatch::class, 'match_id');
+    }
 
     /**
      * The table associated with the model.

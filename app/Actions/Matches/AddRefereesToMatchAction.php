@@ -7,11 +7,16 @@ namespace App\Actions\Matches;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
+use App\Services\MatchAssignmentConflictService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AddRefereesToMatchAction
 {
+    public function __construct(
+        protected MatchAssignmentConflictService $conflictService,
+    ) {}
+
     /**
      * Add referees to an event match.
      *
@@ -53,6 +58,8 @@ class AddRefereesToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $eligibleReferees): void {
+            $this->conflictService->ensureRefereesCanBeAssigned($eventMatch, $eligibleReferees);
+
             // Add each eligible referee to officiate the match
             $eligibleReferees->each(function (Referee $referee) use ($eventMatch) {
                 $eventMatch->referees()->attach($referee->id);
