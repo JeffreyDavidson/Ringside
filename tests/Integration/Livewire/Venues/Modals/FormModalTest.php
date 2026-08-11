@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
 use App\Models\Shared\State;
 use App\Models\Users\User;
+use Illuminate\Database\Eloquent\MissingAttributeException;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Livewire\livewire;
 
@@ -70,6 +74,25 @@ describe('Form Modal Initialization', function () {
 });
 
 describe('Form Modal Editing', function () {
+    it('propagates a missing model failure', function () {
+        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
+            ->toThrow(ModelNotFoundException::class);
+    });
+
+    it('propagates a misconfigured model title field', function () {
+        $venue = Venue::factory()->create();
+        $form = new CreateEditForm(livewire(FormModal::class)->instance(), 'form');
+        $form->setModel(Venue::query()->findOrFail($venue->id));
+        Model::preventAccessingMissingAttributes();
+
+        try {
+            expect(fn () => $form->generateModelEditName('missing_title_field'))
+                ->toThrow(MissingAttributeException::class);
+        } finally {
+            Model::preventAccessingMissingAttributes(false);
+        }
+    });
+
     it('can load existing venue for editing', function () {
         $venue = Venue::factory()->create([
             'name' => 'Madison Square Garden',

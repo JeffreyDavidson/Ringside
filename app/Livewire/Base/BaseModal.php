@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use LivewireUI\Modal\ModalComponent;
 
@@ -71,13 +69,9 @@ abstract class BaseModal extends ModalComponent
     public function mount(int|string|null $modelId = null): void
     {
         if ($modelId !== null) {
-            try {
-                $id = is_numeric($modelId) ? (int) $modelId : $modelId;
-                $this->model = $this->modelType::findOrFail($id);
-                $this->modelForm->setModel($this->model);
-            } catch (Exception $e) {
-                Log::error($e->getMessage());
-            }
+            $id = is_numeric($modelId) ? (int) $modelId : $modelId;
+            $this->model = $this->modelType::findOrFail($id);
+            $this->modelForm->setModel($this->model);
         } else {
             // Reset to create mode
             $this->model = null;
