@@ -15,7 +15,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use InvalidArgumentException;
+use LogicException;
 
 /**
  * @template TPivotModel of Pivot
@@ -43,7 +43,7 @@ trait CanJoinStables
                 'foreignKey' => 'tag_team_id',
                 'pivot' => StableTagTeam::class,
             ],
-            default => throw new InvalidArgumentException('Unsupported stable member type: '.static::class),
+            default => throw new LogicException('Unsupported stable member type: '.static::class),
         };
     }
 

@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use JMac\Testing\Double;
-use RuntimeException;
+use LogicException;
 use Tests\Unit\Models\Concerns\Support\FakeInjuryModel;
 
 /** @extends EloquentBuilder<FakeInjuryModel> */
@@ -211,7 +211,7 @@ describe('IsInjurable Trait Unit Tests', function () {
                 use IsInjurable;
             };
 
-            expect(fn () => $model->injuries())->toThrow(RuntimeException::class);
+            expect(fn () => $model->injuries())->toThrow(LogicException::class);
         });
     });
 

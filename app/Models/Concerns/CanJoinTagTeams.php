@@ -11,7 +11,7 @@ use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use RuntimeException;
+use LogicException;
 
 /**
  * Provides functionality for models (e.g., Wrestlers) to join and manage relationships with tag teams.
@@ -211,7 +211,7 @@ trait CanJoinTagTeams
      * a 'TagTeamWrestler' pivot model class.
      *
      *
-     * @throws RuntimeException If the resolved model class doesn't exist
+     * @throws LogicException If the resolved model class doesn't exist
      * @return class-string<TPivotModel> The fully qualified class name of the pivot model
      *
      * @example
@@ -241,7 +241,7 @@ trait CanJoinTagTeams
         $resolved = 'App\\Models\\TagTeams\\'.$relatedModelName;
 
         if (! class_exists($resolved)) {
-            throw new RuntimeException("Related pivot model [{$resolved}] not found for [{$declaring}]. Override the resolution method or ensure the class exists.");
+            throw new LogicException("Related pivot model [{$resolved}] not found for [{$declaring}]. Override the resolution method or ensure the class exists.");
         }
 
         /** @var class-string<TPivotModel> */

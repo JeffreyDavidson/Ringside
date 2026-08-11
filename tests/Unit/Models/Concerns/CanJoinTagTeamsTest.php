@@ -18,6 +18,7 @@ use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Contracts\CanBeATagTeamMember;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use LogicException;
 use Tests\Unit\Models\Concerns\Support\FakeTagTeamMemberModel;
 use Tests\Unit\Models\Concerns\Support\FakeTagTeamPivotModel;
 
@@ -81,6 +82,22 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
     });
 
     describe('tag team pivot model resolution', function () {
+        test('reports missing convention-based pivot models as logic errors', function () {
+            $model = new class extends Model implements CanBeATagTeamMember
+            {
+                /** @use CanJoinTagTeams<FakeTagTeamPivotModel, self> */
+                use CanJoinTagTeams;
+
+                public function resolvePivotModel(): string
+                {
+                    return $this->resolveTagTeamPivotModel();
+                }
+            };
+
+            expect(fn () => $model->resolvePivotModel())
+                ->toThrow(LogicException::class, 'Related pivot model');
+        });
+
         test('can fake tag team pivot model class', function () {
             FakeTagTeamMemberModel::fakeTagTeamPivotModel(FakeTagTeamPivotModel::class);
             $model = new FakeTagTeamMemberModel();

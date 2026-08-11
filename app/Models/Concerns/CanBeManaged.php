@@ -9,7 +9,7 @@ use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use RuntimeException;
+use LogicException;
 
 /**
  * Provides manager relationship support for models that can be managed by `Manager` instances.
@@ -160,7 +160,7 @@ trait CanBeManaged
      * a 'WrestlerManager' pivot model class.
      *
      *
-     * @throws RuntimeException If the resolved model class doesn't exist
+     * @throws LogicException If the resolved model class doesn't exist
      * @return class-string<TPivotModel> The fully qualified class name of the pivot model
      *
      * @example
@@ -191,7 +191,7 @@ trait CanBeManaged
         $resolved = $namespace.'\\'.$relatedModelName;
 
         if (! class_exists($resolved)) {
-            throw new RuntimeException("Related pivot model [{$resolved}] not found for [{$declaring}]. Override the resolution method or ensure the class exists.");
+            throw new LogicException("Related pivot model [{$resolved}] not found for [{$declaring}]. Override the resolution method or ensure the class exists.");
         }
 
         /** @var class-string<TPivotModel> */
