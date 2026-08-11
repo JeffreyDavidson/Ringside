@@ -7,10 +7,11 @@ namespace App\Actions\Titles;
 use App\Exceptions\Titles\CannotBePulledException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class PullAction
 {
+    public function __construct(private EndActivityPeriodAction $endActivityPeriod) {}
+
     /**
      * Pull a title from active competition and make it inactive.
      *
@@ -34,12 +35,7 @@ class PullAction
 
         $pullDate = $pullDate ?? now();
 
-        DB::transaction(function () use ($title, $pullDate): void {
-            $currentActivityPeriod = $title->currentActivityPeriod()->first();
-            if ($currentActivityPeriod) {
-                $currentActivityPeriod->update(['ended_at' => $pullDate]);
-            }
-        });
+        $this->endActivityPeriod->handle($title, $pullDate);
     }
 
     /**

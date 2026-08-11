@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
+    public function __construct(private StartActivityPeriodAction $startActivityPeriod) {}
+
     /**
      * Create a title.
      *
@@ -33,11 +35,7 @@ class CreateAction
 
             // Create active status if debut_date is provided
             if (isset($titleData->debut_date)) {
-                // Create activity period for title debut
-                $title->activityPeriods()->updateOrCreate(
-                    ['ended_at' => null],
-                    ['started_at' => $titleData->debut_date->toDateTimeString()]
-                );
+                $this->startActivityPeriod->handle($title, $titleData->debut_date);
             }
 
             return $title;
