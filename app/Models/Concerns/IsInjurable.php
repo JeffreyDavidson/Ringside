@@ -8,7 +8,7 @@ use App\Models\Contracts\Injurable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use RuntimeException;
+use LogicException;
 
 /**
  * Adds injury-related behavior to a model.
@@ -198,7 +198,7 @@ trait IsInjurable
      * conventions. For example, if the parent model is 'Wrestler', it will look for
      * a 'WrestlerInjury' model class.
      *
-     * @throws RuntimeException If the resolved model class doesn't exist
+     * @throws LogicException If the resolved model class doesn't exist
      * @return class-string<TInjury> The fully qualified class name of the injury model
      *
      * @example
