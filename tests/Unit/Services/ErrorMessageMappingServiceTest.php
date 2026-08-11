@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BusinessRuleReason;
+use App\Exceptions\Data\CannotBeRestoredException;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\CannotBeEmployedException;
@@ -38,6 +39,15 @@ test('it maps common lifecycle reasons for each roster presentation', function (
         ->toBe('referees.errors.cannot_injure_unemployed')
         ->and(ErrorMessageMappingService::mapWrestlerException(CannotBeClearedFromInjuryException::notInjured($wrestler)))
         ->toBe('wrestlers.errors.not_injured');
+});
+
+test('it maps restoration failures from the not-deleted reason', function () {
+    $wrestler = new Wrestler(['name' => 'Test Wrestler']);
+    $exception = CannotBeRestoredException::notDeleted($wrestler);
+
+    expect($exception->reason())->toBe(BusinessRuleReason::NotDeleted)
+        ->and(ErrorMessageMappingService::mapWrestlerException($exception))
+        ->toBe('wrestlers.errors.not_deleted');
 });
 
 test('it maps available roster reinstatement failures to suspension guidance', function () {
