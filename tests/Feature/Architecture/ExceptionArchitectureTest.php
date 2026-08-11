@@ -71,7 +71,7 @@ test('application code does not directly construct generic exceptions', function
     expect($violations)->toBeEmpty();
 });
 
-test('Livewire table actions do not catch generic exception types', function () {
+test('Livewire components do not catch generic exception types', function () {
     $genericCatchTypes = function (string $contents): array {
         $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
         $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
@@ -97,15 +97,22 @@ test('Livewire table actions do not catch generic exception types', function () 
         }
         PHP))->toBe([Exception::class]);
 
-    $violations = collect(glob(app_path('Livewire/*/Tables/Main.php')) ?: [])
-        ->filter(function (string $filename) use ($genericCatchTypes): bool {
-            $contents = file_get_contents($filename);
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(app_path('Livewire'), FilesystemIterator::SKIP_DOTS)
+    );
+    $violations = [];
 
-            return $contents !== false && $genericCatchTypes($contents) !== [];
-        })
-        ->map(fn (string $filename): string => str($filename)->after(app_path().DIRECTORY_SEPARATOR)->toString())
-        ->values()
-        ->all();
+    foreach ($files as $file) {
+        if (! $file instanceof SplFileInfo || ! $file->isFile() || $file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $contents = file_get_contents($file->getPathname());
+
+        if ($contents !== false && $genericCatchTypes($contents) !== []) {
+            $violations[] = str($file->getPathname())->after(app_path().DIRECTORY_SEPARATOR)->toString();
+        }
+    }
 
     expect($violations)->toBeEmpty();
 });

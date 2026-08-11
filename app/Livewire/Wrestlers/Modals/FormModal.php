@@ -44,7 +44,7 @@ class FormModal extends BaseFormModal
             'height_inches' => fn () => fake()->numberBetween(0, 11),
             'weight' => fn () => fake()->numberBetween(180, 350),
             'signature_move' => fn () => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
-            'employment_date' => fn () => $this->generateOptionalStartDate(),
+            'employment_date' => fn () => $this->generateOptionalEmploymentDate(),
         ];
     }
 
