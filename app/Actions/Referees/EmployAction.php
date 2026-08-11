@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Exception;
@@ -16,7 +15,6 @@ class EmployAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
     ) {}
 
     /**
@@ -24,7 +22,6 @@ class EmployAction
      *
      * This handles the complete referee employment workflow:
      * - Validates the referee can be employed (not retired, not already employed)
-     * - Ends retirement if currently retired
      * - Creates the employment record through the shared lifecycle component
      * - Makes the referee available for match officiating assignments
      *
@@ -39,10 +36,6 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($referee, $employmentDate): void {
-            if ($referee->isRetired()) {
-                $this->retirementPeriods->end($referee, $employmentDate);
-            }
-
             $this->employmentPeriods->start($referee, $employmentDate);
         });
     }

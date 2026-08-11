@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
+use App\Exceptions\Roster\CannotBeEmployedException;
 use App\Models\Managers\Manager;
 use App\Models\Wrestlers\Wrestler;
 
@@ -107,4 +108,24 @@ test('it prevents employing already employed wrestler', function () {
 
     expect(fn () => resolve(EmployAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
+});
+
+test('it rejects employing a retired wrestler without changing retirement', function () {
+    $wrestler = Wrestler::factory()->retired()->create();
+    $retirement = $wrestler->currentRetirement()->firstOrFail();
+
+    expect(fn () => resolve(EmployAction::class)->handle($wrestler))
+        ->toThrow(CannotBeEmployedException::class);
+
+    $wrestler->refresh();
+    $retirement->refresh();
+
+    expect($wrestler->isEmployed())->toBeFalse()
+        ->and($wrestler->isRetired())->toBeTrue()
+        ->and($retirement->ended_at)->toBeNull();
+
+    $this->assertDatabaseMissing('wrestlers_employments', [
+        'wrestler_id' => $wrestler->id,
+        'ended_at' => null,
+    ]);
 });

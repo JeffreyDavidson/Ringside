@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\ReleaseAction;
 use App\Actions\Managers\SuspendAction;
+use App\Actions\Managers\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Carbon;
@@ -136,8 +137,8 @@ describe('Manager Employment Workflows', function () {
         test('complex multi-action management workflows maintain data consistency', function () {
             $manager = Manager::factory()->retired()->create();
 
-            // Retire -> Employ -> Suspend -> Release workflow
-            resolve(EmployAction::class)->handle($manager, Carbon::now());
+            // Retire -> Unretire -> Suspend -> Release workflow
+            resolve(UnretireAction::class)->handle($manager, Carbon::now());
             $employed = freshModel($manager);
             expect($employed->isEmployed())->toBeTrue();
 

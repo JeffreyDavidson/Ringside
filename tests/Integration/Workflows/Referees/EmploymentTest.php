@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Referees\EmployAction;
 use App\Actions\Referees\ReleaseAction;
 use App\Actions\Referees\SuspendAction;
+use App\Actions\Referees\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
@@ -135,8 +136,8 @@ describe('Referee Employment Workflows', function () {
         test('complex multi-action employment workflows maintain data consistency', function () {
             $referee = Referee::factory()->retired()->create();
 
-            // Retire -> Employ -> Suspend -> Release workflow
-            resolve(EmployAction::class)->handle($referee, Carbon::now());
+            // Retire -> Unretire -> Suspend -> Release workflow
+            resolve(UnretireAction::class)->handle($referee, Carbon::now());
             $employed = freshModel($referee);
             expect($employed->isEmployed())->toBeTrue();
 
