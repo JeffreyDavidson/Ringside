@@ -19,3 +19,6 @@ Build server-driven interactive UI with class-based Livewire components and Blad
 
 ## Class-based Livewire components
 Implement Livewire behavior in namespaced PHP classes using shared base classes where applicable. Do not introduce Volt or single-file components.
+
+## Translate only domain failures
+Catch and translate BaseBusinessException at Livewire user-interaction boundaries. Do not catch generic Exception or Throwable to produce business flash messages; let programmer, infrastructure, and framework failures propagate through Laravel's normal exception reporting.

@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Actions\Referees\EmployAction;
 use App\Livewire\Referees\Components\Actions;
 use App\Models\Referees\Referee;
 use App\Models\Users\User;
+use JMac\Testing\Double;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -57,6 +59,20 @@ describe('RefereesActions Integration Tests', function () {
             livewire(Actions::class, ['referee' => $this->referee])
                 ->assertOk();
             expect(true)->toBeTrue();
+        });
+
+        test('unexpected action failures propagate to Laravel', function () {
+            actingAs($this->admin);
+            $employAction = Double::for(EmployAction::class);
+            $employAction->expects('handle')
+                ->throws(new LogicException('Unexpected employment failure.'));
+            app()->instance(EmployAction::class, $employAction);
+            $component = livewire(Actions::class, ['referee' => $this->referee]);
+
+            expect(fn () => $component->call('employ'))
+                ->toThrow(LogicException::class, 'Unexpected employment failure.');
+
+            $employAction->verify();
         });
     });
 

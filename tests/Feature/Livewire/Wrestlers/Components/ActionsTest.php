@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Actions\Wrestlers\EmployAction;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
+use JMac\Testing\Double;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
@@ -30,5 +32,18 @@ describe('Actions Basic Functionality', function () {
         $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
 
         $component->assertSuccessful();
+    });
+
+    it('does not translate unexpected action failures into business errors', function () {
+        $employAction = Double::for(EmployAction::class);
+        $employAction->expects('handle')
+            ->throws(new LogicException('Unexpected employment failure.'));
+        app()->instance(EmployAction::class, $employAction);
+        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
+
+        expect(fn () => $component->call('employ'))
+            ->toThrow(LogicException::class, 'Unexpected employment failure.');
+
+        $employAction->verify();
     });
 });
