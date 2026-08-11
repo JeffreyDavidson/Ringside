@@ -38,6 +38,8 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
+        $referee->ensureCanBeDeleted();
+
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($referee, $deletionDate): void {

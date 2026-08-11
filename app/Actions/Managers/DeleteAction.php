@@ -41,6 +41,8 @@ class DeleteAction
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
+        $manager->ensureCanBeDeleted();
+
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($manager, $deletionDate): void {

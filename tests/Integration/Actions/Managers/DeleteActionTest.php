@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\DeleteAction;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -30,6 +31,14 @@ test('it soft deletes an unemployed manager', function () {
     $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
     expect($trashedManager)->not->toBeNull();
     expect($trashedManager->deleted_at)->not->toBeNull();
+});
+
+test('it rejects deleting an already deleted manager', function () {
+    $manager = Manager::factory()->create();
+    $manager->delete();
+
+    expect(fn () => resolve(DeleteAction::class)->handle($manager))
+        ->toThrow(CannotBeDeletedException::class);
 });
 
 test('it soft deletes an employed manager and ends employment', function () {
