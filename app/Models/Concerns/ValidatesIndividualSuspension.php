@@ -7,7 +7,6 @@ namespace App\Models\Concerns;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
-use App\Models\Contracts\Bookable;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\Wrestlers\Wrestler;
@@ -92,9 +91,6 @@ trait ValidatesIndividualSuspension
             throw CannotBeReinstatedException::retired($entity);
         }
 
-        if ($entity instanceof Bookable && $entity->isBookable()) {
-            throw CannotBeReinstatedException::bookable($entity);
-        }
     }
 
     private function individualSuspensionEntity(): Wrestler|Manager|Referee
