@@ -13,7 +13,7 @@ beforeEach(function () {
 });
 
 test('it heals an injured referee', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
     expect($referee->isInjured())->toBeTrue();
@@ -34,7 +34,7 @@ test('it heals an injured referee', function () {
 });
 
 test('it heals referee with specific recovery date', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
     $recoveryDate = now()->subDays(2);
 
@@ -53,7 +53,7 @@ test('it heals referee with specific recovery date', function () {
 });
 
 test('it persists the healing lifecycle', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
 
     expect($referee->isInjured())->toBeTrue();
 
@@ -67,7 +67,7 @@ test('it persists the healing lifecycle', function () {
 });
 
 test('it handles DateHelper date resolution', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
     $recoveryDate = now()->subDays(5);
 
     resolve(HealAction::class)->handle($referee, $recoveryDate);
@@ -82,7 +82,7 @@ test('it handles DateHelper date resolution', function () {
 });
 
 test('it validates referee can be healed', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
 
     // Should succeed without throwing validation exception
     resolve(HealAction::class)->handle($referee);
@@ -101,7 +101,7 @@ test('it throws exception when referee cannot be healed', function () {
 });
 
 test('it maintains referee employment status after healing', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
@@ -119,7 +119,7 @@ test('it maintains referee employment status after healing', function () {
 });
 
 test('it preserves injury history', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
     $originalStartedAt = $injury->started_at;
 

@@ -97,7 +97,7 @@ test('it handles database transactions correctly', function () {
 });
 
 test('it maintains employment status during healing', function () {
-    $manager = Manager::factory()->employed()->injured()->create();
+    $manager = Manager::factory()->injured()->create();
 
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();

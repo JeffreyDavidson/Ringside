@@ -50,7 +50,7 @@ test('it releases manager with specific release date', function () {
 });
 
 test('it releases suspended manager and ends suspension', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
@@ -76,7 +76,7 @@ test('it releases suspended manager and ends suspension', function () {
 });
 
 test('it releases injured manager and ends injury', function () {
-    $manager = Manager::factory()->employed()->injured()->create();
+    $manager = Manager::factory()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
@@ -176,7 +176,7 @@ test('it prevents releasing unemployed manager', function () {
 });
 
 test('it handles database transactions correctly', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
     $wrestler = Wrestler::factory()->employed()->create();
     $manager->wrestlers()->attach($wrestler->id, ['hired_at' => now()->subDay()]);
 
@@ -203,7 +203,7 @@ test('it handles database transactions correctly', function () {
 });
 
 test('it uses DateHelper for consistent date handling', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
     $customReleaseDate = now()->subDays(2)->startOfDay();
 
     resolve(ReleaseAction::class)->handle($manager, $customReleaseDate);

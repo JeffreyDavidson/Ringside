@@ -47,7 +47,7 @@ test('it prevents reinstating an injured manager', function () {
 });
 
 test('it reinstates manager with specific reinstatement date', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
     $reinstatementDate = now()->subDays(2);
 
     resolve(ReinstateAction::class)->handle($manager, $reinstatementDate);
@@ -63,7 +63,7 @@ test('it reinstates manager with specific reinstatement date', function () {
 });
 
 test('it persists the reinstatement lifecycle', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
 
     // Get current suspension to verify it gets ended
     $currentSuspension = $manager->currentSuspension()->firstOrFail();
@@ -93,7 +93,7 @@ test('it prevents reinstating non-suspended manager', function () {
 });
 
 test('it handles database transactions correctly', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
     $originalSuspensionId = $manager->currentSuspension()->firstOrFail()->id;
 
     resolve(ReinstateAction::class)->handle($manager);
@@ -115,7 +115,7 @@ test('it handles database transactions correctly', function () {
 });
 
 test('it maintains employment status during reinstatement', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
     $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
     expect($manager->isEmployed())->toBeTrue();
@@ -136,7 +136,7 @@ test('it maintains employment status during reinstatement', function () {
 });
 
 test('it uses DateHelper for consistent date handling', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
     $customReinstatementDate = now()->subDays(1)->startOfDay();
 
     resolve(ReinstateAction::class)->handle($manager, $customReinstatementDate);
