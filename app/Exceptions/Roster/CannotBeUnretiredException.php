@@ -7,7 +7,10 @@ namespace App\Exceptions\Roster;
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Contracts\Employable;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
+use App\Models\Wrestlers\Wrestler;
 
 /**
  * Exception thrown when a roster member cannot be unretired due to business rule violations.
@@ -34,6 +37,13 @@ use App\Models\Stables\Stable;
  */
 final class CannotBeUnretiredException extends BaseBusinessException
 {
+    public static function deleted(Wrestler|Manager|Referee $entity): static
+    {
+        $context = self::formatModelContext($entity);
+
+        return new self("{$context} cannot be unretired because it is deleted. Restore it first.");
+    }
+
     /**
      * Roster member is not currently retired and cannot be unretired.
      *

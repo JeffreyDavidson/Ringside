@@ -35,6 +35,13 @@ use App\Models\Titles\Title;
  */
 final class CannotBeUnretiredException extends BaseBusinessException
 {
+    public static function deleted(Title $title): static
+    {
+        $context = self::formatModelContext($title);
+
+        return new self("{$context} cannot be unretired because it is deleted. Restore it first.");
+    }
+
     /**
      * Title is not currently retired and cannot be unretired.
      *
