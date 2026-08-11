@@ -7,8 +7,8 @@ namespace App\Livewire\Managers\Tables;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Livewire\Table\Column;
 use App\Models\Stables\Stable;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousStables extends BasePreviousStablesTable
 {
@@ -29,7 +29,7 @@ class PreviousStables extends BasePreviousStablesTable
     public function builder(): Builder
     {
         if (! isset($this->managerId)) {
-            throw new Exception("You didn't specify a manager");
+            throw new LogicException('A manager was not provided.');
         }
 
         // Simplified query - just return all stables for now to fix the test

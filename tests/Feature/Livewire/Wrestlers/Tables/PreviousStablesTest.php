@@ -15,10 +15,8 @@ beforeEach(function () {
 
 describe('PreviousStablesTable Configuration', function () {
     it('requires wrestler id to be set', function () {
-        expect(function () {
-            testLivewire(PreviousStables::class)
-                ->call('builder');
-        })->toThrow(Exception::class, "You didn't specify a wrestler");
+        expect(fn () => (new PreviousStables())->builder())
+            ->toThrow(LogicException::class, 'A wrestler was not provided.');
     });
 
     it('can set wrestler id', function () {

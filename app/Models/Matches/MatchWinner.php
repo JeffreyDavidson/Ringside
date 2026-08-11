@@ -7,7 +7,6 @@ namespace App\Models\Matches;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchWinnerFactory;
-use Exception;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -15,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use LogicException;
 
 /**
  * Match winner model for tracking match winners.
@@ -80,7 +80,7 @@ class MatchWinner extends Model
     /**
      * Get the winner entity with type safety.
      *
-     * @throws Exception
+     * @throws LogicException
      */
     public function getWinner(): Wrestler|TagTeam
     {
@@ -89,7 +89,7 @@ class MatchWinner extends Model
         return match ($winner::class) {
             Wrestler::class,
             TagTeam::class => $winner,
-            default => throw new Exception('Unexpected winner type: '.$winner::class),
+            default => throw new LogicException('Unexpected winner type: '.$winner::class),
         };
     }
 

@@ -8,8 +8,8 @@ use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Livewire\Table\Column;
 use App\Models\Managers\Manager;
 use App\Models\Stables\Stable;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousManagers extends BasePreviousManagersTable
 {
@@ -23,7 +23,7 @@ class PreviousManagers extends BasePreviousManagersTable
     public function builder(): Builder
     {
         if (! isset($this->stableId)) {
-            throw new Exception("You didn't specify a stable");
+            throw new LogicException('A stable was not provided.');
         }
 
         // Note: Stables do not directly have managers.

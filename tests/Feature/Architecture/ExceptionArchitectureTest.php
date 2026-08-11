@@ -35,3 +35,33 @@ test('exceptions do not use technical catch-all directories', function () {
     expect(glob(app_path('Exceptions/Data/*.php')) ?: [])->toBeEmpty()
         ->and(glob(app_path('Exceptions/BusinessRules/*.php')) ?: [])->toBeEmpty();
 });
+
+test('application code does not directly construct generic exceptions', function () {
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(app_path(), FilesystemIterator::SKIP_DOTS)
+    );
+
+    $violations = [];
+
+    foreach ($files as $file) {
+        if (! $file instanceof SplFileInfo) {
+            continue;
+        }
+
+        if (! $file->isFile() || $file->getExtension() !== 'php') {
+            continue;
+        }
+
+        if ($file->getPathname() === app_path('Exceptions/BaseBusinessException.php')) {
+            continue;
+        }
+
+        $contents = file_get_contents($file->getPathname());
+
+        if ($contents !== false && preg_match('/throw\s+new\s+\\?Exception\s*\(/', $contents) === 1) {
+            $violations[] = str($file->getPathname())->after(app_path().DIRECTORY_SEPARATOR)->toString();
+        }
+    }
+
+    expect($violations)->toBeEmpty();
+});

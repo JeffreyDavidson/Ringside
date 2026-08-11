@@ -6,8 +6,8 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Wrestlers\WrestlerManager;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousManagers extends BasePreviousManagersTable
 {
@@ -24,7 +24,7 @@ class PreviousManagers extends BasePreviousManagersTable
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
+            throw new LogicException('A wrestler was not provided.');
         }
 
         return WrestlerManager::query()

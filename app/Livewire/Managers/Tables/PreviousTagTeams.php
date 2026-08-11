@@ -9,8 +9,8 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\TagTeams\TagTeamManager;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousTagTeams extends DataTableComponent
 {
@@ -31,7 +31,7 @@ class PreviousTagTeams extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->managerId)) {
-            throw new Exception("You didn't specify a manager");
+            throw new LogicException('A manager was not provided.');
         }
 
         return TagTeamManager::query()

@@ -6,8 +6,8 @@ namespace App\Livewire\Referees\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
@@ -26,7 +26,7 @@ class PreviousMatches extends BasePreviousMatchesTable
     public function builder(): Builder
     {
         if (! isset($this->refereeId)) {
-            throw new Exception("You didn't specify a referee");
+            throw new LogicException('A referee was not provided.');
         }
 
         return EventMatch::query()

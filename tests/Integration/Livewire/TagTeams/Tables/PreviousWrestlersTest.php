@@ -33,9 +33,8 @@ describe('Previous Wrestlers Table Component', function () {
     });
 
     it('throws exception when tag team ID not specified', function () {
-        expect(function () {
-            livewire(PreviousWrestlers::class);
-        })->toThrow(Exception::class, "You didn't specify a tag team");
+        expect(fn () => (new PreviousWrestlers())->builder())
+            ->toThrow(LogicException::class, 'A tag team was not provided.');
     });
 
     it('displays only previous wrestlers with left dates', function () {

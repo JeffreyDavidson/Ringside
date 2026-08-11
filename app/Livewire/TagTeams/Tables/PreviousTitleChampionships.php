@@ -7,8 +7,8 @@ namespace App\Livewire\TagTeams\Tables;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 {
@@ -23,7 +23,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     public function builder(): Builder
     {
         if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
+            throw new LogicException('A tag team was not provided.');
         }
 
         return TitleChampionship::query()

@@ -7,8 +7,8 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 /**
  * Livewire table component for displaying a wrestler's previous tag team memberships.
@@ -62,7 +62,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * most recent previous memberships first.
      *
      *
-     * @throws Exception If wrestlerId is not set
+     * @throws LogicException If wrestlerId is not set
      * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
      *
      * @example
@@ -76,7 +76,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
+            throw new LogicException('A wrestler was not provided.');
         }
 
         return TagTeamWrestler::query()

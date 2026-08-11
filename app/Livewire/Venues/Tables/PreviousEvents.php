@@ -11,7 +11,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Events\Event;
-use Exception;
+use LogicException;
 
 class PreviousEvents extends DataTableComponent
 {
@@ -29,7 +29,7 @@ class PreviousEvents extends DataTableComponent
     public function builder(): EventBuilder
     {
         if (! isset($this->venueId)) {
-            throw new Exception("You didn't specify a venue");
+            throw new LogicException('A venue was not provided.');
         }
 
         return Event::query()

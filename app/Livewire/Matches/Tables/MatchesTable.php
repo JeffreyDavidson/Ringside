@@ -12,9 +12,9 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
+use LogicException;
 
 class MatchesTable extends DataTableComponent
 {
@@ -35,7 +35,7 @@ class MatchesTable extends DataTableComponent
     public function builder(): Builder
     {
         if ($this->eventId === null) {
-            throw new Exception("You didn't specify a event");
+            throw new LogicException('An event was not provided.');
         }
 
         return EventMatch::query()

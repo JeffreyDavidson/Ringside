@@ -76,11 +76,8 @@ describe('PreviousEventsTable Integration Tests', function () {
         });
 
         test('throws exception when venue ID is not provided', function () {
-            expect(function () {
-                \Pest\Laravel\actingAs($this->admin);
-
-                \Pest\Livewire\livewire(PreviousEvents::class);
-            })->toThrow(Exception::class, "You didn't specify a venue");
+            expect(fn () => (new PreviousEvents())->builder())
+                ->toThrow(LogicException::class, 'A venue was not provided.');
         });
 
         test('filters events by specific venue only', function () {
@@ -260,7 +257,7 @@ describe('PreviousEventsTable Integration Tests', function () {
             expect(function () {
                 $table = new PreviousEvents();
                 $table->builder();
-            })->toThrow(Exception::class, "You didn't specify a venue");
+            })->toThrow(LogicException::class, 'A venue was not provided.');
         });
 
         test('handles invalid venue ID gracefully', function () {

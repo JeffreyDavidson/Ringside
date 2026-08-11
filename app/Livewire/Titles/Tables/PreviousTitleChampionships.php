@@ -9,9 +9,9 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
+use LogicException;
 
 class PreviousTitleChampionships extends DataTableComponent
 {
@@ -37,7 +37,7 @@ class PreviousTitleChampionships extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->titleId)) {
-            throw new Exception("You didn't specify a title");
+            throw new LogicException('A title was not provided.');
         }
 
         return TitleChampionship::query()
