@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\ReinstateAction;
-use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Models\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;

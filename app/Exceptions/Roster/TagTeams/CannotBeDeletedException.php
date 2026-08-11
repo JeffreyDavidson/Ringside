@@ -7,13 +7,13 @@ namespace App\Exceptions\Roster\TagTeams;
 use App\Exceptions\BaseBusinessException;
 use App\Models\TagTeams\TagTeam;
 
-class CannotBeDeletedException extends BaseBusinessException
+final class CannotBeDeletedException extends BaseBusinessException
 {
     public static function alreadyDeleted(TagTeam $tagTeam): static
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new static("{$context} cannot be deleted because it is already deleted.");
+        return new self("{$context} cannot be deleted because it is already deleted.");
     }
 
     public static function stillRetired(TagTeam $tagTeam): static

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Exceptions\Roster\CannotBeUnretiredException;
+use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;

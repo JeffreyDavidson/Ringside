@@ -8,7 +8,7 @@ use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
-use App\Exceptions\BusinessRules\InvalidDateRangeException;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;

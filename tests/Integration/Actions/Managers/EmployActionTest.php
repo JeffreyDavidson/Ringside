@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
-use App\Exceptions\Roster\CannotBeEmployedException;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Models\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;

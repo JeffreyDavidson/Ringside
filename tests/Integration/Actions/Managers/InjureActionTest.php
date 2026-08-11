@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\InjureAction;
-use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Models\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;

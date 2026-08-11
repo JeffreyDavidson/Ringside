@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\EndActivityPeriodAction;
-use App\Exceptions\BusinessRules\InvalidDateRangeException;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Titles\Title;
 
 use function Spatie\PestPluginTestTime\testTime;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\Roster\CannotBeReleasedException;
+use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;

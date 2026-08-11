@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;

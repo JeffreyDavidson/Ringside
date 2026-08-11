@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;

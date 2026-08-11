@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;

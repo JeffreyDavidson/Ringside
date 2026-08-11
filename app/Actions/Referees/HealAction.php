@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;

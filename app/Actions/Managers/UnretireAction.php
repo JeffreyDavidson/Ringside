@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\Roster\CannotBeUnretiredException;
+use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Managers\Manager;

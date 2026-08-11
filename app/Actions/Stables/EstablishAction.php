@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Exceptions\BusinessRules\InvalidDateRangeException;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivityPeriod;

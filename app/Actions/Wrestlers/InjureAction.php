@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Exceptions\Roster\CannotBeInjuredException;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;

@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\BusinessRuleReason;
-use App\Exceptions\Data\CannotBeRestoredException;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
-use App\Exceptions\Roster\CannotBeClearedFromInjuryException;
-use App\Exceptions\Roster\CannotBeEmployedException;
-use App\Exceptions\Roster\CannotBeInjuredException;
-use App\Exceptions\Roster\CannotBeReinstatedException;
-use App\Exceptions\Roster\CannotBeSuspendedException;
+use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
+use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
+use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotBeReinstatedException;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;

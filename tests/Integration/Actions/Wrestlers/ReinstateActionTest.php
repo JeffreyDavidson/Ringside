@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\ReinstateAction;
-use App\Exceptions\Roster\CannotBeReinstatedException;
+use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
