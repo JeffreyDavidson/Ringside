@@ -74,3 +74,23 @@ it('keeps reunion former-member validation aligned', function () {
     expect(fn () => $stableWithoutFormerMembers->ensureCanBeReunited())
         ->toThrow(CannotBeReunitedException::class);
 });
+
+it('rejects activity transitions for a deleted stable', function () {
+    $unformedStable = Stable::factory()->create();
+    $activeStable = Stable::factory()->active()->create();
+    $disbandedStable = Stable::factory()->disbanded()->create();
+
+    $unformedStable->delete();
+    $activeStable->delete();
+    $disbandedStable->delete();
+
+    expect($unformedStable->canBeEstablished())->toBeFalse()
+        ->and($activeStable->canBeDisbanded())->toBeFalse()
+        ->and($disbandedStable->canBeReunited())->toBeFalse()
+        ->and(fn () => $unformedStable->ensureCanBeEstablished())
+        ->toThrow(CannotBeEstablishedException::class)
+        ->and(fn () => $activeStable->ensureCanBeDisbanded())
+        ->toThrow(CannotBeDisbandedException::class)
+        ->and(fn () => $disbandedStable->ensureCanBeReunited())
+        ->toThrow(CannotBeReunitedException::class);
+});

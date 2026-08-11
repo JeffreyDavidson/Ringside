@@ -54,6 +54,13 @@ final class CannotBeDeletedException extends BaseBusinessException
         return new self("{$context} is currently active and cannot be deleted. Use disband action first.");
     }
 
+    public static function futureEstablishmentScheduled(Stable $stable): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new self("{$context} has a future establishment scheduled and cannot be deleted.");
+    }
+
     /**
      * Stable has current members who must be removed before deletion.
      *

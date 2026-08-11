@@ -19,10 +19,14 @@ class DeleteAction
      */
     public function handle(Stable $stable): void
     {
-        $stable->ensureCanBeDeleted();
-
         DB::transaction(function () use ($stable): void {
-            $stable->delete();
+            $lockedStable = Stable::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
+
+            $lockedStable->ensureCanBeDeleted();
+            $lockedStable->delete();
         });
     }
 }

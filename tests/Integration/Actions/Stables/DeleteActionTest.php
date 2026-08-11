@@ -20,8 +20,16 @@ test('it rejects an active stable', function () {
     $stable = Stable::factory()->active()->create();
 
     expect($stable->canBeDeleted())->toBeFalse()
-        ->and(fn () => $stable->ensureCanBeDeleted())
+        ->and(fn () => resolve(DeleteAction::class)->handle($stable))
         ->toThrow(CannotBeDeletedException::class);
+});
+
+test('it rejects a stable with a future establishment scheduled', function () {
+    $stable = Stable::factory()->withFutureActivation()->create();
+
+    expect($stable->canBeDeleted())->toBeFalse()
+        ->and(fn () => resolve(DeleteAction::class)->handle($stable))
+        ->toThrow(CannotBeDeletedException::class, 'has a future establishment scheduled');
 });
 
 test('it rejects a stable with current members', function () {

@@ -38,6 +38,13 @@ use App\Models\Stables\Stable;
  */
 final class CannotBeEstablishedException extends BaseBusinessException
 {
+    public static function deleted(Stable $stable): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new self("{$context} cannot be established because it is deleted. Restore the stable first.");
+    }
+
     /**
      * Stable is already established and cannot be re-established.
      *

@@ -16,14 +16,16 @@ trait FindsAvailableStableFormerMembers
     public function getAvailableFormerMembers(): Collection
     {
         $wrestlers = $this->previousWrestlers()
-            ->whereHas('employments', fn ($query) => $query->whereNull('ended_at'))
-            ->whereDoesntHave('injuries', fn ($query) => $query->whereNull('ended_at'))
-            ->whereDoesntHave('suspensions', fn ($query) => $query->whereNull('ended_at'))
+            ->whereHas('employments', fn ($employmentQuery) => $employmentQuery->whereNull('ended_at'))
+            ->whereDoesntHave('injuries', fn ($injuryQuery) => $injuryQuery->whereNull('ended_at'))
+            ->whereDoesntHave('suspensions', fn ($suspensionQuery) => $suspensionQuery->whereNull('ended_at'))
+            ->whereDoesntHave('retirements', fn ($retirementQuery) => $retirementQuery->whereNull('ended_at'))
             ->get();
 
         $tagTeams = $this->previousTagTeams()
-            ->whereHas('employments', fn ($query) => $query->whereNull('ended_at'))
-            ->whereDoesntHave('suspensions', fn ($query) => $query->whereNull('ended_at'))
+            ->whereHas('employments', fn ($employmentQuery) => $employmentQuery->whereNull('ended_at'))
+            ->whereDoesntHave('suspensions', fn ($suspensionQuery) => $suspensionQuery->whereNull('ended_at'))
+            ->whereDoesntHave('retirements', fn ($retirementQuery) => $retirementQuery->whereNull('ended_at'))
             ->get();
 
         return $wrestlers->concat($tagTeams);
@@ -33,19 +35,19 @@ trait FindsAvailableStableFormerMembers
     public function getUnavailableKeyFormerMembers(): Collection
     {
         $wrestlers = $this->previousWrestlers()
-            ->where(function ($query): void {
-                $query->whereHas('retirements', fn ($query) => $query->whereNull('ended_at'))
-                    ->orWhereHas('injuries', fn ($query) => $query->whereNull('ended_at'))
-                    ->orWhereHas('suspensions', fn ($query) => $query->whereNull('ended_at'))
-                    ->orWhereHas('currentStable', fn ($query) => $query->whereKeyNot($this->getKey()));
+            ->where(function ($wrestlerQuery): void {
+                $wrestlerQuery->whereHas('retirements', fn ($retirementQuery) => $retirementQuery->whereNull('ended_at'))
+                    ->orWhereHas('injuries', fn ($injuryQuery) => $injuryQuery->whereNull('ended_at'))
+                    ->orWhereHas('suspensions', fn ($suspensionQuery) => $suspensionQuery->whereNull('ended_at'))
+                    ->orWhereHas('currentStable', fn ($stableQuery) => $stableQuery->whereKeyNot($this->getKey()));
             })
             ->get();
 
         $tagTeams = $this->previousTagTeams()
-            ->where(function ($query): void {
-                $query->whereHas('retirements', fn ($query) => $query->whereNull('ended_at'))
-                    ->orWhereHas('suspensions', fn ($query) => $query->whereNull('ended_at'))
-                    ->orWhereHas('currentStable', fn ($query) => $query->whereKeyNot($this->getKey()));
+            ->where(function ($tagTeamQuery): void {
+                $tagTeamQuery->whereHas('retirements', fn ($retirementQuery) => $retirementQuery->whereNull('ended_at'))
+                    ->orWhereHas('suspensions', fn ($suspensionQuery) => $suspensionQuery->whereNull('ended_at'))
+                    ->orWhereHas('currentStable', fn ($stableQuery) => $stableQuery->whereKeyNot($this->getKey()));
             })
             ->get();
 

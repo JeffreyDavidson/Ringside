@@ -7,15 +7,20 @@ namespace App\Models\Concerns;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
+use App\Models\Stables\Stable;
 
-/**
- * Provides stable-specific validation for establishment, disbandment, and reunion.
- */
+/** @mixin Stable */
 trait ValidatesStableActivity
 {
     public function canBeEstablished(): bool
     {
-        return ! $this->hasActivityPeriods() && ! $this->isRetired();
+        try {
+            $this->ensureCanBeEstablished();
+
+            return true;
+        } catch (CannotBeEstablishedException) {
+            return false;
+        }
     }
 
     /**
@@ -23,6 +28,10 @@ trait ValidatesStableActivity
      */
     public function ensureCanBeEstablished(): void
     {
+        if ($this->trashed()) {
+            throw CannotBeEstablishedException::deleted($this);
+        }
+
         if ($this->hasActivityPeriods()) {
             throw CannotBeEstablishedException::established($this);
         }
@@ -34,10 +43,13 @@ trait ValidatesStableActivity
 
     public function canBeDisbanded(): bool
     {
-        return $this->hasActivityPeriods()
-            && $this->isCurrentlyActive()
-            && ! $this->hasFutureActivation()
-            && ! $this->isRetired();
+        try {
+            $this->ensureCanBeDisbanded();
+
+            return true;
+        } catch (CannotBeDisbandedException) {
+            return false;
+        }
     }
 
     /**
@@ -45,6 +57,10 @@ trait ValidatesStableActivity
      */
     public function ensureCanBeDisbanded(): void
     {
+        if ($this->trashed()) {
+            throw CannotBeDisbandedException::deleted($this);
+        }
+
         if (! $this->hasActivityPeriods()) {
             throw CannotBeDisbandedException::unactivated($this);
         }
@@ -64,12 +80,13 @@ trait ValidatesStableActivity
 
     public function canBeReunited(): bool
     {
-        return $this->hasActivityPeriods()
-            && ! $this->isCurrentlyActive()
-            && ! $this->hasFutureActivation()
-            && ! $this->isRetired()
-            && $this->getAvailableFormerMembers()->count() >= static::MIN_MEMBERS_COUNT
-            && $this->getUnavailableKeyFormerMembers()->isEmpty();
+        try {
+            $this->ensureCanBeReunited();
+
+            return true;
+        } catch (CannotBeReunitedException) {
+            return false;
+        }
     }
 
     /**
@@ -77,6 +94,10 @@ trait ValidatesStableActivity
      */
     public function ensureCanBeReunited(): void
     {
+        if ($this->trashed()) {
+            throw CannotBeReunitedException::deleted($this);
+        }
+
         if (! $this->hasActivityPeriods()) {
             throw CannotBeReunitedException::neverActive($this);
         }

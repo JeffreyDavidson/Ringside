@@ -479,10 +479,10 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify both stables meet minimum requirements
-            $newStableMemberCount = $newStable->currentWrestlers()->count() + $newStable->currentTagTeams()->count();
+            $newStableMemberCount = $newStable->getCurrentMemberCount();
 
             $refreshedOriginal = freshModel($this->originalStable);
-            $originalMemberCount = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();
+            $originalMemberCount = $refreshedOriginal->getCurrentMemberCount();
 
             expect($newStableMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);
             expect($originalMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);

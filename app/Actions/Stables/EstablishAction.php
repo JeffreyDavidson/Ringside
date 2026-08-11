@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Exceptions\BusinessRules\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivityPeriod;
@@ -38,6 +39,10 @@ class EstablishAction
         $stable->ensureCanBeEstablished();
 
         $activationDate = $activationDate ?? now();
+
+        if ($endDate?->lt($activationDate)) {
+            throw InvalidDateRangeException::endBeforeStart($activationDate, $endDate, 'stable establishment');
+        }
 
         return DB::transaction(
             function () use ($stable, $activationDate, $endDate): StableActivityPeriod {

@@ -91,7 +91,7 @@ readonly class StableMembershipData
     }
 
     /**
-     * Get total count of all members.
+     * Get the stable headcount, counting wrestlers as one and tag teams as two.
      */
     public function getTotalMemberCount(): int
     {
@@ -112,10 +112,13 @@ readonly class StableMembershipData
             fn (Wrestler $wrestler): bool => ! $wrestler->isEmployed()
                 || $wrestler->isSuspended()
                 || $wrestler->isInjured()
+                || $wrestler->isRetired()
         )->pluck('name')->all() ?? [];
 
         $unavailableTagTeams = $this->tagTeams?->filter(
-            fn (TagTeam $tagTeam): bool => ! $tagTeam->isEmployed() || $tagTeam->isSuspended()
+            fn (TagTeam $tagTeam): bool => ! $tagTeam->isEmployed()
+                || $tagTeam->isSuspended()
+                || $tagTeam->isRetired()
         )->pluck('name')->all() ?? [];
 
         return [...$unavailableWrestlers, ...$unavailableTagTeams];

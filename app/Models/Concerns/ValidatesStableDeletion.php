@@ -33,6 +33,10 @@ trait ValidatesStableDeletion
             throw CannotBeDeletedException::currentlyActive($this);
         }
 
+        if ($this->hasFutureEstablishment()) {
+            throw CannotBeDeletedException::futureEstablishmentScheduled($this);
+        }
+
         if ($this->hasCurrentMembers()) {
             throw CannotBeDeletedException::hasCurrentMembers(
                 $this,
