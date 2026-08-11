@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableMembershipData;
+use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
-use InvalidArgumentException;
 
 /**
  * Remove members from a stable.
@@ -29,13 +29,12 @@ class RemoveStableMembersAction
      * @param  Stable  $stable  The stable to remove members from
      * @param  StableMembershipData  $members  The members to remove
      * @param  Carbon  $removalDate  The date they left
-     * @throws InvalidArgumentException When parameters are invalid
+     * @throws InvalidDateRangeException When the removal date is in the future
      */
     public function handle(Stable $stable, StableMembershipData $members, Carbon $removalDate): void
     {
-        // Validate parameters
         if ($removalDate->isFuture()) {
-            throw new InvalidArgumentException('Cannot remove members with future date.');
+            throw InvalidDateRangeException::futureNotAllowed($removalDate, 'Stable membership removal');
         }
 
         if ($members->isNotEmpty()) {
