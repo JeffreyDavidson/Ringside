@@ -6,6 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
@@ -54,6 +55,8 @@ class AddMatchForEventAction
      *
      * @param  Event  $event  The event to add the match to
      * @param  EventMatchData  $eventMatchData  Complete match data including all participants
+     * @throws EntityNotAvailableException When an assigned referee or title is unavailable
+     * @throws InvalidMatchConfigurationException When required match data or side assignments are invalid
      * @return EventMatch The newly created match with all components properly assigned
      */
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch
