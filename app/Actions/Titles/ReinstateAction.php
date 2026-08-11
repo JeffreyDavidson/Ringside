@@ -7,10 +7,11 @@ namespace App\Actions\Titles;
 use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ReinstateAction
 {
+    public function __construct(private StartActivityPeriodAction $startActivityPeriod) {}
+
     /**
      * Reinstate an inactive title and make it active again.
      *
@@ -32,11 +33,6 @@ class ReinstateAction
 
         $reinstateDate = $reinstateDate ?? now();
 
-        DB::transaction(function () use ($title, $reinstateDate): void {
-            $title->activityPeriods()->updateOrCreate(
-                ['ended_at' => null],
-                ['started_at' => $reinstateDate->toDateTimeString()]
-            );
-        });
+        $this->startActivityPeriod->handle($title, $reinstateDate);
     }
 }

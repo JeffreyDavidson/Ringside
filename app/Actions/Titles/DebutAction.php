@@ -7,10 +7,11 @@ namespace App\Actions\Titles;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DebutAction
 {
+    public function __construct(private StartActivityPeriodAction $startActivityPeriod) {}
+
     /**
      * Debut a title and make it available for championship competition.
      *
@@ -32,11 +33,6 @@ class DebutAction
 
         $debutDate = $debutDate ?? now();
 
-        DB::transaction(function () use ($title, $debutDate): void {
-            $title->activityPeriods()->updateOrCreate(
-                ['ended_at' => null],
-                ['started_at' => $debutDate->toDateTimeString()]
-            );
-        });
+        $this->startActivityPeriod->handle($title, $debutDate);
     }
 }
