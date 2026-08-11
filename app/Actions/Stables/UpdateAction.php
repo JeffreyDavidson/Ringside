@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
+use App\Exceptions\BusinessRules\InvalidDateRangeException;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Facades\DB;
@@ -34,13 +35,25 @@ class UpdateAction
      */
     public function handle(Stable $stable, StableData $stableData): Stable
     {
+        if ($stableData->start_date && $stableData->end_date && $stableData->end_date->lt($stableData->start_date)) {
+            throw InvalidDateRangeException::endBeforeStart(
+                $stableData->start_date,
+                $stableData->end_date,
+                'stable activity',
+            );
+        }
+
         return DB::transaction(function () use ($stable, $stableData): Stable {
-            $stable->update([
+            $lockedStable = Stable::query()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
+
+            $lockedStable->update([
                 'name' => $stableData->getTrimmedName(),
             ]);
 
             if ($stableData->hasStartDate()) {
-                $activityPeriod = $stable->firstActivityPeriod()->first();
+                $activityPeriod = $lockedStable->firstActivityPeriod()->lockForUpdate()->first();
 
                 if ($activityPeriod) {
                     $activityPeriod->update([
@@ -49,7 +62,7 @@ class UpdateAction
                     ]);
                 } else {
                     $this->establishAction->handle(
-                        $stable,
+                        $lockedStable,
                         $stableData->start_date,
                         $stableData->end_date,
                     );
@@ -57,9 +70,9 @@ class UpdateAction
             }
 
             // Update stable membership using service
-            $this->membershipService->updateMembership($stable, $stableData->members, now());
+            $this->membershipService->updateMembership($lockedStable, $stableData->members, now());
 
-            return $stable;
+            return $lockedStable;
         });
     }
 }

@@ -41,10 +41,13 @@ class SplitStableAction
         Carbon $date
     ): Stable {
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
-            // Validate stable can be split using model validation
-            $originalStable->ensureCanBeSplit();
+            $lockedStable = Stable::query()
+                ->lockForUpdate()
+                ->findOrFail($originalStable->getKey());
 
-            $this->validateSplitMembers($originalStable, $membersForNewStable);
+            $lockedStable->ensureCanBeSplit();
+
+            $this->validateSplitMembers($lockedStable, $membersForNewStable);
 
             $stableData = new StableData(
                 name: mb_trim($newStableName),
@@ -52,7 +55,7 @@ class SplitStableAction
                 members: $membersForNewStable
             );
 
-            $this->membershipService->removeMembers($originalStable, $membersForNewStable, $date);
+            $this->membershipService->removeMembers($lockedStable, $membersForNewStable, $date);
 
             return $this->createAction->handle($stableData);
         });

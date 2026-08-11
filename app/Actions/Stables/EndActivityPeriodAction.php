@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Exceptions\BusinessRules\InvalidDateRangeException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
-use InvalidArgumentException;
+use Illuminate\Support\Facades\DB;
+use LogicException;
 
 /**
  * End the current activity period for a stable.
@@ -21,19 +23,39 @@ class EndActivityPeriodAction
      *
      * @param  Stable  $stable  The stable to end activity for
      * @param  Carbon  $endDate  The date to end the activity period
-     * @throws InvalidArgumentException When parameters are invalid
+     * @throws InvalidDateRangeException When the end date is outside the valid period range
+     * @throws LogicException When the stable has no open activity period
      */
     public function handle(Stable $stable, Carbon $endDate): void
     {
-        // Validate parameters
         if ($endDate->isFuture()) {
-            throw new InvalidArgumentException('Cannot end activity period with future date.');
+            throw InvalidDateRangeException::futureNotAllowed($endDate, 'Stable activity end');
         }
 
-        $currentActivityPeriod = $stable->currentActivityPeriod()->first();
+        DB::transaction(function () use ($stable, $endDate): void {
+            $lockedStable = Stable::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
 
-        if ($currentActivityPeriod) {
+            $currentActivityPeriod = $lockedStable->activityPeriods()
+                ->whereNull('ended_at')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $currentActivityPeriod) {
+                throw new LogicException("Stable {$lockedStable->getKey()} does not have an open activity period.");
+            }
+
+            if ($endDate->lt($currentActivityPeriod->started_at)) {
+                throw InvalidDateRangeException::endBeforeStart(
+                    $currentActivityPeriod->started_at,
+                    $endDate,
+                    'stable activity',
+                );
+            }
+
             $currentActivityPeriod->update(['ended_at' => $endDate]);
-        }
+        });
     }
 }
