@@ -7,7 +7,6 @@ namespace App\Models\Matches;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchLoserFactory;
-use Exception;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -15,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use LogicException;
 
 /**
  * Event match loser model for tracking match losers.
@@ -80,7 +80,7 @@ class MatchLoser extends Model
     /**
      * Get the loser entity with type safety.
      *
-     * @throws Exception
+     * @throws LogicException
      */
     public function getLoser(): Wrestler|TagTeam
     {
@@ -89,7 +89,7 @@ class MatchLoser extends Model
         return match ($loser::class) {
             Wrestler::class,
             TagTeam::class => $loser,
-            default => throw new Exception('Unexpected loser type: '.$loser::class),
+            default => throw new LogicException('Unexpected loser type: '.$loser::class),
         };
     }
 

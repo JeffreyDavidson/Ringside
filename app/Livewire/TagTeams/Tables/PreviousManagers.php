@@ -6,8 +6,8 @@ namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\TagTeams\TagTeamManager;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousManagers extends BasePreviousManagersTable
 {
@@ -24,7 +24,7 @@ class PreviousManagers extends BasePreviousManagersTable
     public function builder(): Builder
     {
         if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
+            throw new LogicException('A tag team was not provided.');
         }
 
         return TagTeamManager::query()

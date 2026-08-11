@@ -7,8 +7,8 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 {
@@ -27,7 +27,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
+            throw new LogicException('A wrestler was not provided.');
         }
 
         // dd(TitleChampionship::query()

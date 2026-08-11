@@ -7,8 +7,8 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
@@ -25,7 +25,7 @@ class PreviousMatches extends BasePreviousMatchesTable
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
+            throw new LogicException('A wrestler was not provided.');
         }
 
         $wrestler = Wrestler::find($this->wrestlerId);

@@ -33,9 +33,8 @@ describe('Previous Managers Table Component', function () {
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'rendering');
 
     it('throws exception when wrestler ID not specified', function () {
-        expect(function () {
-            testLivewire(PreviousManagers::class);
-        })->toThrow(Exception::class, "You didn't specify a wrestler");
+        expect(fn () => (new PreviousManagers())->builder())
+            ->toThrow(LogicException::class, 'A wrestler was not provided.');
         expect(true)->toBeTrue();
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
 

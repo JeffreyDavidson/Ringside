@@ -10,8 +10,8 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\TagTeams\TagTeamWrestler;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class PreviousWrestlers extends DataTableComponent
 {
@@ -29,7 +29,7 @@ class PreviousWrestlers extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->tagTeamId)) {
-            throw new Exception("You didn't specify a tag team");
+            throw new LogicException('A tag team was not provided.');
         }
 
         return TagTeamWrestler::query()

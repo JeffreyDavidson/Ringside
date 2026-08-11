@@ -6,9 +6,9 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Stables\Stable;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use LogicException;
 
 class PreviousStables extends BasePreviousStablesTable
 {
@@ -25,7 +25,7 @@ class PreviousStables extends BasePreviousStablesTable
     public function builder(): Builder
     {
         if (! isset($this->wrestlerId)) {
-            throw new Exception("You didn't specify a wrestler");
+            throw new LogicException('A wrestler was not provided.');
         }
 
         return Stable::query()

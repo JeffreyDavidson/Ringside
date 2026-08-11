@@ -10,9 +10,9 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Stables\StableTagTeam;
 use App\Models\TagTeams\TagTeam;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use LogicException;
 
 class PreviousTagTeams extends DataTableComponent
 {
@@ -28,7 +28,7 @@ class PreviousTagTeams extends DataTableComponent
     public function builder(): Builder
     {
         if (! isset($this->stableId)) {
-            throw new Exception("You didn't specify a stable");
+            throw new LogicException('A stable was not provided.');
         }
 
         return TagTeam::query()
