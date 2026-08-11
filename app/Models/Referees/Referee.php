@@ -14,9 +14,9 @@ use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesIndividualInjury;
+use App\Models\Concerns\ValidatesIndividualRestoration;
 use App\Models\Concerns\ValidatesIndividualRetirement;
 use App\Models\Concerns\ValidatesIndividualSuspension;
-use App\Models\Concerns\ValidatesRestoration;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
@@ -122,9 +122,9 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     use SoftDeletes;
     use ValidatesEmployment;
     use ValidatesIndividualInjury;
+    use ValidatesIndividualRestoration;
     use ValidatesIndividualRetirement;
     use ValidatesIndividualSuspension;
-    use ValidatesRestoration;
 
     /**
      * Get the computed status attribute.
