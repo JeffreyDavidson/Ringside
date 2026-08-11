@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\BusinessRuleReason;
-use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
@@ -73,7 +72,7 @@ test('it maps tag team reinstatement failures from a stable reason', function ()
 });
 
 test('it uses a general message for unknown exceptions', function () {
-    $exception = InvalidMatchConfigurationException::invalidCompetitorCount(1, 'singles');
+    $exception = new RuntimeException('Unknown failure.');
 
     expect(ErrorMessageMappingService::mapWrestlerException($exception))
         ->toBe('wrestlers.errors.general_error');
