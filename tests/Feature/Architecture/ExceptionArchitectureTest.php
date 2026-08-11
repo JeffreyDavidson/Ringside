@@ -71,7 +71,7 @@ test('application code does not directly construct generic exceptions', function
     expect($violations)->toBeEmpty();
 });
 
-test('Livewire components do not catch generic exception types', function () {
+test('application and test code do not catch generic exception types', function () {
     $genericCatchTypes = function (string $contents): array {
         $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
         $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
@@ -97,20 +97,27 @@ test('Livewire components do not catch generic exception types', function () {
         }
         PHP))->toBe([Exception::class]);
 
-    $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(app_path('Livewire'), FilesystemIterator::SKIP_DOTS)
-    );
     $violations = [];
 
-    foreach ($files as $file) {
-        if (! $file instanceof SplFileInfo || ! $file->isFile() || $file->getExtension() !== 'php') {
-            continue;
-        }
+    foreach ([app_path(), base_path('tests')] as $directory) {
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)
+        );
 
-        $contents = file_get_contents($file->getPathname());
+        foreach ($files as $file) {
+            if (! $file instanceof SplFileInfo || ! $file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
 
-        if ($contents !== false && $genericCatchTypes($contents) !== []) {
-            $violations[] = str($file->getPathname())->after(app_path().DIRECTORY_SEPARATOR)->toString();
+            if ($file->getRealPath() === __FILE__) {
+                continue;
+            }
+
+            $contents = file_get_contents($file->getPathname());
+
+            if ($contents !== false && $genericCatchTypes($contents) !== []) {
+                $violations[] = str($file->getPathname())->after(base_path().DIRECTORY_SEPARATOR)->toString();
+            }
         }
     }
 
