@@ -49,7 +49,7 @@ test('it prevents reinstating an injured referee', function () {
 });
 
 test('it reinstates referee with specific reinstatement date', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
     $reinstatementDate = now()->subDays(1);
 
@@ -68,7 +68,7 @@ test('it reinstates referee with specific reinstatement date', function () {
 });
 
 test('it handles DateHelper date resolution', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $reinstatementDate = now()->subDays(2);
 
     resolve(ReinstateAction::class)->handle($referee, $reinstatementDate);
@@ -83,7 +83,7 @@ test('it handles DateHelper date resolution', function () {
 });
 
 test('it validates referee can be reinstated', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
 
     // Should succeed without throwing validation exception
     resolve(ReinstateAction::class)->handle($referee);
@@ -102,7 +102,7 @@ test('it throws exception when referee cannot be reinstated', function () {
 });
 
 test('it maintains referee employment after reinstatement', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->isEmployed())->toBeTrue();
@@ -120,7 +120,7 @@ test('it maintains referee employment after reinstatement', function () {
 });
 
 test('it preserves suspension history', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
     $originalStartedAt = $suspension->started_at;
 

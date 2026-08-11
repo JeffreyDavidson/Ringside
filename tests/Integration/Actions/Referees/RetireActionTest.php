@@ -110,7 +110,7 @@ test('it ends employment when retiring', function () {
 });
 
 test('it ends suspension before retiring', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
     expect($referee->isSuspended())->toBeTrue();
@@ -127,7 +127,7 @@ test('it ends suspension before retiring', function () {
 });
 
 test('it ends injury before retiring', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
     expect($referee->isInjured())->toBeTrue();

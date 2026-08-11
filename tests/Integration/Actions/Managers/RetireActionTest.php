@@ -63,7 +63,7 @@ test('it retires manager with specific retirement date', function () {
 });
 
 test('it retires suspended manager and ends suspension', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();
@@ -90,7 +90,7 @@ test('it retires suspended manager and ends suspension', function () {
 });
 
 test('it retires injured manager and ends injury', function () {
-    $manager = Manager::factory()->employed()->injured()->create();
+    $manager = Manager::factory()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue();

@@ -69,7 +69,7 @@ test('it persists the suspension lifecycle', function () {
 });
 
 test('it prevents suspending already suspended manager', function () {
-    $manager = Manager::factory()->employed()->suspended()->create();
+    $manager = Manager::factory()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
 
@@ -124,7 +124,7 @@ test('it maintains employment status during suspension', function () {
 });
 
 test('it prevents suspending an injured manager', function () {
-    $manager = Manager::factory()->employed()->injured()->create();
+    $manager = Manager::factory()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();

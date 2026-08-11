@@ -70,7 +70,7 @@ test('it ends employment before deletion', function () {
 });
 
 test('it ends suspension before deletion', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
     expect($referee->isSuspended())->toBeTrue();
@@ -93,7 +93,7 @@ test('it ends suspension before deletion', function () {
 });
 
 test('it ends injury before deletion', function () {
-    $referee = Referee::factory()->employed()->injured()->create();
+    $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
     expect($referee->isInjured())->toBeTrue();
@@ -155,7 +155,7 @@ test('it handles DateHelper date resolution for deletion', function () {
 });
 
 test('it maintains transaction boundaries', function () {
-    $referee = Referee::factory()->employed()->suspended()->create();
+    $referee = Referee::factory()->suspended()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
     $suspension = $referee->currentSuspension()->firstOrFail();
 

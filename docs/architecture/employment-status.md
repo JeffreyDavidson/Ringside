@@ -27,6 +27,7 @@ Employment status tracks the working relationship between entities and the promo
 - **Employment End**: Record employment end date when applicable
 - **Employment History**: Track all employment periods
 - **Current Employment**: Determine current employment status
+- **Database Enforcement**: Each employable entity may have only one open employment period while retaining unlimited ended periods
 
 ## Related Documentation
 - [Business Rules](business-rules.md)
