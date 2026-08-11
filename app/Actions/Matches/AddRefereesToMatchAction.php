@@ -50,7 +50,7 @@ class AddRefereesToMatchAction
         // Pre-filter referees to ensure only eligible officials are processed
         $eligibleReferees = $referees->filter(
             fn (Referee $referee) => $this->isRefereeEligibleForMatch($referee, $eventMatch)
-        );
+        )->unique('id')->values();
 
         // Validate we have referees to add after filtering
         if ($eligibleReferees->isEmpty()) {

@@ -48,3 +48,12 @@ test('it rejects a tag team already booked on the event card', function () {
 
     expect($targetMatch->competitors()->count())->toBe(0);
 });
+
+test('it assigns a repeated tag team only once', function () {
+    $match = EventMatch::factory()->create();
+    $tagTeam = TagTeam::factory()->bookable()->create();
+
+    resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$tagTeam, $tagTeam]), 1);
+
+    expect($match->competitors()->count())->toBe(1);
+});

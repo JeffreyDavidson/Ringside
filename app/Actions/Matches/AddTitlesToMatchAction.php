@@ -50,7 +50,7 @@ class AddTitlesToMatchAction
         // Pre-filter titles to ensure only eligible championships are processed
         $eligibleTitles = $titles->filter(
             fn (Title $title) => $this->isTitleEligibleForMatch($title, $eventMatch)
-        );
+        )->unique('id')->values();
 
         // Validate we have titles to add after filtering
         if ($eligibleTitles->isEmpty()) {

@@ -50,7 +50,7 @@ class AddWrestlersToMatchAction
         // Pre-filter wrestlers to ensure only eligible competitors are processed
         $eligibleWrestlers = $wrestlers->filter(
             fn (Wrestler $wrestler) => $this->isWrestlerEligibleForMatch($wrestler, $eventMatch)
-        );
+        )->unique('id')->values();
 
         // Validate we have wrestlers to add after filtering
         if ($eligibleWrestlers->isEmpty()) {

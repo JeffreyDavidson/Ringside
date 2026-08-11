@@ -45,3 +45,12 @@ test('it rejects a referee assigned to another event at the same time', function
 
     expect($targetMatch->referees()->count())->toBe(0);
 });
+
+test('it assigns a repeated referee only once', function () {
+    $match = EventMatch::factory()->create();
+    $referee = Referee::factory()->bookable()->create();
+
+    resolve(AddRefereesToMatchAction::class)->handle($match, $referee->newCollection([$referee, $referee]));
+
+    expect($match->referees()->count())->toBe(1);
+});
