@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\SplitStableAction;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
@@ -11,7 +12,9 @@ use App\Models\Stables\StableTagTeam;
 use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
+use JMac\Testing\Double;
 
 /**
  * Integration tests for SplitStableAction.
@@ -441,28 +444,46 @@ describe('SplitStableAction Integration Tests', function () {
             expect(freshModel($this->originalStable)->currentWrestlers()->count())->toBeGreaterThanOrEqual(0);
         });
 
-        test('split handles transaction rollback on constraint violation', function () {
+        test('split rolls back membership changes when stable creation fails', function () {
             $splitDate = Carbon::now();
-
-            // Get initial counts
             $initialStableCount = Stable::count();
+            $originalMembershipIds = StableWrestler::query()
+                ->whereBelongsTo($this->originalStable)
+                ->whereNull('left_at')
+                ->pluck('id');
+            $originalTagTeamMembershipIds = StableTagTeam::query()
+                ->whereBelongsTo($this->originalStable)
+                ->whereNull('left_at')
+                ->pluck('id');
+            $createAction = Double::for(CreateAction::class);
+            $createAction->expects('handle')
+                ->throws(new LogicException('Stable creation failed.'));
+            $action = new SplitStableAction(
+                $createAction,
+                resolve(StableMembershipService::class),
+            );
 
-            // For now, verify that normal split doesn't affect counts negatively
-            try {
-                $newStable = resolve(SplitStableAction::class)->handle(
-                    $this->originalStable,
-                    $this->newStableName,
-                    $this->membersForNewStable,
-                    $splitDate
-                );
+            expect(fn () => $action->handle(
+                $this->originalStable,
+                $this->newStableName,
+                $this->membersForNewStable,
+                $splitDate
+            ))
+                ->toThrow(LogicException::class, 'Stable creation failed.');
 
-                // Verify operation completed successfully
-                expect(Stable::count())->toBe($initialStableCount + 1);
+            expect(Stable::count())->toBe($initialStableCount)
+                ->and(StableWrestler::query()
+                    ->whereKey($originalMembershipIds)
+                    ->whereNull('left_at')
+                    ->count())
+                ->toBe($originalMembershipIds->count())
+                ->and(StableTagTeam::query()
+                    ->whereKey($originalTagTeamMembershipIds)
+                    ->whereNull('left_at')
+                    ->count())
+                ->toBe($originalTagTeamMembershipIds->count());
 
-            } catch (Exception $e) {
-                // If transaction fails, verify no partial changes occurred
-                expect(Stable::count())->toBe($initialStableCount);
-            }
+            $createAction->verify();
         });
     });
 
