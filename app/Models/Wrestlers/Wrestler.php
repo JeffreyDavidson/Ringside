@@ -20,10 +20,10 @@ use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
+use App\Models\Concerns\ValidatesIndividualSuspension;
 use App\Models\Concerns\ValidatesInjury;
 use App\Models\Concerns\ValidatesRestoration;
 use App\Models\Concerns\ValidatesRetirement;
-use App\Models\Concerns\ValidatesSuspension;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeATagTeamMember;
@@ -157,10 +157,10 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     use ProvidesDisplayName;
     use SoftDeletes;
     use ValidatesEmployment;
+    use ValidatesIndividualSuspension;
     use ValidatesInjury;
     use ValidatesRestoration;
     use ValidatesRetirement;
-    use ValidatesSuspension;
 
     /**
      * Get the attributes that should be cast.
