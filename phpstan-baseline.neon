@@ -1195,18 +1195,6 @@ parameters:
 			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionships.php
 
 		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Managers/Manager.php
-
-		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Managers/Manager.php
-
-		-
 			message: '#^Variable \$firstName on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
@@ -1219,18 +1207,6 @@ parameters:
 			path: app/Models/Managers/Manager.php
 
 		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Referees/Referee.php
-
-		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Referees/Referee.php
-
-		-
 			message: '#^Variable \$firstName on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.variable
 			count: 1
@@ -1241,57 +1217,9 @@ parameters:
 			identifier: nullCoalesce.variable
 			count: 1
 			path: app/Models/Referees/Referee.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Titles\\Title\:\:\$first_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Titles/Title.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Titles\\Title\:\:\$last_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Titles/Title.php
-
-		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Titles/Title.php
-
-		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Titles/Title.php
 
 		-
 			message: '#^Strict comparison using \=\=\= between Illuminate\\Support\\Carbon and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: app/Models/Titles/TitleChampionship.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$first_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Wrestlers/Wrestler.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Wrestlers\\Wrestler\:\:\$last_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Wrestlers/Wrestler.php
-
-		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeRetiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Wrestlers/Wrestler.php
-
-		-
-			message: '#^PHPDoc tag @throws with type App\\Models\\Concerns\\CannotBeUnretiredException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Models/Wrestlers/Wrestler.php
