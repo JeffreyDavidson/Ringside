@@ -153,6 +153,8 @@ Retirement eligibility no longer uses an operation-name string or a generic `Mod
 
 Suspension eligibility follows the same typed boundary. Shared individual validation accepts only wrestlers, managers, and referees. Tag teams retain their established lifecycle validation, while stables and titles do not support suspension. The unused generic suspension contract and tag-team and stable strategy classes were removed rather than preserving unreachable dispatch paths.
 
+Wrestler injury and suspension are mutually exclusive availability states. Both transition Actions acquire a lock on the wrestler and evaluate their opposing-state guard inside the same transaction that opens the new period. Concurrent injury and suspension requests therefore serialize on the wrestler instead of both validating stale state before either period is written.
+
 Tag-team lifecycle validation uses the concrete `Wrestler` models returned by its current-wrestler relationship. It must not probe for speculative capabilities with `method_exists()`. Current wrestler employment remains valid when employing the team, while an injured current wrestler remains unavailable for tag-team unretirement. Any future exclusivity rule must be introduced as an explicit reviewed domain rule with real model behavior and tests.
 
 Tag-team employment eligibility is isolated in `ValidatesTagTeamEmployment`. The concern owns only the model-level `canBeEmployed()` and `ensureCanBeEmployed()` rules; the employment Action continues to own orchestration and persistence. Other tag-team lifecycle dimensions remain separate and will be extracted independently.

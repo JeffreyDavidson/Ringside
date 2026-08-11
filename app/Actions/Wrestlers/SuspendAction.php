@@ -9,6 +9,7 @@ use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
@@ -29,10 +30,17 @@ class SuspendAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $suspensionDate = null): void
     {
-        $wrestler->ensureCanBeSuspended();
-
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
-        $this->suspensionPeriods->start($wrestler, $suspensionDate);
+        DB::transaction(function () use ($wrestler, $suspensionDate): void {
+            $lockedWrestler = Wrestler::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($wrestler->getKey());
+
+            $lockedWrestler->ensureCanBeSuspended();
+
+            $this->suspensionPeriods->start($lockedWrestler, $suspensionDate);
+        });
     }
 }
