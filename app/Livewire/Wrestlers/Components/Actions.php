@@ -13,6 +13,7 @@ use App\Actions\Wrestlers\RestoreAction;
 use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
+use App\Exceptions\BaseBusinessException;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\ErrorMessageMappingService;
 use Illuminate\Contracts\View\View;
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-use Throwable;
 
 /**
  * Wrestler Actions Component
@@ -62,7 +62,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.employed'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             // Log technical details for developers
@@ -101,7 +101,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.released'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler release failed', [
@@ -139,7 +139,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.retired'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler retirement failed', [
@@ -177,7 +177,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.unretired'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler unretirement failed', [
@@ -214,7 +214,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.suspended'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler suspension failed', [
@@ -252,7 +252,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.reinstated'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler reinstatement failed', [
@@ -291,7 +291,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.injured'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler injury recording failed', [
@@ -328,7 +328,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.healed'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler healing failed', [
@@ -365,7 +365,7 @@ class Actions extends Component
 
             $this->dispatch('wrestler-updated');
             session()->flash('success', __('wrestlers.actions.restored'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Wrestler restoration failed', [

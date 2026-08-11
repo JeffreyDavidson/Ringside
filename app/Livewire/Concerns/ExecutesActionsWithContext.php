@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns;
 
+use App\Exceptions\BaseBusinessException;
 use App\Services\ErrorMessageMappingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
-use Throwable;
 
 /**
  * Trait for executing business actions with rich context and error handling.
@@ -66,7 +66,7 @@ trait ExecutesActionsWithContext
             $this->dispatch("{$entityType}-updated");
             session()->flash('success', __("{$entityType}s.actions.{$actionName}"));
 
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             // Log technical details for developers
@@ -134,10 +134,10 @@ trait ExecutesActionsWithContext
     /**
      * Map exception to user-friendly message based on entity type.
      *
-     * @param  Throwable  $exception  The exception to map
+     * @param  BaseBusinessException  $exception  The business exception to map
      * @param  string  $entityType  Entity type for mapping
      */
-    protected function mapExceptionToUserMessage(Throwable $exception, string $entityType): string
+    protected function mapExceptionToUserMessage(BaseBusinessException $exception, string $entityType): string
     {
         return match ($entityType) {
             'wrestler' => ErrorMessageMappingService::mapWrestlerException($exception),

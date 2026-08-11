@@ -13,6 +13,7 @@ use App\Actions\Referees\RestoreAction;
 use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
+use App\Exceptions\BaseBusinessException;
 use App\Models\Referees\Referee;
 use App\Services\ErrorMessageMappingService;
 use Illuminate\Contracts\View\View;
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
-use Throwable;
 
 /**
  * Referee Actions Component
@@ -62,7 +62,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.employed'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             // Log technical details for developers
@@ -101,7 +101,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.released'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee release failed', [
@@ -140,7 +140,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.retired'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee retirement failed', [
@@ -179,7 +179,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.unretired'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee unretirement failed', [
@@ -217,7 +217,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.suspended'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee suspension failed', [
@@ -255,7 +255,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.reinstated'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee reinstatement failed', [
@@ -293,7 +293,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.injured'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee injury recording failed', [
@@ -331,7 +331,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.healed'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee healing failed', [
@@ -369,7 +369,7 @@ class Actions extends Component
 
             $this->dispatch('referee-updated');
             session()->flash('success', __('referees.actions.restored'));
-        } catch (Throwable $e) {
+        } catch (BaseBusinessException $e) {
             Context::push('action_breadcrumbs', 'action_failed_with_exception');
 
             Log::warning('Referee restoration failed', [
