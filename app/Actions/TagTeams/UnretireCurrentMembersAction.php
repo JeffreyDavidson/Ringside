@@ -6,10 +6,10 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\UnretireAction as UnretireManagerAction;
 use App\Actions\Wrestlers\UnretireAction as UnretireWrestlerAction;
+use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Exception;
 use Illuminate\Support\Carbon;
 
 class UnretireCurrentMembersAction
@@ -27,7 +27,7 @@ class UnretireCurrentMembersAction
         foreach ($wrestlers as $wrestler) {
             try {
                 $this->unretireWrestler->handle($wrestler, $unretirementDate, false);
-            } catch (Exception) {
+            } catch (CannotBeUnretiredException) {
                 continue;
             }
         }
@@ -38,7 +38,7 @@ class UnretireCurrentMembersAction
         foreach ($managers as $manager) {
             try {
                 $this->unretireManager->handle($manager, $unretirementDate, false);
-            } catch (Exception) {
+            } catch (CannotBeUnretiredException) {
                 continue;
             }
         }

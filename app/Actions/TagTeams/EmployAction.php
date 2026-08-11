@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\EmployCurrentManagersAction;
+use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
-use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +35,7 @@ class EmployAction
      *
      * @param  TagTeam  $tagTeam  The tag team to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
-     * @throws Exception When tag team cannot be employed due to business rules
+     * @throws CannotBeEmployedException When the tag team cannot be employed
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
