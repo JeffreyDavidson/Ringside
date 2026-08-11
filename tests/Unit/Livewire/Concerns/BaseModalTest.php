@@ -183,9 +183,7 @@ describe('BaseModal Unit Tests', function () {
             $source = reflectionSource($reflection);
 
             // Check for actual imports in BaseModal
-            expect($source)->toContain('use Exception;');
             expect($source)->toContain('use Illuminate\\Database\\Eloquent\\Model;');
-            expect($source)->toContain('use Illuminate\\Support\\Facades\\Log;');
             expect($source)->toContain('use Illuminate\\View\\View;');
             expect($source)->toContain('use LivewireUI\\Modal\\ModalComponent;');
         });

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use Livewire\Form;
@@ -260,12 +259,12 @@ abstract class BaseForm extends Form
      *
      * The method provides several layers of safety:
      * 1. Checks if the model exists (handles creation mode gracefully)
-     * 2. Verifies the requested field exists on the model
+     * 2. Accesses the requested field directly so field access failures propagate
      * 3. Handles null field values with appropriate fallbacks
      * 4. Converts values to strings for display purposes
      *
      * @param  string  $fieldName  The name of the model field to extract
-     * @return string The field value as a string, or 'Unknown' if unavailable
+     * @return string The field value as a string, or 'Unknown' when the model or value is null
      *
      * @example
      * ```php
@@ -300,15 +299,9 @@ abstract class BaseForm extends Form
             return 'Unknown';
         }
 
-        // Try to access the field (handles both properties and accessors)
-        try {
-            $value = $this->formModel->{$fieldName};
+        $value = $this->formModel->{$fieldName};
 
-            return (string) ($value ?? 'Unknown');
-        } catch (Exception) {
-            // Fallback for non-existent fields or other errors
-            return 'Unknown';
-        }
+        return (string) ($value ?? 'Unknown');
     }
 
     /**
@@ -499,7 +492,6 @@ abstract class BaseForm extends Form
      * - Maintains the existing model reference
      *
      *
-     * @throws Exception If model creation or update fails
      * @return bool True if the model was successfully saved, false otherwise
      *
      * @see getModelData() For data transformation requirements
