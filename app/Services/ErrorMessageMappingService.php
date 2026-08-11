@@ -15,7 +15,13 @@ use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Exceptions\Roster\TagTeams\CannotBeEmployedException as TagTeamCannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException as TagTeamCannotBeReinstatedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReleasedException as TagTeamCannotBeReleasedException;
+use App\Exceptions\Roster\TagTeams\CannotBeRestoredException as TagTeamCannotBeRestoredException;
+use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRetiredException;
+use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
+use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
 use Throwable;
 
 final class ErrorMessageMappingService
@@ -47,16 +53,22 @@ final class ErrorMessageMappingService
             : BusinessRuleReason::General;
 
         $key = match ($exception::class) {
-            CannotBeEmployedException::class => self::employmentKey($reason, $entity),
-            CannotBeReleasedException::class => self::releaseKey($reason, $entity),
-            CannotBeRetiredException::class => self::retirementKey($reason, $entity),
-            CannotBeUnretiredException::class => self::unretirementKey($reason),
-            CannotBeSuspendedException::class => self::suspensionKey($reason, $entity),
+            CannotBeEmployedException::class,
+            TagTeamCannotBeEmployedException::class => self::employmentKey($reason, $entity),
+            CannotBeReleasedException::class,
+            TagTeamCannotBeReleasedException::class => self::releaseKey($reason, $entity),
+            CannotBeRetiredException::class,
+            TagTeamCannotBeRetiredException::class => self::retirementKey($reason, $entity),
+            CannotBeUnretiredException::class,
+            TagTeamCannotBeUnretiredException::class => self::unretirementKey($reason),
+            CannotBeSuspendedException::class,
+            TagTeamCannotBeSuspendedException::class => self::suspensionKey($reason, $entity),
             CannotBeReinstatedException::class,
             TagTeamCannotBeReinstatedException::class => self::reinstatementKey($reason),
             CannotBeInjuredException::class => self::injuryKey($reason, $entity),
             CannotBeClearedFromInjuryException::class => self::healingKey($reason),
-            CannotBeRestoredException::class => self::restorationKey($reason),
+            CannotBeRestoredException::class,
+            TagTeamCannotBeRestoredException::class => self::restorationKey($reason),
             default => 'general_error',
         };
 
