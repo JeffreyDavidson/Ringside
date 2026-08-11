@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableMembershipData;
+use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
@@ -16,7 +17,8 @@ class MergeStablesAction
      * Create a new merge stables action instance.
      */
     public function __construct(
-        protected StableMembershipService $membershipService
+        protected StableMembershipService $membershipService,
+        protected EndActivityPeriodAction $endActivityPeriodAction,
     ) {}
 
     /**
@@ -42,8 +44,15 @@ class MergeStablesAction
                 tagTeams: $secondaryStable->currentTagTeams,
             );
 
+            $unavailableMemberNames = $members->getUnavailableMemberNames();
+
+            if ($unavailableMemberNames !== []) {
+                throw CannotBeMergedException::membersUnavailable($unavailableMemberNames);
+            }
+
             $this->membershipService->removeMembers($secondaryStable, $members, $date);
             $this->membershipService->addMembers($primaryStable, $members, $date);
+            $this->endActivityPeriodAction->handle($secondaryStable, $date);
             $secondaryStable->delete();
         });
     }

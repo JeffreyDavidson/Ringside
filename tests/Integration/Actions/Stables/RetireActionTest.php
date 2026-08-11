@@ -155,9 +155,20 @@ test('it retires the current tag teams and current wrestlers of a stable', funct
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    resolve(RetireAction::class)->handle($stable);
-})->throws(CannotBeRetiredException::class)->with([
+    expect($stable->canBeRetired())->toBeFalse()
+        ->and(fn () => resolve(RetireAction::class)->handle($stable))
+        ->toThrow(CannotBeRetiredException::class);
+})->with([
     'unactivated',
     'withFutureActivation',
     'retired',
 ]);
+
+test('it rejects a deleted stable', function () {
+    $stable = Stable::factory()->inactive()->create();
+    $stable->delete();
+
+    expect($stable->canBeRetired())->toBeFalse()
+        ->and(fn () => resolve(RetireAction::class)->handle($stable))
+        ->toThrow(CannotBeRetiredException::class);
+});

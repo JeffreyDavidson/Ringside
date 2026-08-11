@@ -36,6 +36,13 @@ use App\Models\Stables\Stable;
  */
 final class CannotBeUnretiredException extends BaseBusinessException
 {
+    public static function deleted(Stable $stable): static
+    {
+        $context = self::formatModelContext($stable);
+
+        return new self("{$context} cannot be unretired because it is deleted. Restore the stable first.");
+    }
+
     /**
      * Stable is not currently retired and cannot be unretired.
      *

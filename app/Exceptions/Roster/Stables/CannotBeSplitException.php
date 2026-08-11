@@ -90,6 +90,31 @@ final class CannotBeSplitException extends BaseBusinessException
     }
 
     /**
+     * One or more selected members do not belong to the original stable.
+     *
+     * @param  array<int, string>  $memberNames
+     */
+    public static function membersDoNotBelongToStable(array $memberNames): static
+    {
+        return new self('Cannot split stable: these selected members do not belong to the original stable: '.implode(', ', $memberNames).'.');
+    }
+
+    /**
+     * One or more selected members are unavailable for the new stable.
+     *
+     * @param  array<int, string>  $memberNames
+     */
+    public static function membersUnavailable(array $memberNames): static
+    {
+        return new self('Cannot split stable: these selected members are unavailable: '.implode(', ', $memberNames).'.');
+    }
+
+    public static function resultingStableBelowMinimum(string $stable, int $memberCount, int $minimumRequired): static
+    {
+        return new self("Cannot split stable: the {$stable} stable would have {$memberCount} members but requires at least {$minimumRequired}.");
+    }
+
+    /**
      * Stable cannot be split during active championship reigns.
      *
      * @param  Stable  $stable  The stable that cannot be split

@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReuniteAction
 {
@@ -14,7 +15,7 @@ class ReuniteAction
      * Create a new reunite action instance.
      */
     public function __construct(
-        protected EstablishAction $establishAction
+        protected StartActivityPeriodAction $startActivityPeriodAction,
     ) {}
 
     /**
@@ -36,6 +37,8 @@ class ReuniteAction
 
         $reuniteDate ??= now();
 
-        $this->establishAction->handle($stable, $reuniteDate);
+        DB::transaction(
+            fn () => $this->startActivityPeriodAction->handle($stable, $reuniteDate),
+        );
     }
 }

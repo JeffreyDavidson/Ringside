@@ -8,10 +8,13 @@ use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
 use App\Enums\Stables\StableStatus;
+use App\Exceptions\BusinessRules\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
+use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
@@ -53,6 +56,16 @@ describe('Stable Activation Action Integration', function () {
             $refreshedStable = freshModel($this->stable);
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->firstOrFail();
             expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($pastDate->format('Y-m-d H:i:s'));
+        });
+
+        test('debut action rejects an end date before its activation date', function () {
+            $activationDate = now()->subMonth();
+            $endDate = $activationDate->copy()->subDay();
+
+            expect(fn () => resolve(EstablishAction::class)->handle($this->stable, $activationDate, $endDate))
+                ->toThrow(InvalidDateRangeException::class);
+
+            expect($this->stable->activityPeriods()->doesntExist())->toBeTrue();
         });
 
         test('debut action from unformed status creates proper status change', function () {
@@ -221,6 +234,54 @@ describe('Stable Activation Action Integration', function () {
             expect($retiredWrestler->refresh()->isRetired())->toBeTrue()
                 ->and($retiredTagTeam->refresh()->isRetired())->toBeTrue();
         });
+
+        test('retired employed former members are unavailable for reunion', function () {
+            $wrestler = Wrestler::factory()->employed()->create();
+            $wrestler->retirements()->create(['started_at' => now()]);
+            $tagTeam = TagTeam::factory()->employed()->create();
+            $tagTeam->retirements()->create(['started_at' => now()]);
+
+            $this->retiredStable->wrestlers()->attach($wrestler, [
+                'joined_at' => now()->subMonth(),
+                'left_at' => now()->subWeek(),
+            ]);
+            $this->retiredStable->tagTeams()->attach($tagTeam, [
+                'joined_at' => now()->subMonth(),
+                'left_at' => now()->subWeek(),
+            ]);
+
+            $availableFormerMembers = $this->retiredStable->getAvailableFormerMembers();
+            $unavailableFormerMembers = $this->retiredStable->getUnavailableKeyFormerMembers();
+
+            expect($availableFormerMembers->contains(fn ($member): bool => $member->is($wrestler)))->toBeFalse()
+                ->and($availableFormerMembers->contains(fn ($member): bool => $member->is($tagTeam)))->toBeFalse()
+                ->and($unavailableFormerMembers->contains(fn ($member): bool => $member->is($wrestler)))->toBeTrue()
+                ->and($unavailableFormerMembers->contains(fn ($member): bool => $member->is($tagTeam)))->toBeTrue();
+        });
+
+        test('unretire eligibility respects the former member option', function () {
+            $stable = Stable::factory()
+                ->has(StableRetirement::factory()->started(now()->subDay()), 'retirements')
+                ->create();
+
+            expect($stable->canBeUnretired())->toBeFalse()
+                ->and($stable->canBeUnretired(requireFormerMembers: false))->toBeTrue()
+                ->and(fn () => $stable->ensureCanBeUnretired())
+                ->toThrow(CannotBeUnretiredException::class)
+                ->and(fn () => $stable->ensureCanBeUnretired(requireFormerMembers: false))
+                ->not->toThrow(CannotBeUnretiredException::class);
+        });
+
+        test('unretire action rejects a deleted stable', function () {
+            $this->retiredStable->delete();
+
+            expect($this->retiredStable->canBeUnretired())->toBeFalse()
+                ->and(fn () => resolve(UnretireAction::class)->handle($this->retiredStable))
+                ->toThrow(
+                    CannotBeUnretiredException::class,
+                    CannotBeUnretiredException::deleted($this->retiredStable)->getMessage(),
+                );
+        });
     });
 
     describe('complex lifecycle scenarios', function () {
@@ -311,7 +372,7 @@ describe('Stable Activation Action Integration', function () {
             $activeStable = Stable::factory()->active()->create();
 
             expect(fn () => resolve(ReuniteAction::class)->handle($activeStable, Carbon::now()))
-                ->toThrow(CannotBeEstablishedException::class);
+                ->toThrow(CannotBeReunitedException::class);
         });
 
         test('retire action works from active or disbanded status', function () {

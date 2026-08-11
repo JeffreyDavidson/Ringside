@@ -212,18 +212,18 @@ describe('StablesTable Component', function () {
         });
 
         test('establish action integration works correctly', function () {
-            $inactiveStable = Stable::factory()->inactive()->create(['name' => 'Inactive Stable']);
+            $unformedStable = Stable::factory()->unactivated()->create(['name' => 'Unformed Stable']);
 
             actingAs($this->admin);
 
             $component = livewire(Main::class);
 
-            $component->call('establish', $inactiveStable)
+            $component->call('establish', $unformedStable)
                 ->assertHasNoErrors()
                 ->assertRedirect();
 
             // Verify stable is established
-            expect(freshModel($inactiveStable)->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($unformedStable)->isCurrentlyActive())->toBeTrue();
         });
 
         test('restore action integration works correctly', function () {

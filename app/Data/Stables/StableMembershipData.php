@@ -91,14 +91,37 @@ readonly class StableMembershipData
     }
 
     /**
-     * Get total count of all members.
+     * Get the stable headcount, counting wrestlers as one and tag teams as two.
      */
     public function getTotalMemberCount(): int
     {
         $wrestlerCount = $this->wrestlers?->count() ?? 0;
         $tagTeamCount = $this->tagTeams?->count() ?? 0;
 
-        return $wrestlerCount + $tagTeamCount;
+        return $wrestlerCount + ($tagTeamCount * 2);
+    }
+
+    /**
+     * Get the names of members that cannot join a stable now.
+     *
+     * @return array<int, string>
+     */
+    public function getUnavailableMemberNames(): array
+    {
+        $unavailableWrestlers = $this->wrestlers?->filter(
+            fn (Wrestler $wrestler): bool => ! $wrestler->isEmployed()
+                || $wrestler->isSuspended()
+                || $wrestler->isInjured()
+                || $wrestler->isRetired()
+        )->pluck('name')->all() ?? [];
+
+        $unavailableTagTeams = $this->tagTeams?->filter(
+            fn (TagTeam $tagTeam): bool => ! $tagTeam->isEmployed()
+                || $tagTeam->isSuspended()
+                || $tagTeam->isRetired()
+        )->pluck('name')->all() ?? [];
+
+        return [...$unavailableWrestlers, ...$unavailableTagTeams];
     }
 
     /**

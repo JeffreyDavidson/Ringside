@@ -94,6 +94,10 @@ Stable unretirement changes only the stable's retirement and activity state. It 
 
 Stable restoration only restores the soft-deleted record and preserves its historical state. Reunion and activation remain explicit subsequent operations, so restoration does not depend on current former-member availability.
 
+Stable retirement eligibility is isolated in `ValidatesStableRetirement`. Retirement and unretirement remain paired as opposite transitions of the retirement lifecycle dimension. The concern owns stable state, soft-deletion, name-conflict, and optional former-member availability rules; the Actions continue to own retirement-period persistence, dates, transactions, and establishment orchestration.
+
+Stable deletion eligibility is isolated in `ValidatesStableDeletion`. Deletion requires the stable to have already been disbanded and its current memberships to have already ended, so `DeleteAction` changes only the soft-deletion state. Restoration remains paired with deletion and restores only the historical record without reuniting it.
+
 ### Transition policies
 
 A transition policy decides whether a lifecycle transition is permitted and provides the relevant domain failure.
@@ -160,6 +164,10 @@ Tag-team retirement eligibility is isolated in `ValidatesTagTeamRetirement`. Ret
 Tag-team release eligibility is isolated in `ValidatesTagTeamRelease`. The concern owns the requirement that a team be employed before release; the Action continues to own employment and suspension period closure, dates, transactions, and relationship cleanup.
 
 Tag-team deletion eligibility is isolated in `ValidatesTagTeamDeletion`. Deletion and restoration remain paired as opposite transitions of the soft-deletion lifecycle dimension. The concern owns inactive-state and active-name-conflict rules; the Actions continue to own transactions, soft deletion, restoration, and relationship cleanup. The former catch-all `ValidatesTagTeamLifecycle` concern has been removed now that each lifecycle dimension has a dedicated boundary.
+
+Stable activity eligibility is isolated in `ValidatesStableActivity`. Establishment is the first activity transition and is available only to a stable with no activity history. Disbandment closes a current activity period, while reunion opens a later period for a previously active stable that satisfies the existing former-member availability rules. The concern keeps each boolean predicate aligned with its throwing guard and reports reunion failures through `CannotBeReunitedException`. `StartActivityPeriodAction` owns the shared open-period mutation used by establishment, reunion, and optional immediate activity after unretirement; the coordinating typed Actions retain transition validation, dates, membership consequences, and transactions.
+
+Stable retirement and soft deletion eligibility are isolated in `ValidatesStableRetirement` and `ValidatesStableDeletion`. Deleted stables cannot enter retirement transitions, deletion requires the stable to be inactive and without current members, and restoration preserves historical state without implicitly reuniting members. Stable split and merge state eligibility lives in `ValidatesStableRestructuring`; their Actions own selection-specific invariants, membership mutations, activity closure, and transaction boundaries. Former-member availability queries are shared through `FindsAvailableStableFormerMembers` rather than a catch-all lifecycle validator. The former `ValidatesStableLifecycle` concern and unused `StableRetirementValidation` strategy have been removed.
 
 The following generalized classes were confirmed to have no production, configuration, container, console, route, or test consumers and were removed rather than retained as foundations for the target architecture:
 

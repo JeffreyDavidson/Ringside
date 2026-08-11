@@ -17,7 +17,7 @@ class UnretireAction
      * Create a new unretire action instance.
      */
     public function __construct(
-        protected EstablishAction $establishAction,
+        protected StartActivityPeriodAction $startActivityPeriodAction,
         protected RetirementPeriodManager $retirementPeriods,
     ) {}
 
@@ -55,7 +55,7 @@ class UnretireAction
             $stable->update(['status' => StableStatus::Inactive]);
 
             if ($establishImmediately) {
-                $this->establishAction->handle($stable, $unretiredDate);
+                $this->startActivityPeriodAction->handle($stable, $unretiredDate);
             }
         });
     }
