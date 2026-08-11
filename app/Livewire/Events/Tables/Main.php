@@ -15,7 +15,6 @@ use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -141,12 +140,8 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $event);
 
-        try {
-            resolve(RestoreAction::class)->handle($event);
-            session()->flash('status', 'Event successfully restored.');
-            $this->redirect(route('events.index'));
-        } catch (Exception $e) {
-            session()->flash('status', $e->getMessage());
-        }
+        resolve(RestoreAction::class)->handle($event);
+        session()->flash('status', 'Event successfully restored.');
+        $this->redirect(route('events.index'));
     }
 }

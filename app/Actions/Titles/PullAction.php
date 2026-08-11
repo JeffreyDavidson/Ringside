@@ -27,7 +27,7 @@ class PullAction
      * @param  Title  $title  The title to pull
      * @param  Carbon|null  $pullDate  The pull date (defaults to now)
      * @param  string|null  $notes  Optional notes about the pull
-     * @throws CannotBeDeactivatedException When title cannot be pulled due to business rules
+     * @throws CannotBePulledException When title cannot be pulled due to business rules
      */
     public function handle(Title $title, ?Carbon $pullDate = null, ?string $notes = null): void
     {

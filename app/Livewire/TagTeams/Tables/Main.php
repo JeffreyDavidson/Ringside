@@ -13,12 +13,14 @@ use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
-use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
-use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
-use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
-use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
-use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Exceptions\BaseBusinessException;
+use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
+use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
+use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
+use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
+use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
@@ -26,7 +28,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\TagTeams\TagTeam;
-use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
@@ -167,7 +168,7 @@ class Main extends BaseTable
 
         try {
             resolve(RestoreAction::class)->handle($tagTeam);
-        } catch (Exception $e) {
+        } catch (CannotBeRestoredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -239,7 +240,7 @@ class Main extends BaseTable
                 'unretire' => resolve(UnretireAction::class)->handle($tagTeam),
                 default => null,
             };
-        } catch (Exception $e) {
+        } catch (BaseBusinessException $e) {
             session()->flash('error', $e->getMessage());
         }
     }

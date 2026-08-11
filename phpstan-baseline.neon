@@ -7,12 +7,6 @@ parameters:
 			path: app/Actions/Matches/AddMatchForEventAction.php
 
 		-
-			message: '#^PHPDoc tag @throws with type App\\Actions\\Titles\\CannotBeDeactivatedException is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: app/Actions/Titles/PullAction.php
-
-		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Matches\\MatchCompetitor\>\:\:map\(\) expects callable\(App\\Models\\Matches\\MatchCompetitor, int\)\: Illuminate\\Support\\Collection\<int, App\\Models\\TagTeams\\TagTeam\|App\\Models\\Wrestlers\\Wrestler\>, Closure\(App\\Collections\\MatchCompetitorsCollection\)\: Illuminate\\Support\\Collection\<int, App\\Models\\TagTeams\\TagTeam\|App\\Models\\Wrestlers\\Wrestler\> given\.$#'
 			identifier: argument.type
 			count: 1

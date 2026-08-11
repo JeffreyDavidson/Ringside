@@ -10,8 +10,10 @@ use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
+use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
@@ -21,7 +23,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Stables\Stable;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
@@ -144,7 +145,7 @@ class Main extends BaseTable
         try {
             resolve(RestoreAction::class)->handle($stable);
             $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (Exception $e) {
+        } catch (CannotBeRestoredException $e) {
             session()->flash('error', $e->getMessage());
             $this->redirect(request()->header('Referer') ?: route('stables.index'));
         }
@@ -197,7 +198,7 @@ class Main extends BaseTable
                 'unretire' => resolve(UnretireAction::class)->handle($stable),
                 default => null,
             };
-        } catch (Exception $e) {
+        } catch (BaseBusinessException $e) {
             session()->flash('error', $e->getMessage());
         }
     }

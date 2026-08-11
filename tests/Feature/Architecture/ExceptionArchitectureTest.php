@@ -65,3 +65,18 @@ test('application code does not directly construct generic exceptions', function
 
     expect($violations)->toBeEmpty();
 });
+
+test('Livewire table actions do not catch generic exception types', function () {
+    $violations = collect(glob(app_path('Livewire/*/Tables/Main.php')) ?: [])
+        ->filter(function (string $filename): bool {
+            $contents = file_get_contents($filename);
+
+            return $contents !== false
+                && preg_match('/catch\s*\(\s*(?:\\\\?Exception|\\\\?Throwable)\b/', $contents) === 1;
+        })
+        ->map(fn (string $filename): string => str($filename)->after(app_path().DIRECTORY_SEPARATOR)->toString())
+        ->values()
+        ->all();
+
+    expect($violations)->toBeEmpty();
+});

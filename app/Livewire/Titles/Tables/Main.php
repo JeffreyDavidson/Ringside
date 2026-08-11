@@ -10,6 +10,10 @@ use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Builders\Titles\TitleBuilder;
+use App\Exceptions\Titles\CannotBeDebutedException;
+use App\Exceptions\Titles\CannotBePulledException;
+use App\Exceptions\Titles\CannotBeRetiredException;
+use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
@@ -18,7 +22,6 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -209,7 +212,7 @@ class Main extends BaseTable
 
         try {
             resolve(DebutAction::class)->handle($title);
-        } catch (Exception $e) {
+        } catch (CannotBeDebutedException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -228,7 +231,7 @@ class Main extends BaseTable
 
         try {
             resolve(PullAction::class)->handle($title);
-        } catch (Exception $e) {
+        } catch (CannotBePulledException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -264,7 +267,7 @@ class Main extends BaseTable
 
         try {
             resolve(RetireAction::class)->handle($title);
-        } catch (Exception $e) {
+        } catch (CannotBeRetiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
@@ -283,7 +286,7 @@ class Main extends BaseTable
 
         try {
             resolve(UnretireAction::class)->handle($title);
-        } catch (Exception $e) {
+        } catch (CannotBeUnretiredException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
 
