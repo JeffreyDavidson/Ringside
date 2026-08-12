@@ -10,17 +10,17 @@ use App\Data\Stables\StableMembershipData;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\FindsAvailableStableFormerMembers;
 use App\Models\Concerns\HasActivityPeriods;
+use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HasMembers;
-use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ValidatesStableActivity;
 use App\Models\Concerns\ValidatesStableDeletion;
 use App\Models\Concerns\ValidatesStableRestructuring;
 use App\Models\Concerns\ValidatesStableRetirement;
-use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
 use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Lifecycle\LifecycleTransition;
 use App\Models\Lifecycle\Retirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -38,7 +38,6 @@ use Illuminate\Support\Carbon;
 use Tests\Unit\Models\Stables\StableTest;
 
 /**
- * @implements Debutable<StableStatusChange, static>
  * @implements HasActivityPeriodsContract<static>
  * @implements Retirable<static>
  *
@@ -49,9 +48,7 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  *
- * @property-read StableStatusChange|null $debutStatusChange
- * @property-read StableStatusChange|null $latestStatusChange
- * @property-read Collection<int, StableStatusChange> $statusChanges
+ * @property-read Collection<int, LifecycleTransition> $lifecycleTransitions
  * @property-read Retirement|null $currentRetirement
  * @property-read Retirement|null $previousRetirement
  * @property-read Collection<int, Retirement> $retirements
@@ -112,7 +109,7 @@ use Tests\Unit\Models\Stables\StableTest;
 #[Appends('status')]
 #[UseFactory(StableFactory::class)]
 #[UseEloquentBuilder(StableBuilder::class)]
-class Stable extends Model implements Debutable, HasActivityPeriodsContract, Retirable
+class Stable extends Model implements HasActivityPeriodsContract, Retirable
 {
     use FindsAvailableStableFormerMembers;
 
@@ -122,11 +119,8 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
     /** @use HasFactory<StableFactory> */
     use HasFactory;
 
+    use HasLifecycleTransitions;
     use HasMembers;
-
-    /** @use HasStatusHistory<StableStatusChange, static> */
-    use HasStatusHistory;
-
     use HasStatusScopes;
 
     /** @use IsRetirable<static> */

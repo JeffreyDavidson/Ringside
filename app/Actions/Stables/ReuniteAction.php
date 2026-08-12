@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -17,6 +20,7 @@ class ReuniteAction
      */
     public function __construct(
         protected StartActivityPeriodAction $startActivityPeriodAction,
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
     ) {}
 
     /**
@@ -44,6 +48,12 @@ class ReuniteAction
 
             $lockedStable->ensureCanBeReunited();
             $this->startActivityPeriodAction->handle($lockedStable, $reuniteDate);
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Reunited,
+                $reuniteDate,
+            );
         });
     }
 }

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
@@ -12,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class DebutAction
 {
-    public function __construct(private StartActivityPeriodAction $startActivityPeriod) {}
+    public function __construct(
+        private StartActivityPeriodAction $startActivityPeriod,
+        private RecordLifecycleTransitionAction $recordLifecycleTransition,
+    ) {}
 
     /**
      * Debut a title and make it available for championship competition.
@@ -33,7 +39,7 @@ class DebutAction
     {
         $debutDate = $debutDate ?? now();
 
-        DB::transaction(function () use ($title, $debutDate): void {
+        DB::transaction(function () use ($title, $debutDate, $notes): void {
             $lockedTitle = Title::query()
                 ->lockForUpdate()
                 ->findOrFail($title->getKey());
@@ -41,6 +47,13 @@ class DebutAction
             $lockedTitle->ensureCanBeDebuted();
 
             $this->startActivityPeriod->handle($lockedTitle, $debutDate, rescheduleFuturePeriod: true);
+            $this->recordLifecycleTransition->handle(
+                $lockedTitle,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Debuted,
+                $debutDate,
+                array_filter(['notes' => $notes]),
+            );
         });
     }
 }

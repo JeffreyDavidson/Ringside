@@ -6,7 +6,7 @@ use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Concerns\HasChampionships;
-use App\Models\Concerns\HasStatusHistory;
+use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Titles\Title;
@@ -63,7 +63,7 @@ describe('Title Model Unit Tests', function () {
         test('uses all required traits', function () {
             expect(class_uses(Title::class))->toContain(HasChampionships::class);
             expect(class_uses(Title::class))->toContain(HasFactory::class);
-            expect(class_uses(Title::class))->toContain(HasStatusHistory::class);
+            expect(class_uses(Title::class))->toContain(HasLifecycleTransitions::class);
             expect(class_uses(Title::class))->toContain(IsRetirable::class);
             expect(class_uses(Title::class))->toContain(ProvidesDisplayName::class);
             expect(class_uses(Title::class))->toContain(SoftDeletes::class);

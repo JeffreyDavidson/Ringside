@@ -39,7 +39,7 @@ class DeleteAction
 
         DB::transaction(function () use ($title, $deletionDate): void {
             // Handle title status cleanup based on current state
-            if ($title->hasDebuted() && $title->isCurrentlyActive()) {
+            if ($title->isCurrentlyActive()) {
                 // End active status (pull the title from active competition)
                 $title->activityPeriods()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
             } elseif ($title->isRetired()) {

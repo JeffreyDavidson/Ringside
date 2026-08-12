@@ -28,3 +28,6 @@ Store retirement periods in App\Models\Lifecycle\Retirement through the polymorp
 
 ## Use shared polymorphic activity periods
 Store stable and title operational periods in App\Models\Lifecycle\ActivityPeriod through the polymorphic activeable owner. Keep wrestling-specific transitions in typed Actions such as DebutAction, PullAction, ReinstateAction, EstablishAction, DisbandAction, and ReuniteAction; use the shared lifecycle start/end Actions only for persistence, locking, and period integrity.
+
+## Separate lifecycle state from transition auditing
+Use lifecycle period models as the authoritative source of current and historical state. Use the immutable polymorphic LifecycleTransition model only as an audit log of named transitions, effective dates, actors, and optional context; never derive current state from transition records.

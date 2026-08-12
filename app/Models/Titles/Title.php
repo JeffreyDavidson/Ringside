@@ -10,16 +10,16 @@ use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasChampionships;
-use App\Models\Concerns\HasStatusHistory;
+use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesTitleLifecycle;
 use App\Models\Concerns\ValidatesTitleRetirement;
-use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
 use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Lifecycle\LifecycleTransition;
 use App\Models\Lifecycle\Retirement;
 use Database\Factories\Titles\TitleFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -34,7 +34,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
- * @implements Debutable<TitleStatusChange, static>
  * @implements HasActivityPeriodsContract<static>
  * @implements Retirable<static>
  *
@@ -45,9 +44,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  *
- * @property-read TitleStatusChange|null $debutStatusChange
- * @property-read TitleStatusChange|null $latestStatusChange
- * @property-read Collection<int, TitleStatusChange> $statusChanges
+ * @property-read Collection<int, LifecycleTransition> $lifecycleTransitions
  * @property-read Retirement|null $currentRetirement
  * @property-read Retirement|null $previousRetirement
  * @property-read Collection<int, Retirement> $retirements
@@ -103,7 +100,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(TitleFactory::class)]
 #[UseEloquentBuilder(TitleBuilder::class)]
-class Title extends Model implements Debutable, HasActivityPeriodsContract, HasDisplayName, Retirable
+class Title extends Model implements HasActivityPeriodsContract, HasDisplayName, Retirable
 {
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
@@ -113,9 +110,7 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
     /** @use HasFactory<TitleFactory> */
     use HasFactory;
 
-    /** @use HasStatusHistory<TitleStatusChange, static> */
-    use HasStatusHistory;
-
+    use HasLifecycleTransitions;
     use HasStatusScopes;
 
     /** @use IsRetirable<static> */

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Models\Lifecycle\ActivityPeriod;
@@ -16,6 +19,7 @@ class EstablishAction
 {
     public function __construct(
         protected StartActivityPeriodAction $startActivityPeriodAction,
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
     ) {}
 
     /**
@@ -58,6 +62,14 @@ class EstablishAction
                 if ($endDate) {
                     $activityPeriod->update(['ended_at' => $endDate]);
                 }
+
+                $this->recordLifecycleTransitionAction->handle(
+                    $lockedStable,
+                    LifecycleDimension::Activity,
+                    LifecycleTransitionType::Established,
+                    $activationDate,
+                    array_filter(['ended_at' => $endDate?->toDateTimeString()]),
+                );
 
                 return $activityPeriod;
             }

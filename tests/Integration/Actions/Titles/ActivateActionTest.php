@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Titles\ActivateAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
@@ -32,6 +33,7 @@ test('it activates an unactivated title at the current datetime by default', fun
     // Verify the debut was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod()->firstOrFail();
     expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($refreshedTitle->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Debuted);
 });
 
 test('it activates an inactive title at the current datetime by default', function () {
@@ -54,6 +56,7 @@ test('it activates an inactive title at the current datetime by default', functi
     // Verify the reinstatement was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod()->firstOrFail();
     expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($refreshedTitle->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Reinstated);
 });
 
 test('it activates an unactivated title at a specific datetime', function () {
