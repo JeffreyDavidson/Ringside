@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Shared\ActivationStatus;
+use App\Enums\Stables\StableStatus;
 use App\Models\Stables\Stable;
 use App\Models\Titles\Title;
 use Illuminate\Database\Schema\Blueprint;
@@ -31,14 +33,14 @@ test('legacy stable and title status history is preserved as lifecycle transitio
 
     DB::table('titles_status_changes')->insert([
         'title_id' => $title->id,
-        'status' => 'active',
+        'status' => ActivationStatus::Active->value,
         'changed_at' => $changedAt,
         'created_at' => $changedAt,
         'updated_at' => $changedAt,
     ]);
     DB::table('stables_status_changes')->insert([
         'stable_id' => $stable->id,
-        'status' => 'inactive',
+        'status' => StableStatus::Inactive->value,
         'changed_at' => $changedAt,
         'created_at' => $changedAt,
         'updated_at' => $changedAt,
@@ -51,9 +53,9 @@ test('legacy stable and title status history is preserved as lifecycle transitio
     $stableTransition = $stable->lifecycleTransitions()->sole();
 
     expect($titleTransition->transition)->toBe(LifecycleTransitionType::LegacyStatusChanged)
-        ->and($titleTransition->context)->toBe(['status' => 'active'])
+        ->and($titleTransition->context)->toBe(['status' => ActivationStatus::Active->value])
         ->and($stableTransition->transition)->toBe(LifecycleTransitionType::LegacyStatusChanged)
-        ->and($stableTransition->context)->toBe(['status' => 'inactive']);
+        ->and($stableTransition->context)->toBe(['status' => StableStatus::Inactive->value]);
 
     $dropMigration = require database_path('migrations/2026_08_12_160742_remove_legacy_status_change_tables.php');
     $dropMigration->up();

@@ -13,4 +13,6 @@ enum LifecycleTransitionType: string
     case Pulled = 'pulled';
     case Reinstated = 'reinstated';
     case Reunited = 'reunited';
+    case Retired = 'retired';
+    case Unretired = 'unretired';
 }

@@ -7,4 +7,5 @@ namespace App\Enums\Lifecycle;
 enum LifecycleDimension: string
 {
     case Activity = 'activity';
+    case Retirement = 'retirement';
 }

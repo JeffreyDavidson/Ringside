@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -56,7 +57,7 @@ class RetireAction
                 $this->injuryPeriods->end($wrestler, $retirementDate);
             }
 
-            $this->retirementPeriods->start($wrestler, $retirementDate);
+            $this->retirementPeriods->start($wrestler, $retirementDate, LifecycleTransitionType::Retired);
             $this->endCurrentRelationships->handle($wrestler, $retirementDate);
         });
     }

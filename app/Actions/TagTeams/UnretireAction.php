@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\TagTeams\TagTeam;
@@ -52,7 +53,7 @@ class UnretireAction
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($tagTeam, $unretiredDate, $unretireMembers, $employImmediately): void {
-            $this->retirementPeriods->end($tagTeam, $unretiredDate);
+            $this->retirementPeriods->end($tagTeam, $unretiredDate, LifecycleTransitionType::Unretired);
 
             if ($unretireMembers) {
                 $this->unretireCurrentMembers->handle($tagTeam, $unretiredDate);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
@@ -40,7 +41,7 @@ class UnretireAction
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
-            $this->retirementPeriods->end($referee, $unretiredDate);
+            $this->retirementPeriods->end($referee, $unretiredDate, LifecycleTransitionType::Unretired);
             $this->employmentPeriods->start($referee, $unretiredDate);
         });
     }

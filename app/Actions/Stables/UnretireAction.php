@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
@@ -55,7 +56,7 @@ class UnretireAction
                 ->findOrFail($stable->getKey());
 
             $lockedStable->ensureCanBeUnretired($requireFormerMembers);
-            $this->retirementPeriods->end($lockedStable, $unretiredDate);
+            $this->retirementPeriods->end($lockedStable, $unretiredDate, LifecycleTransitionType::Unretired);
 
             $lockedStable->update(['status' => StableStatus::Inactive]);
 

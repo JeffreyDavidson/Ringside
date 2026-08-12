@@ -9,10 +9,13 @@ Ringside uses a domain-organized enum structure to maintain type safety and cons
 ### Domain Structure
 ```
 app/Enums/
+├── Lifecycle/              # Lifecycle audit enums
+│   ├── LifecycleDimension.php
+│   ├── LifecycleOwnerType.php
+│   └── LifecycleTransitionType.php
 ├── Shared/                 # Cross-domain enums
 │   ├── ActivationStatus.php
-│   ├── EmploymentStatus.php
-│   └── RosterMemberType.php
+│   └── EmploymentStatus.php
 ├── Events/                 # Event-specific enums
 ├── Stables/               # Stable-specific enums
 │   ├── StableMemberType.php

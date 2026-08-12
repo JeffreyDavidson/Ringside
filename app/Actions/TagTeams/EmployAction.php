@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\EmployCurrentManagersAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
@@ -45,7 +46,7 @@ class EmployAction
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
             if ($tagTeam->isRetired()) {
-                $this->retirementPeriods->end($tagTeam, $employmentDate);
+                $this->retirementPeriods->end($tagTeam, $employmentDate, LifecycleTransitionType::Unretired);
             }
 
             $this->employmentPeriods->start($tagTeam, $employmentDate);
