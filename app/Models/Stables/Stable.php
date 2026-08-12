@@ -20,6 +20,7 @@ use App\Models\Concerns\ValidatesStableRetirement;
 use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
+use App\Models\Lifecycle\Retirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Stables\StableFactory;
@@ -38,7 +39,7 @@ use Tests\Unit\Models\Stables\StableTest;
 /**
  * @implements Debutable<StableStatusChange, static>
  * @implements HasActivityPeriodsContract<StableActivityPeriod, static>
- * @implements Retirable<StableRetirement, static>
+ * @implements Retirable<static>
  *
  * @property int $id
  * @property string $name
@@ -50,10 +51,10 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property-read StableStatusChange|null $debutStatusChange
  * @property-read StableStatusChange|null $latestStatusChange
  * @property-read Collection<int, StableStatusChange> $statusChanges
- * @property-read StableRetirement|null $currentRetirement
- * @property-read StableRetirement|null $previousRetirement
- * @property-read Collection<int, StableRetirement> $retirements
- * @property-read Collection<int, StableRetirement> $previousRetirements
+ * @property-read Retirement|null $currentRetirement
+ * @property-read Retirement|null $previousRetirement
+ * @property-read Collection<int, Retirement> $retirements
+ * @property-read Collection<int, Retirement> $previousRetirements
  * t
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, TagTeam> $currentTagTeams
@@ -128,7 +129,7 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
 
     use HasStatusScopes;
 
-    /** @use IsRetirable<StableRetirement, static> */
+    /** @use IsRetirable<static> */
     use IsRetirable;
 
     use SoftDeletes;

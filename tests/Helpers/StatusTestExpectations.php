@@ -92,7 +92,7 @@ function expectValidEmploymentLifecycle(Model&Employable $entity): void
 /**
  * Expect retirement state to be consistent.
  *
- * @param  Model&Retirable<Model, Model>  $entity
+ * @param  Model&Retirable<Model>  $entity
  */
 function expectValidRetirementState(Model&Retirable $entity): void
 {

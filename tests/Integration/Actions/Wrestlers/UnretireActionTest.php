@@ -25,8 +25,9 @@ test('it unretires a retired wrestler with employment', function () {
     expect($wrestler->isEmployed())->toBeTrue(); // Should be employed by default
 
     // Verify retirement record was ended
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -50,8 +51,9 @@ test('it unretires wrestler without immediate employment', function () {
     expect($wrestler->isEmployed())->toBeFalse(); // Should remain unemployed
 
     // Verify retirement record was ended
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -73,8 +75,9 @@ test('it unretires wrestler with specific date', function () {
     expect($wrestler->isEmployed())->toBeTrue();
 
     // Verify retirement was ended with specific date
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => $unretirementDate->toDateTimeString(),
     ]);
 
@@ -102,9 +105,10 @@ test('it persists the unretirement lifecycle', function () {
     expect($wrestler->isRetired())->toBeFalse();
 
     // Verify the specific retirement record was updated
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $currentRetirement->id,
-        'wrestler_id' => $wrestler->id,
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -182,8 +186,9 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -210,16 +215,18 @@ test('it handles multiple retirement records correctly', function () {
     expect($wrestler->isRetired())->toBeFalse();
 
     // Only the current retirement should be ended
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $currentRetirement->id,
-        'wrestler_id' => $wrestler->id,
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(30)->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Old retirement should remain unchanged
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(100)->toDateTimeString(),
         'ended_at' => now()->subDays(60)->toDateTimeString(),
     ]);
@@ -269,17 +276,17 @@ test('it maintains retirement history integrity', function () {
     expect($wrestler->isRetired())->toBeFalse();
 
     // All retirement records should be preserved
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $firstRetirement->id,
         'ended_at' => now()->subDays(150)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $secondRetirement->id,
         'ended_at' => now()->subDays(50)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $currentRetirement->id,
         'ended_at' => now()->toDateTimeString(),
     ]);

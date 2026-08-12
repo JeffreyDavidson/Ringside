@@ -51,7 +51,7 @@ test('it unretires referee with specific unretirement date', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect(requiredDate($retirement->ended_at)->toDateTimeString())->toBe($unretiredDate->toDateTimeString());
 
-    $this->assertDatabaseHas('referees_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $retirement->id,
         'ended_at' => $unretiredDate->toDateTimeString(),
     ]);
@@ -86,8 +86,9 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
 
     // DateHelper should have processed the unretirement date
-    $this->assertDatabaseHas('referees_retirements', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'ended_at' => $unretiredDate->toDateTimeString(),
     ]);
 
@@ -128,9 +129,10 @@ test('it preserves retirement history', function () {
     $retirement->refresh();
 
     // Retirement record should be preserved with ended_at set
-    $this->assertDatabaseHas('referees_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $retirement->id,
-        'referee_id' => $referee->id,
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'started_at' => $originalStartedAt->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);

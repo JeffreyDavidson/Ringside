@@ -142,9 +142,10 @@ test('it ends retirement before deletion', function () {
     expect($retirement->ended_at)->not->toBeNull();
 
     // Verify retirement was ended
-    $this->assertDatabaseHas('referees_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $retirement->id,
-        'referee_id' => $referee->id,
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

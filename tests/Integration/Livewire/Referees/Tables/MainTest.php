@@ -12,10 +12,10 @@ use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Events\Event;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
-use App\Models\Referees\RefereeRetirement;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -502,8 +502,8 @@ describe('RefereesTable Component', function () {
                     'ended_at' => now()->subYear(),
                 ]);
 
-            RefereeRetirement::factory()
-                ->for($comebackReferee, 'referee')
+            Retirement::factory()
+                ->for($comebackReferee, 'retirable')
                 ->create([
                     'started_at' => now()->subYear(),
                     'ended_at' => now()->subMonths(6),

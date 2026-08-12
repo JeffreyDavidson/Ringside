@@ -9,9 +9,9 @@ use App\Actions\TagTeams\SuspendAction;
 use App\Livewire\TagTeams\Tables\Main;
 use App\Livewire\TagTeams\Tables\TagTeamsTable;
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamRetirement;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
@@ -208,8 +208,8 @@ describe('TagTeamsTable Component', function () {
             $tagTeam = TagTeam::factory()->create(['name' => 'Retirement History']);
 
             // Create retirement history
-            TagTeamRetirement::factory()
-                ->for($tagTeam, 'tagTeam')
+            Retirement::factory()
+                ->for($tagTeam, 'retirable')
                 ->create([
                     'started_at' => now()->subDays(100),
                     'ended_at' => now()->subDays(50),
@@ -524,8 +524,8 @@ describe('TagTeamsTable Component', function () {
                     'ended_at' => now()->subYear(),
                 ]);
 
-            TagTeamRetirement::factory()
-                ->for($reunitedTeam, 'tagTeam')
+            Retirement::factory()
+                ->for($reunitedTeam, 'retirable')
                 ->create([
                     'started_at' => now()->subYear(),
                     'ended_at' => now()->subMonths(6),

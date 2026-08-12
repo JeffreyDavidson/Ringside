@@ -32,8 +32,9 @@ test('it retires an employed tag team', function () {
     ]);
 
     // Verify retirement record was created
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -88,8 +89,9 @@ test('it retires tag team with specific retirement date', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Verify retirement started with specific date
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -122,8 +124,9 @@ test('it retires suspended tag team', function () {
     ]);
 
     // Verify retirement started
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -222,8 +225,9 @@ test('it uses DateHelper for consistent date handling', function () {
         'ended_at' => $customRetirementDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'started_at' => $customRetirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);

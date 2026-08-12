@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Database\Factories\Stables;
 
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivation;
-use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -126,7 +126,7 @@ class StableFactory extends Factory
         // available — that's what makes them eligible "former members" for an
         // unretire / reunite scenario.
         return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
-            ->has(StableRetirement::factory()->started($end), 'retirements')
+            ->has(Retirement::factory()->started($end), 'retirements')
             ->hasAttached(
                 Wrestler::factory()->count(2)
                     ->has(Employment::factory()->started($start), 'employments'),
