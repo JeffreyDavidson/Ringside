@@ -7,14 +7,13 @@ use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\FindsAvailableStableFormerMembers;
 use App\Models\Concerns\HasActivityPeriods;
+use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HasMembers;
-use App\Models\Concerns\HasStatusHistory;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ValidatesStableActivity;
 use App\Models\Concerns\ValidatesStableDeletion;
 use App\Models\Concerns\ValidatesStableRestructuring;
 use App\Models\Concerns\ValidatesStableRetirement;
-use App\Models\Contracts\Debutable;
 use App\Models\Contracts\Retirable;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -69,7 +68,7 @@ describe('Stable Model Unit Tests', function () {
             expect(class_uses(Stable::class))->toContain(HasActivityPeriods::class);
             expect(class_uses(Stable::class))->toContain(HasFactory::class);
             expect(class_uses(Stable::class))->toContain(HasMembers::class);
-            expect(class_uses(Stable::class))->toContain(HasStatusHistory::class);
+            expect(class_uses(Stable::class))->toContain(HasLifecycleTransitions::class);
             expect(class_uses(Stable::class))->toContain(HasStatusScopes::class);
             expect(class_uses(Stable::class))->toContain(FindsAvailableStableFormerMembers::class);
             expect(class_uses(Stable::class))->toContain(IsRetirable::class);
@@ -85,7 +84,6 @@ describe('Stable Model Unit Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Stable::class);
 
-            expect($interfaces)->toContain(Debutable::class);
             expect($interfaces)->toContain(App\Models\Contracts\HasActivityPeriods::class);
             expect($interfaces)->toContain(Retirable::class);
         });

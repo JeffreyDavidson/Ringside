@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
@@ -12,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class ReinstateAction
 {
-    public function __construct(private StartActivityPeriodAction $startActivityPeriod) {}
+    public function __construct(
+        private StartActivityPeriodAction $startActivityPeriod,
+        private RecordLifecycleTransitionAction $recordLifecycleTransition,
+    ) {}
 
     /**
      * Reinstate an inactive title and make it active again.
@@ -33,7 +39,7 @@ class ReinstateAction
     {
         $reinstateDate = $reinstateDate ?? now();
 
-        DB::transaction(function () use ($title, $reinstateDate): void {
+        DB::transaction(function () use ($title, $reinstateDate, $notes): void {
             $lockedTitle = Title::query()
                 ->lockForUpdate()
                 ->findOrFail($title->getKey());
@@ -41,6 +47,13 @@ class ReinstateAction
             $lockedTitle->ensureCanBeReinstated();
 
             $this->startActivityPeriod->handle($lockedTitle, $reinstateDate, rescheduleFuturePeriod: true);
+            $this->recordLifecycleTransition->handle(
+                $lockedTitle,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Reinstated,
+                $reinstateDate,
+                array_filter(['notes' => $notes]),
+            );
         });
     }
 }

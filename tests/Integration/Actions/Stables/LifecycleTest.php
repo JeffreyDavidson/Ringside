@@ -7,6 +7,7 @@ use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\ReuniteAction;
 use App\Actions\Stables\UnretireAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
@@ -46,6 +47,8 @@ describe('Stable Activation Action Integration', function () {
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->firstOrFail();
             expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($debutDate->format('Y-m-d H:i:s'));
             expect($activityPeriod->ended_at)->toBeNull();
+            expect($refreshedStable->lifecycleTransitions()->sole()->transition)
+                ->toBe(LifecycleTransitionType::Established);
         });
 
         test('debut action handles date parameter correctly', function () {
@@ -68,14 +71,17 @@ describe('Stable Activation Action Integration', function () {
             expect($this->stable->activityPeriods()->doesntExist())->toBeTrue();
         });
 
-        test('debut action from unformed status creates proper status change', function () {
+        test('establishment records its lifecycle transition', function () {
+            $establishedAt = now();
             expect($this->stable->status)->toBe(StableStatus::Unformed);
 
-            resolve(EstablishAction::class)->handle($this->stable, Carbon::now());
+            resolve(EstablishAction::class)->handle($this->stable, $establishedAt);
 
             $refreshedStable = freshModel($this->stable);
-            expect($refreshedStable->isCurrentlyActive())->toBeTrue();
-            expect($refreshedStable->status)->toBe(StableStatus::Active);
+            $transition = $refreshedStable->lifecycleTransitions()->sole();
+
+            expect($transition->transition)->toBe(LifecycleTransitionType::Established)
+                ->and($transition->effective_at->toDateTimeString())->toBe($establishedAt->toDateTimeString());
         });
     });
 
@@ -98,14 +104,20 @@ describe('Stable Activation Action Integration', function () {
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->firstOrFail();
             expect($activityPeriod->ended_at)->not()->toBeNull();
             expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($disbandDate->format('Y-m-d H:i:s'));
+            expect($refreshedStable->lifecycleTransitions()->sole()->transition)
+                ->toBe(LifecycleTransitionType::Disbanded);
         });
 
-        test('disband action creates proper status change record', function () {
-            resolve(DisbandAction::class)->handle($this->activeStable, Carbon::now());
+        test('disbandment records its lifecycle transition', function () {
+            $disbandedAt = now();
+
+            resolve(DisbandAction::class)->handle($this->activeStable, $disbandedAt);
 
             $refreshedStable = freshModel($this->activeStable);
-            expect($refreshedStable->status)->toBe(StableStatus::Inactive);
-            expect($refreshedStable->isDisbanded())->toBeTrue();
+            $transition = $refreshedStable->lifecycleTransitions()->sole();
+
+            expect($transition->transition)->toBe(LifecycleTransitionType::Disbanded)
+                ->and($transition->effective_at->toDateTimeString())->toBe($disbandedAt->toDateTimeString());
         });
 
         test('disband action rolls back when the end date precedes the activity period', function () {
@@ -146,6 +158,8 @@ describe('Stable Activation Action Integration', function () {
             $latestPeriod = $activityPeriods->reverse()->firstOrFail();
             expect(requiredDate($latestPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($reuniteDate->format('Y-m-d H:i:s'));
             expect($latestPeriod->ended_at)->toBeNull();
+            expect($refreshedStable->lifecycleTransitions()->sole()->transition)
+                ->toBe(LifecycleTransitionType::Reunited);
         });
 
         test('reunite action maintains historical activity periods', function () {
@@ -330,14 +344,15 @@ describe('Stable Activation Action Integration', function () {
             $finalStable = freshModel($stable);
             expect($finalStable->isInactive())->toBeTrue();
 
-            // Verify all status changes are recorded
-            // Note: Status change functionality is not yet implemented
-            // $statusChanges = $finalStable->statusChanges()->orderBy('changed_at')->get();
-            // expect($statusChanges)->toHaveCount(2); // Debut and Disband (others are different types)
-
             // Verify activity periods
             $activityPeriods = $finalStable->activityPeriods()->orderBy('started_at')->get();
             expect($activityPeriods)->toHaveCount(2); // Original debut + reunite
+
+            expect($finalStable->lifecycleTransitions()->pluck('transition')->all())->toBe([
+                LifecycleTransitionType::Established,
+                LifecycleTransitionType::Disbanded,
+                LifecycleTransitionType::Reunited,
+            ]);
 
             // Verify retirement record
             $retirement = $finalStable->retirements()->firstOrFail();

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -17,7 +20,8 @@ class DisbandAction
      */
     public function __construct(
         protected EndActivityPeriodAction $endActivityPeriodAction,
-        protected RemoveStableMembersAction $removeStableMembersAction
+        protected RemoveStableMembersAction $removeStableMembersAction,
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
     ) {}
 
     /**
@@ -54,6 +58,13 @@ class DisbandAction
                     $disbandDate,
                 );
             }
+
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Disbanded,
+                $disbandDate,
+            );
         });
     }
 }
