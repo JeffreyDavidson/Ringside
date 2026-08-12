@@ -35,23 +35,27 @@ class RetireAction
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
-        $title->ensureCanBeRetired();
-
         $retirementDate = $retirementDate ?? now();
         $operationalDate = $retirementDate->isFuture() ? now() : $retirementDate;
 
         DB::transaction(function () use ($title, $retirementDate, $operationalDate): void {
-            if ($title->hasActivityPeriods() && $title->isCurrentlyActive()) {
-                $this->endActivityPeriod->handle($title, $operationalDate);
+            $lockedTitle = Title::query()
+                ->lockForUpdate()
+                ->findOrFail($title->getKey());
+
+            $lockedTitle->ensureCanBeRetired();
+
+            if ($lockedTitle->hasActivityPeriods() && $lockedTitle->isCurrentlyActive()) {
+                $this->endActivityPeriod->handle($lockedTitle, $operationalDate);
             }
 
             // End current championship if title has an active champion
-            $currentChampionship = $title->currentChampionship;
+            $currentChampionship = $lockedTitle->currentChampionship;
             if ($currentChampionship) {
                 $currentChampionship->update(['lost_at' => $retirementDate]);
             }
 
-            $this->retirementPeriods->start($title, $retirementDate);
+            $this->retirementPeriods->start($lockedTitle, $retirementDate);
         });
     }
 }

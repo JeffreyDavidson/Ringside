@@ -6,6 +6,7 @@ namespace App\Actions\Titles;
 
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Activate action for titles.
@@ -31,18 +32,24 @@ class ActivateAction
     {
         $activationDate = $activationDate ?? now();
 
-        // If the title is retired, first unretire it
-        if ($title->isRetired()) {
-            $this->unretireAction->handle($title, $activationDate);
-        }
+        DB::transaction(function () use ($title, $activationDate): void {
+            $lockedTitle = Title::query()
+                ->lockForUpdate()
+                ->findOrFail($title->getKey());
 
-        // Determine if this is a debut or reinstatement
-        if ($title->hasActivityPeriods()) {
-            // Title has been debuted before, so reinstate it
-            $this->reinstateAction->handle($title, $activationDate);
-        } else {
-            // Title has never been debuted, so debut it
-            $this->debutAction->handle($title, $activationDate);
-        }
+            // If the title is retired, first unretire it
+            if ($lockedTitle->isRetired()) {
+                $this->unretireAction->handle($lockedTitle, $activationDate);
+            }
+
+            // Determine if this is a debut or reinstatement
+            if ($lockedTitle->hasActivityPeriods()) {
+                // Title has been debuted before, so reinstate it
+                $this->reinstateAction->handle($lockedTitle, $activationDate);
+            } else {
+                // Title has never been debuted, so debut it
+                $this->debutAction->handle($lockedTitle, $activationDate);
+            }
+        });
     }
 }
