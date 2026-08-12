@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
@@ -33,6 +34,6 @@ class DebutAction
 
         $debutDate = $debutDate ?? now();
 
-        $this->startActivityPeriod->handle($title, $debutDate);
+        $this->startActivityPeriod->handle($title, $debutDate, rescheduleFuturePeriod: true);
     }
 }

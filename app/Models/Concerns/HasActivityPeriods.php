@@ -7,17 +7,16 @@ namespace App\Models\Concerns;
 use App\Enums\Shared\ActivationStatus;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
+use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
-use LogicException;
 
 /**
- * @template TActivityPeriod of Model The activity period model class (e.g., TitleActivityPeriod)
  * @template TModel of Model The parent model class that can have activity periods (e.g., Title)
  *
- * @phpstan-require-implements HasActivityPeriodsContract<TActivityPeriod, TModel>
+ * @phpstan-require-implements HasActivityPeriodsContract<TModel>
  *
  * @see HasActivityPeriodsContract
  */
@@ -26,13 +25,11 @@ trait HasActivityPeriods
     /** @use HasEnumStatus<ActivationStatus> */
     use HasEnumStatus;
 
-    use ResolvesRelatedModels;
-
-    /** @return HasMany<TActivityPeriod, TModel> */
-    public function activityPeriods(): HasMany
+    /** @return MorphMany<ActivityPeriod, TModel> */
+    public function activityPeriods(): MorphMany
     {
-        /** @var HasMany<TActivityPeriod, TModel> $relation */
-        $relation = $this->hasMany($this->resolveActivityPeriodModelClass());
+        /** @var MorphMany<ActivityPeriod, TModel> $relation */
+        $relation = $this->morphMany(ActivityPeriod::class, 'activeable');
 
         return $relation;
     }
@@ -40,12 +37,12 @@ trait HasActivityPeriods
     /**
      * Get the current activity period, which has started and has not ended.
      *
-     * @return HasOne<TActivityPeriod, TModel>
+     * @return MorphOne<ActivityPeriod, TModel>
      */
-    public function currentActivityPeriod(): HasOne
+    public function currentActivityPeriod(): MorphOne
     {
-        /** @var HasOne<TActivityPeriod, TModel> $relation */
-        $relation = $this->hasOne($this->resolveActivityPeriodModelClass())
+        /** @var MorphOne<ActivityPeriod, TModel> $relation */
+        $relation = $this->morphOne(ActivityPeriod::class, 'activeable')
             ->whereNull('ended_at')
             ->where('started_at', '<=', now());
 
@@ -55,12 +52,12 @@ trait HasActivityPeriods
     /**
      * Get a future activity period that has not started or ended.
      *
-     * @return HasOne<TActivityPeriod, TModel>
+     * @return MorphOne<ActivityPeriod, TModel>
      */
-    public function futureActivityPeriod(): HasOne
+    public function futureActivityPeriod(): MorphOne
     {
-        /** @var HasOne<TActivityPeriod, TModel> $relation */
-        $relation = $this->hasOne($this->resolveActivityPeriodModelClass())
+        /** @var MorphOne<ActivityPeriod, TModel> $relation */
+        $relation = $this->morphOne(ActivityPeriod::class, 'activeable')
             ->whereNull('ended_at')
             ->where('started_at', '>', now());
 
@@ -70,12 +67,12 @@ trait HasActivityPeriods
     /**
      * Get activity periods that have ended.
      *
-     * @return HasMany<TActivityPeriod, TModel>
+     * @return MorphMany<ActivityPeriod, TModel>
      */
-    public function previousActivityPeriods(): HasMany
+    public function previousActivityPeriods(): MorphMany
     {
-        /** @var HasMany<TActivityPeriod, TModel> $relation */
-        $relation = $this->hasMany($this->resolveActivityPeriodModelClass())
+        /** @var MorphMany<ActivityPeriod, TModel> $relation */
+        $relation = $this->morphMany(ActivityPeriod::class, 'activeable')
             ->whereNotNull('ended_at');
 
         return $relation;
@@ -84,12 +81,12 @@ trait HasActivityPeriods
     /**
      * Get the most recently ended activity period.
      *
-     * @return HasOne<TActivityPeriod, TModel>
+     * @return MorphOne<ActivityPeriod, TModel>
      */
-    public function previousActivityPeriod(): HasOne
+    public function previousActivityPeriod(): MorphOne
     {
-        /** @var HasOne<TActivityPeriod, TModel> $relation */
-        $relation = $this->hasOne($this->resolveActivityPeriodModelClass())
+        /** @var MorphOne<ActivityPeriod, TModel> $relation */
+        $relation = $this->morphOne(ActivityPeriod::class, 'activeable')
             ->whereNotNull('ended_at')
             ->latest('ended_at');
 
@@ -99,12 +96,12 @@ trait HasActivityPeriods
     /**
      * Get the earliest activity period by start date.
      *
-     * @return HasOne<TActivityPeriod, TModel>
+     * @return MorphOne<ActivityPeriod, TModel>
      */
-    public function firstActivityPeriod(): HasOne
+    public function firstActivityPeriod(): MorphOne
     {
-        /** @var HasOne<TActivityPeriod, TModel> $relation */
-        $relation = $this->hasOne($this->resolveActivityPeriodModelClass())
+        /** @var MorphOne<ActivityPeriod, TModel> $relation */
+        $relation = $this->morphOne(ActivityPeriod::class, 'activeable')
             ->ofMany('started_at', 'min');
 
         return $relation;
@@ -193,20 +190,8 @@ trait HasActivityPeriods
         return $firstPeriod?->started_at?->format('Y-m-d') ?? 'TBD';
     }
 
-    /**
-     * @throws LogicException
-     * @return class-string<TActivityPeriod>
-     */
-    protected function resolveActivityPeriodModelClass(): string
-    {
-        return $this->resolveRelatedModelClass('ActivityPeriod');
-    }
-
     protected function getActivityPeriodTableName(): string
     {
-        $modelClass = $this->resolveActivityPeriodModelClass();
-        $model = new $modelClass();
-
-        return $model->getTable();
+        return (new ActivityPeriod())->getTable();
     }
 }

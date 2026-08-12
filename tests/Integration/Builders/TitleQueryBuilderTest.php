@@ -242,7 +242,7 @@ describe('TitleBuilder Query Scopes', function () {
             $sql = $query->toSql();
 
             expect($sql)->toContain('not exists');
-            expect($sql)->toContain('titles_activations');
+            expect($sql)->toContain('activity_periods');
         });
 
         test('active scope uses exists query for performance', function () {
@@ -250,7 +250,7 @@ describe('TitleBuilder Query Scopes', function () {
             $sql = $query->toSql();
 
             expect($sql)->toContain('exists');
-            expect($sql)->toContain('titles_activations');
+            expect($sql)->toContain('activity_periods');
         });
 
         test('vacant scope combines active and championship filters', function () {

@@ -19,6 +19,7 @@ use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Lifecycle\Retirement;
 use Database\Factories\Titles\TitleFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -34,7 +35,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @implements Debutable<TitleStatusChange, static>
- * @implements HasActivityPeriodsContract<TitleActivityPeriod, static>
+ * @implements HasActivityPeriodsContract<static>
  * @implements Retirable<static>
  *
  * @property int $id
@@ -60,13 +61,13 @@ use Illuminate\Support\Carbon;
  * @property string|null $previous_champion_type
  * @property int|null $previous_champion_id
  *
- * @property-read Collection<int, TitleActivityPeriod> $activityPeriods
- * @property-read TitleActivityPeriod|null $currentActivityPeriod
+ * @property-read Collection<int, ActivityPeriod> $activityPeriods
+ * @property-read ActivityPeriod|null $currentActivityPeriod
  * @property-read mixed $display_name
- * @property-read TitleActivityPeriod|null $firstActivityPeriod
- * @property-read TitleActivityPeriod|null $futureActivityPeriod
- * @property-read TitleActivityPeriod|null $previousActivityPeriod
- * @property-read Collection<int, TitleActivityPeriod> $previousActivityPeriods
+ * @property-read ActivityPeriod|null $firstActivityPeriod
+ * @property-read ActivityPeriod|null $futureActivityPeriod
+ * @property-read ActivityPeriod|null $previousActivityPeriod
+ * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
  *
  * @method static TitleBuilder<static>|Title activatedAfter(\Carbon\Carbon $date)
  * @method static TitleBuilder<static>|Title activatedBefore(\Carbon\Carbon $date)
@@ -104,7 +105,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TitleBuilder::class)]
 class Title extends Model implements Debutable, HasActivityPeriodsContract, HasDisplayName, Retirable
 {
-    /** @use HasActivityPeriods<TitleActivityPeriod, static> */
+    /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 
     use HasChampionships;

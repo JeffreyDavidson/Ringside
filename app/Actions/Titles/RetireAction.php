@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Titles\Title;
@@ -12,7 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
-    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+    public function __construct(
+        private readonly EndActivityPeriodAction $endActivityPeriod,
+        private readonly RetirementPeriodManager $retirementPeriods,
+    ) {}
 
     /**
      * Retire a title and permanently end its championship lineage.
@@ -34,14 +38,11 @@ class RetireAction
         $title->ensureCanBeRetired();
 
         $retirementDate = $retirementDate ?? now();
+        $operationalDate = $retirementDate->isFuture() ? now() : $retirementDate;
 
-        DB::transaction(function () use ($title, $retirementDate): void {
-            // Handle title status - active titles need to be pulled before retirement
+        DB::transaction(function () use ($title, $retirementDate, $operationalDate): void {
             if ($title->hasActivityPeriods() && $title->isCurrentlyActive()) {
-                $currentActivityPeriod = $title->currentActivityPeriod()->first();
-                if ($currentActivityPeriod) {
-                    $currentActivityPeriod->update(['ended_at' => $retirementDate]);
-                }
+                $this->endActivityPeriod->handle($title, $operationalDate);
             }
 
             // End current championship if title has an active champion

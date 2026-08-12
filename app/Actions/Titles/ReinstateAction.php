@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
@@ -33,6 +34,6 @@ class ReinstateAction
 
         $reinstateDate = $reinstateDate ?? now();
 
-        $this->startActivityPeriod->handle($title, $reinstateDate);
+        $this->startActivityPeriod->handle($title, $reinstateDate, rescheduleFuturePeriod: true);
     }
 }

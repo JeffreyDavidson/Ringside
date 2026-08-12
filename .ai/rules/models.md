@@ -25,3 +25,6 @@ Store suspension periods in App\Models\Lifecycle\Suspension through the polymorp
 
 ## Use shared polymorphic retirement records
 Store retirement periods in App\Models\Lifecycle\Retirement through the polymorphic retirable owner. Wrestlers, managers, referees, tag teams, stables, and titles share this record model; keep eligibility, locking, transactions, and cascades in their typed concerns and Actions rather than adding entity-specific retirement models.
+
+## Use shared polymorphic activity periods
+Store stable and title operational periods in App\Models\Lifecycle\ActivityPeriod through the polymorphic activeable owner. Keep wrestling-specific transitions in typed Actions such as DebutAction, PullAction, ReinstateAction, EstablishAction, DisbandAction, and ReuniteAction; use the shared lifecycle start/end Actions only for persistence, locking, and period integrity.

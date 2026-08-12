@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Data\Titles\TitleData;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
+    public function __construct(private StartActivityPeriodAction $startActivityPeriod) {}
+
     /**
      * Update a title.
      *
@@ -35,10 +38,7 @@ class UpdateAction
             // Handle conditional debut creation - only debut titles that have never debuted before
             // Note: This will not reactivate pulled titles - use ReinstateAction for that
             if (! is_null($titleData->debut_date) && ! $title->hasActivityPeriods()) {
-                $title->activityPeriods()->create([
-                    'started_at' => $titleData->debut_date,
-                    'ended_at' => null,
-                ]);
+                $this->startActivityPeriod->handle($title, $titleData->debut_date);
             }
 
             return $title;

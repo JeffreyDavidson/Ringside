@@ -2,24 +2,21 @@
 
 declare(strict_types=1);
 
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Titles\Title;
-use App\Models\Titles\TitleActivityPeriod;
 use Illuminate\Database\QueryException;
 
 test('a title has only one open activity period', function () {
     $title = Title::factory()->create();
 
-    TitleActivityPeriod::factory()->count(2)->create([
-        'title_id' => $title->id,
+    ActivityPeriod::factory()->for($title, 'activeable')->count(2)->create([
         'ended_at' => now(),
     ]);
-    TitleActivityPeriod::factory()->create([
-        'title_id' => $title->id,
+    ActivityPeriod::factory()->for($title, 'activeable')->create([
         'ended_at' => null,
     ]);
 
-    expect(fn () => TitleActivityPeriod::factory()->create([
-        'title_id' => $title->id,
+    expect(fn () => ActivityPeriod::factory()->for($title, 'activeable')->create([
         'ended_at' => null,
     ]))->toThrow(QueryException::class);
 });

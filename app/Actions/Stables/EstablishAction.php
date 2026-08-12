@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableActivityPeriod;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +37,7 @@ class EstablishAction
         Stable $stable,
         ?Carbon $activationDate = null,
         ?Carbon $endDate = null,
-    ): StableActivityPeriod {
+    ): ActivityPeriod {
         $activationDate = $activationDate ?? now();
 
         if ($endDate?->lt($activationDate)) {
@@ -44,7 +45,7 @@ class EstablishAction
         }
 
         return DB::transaction(
-            function () use ($stable, $activationDate, $endDate): StableActivityPeriod {
+            function () use ($stable, $activationDate, $endDate): ActivityPeriod {
                 $lockedStable = Stable::query()
                     ->withTrashed()
                     ->lockForUpdate()

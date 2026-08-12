@@ -2,87 +2,84 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Database\Factories\Stables;
+namespace Tests\Unit\Database\Factories\Lifecycle;
 
-use App\Models\Stables\Stable;
-use App\Models\Stables\StableActivityPeriod;
-use Database\Factories\Stables\StableActivityPeriodFactory;
+use App\Models\Titles\Title;
+use App\Models\Lifecycle\ActivityPeriod;
+use Database\Factories\Lifecycle\ActivityPeriodFactory;
 use Illuminate\Support\Carbon;
 
 /**
- * Unit tests for StableActivityPeriodFactory data generation and state management.
+ * Unit tests for ActivityPeriodFactory data generation and state management.
  *
  * UNIT TEST SCOPE:
  * - Factory default attribute generation (activity period data)
  * - Factory state methods (current, past, ended periods)
- * - Factory relationship creation (stable associations)
+ * - Factory relationship creation (title associations)
  * - Activity timeline data (started_at, ended_at dates)
  * - Activity period validation and consistency
  *
- * These tests verify that the StableActivityPeriodFactory generates consistent,
+ * These tests verify that the ActivityPeriodFactory generates consistent,
  * realistic activity period data that complies with business rules and supports
  * comprehensive testing scenarios across the application.
  *
- * @see StableActivityPeriodFactory
+ * @see ActivityPeriodFactory
  */
-describe('StableActivityPeriodFactory Unit Tests', function () {
+describe('ActivityPeriodFactory Unit Tests', function () {
     describe('default attribute generation', function () {
         test('creates activity period with correct default attributes', function () {
             // Arrange & Act
-            $activityPeriod = StableActivityPeriod::factory()->make();
+            $activityPeriod = ActivityPeriod::factory()->make();
 
             // Assert
-            expect($activityPeriod->stable_id)->toBeInt();
+            expect($activityPeriod->getAttributes())->not->toHaveKey('activeable_id');
             expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
             expect($activityPeriod->ended_at)->toBeNull(); // Default is current activity
         });
 
         test('creates realistic activity dates', function () {
             // Arrange & Act
-            $activityPeriod = StableActivityPeriod::factory()->make();
+            $activityPeriod = ActivityPeriod::factory()->make();
 
             // Assert
-            expect($activityPeriod->started_at)->toBeInstanceOf(\Carbon\Carbon::class);
-            expect($activityPeriod->started_at->isPast())->toBeTrue();
-            expect(requiredDate($activityPeriod->started_at)->isAfter(now()->subYears(3)))->toBeTrue();
-            expect($activityPeriod->ended_at)->toBeNull(); // Active by default
+            expect($activityPeriod->started_at->isYesterday())->toBeTrue();
         });
     });
 
     describe('factory state methods', function () {
         test('current activity state works correctly', function () {
             // Arrange
-            $stable = Stable::factory()->create();
+            $title = Title::factory()->create();
             $startDate = now()->subMonths(6);
 
             // Act
-            $activityPeriod = StableActivityPeriod::factory()->make([
-                'stable_id' => $stable->id,
+            $activityPeriod = ActivityPeriod::factory()->make([
+                'activeable_id' => $title->id,
                 'started_at' => $startDate,
                 'ended_at' => null,
             ]);
 
             // Assert
-            expect($activityPeriod->stable_id)->toBe($stable->id);
+            expect($activityPeriod->activeable_id)->toBe($title->id);
             expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect($activityPeriod->ended_at)->toBeNull();
         });
 
         test('ended activity state works correctly', function () {
             // Arrange
-            $stable = Stable::factory()->create();
+            $title = Title::factory()->create();
             $startDate = now()->subYears(2);
             $endDate = now()->subYear();
 
             // Act
-            $activityPeriod = StableActivityPeriod::factory()->make([
-                'stable_id' => $stable->id,
+            $activityPeriod = ActivityPeriod::factory()->make([
+                'activeable_id' => $title->id,
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
 
             // Assert
-            expect($activityPeriod->stable_id)->toBe($stable->id);
+            expect($activityPeriod->activeable_id)->toBe($title->id);
             expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
             expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
             expect(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
@@ -90,15 +87,15 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
     });
 
     describe('factory customization', function () {
-        test('accepts custom stable association', function () {
+        test('accepts custom title association', function () {
             // Arrange
-            $stable = Stable::factory()->create();
+            $title = Title::factory()->create();
 
             // Act
-            $activityPeriod = StableActivityPeriod::factory()->make(['stable_id' => $stable->id]);
+            $activityPeriod = ActivityPeriod::factory()->make(['activeable_id' => $title->id]);
 
             // Assert
-            expect($activityPeriod->stable_id)->toBe($stable->id);
+            expect($activityPeriod->activeable_id)->toBe($title->id);
         });
 
         test('accepts custom date ranges', function () {
@@ -107,7 +104,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
             $endDate = now()->subYears(2);
 
             // Act
-            $activityPeriod = StableActivityPeriod::factory()->make([
+            $activityPeriod = ActivityPeriod::factory()->make([
                 'started_at' => $startDate,
                 'ended_at' => $endDate,
             ]);
@@ -121,7 +118,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
     describe('data consistency', function () {
         test('database creation works correctly', function () {
             // Arrange & Act
-            $activityPeriod = StableActivityPeriod::factory()->create();
+            $activityPeriod = ActivityPeriod::factory()->forRandomActiveable()->create();
 
             // Assert
             expect($activityPeriod->exists)->toBeTrue();
@@ -130,7 +127,7 @@ describe('StableActivityPeriodFactory Unit Tests', function () {
 
         test('maintains date consistency', function () {
             // Arrange & Act
-            $activityPeriod = StableActivityPeriod::factory()->make();
+            $activityPeriod = ActivityPeriod::factory()->make();
 
             // Assert
             expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
