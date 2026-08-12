@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Managers\Manager;
@@ -36,7 +37,7 @@ class EmployAction
         $startDate = DateHelper::resolveDate($startDate);
 
         DB::transaction(function () use ($manager, $startDate): void {
-            $this->employmentPeriods->start($manager, $startDate);
+            $this->employmentPeriods->start($manager, $startDate, LifecycleTransitionType::Employed);
         });
     }
 }

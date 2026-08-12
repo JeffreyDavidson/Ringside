@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -43,7 +44,7 @@ class ReleaseAction
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($wrestler, $releaseDate): void {
-            $this->employmentPeriods->end($wrestler, $releaseDate);
+            $this->employmentPeriods->end($wrestler, $releaseDate, LifecycleTransitionType::Released);
 
             if ($wrestler->isSuspended()) {
                 $this->suspensionPeriods->end($wrestler, $releaseDate);

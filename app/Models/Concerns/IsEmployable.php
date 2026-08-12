@@ -45,6 +45,8 @@ trait IsEmployable
     /** @use HasEnumStatus<EmploymentStatus> */
     use HasEnumStatus;
 
+    use HasLifecycleTransitions;
+
     /**
      * Get all employments for the model.
      *

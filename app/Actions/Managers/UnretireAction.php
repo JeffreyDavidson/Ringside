@@ -44,7 +44,7 @@ class UnretireAction
             $this->retirementPeriods->end($manager, $unretiredDate, LifecycleTransitionType::Unretired);
 
             if ($employImmediately) {
-                $this->employmentPeriods->start($manager, $unretiredDate);
+                $this->employmentPeriods->start($manager, $unretiredDate, LifecycleTransitionType::Employed);
             }
         });
     }

@@ -49,7 +49,7 @@ class EmployAction
                 $this->retirementPeriods->end($tagTeam, $employmentDate, LifecycleTransitionType::Unretired);
             }
 
-            $this->employmentPeriods->start($tagTeam, $employmentDate);
+            $this->employmentPeriods->start($tagTeam, $employmentDate, LifecycleTransitionType::Employed);
             $this->employCurrentWrestlers->handle($tagTeam, $employmentDate);
             $this->employCurrentManagers->handle($tagTeam, $employmentDate);
         });

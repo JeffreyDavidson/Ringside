@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\InjuryPeriodManager;
@@ -47,7 +48,7 @@ class ReleaseAction
                 $this->injuryPeriods->end($referee, $releaseDate);
             }
 
-            $this->employmentPeriods->end($referee, $releaseDate);
+            $this->employmentPeriods->end($referee, $releaseDate, LifecycleTransitionType::Released);
         });
     }
 }

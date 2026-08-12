@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Actions\Managers\EmployCurrentManagersAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -40,7 +41,7 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($wrestler, $employmentDate): void {
-            $this->employmentPeriods->start($wrestler, $employmentDate);
+            $this->employmentPeriods->start($wrestler, $employmentDate, LifecycleTransitionType::Employed);
             $this->employCurrentManagers->handle($wrestler, $employmentDate);
         });
     }

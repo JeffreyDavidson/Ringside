@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Referees\Referee;
@@ -36,7 +37,7 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($referee, $employmentDate): void {
-            $this->employmentPeriods->start($referee, $employmentDate);
+            $this->employmentPeriods->start($referee, $employmentDate, LifecycleTransitionType::Employed);
         });
     }
 }
