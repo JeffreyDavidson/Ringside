@@ -33,8 +33,8 @@ test('it unretires a retired tag team', function () {
     ]);
 
     // Verify employment record was created
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -139,8 +139,8 @@ test('it unretires tag team with specific unretirement date', function () {
     ]);
 
     // Verify employment started with same date
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => $unretirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -280,8 +280,8 @@ test('it uses DateHelper for consistent date handling', function () {
         'ended_at' => $customUnretirementDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => $customUnretirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -360,8 +360,8 @@ test('it handles unretirement with cascade effects', function () {
     ]);
 
     // Employment should be active
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);

@@ -10,9 +10,9 @@ use App\Actions\Referees\RetireAction;
 use App\Livewire\Referees\Tables\Main;
 use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Events\Event;
+use App\Models\Lifecycle\Employment;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
-use App\Models\Referees\RefereeEmployment;
 use App\Models\Referees\RefereeInjury;
 use App\Models\Referees\RefereeRetirement;
 use App\Models\Referees\RefereeSuspension;
@@ -161,15 +161,15 @@ describe('RefereesTable Component', function () {
             $referee = Referee::factory()->create(['first_name' => 'Referee', 'last_name' => 'History']);
 
             // Create employment history
-            RefereeEmployment::factory()
-                ->for($referee, 'referee')
+            Employment::factory()
+                ->for($referee, 'employable')
                 ->create([
                     'started_at' => now()->subDays(200),
                     'ended_at' => now()->subDays(100),
                 ]);
 
-            RefereeEmployment::factory()
-                ->for($referee, 'referee')
+            Employment::factory()
+                ->for($referee, 'employable')
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 
@@ -435,15 +435,15 @@ describe('RefereesTable Component', function () {
             $rookieReferee = Referee::factory()->employed()->create(['first_name' => 'Rookie', 'last_name' => 'Referee']);
 
             // Create different employment history lengths
-            RefereeEmployment::factory()
-                ->for($veteranReferee, 'referee')
+            Employment::factory()
+                ->for($veteranReferee, 'employable')
                 ->create([
                     'started_at' => now()->subYears(10),
                     'ended_at' => now()->subYears(8),
                 ]);
 
-            RefereeEmployment::factory()
-                ->for($veteranReferee, 'referee')
+            Employment::factory()
+                ->for($veteranReferee, 'employable')
                 ->create([
                     'started_at' => now()->subYears(5),
                     'ended_at' => now()->subYears(3),
@@ -495,8 +495,8 @@ describe('RefereesTable Component', function () {
             $comebackReferee = Referee::factory()->unemployed()->create(['first_name' => 'Comeback', 'last_name' => 'Referee']);
 
             // Create previous employment and retirement
-            RefereeEmployment::factory()
-                ->for($comebackReferee, 'referee')
+            Employment::factory()
+                ->for($comebackReferee, 'employable')
                 ->create([
                     'started_at' => now()->subYears(3),
                     'ended_at' => now()->subYear(),

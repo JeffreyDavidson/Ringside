@@ -24,6 +24,7 @@ use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use App\Models\Lifecycle\Employment;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Managers\ManagerFactory;
@@ -40,7 +41,7 @@ use Illuminate\Support\Carbon;
 use Tests\Unit\Models\Managers\ManagerTest;
 
 /**
- * @implements Employable<ManagerEmployment, static>
+ * @implements Employable<static>
  * @implements Injurable<ManagerInjury, static>
  * @implements Retirable<ManagerRetirement, static>
  * @implements Suspendable<ManagerSuspension, static>
@@ -56,12 +57,12 @@ use Tests\Unit\Models\Managers\ManagerTest;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  *
- * @property-read ManagerEmployment|null $currentEmployment
- * @property-read ManagerEmployment|null $firstEmployment
- * @property-read ManagerEmployment|null $futureEmployment
- * @property-read ManagerEmployment|null $previousEmployment
- * @property-read Collection<int, ManagerEmployment> $employments
- * @property-read Collection<int, ManagerEmployment> $previousEmployments
+ * @property-read Employment|null $currentEmployment
+ * @property-read Employment|null $firstEmployment
+ * @property-read Employment|null $futureEmployment
+ * @property-read Employment|null $previousEmployment
+ * @property-read Collection<int, Employment> $employments
+ * @property-read Collection<int, Employment> $previousEmployments
  * @property-read ManagerInjury|null $currentInjury
  * @property-read ManagerInjury|null $previousInjury
  * @property-read Collection<int, ManagerInjury> $injuries
@@ -116,7 +117,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     /** @use HasFactory<ManagerFactory> */
     use HasFactory;
 
-    /** @use IsEmployable<ManagerEmployment, static> */
+    /** @use IsEmployable<static> */
     use IsEmployable;
 
     /** @use IsInjurable<ManagerInjury, static> */

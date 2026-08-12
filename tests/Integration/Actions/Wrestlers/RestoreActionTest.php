@@ -95,8 +95,8 @@ test('it restores wrestler without automatically restoring relationships', funct
     ]);
 
     // Employment should still be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->subDays(5)->toDateTimeString(),
     ]);
 });
@@ -123,14 +123,14 @@ test('it maintains historical data integrity', function () {
     expect($wrestler->trashed())->toBeFalse();
 
     // All historical records should be preserved
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(100)->toDateTimeString(),
         'ended_at' => now()->subDays(80)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(50)->toDateTimeString(),
         'ended_at' => now()->subDays(10)->toDateTimeString(),
     ]);

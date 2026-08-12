@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories\Stables;
 
+use App\Models\Lifecycle\Employment;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableActivation;
 use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamEmployment;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerEmployment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -57,16 +56,16 @@ class StableFactory extends Factory
 
         return $this->has(StableActivation::factory()->started($activationDate), 'activations')
             ->hasAttached(
-                Wrestler::factory()->count(2)->has(WrestlerEmployment::factory()->started($activationDate), 'employments'),
+                Wrestler::factory()->count(2)->has(Employment::factory()->started($activationDate), 'employments'),
                 ['joined_at' => $activationDate]
             )
             ->hasAttached(
                 TagTeam::factory()
-                    ->has(TagTeamEmployment::factory()->started($activationDate), 'employments')
+                    ->has(Employment::factory()->started($activationDate), 'employments')
                     ->afterCreating(function (TagTeam $tagTeam) use ($activationDate) {
                         // Attach wrestlers to the tag team to ensure it has active wrestlers
                         $wrestlers = Wrestler::factory()->count(2)
-                            ->has(WrestlerEmployment::factory()->started($activationDate), 'employments')
+                            ->has(Employment::factory()->started($activationDate), 'employments')
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $activationDate]);
                     }),
@@ -91,16 +90,16 @@ class StableFactory extends Factory
 
         return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
             ->hasAttached(
-                Wrestler::factory()->count(2)->has(WrestlerEmployment::factory()->started($start), 'employments'),
+                Wrestler::factory()->count(2)->has(Employment::factory()->started($start), 'employments'),
                 ['joined_at' => $start, 'left_at' => $end]
             )
             ->hasAttached(
                 TagTeam::factory()
-                    ->has(TagTeamEmployment::factory()->started($start), 'employments')
+                    ->has(Employment::factory()->started($start), 'employments')
                     ->afterCreating(function (TagTeam $tagTeam) use ($start) {
                         // Attach wrestlers to the tag team to ensure it has active wrestlers
                         $wrestlers = Wrestler::factory()->count(2)
-                            ->has(WrestlerEmployment::factory()->started($start), 'employments')
+                            ->has(Employment::factory()->started($start), 'employments')
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
                     }),
@@ -130,15 +129,15 @@ class StableFactory extends Factory
             ->has(StableRetirement::factory()->started($end), 'retirements')
             ->hasAttached(
                 Wrestler::factory()->count(2)
-                    ->has(WrestlerEmployment::factory()->started($start), 'employments'),
+                    ->has(Employment::factory()->started($start), 'employments'),
                 ['joined_at' => $start, 'left_at' => $end]
             )
             ->hasAttached(
                 TagTeam::factory()
-                    ->has(TagTeamEmployment::factory()->started($start), 'employments')
+                    ->has(Employment::factory()->started($start), 'employments')
                     ->afterCreating(function (TagTeam $tagTeam) use ($start) {
                         $wrestlers = Wrestler::factory()->count(2)
-                            ->has(WrestlerEmployment::factory()->started($start), 'employments')
+                            ->has(Employment::factory()->started($start), 'employments')
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => $start]);
                     }),
@@ -161,16 +160,16 @@ class StableFactory extends Factory
         return $this
             ->hasAttached(
                 Wrestler::factory()->count(2)
-                    ->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments'),
+                    ->has(Employment::factory()->started(Carbon::yesterday()), 'employments'),
                 ['joined_at' => now()]
             )
             ->hasAttached(
                 TagTeam::factory()
-                    ->has(TagTeamEmployment::factory()->started(Carbon::yesterday()), 'employments')
+                    ->has(Employment::factory()->started(Carbon::yesterday()), 'employments')
                     ->afterCreating(function (TagTeam $tagTeam) {
                         // Attach wrestlers to the tag team to ensure it has active wrestlers
                         $wrestlers = Wrestler::factory()->count(2)
-                            ->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments')
+                            ->has(Employment::factory()->started(Carbon::yesterday()), 'employments')
                             ->create();
                         $tagTeam->wrestlers()->attach($wrestlers->pluck('id'), ['joined_at' => Carbon::yesterday()]);
                     }),

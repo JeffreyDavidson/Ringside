@@ -71,9 +71,9 @@ test('it ends employment before deletion', function () {
     expect($employment->ended_at)->not->toBeNull();
 
     // Verify employment was ended
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
-        'referee_id' => $referee->id,
+        'employable_id' => $referee->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -157,8 +157,8 @@ test('it handles DateHelper date resolution for deletion', function () {
     expect($referee->trashed())->toBeTrue();
 
     // DateHelper should have processed the deletion date for ending relationships
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => $deletionDate->toDateTimeString(),
     ]);
 });
@@ -200,9 +200,9 @@ test('it preserves historical data after deletion', function () {
     $employment->refresh();
 
     // Historical employment record should be preserved with ended_at set
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
-        'referee_id' => $referee->id,
+        'employable_id' => $referee->id,
         'started_at' => requiredDate($employment->started_at)->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);

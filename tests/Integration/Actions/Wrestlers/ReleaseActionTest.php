@@ -22,8 +22,8 @@ test('it releases an employed wrestler', function () {
     expect($wrestler->isEmployed())->toBeFalse();
 
     // Verify employment record was ended
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -38,8 +38,8 @@ test('it releases wrestler with specific release date', function () {
     expect($wrestler->isEmployed())->toBeFalse();
 
     // Verify employment was ended with specific date
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
@@ -60,9 +60,9 @@ test('it persists the release lifecycle', function () {
     expect($wrestler->isEmployed())->toBeFalse();
 
     // Verify the specific employment record was updated
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -76,8 +76,8 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -104,16 +104,16 @@ test('it handles multiple employment records correctly', function () {
     expect($wrestler->isEmployed())->toBeFalse();
 
     // Only the current employment should be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(20)->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Old employment should remain unchanged
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
@@ -150,8 +150,8 @@ test('it can release suspended wrestler', function () {
     expect($wrestler->isEmployed())->toBeFalse();
     expect($wrestler->isSuspended())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -173,8 +173,8 @@ test('it can release injured wrestler', function () {
     expect($wrestler->isEmployed())->toBeFalse(); // Should no longer be employed
     expect($wrestler->isInjured())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -201,12 +201,12 @@ test('it maintains employment history integrity', function () {
     expect($wrestler->isEmployed())->toBeFalse();
 
     // All employment records should be preserved
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $firstEmployment->id,
         'ended_at' => now()->subDays(50)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
         'ended_at' => now()->toDateTimeString(),
     ]);

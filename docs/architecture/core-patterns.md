@@ -25,11 +25,10 @@
 
 ## Related Model Resolution
 
-- Status concerns resolve related models by convention through `ResolvesRelatedModels`.
-- A model such as `Wrestler` resolves the `Employment` suffix to `WrestlerEmployment` in the same namespace.
-- Domain-specific protected methods such as `resolveEmploymentModelClass()` are the extension points for specialized models and test fakes.
-- Resolution is stateless. Production concerns do not expose test-only fake APIs or mutable static resolver caches.
-- Tests override the protected domain-specific resolver on a purpose-built fake model instead of setting and resetting global state.
+- Employment history uses the shared `App\Models\Lifecycle\Employment` model and an `employable` polymorphic owner.
+- Wrestlers, managers, referees, and tag teams expose the same typed employment relationships through `IsEmployable`.
+- Employment models are not resolved from entity naming conventions and entity-specific employment record classes must not be introduced.
+- Other lifecycle dimensions retain their existing persistence models until they are reviewed and migrated independently.
 
 ## Computed Status Pattern
 - **Status fields are computed, not stored** - eliminates data inconsistency

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Contracts;
 
 use App\Models\Concerns\IsEmployable;
+use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
- * @template TEmployment of Model The employment model class
  * @template TModel of Model The model that can be employed
  *
  * @see IsEmployable For the trait implementation
@@ -18,14 +18,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 interface Employable
 {
     /**
-     * @return HasMany<TEmployment, TModel>
+     * @return MorphMany<Employment, TModel>
      */
-    public function employments(): HasMany;
+    public function employments(): MorphMany;
 
     /**
-     * @return HasOne<TEmployment, TModel>
+     * @return MorphOne<Employment, TModel>
      */
-    public function currentEmployment(): HasOne;
+    public function currentEmployment(): MorphOne;
 
     public function isEmployed(): bool;
 

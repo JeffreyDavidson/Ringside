@@ -23,8 +23,8 @@ test('it employs an unemployed tag team', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify employment record was created
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -51,8 +51,8 @@ test('it employs tag team with specific employment date', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify employment started with specific date
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -82,8 +82,8 @@ test('it persists the employment lifecycle', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify records show proper dates
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -141,8 +141,8 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam->refresh();
 
     // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'started_at' => $customEmploymentDate->toDateTimeString(),
         'ended_at' => null,
     ]);

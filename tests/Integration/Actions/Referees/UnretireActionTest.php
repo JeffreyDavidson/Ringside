@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Referees\UnretireAction;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Models\Lifecycle\Employment;
 use App\Models\Referees\Referee;
-use App\Models\Referees\RefereeEmployment;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -30,8 +30,8 @@ test('it unretires a retired referee', function () {
     expect($referee->isEmployed())->toBeTrue();
     expect($retirement->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -56,8 +56,8 @@ test('it unretires referee with specific unretirement date', function () {
         'ended_at' => $unretiredDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => $unretiredDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -91,8 +91,8 @@ test('it handles DateHelper date resolution', function () {
         'ended_at' => $unretiredDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => $unretiredDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -147,7 +147,7 @@ test('it restores referee employment after unretirement', function () {
     $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($employment)->not->toBeNull();
-    expect($employment->referee_id)->toBe($referee->id);
+    expect($employment->employable_id)->toBe($referee->id);
     expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });
@@ -156,7 +156,7 @@ test('it rolls back retirement changes when employment restoration fails', funct
     $referee = Referee::factory()->retired()->create();
     $retirement = $referee->currentRetirement()->firstOrFail();
 
-    RefereeEmployment::creating(function (): void {
+    Employment::creating(function (): void {
         throw new RuntimeException('Employment restoration failed.');
     });
 
@@ -164,7 +164,7 @@ test('it rolls back retirement changes when employment restoration fails', funct
         expect(fn () => resolve(UnretireAction::class)->handle($referee))
             ->toThrow(RuntimeException::class);
     } finally {
-        RefereeEmployment::flushEventListeners();
+        Employment::flushEventListeners();
     }
 
     $referee->refresh();

@@ -6,8 +6,8 @@ use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\InjureAction;
 use App\Livewire\Managers\Tables\Main;
 use App\Livewire\Managers\Tables\ManagersTable;
+use App\Models\Lifecycle\Employment;
 use App\Models\Managers\Manager;
-use App\Models\Managers\ManagerEmployment;
 use App\Models\Managers\ManagerInjury;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -163,15 +163,15 @@ describe('ManagersTable Component', function () {
             $manager = Manager::factory()->create(['first_name' => 'Manager', 'last_name' => 'History']);
 
             // Create employment history
-            ManagerEmployment::factory()
-                ->for($manager, 'manager')
+            Employment::factory()
+                ->for($manager, 'employable')
                 ->create([
                     'started_at' => now()->subDays(200),
                     'ended_at' => now()->subDays(100),
                 ]);
 
-            ManagerEmployment::factory()
-                ->for($manager, 'manager')
+            Employment::factory()
+                ->for($manager, 'employable')
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 

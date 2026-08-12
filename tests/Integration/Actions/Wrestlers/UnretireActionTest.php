@@ -31,8 +31,8 @@ test('it unretires a retired wrestler with employment', function () {
     ]);
 
     // Verify employment record was created
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -56,8 +56,8 @@ test('it unretires wrestler without immediate employment', function () {
     ]);
 
     // Verify no employment record was created
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
     ]);
 });
@@ -79,8 +79,8 @@ test('it unretires wrestler with specific date', function () {
     ]);
 
     // Verify employment started with same date
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => $unretirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -133,13 +133,13 @@ test('it employs unemployed managers when wrestler is employed', function () {
     expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager1->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager1->id,
         'ended_at' => null,
     ]);
 });
@@ -162,13 +162,13 @@ test('it does not employ managers when wrestler is not employed immediately', fu
     expect($manager->isEmployed())->toBeFalse(); // Should remain unemployed
 
     // No employment records should be created
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseMissing('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => null,
     ]);
 });

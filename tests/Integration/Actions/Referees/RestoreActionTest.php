@@ -136,8 +136,8 @@ test('it preserves historical relationships', function () {
     expect($referee->employments()->count())->toBe(1);
     expect($referee->injuries()->count())->toBe(1);
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
     ]);
 
     $this->assertDatabaseHas('referees_injuries', [

@@ -25,7 +25,7 @@ use Illuminate\Support\Carbon;
 /**
  * Expect an entity to have a specific employment status.
  *
- * @param  Model&Employable<Model, Model>  $entity
+ * @param  Model&Employable<Model>  $entity
  */
 function expectEmploymentStatus(Model&Employable $entity, EmploymentStatus $expectedStatus): void
 {
@@ -36,7 +36,7 @@ function expectEmploymentStatus(Model&Employable $entity, EmploymentStatus $expe
 /**
  * Expect an entity to transition from one status to another.
  *
- * @param  Model&Employable<Model, Model>  $entity
+ * @param  Model&Employable<Model>  $entity
  */
 function expectStatusTransition(Model&Employable $entity, EmploymentStatus $fromStatus, EmploymentStatus $toStatus): void
 {
@@ -68,7 +68,7 @@ function expectToBeUnavailable(Wrestler|Referee|TagTeam $entity): void
 /**
  * Expect employment lifecycle to be valid.
  *
- * @param  Model&Employable<Model, Model>  $entity
+ * @param  Model&Employable<Model>  $entity
  */
 function expectValidEmploymentLifecycle(Model&Employable $entity): void
 {
@@ -146,7 +146,7 @@ function expectValidSuspensionState(Model&Suspendable $entity): void
 /**
  * Expect a complete entity state to be valid and consistent.
  *
- * @param  Model&Employable<Model, Model>  $entity
+ * @param  Model&Employable<Model>  $entity
  */
 function expectValidEntityState(Model&Employable $entity): void
 {

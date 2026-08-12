@@ -38,13 +38,13 @@ test('it employs unemployed managers for each manageable roster type', function 
         ->and($futureManager->isEmployed())->toBeFalse()
         ->and($futureManager->hasFutureEmployment())->toBeTrue();
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $wrestlerManager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestlerManager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $tagTeamManager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeamManager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);

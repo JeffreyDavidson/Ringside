@@ -22,8 +22,8 @@ test('it employs an unemployed manager', function () {
     $manager->refresh();
     expect($manager->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -38,8 +38,8 @@ test('it employs manager with specific employment date', function () {
     $manager->refresh();
     expect($manager->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -62,8 +62,8 @@ test('it rejects employing a retired manager without changing retirement', funct
         ->and($manager->isRetired())->toBeTrue()
         ->and($retirement->ended_at)->toBeNull();
 
-    $this->assertDatabaseMissing('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => null,
     ]);
 });
@@ -127,8 +127,8 @@ test('it persists the employment lifecycle', function () {
     expect($manager->status->value)->toBe('employed');
 
     // Should create proper employment record
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => null,
     ]);
 });

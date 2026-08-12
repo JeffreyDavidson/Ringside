@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 final class EmploymentPeriodManager
 {
     /**
-     * @param  Employable<*, *>  $employable
+     * @param  Employable<*>  $employable
      */
     public function start(Employable $employable, Carbon $date): void
     {
@@ -21,7 +21,7 @@ final class EmploymentPeriodManager
     }
 
     /**
-     * @param  Employable<*, *>  $employable
+     * @param  Employable<*>  $employable
      */
     public function end(Employable $employable, Carbon $date): void
     {

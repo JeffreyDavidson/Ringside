@@ -30,8 +30,8 @@ test('it unretires a retired manager', function () {
     ]);
 
     // Verify employment record was created
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -53,8 +53,8 @@ test('it unretires manager with specific unretirement date', function () {
         'ended_at' => $unretirementDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => $unretirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -83,8 +83,8 @@ test('it persists the unretirement lifecycle', function () {
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -156,8 +156,8 @@ test('it uses DateHelper for consistent date handling', function () {
         'ended_at' => $customUnretirementDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => $customUnretirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);

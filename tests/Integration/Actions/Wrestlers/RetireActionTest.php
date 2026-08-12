@@ -131,9 +131,9 @@ test('it ends employment when retiring', function () {
     $wrestler->refresh();
 
     // Employment should be ended
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 

@@ -74,8 +74,8 @@ test('it updates wrestler and employs them when employment date provided', funct
     expect($result->isEmployed())->toBeTrue();
 
     // Verify employment record was created via EmployAction
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -103,8 +103,8 @@ test('it updates wrestler without employing when no employment date', function (
     expect($result->isEmployed())->toBeFalse();
 
     // Verify no employment record was created
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $wrestler->id,
     ]);
 });
 
@@ -170,14 +170,14 @@ test('it employs managers when wrestler gets employed', function () {
     expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager1->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager1->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -202,8 +202,8 @@ test('it handles DateHelper date resolution for employment', function () {
     expect($result->isEmployed())->toBeTrue();
 
     // DateHelper should have processed the employment date
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -233,8 +233,8 @@ test('it maintains transaction boundaries', function () {
         'name' => 'Transaction Test',
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => null,
     ]);
 });

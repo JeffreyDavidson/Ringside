@@ -21,8 +21,8 @@ use LogicException;
  *
  * NAMING CONVENTION:
  * Given a parent model like 'App\Models\Wrestlers\Wrestler',
- * and a suffix like 'Employment', resolves to:
- * 'App\Models\Wrestlers\WrestlerEmployment'
+ * and a suffix like 'Retirement', resolves to:
+ * 'App\Models\Wrestlers\WrestlerRetirement'
  *
  * @example
  * ```php
@@ -30,9 +30,9 @@ use LogicException;
  * {
  *     use ResolvesRelatedModels;
  *
- *     protected function resolveEmploymentModelClass(): string
+ *     protected function resolveRetirementModelClass(): string
  *     {
- *         return $this->resolveRelatedModelClass('Employment');
+ *         return $this->resolveRelatedModelClass('Retirement');
  *     }
  * }
  * ```
@@ -43,21 +43,18 @@ trait ResolvesRelatedModels
      * Resolve a related model class based on suffix.
      *
      * Automatically determines the related model class name using naming conventions.
-     * For example, if the parent model is 'Wrestler' and suffix is 'Employment',
-     * it will resolve to 'WrestlerEmployment' in the same namespace.
+     * For example, if the parent model is 'Wrestler' and suffix is 'Retirement',
+     * it will resolve to 'WrestlerRetirement' in the same namespace.
      *
-     * @param  string  $suffix  The suffix to append to the base model name (e.g., 'Employment', 'Retirement')
+     * @param  string  $suffix  The suffix to append to the base model name (e.g., 'Retirement', 'Suspension')
      * @throws LogicException If the resolved model class doesn't exist
      * @return string The fully qualified class name of the resolved model
      *
      * @example
      * ```php
-     * // In IsEmployable trait:
-     * $employmentClass = $this->resolveRelatedModelClass('Employment');
-     * // Returns: 'App\Models\Wrestlers\WrestlerEmployment'
-     *
      * // In IsRetirable trait:
      * $retirementClass = $this->resolveRelatedModelClass('Retirement');
+     * // Returns: 'App\Models\Wrestlers\WrestlerRetirement'
      * // Returns: 'App\Models\Wrestlers\WrestlerRetirement'
      * ```
      */

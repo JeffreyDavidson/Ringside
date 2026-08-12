@@ -51,8 +51,8 @@ test('it retires referee with specific retirement date', function () {
     ]);
 
     // Employment should be ended on the same date
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => $retirementDate->toDateTimeString(),
     ]);
 });
@@ -103,7 +103,7 @@ test('it ends employment when retiring', function () {
     $employment->refresh();
     expect($employment->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
         'ended_at' => now()->toDateTimeString(),
     ]);

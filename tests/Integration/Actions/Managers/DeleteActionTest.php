@@ -53,8 +53,8 @@ test('it soft deletes an employed manager and ends employment', function () {
     $this->assertSoftDeleted('managers', ['id' => $manager->id]);
 
     // Employment should be ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $deletionDate->toDateTimeString(),
     ]);
 });
@@ -135,8 +135,8 @@ test('it handles deletion with specific date', function () {
     expect($trashedManager->deleted_at)->not->toBeNull();
 
     // Employment should end on the custom date
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $customDeletionDate->toDateTimeString(),
     ]);
 });

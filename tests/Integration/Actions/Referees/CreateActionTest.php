@@ -31,8 +31,8 @@ test('it creates a referee with basic information', function () {
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('referees_employments', [
-        'referee_id' => $result->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $result->id,
     ]);
 });
 
@@ -57,8 +57,8 @@ test('it creates a referee with employment when employment date is provided', fu
     ]);
 
     // Should create employment record using EmployAction
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -86,8 +86,8 @@ test('it creates referee with proper database transactions', function () {
         'last_name' => 'Robinson',
     ]);
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
