@@ -8,6 +8,12 @@ use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+
+test('it requires an explicit suspendable owner', function () {
+    expect(fn () => Suspension::factory()->create())
+        ->toThrow(QueryException::class);
+});
 
 test('it creates a suspension for an explicit suspendable owner', function (Closure $createSuspendable) {
     /** @var Model $suspendable */
