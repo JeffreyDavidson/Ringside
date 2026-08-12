@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -29,7 +30,7 @@ class HealAction
 
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
-        $this->injuryPeriods->end($wrestler, $recoveryDate);
+        $this->injuryPeriods->end($wrestler, $recoveryDate, LifecycleTransitionType::Healed);
 
         // Note: Tag team bookability is handled automatically by the isBookable() method
         // which checks if all current wrestlers are available for competition

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Managers\Manager;
@@ -33,6 +34,6 @@ class InjureAction
 
         $injureDate = DateHelper::resolveDate($injureDate);
 
-        $this->injuryPeriods->start($manager, $injureDate);
+        $this->injuryPeriods->start($manager, $injureDate, LifecycleTransitionType::Injured);
     }
 }
