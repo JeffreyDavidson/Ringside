@@ -7,7 +7,6 @@ namespace App\Exceptions;
 use App\Enums\BusinessRuleReason;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Throwable;
 
 abstract class BaseBusinessException extends Exception
@@ -31,25 +30,10 @@ abstract class BaseBusinessException extends Exception
         return new static($message, reason: $reason);
     }
 
-    /** @return array{name: mixed, type: string, id: mixed} */
-    protected static function extractModelInfo(Model $model): array
-    {
-        return [
-            'name' => $model->getAttribute('name') ?? "ID: {$model->getKey()}",
-            'type' => class_basename($model),
-            'id' => $model->getKey(),
-        ];
-    }
-
     protected static function formatModelContext(Model $model): string
     {
-        $info = self::extractModelInfo($model);
+        $name = $model->getAttribute('name') ?? "ID: {$model->getKey()}";
 
-        return "{$info['type']} '{$info['name']}'";
-    }
-
-    protected static function formatDateContext(?Carbon $date, string $format = 'Y-m-d'): string
-    {
-        return $date?->format($format) ?? '';
+        return class_basename($model)." '{$name}'";
     }
 }

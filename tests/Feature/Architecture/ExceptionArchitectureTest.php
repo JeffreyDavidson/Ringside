@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Exceptions\BaseBusinessException;
+use Illuminate\Database\Eloquent\Model;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\NodeFinder;
 use PhpParser\NodeTraverser;
@@ -25,6 +26,12 @@ arch('business exceptions use the exception suffix')
     ->expect('App\Exceptions')
     ->classes()
     ->toHaveSuffix('Exception');
+
+arch('concrete business exceptions expose domain-specific inputs')
+    ->expect('App\Exceptions')
+    ->classes()
+    ->not->toUse(Model::class)
+    ->ignoring(BaseBusinessException::class);
 
 test('the business exception foundation is abstract', function () {
     $reflection = new ReflectionClass(BaseBusinessException::class);
