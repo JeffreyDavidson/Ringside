@@ -6,10 +6,10 @@ use App\Actions\Wrestlers\EmployAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Injury;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerInjury;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -208,8 +208,8 @@ describe('Main Component Integration', function () {
             $wrestler = Wrestler::factory()->create(['name' => 'Injury History']);
 
             // Create injury history
-            WrestlerInjury::factory()
-                ->for($wrestler, 'wrestler')
+            Injury::factory()
+                ->for($wrestler, 'injurable')
                 ->create([
                     'started_at' => now()->subDays(100),
                     'ended_at' => now()->subDays(50),

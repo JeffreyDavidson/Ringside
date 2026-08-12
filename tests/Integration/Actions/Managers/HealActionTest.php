@@ -22,8 +22,9 @@ test('it heals an injured manager', function () {
     expect($manager->isInjured())->toBeFalse();
 
     // Verify injury record was ended
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -38,8 +39,9 @@ test('it heals manager with specific recovery date', function () {
     expect($manager->isInjured())->toBeFalse();
 
     // Verify injury was ended with specific date
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'ended_at' => $recoveryDate->toDateTimeString(),
     ]);
 });
@@ -59,8 +61,9 @@ test('it persists the healing lifecycle', function () {
     expect($manager->isInjured())->toBeFalse();
 
     // Verify injury record shows proper end date
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -86,9 +89,10 @@ test('it handles database transactions correctly', function () {
     expect($manager->isInjured())->toBeFalse();
 
     // Verify original injury record was properly ended
-    $this->assertDatabaseHas('managers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $originalInjuryId,
-        'manager_id' => $manager->id,
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -124,8 +128,9 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager->refresh();
 
     // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'ended_at' => $customRecoveryDate->toDateTimeString(),
     ]);
 });

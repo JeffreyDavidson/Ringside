@@ -40,7 +40,7 @@ test('it prevents reinstating an injured manager', function () {
 
     $manager->refresh();
     expect($manager->isInjured())->toBeTrue();
-    $this->assertDatabaseHas('managers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injuryId,
         'ended_at' => null,
     ]);

@@ -42,7 +42,7 @@ test('it prevents reinstating an injured referee', function () {
 
     $referee->refresh();
     expect($referee->isInjured())->toBeTrue();
-    $this->assertDatabaseHas('referees_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injuryId,
         'ended_at' => null,
     ]);

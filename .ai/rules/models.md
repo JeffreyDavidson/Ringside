@@ -16,3 +16,6 @@ Cast enum-backed string columns to their PHP enum classes in model casts().
 
 ## Use shared polymorphic employment records
 Store employment periods in App\Models\Lifecycle\Employment through the polymorphic employable owner. Wrestlers, managers, referees, and tag teams share this record model; do not add entity-specific employment models or infer them from naming conventions. Migrate other lifecycle dimensions only through their own reviewed changes.
+
+## Use shared polymorphic injury records
+Store injury periods in App\Models\Lifecycle\Injury through the polymorphic injurable owner. Wrestlers, managers, and referees share this record model; keep eligibility and transitions in their existing typed concerns and Actions rather than adding entity-specific injury models.

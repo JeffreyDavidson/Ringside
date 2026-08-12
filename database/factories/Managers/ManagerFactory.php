@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories\Managers;
 
 use App\Models\Lifecycle\Employment;
-use App\Models\Managers\ManagerInjury;
+use App\Models\Lifecycle\Injury;
 use App\Models\Managers\ManagerRetirement;
 use App\Models\Managers\ManagerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -78,7 +78,7 @@ class ManagerFactory extends Factory
         $start = $now->copy()->subDays(2);
 
         return $this->has(Employment::factory()->started($start), 'employments')
-            ->has(ManagerInjury::factory()->started($now), 'injuries');
+            ->has(Injury::factory()->started($now), 'injuries');
     }
 
     public function available(): static

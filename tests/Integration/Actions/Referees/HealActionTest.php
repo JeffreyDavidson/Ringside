@@ -27,7 +27,7 @@ test('it heals an injured referee', function () {
     expect($referee->isInjured())->toBeFalse();
     expect($injury->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injury->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -46,7 +46,7 @@ test('it heals referee with specific recovery date', function () {
     expect($referee->isInjured())->toBeFalse();
     expect(requiredDate($injury->ended_at)->toDateTimeString())->toBe($recoveryDate->toDateTimeString());
 
-    $this->assertDatabaseHas('referees_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injury->id,
         'ended_at' => $recoveryDate->toDateTimeString(),
     ]);
@@ -75,8 +75,9 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
 
     // DateHelper should have processed the recovery date
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'ended_at' => $recoveryDate->toDateTimeString(),
     ]);
 });
@@ -128,9 +129,10 @@ test('it preserves injury history', function () {
     $injury->refresh();
 
     // Injury record should be preserved with ended_at set
-    $this->assertDatabaseHas('referees_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injury->id,
-        'referee_id' => $referee->id,
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => $originalStartedAt->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);

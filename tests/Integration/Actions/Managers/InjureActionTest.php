@@ -24,8 +24,9 @@ test('it injures an employed manager', function () {
     expect($manager->isInjured())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue(); // Should remain employed while injured
 
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -40,8 +41,9 @@ test('it injures manager with specific injury date', function () {
     $manager->refresh();
     expect($manager->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'started_at' => $injuryDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -61,8 +63,9 @@ test('it persists the injury lifecycle', function () {
     expect($manager->isInjured())->toBeTrue();
 
     // Verify injury record shows proper start date
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -148,8 +151,9 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager->refresh();
 
     // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'started_at' => $customInjuryDate->toDateTimeString(),
         'ended_at' => null,
     ]);

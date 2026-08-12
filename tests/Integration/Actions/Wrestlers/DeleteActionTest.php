@@ -120,9 +120,10 @@ test('it ends injury before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify injury was ended before deletion
-    $this->assertDatabaseHas('wrestlers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $currentInjury->id,
-        'wrestler_id' => $wrestler->id,
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

@@ -22,8 +22,9 @@ test('it heals an injured wrestler', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Verify injury record was ended
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -38,8 +39,9 @@ test('it heals wrestler with specific recovery date', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Verify injury was ended with specific date
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'ended_at' => $recoveryDate->toDateTimeString(),
     ]);
 });
@@ -59,9 +61,10 @@ test('it persists the healing lifecycle', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Verify the specific injury record was updated
-    $this->assertDatabaseHas('wrestlers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $currentInjury->id,
-        'wrestler_id' => $wrestler->id,
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -75,8 +78,9 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -103,15 +107,17 @@ test('it handles multiple injury records correctly', function () {
     expect($wrestler->isInjured())->toBeFalse();
 
     // Only the current injury should be ended
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(10)->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Old injury should remain unchanged
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(30)->toDateTimeString(),
         'ended_at' => now()->subDays(20)->toDateTimeString(),
     ]);

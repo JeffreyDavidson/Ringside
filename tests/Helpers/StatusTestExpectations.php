@@ -110,7 +110,7 @@ function expectValidRetirementState(Model&Retirable $entity): void
 /**
  * Expect injury state to be consistent.
  *
- * @param  Model&Injurable<Model, Model>  $entity
+ * @param  Model&Injurable<Model>  $entity
  */
 function expectValidInjuryState(Model&Injurable $entity): void
 {

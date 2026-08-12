@@ -11,9 +11,9 @@ use App\Livewire\Referees\Tables\Main;
 use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Events\Event;
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Injury;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
-use App\Models\Referees\RefereeInjury;
 use App\Models\Referees\RefereeRetirement;
 use App\Models\Referees\RefereeSuspension;
 use Livewire\Livewire;
@@ -207,8 +207,8 @@ describe('RefereesTable Component', function () {
             $referee = Referee::factory()->create(['first_name' => 'Injury', 'last_name' => 'History']);
 
             // Create injury history
-            RefereeInjury::factory()
-                ->for($referee, 'referee')
+            Injury::factory()
+                ->for($referee, 'injurable')
                 ->create([
                     'started_at' => now()->subDays(100),
                     'ended_at' => now()->subDays(50),
@@ -519,8 +519,8 @@ describe('RefereesTable Component', function () {
             $recoveredReferee = Referee::factory()->employed()->create(['first_name' => 'Recovered', 'last_name' => 'Referee']);
 
             // Create previous injury
-            RefereeInjury::factory()
-                ->for($recoveredReferee, 'referee')
+            Injury::factory()
+                ->for($recoveredReferee, 'injurable')
                 ->create([
                     'started_at' => now()->subMonths(6),
                     'ended_at' => now()->subMonths(3),
