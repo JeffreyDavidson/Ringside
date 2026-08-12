@@ -24,8 +24,9 @@ test('it suspends an employed wrestler', function () {
     expect($wrestler->isSuspended())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -40,8 +41,9 @@ test('it suspends wrestler with specific suspension date', function () {
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => $suspensionDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -55,8 +57,9 @@ test('it suspends a wrestler without suspension notes', function () {
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -75,8 +78,9 @@ test('it persists the suspension lifecycle', function () {
     expect($wrestler->currentSuspension)->not()->toBeNull();
     expect($wrestler->isSuspended())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -91,8 +95,9 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
     ]);
 });
@@ -121,15 +126,17 @@ test('it handles multiple suspension scenarios', function () {
     expect($wrestler->isSuspended())->toBeTrue();
 
     // New suspension should be created
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 
     // Old suspension should remain unchanged
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(30)->toDateTimeString(),
         'ended_at' => now()->subDays(20)->toDateTimeString(),
     ]);

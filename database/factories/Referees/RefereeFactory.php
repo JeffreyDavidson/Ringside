@@ -6,9 +6,9 @@ namespace Database\Factories\Referees;
 
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeRetirement;
-use App\Models\Referees\RefereeSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -80,7 +80,7 @@ class RefereeFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->has(Employment::factory()->started($start), 'employments')
-            ->has(RefereeSuspension::factory()->started($end), 'suspensions');
+            ->has(Suspension::factory()->started($end), 'suspensions');
     }
 
     public function injured(): static

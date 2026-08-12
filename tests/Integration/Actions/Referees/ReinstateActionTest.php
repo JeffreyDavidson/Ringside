@@ -27,7 +27,7 @@ test('it reinstates a suspended referee', function () {
     expect($referee->isSuspended())->toBeFalse();
     expect($suspension->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -61,7 +61,7 @@ test('it reinstates referee with specific reinstatement date', function () {
     expect($referee->isSuspended())->toBeFalse();
     expect(requiredDate($suspension->ended_at)->toDateTimeString())->toBe($reinstatementDate->toDateTimeString());
 
-    $this->assertDatabaseHas('referees_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
         'ended_at' => $reinstatementDate->toDateTimeString(),
     ]);
@@ -76,8 +76,9 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
 
     // DateHelper should have processed the reinstatement date
-    $this->assertDatabaseHas('referees_suspensions', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $referee->id,
+        'suspendable_type' => $referee->getMorphClass(),
         'ended_at' => $reinstatementDate->toDateTimeString(),
     ]);
 });
@@ -129,9 +130,10 @@ test('it preserves suspension history', function () {
     $suspension->refresh();
 
     // Suspension record should be preserved with ended_at set
-    $this->assertDatabaseHas('referees_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
-        'referee_id' => $referee->id,
+        'suspendable_id' => $referee->id,
+        'suspendable_type' => $referee->getMorphClass(),
         'started_at' => $originalStartedAt->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);

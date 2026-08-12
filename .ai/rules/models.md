@@ -19,3 +19,6 @@ Store employment periods in App\Models\Lifecycle\Employment through the polymorp
 
 ## Use shared polymorphic injury records
 Store injury periods in App\Models\Lifecycle\Injury through the polymorphic injurable owner. Wrestlers, managers, and referees share this record model; keep eligibility and transitions in their existing typed concerns and Actions rather than adding entity-specific injury models.
+
+## Use shared polymorphic suspension records
+Store suspension periods in App\Models\Lifecycle\Suspension through the polymorphic suspendable owner. Wrestlers, managers, referees, and tag teams share this record model; keep eligibility, locking, transactions, and cascades in their existing typed concerns and Actions rather than adding entity-specific suspension models.

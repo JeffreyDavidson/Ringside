@@ -17,8 +17,9 @@ test('it starts a suspension period on the effective date', function () {
 
     resolve(SuspensionPeriodManager::class)->start($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => $effectiveDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -31,9 +32,10 @@ test('it ends and preserves the active suspension period', function () {
 
     resolve(SuspensionPeriodManager::class)->end($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $suspensionId,
-        'wrestler_id' => $wrestler->id,
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => $effectiveDate->toDateTimeString(),
     ]);
 });

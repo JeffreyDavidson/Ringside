@@ -31,8 +31,9 @@ test('it reinstates suspended current wrestlers and managers', function () {
 
         expect($wrestler->isSuspended())->toBeFalse();
 
-        $this->assertDatabaseHas('wrestlers_suspensions', [
-            'wrestler_id' => $wrestler->id,
+        $this->assertDatabaseHas('suspensions', [
+            'suspendable_id' => $wrestler->id,
+            'suspendable_type' => $wrestler->getMorphClass(),
             'ended_at' => $reinstatementDate->toDateTimeString(),
         ]);
     }
@@ -43,8 +44,9 @@ test('it reinstates suspended current wrestlers and managers', function () {
     expect($manager->isSuspended())->toBeFalse()
         ->and($activeManager->suspensions()->count())->toBe($activeManagerSuspensionCount);
 
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $reinstatementDate->toDateTimeString(),
     ]);
 });

@@ -29,6 +29,8 @@
 - Wrestlers, managers, referees, and tag teams expose the same typed employment relationships through `IsEmployable`.
 - Employment models are not resolved from entity naming conventions and entity-specific employment record classes must not be introduced.
 - Injury history uses the shared `App\Models\Lifecycle\Injury` model and an `injurable` polymorphic owner.
+- Suspension history uses the shared `App\Models\Lifecycle\Suspension` model and a `suspendable` polymorphic owner.
+- Suspension models are not resolved from entity naming conventions and entity-specific suspension record classes must not be introduced.
 - Wrestlers, managers, and referees expose the same typed injury relationships through `IsInjurable`; eligibility and transition orchestration remain in the existing individual concerns and Actions.
 - Other lifecycle dimensions retain their existing persistence models until they are reviewed and migrated independently.
 

@@ -94,9 +94,10 @@ test('it ends suspension before deletion', function () {
     expect($suspension->ended_at)->not->toBeNull();
 
     // Verify suspension was ended
-    $this->assertDatabaseHas('referees_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
-        'referee_id' => $referee->id,
+        'suspendable_id' => $referee->id,
+        'suspendable_type' => $referee->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

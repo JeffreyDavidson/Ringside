@@ -25,8 +25,9 @@ test('it reinstates a suspended wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
 
     // Verify suspension record was ended
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -62,8 +63,9 @@ test('it reinstates wrestler with specific reinstatement date', function () {
     expect($wrestler->isSuspended())->toBeFalse();
 
     // Verify suspension was ended with specific date
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => $reinstatementDate->toDateTimeString(),
     ]);
 });
@@ -84,9 +86,10 @@ test('it persists the reinstatement lifecycle', function () {
     expect($wrestler->isSuspended())->toBeFalse();
 
     // Verify the specific suspension record was updated
-    $this->assertDatabaseHas('wrestlers_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $currentSuspension->id,
-        'wrestler_id' => $wrestler->id,
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -100,8 +103,9 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeFalse();
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -131,14 +135,15 @@ test('it handles multiple suspension records correctly', function () {
     expect($wrestler->isSuspended())->toBeFalse();
 
     // Only current suspension should be ended
-    $this->assertDatabaseHas('wrestlers_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $currentSuspension->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
     // Old records should remain unchanged
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(40)->toDateTimeString(),
     ]);
@@ -182,8 +187,9 @@ test('it can reinstate suspended wrestler who is also employed', function () {
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed
     expect($wrestler->isSuspended())->toBeFalse(); // Should no longer be suspended
 
-    $this->assertDatabaseHas('wrestlers_suspensions', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

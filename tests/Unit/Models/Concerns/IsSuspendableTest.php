@@ -2,60 +2,51 @@
 
 declare(strict_types=1);
 
-/**
- * Trait Isolation Test for IsSuspendable
- *
- * This test ensures the IsSuspendable trait is agnostic, reusable, and not tied to any business/domain model.
- * It verifies relationship types, related model resolution, resolver overrides, and error handling.
- *
- * This is NOT a business logic test. It is meant to guarantee the trait can be safely reused across any model.
- */
-
 namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Contracts\Suspendable;
+use App\Models\Lifecycle\Suspension;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use JMac\Testing\Double;
-use Tests\Unit\Models\Concerns\Support\FakeSuspendableModel;
-use Tests\Unit\Models\Concerns\Support\FakeSuspensionModel;
 
-/** @extends EloquentBuilder<FakeSuspensionModel> */
+/** @extends EloquentBuilder<Suspension> */
 final class FakeSuspensionBuilder extends EloquentBuilder {}
 
-/** @implements Suspendable<FakeSuspensionModel, self> */
+/** @implements Suspendable<self> */
 final class SuspensionStateModel extends Model implements Suspendable
 {
-    /** @use IsSuspendable<FakeSuspensionModel, self> */
+    /** @use IsSuspendable<self> */
     use IsSuspendable;
 
     public bool $currentSuspensionExists = false;
 
     public bool $suspensionExists = false;
 
-    public function resolveSuspensionModelClass(): string
+    /** @return MorphOne<Suspension, self> */
+    public function currentSuspension(): MorphOne
     {
-        return FakeSuspensionModel::class;
+        return $this->suspensionHasOne($this->currentSuspensionExists);
     }
 
-    /** @return HasOne<FakeSuspensionModel, self> */
-    public function currentSuspension(): HasOne
-    {
-        $builder = $this->suspensionBuilder($this->currentSuspensionExists);
-
-        return new HasOne($builder, new self(), 'entity_id', 'id');
-    }
-
-    /** @return HasMany<FakeSuspensionModel, self> */
-    public function suspensions(): HasMany
+    /** @return MorphMany<Suspension, self> */
+    public function suspensions(): MorphMany
     {
         $builder = $this->suspensionBuilder($this->suspensionExists);
 
-        return new HasMany($builder, new self(), 'entity_id', 'id');
+        return new MorphMany($builder, new self(), 'suspendable_type', 'suspendable_id', 'id');
+    }
+
+    /** @return MorphOne<Suspension, self> */
+    private function suspensionHasOne(bool $exists): MorphOne
+    {
+        $builder = $this->suspensionBuilder($exists);
+
+        return new MorphOne($builder, new self(), 'suspendable_type', 'suspendable_id', 'id');
     }
 
     private function suspensionBuilder(bool $exists): FakeSuspensionBuilder
@@ -63,153 +54,54 @@ final class SuspensionStateModel extends Model implements Suspendable
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
         $builder = new FakeSuspensionBuilder($query);
-        $builder->setModel(new FakeSuspensionModel());
+        $builder->setModel(new Suspension());
 
         return $builder;
     }
 }
 
-describe('IsSuspendable Trait Unit Tests', function () {
-    describe('suspension relationships', function () {
-        test('provides suspensions relationship', function () {
-            $model = new class extends Model implements Suspendable
-            {
-                /** @use IsSuspendable<FakeSuspensionModel, self> */
-                use IsSuspendable;
+describe('IsSuspendable', function () {
+    test('provides polymorphic suspension relationships', function () {
+        $model = new class extends Model implements Suspendable
+        {
+            /** @use IsSuspendable<self> */
+            use IsSuspendable;
+        };
 
-                public function resolveSuspensionModelClass(): string
-                {
-                    return FakeSuspensionModel::class;
-                }
-            };
-            expect($model->suspensions())->toBeInstanceOf(HasMany::class);
-        });
-
-        test('provides current suspension relationship', function () {
-            $model = new class extends Model implements Suspendable
-            {
-                /** @use IsSuspendable<FakeSuspensionModel, self> */
-                use IsSuspendable;
-
-                public function resolveSuspensionModelClass(): string
-                {
-                    return FakeSuspensionModel::class;
-                }
-            };
-            expect($model->currentSuspension())->toBeInstanceOf(HasOne::class);
-        });
-
-        test('provides previous suspensions relationship', function () {
-            $model = new class extends Model implements Suspendable
-            {
-                /** @use IsSuspendable<FakeSuspensionModel, self> */
-                use IsSuspendable;
-
-                public function resolveSuspensionModelClass(): string
-                {
-                    return FakeSuspensionModel::class;
-                }
-            };
-            expect($model->previousSuspensions())->toBeInstanceOf(HasMany::class);
-        });
-
-        test('provides previous suspension relationship', function () {
-            $model = new class extends Model implements Suspendable
-            {
-                /** @use IsSuspendable<FakeSuspensionModel, self> */
-                use IsSuspendable;
-
-                public function resolveSuspensionModelClass(): string
-                {
-                    return FakeSuspensionModel::class;
-                }
-            };
-            expect($model->previousSuspension())->toBeInstanceOf(HasOne::class);
-        });
-
-        test('suspensions relationship uses the correct related model', function () {
-            $model = new class extends Model implements Suspendable
-            {
-                /** @use IsSuspendable<FakeSuspensionModel, self> */
-                use IsSuspendable;
-
-                public function resolveSuspensionModelClass(): string
-                {
-                    return FakeSuspensionModel::class;
-                }
-            };
-            $relation = $model->suspensions();
-            expect($relation)->toBeInstanceOf(HasMany::class);
-            expect($relation->getRelated())->toBeInstanceOf(FakeSuspensionModel::class);
-        });
-
-        test('currentSuspension relationship uses the correct related model', function () {
-            $model = new class extends Model implements Suspendable
-            {
-                /** @use IsSuspendable<FakeSuspensionModel, self> */
-                use IsSuspendable;
-
-                public function resolveSuspensionModelClass(): string
-                {
-                    return FakeSuspensionModel::class;
-                }
-            };
-            $relation = $model->currentSuspension();
-            expect($relation)->toBeInstanceOf(HasOne::class);
-            expect($relation->getRelated())->toBeInstanceOf(FakeSuspensionModel::class);
-        });
+        expect($model->suspensions())->toBeInstanceOf(MorphMany::class)
+            ->and($model->currentSuspension())->toBeInstanceOf(MorphOne::class)
+            ->and($model->previousSuspensions())->toBeInstanceOf(MorphMany::class)
+            ->and($model->previousSuspension())->toBeInstanceOf(MorphOne::class)
+            ->and($model->suspensions()->getRelated())->toBeInstanceOf(Suspension::class);
     });
 
-    describe('suspension status checks', function () {
-        test('can check if model is suspended', function () {
-            $model = new SuspensionStateModel();
-            $model->currentSuspensionExists = true;
+    test('checks current and historical suspension state', function () {
+        $model = new SuspensionStateModel();
 
-            expect($model->isSuspended())->toBeTrue();
-        });
+        expect($model->isSuspended())->toBeFalse()
+            ->and($model->hasSuspensions())->toBeFalse();
 
-        test('can check if model is not suspended', function () {
-            $model = new SuspensionStateModel();
+        $model->currentSuspensionExists = true;
+        $model->suspensionExists = true;
 
-            expect($model->isSuspended())->toBeFalse();
-        });
-
-        test('can check if model has suspensions', function () {
-            $modelWith = new SuspensionStateModel();
-            $modelWith->suspensionExists = true;
-            $modelWithout = new SuspensionStateModel();
-
-            expect($modelWith->hasSuspensions())->toBeTrue();
-            expect($modelWithout->hasSuspensions())->toBeFalse();
-        });
+        expect($model->isSuspended())->toBeTrue()
+            ->and($model->hasSuspensions())->toBeTrue();
     });
 
-    describe('suspension model resolution', function () {
-        test('uses the model-specific suspension resolver', function () {
-            $model = new FakeSuspendableModel();
+    test('constrains current and previous suspension relationships', function () {
+        $model = new class extends Model implements Suspendable
+        {
+            /** @use IsSuspendable<self> */
+            use IsSuspendable;
+        };
 
-            expect($model->suspensions()->getRelated())->toBeInstanceOf(FakeSuspensionModel::class);
-        });
-    });
+        $currentWheres = $model->currentSuspension()->getQuery()->getQuery()->wheres;
+        $previousWheres = $model->previousSuspensions()->getQuery()->getQuery()->wheres;
 
-    describe('suspension relationship queries', function () {
-        test('current suspension query includes whereNull ended_at', function () {
-            $model = new class extends Model implements Suspendable
-            {
-                /** @use IsSuspendable<FakeSuspensionModel, self> */
-                use IsSuspendable;
-
-                public function resolveSuspensionModelClass(): string
-                {
-                    return FakeSuspensionModel::class;
-                }
-            };
-            $relation = $model->currentSuspension();
-            $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNull = collect($wheres)->contains(function ($where) {
-                return ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at';
-            });
-            expect($hasWhereNull)->toBeTrue();
-        });
+        expect(collect($currentWheres)->contains(
+            fn (array $where): bool => $where['type'] === 'Null' && $where['column'] === 'ended_at'
+        ))->toBeTrue()->and(collect($previousWheres)->contains(
+            fn (array $where): bool => $where['type'] === 'NotNull' && $where['column'] === 'ended_at'
+        ))->toBeTrue();
     });
 });

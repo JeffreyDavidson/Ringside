@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Database\Factories\TagTeams;
 
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Suspension;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamRetirement;
-use App\Models\TagTeams\TagTeamSuspension;
 use App\Models\Wrestlers\Wrestler;
 use App\Models\Wrestlers\WrestlerRetirement;
-use App\Models\Wrestlers\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -84,11 +83,11 @@ class TagTeamFactory extends Factory
         $suspensionStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
             ->has(Employment::factory()->started($employmentStartDate), 'employments')
-            ->has(WrestlerSuspension::factory()->started($suspensionStartDate), 'suspensions')
+            ->has(Suspension::factory()->started($suspensionStartDate), 'suspensions')
             ->create();
 
         return $this->has(Employment::factory()->started($employmentStartDate), 'employments')
-            ->has(TagTeamSuspension::factory()->started($suspensionStartDate), 'suspensions')
+            ->has(Suspension::factory()->started($suspensionStartDate), 'suspensions')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 

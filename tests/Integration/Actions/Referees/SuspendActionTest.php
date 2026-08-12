@@ -23,8 +23,9 @@ test('it suspends an employed referee', function () {
     $referee->refresh();
     expect($referee->isSuspended())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_suspensions', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $referee->id,
+        'suspendable_type' => $referee->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -39,8 +40,9 @@ test('it suspends referee with specific suspension date', function () {
     $referee->refresh();
     expect($referee->isSuspended())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_suspensions', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $referee->id,
+        'suspendable_type' => $referee->getMorphClass(),
         'started_at' => $suspensionDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -55,8 +57,9 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
 
     // DateHelper should have processed the suspension date
-    $this->assertDatabaseHas('referees_suspensions', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $referee->id,
+        'suspendable_type' => $referee->getMorphClass(),
         'started_at' => $suspensionDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -122,7 +125,7 @@ test('it creates suspension record with correct structure', function () {
     $suspension = freshModel($referee)->currentSuspension()->firstOrFail();
 
     expect($suspension)->not->toBeNull();
-    expect($suspension->referee_id)->toBe($referee->id);
+    expect($suspension->suspendable->is($referee))->toBeTrue();
     expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe($suspensionDate->toDateTimeString());
     expect($suspension->ended_at)->toBeNull();
 });

@@ -65,8 +65,9 @@ test('it releases suspended tag team', function () {
     ]);
 
     // Verify suspension ended
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
