@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Tables;
 
+use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Livewire\Base\Tables\BaseTable;
@@ -128,7 +129,10 @@ class Main extends BaseTable
 
     public function delete(Event $event): void
     {
-        $this->deleteModel($event);
+        Gate::authorize('delete', $event);
+
+        resolve(DeleteAction::class)->handle($event);
+        session()->flash('status', 'Event successfully deleted.');
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Actions\Managers\DeleteAction;
 use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\HealAction;
 use App\Actions\Managers\InjureAction;
@@ -114,7 +115,10 @@ class Main extends BaseTable
 
     public function delete(Manager $manager): void
     {
-        $this->deleteModel($manager);
+        Gate::authorize('delete', $manager);
+
+        resolve(DeleteAction::class)->handle($manager);
+        session()->flash('status', 'Manager successfully deleted.');
     }
 
     /**

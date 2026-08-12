@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Actions\Stables\DeleteAction;
 use App\Actions\Stables\DisbandAction;
 use App\Actions\Stables\EstablishAction;
 use App\Actions\Stables\RestoreAction;
@@ -98,7 +99,10 @@ class Main extends BaseTable
 
     public function delete(Stable $stable): void
     {
-        $this->deleteModel($stable);
+        Gate::authorize('delete', $stable);
+
+        resolve(DeleteAction::class)->handle($stable);
+        session()->flash('status', 'Stable successfully deleted.');
     }
 
     /**
