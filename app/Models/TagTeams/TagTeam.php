@@ -25,6 +25,7 @@ use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Retirement;
@@ -126,7 +127,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(TagTeamFactory::class)]
 #[UseEloquentBuilder(TagTeamBuilder::class)]
-class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, Suspendable
+class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, SoftDeletable, Suspendable
 {
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;

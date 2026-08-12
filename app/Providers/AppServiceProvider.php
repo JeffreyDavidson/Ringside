@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Console\Commands\EnhancedTestMakeCommand;
+use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
@@ -65,6 +67,8 @@ class AppServiceProvider extends ServiceProvider
             'tagTeam' => TagTeam::class,
             'referee' => Referee::class,
             'stable' => Stable::class,
+            'event' => Event::class,
+            'venue' => Venue::class,
         ]);
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));

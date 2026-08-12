@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Restore a soft-deleted wrestler record.
      *
@@ -30,8 +33,8 @@ class RestoreAction
 
         $restoreDate = DateHelper::resolveDate($restoreDate);
 
-        DB::transaction(function () use ($wrestler): void {
-            $wrestler->restore();
+        DB::transaction(function () use ($wrestler, $restoreDate): void {
+            $this->deletionState->restore($wrestler, $restoreDate);
 
             // Note: No automatic relationship restoration to avoid conflicts.
             // All employment, tag team, stable, and manager relationships

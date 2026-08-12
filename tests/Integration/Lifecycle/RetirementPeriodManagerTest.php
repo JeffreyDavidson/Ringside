@@ -74,6 +74,7 @@ test('it records retirement transitions for every supported owner', function (Li
         LifecycleOwnerType::TagTeam => TagTeam::factory()->create(),
         LifecycleOwnerType::Title => Title::factory()->create(),
         LifecycleOwnerType::Wrestler => Wrestler::factory()->create(),
+        default => throw new LogicException("{$ownerType->value} does not support retirement"),
     };
     $effectiveDate = now()->subDay();
 
@@ -87,4 +88,11 @@ test('it records retirement transitions for every supported owner', function (Li
     expect($transition->subject->is($owner))->toBeTrue()
         ->and($transition->dimension)->toBe(LifecycleDimension::Retirement)
         ->and($transition->transition)->toBe(LifecycleTransitionType::Retired);
-})->with(LifecycleOwnerType::cases());
+})->with([
+    LifecycleOwnerType::Manager,
+    LifecycleOwnerType::Referee,
+    LifecycleOwnerType::Stable,
+    LifecycleOwnerType::TagTeam,
+    LifecycleOwnerType::Title,
+    LifecycleOwnerType::Wrestler,
+]);

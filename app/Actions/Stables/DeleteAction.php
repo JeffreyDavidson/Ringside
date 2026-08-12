@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Delete a stable.
      *
@@ -26,7 +29,7 @@ class DeleteAction
                 ->findOrFail($stable->getKey());
 
             $lockedStable->ensureCanBeDeleted();
-            $lockedStable->delete();
+            $this->deletionState->delete($lockedStable, now());
         });
     }
 }

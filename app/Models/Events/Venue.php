@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\VenueBuilder;
+use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HoldsEvents;
+use App\Models\Contracts\SoftDeletable;
 use Database\Factories\Events\VenueFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -48,11 +50,12 @@ use Illuminate\Support\Carbon;
 #[Fillable('name', 'street_address', 'city', 'state', 'zipcode')]
 #[UseFactory(VenueFactory::class)]
 #[UseEloquentBuilder(VenueBuilder::class)]
-class Venue extends Model
+class Venue extends Model implements SoftDeletable
 {
     /** @use HasFactory<VenueFactory> */
     use HasFactory;
 
+    use HasLifecycleTransitions;
     use HoldsEvents;
     use SoftDeletes;
 }

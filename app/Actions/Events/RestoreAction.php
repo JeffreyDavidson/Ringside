@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Event;
 
 class RestoreAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Restore a soft-deleted event.
      *
@@ -23,6 +26,6 @@ class RestoreAction
      */
     public function handle(Event $event): void
     {
-        $event->restore();
+        $this->deletionState->restore($event, now());
     }
 }

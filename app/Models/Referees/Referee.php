@@ -23,6 +23,7 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
@@ -105,7 +106,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(RefereeFactory::class)]
 #[UseEloquentBuilder(RefereeBuilder::class)]
-class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, Suspendable
+class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, SoftDeletable, Suspendable
 {
     /** @use HasFactory<RefereeFactory> */
     use HasFactory;

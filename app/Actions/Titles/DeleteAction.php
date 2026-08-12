@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Delete a title.
      *
@@ -49,7 +52,7 @@ class DeleteAction
             // Note: Inactive (pulled) titles that have debuted require no status cleanup
 
             // Soft delete the title record
-            $title->delete();
+            $this->deletionState->delete($title, $deletionDate);
         });
     }
 }

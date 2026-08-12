@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Restore a soft-deleted stable.
      *
@@ -22,7 +25,7 @@ class RestoreAction
     {
         DB::transaction(function () use ($stable): void {
             $stable->ensureCanBeRestored();
-            $stable->restore();
+            $this->deletionState->restore($stable, now());
         });
     }
 }
