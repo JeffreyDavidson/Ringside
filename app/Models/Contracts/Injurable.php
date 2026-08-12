@@ -5,27 +5,23 @@ declare(strict_types=1);
 namespace App\Models\Contracts;
 
 use App\Models\Concerns\IsInjurable;
+use App\Models\Lifecycle\Injury;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
- * @template TInjury of Model The injury model class
- * @template TModel of Model The model that can be injured
+ * @template TModel of Model
  *
- * @see IsInjurable For the trait implementation
+ * @see IsInjurable
  */
 interface Injurable
 {
-    /**
-     * @return HasMany<TInjury, TModel>
-     */
-    public function injuries(): HasMany;
+    /** @return MorphMany<Injury, TModel> */
+    public function injuries(): MorphMany;
 
-    /**
-     * @return HasOne<TInjury, TModel>
-     */
-    public function currentInjury(): HasOne;
+    /** @return MorphOne<Injury, TModel> */
+    public function currentInjury(): MorphOne;
 
     public function isInjured(): bool;
 }

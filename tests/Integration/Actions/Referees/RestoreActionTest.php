@@ -140,8 +140,9 @@ test('it preserves historical relationships', function () {
         'employable_id' => $referee->id,
     ]);
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
     ]);
 });
 

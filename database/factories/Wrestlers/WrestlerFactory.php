@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Database\Factories\Wrestlers;
 
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Injury;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerInjury;
 use App\Models\Wrestlers\WrestlerRetirement;
 use App\Models\Wrestlers\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -114,7 +114,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
 
         return $this->has(Employment::factory()->started($start), 'employments')
-            ->has(WrestlerInjury::factory()->started($now), 'injuries');
+            ->has(Injury::factory()->started($now), 'injuries');
     }
 
     /**

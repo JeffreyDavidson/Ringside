@@ -46,7 +46,7 @@ test('it prevents reinstating an injured wrestler', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injuryId,
         'ended_at' => null,
     ]);

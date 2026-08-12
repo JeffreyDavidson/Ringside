@@ -23,8 +23,9 @@ test('it injures an employed referee', function () {
     $referee->refresh();
     expect($referee->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -39,8 +40,9 @@ test('it injures referee with specific injury date', function () {
     $referee->refresh();
     expect($referee->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => $injuryDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -55,8 +57,9 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
 
     // DateHelper should have processed the injury date
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => $injuryDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -106,8 +109,9 @@ test('it maintains transaction boundaries', function () {
     // Injury creation should be atomic
     expect($referee->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_injuries', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -139,7 +143,8 @@ test('it creates injury record with correct structure', function () {
     $injury = freshModel($referee)->currentInjury()->firstOrFail();
 
     expect($injury)->not->toBeNull();
-    expect($injury->referee_id)->toBe($referee->id);
+    expect($injury->injurable_id)->toBe($referee->id)
+        ->and($injury->injurable_type)->toBe($referee->getMorphClass());
     expect(requiredDate($injury->started_at)->toDateTimeString())->toBe($injuryDate->toDateTimeString());
     expect($injury->ended_at)->toBeNull();
 });

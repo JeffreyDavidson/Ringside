@@ -24,8 +24,9 @@ test('it injures an employed wrestler', function () {
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed while injured
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -40,8 +41,9 @@ test('it injures wrestler with specific injury date', function () {
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => $injuryDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -60,8 +62,9 @@ test('it persists the injury lifecycle', function () {
     expect($wrestler->currentInjury)->not()->toBeNull();
     expect($wrestler->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -76,8 +79,9 @@ test('it handles DateHelper date resolution', function () {
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
     ]);
 });
@@ -100,15 +104,17 @@ test('it handles multiple injury scenarios', function () {
     expect($wrestler->isInjured())->toBeTrue();
 
     // New injury should be created
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
 
     // Old injury should remain unchanged
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->subDays(60)->toDateTimeString(),
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
@@ -179,19 +185,20 @@ test('it maintains injury history integrity', function () {
     expect($wrestler->isInjured())->toBeTrue();
 
     // All injury records should be preserved
-    $this->assertDatabaseHas('wrestlers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $firstInjury->id,
         'ended_at' => now()->subDays(60)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $secondInjury->id,
         'ended_at' => now()->subDays(20)->toDateTimeString(),
     ]);
 
     // New current injury should exist
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -222,8 +229,9 @@ test('it allows re-injury after healing', function () {
     expect($wrestler->injuries()->count())->toBe(2);
 
     // Current injury should be active
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);

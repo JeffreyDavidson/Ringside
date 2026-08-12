@@ -91,7 +91,8 @@ describe('Builder Concerns Unit Tests', function () {
             // Assert
             $sql = $builder->toSql();
             expect($sql)->toContain('not exists');
-            expect($sql)->toContain('wrestlers_injuries');
+            expect($sql)->toContain('"injuries"')
+                ->not->toContain('wrestlers_injuries');
             expect($sql)->toContain('ended_at" is null');
         });
 

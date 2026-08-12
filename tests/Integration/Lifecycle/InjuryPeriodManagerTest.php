@@ -17,8 +17,9 @@ test('it starts an injury period on the effective date', function () {
 
     resolve(InjuryPeriodManager::class)->start($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'started_at' => $effectiveDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -31,9 +32,10 @@ test('it ends and preserves the active injury period', function () {
 
     resolve(InjuryPeriodManager::class)->end($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injuryId,
-        'wrestler_id' => $wrestler->id,
+        'injurable_id' => $wrestler->id,
+        'injurable_type' => $wrestler->getMorphClass(),
         'ended_at' => $effectiveDate->toDateTimeString(),
     ]);
 });

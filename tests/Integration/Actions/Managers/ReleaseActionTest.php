@@ -89,8 +89,9 @@ test('it releases injured manager and ends injury', function () {
     expect($manager->isEmployed())->toBeFalse();
 
     // Verify injury was ended
-    $this->assertDatabaseHas('managers_injuries', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('injuries', [
+        'injurable_id' => $manager->id,
+        'injurable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 

@@ -12,7 +12,7 @@ final class InjuryPeriodManager
     /**
      * Start an injury period.
      *
-     * @param  Injurable<*, *>  $injurable
+     * @param  Injurable<*>  $injurable
      */
     public function start(Injurable $injurable, Carbon $date): void
     {
@@ -25,7 +25,7 @@ final class InjuryPeriodManager
     /**
      * End the active injury period.
      *
-     * @param  Injurable<*, *>  $injurable
+     * @param  Injurable<*>  $injurable
      */
     public function end(Injurable $injurable, Carbon $date): void
     {

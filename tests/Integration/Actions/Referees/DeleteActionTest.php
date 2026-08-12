@@ -117,9 +117,10 @@ test('it ends injury before deletion', function () {
     expect($injury->ended_at)->not->toBeNull();
 
     // Verify injury was ended
-    $this->assertDatabaseHas('referees_injuries', [
+    $this->assertDatabaseHas('injuries', [
         'id' => $injury->id,
-        'referee_id' => $referee->id,
+        'injurable_id' => $referee->id,
+        'injurable_type' => $referee->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

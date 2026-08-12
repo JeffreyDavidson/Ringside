@@ -7,8 +7,8 @@ use App\Actions\Managers\InjureAction;
 use App\Livewire\Managers\Tables\Main;
 use App\Livewire\Managers\Tables\ManagersTable;
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Injury;
 use App\Models\Managers\Manager;
-use App\Models\Managers\ManagerInjury;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -209,8 +209,8 @@ describe('ManagersTable Component', function () {
             $manager = Manager::factory()->create(['first_name' => 'Injury', 'last_name' => 'History']);
 
             // Create injury history
-            ManagerInjury::factory()
-                ->for($manager, 'manager')
+            Injury::factory()
+                ->for($manager, 'injurable')
                 ->create([
                     'started_at' => now()->subDays(100),
                     'ended_at' => now()->subDays(50),
