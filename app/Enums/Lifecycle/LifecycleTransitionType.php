@@ -16,5 +16,6 @@ enum LifecycleTransitionType: string
     case Released = 'released';
     case Reunited = 'reunited';
     case Retired = 'retired';
+    case Suspended = 'suspended';
     case Unretired = 'unretired';
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Managers\Manager;
@@ -33,6 +34,6 @@ class SuspendAction
 
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
-        $this->suspensionPeriods->start($manager, $suspensionDate);
+        $this->suspensionPeriods->start($manager, $suspensionDate, LifecycleTransitionType::Suspended);
     }
 }

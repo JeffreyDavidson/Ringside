@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\TagTeams\TagTeam;
@@ -39,7 +40,7 @@ class ReinstateAction
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
-            $this->suspensionPeriods->end($tagTeam, $reinstatementDate);
+            $this->suspensionPeriods->end($tagTeam, $reinstatementDate, LifecycleTransitionType::Reinstated);
             $this->reinstateCurrentMembers->handle($tagTeam, $reinstatementDate);
         });
     }

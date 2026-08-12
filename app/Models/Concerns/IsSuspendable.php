@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  */
 trait IsSuspendable
 {
+    use HasLifecycleTransitions;
+
     /** @return MorphMany<Suspension, TModel> */
     public function suspensions(): MorphMany
     {

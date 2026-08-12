@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -40,7 +41,7 @@ class SuspendAction
 
             $lockedWrestler->ensureCanBeSuspended();
 
-            $this->suspensionPeriods->start($lockedWrestler, $suspensionDate);
+            $this->suspensionPeriods->start($lockedWrestler, $suspensionDate, LifecycleTransitionType::Suspended);
         });
     }
 }

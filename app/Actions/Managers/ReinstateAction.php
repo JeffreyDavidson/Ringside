@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Managers\Manager;
@@ -33,6 +34,6 @@ final class ReinstateAction
 
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        $this->suspensionPeriods->end($manager, $reinstatementDate);
+        $this->suspensionPeriods->end($manager, $reinstatementDate, LifecycleTransitionType::Reinstated);
     }
 }
