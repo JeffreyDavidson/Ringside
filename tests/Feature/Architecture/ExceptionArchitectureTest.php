@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 use App\Exceptions\BaseBusinessException;
 use Illuminate\Database\Eloquent\Model;
+use PhpParser\Node\Expr\StaticCall;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\NodeFinder;
 use PhpParser\NodeTraverser;
@@ -129,4 +132,67 @@ test('application and test code do not catch generic exception types', function 
     }
 
     expect($violations)->toBeEmpty();
+});
+
+test('every concrete exception factory has an enforced caller', function () {
+    $calledFactories = collect([app_path(), base_path('tests')])
+        ->flatMap(function (string $directory): array {
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)
+            );
+
+            return iterator_to_array($files);
+        })
+        ->filter(fn (SplFileInfo $file): bool => $file->isFile() && $file->getExtension() === 'php')
+        ->flatMap(function (SplFileInfo $file): array {
+            $contents = file_get_contents($file->getPathname());
+
+            if ($contents === false) {
+                return [];
+            }
+
+            $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
+            $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
+            $calledFactories = [];
+
+            foreach ((new NodeFinder())->findInstanceOf($resolvedStatements, StaticCall::class) as $call) {
+                if (! $call->class instanceof Name || ! $call->name instanceof Identifier) {
+                    continue;
+                }
+
+                $calledFactories[] = $call->class->toString().'::'.$call->name->toString();
+            }
+
+            return $calledFactories;
+        })
+        ->unique();
+
+    $exceptionFiles = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(app_path('Exceptions'), FilesystemIterator::SKIP_DOTS)
+    );
+    $exceptionClasses = [];
+
+    foreach ($exceptionFiles as $file) {
+        if (! $file instanceof SplFileInfo || ! $file->isFile() || $file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $exceptionClasses[] = 'App\\Exceptions\\'.str($file->getPathname())
+            ->after(app_path('Exceptions').DIRECTORY_SEPARATOR)
+            ->beforeLast('.php')
+            ->replace(DIRECTORY_SEPARATOR, '\\');
+    }
+
+    $orphanedFactories = collect($exceptionClasses)
+        ->filter(fn (string $class): bool => class_exists($class) && $class !== BaseBusinessException::class)
+        ->flatMap(function (string $class): array {
+            return collect((new ReflectionClass($class))->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_STATIC))
+                ->filter(fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $class)
+                ->map(fn (ReflectionMethod $method): string => $class.'::'.$method->getName())
+                ->all();
+        })
+        ->reject(fn (string $factory): bool => $calledFactories->contains($factory))
+        ->values();
+
+    expect($orphanedFactories)->toBeEmpty();
 });
