@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Exceptions\BaseBusinessException;
 use Illuminate\Database\Eloquent\Model;
+use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
@@ -75,6 +76,52 @@ test('application code does not directly construct generic exceptions', function
 
         if ($contents !== false && preg_match('/throw\s+new\s+\\?Exception\s*\(/', $contents) === 1) {
             $violations[] = str($file->getPathname())->after(app_path().DIRECTORY_SEPARATOR)->toString();
+        }
+    }
+
+    expect($violations)->toBeEmpty();
+});
+
+test('application and test code construct business exceptions through factories', function () {
+    $violations = [];
+
+    foreach ([app_path(), base_path('tests')] as $directory) {
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($files as $file) {
+            if (! $file instanceof SplFileInfo || ! $file->isFile() || $file->getExtension() !== 'php') {
+                continue;
+            }
+
+            if (str_starts_with($file->getPathname(), app_path('Exceptions').DIRECTORY_SEPARATOR)) {
+                continue;
+            }
+
+            $contents = file_get_contents($file->getPathname());
+
+            if ($contents === false) {
+                continue;
+            }
+
+            $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
+            $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
+
+            foreach ((new NodeFinder())->findInstanceOf($resolvedStatements, New_::class) as $construction) {
+                if (! $construction->class instanceof Name) {
+                    continue;
+                }
+
+                $class = $construction->class->toString();
+
+                if (class_exists($class) && is_subclass_of($class, BaseBusinessException::class)) {
+                    $relativePath = str($file->getPathname())
+                        ->after(base_path().DIRECTORY_SEPARATOR)
+                        ->toString();
+                    $violations[] = "{$relativePath}:{$construction->getStartLine()} constructs {$class}";
+                }
+            }
         }
     }
 
