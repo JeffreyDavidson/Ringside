@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -32,6 +33,6 @@ class ReinstateAction
 
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        $this->suspensionPeriods->end($wrestler, $reinstatementDate);
+        $this->suspensionPeriods->end($wrestler, $reinstatementDate, LifecycleTransitionType::Reinstated);
     }
 }

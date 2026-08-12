@@ -9,4 +9,5 @@ enum LifecycleDimension: string
     case Activity = 'activity';
     case Employment = 'employment';
     case Retirement = 'retirement';
+    case Suspension = 'suspension';
 }

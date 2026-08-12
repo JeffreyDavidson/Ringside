@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Referees\Referee;
@@ -33,6 +34,6 @@ class ReinstateAction
 
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        $this->suspensionPeriods->end($referee, $reinstatementDate);
+        $this->suspensionPeriods->end($referee, $reinstatementDate, LifecycleTransitionType::Reinstated);
     }
 }

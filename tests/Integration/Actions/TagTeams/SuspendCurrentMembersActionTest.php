@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\SuspendCurrentMembersAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 
@@ -31,6 +33,12 @@ test('it suspends eligible current wrestlers and managers', function () {
 
         expect($wrestler->isSuspended())->toBeTrue();
 
+        $transition = $wrestler->lifecycleTransitions()
+            ->where('dimension', LifecycleDimension::Suspension)
+            ->sole();
+        expect($transition->transition)->toBe(LifecycleTransitionType::Suspended)
+            ->and($transition->effective_at->toDateTimeString())->toBe($suspensionDate->toDateTimeString());
+
         $this->assertDatabaseHas('suspensions', [
             'suspendable_id' => $wrestler->id,
             'suspendable_type' => $wrestler->getMorphClass(),
@@ -44,6 +52,12 @@ test('it suspends eligible current wrestlers and managers', function () {
 
     expect($manager->isSuspended())->toBeTrue()
         ->and($alreadySuspendedManager->suspensions()->count())->toBe($existingSuspensionCount);
+
+    $managerTransition = $manager->lifecycleTransitions()
+        ->where('dimension', LifecycleDimension::Suspension)
+        ->sole();
+    expect($managerTransition->transition)->toBe(LifecycleTransitionType::Suspended)
+        ->and($alreadySuspendedManager->lifecycleTransitions()->count())->toBe(0);
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $manager->id,

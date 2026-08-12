@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
@@ -38,7 +39,7 @@ class SuspendAction
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         DB::transaction(function () use ($tagTeam, $suspensionDate): void {
-            $this->suspensionPeriods->start($tagTeam, $suspensionDate);
+            $this->suspensionPeriods->start($tagTeam, $suspensionDate, LifecycleTransitionType::Suspended);
             $this->suspendCurrentMembers->handle($tagTeam, $suspensionDate);
         });
     }
