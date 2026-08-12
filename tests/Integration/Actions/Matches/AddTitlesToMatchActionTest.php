@@ -152,3 +152,12 @@ test('it rejects a title already assigned on the event card', function () {
 
     expect($targetMatch->titles()->count())->toBe(0);
 });
+
+test('it assigns a repeated title only once', function () {
+    $match = EventMatch::factory()->create();
+    $title = Title::factory()->active()->create();
+
+    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title, $title]));
+
+    expect($match->titles()->count())->toBe(1);
+});

@@ -52,7 +52,7 @@ class AddTagTeamsToMatchAction
         // Pre-filter tag teams to ensure only eligible teams are processed
         $eligibleTagTeams = $tagTeams->filter(
             fn (TagTeam $tagTeam) => $this->isTagTeamEligibleForMatch($tagTeam, $eventMatch)
-        );
+        )->unique('id')->values();
 
         // Validate we have tag teams to add after filtering
         if ($eligibleTagTeams->isEmpty()) {

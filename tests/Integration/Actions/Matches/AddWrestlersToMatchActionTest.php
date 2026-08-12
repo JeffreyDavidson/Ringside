@@ -197,3 +197,12 @@ test('it allows a wrestler booked at a different event time', function () {
 
     expect($targetMatch->competitors()->count())->toBe(1);
 });
+
+test('it assigns a repeated wrestler only once', function () {
+    $match = EventMatch::factory()->create();
+    $wrestler = Wrestler::factory()->bookable()->create();
+
+    resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$wrestler, $wrestler]), 1);
+
+    expect($match->competitors()->count())->toBe(1);
+});
