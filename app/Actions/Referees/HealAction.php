@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Referees\Referee;
@@ -34,6 +35,6 @@ class HealAction
 
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
-        $this->injuryPeriods->end($referee, $recoveryDate);
+        $this->injuryPeriods->end($referee, $recoveryDate, LifecycleTransitionType::Healed);
     }
 }

@@ -8,6 +8,7 @@ enum LifecycleDimension: string
 {
     case Activity = 'activity';
     case Employment = 'employment';
+    case Injury = 'injury';
     case Retirement = 'retirement';
     case Suspension = 'suspension';
 }

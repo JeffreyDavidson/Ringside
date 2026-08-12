@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  */
 trait IsInjurable
 {
+    use HasLifecycleTransitions;
+
     /** @return MorphMany<Injury, TModel> */
     public function injuries(): MorphMany
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Referees\Referee;
@@ -33,6 +34,6 @@ class InjureAction
 
         $injureDate = DateHelper::resolveDate($injureDate);
 
-        $this->injuryPeriods->start($referee, $injureDate);
+        $this->injuryPeriods->start($referee, $injureDate, LifecycleTransitionType::Injured);
     }
 }
