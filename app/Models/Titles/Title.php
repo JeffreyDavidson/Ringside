@@ -60,7 +60,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $previous_champion_type
  * @property int|null $previous_champion_id
  *
- * @property-read Collection<int, TitleActivityPeriod> $activations
  * @property-read Collection<int, TitleActivityPeriod> $activityPeriods
  * @property-read TitleActivityPeriod|null $currentActivityPeriod
  * @property-read mixed $display_name

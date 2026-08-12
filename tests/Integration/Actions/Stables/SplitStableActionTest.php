@@ -31,7 +31,7 @@ describe('SplitStableAction Integration Tests', function () {
 
         // Make it active by adding activation period manually
         $activationDate = Carbon::yesterday();
-        $this->originalStable->activations()->create([
+        $this->originalStable->activityPeriods()->create([
             'started_at' => $activationDate,
         ]);
 

@@ -92,7 +92,7 @@ class Main extends BaseTable
                         default => null,
                     };
                 }),
-            FirstActivityPeriodFilter::make('Activation Date')->setFields('activations', 'stables_activations.started_at', 'stables_activations.ended_at'),
+            FirstActivityPeriodFilter::make('Activation Date')->setFields('activityPeriods', 'stables_activations.started_at', 'stables_activations.ended_at'),
         ];
     }
 

@@ -21,7 +21,7 @@ test('it creates a title', function () {
     expect($result)->toBeInstanceOf(Title::class);
     expect($result->name)->toBe('Example Title');
     expect($result->type)->toBe(TitleType::Singles);
-    expect($result->activations)->toHaveCount(0);
+    expect($result->activityPeriods)->toHaveCount(0);
 });
 
 test('it activates a title if activation date is filled in request', function () {
@@ -33,6 +33,6 @@ test('it activates a title if activation date is filled in request', function ()
     expect($result)->toBeInstanceOf(Title::class);
     expect($result->name)->toBe('Example Title');
     expect($result->type)->toBe(TitleType::Singles);
-    expect($result->activations)->toHaveCount(1);
-    expect(requiredDate($result->activations->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($result->activityPeriods)->toHaveCount(1);
+    expect(requiredDate($result->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });

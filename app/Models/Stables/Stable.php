@@ -62,7 +62,6 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property-read Collection<int, Wrestler> $wrestlers
  * @property-read Collection<int, Wrestler> $currentWrestlers
  * @property-read Collection<int, Wrestler> $previousWrestlers
- * @property-read Collection<int, StableActivityPeriod> $activations
  * @property-read Collection<int, StableActivityPeriod> $activityPeriods
  * @property-read StableActivityPeriod|null $currentActivityPeriod
  * @property-read StableActivityPeriod|null $firstActivityPeriod

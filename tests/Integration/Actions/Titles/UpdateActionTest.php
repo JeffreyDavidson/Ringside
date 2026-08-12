@@ -34,15 +34,15 @@ test('it activates an unactivated title if activation date is filled in request'
     $title->refresh();
     expect($title->name)->toBe('New Example Title');
     expect($title->type)->toBe(TitleType::Singles);
-    expect($title->activations)->toHaveCount(1);
-    expect(requiredDate($title->activations->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($title->activityPeriods)->toHaveCount(1);
+    expect(requiredDate($title->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
 test('it updates a title with future activation but does not create new debut since it already has debuted', function () {
     $datetime = now()->addDays(2);
     $data = new TitleData('New Example Title', TitleType::Singles, $datetime);
     $title = Title::factory()->active()->create();
-    $originalActivationsCount = $title->activations->count();
+    $originalActivityPeriodCount = $title->activityPeriods->count();
 
     resolve(UpdateAction::class)->handle($title, $data);
 
@@ -50,5 +50,5 @@ test('it updates a title with future activation but does not create new debut si
     expect($title->name)->toBe('New Example Title');
     expect($title->type)->toBe(TitleType::Singles);
     // Should not create new activation since title already has debuted
-    expect($title->activations)->toHaveCount($originalActivationsCount);
+    expect($title->activityPeriods)->toHaveCount($originalActivityPeriodCount);
 });

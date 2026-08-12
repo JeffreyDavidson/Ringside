@@ -33,10 +33,6 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             expect($model->activityPeriods->pluck('id'))->toContain($activityPeriod->id);
         });
 
-        test('activations alias relationship works', function () {
-            $model = $this->model;
-            expect($model->activations())->toBeInstanceOf(HasMany::class);
-        });
     });
 
     describe('current activity period', function () {
