@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
@@ -42,7 +43,7 @@ class ReleaseAction
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($tagTeam, $releaseDate): void {
-            $this->employmentPeriods->end($tagTeam, $releaseDate);
+            $this->employmentPeriods->end($tagTeam, $releaseDate, LifecycleTransitionType::Released);
 
             if ($tagTeam->isSuspended()) {
                 $this->suspensionPeriods->end($tagTeam, $releaseDate);

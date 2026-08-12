@@ -42,7 +42,7 @@ class UnretireAction
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
             $this->retirementPeriods->end($referee, $unretiredDate, LifecycleTransitionType::Unretired);
-            $this->employmentPeriods->start($referee, $unretiredDate);
+            $this->employmentPeriods->start($referee, $unretiredDate, LifecycleTransitionType::Employed);
         });
     }
 }
