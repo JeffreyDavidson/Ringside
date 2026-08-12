@@ -7,7 +7,7 @@ namespace Database\Factories\Stables;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableActivation;
+use App\Models\Stables\StableActivityPeriod;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,7 +33,7 @@ class StableFactory extends Factory
 
     public function withFutureActivation(): static
     {
-        return $this->has(StableActivation::factory()->started(Carbon::tomorrow()), 'activations')
+        return $this->has(StableActivityPeriod::factory()->started(Carbon::tomorrow()), 'activityPeriods')
             ->afterCreating(function (Stable $stable) {
                 $stable->currentWrestlers->each(function ($wrestler) {
                     $wrestler->save();
@@ -54,7 +54,7 @@ class StableFactory extends Factory
     {
         $activationDate = Carbon::yesterday();
 
-        return $this->has(StableActivation::factory()->started($activationDate), 'activations')
+        return $this->has(StableActivityPeriod::factory()->started($activationDate), 'activityPeriods')
             ->hasAttached(
                 Wrestler::factory()->count(2)->has(Employment::factory()->started($activationDate), 'employments'),
                 ['joined_at' => $activationDate]
@@ -88,7 +88,7 @@ class StableFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
+        return $this->has(StableActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods')
             ->hasAttached(
                 Wrestler::factory()->count(2)->has(Employment::factory()->started($start), 'employments'),
                 ['joined_at' => $start, 'left_at' => $end]
@@ -125,7 +125,7 @@ class StableFactory extends Factory
         // Members "left" the stable when it retired but stayed employed and
         // available — that's what makes them eligible "former members" for an
         // unretire / reunite scenario.
-        return $this->has(StableActivation::factory()->started($start)->ended($end), 'activations')
+        return $this->has(StableActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods')
             ->has(Retirement::factory()->started($end), 'retirements')
             ->hasAttached(
                 Wrestler::factory()->count(2)

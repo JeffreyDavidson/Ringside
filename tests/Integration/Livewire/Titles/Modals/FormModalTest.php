@@ -244,7 +244,7 @@ describe('FormModal Business Logic', function () {
 
         $component->assertHasNoErrors();
 
-        $title = Title::with('activations')->where('name', 'New Championship Title')->firstOrFail();
+        $title = Title::with('activityPeriods')->where('name', 'New Championship Title')->firstOrFail();
         expect($title->firstActivityPeriod?->started_at)->toBeInstanceOf(Carbon::class);
     });
 

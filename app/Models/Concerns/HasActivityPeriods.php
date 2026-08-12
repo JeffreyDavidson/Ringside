@@ -38,16 +38,6 @@ trait HasActivityPeriods
     }
 
     /**
-     * Alias for activityPeriods relationship for backward compatibility.
-     *
-     * @return HasMany<TActivityPeriod, TModel>
-     */
-    public function activations(): HasMany
-    {
-        return $this->activityPeriods();
-    }
-
-    /**
      * Get the current activity period, which has started and has not ended.
      *
      * @return HasOne<TActivityPeriod, TModel>

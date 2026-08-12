@@ -39,7 +39,7 @@ class TitleFactory extends Factory
         $activationDate = Carbon::yesterday();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($activationDate), 'activations');
+            ->has(TitleActivityPeriod::factory()->started($activationDate), 'activityPeriods');
     }
 
     public function inactive(): static
@@ -49,13 +49,13 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations');
+            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods');
     }
 
     public function withFutureActivation(): static
     {
         return $this
-            ->has(TitleActivityPeriod::factory()->started(Carbon::tomorrow()), 'activations');
+            ->has(TitleActivityPeriod::factory()->started(Carbon::tomorrow()), 'activityPeriods');
     }
 
     public function retired(): static
@@ -65,7 +65,7 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations')
+            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods')
             ->has(Retirement::factory()->started($end), 'retirements');
     }
 
@@ -113,10 +113,10 @@ class TitleFactory extends Factory
 
         if ($endDate) {
             return $this
-                ->has(TitleActivityPeriod::factory()->started($startDate)->ended($endDate), 'activations');
+                ->has(TitleActivityPeriod::factory()->started($startDate)->ended($endDate), 'activityPeriods');
         }
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($startDate), 'activations');
+            ->has(TitleActivityPeriod::factory()->started($startDate), 'activityPeriods');
     }
 }

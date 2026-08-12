@@ -29,16 +29,23 @@ class StableActivityPeriodFactory extends Factory
         ];
     }
 
+    public function started(Carbon $startedAt): static
+    {
+        return $this->state([
+            'started_at' => $startedAt,
+        ]);
+    }
+
     /**
      * Configure the factory to create an ended activity period.
      */
-    public function ended(): static
+    public function ended(?Carbon $endedAt = null): static
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes) use ($endedAt) {
             $startedAt = Carbon::parse($attributes['started_at']);
 
             return [
-                'ended_at' => fake()->dateTimeBetween($startedAt, 'now'),
+                'ended_at' => $endedAt ?? fake()->dateTimeBetween($startedAt, 'now'),
             ];
         });
     }
