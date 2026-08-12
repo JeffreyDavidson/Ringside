@@ -26,6 +26,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Referees\RefereeFactory;
@@ -43,7 +44,7 @@ use Illuminate\Support\Carbon;
 /**
  * @implements Employable<static>
  * @implements Injurable<static>
- * @implements Retirable<RefereeRetirement, static>
+ * @implements Retirable<static>
  * @implements Suspendable<static>
  *
  * @property int $id
@@ -67,10 +68,10 @@ use Illuminate\Support\Carbon;
  * @property-read Injury|null $previousInjury
  * @property-read Collection<int, Injury> $injuries
  * @property-read Collection<int, Injury> $previousInjuries
- * @property-read RefereeRetirement|null $currentRetirement
- * @property-read RefereeRetirement|null $previousRetirement
- * @property-read Collection<int, RefereeRetirement> $retirements
- * @property-read Collection<int, RefereeRetirement> $previousRetirements
+ * @property-read Retirement|null $currentRetirement
+ * @property-read Retirement|null $previousRetirement
+ * @property-read Collection<int, Retirement> $retirements
+ * @property-read Collection<int, Retirement> $previousRetirements
  * @property-read Suspension|null $currentSuspension
  * @property-read Suspension|null $previousSuspension
  * @property-read Collection<int, Suspension> $suspensions
@@ -115,7 +116,7 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     /** @use IsInjurable<static> */
     use IsInjurable;
 
-    /** @use IsRetirable<RefereeRetirement, static> */
+    /** @use IsRetirable<static> */
     use IsRetirable;
 
     /** @use IsSuspendable<static> */

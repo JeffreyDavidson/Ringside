@@ -27,8 +27,9 @@ test('it retires an employed manager', function () {
     expect($manager->isEmployed())->toBeFalse();
 
     // Verify retirement record was created
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -50,8 +51,9 @@ test('it retires manager with specific retirement date', function () {
     expect($manager->isRetired())->toBeTrue();
 
     // Verify retirement and employment ended with specific date
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -83,8 +85,9 @@ test('it retires suspended manager and ends suspension', function () {
     ]);
 
     // Verify retirement was created
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -111,8 +114,9 @@ test('it retires injured manager and ends injury', function () {
     ]);
 
     // Verify retirement was created
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -219,8 +223,9 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager->refresh();
 
     // Verify DateHelper was used for date resolution across all operations
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'started_at' => $customRetirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);

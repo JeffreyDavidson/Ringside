@@ -34,8 +34,9 @@ test('it unretires retired current wrestlers and managers without employing them
         expect($wrestler->isRetired())->toBeFalse()
             ->and($wrestler->isEmployed())->toBeFalse();
 
-        $this->assertDatabaseHas('wrestlers_retirements', [
-            'wrestler_id' => $wrestler->id,
+        $this->assertDatabaseHas('retirements', [
+            'retirable_id' => $wrestler->id,
+            'retirable_type' => $wrestler->getMorphClass(),
             'ended_at' => $unretirementDate->toDateTimeString(),
         ]);
     }
@@ -45,8 +46,9 @@ test('it unretires retired current wrestlers and managers without employing them
     expect($manager->isRetired())->toBeFalse()
         ->and($manager->isEmployed())->toBeFalse();
 
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'ended_at' => $unretirementDate->toDateTimeString(),
     ]);
 });

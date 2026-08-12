@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 final class RetirementPeriodManager
 {
     /**
-     * @param  Retirable<*, *>  $retirable
+     * @param  Retirable<*>  $retirable
      */
     public function start(Retirable $retirable, Carbon $date): void
     {
@@ -21,7 +21,7 @@ final class RetirementPeriodManager
     }
 
     /**
-     * @param  Retirable<*, *>  $retirable
+     * @param  Retirable<*>  $retirable
      */
     public function end(Retirable $retirable, Carbon $date): void
     {

@@ -6,10 +6,10 @@ namespace Database\Factories\Wrestlers;
 
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -77,7 +77,7 @@ class WrestlerFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this->has(Employment::factory()->started($start)->ended($end), 'employments')
-            ->has(WrestlerRetirement::factory()->started($end), 'retirements');
+            ->has(Retirement::factory()->started($end), 'retirements');
     }
 
     /**

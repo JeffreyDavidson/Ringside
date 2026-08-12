@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Database\Factories\Titles;
 
 use App\Enums\Titles\TitleType;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleActivityPeriod;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Titles\TitleRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -66,7 +66,7 @@ class TitleFactory extends Factory
 
         return $this
             ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activations')
-            ->has(TitleRetirement::factory()->started($end), 'retirements');
+            ->has(Retirement::factory()->started($end), 'retirements');
     }
 
     public function unactivated(): static

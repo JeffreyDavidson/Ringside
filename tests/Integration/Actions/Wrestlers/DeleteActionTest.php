@@ -80,9 +80,10 @@ test('it ends retirement before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify retirement was ended before deletion
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $currentRetirement->id,
-        'wrestler_id' => $wrestler->id,
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -253,8 +254,9 @@ test('it handles wrestler with no active relationships', function () {
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->subDays(80)->toDateTimeString(),
     ]);
 });

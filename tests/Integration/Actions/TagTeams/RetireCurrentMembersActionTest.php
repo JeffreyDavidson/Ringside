@@ -31,13 +31,15 @@ test('it retires eligible current wrestlers and managers', function () {
     expect($wrestler->isRetired())->toBeTrue()
         ->and($manager->isRetired())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
-    $this->assertDatabaseHas('managers_retirements', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $manager->id,
+        'retirable_type' => $manager->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);

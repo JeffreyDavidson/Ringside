@@ -57,7 +57,7 @@ describe('Builder Concerns Unit Tests', function () {
             // Assert
             $sql = $builder->toSql();
             expect($sql)->toContain('not exists');
-            expect($sql)->toContain('wrestlers_retirements');
+            expect($sql)->toContain('retirements');
             expect($sql)->toContain('ended_at" is null');
         });
 
@@ -134,7 +134,7 @@ describe('Builder Concerns Unit Tests', function () {
             expect($sql)->toContain(' or ');
             expect($sql)->toContain('employments');
             expect($sql)->toContain('suspensions');
-            expect($sql)->toContain('wrestlers_retirements');
+            expect($sql)->toContain('retirements');
         });
 
         test('trait methods return builder instance for method chaining', function () {
@@ -174,8 +174,8 @@ describe('Builder Concerns Unit Tests', function () {
             $tagTeamSql = $tagTeamBuilder->toSql();
             $wrestlerSql = $wrestlerBuilder->toSql();
 
-            expect($tagTeamSql)->toContain('tag_teams_retirements');
-            expect($wrestlerSql)->toContain('wrestlers_retirements');
+            expect($tagTeamSql)->toContain('retirements');
+            expect($wrestlerSql)->toContain('retirements');
             expect($tagTeamSql)->toContain('not exists');
             expect($wrestlerSql)->toContain('not exists');
         });
@@ -200,7 +200,7 @@ describe('Builder Concerns Unit Tests', function () {
             // Assert
             $sql = $retiredBuilder->toSql();
             expect($sql)->toContain('where exists');
-            expect($sql)->toContain('wrestlers_retirements');
+            expect($sql)->toContain('retirements');
             expect($sql)->toContain('ended_at" is null');
         });
 
@@ -221,8 +221,8 @@ describe('Builder Concerns Unit Tests', function () {
         test('retired method works polymorphically across entity types', function () {
             // Arrange
             $builders = [
-                ['builder' => Wrestler::query(), 'table' => 'wrestlers_retirements'],
-                ['builder' => TagTeam::query(), 'table' => 'tag_teams_retirements'],
+                ['builder' => Wrestler::query(), 'table' => 'retirements'],
+                ['builder' => TagTeam::query(), 'table' => 'retirements'],
             ];
 
             // Act & Assert
@@ -254,7 +254,7 @@ describe('Builder Concerns Unit Tests', function () {
 
             $sql = $chainedBuilder->toSql();
             expect($sql)->toContain('where exists');
-            expect($sql)->toContain('wrestlers_retirements');
+            expect($sql)->toContain('retirements');
             expect($sql)->toContain('"name" like ?');
             expect($sql)->toContain('order by "created_at" desc');
         });

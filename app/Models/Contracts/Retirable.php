@@ -5,27 +5,23 @@ declare(strict_types=1);
 namespace App\Models\Contracts;
 
 use App\Models\Concerns\IsRetirable;
+use App\Models\Lifecycle\Retirement;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
- * @template TRetirement of Model The retirement model class
- * @template TModel of Model The model that can be retired
+ * @template TModel of Model
  *
- * @see IsRetirable For the trait implementation
+ * @see IsRetirable
  */
 interface Retirable
 {
-    /**
-     * @return HasMany<TRetirement, TModel>
-     */
-    public function retirements(): HasMany;
+    /** @return MorphMany<Retirement, TModel> */
+    public function retirements(): MorphMany;
 
-    /**
-     * @return HasOne<TRetirement, TModel>
-     */
-    public function currentRetirement(): HasOne;
+    /** @return MorphOne<Retirement, TModel> */
+    public function currentRetirement(): MorphOne;
 
     public function isRetired(): bool;
 }

@@ -6,8 +6,8 @@ namespace Database\Factories\Managers;
 
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
-use App\Models\Managers\ManagerRetirement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
@@ -51,7 +51,7 @@ class ManagerFactory extends Factory
         $end = now()->subDays(3);
 
         return $this->has(Employment::factory()->started($start)->ended($end), 'employments')
-            ->has(ManagerRetirement::factory()->started($end), 'retirements');
+            ->has(Retirement::factory()->started($end), 'retirements');
     }
 
     public function released(): static

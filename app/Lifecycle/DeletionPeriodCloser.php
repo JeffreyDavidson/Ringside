@@ -20,7 +20,7 @@ final class DeletionPeriodCloser
     ) {}
 
     /**
-     * @param  Employable<*>&Injurable<*>&Retirable<*, *>&Suspendable<*>  $subject
+     * @param  Employable<*>&Injurable<*>&Retirable<*>&Suspendable<*>  $subject
      */
     public function close(Employable&Injurable&Retirable&Suspendable $subject, Carbon $date): void
     {

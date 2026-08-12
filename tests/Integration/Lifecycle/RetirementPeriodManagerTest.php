@@ -17,8 +17,9 @@ test('it starts a retirement period on the effective date', function () {
 
     resolve(RetirementPeriodManager::class)->start($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'started_at' => $effectiveDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -31,9 +32,10 @@ test('it ends and preserves the active retirement period', function () {
 
     resolve(RetirementPeriodManager::class)->end($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $retirementId,
-        'wrestler_id' => $wrestler->id,
+        'retirable_id' => $wrestler->id,
+        'retirable_type' => $wrestler->getMorphClass(),
         'ended_at' => $effectiveDate->toDateTimeString(),
     ]);
 });

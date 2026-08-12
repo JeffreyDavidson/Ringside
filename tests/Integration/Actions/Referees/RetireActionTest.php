@@ -28,8 +28,9 @@ test('it retires an employed referee', function () {
     expect($referee->isEmployed())->toBeFalse();
     expect($employment->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_retirements', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -44,8 +45,9 @@ test('it retires referee with specific retirement date', function () {
     $referee->refresh();
     expect($referee->isRetired())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_retirements', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -66,8 +68,9 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
 
     // DateHelper should have processed the retirement date
-    $this->assertDatabaseHas('referees_retirements', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $referee->id,
+        'retirable_type' => $referee->getMorphClass(),
         'started_at' => $retirementDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -152,7 +155,7 @@ test('it creates retirement record with correct structure', function () {
     $retirement = freshModel($referee)->currentRetirement()->firstOrFail();
 
     expect($retirement)->not->toBeNull();
-    expect($retirement->referee_id)->toBe($referee->id);
+    expect($retirement->retirable->is($referee))->toBeTrue();
     expect(requiredDate($retirement->started_at)->toDateTimeString())->toBe($retirementDate->toDateTimeString());
     expect($retirement->ended_at)->toBeNull();
 });

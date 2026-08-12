@@ -27,8 +27,9 @@ test('it unretires a retired tag team', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify retirement record was ended
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -133,8 +134,9 @@ test('it unretires tag team with specific unretirement date', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify retirement ended with specific date
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => $unretirementDate->toDateTimeString(),
     ]);
 
@@ -220,9 +222,10 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify original retirement record was properly ended
-    $this->assertDatabaseHas('tag_teams_retirements', [
+    $this->assertDatabaseHas('retirements', [
         'id' => $originalRetirementId,
-        'tag_team_id' => $tagTeam->id,
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -275,8 +278,9 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam->refresh();
 
     // Verify DateHelper was used for date resolution across all operations
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => $customUnretirementDate->toDateTimeString(),
     ]);
 
@@ -354,8 +358,9 @@ test('it handles unretirement with cascade effects', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Retirement should be ended
-    $this->assertDatabaseHas('tag_teams_retirements', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('retirements', [
+        'retirable_id' => $tagTeam->id,
+        'retirable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 

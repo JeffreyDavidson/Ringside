@@ -13,8 +13,8 @@ use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableRetirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
@@ -276,7 +276,7 @@ describe('Stable Activation Action Integration', function () {
 
         test('unretire eligibility respects the former member option', function () {
             $stable = Stable::factory()
-                ->has(StableRetirement::factory()->started(now()->subDay()), 'retirements')
+                ->has(Retirement::factory()->started(now()->subDay()), 'retirements')
                 ->create();
 
             expect($stable->canBeUnretired())->toBeFalse()

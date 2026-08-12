@@ -2,62 +2,51 @@
 
 declare(strict_types=1);
 
-/**
- * Trait Isolation Test for IsRetirable
- *
- * This test ensures the IsRetirable trait is agnostic, reusable, and not tied to any business/domain model.
- * It verifies relationship types, related model resolution, resolver overrides, and error handling.
- *
- * This is NOT a business logic test. It is meant to guarantee the trait can be safely reused across any model.
- */
-
 namespace Tests\Unit\Models\Concerns;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Contracts\Retirable;
-use Exception;
+use App\Models\Lifecycle\Retirement;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use JMac\Testing\Double;
-use Tests\Unit\Models\Concerns\Support\FakeRetirableModel;
-use Tests\Unit\Models\Concerns\Support\FakeRetirementModel;
 
-/** @extends EloquentBuilder<FakeRetirementModel> */
+/** @extends EloquentBuilder<Retirement> */
 final class FakeRetirementBuilder extends EloquentBuilder {}
 
-/** @implements Retirable<FakeRetirementModel, self> */
+/** @implements Retirable<self> */
 final class RetirementStateModel extends Model implements Retirable
 {
-    /** @use IsRetirable<FakeRetirementModel, self> */
+    /** @use IsRetirable<self> */
     use IsRetirable;
 
     public bool $currentRetirementExists = false;
 
     public bool $retirementExists = false;
 
-    public function resolveRetirementModelClass(): string
+    /** @return MorphOne<Retirement, self> */
+    public function currentRetirement(): MorphOne
     {
-        return FakeRetirementModel::class;
+        return $this->retirementHasOne($this->currentRetirementExists);
     }
 
-    /** @return HasOne<FakeRetirementModel, self> */
-    public function currentRetirement(): HasOne
-    {
-        $builder = $this->retirementBuilder($this->currentRetirementExists);
-
-        return new HasOne($builder, new self(), 'entity_id', 'id');
-    }
-
-    /** @return HasMany<FakeRetirementModel, self> */
-    public function retirements(): HasMany
+    /** @return MorphMany<Retirement, self> */
+    public function retirements(): MorphMany
     {
         $builder = $this->retirementBuilder($this->retirementExists);
 
-        return new HasMany($builder, new self(), 'entity_id', 'id');
+        return new MorphMany($builder, new self(), 'retirable_type', 'retirable_id', 'id');
+    }
+
+    /** @return MorphOne<Retirement, self> */
+    private function retirementHasOne(bool $exists): MorphOne
+    {
+        $builder = $this->retirementBuilder($exists);
+
+        return new MorphOne($builder, new self(), 'retirable_type', 'retirable_id', 'id');
     }
 
     private function retirementBuilder(bool $exists): FakeRetirementBuilder
@@ -65,302 +54,54 @@ final class RetirementStateModel extends Model implements Retirable
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
         $builder = new FakeRetirementBuilder($query);
-        $builder->setModel(new FakeRetirementModel());
+        $builder->setModel(new Retirement());
 
         return $builder;
     }
 }
 
-describe('IsRetirable Trait Unit Tests', function () {
-    describe('retirement relationships', function () {
-        test('provides retirements relationship', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
+describe('IsRetirable', function () {
+    test('provides polymorphic retirement relationships', function () {
+        $model = new class extends Model implements Retirable
+        {
+            /** @use IsRetirable<self> */
+            use IsRetirable;
+        };
 
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            expect($model->retirements())->toBeInstanceOf(HasMany::class);
-        });
-
-        test('provides current retirement relationship', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            expect($model->currentRetirement())->toBeInstanceOf(HasOne::class);
-        });
-
-        test('provides previous retirements relationship', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            expect($model->previousRetirements())->toBeInstanceOf(HasMany::class);
-        });
-
-        test('provides previous retirement relationship', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            expect($model->previousRetirement())->toBeInstanceOf(HasOne::class);
-        });
-
-        test('retirements relationship uses the correct related model', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            $relation = $model->retirements();
-            expect($relation)->toBeInstanceOf(HasMany::class);
-            expect($relation->getRelated())->toBeInstanceOf(FakeRetirementModel::class);
-        });
-
-        test('currentRetirement relationship uses the correct related model', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            $relation = $model->currentRetirement();
-            expect($relation)->toBeInstanceOf(HasOne::class);
-            expect($relation->getRelated())->toBeInstanceOf(FakeRetirementModel::class);
-        });
+        expect($model->retirements())->toBeInstanceOf(MorphMany::class)
+            ->and($model->currentRetirement())->toBeInstanceOf(MorphOne::class)
+            ->and($model->previousRetirements())->toBeInstanceOf(MorphMany::class)
+            ->and($model->previousRetirement())->toBeInstanceOf(MorphOne::class)
+            ->and($model->retirements()->getRelated())->toBeInstanceOf(Retirement::class);
     });
 
-    describe('retirement status checks', function () {
-        test('can check if model is retired', function () {
-            $model = new RetirementStateModel();
-            $model->currentRetirementExists = true;
+    test('checks current and historical retirement state', function () {
+        $model = new RetirementStateModel();
 
-            expect($model->isRetired())->toBeTrue();
-        });
+        expect($model->isRetired())->toBeFalse()
+            ->and($model->hasRetirements())->toBeFalse();
 
-        test('can check if model is not retired', function () {
-            $model = new RetirementStateModel();
+        $model->currentRetirementExists = true;
+        $model->retirementExists = true;
 
-            expect($model->isRetired())->toBeFalse();
-        });
-
-        test('can check if model has retirements', function () {
-            $modelWith = new RetirementStateModel();
-            $modelWith->retirementExists = true;
-            $modelWithout = new RetirementStateModel();
-
-            expect($modelWith->hasRetirements())->toBeTrue();
-            expect($modelWithout->hasRetirements())->toBeFalse();
-        });
+        expect($model->isRetired())->toBeTrue()
+            ->and($model->hasRetirements())->toBeTrue();
     });
 
-    describe('retirement model resolution', function () {
-        test('uses the model-specific retirement resolver', function () {
-            $model = new FakeRetirableModel();
+    test('constrains current and previous retirement relationships', function () {
+        $model = new class extends Model implements Retirable
+        {
+            /** @use IsRetirable<self> */
+            use IsRetirable;
+        };
 
-            expect($model->retirements()->getRelated())->toBeInstanceOf(FakeRetirementModel::class);
-        });
+        $currentWheres = $model->currentRetirement()->getQuery()->getQuery()->wheres;
+        $previousWheres = $model->previousRetirements()->getQuery()->getQuery()->wheres;
+
+        expect(collect($currentWheres)->contains(
+            fn (array $where): bool => $where['type'] === 'Null' && $where['column'] === 'ended_at'
+        ))->toBeTrue()->and(collect($previousWheres)->contains(
+            fn (array $where): bool => $where['type'] === 'NotNull' && $where['column'] === 'ended_at'
+        ))->toBeTrue();
     });
-
-    describe('retirement relationship queries', function () {
-        test('current retirement query includes whereNull ended_at', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            $relation = $model->currentRetirement();
-            $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNull = collect($wheres)->contains(function ($where) {
-                return ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at';
-            });
-            expect($hasWhereNull)->toBeTrue();
-        });
-
-        test('previous retirements query includes whereNotNull ended_at', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            $relation = $model->previousRetirements();
-            $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNotNull = collect($wheres)->contains(function ($where) {
-                return ($where['type'] ?? null) === 'NotNull' && ($where['column'] ?? null) === 'ended_at';
-            });
-            expect($hasWhereNotNull)->toBeTrue();
-        });
-
-        test('previous retirement query includes ofMany constraint', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public function resolveRetirementModelClass(): string
-                {
-                    return FakeRetirementModel::class;
-                }
-            };
-            $relation = $model->previousRetirement();
-            expect($relation)->toBeInstanceOf(HasOne::class);
-            // The ofMany constraint is applied internally by Laravel
-            // We can verify the relationship type and that it's properly configured
-        });
-    });
-
-    describe('retirement validation methods', function () {
-        test('can check if model can be retired', function () {
-            $employedModel = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public EmploymentStatus $status = EmploymentStatus::Employed;
-
-                public function canBeRetired(): bool
-                {
-                    return $this->status === EmploymentStatus::Employed;
-                }
-            };
-
-            $retiredModel = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public EmploymentStatus $status = EmploymentStatus::Retired;
-
-                public function canBeRetired(): bool
-                {
-                    return $this->status === EmploymentStatus::Employed;
-                }
-            };
-
-            expect($employedModel->canBeRetired())->toBeTrue();
-            expect($retiredModel->canBeRetired())->toBeFalse();
-        });
-
-        test('can check if model can be unretired', function () {
-            $retiredModel = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public EmploymentStatus $status = EmploymentStatus::Retired;
-
-                public function canBeUnretired(): bool
-                {
-                    return $this->status === EmploymentStatus::Retired;
-                }
-            };
-
-            $employedModel = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public EmploymentStatus $status = EmploymentStatus::Employed;
-
-                public function canBeUnretired(): bool
-                {
-                    return $this->status === EmploymentStatus::Retired;
-                }
-            };
-
-            expect($retiredModel->canBeUnretired())->toBeTrue();
-            expect($employedModel->canBeUnretired())->toBeFalse();
-        });
-
-        test('can ensure model can be retired', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public EmploymentStatus $status = EmploymentStatus::Employed;
-
-                public function canBeRetired(): bool
-                {
-                    return $this->status === EmploymentStatus::Employed;
-                }
-
-                public function ensureCanBeRetired(): void
-                {
-                    if (! $this->canBeRetired()) {
-                        throw new Exception('Cannot be retired');
-                    }
-                }
-            };
-
-            expect(fn () => $model->ensureCanBeRetired())->not->toThrow(Exception::class);
-        });
-
-        test('can ensure model can be unretired', function () {
-            $model = new class extends Model implements Retirable
-            {
-                /** @use IsRetirable<FakeRetirementModel, self> */
-                use IsRetirable;
-
-                public EmploymentStatus $status = EmploymentStatus::Retired;
-
-                public function canBeUnretired(): bool
-                {
-                    return $this->status === EmploymentStatus::Retired;
-                }
-
-                public function ensureCanBeUnretired(): void
-                {
-                    if (! $this->canBeUnretired()) {
-                        throw new Exception('Cannot be unretired');
-                    }
-                }
-            };
-
-            expect(fn () => $model->ensureCanBeUnretired())->not->toThrow(Exception::class);
-        });
-    });
-
 });

@@ -19,6 +19,7 @@ use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
+use App\Models\Lifecycle\Retirement;
 use Database\Factories\Titles\TitleFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -34,7 +35,7 @@ use Illuminate\Support\Carbon;
 /**
  * @implements Debutable<TitleStatusChange, static>
  * @implements HasActivityPeriodsContract<TitleActivityPeriod, static>
- * @implements Retirable<TitleRetirement, static>
+ * @implements Retirable<static>
  *
  * @property int $id
  * @property string $name
@@ -46,10 +47,10 @@ use Illuminate\Support\Carbon;
  * @property-read TitleStatusChange|null $debutStatusChange
  * @property-read TitleStatusChange|null $latestStatusChange
  * @property-read Collection<int, TitleStatusChange> $statusChanges
- * @property-read TitleRetirement|null $currentRetirement
- * @property-read TitleRetirement|null $previousRetirement
- * @property-read Collection<int, TitleRetirement> $retirements
- * @property-read Collection<int, TitleRetirement> $previousRetirements
+ * @property-read Retirement|null $currentRetirement
+ * @property-read Retirement|null $previousRetirement
+ * @property-read Collection<int, Retirement> $retirements
+ * @property-read Collection<int, Retirement> $previousRetirements
  * @property-read TitleChampionship|null $currentChampionship
  * @property-read Collection<int, TitleChampionship> $championships
  *
@@ -117,7 +118,7 @@ class Title extends Model implements Debutable, HasActivityPeriodsContract, HasD
 
     use HasStatusScopes;
 
-    /** @use IsRetirable<TitleRetirement, static> */
+    /** @use IsRetirable<static> */
     use IsRetirable;
 
     use ProvidesDisplayName;
