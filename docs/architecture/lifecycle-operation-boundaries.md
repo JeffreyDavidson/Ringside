@@ -163,6 +163,8 @@ Individual injury eligibility is shared only by wrestlers, managers, and referee
 
 Wrestlers, managers, and referees persist injury history through the shared `App\Models\Lifecycle\Injury` model and its polymorphic `injurable` owner. `IsInjurable` exposes relationship-derived state predicates on each owner, while typed injury and healing Actions retain validation, locking, transaction, and transition responsibilities. The database permits historical periods but enforces at most one open injury per owner.
 
+Wrestlers, managers, referees, and tag teams persist suspension history through the shared `App\Models\Lifecycle\Suspension` model and its polymorphic `suspendable` owner. `IsSuspendable` exposes relationship-derived state predicates on each owner, while typed suspension and reinstatement Actions retain validation, locking, transaction, date, and cascade responsibilities. The database permits historical periods but enforces at most one open suspension per owner.
+
 Tag-team lifecycle validation uses the concrete `Wrestler` models returned by its current-wrestler relationship. It must not probe for speculative capabilities with `method_exists()`. Current wrestler employment remains valid when employing the team, while an injured current wrestler remains unavailable for tag-team unretirement. Any future exclusivity rule must be introduced as an explicit reviewed domain rule with real model behavior and tests.
 
 Tag-team employment eligibility is isolated in `ValidatesTagTeamEmployment`. The concern owns only the model-level `canBeEmployed()` and `ensureCanBeEmployed()` rules; the employment Action continues to own orchestration and persistence. Other tag-team lifecycle dimensions remain separate and will be extracted independently.

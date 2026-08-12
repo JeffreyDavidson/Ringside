@@ -24,8 +24,9 @@ test('it suspends an employed tag team', function () {
     expect($tagTeam->isSuspended())->toBeTrue();
 
     // Verify suspension record was created
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -41,8 +42,9 @@ test('it suspends tag team with specific suspension date', function () {
     expect($tagTeam->isSuspended())->toBeTrue();
 
     // Verify suspension started with specific date
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => $suspensionDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -63,8 +65,9 @@ test('it persists the suspension lifecycle', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Verify records show proper dates
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -141,8 +144,9 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam->refresh();
 
     // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => $customSuspensionDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -253,8 +257,9 @@ test('it handles suspension with cascade effects', function () {
     expect($tagTeam->isEmployed())->toBeTrue();
 
     // Suspension should be active
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);

@@ -9,9 +9,9 @@ use App\Actions\TagTeams\SuspendAction;
 use App\Livewire\TagTeams\Tables\Main;
 use App\Livewire\TagTeams\Tables\TagTeamsTable;
 use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Suspension;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamRetirement;
-use App\Models\TagTeams\TagTeamSuspension;
 use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
@@ -225,8 +225,8 @@ describe('TagTeamsTable Component', function () {
             $tagTeam = TagTeam::factory()->create(['name' => 'Suspension History']);
 
             // Create suspension history
-            TagTeamSuspension::factory()
-                ->for($tagTeam, 'tagTeam')
+            Suspension::factory()
+                ->for($tagTeam, 'suspendable')
                 ->create([
                     'started_at' => now()->subDays(100),
                     'ended_at' => now()->subDays(50),

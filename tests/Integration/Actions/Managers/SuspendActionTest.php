@@ -24,8 +24,9 @@ test('it suspends an employed manager', function () {
     expect($manager->isSuspended())->toBeTrue();
     expect($manager->isEmployed())->toBeTrue(); // Should remain employed while suspended
 
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -40,8 +41,9 @@ test('it suspends manager with specific suspension date', function () {
     $manager->refresh();
     expect($manager->isSuspended())->toBeTrue();
 
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'started_at' => $suspensionDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -61,8 +63,9 @@ test('it persists the suspension lifecycle', function () {
     expect($manager->isSuspended())->toBeTrue();
 
     // Verify suspension record shows proper start date
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -148,8 +151,9 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager->refresh();
 
     // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'started_at' => $customSuspensionDate->toDateTimeString(),
         'ended_at' => null,
     ]);

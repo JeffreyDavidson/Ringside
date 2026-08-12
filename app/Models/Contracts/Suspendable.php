@@ -5,27 +5,23 @@ declare(strict_types=1);
 namespace App\Models\Contracts;
 
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Lifecycle\Suspension;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
- * @template TSuspension of Model The suspension model class
- * @template TModel of Model The model that can be suspended
+ * @template TModel of Model
  *
- * @see IsSuspendable For the trait implementation
+ * @see IsSuspendable
  */
 interface Suspendable
 {
-    /**
-     * @return HasMany<TSuspension, TModel>
-     */
-    public function suspensions(): HasMany;
+    /** @return MorphMany<Suspension, TModel> */
+    public function suspensions(): MorphMany;
 
-    /**
-     * @return HasOne<TSuspension, TModel>
-     */
-    public function currentSuspension(): HasOne;
+    /** @return MorphOne<Suspension, TModel> */
+    public function currentSuspension(): MorphOne;
 
     public function isSuspended(): bool;
 }

@@ -76,8 +76,9 @@ test('it retires suspended manager and ends suspension', function () {
     expect($manager->isEmployed())->toBeFalse();
 
     // Verify suspension was ended
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 

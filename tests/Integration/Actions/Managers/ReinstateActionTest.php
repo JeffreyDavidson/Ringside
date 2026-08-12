@@ -25,8 +25,9 @@ test('it reinstates a suspended manager', function () {
     expect($manager->isEmployed())->toBeTrue(); // Should remain employed after reinstatement
 
     // Verify suspension record was ended
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -56,8 +57,9 @@ test('it reinstates manager with specific reinstatement date', function () {
     expect($manager->isSuspended())->toBeFalse();
 
     // Verify suspension was ended with specific date
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $reinstatementDate->toDateTimeString(),
     ]);
 });
@@ -77,8 +79,9 @@ test('it persists the reinstatement lifecycle', function () {
     expect($manager->isSuspended())->toBeFalse();
 
     // Verify suspension record shows proper end date
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -104,9 +107,10 @@ test('it handles database transactions correctly', function () {
     expect($manager->isSuspended())->toBeFalse();
 
     // Verify original suspension record was properly ended
-    $this->assertDatabaseHas('managers_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $originalSuspensionId,
-        'manager_id' => $manager->id,
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -144,8 +148,9 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager->refresh();
 
     // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $customReinstatementDate->toDateTimeString(),
     ]);
 });

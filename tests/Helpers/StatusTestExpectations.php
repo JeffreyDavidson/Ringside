@@ -128,7 +128,7 @@ function expectValidInjuryState(Model&Injurable $entity): void
 /**
  * Expect suspension state to be consistent.
  *
- * @param  Model&Suspendable<Model, Model>  $entity
+ * @param  Model&Suspendable<Model>  $entity
  */
 function expectValidSuspensionState(Model&Suspendable $entity): void
 {

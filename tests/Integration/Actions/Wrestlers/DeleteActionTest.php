@@ -100,9 +100,10 @@ test('it ends suspension before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify suspension was ended before deletion
-    $this->assertDatabaseHas('wrestlers_suspensions', [
+    $this->assertDatabaseHas('suspensions', [
         'id' => $currentSuspension->id,
-        'wrestler_id' => $wrestler->id,
+        'suspendable_id' => $wrestler->id,
+        'suspendable_type' => $wrestler->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

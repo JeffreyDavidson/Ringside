@@ -26,6 +26,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Managers\ManagerFactory;
@@ -45,7 +46,7 @@ use Tests\Unit\Models\Managers\ManagerTest;
  * @implements Employable<static>
  * @implements Injurable<static>
  * @implements Retirable<ManagerRetirement, static>
- * @implements Suspendable<ManagerSuspension, static>
+ * @implements Suspendable<static>
  *
  * @property int $id
  * @property string $first_name
@@ -72,10 +73,10 @@ use Tests\Unit\Models\Managers\ManagerTest;
  * @property-read ManagerRetirement|null $previousRetirement
  * @property-read Collection<int, ManagerRetirement> $retirements
  * @property-read Collection<int, ManagerRetirement> $previousRetirements
- * @property-read ManagerSuspension|null $currentSuspension
- * @property-read ManagerSuspension|null $previousSuspension
- * @property-read Collection<int, ManagerSuspension> $suspensions
- * @property-read Collection<int, ManagerSuspension> $previousSuspensions
+ * @property-read Suspension|null $currentSuspension
+ * @property-read Suspension|null $previousSuspension
+ * @property-read Collection<int, Suspension> $suspensions
+ * @property-read Collection<int, Suspension> $previousSuspensions
  * @property-read Collection<int, Wrestler> $wrestlers
  * @property-read Collection<int, Wrestler> $currentWrestlers
  * @property-read Collection<int, Wrestler> $previousWrestlers
@@ -127,7 +128,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     /** @use IsRetirable<ManagerRetirement, static> */
     use IsRetirable;
 
-    /** @use IsSuspendable<ManagerSuspension, static> */
+    /** @use IsSuspendable<static> */
     use IsSuspendable;
 
     use ProvidesDisplayName;

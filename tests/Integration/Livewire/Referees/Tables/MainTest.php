@@ -12,10 +12,10 @@ use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Events\Event;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Models\Referees\RefereeRetirement;
-use App\Models\Referees\RefereeSuspension;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -224,8 +224,8 @@ describe('RefereesTable Component', function () {
             $referee = Referee::factory()->create(['first_name' => 'Suspension', 'last_name' => 'History']);
 
             // Create suspension history
-            RefereeSuspension::factory()
-                ->for($referee, 'referee')
+            Suspension::factory()
+                ->for($referee, 'suspendable')
                 ->create([
                     'started_at' => now()->subDays(100),
                     'ended_at' => now()->subDays(50),
@@ -536,8 +536,8 @@ describe('RefereesTable Component', function () {
             $reinstatedReferee = Referee::factory()->employed()->create(['first_name' => 'Reinstated', 'last_name' => 'Referee']);
 
             // Create previous suspension
-            RefereeSuspension::factory()
-                ->for($reinstatedReferee, 'referee')
+            Suspension::factory()
+                ->for($reinstatedReferee, 'suspendable')
                 ->create([
                     'started_at' => now()->subMonths(4),
                     'ended_at' => now()->subMonths(2),

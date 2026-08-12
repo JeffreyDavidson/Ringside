@@ -63,8 +63,9 @@ test('it releases suspended manager and ends suspension', function () {
     expect($manager->isEmployed())->toBeFalse();
 
     // Verify suspension was ended
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -195,8 +196,9 @@ test('it handles database transactions correctly', function () {
         'ended_at' => now()->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -215,8 +217,9 @@ test('it uses DateHelper for consistent date handling', function () {
         'ended_at' => $customReleaseDate->toDateTimeString(),
     ]);
 
-    $this->assertDatabaseHas('managers_suspensions', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $manager->id,
+        'suspendable_type' => $manager->getMorphClass(),
         'ended_at' => $customReleaseDate->toDateTimeString(),
     ]);
 });

@@ -74,7 +74,7 @@ describe('Builder Concerns Unit Tests', function () {
             // Assert
             $sql = $builder->toSql();
             expect($sql)->toContain('not exists');
-            expect($sql)->toContain('wrestlers_suspensions');
+            expect($sql)->toContain('suspensions');
             expect($sql)->toContain('ended_at" is null');
         });
 
@@ -133,7 +133,7 @@ describe('Builder Concerns Unit Tests', function () {
             expect($sql)->toContain('not exists');
             expect($sql)->toContain(' or ');
             expect($sql)->toContain('employments');
-            expect($sql)->toContain('wrestlers_suspensions');
+            expect($sql)->toContain('suspensions');
             expect($sql)->toContain('wrestlers_retirements');
         });
 

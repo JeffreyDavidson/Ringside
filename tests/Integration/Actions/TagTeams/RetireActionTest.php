@@ -115,8 +115,9 @@ test('it retires suspended tag team', function () {
     expect($tagTeam->isSuspended())->toBeFalse();
 
     // Verify suspension ended
-    $this->assertDatabaseHas('tag_teams_suspensions', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('suspensions', [
+        'suspendable_id' => $tagTeam->id,
+        'suspendable_type' => $tagTeam->getMorphClass(),
         'ended_at' => now()->toDateTimeString(),
     ]);
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Carbon;
 final class SuspensionPeriodManager
 {
     /**
-     * @param  Suspendable<*, *>  $suspendable
+     * @param  Suspendable<*>  $suspendable
      */
     public function start(Suspendable $suspendable, Carbon $date): void
     {
@@ -21,7 +21,7 @@ final class SuspensionPeriodManager
     }
 
     /**
-     * @param  Suspendable<*, *>  $suspendable
+     * @param  Suspendable<*>  $suspendable
      */
     public function end(Suspendable $suspendable, Carbon $date): void
     {

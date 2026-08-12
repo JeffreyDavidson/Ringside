@@ -26,6 +26,7 @@ use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
+use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Referees\RefereeFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -43,7 +44,7 @@ use Illuminate\Support\Carbon;
  * @implements Employable<static>
  * @implements Injurable<static>
  * @implements Retirable<RefereeRetirement, static>
- * @implements Suspendable<RefereeSuspension, static>
+ * @implements Suspendable<static>
  *
  * @property int $id
  * @property string $first_name
@@ -70,10 +71,10 @@ use Illuminate\Support\Carbon;
  * @property-read RefereeRetirement|null $previousRetirement
  * @property-read Collection<int, RefereeRetirement> $retirements
  * @property-read Collection<int, RefereeRetirement> $previousRetirements
- * @property-read RefereeSuspension|null $currentSuspension
- * @property-read RefereeSuspension|null $previousSuspension
- * @property-read Collection<int, RefereeSuspension> $suspensions
- * @property-read Collection<int, RefereeSuspension> $previousSuspensions
+ * @property-read Suspension|null $currentSuspension
+ * @property-read Suspension|null $previousSuspension
+ * @property-read Collection<int, Suspension> $suspensions
+ * @property-read Collection<int, Suspension> $previousSuspensions
  * @property-read Collection<int, EventMatch> $matches
  * @property-read Collection<int, EventMatch> $previousMatches
  * @property-read mixed $display_name
@@ -117,7 +118,7 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     /** @use IsRetirable<RefereeRetirement, static> */
     use IsRetirable;
 
-    /** @use IsSuspendable<RefereeSuspension, static> */
+    /** @use IsSuspendable<static> */
     use IsSuspendable;
 
     use OfficiatesMatches;
