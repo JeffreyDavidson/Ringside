@@ -20,6 +20,7 @@ use App\Models\Concerns\ValidatesStableRetirement;
 use App\Models\Contracts\Debutable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Lifecycle\Retirement;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -38,7 +39,7 @@ use Tests\Unit\Models\Stables\StableTest;
 
 /**
  * @implements Debutable<StableStatusChange, static>
- * @implements HasActivityPeriodsContract<StableActivityPeriod, static>
+ * @implements HasActivityPeriodsContract<static>
  * @implements Retirable<static>
  *
  * @property int $id
@@ -62,12 +63,12 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property-read Collection<int, Wrestler> $wrestlers
  * @property-read Collection<int, Wrestler> $currentWrestlers
  * @property-read Collection<int, Wrestler> $previousWrestlers
- * @property-read Collection<int, StableActivityPeriod> $activityPeriods
- * @property-read StableActivityPeriod|null $currentActivityPeriod
- * @property-read StableActivityPeriod|null $firstActivityPeriod
- * @property-read StableActivityPeriod|null $futureActivityPeriod
- * @property-read StableActivityPeriod|null $previousActivityPeriod
- * @property-read Collection<int, StableActivityPeriod> $previousActivityPeriods
+ * @property-read Collection<int, ActivityPeriod> $activityPeriods
+ * @property-read ActivityPeriod|null $currentActivityPeriod
+ * @property-read ActivityPeriod|null $firstActivityPeriod
+ * @property-read ActivityPeriod|null $futureActivityPeriod
+ * @property-read ActivityPeriod|null $previousActivityPeriod
+ * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
  *
  * @method static StableBuilder<static>|Stable activatedAfter(\Carbon\Carbon $date)
  * @method static StableBuilder<static>|Stable activatedBefore(\Carbon\Carbon $date)
@@ -115,7 +116,7 @@ class Stable extends Model implements Debutable, HasActivityPeriodsContract, Ret
 {
     use FindsAvailableStableFormerMembers;
 
-    /** @use HasActivityPeriods<StableActivityPeriod, static> */
+    /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 
     /** @use HasFactory<StableFactory> */

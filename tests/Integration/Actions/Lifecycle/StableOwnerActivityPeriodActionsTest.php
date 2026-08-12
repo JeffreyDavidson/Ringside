@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Actions\Stables\EndActivityPeriodAction;
-use App\Actions\Stables\StartActivityPeriodAction;
+use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -14,7 +14,8 @@ test('it starts an activity period for an inactive stable', function () {
 
     $activityPeriod = resolve(StartActivityPeriodAction::class)->handle($stable, $startedAt);
 
-    expect($activityPeriod->stable_id)->toBe($stable->id)
+    expect($activityPeriod->activeable_id)->toBe($stable->id)
+        ->and($activityPeriod->activeable_type)->toBe($stable->getMorphClass())
         ->and($activityPeriod->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString())
         ->and($activityPeriod->ended_at)->toBeNull();
 });
@@ -48,7 +49,7 @@ test('it rejects ending activity when no period is open', function () {
     $stable = Stable::factory()->create();
 
     expect(fn () => resolve(EndActivityPeriodAction::class)->handle($stable, now()))
-        ->toThrow(LogicException::class, 'does not have an open activity period');
+        ->toThrow(LogicException::class, 'does not have a current activity period');
 });
 
 test('it rejects an end date before the activity period starts', function () {

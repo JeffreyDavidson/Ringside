@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DebutAction
 {
@@ -29,10 +31,16 @@ class DebutAction
      */
     public function handle(Title $title, ?Carbon $debutDate = null, ?string $notes = null): void
     {
-        $title->ensureCanBeDebuted();
-
         $debutDate = $debutDate ?? now();
 
-        $this->startActivityPeriod->handle($title, $debutDate);
+        DB::transaction(function () use ($title, $debutDate): void {
+            $lockedTitle = Title::query()
+                ->lockForUpdate()
+                ->findOrFail($title->getKey());
+
+            $lockedTitle->ensureCanBeDebuted();
+
+            $this->startActivityPeriod->handle($lockedTitle, $debutDate, rescheduleFuturePeriod: true);
+        });
     }
 }

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Database\Factories\Titles;
 
 use App\Enums\Titles\TitleType;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Titles\Title;
-use App\Models\Titles\TitleActivityPeriod;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -39,7 +39,7 @@ class TitleFactory extends Factory
         $activationDate = Carbon::yesterday();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($activationDate), 'activityPeriods');
+            ->has(ActivityPeriod::factory()->started($activationDate), 'activityPeriods');
     }
 
     public function inactive(): static
@@ -49,13 +49,13 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods');
+            ->has(ActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods');
     }
 
     public function withFutureActivation(): static
     {
         return $this
-            ->has(TitleActivityPeriod::factory()->started(Carbon::tomorrow()), 'activityPeriods');
+            ->has(ActivityPeriod::factory()->started(Carbon::tomorrow()), 'activityPeriods');
     }
 
     public function retired(): static
@@ -65,7 +65,7 @@ class TitleFactory extends Factory
         $end = $now->copy()->subDays();
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods')
+            ->has(ActivityPeriod::factory()->started($start)->ended($end), 'activityPeriods')
             ->has(Retirement::factory()->started($end), 'retirements');
     }
 
@@ -113,10 +113,10 @@ class TitleFactory extends Factory
 
         if ($endDate) {
             return $this
-                ->has(TitleActivityPeriod::factory()->started($startDate)->ended($endDate), 'activityPeriods');
+                ->has(ActivityPeriod::factory()->started($startDate)->ended($endDate), 'activityPeriods');
         }
 
         return $this
-            ->has(TitleActivityPeriod::factory()->started($startDate), 'activityPeriods');
+            ->has(ActivityPeriod::factory()->started($startDate), 'activityPeriods');
     }
 }

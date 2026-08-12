@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableActivityPeriod;
 
 it('allows only a never-active stable to be established', function () {
     $unformedStable = Stable::factory()->create();
@@ -58,8 +58,8 @@ it('uses reunion exceptions for invalid activity states', function () {
 it('keeps reunion former-member validation aligned', function () {
     $eligibleStable = Stable::factory()->disbanded()->create();
     $stableWithoutFormerMembers = Stable::factory()->create();
-    StableActivityPeriod::factory()
-        ->for($stableWithoutFormerMembers)
+    ActivityPeriod::factory()
+        ->for($stableWithoutFormerMembers, 'activeable')
         ->state([
             'started_at' => now()->subDays(2),
             'ended_at' => now()->subDay(),

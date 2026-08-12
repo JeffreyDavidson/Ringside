@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Titles\EndActivityPeriodAction;
+use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Titles\Title;
 

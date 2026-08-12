@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Models\Titles\TitleActivityPeriod;
+use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * Unit tests for TitleActivityPeriod model structure and configuration.
+ * Unit tests for ActivityPeriod model structure and configuration.
  *
  * UNIT TEST SCOPE:
  * - Model attribute configuration (fillable, casts, defaults)
@@ -14,24 +14,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * - Trait integration verification
  * - Interface implementation verification
  *
- * These tests verify that the TitleActivityPeriod model is properly configured
+ * These tests verify that the ActivityPeriod model is properly configured
  * and structured according to the data layer requirements.
  */
-describe('TitleActivityPeriod Model Unit Tests', function () {
+describe('ActivityPeriod Model Unit Tests', function () {
     describe('model attributes and configuration', function () {
         test('has correct fillable properties', function () {
-            $titleActivityPeriod = new TitleActivityPeriod();
+            $activityPeriod = new ActivityPeriod();
 
-            expect($titleActivityPeriod->getFillable())->toEqual([
-                'title_id',
+            expect($activityPeriod->getFillable())->toEqual([
                 'started_at',
                 'ended_at',
             ]);
         });
 
         test('has correct casts configuration', function () {
-            $titleActivityPeriod = new TitleActivityPeriod();
-            $casts = $titleActivityPeriod->getCasts();
+            $activityPeriod = new ActivityPeriod();
+            $casts = $activityPeriod->getCasts();
 
             expect($casts)->toBeArray();
             expect($casts['id'])->toBe('int');
@@ -40,35 +39,35 @@ describe('TitleActivityPeriod Model Unit Tests', function () {
         });
 
         test('uses correct table name', function () {
-            $titleActivityPeriod = new TitleActivityPeriod();
+            $activityPeriod = new ActivityPeriod();
 
-            expect($titleActivityPeriod->getTable())->toBe('titles_activations');
+            expect($activityPeriod->getTable())->toBe('activity_periods');
         });
 
         test('has correct default values', function () {
-            $titleActivityPeriod = new TitleActivityPeriod();
+            $activityPeriod = new ActivityPeriod();
 
             // Model has no custom default values
-            expect($titleActivityPeriod)->toBeInstanceOf(TitleActivityPeriod::class);
+            expect($activityPeriod)->toBeInstanceOf(ActivityPeriod::class);
         });
 
         test('has custom eloquent builder', function () {
-            $titleActivityPeriod = new TitleActivityPeriod();
+            $activityPeriod = new ActivityPeriod();
 
             // Model has no custom builder
-            expect($titleActivityPeriod->query())->toBeObject();
+            expect($activityPeriod->query())->toBeObject();
         });
     });
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(TitleActivityPeriod::class))->toContain(HasFactory::class);
+            expect(class_uses(ActivityPeriod::class))->toContain(HasFactory::class);
         });
     });
 
     describe('interface implementation', function () {
         test('implements all required interfaces', function () {
-            $interfaces = class_implements(TitleActivityPeriod::class);
+            $interfaces = class_implements(ActivityPeriod::class);
 
             // Model implements no specific interfaces beyond base Model
             expect($interfaces)->toBeArray();
@@ -77,14 +76,14 @@ describe('TitleActivityPeriod Model Unit Tests', function () {
 
     describe('model constants', function () {
         test('has no model-specific constants defined', function () {
-            $reflection = new ReflectionClass(TitleActivityPeriod::class);
+            $reflection = new ReflectionClass(ActivityPeriod::class);
             $constants = $reflection->getConstants();
 
             // Filter out inherited constants from parent classes
             $modelConstants = array_filter($constants, function ($value, $key) use ($reflection) {
                 $constant = $reflection->getReflectionConstant($key);
 
-                return $constant && $constant->getDeclaringClass()->getName() === TitleActivityPeriod::class;
+                return $constant && $constant->getDeclaringClass()->getName() === ActivityPeriod::class;
             }, ARRAY_FILTER_USE_BOTH);
 
             expect($modelConstants)->toBeEmpty();

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReinstateAction
 {
@@ -29,10 +31,16 @@ class ReinstateAction
      */
     public function handle(Title $title, ?Carbon $reinstateDate = null, ?string $notes = null): void
     {
-        $title->ensureCanBeReinstated();
-
         $reinstateDate = $reinstateDate ?? now();
 
-        $this->startActivityPeriod->handle($title, $reinstateDate);
+        DB::transaction(function () use ($title, $reinstateDate): void {
+            $lockedTitle = Title::query()
+                ->lockForUpdate()
+                ->findOrFail($title->getKey());
+
+            $lockedTitle->ensureCanBeReinstated();
+
+            $this->startActivityPeriod->handle($lockedTitle, $reinstateDate, rescheduleFuturePeriod: true);
+        });
     }
 }

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
+use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -15,7 +16,6 @@ use Illuminate\Support\Carbon;
  * This contract defines the interface for models that can be activated and deactivated
  * over time, tracking periods of activity with start and end dates.
  *
- * @template TActivityPeriod of Model
  * @template TDeclaringModel of Model
  */
 interface HasActivityPeriods
@@ -67,14 +67,14 @@ interface HasActivityPeriods
     /**
      * Get all activity periods for this model.
      *
-     * @return HasMany<TActivityPeriod, TDeclaringModel>
+     * @return MorphMany<ActivityPeriod, TDeclaringModel>
      */
-    public function activityPeriods(): HasMany;
+    public function activityPeriods(): MorphMany;
 
     /**
      * Get the current activity period.
      *
-     * @return HasOne<TActivityPeriod, TDeclaringModel>
+     * @return MorphOne<ActivityPeriod, TDeclaringModel>
      */
-    public function currentActivityPeriod(): HasOne;
+    public function currentActivityPeriod(): MorphOne;
 }
