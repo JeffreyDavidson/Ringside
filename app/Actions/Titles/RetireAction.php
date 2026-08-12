@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Titles\Title;
@@ -55,7 +56,7 @@ class RetireAction
                 $currentChampionship->update(['lost_at' => $retirementDate]);
             }
 
-            $this->retirementPeriods->start($lockedTitle, $retirementDate);
+            $this->retirementPeriods->start($lockedTitle, $retirementDate, LifecycleTransitionType::Retired);
         });
     }
 }

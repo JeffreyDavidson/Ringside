@@ -17,6 +17,8 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  */
 trait IsRetirable
 {
+    use HasLifecycleTransitions;
+
     /** @return MorphMany<Retirement, TModel> */
     public function retirements(): MorphMany
     {

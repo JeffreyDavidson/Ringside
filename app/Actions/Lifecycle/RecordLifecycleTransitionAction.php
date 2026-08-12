@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Lifecycle;
 
 use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Lifecycle\LifecycleTransition;
 use Illuminate\Contracts\Auth\Guard;
@@ -23,8 +24,10 @@ class RecordLifecycleTransitionAction
         Carbon $effectiveAt,
         array $context = [],
     ): LifecycleTransition {
+        $ownerType = LifecycleOwnerType::fromModel($subject);
+
         return LifecycleTransition::query()->create([
-            'subject_type' => $subject->getMorphClass(),
+            'subject_type' => $ownerType->morphAlias(),
             'subject_id' => $subject->getKey(),
             'dimension' => $dimension,
             'transition' => $transition,

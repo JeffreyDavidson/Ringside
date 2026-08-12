@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -41,7 +42,7 @@ class UnretireAction
         $unretirementDate = DateHelper::resolveDate($unretirementDate);
 
         DB::transaction(function () use ($wrestler, $unretirementDate, $employImmediately): void {
-            $this->retirementPeriods->end($wrestler, $unretirementDate);
+            $this->retirementPeriods->end($wrestler, $unretirementDate, LifecycleTransitionType::Unretired);
 
             if ($employImmediately) {
                 $this->employ->handle($wrestler, $unretirementDate);

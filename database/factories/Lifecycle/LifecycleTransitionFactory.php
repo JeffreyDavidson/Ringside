@@ -23,7 +23,7 @@ class LifecycleTransitionFactory extends Factory
     public function definition(): array
     {
         return [
-            'subject_type' => 'title',
+            'subject_type' => (new Title())->getMorphClass(),
             'subject_id' => Title::factory(),
             'dimension' => LifecycleDimension::Activity,
             'transition' => LifecycleTransitionType::Debuted,

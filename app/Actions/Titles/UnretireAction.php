@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Titles\Title;
@@ -36,7 +37,7 @@ class UnretireAction
         $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($title, $unretiredDate): void {
-            $this->retirementPeriods->end($title, $unretiredDate);
+            $this->retirementPeriods->end($title, $unretiredDate, LifecycleTransitionType::Unretired);
         });
     }
 }

@@ -352,6 +352,8 @@ describe('Stable Activation Action Integration', function () {
                 LifecycleTransitionType::Established,
                 LifecycleTransitionType::Disbanded,
                 LifecycleTransitionType::Reunited,
+                LifecycleTransitionType::Retired,
+                LifecycleTransitionType::Unretired,
             ]);
 
             // Verify retirement record

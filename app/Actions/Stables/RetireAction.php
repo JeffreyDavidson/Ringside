@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Lifecycle\RetirementPeriodManager;
@@ -81,7 +82,7 @@ class RetireAction
                 }
             }
 
-            $this->retirementPeriods->start($lockedStable, $retirementDate);
+            $this->retirementPeriods->start($lockedStable, $retirementDate, LifecycleTransitionType::Retired);
 
             $lockedStable->update(['status' => StableStatus::Retired]);
         });

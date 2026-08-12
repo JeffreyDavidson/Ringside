@@ -8,6 +8,7 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 final class DeletionPeriodCloser
@@ -20,9 +21,9 @@ final class DeletionPeriodCloser
     ) {}
 
     /**
-     * @param  Employable<*>&Injurable<*>&Retirable<*>&Suspendable<*>  $subject
+     * @param  Model&Employable<*>&Injurable<*>&Retirable<*>&Suspendable<*>  $subject
      */
-    public function close(Employable&Injurable&Retirable&Suspendable $subject, Carbon $date): void
+    public function close(Model&Employable&Injurable&Retirable&Suspendable $subject, Carbon $date): void
     {
         if ($subject->isEmployed()) {
             $this->employmentPeriods->end($subject, $date);

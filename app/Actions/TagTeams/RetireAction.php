@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
@@ -54,7 +55,7 @@ class RetireAction
                 $this->suspensionPeriods->end($tagTeam, $retirementDate);
             }
 
-            $this->retirementPeriods->start($tagTeam, $retirementDate);
+            $this->retirementPeriods->start($tagTeam, $retirementDate, LifecycleTransitionType::Retired);
             if ($retireMembers) {
                 $this->retireCurrentMembers->handle($tagTeam, $retirementDate);
             }
