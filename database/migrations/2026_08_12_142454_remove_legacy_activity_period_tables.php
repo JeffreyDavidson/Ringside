@@ -10,9 +10,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::drop('stables_activations');
-        Schema::drop('titles_activations');
-
         $connection = DB::connection();
 
         match ($connection->getDriverName()) {
@@ -31,5 +28,8 @@ return new class extends Migration
             ),
             default => throw new LogicException('The database driver does not support open activity-period constraints.'),
         };
+
+        Schema::drop('stables_activations');
+        Schema::drop('titles_activations');
     }
 };

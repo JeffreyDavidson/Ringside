@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Database\Factories\Lifecycle;
 
-use App\Models\Titles\Title;
 use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Titles\Title;
 use Database\Factories\Lifecycle\ActivityPeriodFactory;
 use Illuminate\Support\Carbon;
 
