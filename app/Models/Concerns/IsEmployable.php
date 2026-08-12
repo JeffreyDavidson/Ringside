@@ -6,23 +6,22 @@ namespace App\Models\Concerns;
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Contracts\Employable;
+use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
-use LogicException;
 
 /**
  * Adds employment-related behavior to a model.
  *
  * This trait provides a complete employment system for Eloquent models, including
  * methods to manage current employments, historical employments, and employment status.
- * It automatically resolves the related employment model class based on naming conventions.
+ * Every employable model persists its history through the shared Employment model.
  *
- * @template TEmployment of Model The employment model class (e.g., WrestlerEmployment)
  * @template TModel of Model The parent model class that can be employed (e.g., Wrestler)
  *
- * @phpstan-require-implements Employable<TEmployment, TModel>
+ * @phpstan-require-implements Employable<TModel>
  *
  * @see Employable
  *
@@ -46,15 +45,13 @@ trait IsEmployable
     /** @use HasEnumStatus<EmploymentStatus> */
     use HasEnumStatus;
 
-    use ResolvesRelatedModels;
-
     /**
      * Get all employments for the model.
      *
-     * This method returns a HasMany relationship that includes all employment records
+     * This method returns a polymorphic relationship that includes all employment records
      * for the model, regardless of their status (active, completed, etc.).
      *
-     * @return HasMany<TEmployment, TModel> The relationship instance
+     * @return MorphMany<Employment, TModel> The relationship instance
      *
      * @example
      * ```php
@@ -63,10 +60,10 @@ trait IsEmployable
      * $employmentCount = $wrestler->employments()->count();
      * ```
      */
-    public function employments(): HasMany
+    public function employments(): MorphMany
     {
-        /** @var HasMany<TEmployment, TModel> $relation */
-        $relation = $this->hasMany($this->resolveEmploymentModelClass());
+        /** @var MorphMany<Employment, TModel> $relation */
+        $relation = $this->morphMany(Employment::class, 'employable');
 
         return $relation;
     }
@@ -77,7 +74,7 @@ trait IsEmployable
      * Returns a HasOne relationship for the currently active employment.
      * An active employment is one where the 'ended_at' field is null.
      *
-     * @return HasOne<TEmployment, TModel> The relationship instance
+     * @return MorphOne<Employment, TModel> The relationship instance
      *
      * @example
      * ```php
@@ -89,10 +86,10 @@ trait IsEmployable
      * }
      * ```
      */
-    public function currentEmployment(): HasOne
+    public function currentEmployment(): MorphOne
     {
-        /** @var HasOne<TEmployment, TModel> $relation */
-        $relation = $this->hasOne($this->resolveEmploymentModelClass())
+        /** @var MorphOne<Employment, TModel> $relation */
+        $relation = $this->morphOne(Employment::class, 'employable')
             ->whereNull('ended_at')
             ->where('started_at', '<=', now());
 
@@ -105,7 +102,7 @@ trait IsEmployable
      * Returns a HasOne relationship for an employment that is scheduled for the future.
      * A future employment has a 'started_at' date greater than now and 'ended_at' is null.
      *
-     * @return HasOne<TEmployment, TModel> The relationship instance
+     * @return MorphOne<Employment, TModel> The relationship instance
      *
      * @example
      * ```php
@@ -117,10 +114,10 @@ trait IsEmployable
      * }
      * ```
      */
-    public function futureEmployment(): HasOne
+    public function futureEmployment(): MorphOne
     {
-        /** @var HasOne<TEmployment, TModel> $relation */
-        $relation = $this->hasOne($this->resolveEmploymentModelClass())
+        /** @var MorphOne<Employment, TModel> $relation */
+        $relation = $this->morphOne(Employment::class, 'employable')
             ->whereNull('ended_at')
             ->where('started_at', '>', now());
 
@@ -133,7 +130,7 @@ trait IsEmployable
      * Returns a HasMany relationship for employments that have ended.
      * A completed employment is one where the 'ended_at' field is not null.
      *
-     * @return HasMany<TEmployment, TModel> The relationship instance
+     * @return MorphMany<Employment, TModel> The relationship instance
      *
      * @example
      * ```php
@@ -142,10 +139,10 @@ trait IsEmployable
      * $employmentHistory = $wrestler->previousEmployments()->orderBy('ended_at', 'desc')->get();
      * ```
      */
-    public function previousEmployments(): HasMany
+    public function previousEmployments(): MorphMany
     {
-        /** @var HasMany<TEmployment, TModel> $relation */
-        $relation = $this->hasMany($this->resolveEmploymentModelClass())
+        /** @var MorphMany<Employment, TModel> $relation */
+        $relation = $this->morphMany(Employment::class, 'employable')
             ->whereNotNull('ended_at');
 
         return $relation;
@@ -157,7 +154,7 @@ trait IsEmployable
      * Returns a HasOne relationship for the most recently completed employment,
      * determined by the highest 'ended_at' value.
      *
-     * @return HasOne<TEmployment, TModel> The relationship instance
+     * @return MorphOne<Employment, TModel> The relationship instance
      *
      * @example
      * ```php
@@ -169,10 +166,10 @@ trait IsEmployable
      * }
      * ```
      */
-    public function previousEmployment(): HasOne
+    public function previousEmployment(): MorphOne
     {
-        /** @var HasOne<TEmployment, TModel> $relation */
-        $relation = $this->hasOne($this->resolveEmploymentModelClass())
+        /** @var MorphOne<Employment, TModel> $relation */
+        $relation = $this->morphOne(Employment::class, 'employable')
             ->whereNotNull('ended_at')
             ->ofMany('ended_at', 'max');
 
@@ -184,7 +181,7 @@ trait IsEmployable
      *
      * Returns a HasOne relationship for the earliest employment based on 'started_at'.
      *
-     * @return HasOne<TEmployment, TModel> The relationship instance
+     * @return MorphOne<Employment, TModel> The relationship instance
      *
      * @example
      * ```php
@@ -196,10 +193,10 @@ trait IsEmployable
      * }
      * ```
      */
-    public function firstEmployment(): HasOne
+    public function firstEmployment(): MorphOne
     {
-        /** @var HasOne<TEmployment, TModel> $relation */
-        $relation = $this->hasOne($this->resolveEmploymentModelClass())
+        /** @var MorphOne<Employment, TModel> $relation */
+        $relation = $this->morphOne(Employment::class, 'employable')
             ->ofMany('started_at', 'min');
 
         return $relation;
@@ -409,24 +406,6 @@ trait IsEmployable
         $firstEmployment = $this->firstEmployment;
 
         return $firstEmployment?->started_at?->format('Y-m-d') ?? 'TBD';
-    }
-
-    /**
-     * Resolve the model class for the employment relation.
-     *
-     * This method automatically determines the employment model class based on naming
-     * conventions. For example, if the parent model is 'Wrestler', it will look for
-     * a 'WrestlerEmployment' model class.
-     *
-     * @throws LogicException If the resolved model class doesn't exist
-     * @return class-string<TEmployment> The fully qualified class name of the employment model
-     *
-     * @example
-     * For a 'Wrestler' model, this will resolve to 'App\\Models\\Wrestlers\\WrestlerEmployment'
-     */
-    protected function resolveEmploymentModelClass(): string
-    {
-        return $this->resolveRelatedModelClass('Employment');
     }
 
     /**

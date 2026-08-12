@@ -54,8 +54,8 @@ test('it updates manager and creates employment when employment date is provided
         'last_name' => 'Updated',
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);

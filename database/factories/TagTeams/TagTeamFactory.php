@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories\TagTeams;
 
+use App\Models\Lifecycle\Employment;
 use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamEmployment;
 use App\Models\TagTeams\TagTeamRetirement;
 use App\Models\TagTeams\TagTeamSuspension;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerEmployment;
 use App\Models\Wrestlers\WrestlerRetirement;
 use App\Models\Wrestlers\WrestlerSuspension;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -44,10 +43,10 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
 
         $wrestlers = Wrestler::factory()->count(2)
-            ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
+            ->has(Employment::factory()->started($employmentStartDate), 'employments')
             ->create();
 
-        return $this->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
+        return $this->has(Employment::factory()->started($employmentStartDate), 'employments')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 
@@ -66,10 +65,10 @@ class TagTeamFactory extends Factory
     {
         $employmentStartDate = Carbon::tomorrow();
         $wrestlers = Wrestler::factory()->count(2)
-            ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
+            ->has(Employment::factory()->started($employmentStartDate), 'employments')
             ->create();
 
-        return $this->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
+        return $this->has(Employment::factory()->started($employmentStartDate), 'employments')
             ->withCurrentWrestlers($wrestlers, Carbon::now());
     }
 
@@ -84,11 +83,11 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $suspensionStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
-            ->has(WrestlerEmployment::factory()->started($employmentStartDate), 'employments')
+            ->has(Employment::factory()->started($employmentStartDate), 'employments')
             ->has(WrestlerSuspension::factory()->started($suspensionStartDate), 'suspensions')
             ->create();
 
-        return $this->has(TagTeamEmployment::factory()->started($employmentStartDate), 'employments')
+        return $this->has(Employment::factory()->started($employmentStartDate), 'employments')
             ->has(TagTeamSuspension::factory()->started($suspensionStartDate), 'suspensions')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
@@ -99,11 +98,11 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(3);
         $retirementStartDate = $now->copy()->subDays(2);
         $wrestlers = Wrestler::factory()->count(2)
-            ->has(WrestlerEmployment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
+            ->has(Employment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
             ->has(WrestlerRetirement::factory()->started($retirementStartDate), 'retirements')
             ->create();
 
-        return $this->has(TagTeamEmployment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
+        return $this->has(Employment::factory()->started($employmentStartDate)->ended($retirementStartDate), 'employments')
             ->has(TagTeamRetirement::factory()->started($retirementStartDate), 'retirements')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
@@ -121,10 +120,10 @@ class TagTeamFactory extends Factory
         $employmentStartDate = $now->copy()->subDays(2);
         $employmentEndDate = $now->copy()->subDays();
         $wrestlers = Wrestler::factory()->count(2)
-            ->has(WrestlerEmployment::factory()->started($employmentStartDate)->ended($employmentEndDate), 'employments')
+            ->has(Employment::factory()->started($employmentStartDate)->ended($employmentEndDate), 'employments')
             ->create();
 
-        return $this->has(TagTeamEmployment::factory()->started($employmentStartDate)->ended($employmentEndDate), 'employments')
+        return $this->has(Employment::factory()->started($employmentStartDate)->ended($employmentEndDate), 'employments')
             ->withCurrentWrestlers($wrestlers, $employmentStartDate);
     }
 

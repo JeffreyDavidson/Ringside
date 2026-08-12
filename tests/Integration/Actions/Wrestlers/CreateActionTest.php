@@ -43,8 +43,8 @@ test('it creates a wrestler with basic information', function () {
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $result->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $result->id,
     ]);
 });
 
@@ -73,8 +73,8 @@ test('it creates a wrestler with employment when employment date is provided', f
     ]);
 
     // Should create employment record
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -111,8 +111,8 @@ test('it creates wrestler with all optional fields', function () {
         'signature_move' => 'Stone Cold Stunner',
     ]);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -172,8 +172,8 @@ test('it employs assigned managers through the wrestler employment cascade', fun
     expect($wrestler->isEmployed())->toBeTrue()
         ->and($manager->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);

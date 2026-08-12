@@ -57,8 +57,8 @@ test('it updates referee and employs them when employment date provided', functi
     expect($result->isEmployed())->toBeTrue();
 
     // Verify employment record was created via EmployAction
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -83,8 +83,8 @@ test('it updates referee without employing when no employment date', function ()
     expect($result->isEmployed())->toBeFalse();
 
     // Verify no employment record was created
-    $this->assertDatabaseMissing('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $referee->id,
     ]);
 });
 
@@ -127,8 +127,8 @@ test('it handles DateHelper date resolution for employment', function () {
     expect($result->isEmployed())->toBeTrue();
 
     // DateHelper should have processed the employment date
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -155,8 +155,8 @@ test('it maintains transaction boundaries', function () {
         'last_name' => 'Test',
     ]);
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => null,
     ]);
 });

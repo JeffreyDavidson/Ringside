@@ -110,7 +110,7 @@ describe('Builder Concerns Unit Tests', function () {
             $bindings = $builder->getBindings();
 
             expect($sql)->toContain('where exists');
-            expect($sql)->toContain('wrestlers_employments');
+            expect($sql)->toContain('employments');
             expect($sql)->toContain('started_at" <= ?');
             expect($sql)->toContain('ended_at" is null');
             expect($bindings)->toBeArray()->not->toBeEmpty();
@@ -131,7 +131,7 @@ describe('Builder Concerns Unit Tests', function () {
             expect($sql)->toContain('where (');
             expect($sql)->toContain('not exists');
             expect($sql)->toContain(' or ');
-            expect($sql)->toContain('wrestlers_employments');
+            expect($sql)->toContain('employments');
             expect($sql)->toContain('wrestlers_suspensions');
             expect($sql)->toContain('wrestlers_retirements');
         });

@@ -27,8 +27,8 @@ test('it releases an employed manager', function () {
     expect($manager->isEmployed())->toBeFalse();
 
     // Verify employment was ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -43,8 +43,8 @@ test('it releases manager with specific release date', function () {
     expect($manager->isReleased())->toBeTrue();
 
     // Verify employment ended with specific date
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
@@ -69,8 +69,8 @@ test('it releases suspended manager and ends suspension', function () {
     ]);
 
     // Verify employment was ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -95,8 +95,8 @@ test('it releases injured manager and ends injury', function () {
     ]);
 
     // Verify employment was ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -189,8 +189,8 @@ test('it handles database transactions correctly', function () {
     expect($manager->currentWrestlers)->toHaveCount(0);
 
     // Verify all database changes are consistent
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -209,8 +209,8 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager->refresh();
 
     // Verify DateHelper was used for date resolution across all operations
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $customReleaseDate->toDateTimeString(),
     ]);
 
@@ -267,8 +267,8 @@ test('it handles manager with no management relationships', function () {
     expect($manager->isReleased())->toBeTrue();
     expect($manager->isEmployed())->toBeFalse();
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

@@ -17,8 +17,8 @@ test('it starts an employment period on the effective date', function () {
 
     resolve(EmploymentPeriodManager::class)->start($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => $effectiveDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -31,9 +31,9 @@ test('it ends and preserves the active employment period', function () {
 
     resolve(EmploymentPeriodManager::class)->end($wrestler, $effectiveDate);
 
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employmentId,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'ended_at' => $effectiveDate->toDateTimeString(),
     ]);
 });

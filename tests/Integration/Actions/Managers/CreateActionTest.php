@@ -27,8 +27,8 @@ test('it creates a manager with basic information', function () {
     ]);
 
     // Should not create employment record when no employment date provided
-    $this->assertDatabaseMissing('managers_employments', [
-        'manager_id' => $result->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $result->id,
     ]);
 });
 
@@ -48,8 +48,8 @@ test('it creates a manager with employment when employment date is provided', fu
     ]);
 
     // Should create employment record
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -79,8 +79,8 @@ test('it creates manager with all optional fields', function () {
         'last_name' => 'Doe',
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $result->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $result->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);

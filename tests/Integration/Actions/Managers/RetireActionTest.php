@@ -34,8 +34,8 @@ test('it retires an employed manager', function () {
     ]);
 
     // Verify employment was ended
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -56,8 +56,8 @@ test('it retires manager with specific retirement date', function () {
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $retirementDate->toDateTimeString(),
     ]);
 });
@@ -223,8 +223,8 @@ test('it uses DateHelper for consistent date handling', function () {
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager->id,
         'ended_at' => $customRetirementDate->toDateTimeString(),
     ]);
 });

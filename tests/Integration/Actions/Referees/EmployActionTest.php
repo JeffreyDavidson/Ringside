@@ -23,8 +23,8 @@ test('it employs an unemployed referee', function () {
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -39,8 +39,8 @@ test('it employs referee with specific employment date', function () {
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -83,8 +83,8 @@ test('it rejects employing a retired referee without changing retirement', funct
         ->and($referee->isRetired())->toBeTrue()
         ->and($retirement->ended_at)->toBeNull();
 
-    $this->assertDatabaseMissing('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => null,
     ]);
 });
@@ -99,8 +99,8 @@ test('it handles DateHelper date resolution', function () {
     expect($referee->isEmployed())->toBeTrue();
 
     // DateHelper should have processed the employment date
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -166,7 +166,7 @@ test('it creates employment record with correct structure', function () {
     $employment = freshModel($referee)->currentEmployment()->firstOrFail();
 
     expect($employment)->not->toBeNull();
-    expect($employment->referee_id)->toBe($referee->id);
+    expect($employment->employable_id)->toBe($referee->id);
     expect(requiredDate($employment->started_at)->toDateTimeString())->toBe($employmentDate->toDateTimeString());
     expect($employment->ended_at)->toBeNull();
 });

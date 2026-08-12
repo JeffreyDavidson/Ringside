@@ -26,8 +26,8 @@ test('it retires an employed tag team', function () {
     expect($tagTeam->isRetired())->toBeTrue();
 
     // Verify employment record was ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -95,8 +95,8 @@ test('it retires tag team with specific retirement date', function () {
     ]);
 
     // Verify employment ended with same date
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => $retirementDate->toDateTimeString(),
     ]);
 });
@@ -177,9 +177,9 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Verify original employment record was properly ended
-    $this->assertDatabaseHas('tag_teams_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $originalEmploymentId,
-        'tag_team_id' => $tagTeam->id,
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -216,8 +216,8 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam->refresh();
 
     // Verify DateHelper was used for date resolution across all operations
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => $customRetirementDate->toDateTimeString(),
     ]);
 

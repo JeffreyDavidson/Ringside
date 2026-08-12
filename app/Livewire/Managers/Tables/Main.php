@@ -108,7 +108,7 @@ class Main extends BaseTable
                         default => null,
                     };
                 }),
-            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'managers_employments.started_at', 'managers_employments.ended_at'),
+            FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
     }
 

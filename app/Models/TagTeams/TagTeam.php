@@ -26,6 +26,7 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use App\Models\Lifecycle\Employment;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
 use App\Models\Stables\Stable;
@@ -47,7 +48,7 @@ use Illuminate\Support\Carbon;
 /**
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableTagTeam, static>
- * @implements Employable<TagTeamEmployment, static>
+ * @implements Employable<static>
  * @implements Manageable<TagTeamManager, static>
  * @implements Retirable<TagTeamRetirement, static>
  * @implements Suspendable<TagTeamSuspension, static>
@@ -64,12 +65,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $deleted_at
  *
  * @property-read TagTeamWrestler|TagTeamManager|null $pivot
- * @property-read TagTeamEmployment|null $currentEmployment
- * @property-read TagTeamEmployment|null $firstEmployment
- * @property-read TagTeamEmployment|null $futureEmployment
- * @property-read TagTeamEmployment|null $previousEmployment
- * @property-read Collection<int, TagTeamEmployment> $employments
- * @property-read Collection<int, TagTeamEmployment> $previousEmployments
+ * @property-read Employment|null $currentEmployment
+ * @property-read Employment|null $firstEmployment
+ * @property-read Employment|null $futureEmployment
+ * @property-read Employment|null $previousEmployment
+ * @property-read Collection<int, Employment> $employments
+ * @property-read Collection<int, Employment> $previousEmployments
  * @property-read TagTeamRetirement|null $currentRetirement
  * @property-read TagTeamRetirement|null $previousRetirement
  * @property-read Collection<int, TagTeamRetirement> $retirements
@@ -139,7 +140,7 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
 
     use IsBookableCompetitor;
 
-    /** @use IsEmployable<TagTeamEmployment, static> */
+    /** @use IsEmployable<static> */
     use IsEmployable;
 
     /** @use IsRetirable<TagTeamRetirement, static> */

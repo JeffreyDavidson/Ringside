@@ -27,7 +27,7 @@ test('it releases an employed referee', function () {
     expect($referee->isEmployed())->toBeFalse();
     expect($employment->ended_at)->not->toBeNull();
 
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
@@ -46,7 +46,7 @@ test('it releases referee with specific release date', function () {
     expect($referee->isEmployed())->toBeFalse();
     expect(requiredDate($employment->ended_at)->toDateTimeString())->toBe($releaseDate->toDateTimeString());
 
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
@@ -61,8 +61,8 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
 
     // DateHelper should have processed the release date
-    $this->assertDatabaseHas('referees_employments', [
-        'referee_id' => $referee->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $referee->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
@@ -147,9 +147,9 @@ test('it preserves employment history', function () {
     $employment->refresh();
 
     // Employment record should be preserved with ended_at set
-    $this->assertDatabaseHas('referees_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $employment->id,
-        'referee_id' => $referee->id,
+        'employable_id' => $referee->id,
         'started_at' => $originalStartedAt->toDateTimeString(),
         'ended_at' => now()->toDateTimeString(),
     ]);

@@ -8,8 +8,8 @@ use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Livewire\TagTeams\Tables\Main;
 use App\Livewire\TagTeams\Tables\TagTeamsTable;
+use App\Models\Lifecycle\Employment;
 use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamEmployment;
 use App\Models\TagTeams\TagTeamRetirement;
 use App\Models\TagTeams\TagTeamSuspension;
 use App\Models\Wrestlers\Wrestler;
@@ -162,15 +162,15 @@ describe('TagTeamsTable Component', function () {
             $tagTeam = TagTeam::factory()->create(['name' => 'Team History']);
 
             // Create employment history
-            TagTeamEmployment::factory()
-                ->for($tagTeam, 'tagTeam')
+            Employment::factory()
+                ->for($tagTeam, 'employable')
                 ->create([
                     'started_at' => now()->subDays(200),
                     'ended_at' => now()->subDays(100),
                 ]);
 
-            TagTeamEmployment::factory()
-                ->for($tagTeam, 'tagTeam')
+            Employment::factory()
+                ->for($tagTeam, 'employable')
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 
@@ -452,8 +452,8 @@ describe('TagTeamsTable Component', function () {
             $newTeam = TagTeam::factory()->employed()->create(['name' => 'New Team']);
 
             // Create different employment history lengths
-            TagTeamEmployment::factory()
-                ->for($veteranTeam, 'tagTeam')
+            Employment::factory()
+                ->for($veteranTeam, 'employable')
                 ->create([
                     'started_at' => now()->subYears(5),
                     'ended_at' => now()->subYears(3),
@@ -517,8 +517,8 @@ describe('TagTeamsTable Component', function () {
             $reunitedTeam = TagTeam::factory()->unemployed()->create(['name' => 'Reunited Team']);
 
             // Create previous employment and retirement
-            TagTeamEmployment::factory()
-                ->for($reunitedTeam, 'tagTeam')
+            Employment::factory()
+                ->for($reunitedTeam, 'employable')
                 ->create([
                     'started_at' => now()->subYears(2),
                     'ended_at' => now()->subYear(),

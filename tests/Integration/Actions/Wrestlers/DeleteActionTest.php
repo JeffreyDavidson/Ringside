@@ -60,9 +60,9 @@ test('it ends employment before deletion', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment was ended before deletion
-    $this->assertDatabaseHas('wrestlers_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $currentEmployment->id,
-        'wrestler_id' => $wrestler->id,
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -147,8 +147,8 @@ test('it closes lifecycle periods and applies relationship cascades', function (
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment period was ended
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -170,8 +170,8 @@ test('it handles DateHelper date resolution', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Verify employment ended with current timestamp
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -246,8 +246,8 @@ test('it handles wrestler with no active relationships', function () {
     expect($wrestler->trashed())->toBeTrue();
 
     // Historical relationships should remain unchanged
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => now()->subDays(30)->toDateTimeString(),
     ]);
 

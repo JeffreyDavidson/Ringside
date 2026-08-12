@@ -35,6 +35,7 @@ use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use App\Models\Lifecycle\Employment;
 use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
 use App\Models\Stables\Stable;
@@ -61,7 +62,7 @@ use Illuminate\Support\Carbon;
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableWrestler, static>
  * @implements CanBeATagTeamMember<TagTeamWrestler, static>
- * @implements Employable<WrestlerEmployment, static>
+ * @implements Employable<static>
  * @implements Injurable<WrestlerInjury, static>
  * @implements Manageable<WrestlerManager, static>
  * @implements Retirable<WrestlerRetirement, static>
@@ -78,12 +79,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  *
- * @property-read WrestlerEmployment|null $currentEmployment
- * @property-read WrestlerEmployment|null $firstEmployment
- * @property-read WrestlerEmployment|null $futureEmployment
- * @property-read WrestlerEmployment|null $previousEmployment
- * @property-read Collection<int, WrestlerEmployment> $employments
- * @property-read Collection<int, WrestlerEmployment> $previousEmployments
+ * @property-read Employment|null $currentEmployment
+ * @property-read Employment|null $firstEmployment
+ * @property-read Employment|null $futureEmployment
+ * @property-read Employment|null $previousEmployment
+ * @property-read Collection<int, Employment> $employments
+ * @property-read Collection<int, Employment> $previousEmployments
  * @property-read WrestlerInjury|null $currentInjury
  * @property-read WrestlerInjury|null $previousInjury
  * @property-read Collection<int, WrestlerInjury> $injuries
@@ -143,7 +144,7 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
 
     use IsBookableCompetitor;
 
-    /** @use IsEmployable<WrestlerEmployment, static> */
+    /** @use IsEmployable<static> */
     use IsEmployable;
 
     /** @use IsInjurable<WrestlerInjury, static> */

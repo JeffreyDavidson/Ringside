@@ -27,6 +27,8 @@ Employment status tracks the working relationship between entities and the promo
 - **Employment End**: Record employment end date when applicable
 - **Employment History**: Track all employment periods
 - **Current Employment**: Determine current employment status
+- **Shared Persistence**: Store every employment period in `employments` through the polymorphic `employable` owner
+- **Supported Owners**: Wrestlers, managers, referees, and tag teams
 - **Database Enforcement**: Each employable entity may have only one open employment period while retaining unlimited ended periods
 
 ## Related Documentation

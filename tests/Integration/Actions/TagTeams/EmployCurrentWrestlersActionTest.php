@@ -28,8 +28,8 @@ test('it employs unemployed current wrestlers', function () {
 
         expect($wrestler->isEmployed())->toBeTrue();
 
-        $this->assertDatabaseHas('wrestlers_employments', [
-            'wrestler_id' => $wrestler->id,
+        $this->assertDatabaseHas('employments', [
+            'employable_id' => $wrestler->id,
             'started_at' => $employmentDate->toDateTimeString(),
             'ended_at' => null,
         ]);

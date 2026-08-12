@@ -5,10 +5,10 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\EmployAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Livewire\Wrestlers\Tables\Main;
+use App\Models\Lifecycle\Employment;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerEmployment;
 use App\Models\Wrestlers\WrestlerInjury;
 use Livewire\Livewire;
 
@@ -162,15 +162,15 @@ describe('Main Component Integration', function () {
             $wrestler = Wrestler::factory()->create(['name' => 'Wrestler History']);
 
             // Create employment history
-            WrestlerEmployment::factory()
-                ->for($wrestler, 'wrestler')
+            Employment::factory()
+                ->for($wrestler, 'employable')
                 ->create([
                     'started_at' => now()->subDays(200),
                     'ended_at' => now()->subDays(100),
                 ]);
 
-            WrestlerEmployment::factory()
-                ->for($wrestler, 'wrestler')
+            Employment::factory()
+                ->for($wrestler, 'employable')
                 ->current()
                 ->create(['started_at' => now()->subDays(50)]);
 
@@ -427,8 +427,8 @@ describe('Main Component Integration', function () {
             $rookieWrestler = Wrestler::factory()->employed()->create(['name' => 'Rookie Wrestler']);
 
             // Create different employment history lengths
-            WrestlerEmployment::factory()
-                ->for($veteranWrestler, 'wrestler')
+            Employment::factory()
+                ->for($veteranWrestler, 'employable')
                 ->create([
                     'started_at' => now()->subYears(5),
                     'ended_at' => now()->subYears(3),

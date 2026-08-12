@@ -15,22 +15,21 @@ namespace Tests\Unit\Models\Concerns;
 
 use App\Models\Concerns\IsEmployable;
 use App\Models\Contracts\Employable;
+use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use JMac\Testing\Double;
-use Tests\Unit\Models\Concerns\Support\FakeEmployableModel;
-use Tests\Unit\Models\Concerns\Support\FakeEmploymentModel;
 
-/** @extends EloquentBuilder<FakeEmploymentModel> */
+/** @extends EloquentBuilder<Employment> */
 final class FakeEmploymentBuilder extends EloquentBuilder {}
 
-/** @implements Employable<FakeEmploymentModel, self> */
+/** @implements Employable<self> */
 final class EmploymentStateModel extends Model implements Employable
 {
-    /** @use IsEmployable<FakeEmploymentModel, self> */
+    /** @use IsEmployable<self> */
     use IsEmployable;
 
     public bool $futureEmploymentExists = false;
@@ -39,37 +38,32 @@ final class EmploymentStateModel extends Model implements Employable
 
     public bool $employmentExists = false;
 
-    public function resolveEmploymentModelClass(): string
-    {
-        return FakeEmploymentModel::class;
-    }
-
-    /** @return HasOne<FakeEmploymentModel, self> */
-    public function futureEmployment(): HasOne
+    /** @return MorphOne<Employment, self> */
+    public function futureEmployment(): MorphOne
     {
         return $this->employmentHasOne($this->futureEmploymentExists);
     }
 
-    /** @return HasOne<FakeEmploymentModel, self> */
-    public function currentEmployment(): HasOne
+    /** @return MorphOne<Employment, self> */
+    public function currentEmployment(): MorphOne
     {
         return $this->employmentHasOne($this->currentEmploymentExists);
     }
 
-    /** @return HasMany<FakeEmploymentModel, self> */
-    public function employments(): HasMany
+    /** @return MorphMany<Employment, self> */
+    public function employments(): MorphMany
     {
         $builder = $this->employmentBuilder($this->employmentExists);
 
-        return new HasMany($builder, new self(), 'entity_id', 'id');
+        return new MorphMany($builder, new self(), 'employable_type', 'employable_id', 'id');
     }
 
-    /** @return HasOne<FakeEmploymentModel, self> */
-    private function employmentHasOne(bool $exists): HasOne
+    /** @return MorphOne<Employment, self> */
+    private function employmentHasOne(bool $exists): MorphOne
     {
         $builder = $this->employmentBuilder($exists);
 
-        return new HasOne($builder, new self(), 'entity_id', 'id');
+        return new MorphOne($builder, new self(), 'employable_type', 'employable_id', 'id');
     }
 
     private function employmentBuilder(bool $exists): FakeEmploymentBuilder
@@ -77,7 +71,7 @@ final class EmploymentStateModel extends Model implements Employable
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
         $builder = new FakeEmploymentBuilder($query);
-        $builder->setModel(new FakeEmploymentModel());
+        $builder->setModel(new Employment());
 
         return $builder;
     }
@@ -88,117 +82,77 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('provides employments relationship', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
-            expect($model->employments())->toBeInstanceOf(HasMany::class);
+            expect($model->employments())->toBeInstanceOf(MorphMany::class);
         });
 
         test('provides current employment relationship', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
-            expect($model->currentEmployment())->toBeInstanceOf(HasOne::class);
+            expect($model->currentEmployment())->toBeInstanceOf(MorphOne::class);
         });
 
         test('provides future employment relationship', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
-            expect($model->futureEmployment())->toBeInstanceOf(HasOne::class);
+            expect($model->futureEmployment())->toBeInstanceOf(MorphOne::class);
         });
 
         test('provides previous employments relationship', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
-            expect($model->previousEmployments())->toBeInstanceOf(HasMany::class);
+            expect($model->previousEmployments())->toBeInstanceOf(MorphMany::class);
         });
 
         test('provides previous employment relationship', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
-            expect($model->previousEmployment())->toBeInstanceOf(HasOne::class);
+            expect($model->previousEmployment())->toBeInstanceOf(MorphOne::class);
         });
 
         test('provides first employment relationship', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
-            expect($model->firstEmployment())->toBeInstanceOf(HasOne::class);
+            expect($model->firstEmployment())->toBeInstanceOf(MorphOne::class);
         });
 
         test('employments relationship uses the correct related model', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
             $relation = $model->employments();
-            expect($relation)->toBeInstanceOf(HasMany::class);
-            expect($relation->getRelated())->toBeInstanceOf(FakeEmploymentModel::class);
+            expect($relation)->toBeInstanceOf(MorphMany::class);
+            expect($relation->getRelated())->toBeInstanceOf(Employment::class);
         });
 
         test('currentEmployment relationship uses the correct related model', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
             $relation = $model->currentEmployment();
-            expect($relation)->toBeInstanceOf(HasOne::class);
-            expect($relation->getRelated())->toBeInstanceOf(FakeEmploymentModel::class);
+            expect($relation)->toBeInstanceOf(MorphOne::class);
+            expect($relation->getRelated())->toBeInstanceOf(Employment::class);
         });
     });
 
@@ -244,25 +198,12 @@ describe('IsEmployable Trait Unit Tests', function () {
         });
     });
 
-    describe('employment model resolution', function () {
-        test('uses the model-specific employment resolver', function () {
-            $model = new FakeEmployableModel();
-
-            expect($model->employments()->getRelated())->toBeInstanceOf(FakeEmploymentModel::class);
-        });
-    });
-
     describe('employment relationship queries', function () {
         test('current employment query includes whereNull ended_at', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
             $relation = $model->currentEmployment();
             $wheres = $relation->getQuery()->getQuery()->wheres;
@@ -275,13 +216,8 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('future employment query includes whereNull ended_at and started_at > now', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
             $relation = $model->futureEmployment();
             $wheres = $relation->getQuery()->getQuery()->wheres;
@@ -298,13 +234,8 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('previous employments query includes whereNotNull ended_at', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
             $relation = $model->previousEmployments();
             $wheres = $relation->getQuery()->getQuery()->wheres;
@@ -317,16 +248,11 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('previous employment query includes ofMany constraint', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
             $relation = $model->previousEmployment();
-            expect($relation)->toBeInstanceOf(HasOne::class);
+            expect($relation)->toBeInstanceOf(MorphOne::class);
             // The ofMany constraint is applied internally by Laravel
             // We can verify the relationship type and that it's properly configured
         });
@@ -334,16 +260,11 @@ describe('IsEmployable Trait Unit Tests', function () {
         test('first employment query includes ofMany constraint', function () {
             $model = new class extends Model implements Employable
             {
-                /** @use IsEmployable<FakeEmploymentModel, self> */
+                /** @use IsEmployable<self> */
                 use IsEmployable;
-
-                public function resolveEmploymentModelClass(): string
-                {
-                    return FakeEmploymentModel::class;
-                }
             };
             $relation = $model->firstEmployment();
-            expect($relation)->toBeInstanceOf(HasOne::class);
+            expect($relation)->toBeInstanceOf(MorphOne::class);
             // The ofMany constraint is applied internally by Laravel
             // We can verify the relationship type and that it's properly configured
         });

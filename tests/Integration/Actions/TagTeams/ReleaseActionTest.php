@@ -24,8 +24,8 @@ test('it releases an employed tag team', function () {
         ->and($tagTeam->canBeReleased())->toBeFalse();
 
     // Verify employment record was ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -40,8 +40,8 @@ test('it releases tag team with specific release date', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Verify employment ended with specific date
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => $releaseDate->toDateTimeString(),
     ]);
 });
@@ -59,8 +59,8 @@ test('it releases suspended tag team', function () {
     expect($tagTeam->isSuspended())->toBeFalse();
 
     // Verify employment ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 
@@ -86,8 +86,8 @@ test('it persists the release lifecycle', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Verify records show proper dates
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -113,9 +113,9 @@ test('it handles database transactions correctly', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Verify original employment record was properly ended
-    $this->assertDatabaseHas('tag_teams_employments', [
+    $this->assertDatabaseHas('employments', [
         'id' => $originalEmploymentId,
-        'tag_team_id' => $tagTeam->id,
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -145,8 +145,8 @@ test('it uses DateHelper for consistent date handling', function () {
     $tagTeam->refresh();
 
     // Verify DateHelper was used for date resolution
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => $customReleaseDate->toDateTimeString(),
     ]);
 });
@@ -209,8 +209,8 @@ test('it handles release with cascade to partners and managers', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Verify employment record ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });
@@ -226,8 +226,8 @@ test('it ends all current relationships', function () {
     expect($tagTeam->isEmployed())->toBeFalse();
 
     // Employment should be ended
-    $this->assertDatabaseHas('tag_teams_employments', [
-        'tag_team_id' => $tagTeam->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $tagTeam->id,
         'ended_at' => now()->toDateTimeString(),
     ]);
 });

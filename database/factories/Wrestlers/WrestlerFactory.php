@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories\Wrestlers;
 
+use App\Models\Lifecycle\Employment;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerEmployment;
 use App\Models\Wrestlers\WrestlerInjury;
 use App\Models\Wrestlers\WrestlerRetirement;
 use App\Models\Wrestlers\WrestlerSuspension;
@@ -40,7 +40,7 @@ class WrestlerFactory extends Factory
      */
     public function employed(): static
     {
-        return $this->has(WrestlerEmployment::factory()->started(Carbon::yesterday()), 'employments');
+        return $this->has(Employment::factory()->started(Carbon::yesterday()), 'employments');
     }
 
     /**
@@ -56,7 +56,7 @@ class WrestlerFactory extends Factory
      */
     public function withFutureEmployment(): static
     {
-        return $this->has(WrestlerEmployment::factory()->started(Carbon::tomorrow()), 'employments');
+        return $this->has(Employment::factory()->started(Carbon::tomorrow()), 'employments');
     }
 
     /**
@@ -76,7 +76,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments')
+        return $this->has(Employment::factory()->started($start)->ended($end), 'employments')
             ->has(WrestlerRetirement::factory()->started($end), 'retirements');
     }
 
@@ -89,7 +89,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->has(WrestlerEmployment::factory()->started($start)->ended($end), 'employments');
+        return $this->has(Employment::factory()->started($start)->ended($end), 'employments');
     }
 
     /**
@@ -101,7 +101,7 @@ class WrestlerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->has(WrestlerEmployment::factory()->started($start), 'employments')
+        return $this->has(Employment::factory()->started($start), 'employments')
             ->has(WrestlerSuspension::factory()->started($end), 'suspensions');
     }
 
@@ -113,7 +113,7 @@ class WrestlerFactory extends Factory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->has(WrestlerEmployment::factory()->started($start), 'employments')
+        return $this->has(Employment::factory()->started($start), 'employments')
             ->has(WrestlerInjury::factory()->started($now), 'injuries');
     }
 

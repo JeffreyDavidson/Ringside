@@ -24,6 +24,7 @@ use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
+use App\Models\Lifecycle\Employment;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Referees\RefereeFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -38,7 +39,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
- * @implements Employable<RefereeEmployment, static>
+ * @implements Employable<static>
  * @implements Injurable<RefereeInjury, static>
  * @implements Retirable<RefereeRetirement, static>
  * @implements Suspendable<RefereeSuspension, static>
@@ -54,12 +55,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  *
- * @property-read RefereeEmployment|null $currentEmployment
- * @property-read RefereeEmployment|null $firstEmployment
- * @property-read RefereeEmployment|null $futureEmployment
- * @property-read RefereeEmployment|null $previousEmployment
- * @property-read Collection<int, RefereeEmployment> $employments
- * @property-read Collection<int, RefereeEmployment> $previousEmployments
+ * @property-read Employment|null $currentEmployment
+ * @property-read Employment|null $firstEmployment
+ * @property-read Employment|null $futureEmployment
+ * @property-read Employment|null $previousEmployment
+ * @property-read Collection<int, Employment> $employments
+ * @property-read Collection<int, Employment> $previousEmployments
  * @property-read RefereeInjury|null $currentInjury
  * @property-read RefereeInjury|null $previousInjury
  * @property-read Collection<int, RefereeInjury> $injuries
@@ -106,7 +107,7 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     /** @use HasFactory<RefereeFactory> */
     use HasFactory;
 
-    /** @use IsEmployable<RefereeEmployment, static> */
+    /** @use IsEmployable<static> */
     use IsEmployable;
 
     /** @use IsInjurable<RefereeInjury, static> */

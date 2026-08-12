@@ -23,8 +23,8 @@ test('it employs an unemployed wrestler', function () {
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => now()->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -39,8 +39,8 @@ test('it employs wrestler with specific employment date', function () {
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue();
 
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'started_at' => $employmentDate->toDateTimeString(),
         'ended_at' => null,
     ]);
@@ -90,13 +90,13 @@ test('it employs wrestler and also employs unemployed managers', function () {
     expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
-    $this->assertDatabaseHas('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => null,
     ]);
 
-    $this->assertDatabaseHas('managers_employments', [
-        'manager_id' => $manager1->id,
+    $this->assertDatabaseHas('employments', [
+        'employable_id' => $manager1->id,
         'ended_at' => null,
     ]);
 });
@@ -124,8 +124,8 @@ test('it rejects employing a retired wrestler without changing retirement', func
         ->and($wrestler->isRetired())->toBeTrue()
         ->and($retirement->ended_at)->toBeNull();
 
-    $this->assertDatabaseMissing('wrestlers_employments', [
-        'wrestler_id' => $wrestler->id,
+    $this->assertDatabaseMissing('employments', [
+        'employable_id' => $wrestler->id,
         'ended_at' => null,
     ]);
 });

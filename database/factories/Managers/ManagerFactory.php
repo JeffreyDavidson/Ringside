@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Managers;
 
-use App\Models\Managers\ManagerEmployment;
+use App\Models\Lifecycle\Employment;
 use App\Models\Managers\ManagerInjury;
 use App\Models\Managers\ManagerRetirement;
 use App\Models\Managers\ManagerSuspension;
@@ -32,12 +32,12 @@ class ManagerFactory extends Factory
 
     public function employed(): static
     {
-        return $this->has(ManagerEmployment::factory()->started(Carbon::yesterday()), 'employments');
+        return $this->has(Employment::factory()->started(Carbon::yesterday()), 'employments');
     }
 
     public function withFutureEmployment(): static
     {
-        return $this->has(ManagerEmployment::factory()->started(Carbon::tomorrow()), 'employments');
+        return $this->has(Employment::factory()->started(Carbon::tomorrow()), 'employments');
     }
 
     public function unemployed(): static
@@ -50,7 +50,7 @@ class ManagerFactory extends Factory
         $start = now()->subMonths();
         $end = now()->subDays(3);
 
-        return $this->has(ManagerEmployment::factory()->started($start)->ended($end), 'employments')
+        return $this->has(Employment::factory()->started($start)->ended($end), 'employments')
             ->has(ManagerRetirement::factory()->started($end), 'retirements');
     }
 
@@ -59,7 +59,7 @@ class ManagerFactory extends Factory
         $start = now()->subMonths();
         $end = now()->subDays(3);
 
-        return $this->has(ManagerEmployment::factory()->started($start)->ended($end), 'employments');
+        return $this->has(Employment::factory()->started($start)->ended($end), 'employments');
     }
 
     public function suspended(): static
@@ -68,7 +68,7 @@ class ManagerFactory extends Factory
         $start = $now->copy()->subDays(2);
         $end = $now->copy()->subDays();
 
-        return $this->has(ManagerEmployment::factory()->started($start), 'employments')
+        return $this->has(Employment::factory()->started($start), 'employments')
             ->has(ManagerSuspension::factory()->started($end), 'suspensions');
     }
 
@@ -77,7 +77,7 @@ class ManagerFactory extends Factory
         $now = now();
         $start = $now->copy()->subDays(2);
 
-        return $this->has(ManagerEmployment::factory()->started($start), 'employments')
+        return $this->has(Employment::factory()->started($start), 'employments')
             ->has(ManagerInjury::factory()->started($now), 'injuries');
     }
 
