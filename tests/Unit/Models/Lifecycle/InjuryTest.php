@@ -7,6 +7,12 @@ use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+
+test('it requires an explicit injurable owner', function () {
+    expect(fn () => Injury::factory()->create())
+        ->toThrow(QueryException::class);
+});
 
 test('it creates an injury for an explicit injurable owner', function (Closure $createInjurable) {
     /** @var Model $injurable */
