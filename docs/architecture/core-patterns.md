@@ -67,7 +67,7 @@
 - Method: `$this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors')`
 
 ### Officials (Referees)
-- Use `OfficiatesMatches` trait  
+- Define officiated match relationships directly on `Referee`, the sole official model
 - Relationship: Many-to-many direct through `events_matches_referees` table
 - Method: `$this->belongsToMany(EventMatch::class, 'events_matches_referees')`
 

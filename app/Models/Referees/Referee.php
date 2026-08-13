@@ -11,7 +11,6 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
@@ -29,9 +28,11 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -118,9 +119,22 @@ class Referee extends Model implements Employable, HasDisplayName, Injurable, Re
     /** @use IsSuspendable<static> */
     use IsSuspendable;
 
-    use OfficiatesMatches;
     use ProvidesDisplayName;
     use SoftDeletes;
+
+    /** @return BelongsToMany<EventMatch, $this> */
+    public function matches(): BelongsToMany
+    {
+        return $this->belongsToMany(EventMatch::class, 'events_matches_referees');
+    }
+
+    /** @return BelongsToMany<EventMatch, $this> */
+    public function previousMatches(): BelongsToMany
+    {
+        return $this->matches()->whereHas('event', function (Builder $eventQuery): void {
+            $eventQuery->where('date', '<', now());
+        });
+    }
 
     // full_name is handled by virtual column in database
 

@@ -8,7 +8,6 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
@@ -67,7 +66,6 @@ describe('Referee Model Unit Tests', function () {
     describe('trait integration', function () {
         test('uses all required traits', function () {
             expect(class_uses(Referee::class))->toContain(HasFactory::class);
-            expect(class_uses(Referee::class))->toContain(OfficiatesMatches::class);
             expect(class_uses(Referee::class))->toContain(IsEmployable::class);
             expect(class_uses(Referee::class))->toContain(IsInjurable::class);
             expect(class_uses(Referee::class))->toContain(IsRetirable::class);
