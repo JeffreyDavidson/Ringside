@@ -66,7 +66,7 @@ class MatchesTable extends DataTableComponent
             ArrayColumn::make(__('matches.competitors'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
                 ->outputFormat(function (int $index, MatchCompetitor $value): string {
-                    $competitor = $value->getCompetitor();
+                    $competitor = $value->competitor;
                     $type = str($competitor->getMorphClass())->kebab()->plural();
 
                     return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
