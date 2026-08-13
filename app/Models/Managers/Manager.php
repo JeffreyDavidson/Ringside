@@ -15,7 +15,6 @@ use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesIndividualDeletion;
-use App\Models\Concerns\ValidatesIndividualInjury;
 use App\Models\Concerns\ValidatesIndividualRestoration;
 use App\Models\Concerns\ValidatesIndividualRetirement;
 use App\Models\Concerns\ValidatesIndividualSuspension;
@@ -137,7 +136,6 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     use SoftDeletes;
     use ValidatesEmployment;
     use ValidatesIndividualDeletion;
-    use ValidatesIndividualInjury;
     use ValidatesIndividualRestoration;
     use ValidatesIndividualRetirement;
     use ValidatesIndividualSuspension;

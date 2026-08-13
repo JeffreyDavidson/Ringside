@@ -159,7 +159,7 @@ Suspension eligibility follows the same typed boundary. `ValidatesIndividualSusp
 
 Wrestler injury and suspension are mutually exclusive availability states. Both transition Actions acquire a lock on the wrestler and evaluate their opposing-state guard inside the same transaction that opens the new period. Concurrent injury and suspension requests therefore serialize on the wrestler instead of both validating stale state before either period is written.
 
-Individual injury eligibility is shared only by wrestlers, managers, and referees through `ValidatesIndividualInjury`. Injury and healing predicates delegate to the same typed guards used by their Actions, including employment, retirement, future employment, suspension, and current injury checks. The concern does not discover capabilities dynamically.
+Individual injury eligibility is shared only by wrestlers, managers, and referees through `IndividualInjuryEligibility`. Injury and healing predicates delegate to the same typed guards used by their Actions, including employment, retirement, future employment, suspension, and current injury checks. Each Action reloads and locks the individual inside its transaction before checking eligibility and changing the injury period.
 
 Wrestlers, managers, and referees persist injury history through the shared `App\Models\Lifecycle\Injury` model and its polymorphic `injurable` owner. `IsInjurable` exposes relationship-derived state predicates on each owner, while typed injury and healing Actions retain validation, locking, transaction, and transition responsibilities. The database permits historical periods but enforces at most one open injury per owner.
 

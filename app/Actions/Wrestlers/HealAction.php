@@ -6,14 +6,19 @@ namespace App\Actions\Wrestlers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HealAction
 {
-    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+    public function __construct(
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly IndividualInjuryEligibility $eligibility,
+    ) {}
 
     /**
      * Heal a wrestler from injury.
@@ -26,11 +31,14 @@ class HealAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
-        $wrestler->ensureCanBeHealed();
-
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
-        $this->injuryPeriods->end($wrestler, $recoveryDate, LifecycleTransitionType::Healed);
+        DB::transaction(function () use ($wrestler, $recoveryDate): void {
+            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $this->eligibility->ensureCanHeal($lockedWrestler);
+
+            $this->injuryPeriods->end($lockedWrestler, $recoveryDate, LifecycleTransitionType::Healed);
+        });
 
         // Note: Tag team bookability is handled automatically by the isBookable() method
         // which checks if all current wrestlers are available for competition
