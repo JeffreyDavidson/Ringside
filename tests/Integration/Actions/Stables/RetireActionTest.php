@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Stables\RetireAction;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
+use App\Lifecycle\StableRetirementEligibility;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
 use App\Models\Stables\StableWrestler;
@@ -155,7 +156,7 @@ test('it retires the current tag teams and current wrestlers of a stable', funct
 test('it throws exception trying to retire a non retirable stable', function ($factoryState) {
     $stable = Stable::factory()->{$factoryState}()->create();
 
-    expect($stable->canBeRetired())->toBeFalse()
+    expect(resolve(StableRetirementEligibility::class)->canRetire($stable))->toBeFalse()
         ->and(fn () => resolve(RetireAction::class)->handle($stable))
         ->toThrow(CannotBeRetiredException::class);
 })->with([
@@ -168,7 +169,7 @@ test('it rejects a deleted stable', function () {
     $stable = Stable::factory()->inactive()->create();
     $stable->delete();
 
-    expect($stable->canBeRetired())->toBeFalse()
+    expect(resolve(StableRetirementEligibility::class)->canRetire($stable))->toBeFalse()
         ->and(fn () => resolve(RetireAction::class)->handle($stable))
         ->toThrow(CannotBeRetiredException::class);
 });

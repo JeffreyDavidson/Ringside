@@ -12,6 +12,7 @@ use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\StableRetirementEligibility;
 use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -29,6 +30,7 @@ class RetireAction
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected RetirementPeriodManager $retirementPeriods,
         protected IndividualRetirementEligibility $individualRetirementEligibility,
+        protected StableRetirementEligibility $eligibility,
         protected TagTeamRetirementEligibility $tagTeamRetirementEligibility,
     ) {}
 
@@ -59,7 +61,7 @@ class RetireAction
                 ->lockForUpdate()
                 ->findOrFail($stable->getKey());
 
-            $lockedStable->ensureCanBeRetired();
+            $this->eligibility->ensureCanRetire($lockedStable);
 
             if ($lockedStable->isCurrentlyActive()) {
                 $this->endActivityPeriodAction->handle($lockedStable, $operationalDate);

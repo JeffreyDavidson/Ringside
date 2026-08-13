@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\StableDeletionEligibility;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly StableDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted stable.
@@ -24,8 +28,13 @@ class RestoreAction
     public function handle(Stable $stable): void
     {
         DB::transaction(function () use ($stable): void {
-            $stable->ensureCanBeRestored();
-            $this->deletionState->restore($stable, now());
+            $lockedStable = Stable::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($stable->getKey());
+
+            $this->eligibility->ensureCanRestore($lockedStable);
+            $this->deletionState->restore($lockedStable, now());
         });
     }
 }

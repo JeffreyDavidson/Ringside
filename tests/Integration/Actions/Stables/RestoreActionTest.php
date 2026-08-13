@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stables\RestoreAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
+use App\Lifecycle\StableDeletionEligibility;
 use App\Models\Stables\Stable;
 
 test('it restores a stable without former members', function () {
@@ -33,7 +34,7 @@ test('it preserves historical activity without reuniting the stable', function (
 test('it rejects a stable that is not deleted', function () {
     $stable = Stable::factory()->create();
 
-    expect($stable->canBeRestored())->toBeFalse()
+    expect(resolve(StableDeletionEligibility::class)->canRestore($stable))->toBeFalse()
         ->and(fn () => resolve(RestoreAction::class)->handle($stable))
         ->toThrow(CannotBeRestoredException::class);
 });
@@ -43,7 +44,7 @@ test('it rejects an active stable with the same name', function () {
     $stable->delete();
     Stable::factory()->active()->create(['name' => $stable->name]);
 
-    expect($stable->canBeRestored())->toBeFalse()
+    expect(resolve(StableDeletionEligibility::class)->canRestore($stable))->toBeFalse()
         ->and(fn () => resolve(RestoreAction::class)->handle($stable))
         ->toThrow(CannotBeRestoredException::class);
 });

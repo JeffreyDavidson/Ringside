@@ -28,6 +28,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Rules/** | .ai/rules/rules.md |
 | app/Exceptions/Scheduling/** | .ai/rules/scheduling.md |
 | app/Services/** | .ai/rules/services.md |
+| app/{Actions/Stables/**,Lifecycle/Stable*Eligibility.php} | .ai/rules/stables.md |
 | app/{Actions,Lifecycle}/TagTeams/** | .ai/rules/tag-teams.md |
 | tests/** | .ai/rules/tests.md |
 | tests/Unit/** | .ai/rules/unit.md |

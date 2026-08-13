@@ -14,6 +14,7 @@ use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
+use App\Lifecycle\StableRetirementEligibility;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -293,18 +294,18 @@ describe('Stable Activation Action Integration', function () {
                 ->has(Retirement::factory()->started(now()->subDay()), 'retirements')
                 ->create();
 
-            expect($stable->canBeUnretired())->toBeFalse()
-                ->and($stable->canBeUnretired(requireFormerMembers: false))->toBeTrue()
-                ->and(fn () => $stable->ensureCanBeUnretired())
+            expect(resolve(StableRetirementEligibility::class)->canUnretire($stable))->toBeFalse()
+                ->and(resolve(StableRetirementEligibility::class)->canUnretire($stable, requireFormerMembers: false))->toBeTrue()
+                ->and(fn () => resolve(StableRetirementEligibility::class)->ensureCanUnretire($stable))
                 ->toThrow(CannotBeUnretiredException::class)
-                ->and(fn () => $stable->ensureCanBeUnretired(requireFormerMembers: false))
+                ->and(fn () => resolve(StableRetirementEligibility::class)->ensureCanUnretire($stable, requireFormerMembers: false))
                 ->not->toThrow(CannotBeUnretiredException::class);
         });
 
         test('unretire action rejects a deleted stable', function () {
             $this->retiredStable->delete();
 
-            expect($this->retiredStable->canBeUnretired())->toBeFalse()
+            expect(resolve(StableRetirementEligibility::class)->canUnretire($this->retiredStable))->toBeFalse()
                 ->and(fn () => resolve(UnretireAction::class)->handle($this->retiredStable))
                 ->toThrow(
                     CannotBeUnretiredException::class,

@@ -9,6 +9,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\StableRetirementEligibility;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,7 @@ class UnretireAction
     public function __construct(
         protected StartActivityPeriodAction $startActivityPeriodAction,
         protected RetirementPeriodManager $retirementPeriods,
+        protected StableRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -55,7 +57,7 @@ class UnretireAction
                 ->lockForUpdate()
                 ->findOrFail($stable->getKey());
 
-            $lockedStable->ensureCanBeUnretired($requireFormerMembers);
+            $this->eligibility->ensureCanUnretire($lockedStable, $requireFormerMembers);
             $this->retirementPeriods->end($lockedStable, $unretiredDate, LifecycleTransitionType::Unretired);
 
             $lockedStable->update(['status' => StableStatus::Inactive]);

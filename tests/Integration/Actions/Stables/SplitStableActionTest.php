@@ -7,6 +7,7 @@ use App\Actions\Stables\SplitStableAction;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\StableRestructuringEligibility;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
 use App\Models\Stables\StableWrestler;
@@ -461,6 +462,7 @@ describe('SplitStableAction Integration Tests', function () {
             $action = new SplitStableAction(
                 $createAction,
                 resolve(StableMembershipService::class),
+                resolve(StableRestructuringEligibility::class),
             );
 
             expect(fn () => $action->handle(

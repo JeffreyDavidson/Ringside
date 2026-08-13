@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
+use App\Lifecycle\StableRestructuringEligibility;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
@@ -20,6 +21,7 @@ class SplitStableAction
     public function __construct(
         protected CreateAction $createAction,
         protected StableMembershipService $membershipService,
+        protected StableRestructuringEligibility $eligibility,
     ) {}
 
     /**
@@ -46,7 +48,7 @@ class SplitStableAction
                 ->lockForUpdate()
                 ->findOrFail($originalStable->getKey());
 
-            $lockedStable->ensureCanBeSplit();
+            $this->eligibility->ensureCanSplit($lockedStable);
 
             $this->validateSplitMembers($lockedStable, $membersForNewStable);
 
