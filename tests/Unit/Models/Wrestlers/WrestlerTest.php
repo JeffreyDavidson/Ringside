@@ -7,7 +7,6 @@ use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\HasStableMemberships;
@@ -17,7 +16,6 @@ use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\CanBeAStableMember;
-use App\Models\Contracts\CanBeATagTeamMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
@@ -88,7 +86,6 @@ describe('Wrestler Model Unit Tests', function () {
             expect(class_uses(Wrestler::class))->toContain(BelongsToUser::class);
             expect(class_uses(Wrestler::class))->toContain(CanBeManaged::class);
             expect(class_uses(Wrestler::class))->toContain(HasStableMemberships::class);
-            expect(class_uses(Wrestler::class))->toContain(CanJoinTagTeams::class);
             expect(class_uses(Wrestler::class))->toContain(CanWinTitles::class);
             expect(class_uses(Wrestler::class))->toContain(HasFactory::class);
             expect(class_uses(Wrestler::class))->toContain(HasMatchParticipations::class);
@@ -106,7 +103,6 @@ describe('Wrestler Model Unit Tests', function () {
             $interfaces = class_implements(Wrestler::class);
 
             expect($interfaces)->toContain(CanBeAStableMember::class);
-            expect($interfaces)->toContain(CanBeATagTeamMember::class);
             expect($interfaces)->toContain(CanBeChampion::class);
             expect($interfaces)->toContain(Employable::class);
             expect($interfaces)->toContain(HasDisplayName::class);

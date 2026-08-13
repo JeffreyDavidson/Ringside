@@ -1076,6 +1076,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             // Relationship trait methods (common patterns)
             'managers', 'currentManagers', 'previousManagers', 'fakeManagerPivotModel',
             'stables', 'currentStable', 'previousStables',
+            'tagTeams', 'currentTagTeam', 'previousTagTeam', 'previousTagTeams',
             'titleChampionships', 'currentChampionships', 'currentChampionship', 'previousTitleChampionships', 'isChampion',
             'matches', 'previousMatches',
             'wrestlers', 'currentWrestlers', 'previousWrestlers', 'combinedWeight',

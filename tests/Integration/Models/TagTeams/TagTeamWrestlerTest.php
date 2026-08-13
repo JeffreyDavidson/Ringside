@@ -14,8 +14,8 @@ use Illuminate\Support\Carbon;
  * partnerships including joining teams, leaving teams, querying current
  * and previous tag teams, and ensuring proper business rule enforcement.
  *
- * Tests cover the CanJoinTagTeams trait implementation and TagTeamWrestler
- * pivot model functionality with real database relationships.
+ * Tests cover Wrestler's tag team membership relationships and the
+ * TagTeamWrestler pivot model with real database records.
  *
  * @see TagTeamWrestler
  */
