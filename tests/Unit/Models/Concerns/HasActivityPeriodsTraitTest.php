@@ -266,19 +266,19 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
     });
 
     describe('utility methods', function () {
-        test('getFormattedFirstActivity returns TBD when no periods exist', function () {
+        test('first activity period is absent when no periods exist', function () {
             $model = $this->model;
-            expect($model->getFormattedFirstActivity())->toBe('TBD');
+            expect($model->firstActivityPeriod)->toBeNull();
         });
 
-        test('getFormattedFirstActivity returns formatted date when periods exist', function () {
+        test('first activity period exposes its start date', function () {
             $model = $this->model;
             $startDate = Carbon::parse('2024-01-15');
             ActivityPeriod::factory()->for($model, 'activeable')->create([
                 'started_at' => $startDate,
                 'ended_at' => null,
             ]);
-            expect($model->getFormattedFirstActivity())->toBe('2024-01-15');
+            expect($model->firstActivityPeriod?->started_at?->toDateString())->toBe('2024-01-15');
         });
     });
 

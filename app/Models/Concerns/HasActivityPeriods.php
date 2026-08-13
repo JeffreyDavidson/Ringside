@@ -174,22 +174,6 @@ trait HasActivityPeriods
         return $this->futureActivityPeriod()->exists();
     }
 
-    /**
-     * Get the formatted start date of the first activity period.
-     *
-     * Returns 'TBD' if no activity periods exist or the date is unavailable.
-     */
-    public function getFormattedFirstActivity(): string
-    {
-        if (! $this->hasActivityPeriods()) {
-            return 'TBD';
-        }
-
-        $firstPeriod = $this->firstActivityPeriod;
-
-        return $firstPeriod?->started_at?->format('Y-m-d') ?? 'TBD';
-    }
-
     protected function getActivityPeriodTableName(): string
     {
         return (new ActivityPeriod())->getTable();

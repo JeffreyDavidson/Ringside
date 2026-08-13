@@ -13,6 +13,6 @@ class FirstActivityPeriodColumn extends Column
     public function __construct(string $title, ?string $from = null)
     {
         parent::__construct($title, $from);
-        $this->label(fn (Stable|Title $row, Column $column): string => $row->getFormattedFirstActivity());
+        $this->label(fn (Stable|Title $row, Column $column): string => $row->firstActivityPeriod?->started_at?->format('Y-m-d') ?? 'TBD');
     }
 }

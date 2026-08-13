@@ -107,11 +107,6 @@ class User extends Authenticatable
         return $this->role === Role::Administrator;
     }
 
-    public function getAvatar(): string
-    {
-        return $this->avatar_path ?? 'blank.png';
-    }
-
     /**
      * Get all wrestlers owned by this user.
      *

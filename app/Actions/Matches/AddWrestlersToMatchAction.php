@@ -6,6 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Wrestlers\Wrestler;
 use App\Services\MatchAssignmentConflictService;
@@ -86,7 +87,7 @@ class AddWrestlersToMatchAction
     private function isWrestlerEligibleForMatch(Wrestler $wrestler, EventMatch $eventMatch): bool
     {
         // Basic availability checks - wrestler must be active and available
-        if (! $wrestler->isBookable()) {
+        if (! RosterBookingEligibility::allows($wrestler)) {
             return false;
         }
 

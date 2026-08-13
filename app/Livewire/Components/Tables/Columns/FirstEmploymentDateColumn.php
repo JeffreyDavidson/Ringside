@@ -15,6 +15,6 @@ class FirstEmploymentDateColumn extends Column
     public function __construct(string $title, ?string $from = null)
     {
         parent::__construct($title, $from);
-        $this->label(fn (Wrestler|TagTeam|Manager|Referee $row, Column $column): string => $row->getFormattedFirstEmployment());
+        $this->label(fn (Wrestler|TagTeam|Manager|Referee $row, Column $column): string => $row->firstEmployment?->started_at?->format('Y-m-d') ?? 'TBD');
     }
 }

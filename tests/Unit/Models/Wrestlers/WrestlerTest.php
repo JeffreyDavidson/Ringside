@@ -17,7 +17,6 @@ use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
-use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeATagTeamMember;
 use App\Models\Contracts\CanBeChampion;
@@ -108,7 +107,6 @@ describe('Wrestler Model Unit Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Wrestler::class);
 
-            expect($interfaces)->toContain(Bookable::class);
             expect($interfaces)->toContain(CanBeAStableMember::class);
             expect($interfaces)->toContain(CanBeATagTeamMember::class);
             expect($interfaces)->toContain(CanBeChampion::class);

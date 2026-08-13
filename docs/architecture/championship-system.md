@@ -6,6 +6,8 @@ Title matches and championship validation rules.
 
 The championship system manages title matches and ensures proper competitor validation.
 
+`Title` owns only the championship relationships. Current, previous, first, longest, vacancy, and reign-count reporting is provided by `TitleChampionshipQuery`, keeping reporting queries and in-memory summaries outside the Eloquent model.
+
 ## Title Type Matching
 
 ### Championship Rules

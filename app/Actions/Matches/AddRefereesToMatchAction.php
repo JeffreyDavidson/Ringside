@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Services\MatchAssignmentConflictService;
@@ -77,7 +78,7 @@ class AddRefereesToMatchAction
     private function isRefereeEligibleForMatch(Referee $referee, EventMatch $eventMatch): bool
     {
         // Basic availability checks - referee must be active and available
-        if (! $referee->isBookable()) {
+        if (! RosterBookingEligibility::allows($referee)) {
             return false;
         }
 

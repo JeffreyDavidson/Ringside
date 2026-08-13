@@ -40,7 +40,6 @@ class HealAction
             $this->injuryPeriods->end($lockedWrestler, $recoveryDate, LifecycleTransitionType::Healed);
         });
 
-        // Note: Tag team bookability is handled automatically by the isBookable() method
         // which checks if all current wrestlers are available for competition
     }
 }

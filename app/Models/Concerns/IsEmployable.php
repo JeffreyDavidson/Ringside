@@ -387,30 +387,6 @@ trait IsEmployable
     }
 
     /**
-     * Get the formatted start date of the first employment.
-     *
-     * Returns 'TBD' if no employment exists or the date is unavailable.
-     *
-     * @return string The formatted date (Y-m-d) or 'TBD'
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     * echo $wrestler->getFormattedFirstEmployment(); // "2024-01-15" or "TBD"
-     * ```
-     */
-    public function getFormattedFirstEmployment(): string
-    {
-        if (! $this->hasEmployments()) {
-            return 'TBD';
-        }
-
-        $firstEmployment = $this->firstEmployment;
-
-        return $firstEmployment?->started_at?->format('Y-m-d') ?? 'TBD';
-    }
-
-    /**
      * Check if the entity has any employment history records.
      *
      * This method determines whether the entity has ever been employed

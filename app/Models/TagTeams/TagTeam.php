@@ -9,12 +9,12 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanWinTitles;
+use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesTagTeamWrestlers;
-use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
@@ -36,7 +36,6 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -122,7 +121,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(TagTeamFactory::class)]
 #[UseEloquentBuilder(TagTeamBuilder::class)]
-class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, SoftDeletable, Suspendable
+class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, SoftDeletable, Suspendable
 {
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;
@@ -132,6 +131,8 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
 
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
+
+    use HasComputedEmploymentStatus;
 
     /** @use HasFactory<TagTeamFactory> */
     use HasFactory;
@@ -156,70 +157,4 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
      * The number of the wrestlers allowed on a tag team.
      */
     public const int NUMBER_OF_WRESTLERS_ON_TEAM = 2;
-
-    /**
-     * Get the computed status attribute.
-     *
-     * Computes the employment status based on the tag team's current relationships:
-     * - Retired: Has active retirement record
-     * - Employed: Has active employment (started <= now)
-     * - FutureEmployment: Has employment starting in future
-     * - Released: Has previous employment but no current employment
-     * - Unemployed: No employment history
-     *
-     * @return Attribute<EmploymentStatus, never>
-     */
-    protected function status(): Attribute
-    {
-        return Attribute::make(
-            get: function (): EmploymentStatus {
-                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
-                if ($this->isRetired()) {
-                    return EmploymentStatus::Retired;
-                }
-
-                if ($this->currentEmployment) {
-                    return EmploymentStatus::Employed;
-                }
-
-                if ($this->futureEmployment) {
-                    return EmploymentStatus::FutureEmployment;
-                }
-
-                if ($this->previousEmployments()->exists()) {
-                    return EmploymentStatus::Released;
-                }
-
-                return EmploymentStatus::Unemployed;
-            }
-        );
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            // Status is computed attribute that already returns EmploymentStatus enum
-        ];
-    }
-
-    /**
-     * Check to see if the model is bookable.
-     */
-    public function isBookable(): bool
-    {
-        return $this->currentWrestlers->every(fn (Wrestler $wrestler) => $wrestler->isBookable());
-    }
-
-    /**
-     * Check to see if the tag team is unbookable.
-     */
-    public function isUnbookable(): bool
-    {
-        return ! $this->currentWrestlers->every(fn (Wrestler $wrestler): bool => $wrestler->isBookable());
-    }
 }

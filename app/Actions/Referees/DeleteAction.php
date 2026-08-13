@@ -6,6 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,7 @@ class DeleteAction
     public function __construct(
         private readonly DeletionPeriodCloser $periods,
         private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -42,7 +44,7 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        $referee->ensureCanBeDeleted();
+        $this->eligibility->ensureCanDelete($referee);
 
         $deletionDate = DateHelper::resolveDate($deletionDate);
 

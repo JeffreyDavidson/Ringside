@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -12,7 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted wrestler record.
@@ -29,7 +33,7 @@ class RestoreAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $restoreDate = null): void
     {
-        $wrestler->ensureCanBeRestored();
+        $this->eligibility->ensureCanRestore($wrestler);
 
         $restoreDate = DateHelper::resolveDate($restoreDate);
 

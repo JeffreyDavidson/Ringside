@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
@@ -52,7 +53,7 @@ function expectToBeBookable(Wrestler|Referee|TagTeam $entity): void
 {
     $entity = freshModel($entity);
     expect($entity->isEmployed())->toBeTrue();
-    expect($entity->isBookable())->toBeTrue();
+    expect(RosterBookingEligibility::allows($entity))->toBeTrue();
     expect($entity->isNotInEmployment())->toBeFalse();
 }
 
@@ -62,7 +63,7 @@ function expectToBeBookable(Wrestler|Referee|TagTeam $entity): void
 function expectToBeUnavailable(Wrestler|Referee|TagTeam $entity): void
 {
     $entity = freshModel($entity);
-    expect($entity->isBookable())->toBeFalse();
+    expect(RosterBookingEligibility::allows($entity))->toBeFalse();
 }
 
 /**

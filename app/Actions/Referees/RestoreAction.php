@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted referee.
@@ -26,7 +30,7 @@ class RestoreAction
      */
     public function handle(Referee $referee): void
     {
-        $referee->ensureCanBeRestored();
+        $this->eligibility->ensureCanRestore($referee);
 
         DB::transaction(function () use ($referee): void {
             $this->deletionState->restore($referee, now());

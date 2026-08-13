@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Managers\Manager;
 use App\Services\ManagerAssignmentService;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ class RestoreAction
     public function __construct(
         private readonly ManagerAssignmentService $managerAssignments,
         private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -30,7 +32,7 @@ class RestoreAction
      */
     public function handle(Manager $manager): void
     {
-        $manager->ensureCanBeRestored();
+        $this->eligibility->ensureCanRestore($manager);
 
         DB::transaction(function () use ($manager): void {
             $restorationDate = now();

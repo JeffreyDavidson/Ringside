@@ -1084,7 +1084,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'employments', 'currentEmployment', 'futureEmployment', 'previousEmployments', 'previousEmployment',
             'firstEmployment', 'hasEmployments', 'isEmployed', 'isCurrentlyEmployed', 'hasFutureEmployment',
             'isNotInEmployment', 'isReleased', 'employmentStartedOn', 'employmentStartedBefore',
-            'getFormattedFirstEmployment', 'hasEmploymentHistory', 'hasStatus',
+            'hasEmploymentHistory', 'hasStatus',
             'hasAnyStatus', 'doesNotHaveStatus', 'hasNoneOfStatuses',
 
             // Retirement trait methods

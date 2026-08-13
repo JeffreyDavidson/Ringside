@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Wrestlers;
 
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Wrestlers\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -15,7 +16,7 @@ class IsBookable implements ValidationRule
         /** @var Wrestler|null $wrestler */
         $wrestler = Wrestler::find($value);
 
-        if (! $wrestler || ! $wrestler->isBookable()) {
+        if (! $wrestler || ! RosterBookingEligibility::allows($wrestler)) {
             $fail('This wrestler is not available for booking.');
         }
     }

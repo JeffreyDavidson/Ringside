@@ -42,6 +42,10 @@ Match assignments observe these collision rules:
 
 Assignment actions lock the affected event rows and enforce these rules inside their database transactions. This serializes assignment commands that use the application boundary. The schema cannot enforce overlapping match windows because individual matches do not currently have their own start and end times.
 
+Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by Eloquent models. The policy combines persisted employment, injury, suspension, future-employment, and tag-team membership state. Models expose those relationships and state predicates; validation rules, assignment Actions, and collections invoke the policy when deciding whether a participant may be booked.
+
+`MatchStipulation` is a persistence record containing its configured name, slug, description, active flag, and match relationship. Stipulation capabilities and match presentation must be implemented by the match domain when they are enforced; the model does not infer behavior from hard-coded slug lists.
+
 ## Winner/Loser System
 
 ### Multiple Winners and Losers

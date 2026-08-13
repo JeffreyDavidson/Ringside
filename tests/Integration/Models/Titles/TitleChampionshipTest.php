@@ -6,6 +6,7 @@ use App\Actions\Titles\RetireAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -484,7 +485,7 @@ describe('TitleChampionship Model', function () {
             $refreshedWrestler = freshModel($this->wrestler);
 
             expect($refreshedWrestler->isInjured())->toBeTrue();
-            expect($refreshedWrestler->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Injured champion may keep title or be stripped depending on promotion rules
             // For this test, assume they keep the title but can't defend it
@@ -506,7 +507,7 @@ describe('TitleChampionship Model', function () {
             $refreshedWrestler = freshModel($this->wrestler);
 
             expect($refreshedWrestler->isReleased())->toBeTrue();
-            expect($refreshedWrestler->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Released wrestler should be stripped of championship
             $championship->refresh();

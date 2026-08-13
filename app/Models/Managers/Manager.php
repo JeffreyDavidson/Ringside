@@ -8,13 +8,12 @@ use Ankurk91\Eloquent\HasBelongsToOne;
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\DefinesManagedAliases;
+use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
-use App\Models\Concerns\ValidatesIndividualDeletion;
-use App\Models\Concerns\ValidatesIndividualRestoration;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
@@ -32,7 +31,6 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -113,6 +111,7 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
 {
     use DefinesManagedAliases;
     use HasBelongsToOne;
+    use HasComputedEmploymentStatus;
 
     /** @use HasFactory<ManagerFactory> */
     use HasFactory;
@@ -131,44 +130,4 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
 
     use ProvidesDisplayName;
     use SoftDeletes;
-    use ValidatesIndividualDeletion;
-    use ValidatesIndividualRestoration;
-
-    /**
-     * Get the computed status attribute.
-     *
-     * Computes the employment status based on the manager's current relationships:
-     * - Retired: Has active retirement record
-     * - Employed: Has active employment (started <= now)
-     * - FutureEmployment: Has employment starting in future
-     * - Released: Has previous employment but no current employment
-     * - Unemployed: No employment history
-     *
-     * @return Attribute<EmploymentStatus, never>
-     */
-    protected function status(): Attribute
-    {
-        return Attribute::make(
-            get: function (): EmploymentStatus {
-                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
-                if ($this->isRetired()) {
-                    return EmploymentStatus::Retired;
-                }
-
-                if ($this->currentEmployment) {
-                    return EmploymentStatus::Employed;
-                }
-
-                if ($this->futureEmployment) {
-                    return EmploymentStatus::FutureEmployment;
-                }
-
-                if ($this->previousEmployments()->exists()) {
-                    return EmploymentStatus::Released;
-                }
-
-                return EmploymentStatus::Unemployed;
-            }
-        );
-    }
 }
