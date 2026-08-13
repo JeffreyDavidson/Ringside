@@ -7,8 +7,8 @@ namespace App\Models\Contracts;
 interface SoftDeletable
 {
     /** @return bool|null */
-    public function delete();
+    public function delete(); // @pest-ignore-type
 
     /** @return bool */
-    public function restore();
+    public function restore(); // @pest-ignore-type
 }
