@@ -7,6 +7,7 @@ namespace App\Actions\Referees;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
@@ -18,6 +19,7 @@ class UnretireAction
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -36,13 +38,13 @@ class UnretireAction
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
-        $referee->ensureCanBeUnretired();
-
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
-            $this->retirementPeriods->end($referee, $unretiredDate, LifecycleTransitionType::Unretired);
-            $this->employmentPeriods->start($referee, $unretiredDate, LifecycleTransitionType::Employed);
+            $lockedReferee = Referee::query()->withTrashed()->lockForUpdate()->findOrFail($referee->getKey());
+            $this->eligibility->ensureCanUnretire($lockedReferee);
+            $this->retirementPeriods->end($lockedReferee, $unretiredDate, LifecycleTransitionType::Unretired);
+            $this->employmentPeriods->start($lockedReferee, $unretiredDate, LifecycleTransitionType::Employed);
         });
     }
 }

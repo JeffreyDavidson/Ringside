@@ -16,7 +16,6 @@ use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesIndividualDeletion;
 use App\Models\Concerns\ValidatesIndividualRestoration;
-use App\Models\Concerns\ValidatesIndividualRetirement;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
@@ -136,7 +135,6 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     use ValidatesEmployment;
     use ValidatesIndividualDeletion;
     use ValidatesIndividualRestoration;
-    use ValidatesIndividualRetirement;
 
     /**
      * Get the computed status attribute.

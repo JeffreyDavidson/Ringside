@@ -7,6 +7,7 @@ namespace App\Actions\Managers;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
@@ -23,6 +24,7 @@ class RetireAction
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly IndividualRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -42,23 +44,24 @@ class RetireAction
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void
     {
-        $manager->ensureCanBeRetired();
-
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($manager, $retirementDate): void {
-            if ($manager->isEmployed()) {
-                $this->employmentPeriods->end($manager, $retirementDate);
+            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $this->eligibility->ensureCanRetire($lockedManager);
+
+            if ($lockedManager->isEmployed()) {
+                $this->employmentPeriods->end($lockedManager, $retirementDate);
             }
 
-            if ($manager->isSuspended()) {
-                $this->suspensionPeriods->end($manager, $retirementDate);
-            } elseif ($manager->isInjured()) {
-                $this->injuryPeriods->end($manager, $retirementDate);
+            if ($lockedManager->isSuspended()) {
+                $this->suspensionPeriods->end($lockedManager, $retirementDate);
+            } elseif ($lockedManager->isInjured()) {
+                $this->injuryPeriods->end($lockedManager, $retirementDate);
             }
 
-            $this->retirementPeriods->start($manager, $retirementDate, LifecycleTransitionType::Retired);
-            $this->endCurrentRelationships->handle($manager, $retirementDate);
+            $this->retirementPeriods->start($lockedManager, $retirementDate, LifecycleTransitionType::Retired);
+            $this->endCurrentRelationships->handle($lockedManager, $retirementDate);
         });
     }
 }
