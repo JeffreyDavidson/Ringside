@@ -45,52 +45,6 @@ readonly class StableMembershipData
     }
 
     /**
-     * Filter members to only include employed/available ones.
-     */
-    public function filterEmployedMembers(): self
-    {
-        $employedWrestlers = $this->wrestlers?->filter(fn (Wrestler $wrestler) => $wrestler->isEmployed());
-        $employedTagTeams = $this->tagTeams?->filter(fn (TagTeam $tagTeam) => $tagTeam->isEmployed());
-
-        return new self(
-            wrestlers: $employedWrestlers?->isNotEmpty() ? $employedWrestlers : null,
-            tagTeams: $employedTagTeams?->isNotEmpty() ? $employedTagTeams : null
-        );
-    }
-
-    /**
-     * Get wrestlers that need to be retired (not already retired).
-     */
-    public function getWrestlersToRetire(): ?Collection
-    {
-        return $this->wrestlers?->filter(fn (Wrestler $wrestler) => ! $wrestler->isRetired());
-    }
-
-    /**
-     * Get tag teams that need to be retired (not already retired).
-     */
-    public function getTagTeamsToRetire(): ?Collection
-    {
-        return $this->tagTeams?->filter(fn (TagTeam $tagTeam) => ! $tagTeam->isRetired());
-    }
-
-    /**
-     * Get wrestlers that can be unretired (currently retired).
-     */
-    public function getWrestlersToUnretire(): ?Collection
-    {
-        return $this->wrestlers?->filter(fn (Wrestler $wrestler) => $wrestler->isRetired());
-    }
-
-    /**
-     * Get tag teams that can be unretired (currently retired).
-     */
-    public function getTagTeamsToUnretire(): ?Collection
-    {
-        return $this->tagTeams?->filter(fn (TagTeam $tagTeam) => $tagTeam->isRetired());
-    }
-
-    /**
      * Get the stable headcount, counting wrestlers as one and tag teams as two.
      */
     public function getTotalMemberCount(): int
@@ -99,44 +53,5 @@ readonly class StableMembershipData
         $tagTeamCount = $this->tagTeams?->count() ?? 0;
 
         return $wrestlerCount + ($tagTeamCount * 2);
-    }
-
-    /**
-     * Get the names of members that cannot join a stable now.
-     *
-     * @return array<int, string>
-     */
-    public function getUnavailableMemberNames(): array
-    {
-        $unavailableWrestlers = $this->wrestlers?->filter(
-            fn (Wrestler $wrestler): bool => ! $wrestler->isEmployed()
-                || $wrestler->isSuspended()
-                || $wrestler->isInjured()
-                || $wrestler->isRetired()
-        )->pluck('name')->all() ?? [];
-
-        $unavailableTagTeams = $this->tagTeams?->filter(
-            fn (TagTeam $tagTeam): bool => ! $tagTeam->isEmployed()
-                || $tagTeam->isSuspended()
-                || $tagTeam->isRetired()
-        )->pluck('name')->all() ?? [];
-
-        return [...$unavailableWrestlers, ...$unavailableTagTeams];
-    }
-
-    /**
-     * Check if membership contains any wrestlers.
-     */
-    public function hasWrestlers(): bool
-    {
-        return $this->wrestlers !== null && $this->wrestlers->isNotEmpty();
-    }
-
-    /**
-     * Check if membership contains any tag teams.
-     */
-    public function hasTagTeams(): bool
-    {
-        return $this->tagTeams !== null && $this->tagTeams->isNotEmpty();
     }
 }

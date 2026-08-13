@@ -19,30 +19,6 @@ parameters:
 			path: app/Collections/MatchCompetitorsCollection.php
 
 		-
-			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getTagTeamsToRetire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Data/Stables/StableMembershipData.php
-
-		-
-			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getTagTeamsToUnretire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Data/Stables/StableMembershipData.php
-
-		-
-			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getWrestlersToRetire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Data/Stables/StableMembershipData.php
-
-		-
-			message: '#^Method App\\Data\\Stables\\StableMembershipData\:\:getWrestlersToUnretire\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types\: TKey, TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Data/Stables/StableMembershipData.php
-
-		-
 			message: '#^Parameter \#3 \$managers of static method App\\Data\\TagTeams\\TagTeamMembershipData\:\:fromWrestlers\(\) expects Illuminate\\Database\\Eloquent\\Collection\|null, Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\>\|null given\.$#'
 			identifier: argument.type
 			count: 1

@@ -6,7 +6,6 @@ namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Data\Stables\StableMembershipData;
-use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Lifecycle\StableRestructuringEligibility;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
@@ -61,11 +60,7 @@ class MergeStablesAction
                 tagTeams: $lockedSecondaryStable->currentTagTeams,
             );
 
-            $unavailableMemberNames = $members->getUnavailableMemberNames();
-
-            if ($unavailableMemberNames !== []) {
-                throw CannotBeMergedException::membersUnavailable($unavailableMemberNames);
-            }
+            $this->eligibility->ensureMergeMembersAvailable($members);
 
             $this->membershipService->removeMembers($lockedSecondaryStable, $members, $date);
             $this->membershipService->addMembers($lockedPrimaryStable, $members, $date);

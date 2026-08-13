@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
+use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use App\Services\StableMembershipService;
 
 final class StableRestructuringEligibility
@@ -74,5 +77,42 @@ final class StableRestructuringEligibility
         if (! $secondaryStable->isCurrentlyActive()) {
             throw CannotBeMergedException::secondaryNotActive($secondaryStable);
         }
+    }
+
+    public function ensureSplitMembersAvailable(StableMembershipData $members): void
+    {
+        $unavailableMemberNames = $this->unavailableMemberNames($members);
+
+        if ($unavailableMemberNames !== []) {
+            throw CannotBeSplitException::membersUnavailable($unavailableMemberNames);
+        }
+    }
+
+    public function ensureMergeMembersAvailable(StableMembershipData $members): void
+    {
+        $unavailableMemberNames = $this->unavailableMemberNames($members);
+
+        if ($unavailableMemberNames !== []) {
+            throw CannotBeMergedException::membersUnavailable($unavailableMemberNames);
+        }
+    }
+
+    /** @return array<int, string> */
+    private function unavailableMemberNames(StableMembershipData $members): array
+    {
+        $unavailableWrestlers = $members->wrestlers?->filter(
+            fn (Wrestler $wrestler): bool => ! $wrestler->isEmployed()
+                || $wrestler->isSuspended()
+                || $wrestler->isInjured()
+                || $wrestler->isRetired(),
+        )->pluck('name')->all() ?? [];
+
+        $unavailableTagTeams = $members->tagTeams?->filter(
+            fn (TagTeam $tagTeam): bool => ! $tagTeam->isEmployed()
+                || $tagTeam->isSuspended()
+                || $tagTeam->isRetired(),
+        )->pluck('name')->all() ?? [];
+
+        return [...$unavailableWrestlers, ...$unavailableTagTeams];
     }
 }
