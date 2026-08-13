@@ -9,9 +9,9 @@ use App\Models\Matches\MatchCompetitor;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
- * Provides polymorphic match relationships for competitors.
+ * Provides polymorphic match-participation relationships for competitors.
  */
-trait IsBookableCompetitor
+trait HasMatchParticipations
 {
     /**
      * Get all matches this competitor has participated in.

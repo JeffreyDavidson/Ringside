@@ -62,7 +62,7 @@
 **Two distinct patterns for match participation:**
 
 ### Competitors (Wrestlers, Tag Teams)
-- Use `IsBookableCompetitor` trait
+- Use the `HasMatchParticipations` trait for persisted competitor-match relationships
 - Relationship: Many-to-many polymorphic through `event_match_competitors` table
 - Method: `$this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors')`
 

@@ -1077,7 +1077,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'managers', 'currentManagers', 'previousManagers', 'fakeManagerPivotModel',
             'stables', 'currentStable', 'previousStables', 'isNotCurrentlyInStable', 'fakeStablePivotModel',
             'titleChampionships', 'currentChampionships', 'currentChampionship', 'previousTitleChampionships', 'isChampion',
-            'matches', 'previousMatches', 'canBeBooked', 'cannotBeBooked',
+            'matches', 'previousMatches',
             'wrestlers', 'currentWrestlers', 'previousWrestlers', 'combinedWeight',
 
             // Employment trait methods

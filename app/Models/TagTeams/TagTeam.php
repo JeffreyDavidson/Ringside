@@ -10,7 +10,7 @@ use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasComputedEmploymentStatus;
-use App\Models\Concerns\IsBookableCompetitor;
+use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
@@ -137,7 +137,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @use HasFactory<TagTeamFactory> */
     use HasFactory;
 
-    use IsBookableCompetitor;
+    use HasMatchParticipations;
 
     /** @use IsEmployable<static> */
     use IsEmployable;
