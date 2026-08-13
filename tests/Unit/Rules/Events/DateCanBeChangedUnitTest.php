@@ -5,29 +5,12 @@ declare(strict_types=1);
 use App\Models\Events\Event;
 use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Contracts\Validation\ValidationRule;
-use JMac\Testing\Double;
 
-/**
- * Unit tests for DateCanBeChanged validation rule.
- *
- * UNIT TEST SCOPE:
- * - Rule logic validation in complete isolation
- * - Direct rule method testing without Laravel validation system
- * - Mock object behavior with different event states
- * - Error callback testing and message verification
- * - Edge cases (null events, method availability)
- *
- * These tests verify the DateCanBeChanged rule logic independently
- * of models, database, or Laravel's validation framework.
- *
- * @see DateCanBeChanged
- */
 describe('DateCanBeChanged Validation Rule Unit Tests', function () {
     describe('rule logic with event instances', function () {
         test('validation passes when event has future date', function () {
             // Arrange
-            $futureEvent = Double::for(Event::class);
-            $futureEvent->expects('hasPastDate')->returns(false);
+            $futureEvent = Event::factory()->make(['date' => now()->addWeek()]);
 
             $rule = new DateCanBeChanged($futureEvent);
             $failCalled = false;
@@ -44,8 +27,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
 
         test('validation fails when event has past date', function () {
             // Arrange
-            $pastEvent = Double::for(Event::class);
-            $pastEvent->expects('hasPastDate')->returns(true);
+            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
 
             $rule = new DateCanBeChanged($pastEvent);
             $failCalled = false;
@@ -82,7 +64,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
     describe('rule construction and data handling', function () {
         test('rule can be constructed with event', function () {
             // Arrange
-            $event = Double::for(Event::class);
+            $event = Event::factory()->make();
 
             // Act
             $rule = new DateCanBeChanged($event);
@@ -101,8 +83,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
 
         test('rule handles various date value types', function () {
             // Arrange
-            $futureEvent = Double::for(Event::class);
-            $futureEvent->expects('hasPastDate')->returns(false)->times(2);
+            $futureEvent = Event::factory()->make(['date' => now()->addWeek()]);
             $rule = new DateCanBeChanged($futureEvent);
 
             $failCalled = false;
@@ -145,8 +126,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
     describe('error message consistency', function () {
         test('error message is consistent across calls', function () {
             // Arrange
-            $pastEvent = Double::for(Event::class);
-            $pastEvent->expects('hasPastDate')->returns(true)->times(2);
+            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
             $rule = new DateCanBeChanged($pastEvent);
 
             $messages = [];
@@ -166,8 +146,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
 
         test('attribute name does not affect validation logic', function () {
             // Arrange
-            $pastEvent = Double::for(Event::class);
-            $pastEvent->expects('hasPastDate')->returns(true)->times(3);
+            $pastEvent = Event::factory()->make(['date' => now()->subWeek()]);
             $rule = new DateCanBeChanged($pastEvent);
 
             $failCallCount = 0;
@@ -183,9 +162,5 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             // Assert
             expect($failCallCount)->toBe(3);
         });
-    });
-
-    afterEach(function () {
-        Mockery::close();
     });
 });

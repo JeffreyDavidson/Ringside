@@ -88,38 +88,6 @@ class Event extends Model implements SoftDeletable
     }
 
     /**
-     * Checks to see if the event is scheduled for a future date.
-     */
-    public function isScheduled(): bool
-    {
-        return $this->date !== null;
-    }
-
-    /**
-     * Checks to see if the event is unscheduled.
-     */
-    public function isUnscheduled(): bool
-    {
-        return $this->date === null;
-    }
-
-    /**
-     * Checks to see if the event is scheduled for a future date.
-     */
-    public function hasFutureDate(): bool
-    {
-        return $this->isScheduled() && $this->date?->isFuture();
-    }
-
-    /**
-     * Checks to see if the event has already taken place.
-     */
-    public function hasPastDate(): bool
-    {
-        return $this->isScheduled() && $this->date?->isPast();
-    }
-
-    /**
      * Get the computed status of the event based on its date.
      *
      * @return Attribute<EventStatus, never>
@@ -127,13 +95,7 @@ class Event extends Model implements SoftDeletable
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: function (): EventStatus {
-                if ($this->isUnscheduled()) {
-                    return EventStatus::Unscheduled;
-                }
-
-                return $this->hasPastDate() ? EventStatus::Past : EventStatus::Scheduled;
-            }
+            get: fn (): EventStatus => EventStatus::fromDate($this->date)
         );
     }
 }

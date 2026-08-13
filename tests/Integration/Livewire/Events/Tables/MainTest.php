@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\EventStatus;
 use App\Livewire\Events\Tables\EventsTable;
 use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
@@ -364,7 +365,7 @@ describe('EventsTable Component Integration', function () {
             $event = Event::factory()->scheduled()->create(['name' => 'Date Change Event']);
 
             // Verify event is originally scheduled
-            expect($event->isScheduled())->toBeTrue();
+            expect($event->status)->toBe(EventStatus::Scheduled);
 
             actingAs($this->admin);
 

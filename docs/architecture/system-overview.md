@@ -242,6 +242,8 @@ Matches integrate seamlessly with event scheduling:
 - Event-specific configurations
 - Cross-match relationships
 
+An event's nullable `date` remains the authoritative scheduling value. `EventStatus::fromDate()` translates that persisted value into `Unscheduled`, `Scheduled`, or `Past`; the `Event` model exposes the result through its computed `status` attribute instead of carrying separate scheduling predicates.
+
 ### Roster Management
 
 Dynamic competitor assignment from available talent:
