@@ -71,8 +71,8 @@ trait CanJoinTagTeams
      * Returns all tag team relationships regardless of their current status
      * (active or completed). Includes pivot data for join/leave tracking.
      *
-     * @return BelongsToMany<TagTeam, static, TPivotModel>
-     *                                                     A relationship instance for accessing all tag teams
+     * @return BelongsToMany<TagTeam, $this, TPivotModel>
+     *                                                    A relationship instance for accessing all tag teams
      *
      * @example
      * ```php
@@ -83,7 +83,7 @@ trait CanJoinTagTeams
      */
     public function tagTeams(): BelongsToMany
     {
-        /** @var BelongsToMany<TagTeam, static, TPivotModel> $relation */
+        /** @var BelongsToMany<TagTeam, $this, TPivotModel> $relation */
         $relation = $this->belongsToMany(TagTeam::class, $this->getTagTeamPivotTable())
             ->withPivot(['joined_at', 'left_at'])
             ->using($this->resolveTagTeamPivotModel())
@@ -98,8 +98,8 @@ trait CanJoinTagTeams
      * Returns tag teams that the model has left (where 'left_at' is set).
      * These represent completed tag team memberships.
      *
-     * @return BelongsToMany<TagTeam, static, TPivotModel>
-     *                                                     A relationship instance for accessing previous tag teams
+     * @return BelongsToMany<TagTeam, $this, TPivotModel>
+     *                                                    A relationship instance for accessing previous tag teams
      *
      * @example
      * ```php
@@ -110,7 +110,7 @@ trait CanJoinTagTeams
      */
     public function previousTagTeams(): BelongsToMany
     {
-        /** @var BelongsToMany<TagTeam, static, TPivotModel> $relation */
+        /** @var BelongsToMany<TagTeam, $this, TPivotModel> $relation */
         $relation = $this->belongsToMany(TagTeam::class, $this->getTagTeamPivotTable())
             ->withPivot(['joined_at', 'left_at'])
             ->using($this->resolveTagTeamPivotModel())

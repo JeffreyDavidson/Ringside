@@ -65,7 +65,7 @@ Core capabilities define what each entity type can do within the wrestling promo
 
 Wrestlers expose current and historical tag team membership through the `currentTagTeam`, `previousTagTeam`, and `tagTeams` Eloquent relationships. Whether a wrestler currently belongs to a tag team is determined by querying `currentTagTeam`; the model contract does not duplicate that relationship state with a boolean predicate.
 
-Single current/previous tag team and current Stable lookups use Laravel's native `HasOneThrough` relationships through the persisted membership models. Collection relationships remain `BelongsToMany` so callers can inspect complete history and membership pivot dates. Do not reintroduce the abandoned `ankurk91/laravel-eloquent-relationships` package.
+Single current/previous tag team and current Stable lookups use Laravel's native `HasOneThrough` relationships through the persisted membership models. Each Stable-member model explicitly supplies its membership table, foreign key, and pivot model to the shared concern; the concern does not infer its host type at runtime. Collection relationships remain `BelongsToMany` so callers can inspect complete history and membership pivot dates. Do not reintroduce the abandoned `ankurk91/laravel-eloquent-relationships` package.
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

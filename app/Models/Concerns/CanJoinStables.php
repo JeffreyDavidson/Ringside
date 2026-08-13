@@ -6,15 +6,10 @@ namespace App\Models\Concerns;
 
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Stables\Stable;
-use App\Models\Stables\StableTagTeam;
-use App\Models\Stables\StableWrestler;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use LogicException;
 
 /**
  * @template TPivotModel of Pivot
@@ -24,34 +19,31 @@ use LogicException;
  */
 trait CanJoinStables
 {
-    /**
-     * @return array{table: string, foreignKey: string, pivot: class-string<Pivot>}
-     */
+    abstract protected function stableMembershipTable(): string;
+
+    abstract protected function stableMembershipForeignKey(): string;
+
+    /** @return class-string<TPivotModel> */
+    abstract protected function stableMembershipPivotModel(): string;
+
+    /** @return array{table: string, foreignKey: string, pivot: class-string<TPivotModel>} */
     private function stableMembershipRelationConfiguration(): array
     {
-        return match (true) {
-            $this instanceof Wrestler => [
-                'table' => 'stables_wrestlers',
-                'foreignKey' => 'wrestler_id',
-                'pivot' => StableWrestler::class,
-            ],
-            $this instanceof TagTeam => [
-                'table' => 'stables_tag_teams',
-                'foreignKey' => 'tag_team_id',
-                'pivot' => StableTagTeam::class,
-            ],
-            default => throw new LogicException('Unsupported stable member type: '.static::class),
-        };
+        return [
+            'table' => $this->stableMembershipTable(),
+            'foreignKey' => $this->stableMembershipForeignKey(),
+            'pivot' => $this->stableMembershipPivotModel(),
+        ];
     }
 
     /**
-     * @return BelongsToMany<Stable, static, TPivotModel>
+     * @return BelongsToMany<Stable, $this, TPivotModel>
      */
     public function stables(): BelongsToMany
     {
         $configuration = $this->stableMembershipRelationConfiguration();
 
-        /** @var BelongsToMany<Stable, static, TPivotModel> $relation */
+        /** @var BelongsToMany<Stable, $this, TPivotModel> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
             $configuration['table'],
@@ -68,11 +60,10 @@ trait CanJoinStables
     public function currentStable(): HasOneThrough
     {
         $configuration = $this->stableMembershipRelationConfiguration();
-        $pivotModel = $configuration['pivot'];
 
         return $this->hasOneThrough(
             Stable::class,
-            $pivotModel,
+            $configuration['pivot'],
             $configuration['foreignKey'],
             'id',
             'id',
@@ -81,12 +72,12 @@ trait CanJoinStables
             ->whereNull("{$configuration['table']}.left_at");
     }
 
-    /** @return BelongsToMany<Stable, static, TPivotModel> */
+    /** @return BelongsToMany<Stable, $this, TPivotModel> */
     public function previousStables(): BelongsToMany
     {
         $configuration = $this->stableMembershipRelationConfiguration();
 
-        /** @var BelongsToMany<Stable, static, TPivotModel> $relation */
+        /** @var BelongsToMany<Stable, $this, TPivotModel> $relation */
         $relation = $this->belongsToMany(
             Stable::class,
             $configuration['table'],

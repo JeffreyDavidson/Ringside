@@ -44,7 +44,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @implements CanBeChampion<TitleChampionship>
- * @implements CanBeAStableMember<StableTagTeam, static>
+ * @implements CanBeAStableMember<StableTagTeam, $this>
  * @implements Employable<static>
  * @implements Manageable<TagTeamManager, static>
  * @implements Retirable<static>
@@ -126,7 +126,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableTagTeam, static> */
+    /** @use CanJoinStables<StableTagTeam, $this> */
     use CanJoinStables;
 
     /** @use CanWinTitles<TitleChampionship> */
@@ -152,6 +152,21 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     use ProvidesTagTeamWrestlers;
 
     use SoftDeletes;
+
+    protected function stableMembershipTable(): string
+    {
+        return (new StableTagTeam())->getTable();
+    }
+
+    protected function stableMembershipForeignKey(): string
+    {
+        return 'tag_team_id';
+    }
+
+    protected function stableMembershipPivotModel(): string
+    {
+        return StableTagTeam::class;
+    }
 
     /**
      * The number of the wrestlers allowed on a tag team.
