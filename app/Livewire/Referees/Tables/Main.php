@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Tables;
 
+use App\Actions\Referees\DeleteAction;
 use App\Actions\Referees\EmployAction;
 use App\Actions\Referees\HealAction;
 use App\Actions\Referees\InjureAction;
@@ -116,7 +117,10 @@ class Main extends BaseTable
 
     public function delete(Referee $referee): void
     {
-        $this->deleteModel($referee);
+        Gate::authorize('delete', $referee);
+
+        resolve(DeleteAction::class)->handle($referee);
+        session()->flash('status', 'Referee successfully deleted.');
     }
 
     /**

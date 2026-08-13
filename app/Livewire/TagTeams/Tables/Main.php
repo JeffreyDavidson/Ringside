@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Actions\TagTeams\DeleteAction;
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReinstateAction;
 use App\Actions\TagTeams\ReleaseAction;
@@ -106,7 +107,10 @@ class Main extends BaseTable
 
     public function delete(TagTeam $tagTeam): void
     {
-        $this->deleteModel($tagTeam);
+        Gate::authorize('delete', $tagTeam);
+
+        resolve(DeleteAction::class)->handle($tagTeam);
+        session()->flash('status', 'Tag team successfully deleted.');
     }
 
     /**

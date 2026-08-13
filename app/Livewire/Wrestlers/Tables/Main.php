@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Actions\Wrestlers\DeleteAction;
 use App\Actions\Wrestlers\RestoreAction;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
@@ -90,7 +91,10 @@ class Main extends BaseTable
 
     public function delete(Wrestler $wrestler): void
     {
-        $this->deleteModel($wrestler);
+        Gate::authorize('delete', $wrestler);
+
+        resolve(DeleteAction::class)->handle($wrestler);
+        session()->flash('status', 'Wrestler successfully deleted.');
     }
 
     /**

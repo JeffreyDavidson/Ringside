@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Titles\Tables;
 
 use App\Actions\Titles\DebutAction;
+use App\Actions\Titles\DeleteAction;
 use App\Actions\Titles\PullAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
@@ -197,7 +198,10 @@ class Main extends BaseTable
      */
     public function delete(Title $title): void
     {
-        $this->deleteModel($title);
+        Gate::authorize('delete', $title);
+
+        resolve(DeleteAction::class)->handle($title);
+        session()->flash('status', 'Title successfully deleted.');
     }
 
     /**

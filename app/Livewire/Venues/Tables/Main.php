@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Tables;
 
+use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
@@ -56,9 +57,12 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(Venue $Venue): void
+    public function delete(Venue $venue): void
     {
-        $this->deleteModel($Venue);
+        Gate::authorize('delete', $venue);
+
+        resolve(DeleteAction::class)->handle($venue);
+        session()->flash('status', 'Venue successfully deleted.');
     }
 
     /**
