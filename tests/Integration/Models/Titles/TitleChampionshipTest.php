@@ -131,8 +131,8 @@ describe('TitleChampionship Model', function () {
 
             // Verify succession
             expect(freshModel($this->title)->currentChampionship()->firstOrFail()->champion()->firstOrFail()->getKey())->toBe($toChampion->id);
-            expect($fromChampion->refresh()->isChampion())->toBeFalse();
-            expect($toChampion->refresh()->isChampion())->toBeTrue();
+            expect($fromChampion->refresh()->currentChampionships()->exists())->toBeFalse();
+            expect($toChampion->refresh()->currentChampionships()->exists())->toBeTrue();
         })->with([
             'wrestler to tag team' => [Wrestler::class, TagTeam::class, 'John Champion', 'Tag Team Champions'],
             'tag team to wrestler' => [TagTeam::class, Wrestler::class, 'Team Champions', 'Jane Challenger'],

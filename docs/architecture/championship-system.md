@@ -16,6 +16,10 @@ The championship system manages title matches and ensures proper competitor vali
 - **Match Validation**: Title matches must use compatible competitor types
 - **Champion Defense**: Current champions can defend against appropriate challengers
 
+## Persistence Boundaries
+
+`TitleType` is the canonical classification value; consumers compare the model's cast `type` attribute with its enum cases instead of relying on model predicate aliases. Wrestlers and tag teams expose championship history through Eloquent relationships defined by `CanBeChampion`. Current champion state is determined through the `currentChampionships` relationship rather than a separate model method.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)
