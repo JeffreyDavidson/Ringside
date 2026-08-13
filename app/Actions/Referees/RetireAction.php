@@ -7,6 +7,7 @@ namespace App\Actions\Referees;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
@@ -22,6 +23,7 @@ class RetireAction
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -41,22 +43,23 @@ class RetireAction
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
-        $referee->ensureCanBeRetired();
-
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($referee, $retirementDate): void {
-            if ($referee->isEmployed()) {
-                if ($referee->isSuspended()) {
-                    $this->suspensionPeriods->end($referee, $retirementDate);
-                } elseif ($referee->isInjured()) {
-                    $this->injuryPeriods->end($referee, $retirementDate);
+            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $this->eligibility->ensureCanRetire($lockedReferee);
+
+            if ($lockedReferee->isEmployed()) {
+                if ($lockedReferee->isSuspended()) {
+                    $this->suspensionPeriods->end($lockedReferee, $retirementDate);
+                } elseif ($lockedReferee->isInjured()) {
+                    $this->injuryPeriods->end($lockedReferee, $retirementDate);
                 }
 
-                $this->employmentPeriods->end($referee, $retirementDate);
+                $this->employmentPeriods->end($lockedReferee, $retirementDate);
             }
 
-            $this->retirementPeriods->start($referee, $retirementDate, LifecycleTransitionType::Retired);
+            $this->retirementPeriods->start($lockedReferee, $retirementDate, LifecycleTransitionType::Retired);
         });
     }
 }

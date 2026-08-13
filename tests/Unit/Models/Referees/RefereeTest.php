@@ -11,7 +11,6 @@ use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Concerns\ValidatesEmployment;
-use App\Models\Concerns\ValidatesIndividualRetirement;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
@@ -77,7 +76,6 @@ describe('Referee Model Unit Tests', function () {
             expect(class_uses(Referee::class))->toContain(ProvidesDisplayName::class);
             expect(class_uses(Referee::class))->toContain(SoftDeletes::class);
             expect(class_uses(Referee::class))->toContain(ValidatesEmployment::class);
-            expect(class_uses(Referee::class))->toContain(ValidatesIndividualRetirement::class);
         });
     });
 

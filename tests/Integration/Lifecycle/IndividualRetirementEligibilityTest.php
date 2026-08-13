@@ -4,24 +4,26 @@ declare(strict_types=1);
 
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
+use App\Lifecycle\IndividualRetirementEligibility;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\Wrestlers\Wrestler;
 
-describe('individual retirement validation', function () {
+describe('individual retirement eligibility', function () {
     test('keeps the retirement predicate aligned with its guard', function (string $factoryState, bool $canBeRetired) {
+        $eligibility = new IndividualRetirementEligibility();
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-        expect($wrestler->canBeRetired())->toBe($canBeRetired);
+        expect($eligibility->canRetire($wrestler))->toBe($canBeRetired);
 
         if ($canBeRetired) {
-            expect(fn () => $wrestler->ensureCanBeRetired())
+            expect(fn () => $eligibility->ensureCanRetire($wrestler))
                 ->not->toThrow(CannotBeRetiredException::class);
 
             return;
         }
 
-        expect(fn () => $wrestler->ensureCanBeRetired())
+        expect(fn () => $eligibility->ensureCanRetire($wrestler))
             ->toThrow(CannotBeRetiredException::class);
     })->with([
         'employed' => ['employed', true],
@@ -34,10 +36,11 @@ describe('individual retirement validation', function () {
     ]);
 
     test('supports each individual roster model', function (string $modelClass) {
+        $eligibility = new IndividualRetirementEligibility();
         $individual = $modelClass::factory()->employed()->create();
 
-        expect($individual->canBeRetired())->toBeTrue()
-            ->and(fn () => $individual->ensureCanBeRetired())
+        expect($eligibility->canRetire($individual))->toBeTrue()
+            ->and(fn () => $eligibility->ensureCanRetire($individual))
             ->not->toThrow(CannotBeRetiredException::class);
     })->with([
         Wrestler::class,
@@ -46,11 +49,12 @@ describe('individual retirement validation', function () {
     ]);
 
     test('rejects unretiring a deleted retired individual consistently', function () {
+        $eligibility = new IndividualRetirementEligibility();
         $wrestler = Wrestler::factory()->retired()->create();
         $wrestler->delete();
 
-        expect($wrestler->canBeUnretired())->toBeFalse()
-            ->and(fn () => $wrestler->ensureCanBeUnretired())
+        expect($eligibility->canUnretire($wrestler))->toBeFalse()
+            ->and(fn () => $eligibility->ensureCanUnretire($wrestler))
             ->toThrow(
                 CannotBeUnretiredException::class,
                 CannotBeUnretiredException::deleted($wrestler)->getMessage(),
@@ -58,18 +62,19 @@ describe('individual retirement validation', function () {
     });
 
     test('keeps the unretirement predicate aligned with its guard', function (string $factoryState, bool $canBeUnretired) {
+        $eligibility = new IndividualRetirementEligibility();
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-        expect($wrestler->canBeUnretired())->toBe($canBeUnretired);
+        expect($eligibility->canUnretire($wrestler))->toBe($canBeUnretired);
 
         if ($canBeUnretired) {
-            expect(fn () => $wrestler->ensureCanBeUnretired())
+            expect(fn () => $eligibility->ensureCanUnretire($wrestler))
                 ->not->toThrow(CannotBeUnretiredException::class);
 
             return;
         }
 
-        expect(fn () => $wrestler->ensureCanBeUnretired())
+        expect(fn () => $eligibility->ensureCanUnretire($wrestler))
             ->toThrow(
                 CannotBeUnretiredException::class,
                 CannotBeUnretiredException::notRetired($wrestler)->getMessage(),

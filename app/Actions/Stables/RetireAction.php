@@ -10,6 +10,7 @@ use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
+use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -26,6 +27,7 @@ class RetireAction
         protected EndActivityPeriodAction $endActivityPeriodAction,
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected RetirementPeriodManager $retirementPeriods,
+        protected IndividualRetirementEligibility $individualRetirementEligibility,
     ) {}
 
     /**
@@ -68,7 +70,7 @@ class RetireAction
 
             if ($membersToRetire->wrestlers) {
                 foreach ($membersToRetire->wrestlers as $wrestler) {
-                    if ($wrestler->canBeRetired()) {
+                    if ($this->individualRetirementEligibility->canRetire($wrestler)) {
                         $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
                     }
                 }
