@@ -24,10 +24,7 @@ class CreateAction
     {
         return Venue::query()->create([
             'name' => $venueData->name,
-            'street_address' => $venueData->street_address,
-            'city' => $venueData->city,
-            'state' => $venueData->state,
-            'zipcode' => $venueData->zipcode,
+            'address' => $venueData->address,
         ]);
     }
 }

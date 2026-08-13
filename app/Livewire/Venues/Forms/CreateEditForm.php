@@ -6,6 +6,7 @@ namespace App\Livewire\Venues\Forms;
 
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
+use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
@@ -125,10 +126,12 @@ class CreateEditForm extends BaseForm
     {
         return [
             'name' => $this->name,
-            'street_address' => $this->street_address,
-            'city' => $this->city,
-            'state' => $this->state,
-            'zipcode' => $this->zipcode,
+            'address' => new Address(
+                streetAddress: $this->street_address,
+                city: $this->city,
+                state: $this->state,
+                zipcode: (string) $this->zipcode,
+            ),
         ];
     }
 

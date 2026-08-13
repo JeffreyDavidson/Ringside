@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Events\VenueBuilder;
+use App\Casts\AddressCast;
 use App\Models\Concerns\HoldsEvents;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -36,6 +37,7 @@ describe('Venue Model Unit Tests', function () {
                 'city',
                 'state',
                 'zipcode',
+                'address',
             ]);
         });
 
@@ -43,8 +45,9 @@ describe('Venue Model Unit Tests', function () {
             $venue = new Venue();
             $casts = $venue->getCasts();
 
-            // Venue model has no custom casts
-            expect($casts)->toBeArray();
+            expect($casts)->toMatchArray([
+                'address' => AddressCast::class,
+            ]);
         });
 
         test('has custom eloquent builder', function () {
