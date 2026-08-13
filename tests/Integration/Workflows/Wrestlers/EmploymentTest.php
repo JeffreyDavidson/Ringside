@@ -11,9 +11,9 @@ use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\IndividualSuspensionEligibility;
-use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 

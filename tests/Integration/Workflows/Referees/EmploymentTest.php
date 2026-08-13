@@ -7,8 +7,8 @@ use App\Actions\Referees\ReleaseAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Referees\Referee;
 use App\Lifecycle\IndividualEmploymentEligibility;
+use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 
 /**
