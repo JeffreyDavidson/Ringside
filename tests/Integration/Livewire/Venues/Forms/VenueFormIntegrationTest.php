@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
+use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
@@ -147,14 +148,11 @@ describe('VenueForm Integration Tests', function () {
             $data = $this->form->modelDataForTesting();
 
             expect($data)->toBeArray();
-            expect($data)->toHaveKeys([
-                'name', 'street_address', 'city', 'state', 'zipcode',
-            ]);
-            expect($data['name'])->toBe('Madison Square Garden');
-            expect($data['street_address'])->toBe('4 Pennsylvania Plaza');
-            expect($data['city'])->toBe('New York');
-            expect($data['state'])->toBe('New York');
-            expect($data['zipcode'])->toBe('10001');
+            expect($data)->toHaveKeys(['name', 'address']);
+            expect($data['name'])->toBe('Madison Square Garden')
+                ->and($data['address'])->toEqual(
+                    new Address('4 Pennsylvania Plaza', 'New York', 'New York', '10001'),
+                );
         });
     });
 

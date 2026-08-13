@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\VenueBuilder;
+use App\Casts\AddressCast;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HoldsEvents;
 use App\Models\Contracts\SoftDeletable;
+use App\ValueObjects\Address;
 use Database\Factories\Events\VenueFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -25,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string $city
  * @property string $state
  * @property string $zipcode
+ * @property Address $address
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -47,7 +50,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
-#[Fillable('name', 'street_address', 'city', 'state', 'zipcode')]
+#[Fillable('name', 'street_address', 'city', 'state', 'zipcode', 'address')]
 #[UseFactory(VenueFactory::class)]
 #[UseEloquentBuilder(VenueBuilder::class)]
 class Venue extends Model implements SoftDeletable
@@ -58,4 +61,12 @@ class Venue extends Model implements SoftDeletable
     use HasLifecycleTransitions;
     use HoldsEvents;
     use SoftDeletes;
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'address' => AddressCast::class,
+        ];
+    }
 }
