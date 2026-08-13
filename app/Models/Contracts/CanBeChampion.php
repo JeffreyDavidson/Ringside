@@ -6,7 +6,6 @@ namespace App\Models\Contracts;
 
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 /**
  * Interface for models that can win and hold championships.
@@ -28,13 +27,6 @@ interface CanBeChampion
      * @return MorphMany<TitleChampionship, TChampion>
      */
     public function currentChampionships(): MorphMany;
-
-    /**
-     * Get the current championship being held.
-     *
-     * @return MorphOne<TitleChampionship, TChampion>
-     */
-    public function currentChampionship(): MorphOne;
 
     /**
      * Get past championships (already lost).

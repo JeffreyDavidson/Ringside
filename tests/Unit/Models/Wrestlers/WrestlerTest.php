@@ -7,7 +7,7 @@ use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanWinTitles;
+use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
@@ -86,7 +86,7 @@ describe('Wrestler Model Unit Tests', function () {
             expect(class_uses(Wrestler::class))->toContain(BelongsToUser::class);
             expect(class_uses(Wrestler::class))->toContain(CanBeManaged::class);
             expect(class_uses(Wrestler::class))->toContain(HasStableMemberships::class);
-            expect(class_uses(Wrestler::class))->toContain(CanWinTitles::class);
+            expect(class_uses(Wrestler::class))->toContain(HasChampionshipReigns::class);
             expect(class_uses(Wrestler::class))->toContain(HasFactory::class);
             expect(class_uses(Wrestler::class))->toContain(HasMatchParticipations::class);
             expect(class_uses(Wrestler::class))->toContain(IsEmployable::class);

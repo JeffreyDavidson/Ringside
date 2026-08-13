@@ -24,6 +24,7 @@ final class TitleChampionshipQuery
     {
         return $title->championships()
             ->whereNotNull('lost_at')
+            ->reorder()
             ->latest('lost_at')
             ->first();
     }

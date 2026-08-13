@@ -1077,7 +1077,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'managers', 'currentManagers', 'previousManagers', 'fakeManagerPivotModel',
             'stables', 'currentStable', 'previousStables',
             'tagTeams', 'currentTagTeam', 'previousTagTeam', 'previousTagTeams',
-            'titleChampionships', 'currentChampionships', 'currentChampionship', 'previousTitleChampionships', 'isChampion',
+            'titleChampionships', 'currentChampionships', 'previousTitleChampionships',
             'matches', 'previousMatches',
             'wrestlers', 'currentWrestlers', 'previousWrestlers', 'combinedWeight',
 

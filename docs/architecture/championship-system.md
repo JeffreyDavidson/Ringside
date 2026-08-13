@@ -18,7 +18,7 @@ The championship system manages title matches and ensures proper competitor vali
 
 ## Persistence Boundaries
 
-`TitleType` is the canonical classification value; consumers compare the model's cast `type` attribute with its enum cases instead of relying on model predicate aliases. Wrestlers and tag teams expose championship history through Eloquent relationships defined by `CanBeChampion`. Current champion state is determined through the `currentChampionships` relationship rather than a separate model method.
+`TitleType` is the canonical classification value; consumers compare the model's cast `type` attribute with its enum cases instead of relying on model predicate aliases. Wrestlers and tag teams implement `CanBeChampion` and share their polymorphic championship-history relationships through `HasChampionshipReigns`. Because either champion type may hold multiple titles simultaneously, `currentChampionships` is the authoritative current-state relationship; champion models do not expose a singular `currentChampionship` relationship. A `Title` owns its `championships` and singular `currentChampionship` relationships directly because each title has at most one current reign.
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

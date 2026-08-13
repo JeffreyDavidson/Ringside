@@ -9,7 +9,6 @@ use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Concerns\HasActivityPeriods;
-use App\Models\Concerns\HasChampionships;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ProvidesDisplayName;
@@ -29,6 +28,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -104,8 +105,6 @@ class Title extends Model implements HasActivityPeriodsContract, HasDisplayName,
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 
-    use HasChampionships;
-
     /** @use HasFactory<TitleFactory> */
     use HasFactory;
 
@@ -117,6 +116,20 @@ class Title extends Model implements HasActivityPeriodsContract, HasDisplayName,
 
     use ProvidesDisplayName;
     use SoftDeletes;
+
+    /** @return HasMany<TitleChampionship, $this> */
+    public function championships(): HasMany
+    {
+        return $this->hasMany(TitleChampionship::class)->oldest('won_at');
+    }
+
+    /** @return HasOne<TitleChampionship, $this> */
+    public function currentChampionship(): HasOne
+    {
+        return $this->hasOne(TitleChampionship::class)
+            ->whereNull('lost_at')
+            ->latest('won_at');
+    }
 
     /**
      * Get the computed status attribute.

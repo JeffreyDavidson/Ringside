@@ -9,7 +9,7 @@ use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanWinTitles;
+use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\HasStableMemberships;
@@ -55,7 +55,7 @@ use Illuminate\Support\Carbon;
 /**
  * @mixin \Eloquent
  *
- * @implements CanBeChampion<TitleChampionship>
+ * @implements CanBeChampion<$this>
  * @implements CanBeAStableMember<StableWrestler, $this>
  * @implements Employable<static>
  * @implements Injurable<static>
@@ -104,7 +104,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Stable> $previousStables
  * @property-read Collection<int, EventMatch> $matches
  * @property-read Collection<int, EventMatch> $previousMatches
- * @property-read TitleChampionship|null $currentChampionship
  * @property-read Collection<int, TitleChampionship> $titleChampionships
  * @property-read Collection<int, TitleChampionship> $currentChampionships
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
@@ -122,9 +121,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
 
-    /** @use CanWinTitles<TitleChampionship> */
-    use CanWinTitles;
-
+    use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<WrestlerFactory> */
