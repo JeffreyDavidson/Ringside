@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -23,5 +23,8 @@ interface CanBeAStableMember
      */
     public function stables(): BelongsToMany;
 
-    public function currentStable(): BelongsToOne;
+    /**
+     * @return HasOneThrough<Stable, TPivotModel, TModel>
+     */
+    public function currentStable(): HasOneThrough;
 }

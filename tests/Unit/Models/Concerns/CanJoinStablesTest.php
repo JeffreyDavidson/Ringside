@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Models\Concerns;
 
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
 use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use LogicException;
 use Tests\Unit\Models\Concerns\Support\UnsupportedStableMemberModel;
@@ -38,7 +38,7 @@ it('defines all stable relationships', function (Wrestler|TagTeam $member) {
     $previousStables = $member->previousStables();
 
     expect($stables)->toBeInstanceOf(BelongsToMany::class)
-        ->and($currentStable)->toBeInstanceOf(BelongsToOne::class)
+        ->and($currentStable)->toBeInstanceOf(HasOneThrough::class)
         ->and($previousStables)->toBeInstanceOf(BelongsToMany::class)
         ->and($stables->getRelated())->toBeInstanceOf(Stable::class)
         ->and($currentStable->getRelated())->toBeInstanceOf(Stable::class)

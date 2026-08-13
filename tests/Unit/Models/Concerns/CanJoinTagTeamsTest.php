@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Models\Concerns;
 
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Contracts\CanBeATagTeamMember;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use LogicException;
 use Tests\Unit\Models\Concerns\Support\FakeTagTeamMemberModel;
 use Tests\Unit\Models\Concerns\Support\FakeTagTeamPivotModel;
@@ -49,7 +49,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
                     return FakeTagTeamPivotModel::class;
                 }
             };
-            expect($model->currentTagTeam())->toBeInstanceOf(BelongsToOne::class);
+            expect($model->currentTagTeam())->toBeInstanceOf(HasOneThrough::class);
         });
 
         test('provides previousTagTeams relationship', function () {
@@ -77,7 +77,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
                     return FakeTagTeamPivotModel::class;
                 }
             };
-            expect($model->previousTagTeam())->toBeInstanceOf(BelongsToOne::class);
+            expect($model->previousTagTeam())->toBeInstanceOf(HasOneThrough::class);
         });
     });
 
@@ -163,7 +163,7 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
                 }
             };
             $relation = $model->currentTagTeam();
-            expect($relation)->toBeInstanceOf(BelongsToOne::class);
+            expect($relation)->toBeInstanceOf(HasOneThrough::class);
         });
 
         test('previousTagTeams relationship includes wherePivotNotNull constraint', function () {
@@ -197,9 +197,9 @@ describe('CanJoinTagTeams Trait Unit Tests', function () {
             $previousTagTeamsRelation = $model->previousTagTeams();
             $previousTagTeamRelation = $model->previousTagTeam();
             expect($tagTeamsRelation)->toBeInstanceOf(BelongsToMany::class);
-            expect($currentTagTeamRelation)->toBeInstanceOf(BelongsToOne::class);
+            expect($currentTagTeamRelation)->toBeInstanceOf(HasOneThrough::class);
             expect($previousTagTeamsRelation)->toBeInstanceOf(BelongsToMany::class);
-            expect($previousTagTeamRelation)->toBeInstanceOf(BelongsToOne::class);
+            expect($previousTagTeamRelation)->toBeInstanceOf(HasOneThrough::class);
         });
     });
 });

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
@@ -23,9 +23,15 @@ interface CanBeATagTeamMember
      */
     public function tagTeams(): BelongsToMany;
 
-    public function currentTagTeam(): BelongsToOne;
+    /**
+     * @return HasOneThrough<TagTeam, TPivotModel, TModel>
+     */
+    public function currentTagTeam(): HasOneThrough;
 
-    public function previousTagTeam(): BelongsToOne;
+    /**
+     * @return HasOneThrough<TagTeam, TPivotModel, TModel>
+     */
+    public function previousTagTeam(): HasOneThrough;
 
     /**
      * @return BelongsToMany<TagTeam, TModel, TPivotModel>

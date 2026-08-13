@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Managers;
 
-use Ankurk91\Eloquent\HasBelongsToOne;
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\DefinesManagedAliases;
@@ -110,7 +109,6 @@ use Tests\Unit\Models\Managers\ManagerTest;
 class Manager extends Model implements Employable, HasDisplayName, Injurable, Retirable, SoftDeletable, Suspendable
 {
     use DefinesManagedAliases;
-    use HasBelongsToOne;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<ManagerFactory> */

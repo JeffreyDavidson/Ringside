@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use Ankurk91\Eloquent\HasBelongsToOne;
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
@@ -14,6 +12,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use LogicException;
 
@@ -25,8 +24,6 @@ use LogicException;
  */
 trait CanJoinStables
 {
-    use HasBelongsToOne;
-
     /**
      * @return array{table: string, foreignKey: string, pivot: class-string<Pivot>}
      */
@@ -68,20 +65,20 @@ trait CanJoinStables
         return $relation;
     }
 
-    public function currentStable(): BelongsToOne
+    public function currentStable(): HasOneThrough
     {
         $configuration = $this->stableMembershipRelationConfiguration();
+        $pivotModel = $configuration['pivot'];
 
-        return $this->belongsToOne(
+        return $this->hasOneThrough(
             Stable::class,
-            $configuration['table'],
+            $pivotModel,
             $configuration['foreignKey'],
+            'id',
+            'id',
             'stable_id'
         )
-            ->using($configuration['pivot'])
-            ->wherePivotNull('left_at')
-            ->withPivot(['joined_at', 'left_at'])
-            ->withTimestamps();
+            ->whereNull("{$configuration['table']}.left_at");
     }
 
     /** @return BelongsToMany<Stable, static, TPivotModel> */
