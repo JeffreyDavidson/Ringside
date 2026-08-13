@@ -47,8 +47,8 @@ class UpdateAction
             // Update the wrestler's basic information
             $wrestler->update([
                 'name' => $wrestlerData->name,
-                'height' => $wrestlerData->height,
-                'weight' => $wrestlerData->weight,
+                'height' => $wrestlerData->height->toInches(),
+                'weight' => $wrestlerData->weight->toPounds(),
                 'hometown' => $wrestlerData->hometown,
                 'signature_move' => $wrestlerData->signature_move,
             ]);
