@@ -103,7 +103,7 @@ describe('Matches Main Table Component Integration', function () {
             livewire(Main::class)
                 ->call('delete', $match);
 
-            $this->assertModelMissing($match);
+            $this->assertSoftDeleted($match);
         });
     });
 

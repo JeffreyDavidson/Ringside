@@ -7,6 +7,7 @@ namespace App\Enums\Lifecycle;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
+use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -19,6 +20,7 @@ enum LifecycleOwnerType: string
 {
     case Event = 'event';
     case Manager = 'manager';
+    case Match = 'match';
     case Referee = 'referee';
     case Stable = 'stable';
     case TagTeam = 'tag_team';
@@ -31,6 +33,7 @@ enum LifecycleOwnerType: string
         return match (true) {
             $model instanceof Event => self::Event,
             $model instanceof Manager => self::Manager,
+            $model instanceof EventMatch => self::Match,
             $model instanceof Referee => self::Referee,
             $model instanceof Stable => self::Stable,
             $model instanceof TagTeam => self::TagTeam,
@@ -46,6 +49,7 @@ enum LifecycleOwnerType: string
         return match ($this) {
             self::Event => (new Event())->getMorphClass(),
             self::Manager => (new Manager())->getMorphClass(),
+            self::Match => (new EventMatch())->getMorphClass(),
             self::Referee => (new Referee())->getMorphClass(),
             self::Stable => (new Stable())->getMorphClass(),
             self::TagTeam => (new TagTeam())->getMorphClass(),

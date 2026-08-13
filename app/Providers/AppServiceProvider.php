@@ -8,6 +8,7 @@ use App\Console\Commands\EnhancedTestMakeCommand;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
+use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -63,6 +64,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'wrestler' => Wrestler::class,
             'manager' => Manager::class,
+            'match' => EventMatch::class,
             'title' => Title::class,
             'tagTeam' => TagTeam::class,
             'referee' => Referee::class,

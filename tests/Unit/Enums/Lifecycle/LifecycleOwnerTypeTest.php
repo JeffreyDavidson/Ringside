@@ -6,6 +6,7 @@ use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
+use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -20,6 +21,7 @@ test('it resolves supported lifecycle owner models', function (LifecycleOwnerTyp
 })->with([
     'event' => [LifecycleOwnerType::Event, new Event()],
     'manager' => [LifecycleOwnerType::Manager, new Manager()],
+    'match' => [LifecycleOwnerType::Match, new EventMatch()],
     'referee' => [LifecycleOwnerType::Referee, new Referee()],
     'stable' => [LifecycleOwnerType::Stable, new Stable()],
     'tag team' => [LifecycleOwnerType::TagTeam, new TagTeam()],
