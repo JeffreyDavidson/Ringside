@@ -12,6 +12,7 @@ use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\IndividualInjuryEligibility;
+use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
@@ -239,7 +240,7 @@ describe('Wrestler Employment Workflows', function () {
             // Injury and suspension are mutually exclusive availability states.
             resolve(InjureAction::class)->handle($employed, Carbon::now());
             $injured = freshModel($wrestler);
-            expect($injured->canBeSuspended())->toBeFalse();
+            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($injured))->toBeFalse();
             expect($injured->isEmployed())->toBeTrue();
             expect($injured->isInjured())->toBeTrue();
 
@@ -270,7 +271,7 @@ describe('Wrestler Employment Workflows', function () {
 
             // Unemployed wrestler has limited capabilities
             expect($wrestler->isBookable())->toBeFalse();
-            expect($wrestler->canBeSuspended())->toBeFalse();
+            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($wrestler))->toBeFalse();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($wrestler))->toBeFalse();
 
             // Employ wrestler
@@ -279,7 +280,7 @@ describe('Wrestler Employment Workflows', function () {
 
             // Employed wrestler has full capabilities
             expect($employed->isBookable())->toBeTrue();
-            expect($employed->canBeSuspended())->toBeTrue();
+            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($employed))->toBeTrue();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($employed))->toBeTrue();
             expect($employed->canBeEmployed())->toBeFalse(); // Already employed
 
@@ -289,7 +290,7 @@ describe('Wrestler Employment Workflows', function () {
 
             // Released wrestler has limited capabilities again
             expect($released->isBookable())->toBeFalse();
-            expect($released->canBeSuspended())->toBeFalse();
+            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($released))->toBeFalse();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($released))->toBeFalse();
             expect($released->canBeEmployed())->toBeTrue(); // Can be re-employed
         });

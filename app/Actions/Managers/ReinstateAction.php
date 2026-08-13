@@ -6,14 +6,19 @@ namespace App\Actions\Managers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 final class ReinstateAction
 {
-    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualSuspensionEligibility $eligibility,
+    ) {}
 
     /**
      * Reinstate a suspended manager.
@@ -30,10 +35,13 @@ final class ReinstateAction
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {
-        $manager->ensureCanBeReinstated();
-
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        $this->suspensionPeriods->end($manager, $reinstatementDate, LifecycleTransitionType::Reinstated);
+        DB::transaction(function () use ($manager, $reinstatementDate): void {
+            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $this->eligibility->ensureCanReinstate($lockedManager);
+
+            $this->suspensionPeriods->end($lockedManager, $reinstatementDate, LifecycleTransitionType::Reinstated);
+        });
     }
 }

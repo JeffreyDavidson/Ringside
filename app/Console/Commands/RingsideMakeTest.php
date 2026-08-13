@@ -1098,7 +1098,6 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             // Validation trait methods
             'canBeEmployed', 'ensureCanBeEmployed', 'canBeReleased', 'ensureCanBeReleased',
             'canBeRetired', 'ensureCanBeRetired', 'canBeUnretired', 'ensureCanBeUnretired',
-            'canBeSuspended', 'ensureCanBeSuspended', 'canBeReinstated', 'ensureCanBeReinstated',
 
             // Other trait methods
             'belongsToOne',

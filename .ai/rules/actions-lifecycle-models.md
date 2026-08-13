@@ -10,3 +10,6 @@ Keep each model's deleted_at value authoritative for soft-deletion state. Typed 
 
 ## Keep individual injury eligibility outside models
 Store individual injury state through the shared polymorphic Injury model, but keep wrestler, manager, and referee injury/healing eligibility in IndividualInjuryEligibility. Typed Actions must reload and lock the individual inside a database transaction before checking eligibility and changing the injury period.
+
+## Keep individual suspension eligibility outside models
+Store individual suspension state through the shared polymorphic Suspension model, but keep wrestler, manager, and referee suspension/reinstatement eligibility in IndividualSuspensionEligibility. Typed Actions must reload and lock the individual inside a database transaction before checking eligibility and changing the suspension period.
