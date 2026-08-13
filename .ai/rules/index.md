@@ -19,6 +19,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Exceptions/{Matches,Scheduling}/** | .ai/rules/matches-scheduling.md |
 | app/{Actions/Matches,Services}/** | .ai/rules/matches-services.md |
 | database/migrations/** | .ai/rules/migrations.md |
+| app/{Models,ValueObjects,Casts}/** | .ai/rules/models-value-objects-casts.md |
 | app/Models/** | .ai/rules/models.md |
 | app/{Livewire,Http/Requests,Actions,Services}/** | .ai/rules/requests-actions-services.md |
 | app/Http/Requests/** | .ai/rules/requests.md |

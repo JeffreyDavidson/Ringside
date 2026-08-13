@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
+use InvalidArgumentException;
+
 /**
  * Value object representing a wrestler's height in feet and inches.
  *
@@ -31,7 +33,28 @@ readonly class Height
     public function __construct(
         public int $feet,
         public int $inches
-    ) {}
+    ) {
+        if ($feet < 0) {
+            throw new InvalidArgumentException('Height feet cannot be negative.');
+        }
+
+        if ($inches < 0 || $inches > 11) {
+            throw new InvalidArgumentException('Height inches must be between 0 and 11.');
+        }
+
+        if ($feet === 0 && $inches === 0) {
+            throw new InvalidArgumentException('Height must be greater than zero.');
+        }
+    }
+
+    public static function fromInches(int $inches): self
+    {
+        if ($inches <= 0) {
+            throw new InvalidArgumentException('Height must be greater than zero.');
+        }
+
+        return new self(intdiv($inches, 12), $inches % 12);
+    }
 
     /**
      * Get the height formatted as a string in wrestling notation.
