@@ -61,6 +61,10 @@ Core capabilities define what each entity type can do within the wrestling promo
 - **Not Eligible**: Managers, Referees, Titles, Stables
 - **Rationale**: Booking is for match competition, not management or officiating
 
+## Tag Team Membership Capability
+
+Wrestlers expose current and historical tag team membership through the `currentTagTeam`, `previousTagTeam`, and `tagTeams` Eloquent relationships. Whether a wrestler currently belongs to a tag team is determined by querying `currentTagTeam`; the model contract does not duplicate that relationship state with a boolean predicate.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)
