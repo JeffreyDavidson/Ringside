@@ -8,6 +8,7 @@ use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Builder;
 
 final class TagTeamRetirementEligibility
 {
@@ -53,7 +54,7 @@ final class TagTeamRetirementEligibility
         $conflictingTeam = TagTeam::query()
             ->where('name', $tagTeam->name)
             ->whereKeyNot($tagTeam->getKey())
-            ->whereHas('employments', fn ($query) => $query->whereNull('ended_at'))
+            ->whereHas('employments', fn (Builder $employmentQuery) => $employmentQuery->whereNull('ended_at'))
             ->first();
 
         if ($conflictingTeam) {
