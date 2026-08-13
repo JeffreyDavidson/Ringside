@@ -1095,8 +1095,6 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'suspensions', 'currentSuspension', 'previousSuspensions', 'previousSuspension',
             'isSuspended', 'hasSuspensions',
 
-            // Other trait methods
-            'belongsToOne',
         ];
 
         return in_array($methodName, $traitMethods);
