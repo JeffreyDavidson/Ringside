@@ -10,7 +10,6 @@ use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
-use App\Models\Concerns\HasEnumStatus;
 use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
@@ -91,7 +90,6 @@ describe('Wrestler Model Unit Tests', function () {
             expect(class_uses(Wrestler::class))->toContain(CanJoinStables::class);
             expect(class_uses(Wrestler::class))->toContain(CanJoinTagTeams::class);
             expect(class_uses(Wrestler::class))->toContain(CanWinTitles::class);
-            expect(class_uses(Wrestler::class))->toContain(HasEnumStatus::class);
             expect(class_uses(Wrestler::class))->toContain(HasFactory::class);
             expect(class_uses(Wrestler::class))->toContain(IsBookableCompetitor::class);
             expect(class_uses(Wrestler::class))->toContain(IsEmployable::class);
