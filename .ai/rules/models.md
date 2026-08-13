@@ -31,3 +31,6 @@ Store stable and title operational periods in App\Models\Lifecycle\ActivityPerio
 
 ## Separate lifecycle state from transition auditing
 Use lifecycle period models as the authoritative source of current and historical state. Use the immutable polymorphic LifecycleTransition model only as an audit log of named transitions, effective dates, actors, and optional context; never derive current state from transition records.
+
+## Model championship reign relationships
+Wrestler and TagTeam implement CanBeChampion and share polymorphic reign persistence through HasChampionshipReigns. A champion may hold multiple titles, so currentChampionships is authoritative and champion models must not expose singular currentChampionship. Title directly owns championships and singular currentChampionship relationships.

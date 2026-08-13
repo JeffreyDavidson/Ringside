@@ -7,14 +7,13 @@ namespace App\Models\TagTeams;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanWinTitles;
+use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\ProvidesTagTeamWrestlers;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
@@ -36,14 +35,16 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
- * @implements CanBeChampion<TitleChampionship>
+ * @implements CanBeChampion<$this>
  * @implements CanBeAStableMember<StableTagTeam, $this>
  * @implements Employable<static>
  * @implements Manageable<TagTeamManager, static>
@@ -87,7 +88,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Stable> $previousStables
  * @property-read Collection<int, EventMatch> $matches
  * @property-read Collection<int, EventMatch> $previousMatches
- * @property-read TitleChampionship|null $currentChampionship
  * @property-read Collection<int, TitleChampionship> $titleChampionships
  * @property-read Collection<int, TitleChampionship> $currentChampionships
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
@@ -126,9 +126,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;
 
-    /** @use CanWinTitles<TitleChampionship> */
-    use CanWinTitles;
-
+    use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<TagTeamFactory> */
@@ -148,10 +146,34 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @use IsSuspendable<static> */
     use IsSuspendable;
 
-    /** @use ProvidesTagTeamWrestlers<TagTeamWrestler> */
-    use ProvidesTagTeamWrestlers;
-
     use SoftDeletes;
+
+    /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
+    public function wrestlers(): BelongsToMany
+    {
+        return $this->belongsToMany(Wrestler::class, 'tag_teams_wrestlers', 'tag_team_id', 'wrestler_id')
+            ->using(TagTeamWrestler::class)
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
+    public function currentWrestlers(): BelongsToMany
+    {
+        return $this->wrestlers()->wherePivotNull('left_at');
+    }
+
+    /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
+    public function previousWrestlers(): BelongsToMany
+    {
+        return $this->wrestlers()->wherePivotNotNull('left_at');
+    }
+
+    /** @return Attribute<int, never> */
+    protected function combinedWeight(): Attribute
+    {
+        return Attribute::get(fn (): int => (int) $this->currentWrestlers->sum('weight'));
+    }
 
     protected function stableMembershipTable(): string
     {
