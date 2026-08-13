@@ -52,17 +52,23 @@ describe('ProvidesDisplayName Trait Unit Tests', function () {
             expect($model->getDisplayName())->toBe('John Doe');
         });
 
-        test('handles empty first_name and last_name', function () {
+        test('rejects first and last names without usable content', function (string $firstName, string $lastName) {
             $model = new class extends Model
             {
                 use ProvidesDisplayName;
 
-                public ?string $first_name = '';
+                public ?string $first_name;
 
-                public ?string $last_name = '';
+                public ?string $last_name;
             };
-            expect($model->getDisplayName())->toBe('');
-        });
+            $model->first_name = $firstName;
+            $model->last_name = $lastName;
+
+            expect(fn () => $model->getDisplayName())->toThrow(LogicException::class);
+        })->with([
+            'empty' => ['', ''],
+            'whitespace' => ['  ', "\t"],
+        ]);
 
         test('throws exception when no display name fields are available', function () {
             $model = new class extends Model

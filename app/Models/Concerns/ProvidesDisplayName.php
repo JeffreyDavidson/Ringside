@@ -44,9 +44,10 @@ trait ProvidesDisplayName
         if (array_key_exists('first_name', $attributes) && array_key_exists('last_name', $attributes)) {
             $firstName = $attributes['first_name'];
             $lastName = $attributes['last_name'];
+            $displayName = mb_trim((string) ($firstName ?? '').' '.(string) ($lastName ?? ''));
 
-            if ($firstName !== null || $lastName !== null) {
-                return mb_trim((string) ($firstName ?? '').' '.(string) ($lastName ?? ''));
+            if ($displayName !== '') {
+                return $displayName;
             }
         }
 
