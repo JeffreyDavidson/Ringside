@@ -10,6 +10,7 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
+use App\Lifecycle\StableActivityEligibility;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
@@ -20,6 +21,7 @@ class EstablishAction
     public function __construct(
         protected StartActivityPeriodAction $startActivityPeriodAction,
         protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected StableActivityEligibility $eligibility,
     ) {}
 
     /**
@@ -55,7 +57,7 @@ class EstablishAction
                     ->lockForUpdate()
                     ->findOrFail($stable->getKey());
 
-                $lockedStable->ensureCanBeEstablished();
+                $this->eligibility->ensureCanEstablish($lockedStable);
 
                 $activityPeriod = $this->startActivityPeriodAction->handle($lockedStable, $activationDate);
 

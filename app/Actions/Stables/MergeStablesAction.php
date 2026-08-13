@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
+use App\Lifecycle\StableRestructuringEligibility;
 use App\Models\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
@@ -20,6 +21,7 @@ class MergeStablesAction
     public function __construct(
         protected StableMembershipService $membershipService,
         protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected StableRestructuringEligibility $eligibility,
     ) {}
 
     /**
@@ -52,7 +54,7 @@ class MergeStablesAction
                 ? $firstLockedStable
                 : $secondLockedStable;
 
-            $lockedPrimaryStable->ensureCanBeMergedWith($lockedSecondaryStable);
+            $this->eligibility->ensureCanMerge($lockedPrimaryStable, $lockedSecondaryStable);
 
             $members = new StableMembershipData(
                 wrestlers: $lockedSecondaryStable->currentWrestlers,

@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\StableDeletionEligibility;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly StableDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Delete a stable.
@@ -28,7 +32,7 @@ class DeleteAction
                 ->lockForUpdate()
                 ->findOrFail($stable->getKey());
 
-            $lockedStable->ensureCanBeDeleted();
+            $this->eligibility->ensureCanDelete($lockedStable);
             $this->deletionState->delete($lockedStable, now());
         });
     }

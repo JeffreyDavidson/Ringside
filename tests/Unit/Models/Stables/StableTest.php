@@ -10,10 +10,6 @@ use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\IsRetirable;
-use App\Models\Concerns\ValidatesStableActivity;
-use App\Models\Concerns\ValidatesStableDeletion;
-use App\Models\Concerns\ValidatesStableRestructuring;
-use App\Models\Concerns\ValidatesStableRetirement;
 use App\Models\Contracts\Retirable;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -73,10 +69,6 @@ describe('Stable Model Unit Tests', function () {
             expect(class_uses(Stable::class))->toContain(FindsAvailableStableFormerMembers::class);
             expect(class_uses(Stable::class))->toContain(IsRetirable::class);
             expect(class_uses(Stable::class))->toContain(SoftDeletes::class);
-            expect(class_uses(Stable::class))->toContain(ValidatesStableActivity::class);
-            expect(class_uses(Stable::class))->toContain(ValidatesStableDeletion::class);
-            expect(class_uses(Stable::class))->toContain(ValidatesStableRetirement::class);
-            expect(class_uses(Stable::class))->toContain(ValidatesStableRestructuring::class);
         });
     });
 

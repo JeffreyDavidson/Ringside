@@ -9,6 +9,7 @@ use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
+use App\Lifecycle\StableActivityEligibility;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,7 @@ class ReuniteAction
     public function __construct(
         protected StartActivityPeriodAction $startActivityPeriodAction,
         protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected StableActivityEligibility $eligibility,
     ) {}
 
     /**
@@ -46,7 +48,7 @@ class ReuniteAction
                 ->lockForUpdate()
                 ->findOrFail($stable->getKey());
 
-            $lockedStable->ensureCanBeReunited();
+            $this->eligibility->ensureCanReunite($lockedStable);
             $this->startActivityPeriodAction->handle($lockedStable, $reuniteDate);
             $this->recordLifecycleTransitionAction->handle(
                 $lockedStable,
