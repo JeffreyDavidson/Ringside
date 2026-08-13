@@ -180,30 +180,6 @@ trait CanJoinTagTeams
     }
 
     /**
-     * Determine if the model is currently part of an active tag team.
-     *
-     * Checks if there is an active tag team relationship (where 'left_at' is null).
-     * This is more efficient than loading the relationship just to check existence.
-     *
-     * @return bool True if the model is currently in a tag team, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     *
-     * if ($wrestler->isAMemberOfCurrentTagTeam()) {
-     *     echo "Wrestler is currently in a tag team";
-     * }
-     * ```
-     */
-    public function isAMemberOfCurrentTagTeam(): bool
-    {
-        return $this->belongsToMany(TagTeam::class, $this->getTagTeamPivotTable())
-            ->wherePivotNull('left_at')
-            ->exists();
-    }
-
-    /**
      * Resolve the pivot model class for tag team relationships.
      *
      * This method automatically determines the pivot model class based on naming

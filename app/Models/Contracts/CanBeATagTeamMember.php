@@ -31,6 +31,4 @@ interface CanBeATagTeamMember
      * @return BelongsToMany<TagTeam, TModel, TPivotModel>
      */
     public function previousTagTeams(): BelongsToMany;
-
-    public function isAMemberOfCurrentTagTeam(): bool;
 }
