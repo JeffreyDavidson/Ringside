@@ -9,7 +9,6 @@ use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
@@ -96,7 +95,6 @@ class RetireAction
 
             $this->retirementPeriods->start($lockedStable, $retirementDate, LifecycleTransitionType::Retired);
 
-            $lockedStable->update(['status' => StableStatus::Retired]);
         });
     }
 }

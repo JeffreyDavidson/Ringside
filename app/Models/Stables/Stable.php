@@ -167,40 +167,4 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
             }
         );
     }
-
-    /**
-     * Check if the stable is currently active.
-     */
-    public function isActive(): bool
-    {
-        return $this->status === StableStatus::Active;
-    }
-
-    /**
-     * Check if the stable is disbanded (inactive status).
-     */
-    public function isDisbanded(): bool
-    {
-        return $this->status === StableStatus::Inactive;
-    }
-
-    /**
-     * Determine if the stable has a future establishment scheduled.
-     */
-    public function hasFutureEstablishment(): bool
-    {
-        return $this->hasFutureActivity();
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => StableStatus::class,
-        ];
-    }
 }

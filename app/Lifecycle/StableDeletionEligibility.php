@@ -34,7 +34,7 @@ final class StableDeletionEligibility
             throw CannotBeDeletedException::currentlyActive($stable);
         }
 
-        if ($stable->hasFutureEstablishment()) {
+        if ($stable->hasFutureActivity()) {
             throw CannotBeDeletedException::futureEstablishmentScheduled($stable);
         }
 

@@ -99,7 +99,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(DisbandAction::class)->handle($this->activeStable, $disbandDate);
 
             $refreshedStable = freshModel($this->activeStable);
-            expect($refreshedStable->isDisbanded())->toBeTrue();
+            expect($refreshedStable->status === StableStatus::Inactive)->toBeTrue();
             expect($refreshedStable->status)->toBe(StableStatus::Inactive);
 
             // Verify activity period is ended
@@ -303,7 +303,7 @@ describe('Stable Activation Action Integration', function () {
             // Disband
             $disbandDate = Carbon::now()->subMonths(6);
             resolve(DisbandAction::class)->handle($stable, $disbandDate);
-            expect(freshModel($stable)->isDisbanded())->toBeTrue();
+            expect(freshModel($stable)->status === StableStatus::Inactive)->toBeTrue();
 
             // Reunite
             $reuniteDate = Carbon::now()->subMonths(3);

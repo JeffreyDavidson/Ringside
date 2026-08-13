@@ -10,3 +10,6 @@ Put stable activity, retirement, deletion/restoration, and restructuring eligibi
 
 ## Keep former-member eligibility outside Stable
 Keep former-member availability rules in StableFormerMemberEligibility. Reunion and unretirement eligibility may consume that collaborator; do not add business-eligibility query methods or concerns to the Stable model.
+
+## Derive Stable status from lifecycle periods
+Treat activity and retirement periods as the authoritative Stable state. Expose StableStatus only through the computed status accessor; do not persist or update a status column, and use the canonical lifecycle predicates instead of adding status aliases to Stable.
