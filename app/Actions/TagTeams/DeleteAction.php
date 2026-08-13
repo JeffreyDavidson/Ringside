@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\TagTeamDeletionEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -15,6 +16,7 @@ class DeleteAction
     public function __construct(
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
         private readonly DeletionStateManager $deletionState,
+        private readonly TagTeamDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -52,15 +54,17 @@ class DeleteAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void
     {
-        $tagTeam->ensureCanBeDeleted();
-
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
-            $this->endCurrentRelationships->handle($tagTeam, $deletionDate);
+            $lockedTagTeam = TagTeam::query()->withTrashed()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $this->eligibility->ensureCanDelete($lockedTagTeam);
 
-            // Soft delete the tag team record
-            $this->deletionState->delete($tagTeam, $deletionDate);
+            $this->endCurrentRelationships->handle($lockedTagTeam, $deletionDate);
+
+            $this->deletionState->delete($lockedTagTeam, $deletionDate);
         });
+
+        $tagTeam->setAttribute($tagTeam->getDeletedAtColumn(), $deletionDate);
     }
 }

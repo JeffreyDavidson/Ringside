@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
+use App\Lifecycle\TagTeamSuspensionEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -17,6 +18,7 @@ class ReinstateAction
     public function __construct(
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly ReinstateCurrentMembersAction $reinstateCurrentMembers,
+        private readonly TagTeamSuspensionEligibility $eligibility,
     ) {}
 
     /**
@@ -35,13 +37,14 @@ class ReinstateAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {
-        $tagTeam->ensureCanBeReinstated();
-
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
-            $this->suspensionPeriods->end($tagTeam, $reinstatementDate, LifecycleTransitionType::Reinstated);
-            $this->reinstateCurrentMembers->handle($tagTeam, $reinstatementDate);
+            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $this->eligibility->ensureCanReinstate($lockedTagTeam);
+
+            $this->suspensionPeriods->end($lockedTagTeam, $reinstatementDate, LifecycleTransitionType::Reinstated);
+            $this->reinstateCurrentMembers->handle($lockedTagTeam, $reinstatementDate);
         });
     }
 }

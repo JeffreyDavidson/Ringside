@@ -14,9 +14,6 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesTagTeamWrestlers;
-use App\Models\Concerns\ValidatesTagTeamDeletion;
-use App\Models\Concerns\ValidatesTagTeamRetirement;
-use App\Models\Concerns\ValidatesTagTeamSuspension;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
@@ -154,9 +151,6 @@ class TagTeam extends Model implements Bookable, CanBeAStableMember, CanBeChampi
     use ProvidesTagTeamWrestlers;
 
     use SoftDeletes;
-    use ValidatesTagTeamDeletion;
-    use ValidatesTagTeamRetirement;
-    use ValidatesTagTeamSuspension;
 
     /**
      * The number of the wrestlers allowed on a tag team.

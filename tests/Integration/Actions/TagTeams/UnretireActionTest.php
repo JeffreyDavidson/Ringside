@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UnretireAction;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
+use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -55,7 +56,7 @@ test('it prevents unretiring a tag team with an injured current wrestler', funct
         ['joined_at' => now()->subDays(2), 'left_at' => null],
     );
 
-    expect($tagTeam->canBeUnretired())->toBeFalse();
+    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse();
 
     expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
         ->toThrow(CannotBeUnretiredException::class);
@@ -74,7 +75,7 @@ test('it prevents unretiring a tag team without enough current wrestlers', funct
         'left_at' => null,
     ]);
 
-    expect($tagTeam->canBeUnretired())->toBeFalse();
+    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse();
 
     expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
         ->toThrow(CannotBeUnretiredException::class);
@@ -176,8 +177,8 @@ test('it unretires without auto-employing when no current wrestlers are availabl
     $tagTeam->refresh();
     expect($tagTeam->isRetired())->toBeTrue();
     expect($tagTeam->currentWrestlers)->toBeEmpty();
-    expect($tagTeam->canBeUnretired())->toBeFalse()
-        ->and($tagTeam->canBeUnretired(requireAvailablePartners: false))->toBeTrue();
+    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
+        ->and(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam, requireAvailablePartners: false))->toBeTrue();
 
     resolve(UnretireAction::class)->handle($tagTeam, requireAvailablePartners: false);
 

@@ -12,6 +12,7 @@ use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,7 @@ class RetireAction
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected RetirementPeriodManager $retirementPeriods,
         protected IndividualRetirementEligibility $individualRetirementEligibility,
+        protected TagTeamRetirementEligibility $tagTeamRetirementEligibility,
     ) {}
 
     /**
@@ -78,7 +80,7 @@ class RetireAction
 
             if ($membersToRetire->tagTeams) {
                 foreach ($membersToRetire->tagTeams as $tagTeam) {
-                    if ($tagTeam->canBeRetired()) {
+                    if ($this->tagTeamRetirementEligibility->canRetire($tagTeam)) {
                         $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate);
                     }
                 }
