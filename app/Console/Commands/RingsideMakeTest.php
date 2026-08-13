@@ -1079,7 +1079,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'tagTeams', 'currentTagTeam', 'previousTagTeam', 'previousTagTeams',
             'titleChampionships', 'currentChampionships', 'previousTitleChampionships',
             'matches', 'previousMatches',
-            'wrestlers', 'currentWrestlers', 'previousWrestlers', 'combinedWeight',
+            'wrestlers', 'currentWrestlers', 'previousWrestlers',
 
             // Employment trait methods
             'employments', 'currentEmployment', 'futureEmployment', 'previousEmployments', 'previousEmployment',

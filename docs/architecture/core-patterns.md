@@ -39,6 +39,7 @@
 ## Computed Status Pattern
 - **Status fields are computed, not stored** - eliminates data inconsistency
 - Models use computed attributes: `protected function status(): Attribute`
+- Membership-derived calculations belong to typed membership data objects. For example, `TagTeamMembershipData` calculates combined wrestler weight without adding a presentation aggregate to the Eloquent model.
 - Factory methods NEVER set status fields manually
 - Status computed from relationships (employment, retirement, injury, suspension)
 - Priority order: Retired > Employed > FutureEmployment > Released > Unemployed
