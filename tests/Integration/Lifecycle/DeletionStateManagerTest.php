@@ -9,6 +9,7 @@ use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Managers\Manager;
+use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -25,6 +26,7 @@ test('it records deletion and restoration for every soft-deletable owner', funct
     $owner = match ($ownerType) {
         LifecycleOwnerType::Event => Event::factory()->create(),
         LifecycleOwnerType::Manager => Manager::factory()->create(),
+        LifecycleOwnerType::Match => EventMatch::factory()->create(),
         LifecycleOwnerType::Referee => Referee::factory()->create(),
         LifecycleOwnerType::Stable => Stable::factory()->create(),
         LifecycleOwnerType::TagTeam => TagTeam::factory()->create(),

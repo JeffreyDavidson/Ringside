@@ -155,6 +155,8 @@ Retirement eligibility uses explicit typed collaborators rather than an operatio
 
 Individual soft-deletion eligibility is shared by wrestlers, managers, and referees. `ValidatesIndividualDeletion` rejects repeated deletion through a typed business exception, while `ValidatesIndividualRestoration` requires an existing soft-deleted record. Their boolean predicates delegate to the same typed guards used by the deletion and restoration Actions. Restoring an individual does not infer or recreate employment or other historical relationships; those transitions remain explicit operations.
 
+Match deletion soft deletes only the `EventMatch` record through `DeletionStateManager`. Competitors, referee and title assignments, results, winners, losers, and championship references remain intact as historical records. Default match queries exclude deleted matches, while explicit historical queries may include them with `withTrashed()`.
+
 Suspension eligibility follows the same typed boundary. `IndividualSuspensionEligibility` accepts only wrestlers, managers, and referees and keeps each boolean predicate aligned with its throwing guard. Each typed Action reloads and locks the individual inside its transaction before changing the suspension period. Tag teams retain their established lifecycle validation, while stables and titles do not support suspension.
 
 Wrestler injury and suspension are mutually exclusive availability states. Both transition Actions acquire a lock on the wrestler and evaluate their opposing-state guard inside the same transaction that opens the new period. Concurrent injury and suspension requests therefore serialize on the wrestler instead of both validating stale state before either period is written.

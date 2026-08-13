@@ -7,6 +7,7 @@ use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Livewire\Events\Tables\Main as EventsTable;
 use App\Livewire\Managers\Tables\Main as ManagersTable;
+use App\Livewire\Matches\Tables\Main as MatchesTable;
 use App\Livewire\Referees\Tables\Main as RefereesTable;
 use App\Livewire\Stables\Tables\Main as StablesTable;
 use App\Livewire\TagTeams\Tables\Main as TagTeamsTable;
@@ -17,6 +18,7 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Lifecycle\LifecycleTransition;
 use App\Models\Managers\Manager;
+use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
@@ -30,6 +32,7 @@ test('table deletions use the typed lifecycle action', function (LifecycleOwnerT
     $owner = match ($ownerType) {
         LifecycleOwnerType::Event => Event::factory()->create(),
         LifecycleOwnerType::Manager => Manager::factory()->create(),
+        LifecycleOwnerType::Match => EventMatch::factory()->create(),
         LifecycleOwnerType::Referee => Referee::factory()->create(),
         LifecycleOwnerType::Stable => Stable::factory()->inactive()->create(),
         LifecycleOwnerType::TagTeam => TagTeam::factory()->create(),
@@ -40,6 +43,7 @@ test('table deletions use the typed lifecycle action', function (LifecycleOwnerT
     $component = match ($ownerType) {
         LifecycleOwnerType::Event => EventsTable::class,
         LifecycleOwnerType::Manager => ManagersTable::class,
+        LifecycleOwnerType::Match => MatchesTable::class,
         LifecycleOwnerType::Referee => RefereesTable::class,
         LifecycleOwnerType::Stable => StablesTable::class,
         LifecycleOwnerType::TagTeam => TagTeamsTable::class,

@@ -6,6 +6,8 @@ namespace App\Models\Matches;
 
 use App\Collections\MatchCompetitorsCollection;
 use App\Enums\MatchType;
+use App\Models\Concerns\HasLifecycleTransitions;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Events\Event;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
@@ -24,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
@@ -35,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $preview
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  *
  * @property-read MatchCompetitor|null $pivot
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
@@ -51,17 +55,23 @@ use Illuminate\Support\Carbon;
  * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch withoutTrashed()
  *
  * @mixin \Eloquent
  */
 #[Table('events_matches')]
 #[Fillable('event_id', 'match_number', 'match_type', 'match_stipulation_id', 'preview')]
 #[UseFactory(MatchFactory::class)]
-class EventMatch extends Model
+class EventMatch extends Model implements SoftDeletable
 {
     /** @use HasFactory<MatchFactory> */
     use HasFactory;
+
+    use HasLifecycleTransitions;
+    use SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
