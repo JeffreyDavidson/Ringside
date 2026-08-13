@@ -7,6 +7,7 @@ namespace App\Actions\Referees;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Referees\Referee;
@@ -20,6 +21,7 @@ class ReleaseAction
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -37,18 +39,19 @@ class ReleaseAction
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
-        $referee->ensureCanBeReleased();
-
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($referee, $releaseDate): void {
-            if ($referee->isSuspended()) {
-                $this->suspensionPeriods->end($referee, $releaseDate);
-            } elseif ($referee->isInjured()) {
-                $this->injuryPeriods->end($referee, $releaseDate);
+            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $this->eligibility->ensureCanRelease($lockedReferee);
+
+            if ($lockedReferee->isSuspended()) {
+                $this->suspensionPeriods->end($lockedReferee, $releaseDate);
+            } elseif ($lockedReferee->isInjured()) {
+                $this->injuryPeriods->end($lockedReferee, $releaseDate);
             }
 
-            $this->employmentPeriods->end($referee, $releaseDate, LifecycleTransitionType::Released);
+            $this->employmentPeriods->end($lockedReferee, $releaseDate, LifecycleTransitionType::Released);
         });
     }
 }

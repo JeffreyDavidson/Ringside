@@ -8,6 +8,7 @@ use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -18,6 +19,7 @@ class EmployAction
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly EmployCurrentManagersAction $employCurrentManagers,
+        private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -36,13 +38,14 @@ class EmployAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void
     {
-        $wrestler->ensureCanBeEmployed();
-
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($wrestler, $employmentDate): void {
-            $this->employmentPeriods->start($wrestler, $employmentDate, LifecycleTransitionType::Employed);
-            $this->employCurrentManagers->handle($wrestler, $employmentDate);
+            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $this->eligibility->ensureCanEmploy($lockedWrestler);
+
+            $this->employmentPeriods->start($lockedWrestler, $employmentDate, LifecycleTransitionType::Employed);
+            $this->employCurrentManagers->handle($lockedWrestler, $employmentDate);
         });
     }
 }

@@ -1095,9 +1095,6 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'suspensions', 'currentSuspension', 'previousSuspensions', 'previousSuspension',
             'isSuspended', 'hasSuspensions',
 
-            // Validation trait methods
-            'canBeEmployed', 'ensureCanBeEmployed', 'canBeReleased', 'ensureCanBeReleased',
-
             // Other trait methods
             'belongsToOne',
         ];

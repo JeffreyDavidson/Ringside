@@ -13,3 +13,6 @@ Store individual injury state through the shared polymorphic Injury model, but k
 
 ## Keep individual suspension eligibility outside models
 Store individual suspension state through the shared polymorphic Suspension model, but keep wrestler, manager, and referee suspension/reinstatement eligibility in IndividualSuspensionEligibility. Typed Actions must reload and lock the individual inside a database transaction before checking eligibility and changing the suspension period.
+
+## Keep individual employment eligibility outside models
+Store individual employment state through the shared polymorphic Employment model, but keep wrestler, manager, and referee employment/release eligibility in IndividualEmploymentEligibility. Typed Actions must reload and lock the individual inside a database transaction before checking eligibility and changing employment or related lifecycle periods; tag teams retain separate membership-aware rules.

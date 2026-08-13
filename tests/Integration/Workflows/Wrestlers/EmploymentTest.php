@@ -11,6 +11,7 @@ use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Models\Wrestlers\Wrestler;
@@ -262,7 +263,7 @@ describe('Wrestler Employment Workflows', function () {
 
             resolve(RetireAction::class)->handle($reinstated, Carbon::now());
             $retired = freshModel($wrestler);
-            expect($retired->canBeEmployed())->toBeFalse();
+            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($retired))->toBeFalse();
             expect($retired->isRetired())->toBeTrue();
         });
 
@@ -282,7 +283,7 @@ describe('Wrestler Employment Workflows', function () {
             expect($employed->isBookable())->toBeTrue();
             expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($employed))->toBeTrue();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($employed))->toBeTrue();
-            expect($employed->canBeEmployed())->toBeFalse(); // Already employed
+            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($employed))->toBeFalse(); // Already employed
 
             // Release wrestler
             resolve(ReleaseAction::class)->handle($employed, Carbon::now());
@@ -292,7 +293,7 @@ describe('Wrestler Employment Workflows', function () {
             expect($released->isBookable())->toBeFalse();
             expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($released))->toBeFalse();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($released))->toBeFalse();
-            expect($released->canBeEmployed())->toBeTrue(); // Can be re-employed
+            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($released))->toBeTrue(); // Can be re-employed
         });
     });
 
