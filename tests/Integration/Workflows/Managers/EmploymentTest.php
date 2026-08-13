@@ -8,6 +8,7 @@ use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Managers\Manager;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use Illuminate\Support\Carbon;
 
 /**
@@ -119,7 +120,7 @@ describe('Manager Employment Workflows', function () {
 
             // Verify business rule compliance
             expect($refreshedManager->isEmployed())->toBeTrue();
-            expect($refreshedManager->canBeEmployed())->toBeFalse(); // Already employed
+            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($refreshedManager))->toBeFalse(); // Already employed
         });
 
         test('employment enables management capability', function () {

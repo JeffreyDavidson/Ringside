@@ -7,6 +7,7 @@ namespace App\Actions\Wrestlers;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
@@ -21,6 +22,7 @@ class ReleaseAction
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -39,20 +41,21 @@ class ReleaseAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
-        $wrestler->ensureCanBeReleased();
-
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($wrestler, $releaseDate): void {
-            $this->employmentPeriods->end($wrestler, $releaseDate, LifecycleTransitionType::Released);
+            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $this->eligibility->ensureCanRelease($lockedWrestler);
 
-            if ($wrestler->isSuspended()) {
-                $this->suspensionPeriods->end($wrestler, $releaseDate);
-            } elseif ($wrestler->isInjured()) {
-                $this->injuryPeriods->end($wrestler, $releaseDate);
+            $this->employmentPeriods->end($lockedWrestler, $releaseDate, LifecycleTransitionType::Released);
+
+            if ($lockedWrestler->isSuspended()) {
+                $this->suspensionPeriods->end($lockedWrestler, $releaseDate);
+            } elseif ($lockedWrestler->isInjured()) {
+                $this->injuryPeriods->end($lockedWrestler, $releaseDate);
             }
 
-            $this->endCurrentRelationships->handle($wrestler, $releaseDate);
+            $this->endCurrentRelationships->handle($lockedWrestler, $releaseDate);
         });
     }
 }

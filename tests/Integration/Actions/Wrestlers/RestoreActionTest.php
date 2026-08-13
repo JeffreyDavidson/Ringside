@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\RestoreAction;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -207,7 +208,7 @@ test('it allows wrestler to be re-employed after restoration', function () {
 
     // After restoration, wrestler can be employed again using EmployAction
     // This test verifies the wrestler is in a valid state for future employment
-    expect($wrestler->canBeEmployed())->toBeTrue();
+    expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($wrestler))->toBeTrue();
 });
 
 test('it preserves wrestler identity and metadata', function () {

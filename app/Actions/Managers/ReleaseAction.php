@@ -7,6 +7,7 @@ namespace App\Actions\Managers;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Managers\Manager;
@@ -21,6 +22,7 @@ class ReleaseAction
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -38,20 +40,21 @@ class ReleaseAction
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
-        $manager->ensureCanBeReleased();
-
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($manager, $releaseDate): void {
-            $this->employmentPeriods->end($manager, $releaseDate, LifecycleTransitionType::Released);
+            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $this->eligibility->ensureCanRelease($lockedManager);
 
-            if ($manager->isSuspended()) {
-                $this->suspensionPeriods->end($manager, $releaseDate);
-            } elseif ($manager->isInjured()) {
-                $this->injuryPeriods->end($manager, $releaseDate);
+            $this->employmentPeriods->end($lockedManager, $releaseDate, LifecycleTransitionType::Released);
+
+            if ($lockedManager->isSuspended()) {
+                $this->suspensionPeriods->end($lockedManager, $releaseDate);
+            } elseif ($lockedManager->isInjured()) {
+                $this->injuryPeriods->end($lockedManager, $releaseDate);
             }
 
-            $this->endCurrentRelationships->handle($manager, $releaseDate);
+            $this->endCurrentRelationships->handle($lockedManager, $releaseDate);
         });
     }
 }

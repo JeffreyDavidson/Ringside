@@ -7,6 +7,7 @@ namespace App\Actions\Managers;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,7 @@ class EmployAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -32,12 +34,13 @@ class EmployAction
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
-        $manager->ensureCanBeEmployed();
-
         $startDate = DateHelper::resolveDate($startDate);
 
         DB::transaction(function () use ($manager, $startDate): void {
-            $this->employmentPeriods->start($manager, $startDate, LifecycleTransitionType::Employed);
+            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $this->eligibility->ensureCanEmploy($lockedManager);
+
+            $this->employmentPeriods->start($lockedManager, $startDate, LifecycleTransitionType::Employed);
         });
     }
 }

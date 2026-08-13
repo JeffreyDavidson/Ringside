@@ -13,7 +13,6 @@ use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
-use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesIndividualDeletion;
 use App\Models\Concerns\ValidatesIndividualRestoration;
 use App\Models\Contracts\Employable;
@@ -132,7 +131,6 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
 
     use ProvidesDisplayName;
     use SoftDeletes;
-    use ValidatesEmployment;
     use ValidatesIndividualDeletion;
     use ValidatesIndividualRestoration;
 

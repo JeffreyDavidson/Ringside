@@ -8,6 +8,7 @@ use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Referees\Referee;
+use App\Lifecycle\IndividualEmploymentEligibility;
 use Illuminate\Support\Carbon;
 
 /**
@@ -117,7 +118,7 @@ describe('Referee Employment Workflows', function () {
 
             // Verify business rule compliance
             expect($refreshedReferee->isEmployed())->toBeTrue();
-            expect($refreshedReferee->canBeEmployed())->toBeFalse(); // Already employed
+            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($refreshedReferee))->toBeFalse(); // Already employed
             expect($refreshedReferee->isBookable())->toBeTrue(); // Can be booked when employed
         });
 
