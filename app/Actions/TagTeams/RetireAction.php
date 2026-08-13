@@ -9,6 +9,7 @@ use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
+use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -21,6 +22,7 @@ class RetireAction
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly RetireCurrentMembersAction $retireCurrentMembers,
+        private readonly TagTeamRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -42,22 +44,23 @@ class RetireAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retireMembers = true): void
     {
-        $tagTeam->ensureCanBeRetired();
-
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($tagTeam, $retirementDate, $retireMembers): void {
-            if ($tagTeam->isEmployed()) {
-                $this->employmentPeriods->end($tagTeam, $retirementDate);
+            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $this->eligibility->ensureCanRetire($lockedTagTeam);
+
+            if ($lockedTagTeam->isEmployed()) {
+                $this->employmentPeriods->end($lockedTagTeam, $retirementDate);
             }
 
-            if ($tagTeam->isSuspended()) {
-                $this->suspensionPeriods->end($tagTeam, $retirementDate);
+            if ($lockedTagTeam->isSuspended()) {
+                $this->suspensionPeriods->end($lockedTagTeam, $retirementDate);
             }
 
-            $this->retirementPeriods->start($tagTeam, $retirementDate, LifecycleTransitionType::Retired);
+            $this->retirementPeriods->start($lockedTagTeam, $retirementDate, LifecycleTransitionType::Retired);
             if ($retireMembers) {
-                $this->retireCurrentMembers->handle($tagTeam, $retirementDate);
+                $this->retireCurrentMembers->handle($lockedTagTeam, $retirementDate);
             }
         });
     }

@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\TagTeamDeletionEligibility;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly TagTeamDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted tag team.
@@ -25,10 +29,13 @@ class RestoreAction
      */
     public function handle(TagTeam $tagTeam): void
     {
-        $tagTeam->ensureCanBeRestored();
-
         DB::transaction(function () use ($tagTeam): void {
-            $this->deletionState->restore($tagTeam, now());
+            $lockedTagTeam = TagTeam::query()->withTrashed()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $this->eligibility->ensureCanRestore($lockedTagTeam);
+
+            $this->deletionState->restore($lockedTagTeam, now());
         });
+
+        $tagTeam->setAttribute($tagTeam->getDeletedAtColumn(), null);
     }
 }

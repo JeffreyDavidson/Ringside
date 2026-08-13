@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\DeleteAction;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
+use App\Lifecycle\TagTeamDeletionEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 
@@ -11,13 +12,13 @@ test('it soft deletes a tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
     expect($tagTeam->trashed())->toBeFalse()
-        ->and($tagTeam->canBeDeleted())->toBeTrue();
+        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeTrue();
 
     resolve(DeleteAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->trashed())->toBeTrue()
-        ->and($tagTeam->canBeDeleted())->toBeFalse();
+        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse();
 
     // Verify soft delete in database
     $this->assertSoftDeleted('tag_teams', [
@@ -49,7 +50,7 @@ test('it prevents deleting retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     expect($tagTeam->isRetired())->toBeTrue()
-        ->and($tagTeam->canBeDeleted())->toBeFalse();
+        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse();
 
     expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
         ->toThrow(CannotBeDeletedException::class);

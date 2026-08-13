@@ -12,9 +12,6 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesTagTeamWrestlers;
-use App\Models\Concerns\ValidatesTagTeamDeletion;
-use App\Models\Concerns\ValidatesTagTeamRetirement;
-use App\Models\Concerns\ValidatesTagTeamSuspension;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
@@ -86,9 +83,6 @@ describe('TagTeam Model Unit Tests', function () {
             expect(class_uses(TagTeam::class))->toContain(IsSuspendable::class);
             expect(class_uses(TagTeam::class))->toContain(ProvidesTagTeamWrestlers::class);
             expect(class_uses(TagTeam::class))->toContain(SoftDeletes::class);
-            expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamDeletion::class);
-            expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamRetirement::class);
-            expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamSuspension::class);
         });
     });
 

@@ -6,6 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\SuspensionPeriodManager;
+use App\Lifecycle\TagTeamSuspensionEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,7 @@ class SuspendAction
     public function __construct(
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly SuspendCurrentMembersAction $suspendCurrentMembers,
+        private readonly TagTeamSuspensionEligibility $eligibility,
     ) {}
 
     /**
@@ -34,13 +36,14 @@ class SuspendAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void
     {
-        $tagTeam->ensureCanBeSuspended();
-
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         DB::transaction(function () use ($tagTeam, $suspensionDate): void {
-            $this->suspensionPeriods->start($tagTeam, $suspensionDate, LifecycleTransitionType::Suspended);
-            $this->suspendCurrentMembers->handle($tagTeam, $suspensionDate);
+            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $this->eligibility->ensureCanSuspend($lockedTagTeam);
+
+            $this->suspensionPeriods->start($lockedTagTeam, $suspensionDate, LifecycleTransitionType::Suspended);
+            $this->suspendCurrentMembers->handle($lockedTagTeam, $suspensionDate);
         });
     }
 }
