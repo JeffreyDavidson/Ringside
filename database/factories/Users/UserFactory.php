@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'role' => Role::Basic,
             'avatar_path' => '300-3.png',
-            'phone_number' => fake()->unique()->phoneNumber(),
+            'phone_number' => fake()->unique()->numerify('##########'),
         ];
     }
 

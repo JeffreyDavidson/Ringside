@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
+use App\ValueObjects\PhoneNumber;
 use Database\Seeders\UsersTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -85,7 +86,7 @@ describe('UsersTableSeeder Integration Tests', function () {
                 expect($admin->last_name)->toBe('User');
                 expect($admin->email)->toContain('@example.com');
                 expect($admin->avatar_path)->toBe('300-3.png');
-                expect($admin->phone_number)->toBeString();
+                expect($admin->phone_number)->toBeInstanceOf(PhoneNumber::class);
                 expect($admin->status)->toBe(UserStatus::Active);
             }
         });
@@ -134,7 +135,7 @@ describe('UsersTableSeeder Integration Tests', function () {
                 expect($user->last_name)->toBe('User');
                 expect($user->email)->toContain('@example.com');
                 expect($user->avatar_path)->toBe('300-3.png');
-                expect($user->phone_number)->toBeString();
+                expect($user->phone_number)->toBeInstanceOf(PhoneNumber::class);
                 expect($user->status)->toBe(UserStatus::Active);
             }
         });

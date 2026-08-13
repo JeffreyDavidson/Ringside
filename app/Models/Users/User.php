@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Models\Users;
 
 use App\Builders\Users\UserBuilder;
+use App\Casts\PhoneNumberCast;
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\Models\Wrestlers\Wrestler;
+use App\ValueObjects\PhoneNumber;
 use Database\Factories\Users\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -35,14 +37,13 @@ use Illuminate\Support\Carbon;
  * @property string $password
  * @property UserStatus $status
  * @property string|null $avatar_path
- * @property string|null $phone_number
+ * @property PhoneNumber|null $phone_number
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  *
  * @property-read Role $role
- * @property-read string $formatted_phone_number
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read Wrestler|null $wrestler
  * @property-read Collection<int, Wrestler> $wrestlers
@@ -82,6 +83,7 @@ class User extends Authenticatable
         return [
             'role' => Role::class,
             'status' => UserStatus::class,
+            'phone_number' => PhoneNumberCast::class,
         ];
     }
 
@@ -108,20 +110,6 @@ class User extends Authenticatable
     public function getAvatar(): string
     {
         return $this->avatar_path ?? 'blank.png';
-    }
-
-    /**
-     * Get the formatted phone number attribute.
-     *
-     * @return Attribute<string, never>
-     */
-    public function formattedPhoneNumber(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->phone_number
-                ? sprintf('(%s) %s-%s', mb_substr($this->phone_number, 0, 3), mb_substr($this->phone_number, 3, 3), mb_substr($this->phone_number, 6, 4))
-                : '',
-        );
     }
 
     /**
