@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Tables;
 
+use App\Actions\Matches\DeleteAction;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -73,6 +74,10 @@ class Main extends BaseTable
 
     public function delete(EventMatch $eventMatch): void
     {
-        $this->deleteModel($eventMatch);
+        Gate::authorize('delete', $eventMatch);
+
+        resolve(DeleteAction::class)->handle($eventMatch);
+
+        session()->flash('status', 'Match successfully deleted.');
     }
 }

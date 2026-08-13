@@ -92,6 +92,21 @@ describe('Matches Main Table Component Integration', function () {
         });
     });
 
+    describe('deletion', function () {
+        test('deletes matches through the table action', function () {
+            $match = EventMatch::factory()->create([
+                'event_id' => $this->event->id,
+            ]);
+
+            actingAs($this->admin);
+
+            livewire(Main::class)
+                ->call('delete', $match);
+
+            $this->assertModelMissing($match);
+        });
+    });
+
     describe('query optimization and performance', function () {
         test('component loads efficiently with many matches', function () {
             EventMatch::factory()->count(10)->create([
