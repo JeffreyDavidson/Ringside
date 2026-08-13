@@ -72,7 +72,7 @@ describe('UserFactory Unit Tests', function () {
 
             // Assert
             expect($admin->role)->toBe(Role::Administrator);
-            expect($admin->isAdministrator())->toBeTrue();
+            expect($admin->role->isAdministrator())->toBeTrue();
         });
 
         test('unverified state works correctly', function () {
@@ -89,7 +89,7 @@ describe('UserFactory Unit Tests', function () {
 
             // Assert
             expect($user->role)->toBe(Role::Basic);
-            expect($user->isAdministrator())->toBeFalse();
+            expect($user->role->isAdministrator())->toBeFalse();
         });
     });
 

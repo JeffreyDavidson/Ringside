@@ -153,7 +153,7 @@ describe('UserBuilder Unit Tests', function () {
             expect($adminUsers)->toBeInstanceOf(Collection::class);
 
             foreach ($adminUsers as $user) {
-                expect($user->isAdministrator())->toBeTrue();
+                expect($user->role->isAdministrator())->toBeTrue();
             }
         });
 

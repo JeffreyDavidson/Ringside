@@ -9,6 +9,11 @@ enum Role: string
     case Administrator = 'administrator';
     case Basic = 'basic';
 
+    public function isAdministrator(): bool
+    {
+        return $this === self::Administrator;
+    }
+
     public function color(): string
     {
         return match ($this) {

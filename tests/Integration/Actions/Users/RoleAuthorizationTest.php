@@ -70,14 +70,14 @@ describe('User Role Integration Tests', function () {
             $user4 = User::factory()->create(['role' => Role::Basic]);
 
             // All administrators should have same permissions
-            expect($user1->isAdministrator())->toBeTrue();
-            expect($user2->isAdministrator())->toBeTrue();
+            expect($user1->role->isAdministrator())->toBeTrue();
+            expect($user2->role->isAdministrator())->toBeTrue();
             expect(Gate::forUser($user1)->allows('create', User::class))->toBeTrue();
             expect(Gate::forUser($user2)->allows('create', User::class))->toBeTrue();
 
             // All basic users should have same restrictions
-            expect($user3->isAdministrator())->toBeFalse();
-            expect($user4->isAdministrator())->toBeFalse();
+            expect($user3->role->isAdministrator())->toBeFalse();
+            expect($user4->role->isAdministrator())->toBeFalse();
             expect(Gate::forUser($user3)->denies('create', User::class))->toBeTrue();
             expect(Gate::forUser($user4)->denies('create', User::class))->toBeTrue();
         });
@@ -108,7 +108,7 @@ describe('User Role Integration Tests', function () {
             $user = User::factory()->create(['role' => Role::Basic]);
 
             // Initially basic user should be denied
-            expect($user->isAdministrator())->toBeFalse();
+            expect($user->role->isAdministrator())->toBeFalse();
             expect(Gate::forUser($user)->denies('create', User::class))->toBeTrue();
 
             // Change role to administrator
@@ -116,7 +116,7 @@ describe('User Role Integration Tests', function () {
             $user->refresh();
 
             // Should now have administrator permissions
-            expect($user->isAdministrator())->toBeTrue();
+            expect($user->role->isAdministrator())->toBeTrue();
             expect(Gate::forUser($user)->allows('create', User::class))->toBeTrue();
         });
 
@@ -131,7 +131,7 @@ describe('User Role Integration Tests', function () {
             $admin->refresh();
 
             // Should still have administrator permissions
-            expect($admin->isAdministrator())->toBeTrue();
+            expect($admin->role->isAdministrator())->toBeTrue();
             expect(Gate::forUser($admin)->allows('create', User::class))->toBeTrue();
         });
     });
@@ -157,11 +157,11 @@ describe('User Role Integration Tests', function () {
             // Test authentication state integration with roles
             actingAs($this->administrator);
             expect(auth()->check())->toBeTrue();
-            expect(requiredModel(auth()->user())->isAdministrator())->toBeTrue();
+            expect(requiredModel(auth()->user())->role->isAdministrator())->toBeTrue();
 
             actingAs($this->basicUser);
             expect(auth()->check())->toBeTrue();
-            expect(requiredModel(auth()->user())->isAdministrator())->toBeFalse();
+            expect(requiredModel(auth()->user())->role->isAdministrator())->toBeFalse();
         });
     });
 
@@ -171,7 +171,7 @@ describe('User Role Integration Tests', function () {
 
             // Verify initial state
             expect($user->role)->toBe(Role::Basic);
-            expect($user->isAdministrator())->toBeFalse();
+            expect($user->role->isAdministrator())->toBeFalse();
             expect(Gate::forUser($user)->denies('create', User::class))->toBeTrue();
 
             // Promote to administrator
@@ -180,13 +180,13 @@ describe('User Role Integration Tests', function () {
 
             // Verify promotion worked across all systems
             expect($user->role)->toBe(Role::Administrator);
-            expect($user->isAdministrator())->toBeTrue();
+            expect($user->role->isAdministrator())->toBeTrue();
             expect(Gate::forUser($user)->allows('create', User::class))->toBeTrue();
 
             // Verify in database
             $userFromDb = User::findOrFail($user->id);
             expect($userFromDb->role)->toBe(Role::Administrator);
-            expect($userFromDb->isAdministrator())->toBeTrue();
+            expect($userFromDb->role->isAdministrator())->toBeTrue();
         });
 
         test('role demotion workflow maintains consistency', function () {
@@ -194,7 +194,7 @@ describe('User Role Integration Tests', function () {
 
             // Verify initial administrator state
             expect($user->role)->toBe(Role::Administrator);
-            expect($user->isAdministrator())->toBeTrue();
+            expect($user->role->isAdministrator())->toBeTrue();
             expect(Gate::forUser($user)->allows('create', User::class))->toBeTrue();
 
             // Demote to basic user
@@ -203,13 +203,13 @@ describe('User Role Integration Tests', function () {
 
             // Verify demotion worked across all systems
             expect($user->role)->toBe(Role::Basic);
-            expect($user->isAdministrator())->toBeFalse();
+            expect($user->role->isAdministrator())->toBeFalse();
             expect(Gate::forUser($user)->denies('create', User::class))->toBeTrue();
 
             // Verify in database
             $userFromDb = User::findOrFail($user->id);
             expect($userFromDb->role)->toBe(Role::Basic);
-            expect($userFromDb->isAdministrator())->toBeFalse();
+            expect($userFromDb->role->isAdministrator())->toBeFalse();
         });
 
         test('bulk role operations maintain system integrity', function () {
@@ -217,7 +217,7 @@ describe('User Role Integration Tests', function () {
 
             // Verify all are basic users initially
             foreach ($users as $user) {
-                expect($user->isAdministrator())->toBeFalse();
+                expect($user->role->isAdministrator())->toBeFalse();
             }
 
             // Bulk promote to administrators
@@ -226,7 +226,7 @@ describe('User Role Integration Tests', function () {
             // Verify all are now administrators
             $updatedUsers = User::whereIn('id', $users->pluck('id'))->get();
             foreach ($updatedUsers as $user) {
-                expect($user->isAdministrator())->toBeTrue();
+                expect($user->role->isAdministrator())->toBeTrue();
                 expect(Gate::forUser($user)->allows('create', User::class))->toBeTrue();
             }
         });
@@ -285,20 +285,20 @@ describe('User Role Integration Tests', function () {
             $admin = User::factory()->administrator()->create();
 
             // Verify initial state
-            expect($admin->isAdministrator())->toBeTrue();
+            expect($admin->role->isAdministrator())->toBeTrue();
 
             // Soft delete user
             $admin->delete();
 
             // Role should still be maintained on deleted user
             $deletedAdmin = User::withTrashed()->findOrFail($admin->id);
-            expect($deletedAdmin->isAdministrator())->toBeTrue();
+            expect($deletedAdmin->role->isAdministrator())->toBeTrue();
 
             // Restore user
             $admin->restore();
 
             // Role should still work after restoration
-            expect(freshModel($admin)->isAdministrator())->toBeTrue();
+            expect(freshModel($admin)->role->isAdministrator())->toBeTrue();
             expect(Gate::forUser(freshModel($admin))->allows('create', User::class))->toBeTrue();
         });
     });
