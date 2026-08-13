@@ -23,6 +23,7 @@ test('employment predicate stays aligned with its guard', function (string $fact
 })->with([
     'unemployed with current wrestlers' => ['unemployed', true],
     'employed' => ['employed', false],
+    'future employment' => ['withFutureEmployment', false],
     'retired' => ['retired', false],
     'released with current wrestlers' => ['released', true],
 ]);

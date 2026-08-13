@@ -24,6 +24,13 @@ final class CannotBeEmployedException extends BaseBusinessException
         return self::forReason(BusinessRuleReason::Retired, "{$context} is retired and cannot be employed. Consider unretirement first.");
     }
 
+    public static function hasFutureEmployment(TagTeam $tagTeam): static
+    {
+        $context = self::formatModelContext($tagTeam);
+
+        return new self("{$context} already has future employment scheduled and cannot be employed again.");
+    }
+
     public static function partnersUnavailable(TagTeam $tagTeam, string $unavailablePartners): static
     {
         $context = self::formatModelContext($tagTeam);
