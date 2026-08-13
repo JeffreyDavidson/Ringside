@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Venues;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Venue;
 
 class DeleteAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Delete a venue.
      *
@@ -21,6 +24,6 @@ class DeleteAction
      */
     public function handle(Venue $venue): void
     {
-        $venue->delete();
+        $this->deletionState->delete($venue, now());
     }
 }

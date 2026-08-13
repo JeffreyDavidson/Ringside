@@ -34,6 +34,7 @@ use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
@@ -123,7 +124,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
-class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, Suspendable
+class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
     use BelongsToUser;
 

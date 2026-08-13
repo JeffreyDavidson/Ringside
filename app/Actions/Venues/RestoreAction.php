@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Venues;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Venue;
 
 class RestoreAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Restore a soft-deleted venue.
      *
@@ -21,6 +24,6 @@ class RestoreAction
      */
     public function handle(Venue $venue): void
     {
-        $venue->restore();
+        $this->deletionState->restore($venue, now());
     }
 }

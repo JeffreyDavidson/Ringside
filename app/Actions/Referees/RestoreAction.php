@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Restore a soft-deleted referee.
      *
@@ -26,7 +29,7 @@ class RestoreAction
         $referee->ensureCanBeRestored();
 
         DB::transaction(function () use ($referee): void {
-            $referee->restore();
+            $this->deletionState->restore($referee, now());
 
             // Note: No automatic relationship restoration to avoid conflicts.
             // All employment relationships must be re-established explicitly using separate actions.

@@ -23,6 +23,7 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
@@ -112,7 +113,7 @@ use Tests\Unit\Models\Managers\ManagerTest;
 #[Appends('status')]
 #[UseFactory(ManagerFactory::class)]
 #[UseEloquentBuilder(ManagerBuilder::class)]
-class Manager extends Model implements Employable, HasDisplayName, Injurable, Retirable, Suspendable
+class Manager extends Model implements Employable, HasDisplayName, Injurable, Retirable, SoftDeletable, Suspendable
 {
     use DefinesManagedAliases;
     use HasBelongsToOne;

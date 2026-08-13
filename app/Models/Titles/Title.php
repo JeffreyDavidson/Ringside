@@ -18,6 +18,7 @@ use App\Models\Concerns\ValidatesTitleRetirement;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Lifecycle\LifecycleTransition;
 use App\Models\Lifecycle\Retirement;
@@ -100,7 +101,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(TitleFactory::class)]
 #[UseEloquentBuilder(TitleBuilder::class)]
-class Title extends Model implements HasActivityPeriodsContract, HasDisplayName, Retirable
+class Title extends Model implements HasActivityPeriodsContract, HasDisplayName, Retirable, SoftDeletable
 {
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;

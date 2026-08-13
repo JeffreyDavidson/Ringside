@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Event;
 use Illuminate\Support\Carbon;
 
 class DeleteAction
 {
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
+
     /**
      * Delete an event.
      *
@@ -35,6 +38,6 @@ class DeleteAction
      */
     public function handle(Event $event, ?Carbon $deletionDate = null): void
     {
-        $event->delete();
+        $this->deletionState->delete($event, $deletionDate ?? now());
     }
 }

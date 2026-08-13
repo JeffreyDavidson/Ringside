@@ -19,6 +19,7 @@ use App\Models\Concerns\ValidatesStableRestructuring;
 use App\Models\Concerns\ValidatesStableRetirement;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Lifecycle\LifecycleTransition;
 use App\Models\Lifecycle\Retirement;
@@ -109,7 +110,7 @@ use Tests\Unit\Models\Stables\StableTest;
 #[Appends('status')]
 #[UseFactory(StableFactory::class)]
 #[UseEloquentBuilder(StableBuilder::class)]
-class Stable extends Model implements HasActivityPeriodsContract, Retirable
+class Stable extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
     use FindsAvailableStableFormerMembers;
 

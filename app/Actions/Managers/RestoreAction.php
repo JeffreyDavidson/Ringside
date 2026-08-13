@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Managers\Manager;
 use App\Services\ManagerAssignmentService;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly ManagerAssignmentService $managerAssignments) {}
+    public function __construct(
+        private readonly ManagerAssignmentService $managerAssignments,
+        private readonly DeletionStateManager $deletionState,
+    ) {}
 
     /**
      * Restore a soft-deleted manager.
@@ -29,9 +33,8 @@ class RestoreAction
         $manager->ensureCanBeRestored();
 
         DB::transaction(function () use ($manager): void {
-            $manager->restore();
-
             $restorationDate = now();
+            $this->deletionState->restore($manager, $restorationDate);
 
             $manager->employments()->whereNull('ended_at')->update(['ended_at' => $restorationDate]);
             $this->managerAssignments->endCurrentAssignments($manager, $restorationDate);

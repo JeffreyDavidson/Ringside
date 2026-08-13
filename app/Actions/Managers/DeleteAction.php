@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Lifecycle\DeletionPeriodCloser;
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -14,6 +15,7 @@ class DeleteAction
 {
     public function __construct(
         private readonly DeletionPeriodCloser $periods,
+        private readonly DeletionStateManager $deletionState,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
@@ -50,7 +52,7 @@ class DeleteAction
             $this->endCurrentRelationships->handle($manager, $deletionDate);
 
             // Soft delete the manager record
-            $manager->delete();
+            $this->deletionState->delete($manager, $deletionDate);
         });
     }
 }

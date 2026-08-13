@@ -7,6 +7,7 @@ namespace App\Enums\Lifecycle;
 enum LifecycleTransitionType: string
 {
     case Debuted = 'debuted';
+    case Deleted = 'deleted';
     case Disbanded = 'disbanded';
     case Employed = 'employed';
     case Established = 'established';
@@ -15,6 +16,7 @@ enum LifecycleTransitionType: string
     case LegacyStatusChanged = 'legacy_status_changed';
     case Pulled = 'pulled';
     case Reinstated = 'reinstated';
+    case Restored = 'restored';
     case Released = 'released';
     case Reunited = 'reunited';
     case Retired = 'retired';

@@ -6,7 +6,9 @@ namespace App\Models\Events;
 
 use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
+use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HasMatches;
+use App\Models\Contracts\SoftDeletable;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Events\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -54,11 +56,12 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(EventFactory::class)]
 #[UseEloquentBuilder(EventBuilder::class)]
-class Event extends Model
+class Event extends Model implements SoftDeletable
 {
     /** @use HasFactory<EventFactory> */
     use HasFactory;
 
+    use HasLifecycleTransitions;
     use HasMatches;
     use SoftDeletes;
 

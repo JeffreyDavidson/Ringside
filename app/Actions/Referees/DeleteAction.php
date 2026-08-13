@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Lifecycle\DeletionPeriodCloser;
+use App\Lifecycle\DeletionStateManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -12,7 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly DeletionPeriodCloser $periods) {}
+    public function __construct(
+        private readonly DeletionPeriodCloser $periods,
+        private readonly DeletionStateManager $deletionState,
+    ) {}
 
     /**
      * Delete a referee.
@@ -46,7 +50,7 @@ class DeleteAction
             $this->periods->close($referee, $deletionDate);
 
             // Soft delete the referee record
-            $referee->delete();
+            $this->deletionState->delete($referee, $deletionDate);
         });
     }
 }

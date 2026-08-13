@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Lifecycle\DeletionStateManager;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -11,7 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly EndCurrentRelationshipsAction $endCurrentRelationships) {}
+    public function __construct(
+        private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly DeletionStateManager $deletionState,
+    ) {}
 
     /**
      * Delete a tag team.
@@ -56,7 +60,7 @@ class DeleteAction
             $this->endCurrentRelationships->handle($tagTeam, $deletionDate);
 
             // Soft delete the tag team record
-            $tagTeam->delete();
+            $this->deletionState->delete($tagTeam, $deletionDate);
         });
     }
 }
