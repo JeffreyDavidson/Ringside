@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReleaseAction;
+use App\Data\TagTeams\TagTeamMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
+use App\Lifecycle\TagTeamEmploymentEligibility;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
+use App\Services\TagTeamMembershipService;
 use Illuminate\Support\Carbon;
 
 /**
@@ -78,10 +82,20 @@ describe('TagTeam Employment Workflows', function () {
             resolve(ReleaseAction::class)->handle($tagTeam, Carbon::now()->subMonths(9));
 
             // Second employment
+            resolve(TagTeamMembershipService::class)->establishMembership(
+                $tagTeam,
+                new TagTeamMembershipData(Wrestler::factory()->count(2)->create()),
+                Carbon::now()->subMonths(8),
+            );
             resolve(EmployAction::class)->handle($tagTeam, Carbon::now()->subMonths(6));
             resolve(ReleaseAction::class)->handle($tagTeam, Carbon::now()->subMonths(3));
 
             // Current employment
+            resolve(TagTeamMembershipService::class)->establishMembership(
+                $tagTeam,
+                new TagTeamMembershipData(Wrestler::factory()->count(2)->create()),
+                Carbon::now()->subMonths(2),
+            );
             resolve(EmployAction::class)->handle($tagTeam, Carbon::now()->subMonths(1));
 
             $refreshedTagTeam = freshModel($tagTeam);
@@ -136,7 +150,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // Verify business rule compliance
             expect($refreshedTagTeam->isEmployed())->toBeTrue();
-            expect($refreshedTagTeam->canBeEmployed())->toBeFalse(); // Already employed
+            expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($refreshedTagTeam))->toBeFalse();
         });
 
         test('employment status affects basic capabilities workflow', function () {
@@ -144,7 +158,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // Unemployed tag team has limited capabilities
             expect($tagTeam->isEmployed())->toBeFalse();
-            expect($tagTeam->canBeEmployed())->toBeTrue();
+            expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($tagTeam))->toBeTrue();
 
             // Employ tag team
             resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
@@ -152,7 +166,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // Employed tag team has different capabilities
             expect($employed->isEmployed())->toBeTrue();
-            expect($employed->canBeEmployed())->toBeFalse(); // Already employed
+            expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($employed))->toBeFalse();
 
             // Release tag team
             resolve(ReleaseAction::class)->handle($employed, Carbon::now());
@@ -160,7 +174,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // Released tag team capabilities
             expect($released->isEmployed())->toBeFalse();
-            expect($released->canBeEmployed())->toBeFalse(); // Needs current partners before re-employment
+            expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($released))->toBeFalse();
         });
     });
 
@@ -191,6 +205,11 @@ describe('TagTeam Employment Workflows', function () {
             resolve(ReleaseAction::class)->handle($tagTeam, Carbon::now());
             expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(0);
 
+            resolve(TagTeamMembershipService::class)->establishMembership(
+                $tagTeam,
+                new TagTeamMembershipData(Wrestler::factory()->count(2)->create()),
+                Carbon::now(),
+            );
             resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             expect(freshModel($tagTeam)->employments()->whereNull('ended_at')->count())->toBe(1);
 

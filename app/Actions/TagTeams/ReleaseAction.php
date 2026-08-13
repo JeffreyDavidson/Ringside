@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
+use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
+use App\Lifecycle\TagTeamEmploymentEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -19,6 +20,7 @@ class ReleaseAction
         private readonly EmploymentPeriodManager $employmentPeriods,
         private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly TagTeamEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -38,18 +40,19 @@ class ReleaseAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
-        $tagTeam->ensureCanBeReleased();
-
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($tagTeam, $releaseDate): void {
-            $this->employmentPeriods->end($tagTeam, $releaseDate, LifecycleTransitionType::Released);
+            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $this->eligibility->ensureCanRelease($lockedTagTeam);
 
-            if ($tagTeam->isSuspended()) {
-                $this->suspensionPeriods->end($tagTeam, $releaseDate);
+            $this->employmentPeriods->end($lockedTagTeam, $releaseDate, LifecycleTransitionType::Released);
+
+            if ($lockedTagTeam->isSuspended()) {
+                $this->suspensionPeriods->end($lockedTagTeam, $releaseDate);
             }
 
-            $this->endCurrentRelationships->handle($tagTeam, $releaseDate);
+            $this->endCurrentRelationships->handle($lockedTagTeam, $releaseDate);
         });
     }
 }
