@@ -229,8 +229,8 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             $firstCompetitor = $match->competitors->firstOrFail();
             $winner = $match->result->winners->firstOrFail();
 
-            expect($winner->winner_type)->toBe($firstCompetitor->competitor_type);
-            expect($winner->winner_id)->toBe($firstCompetitor->competitor_id);
+            expect($winner->competitor->competitor_type)->toBe($firstCompetitor->competitor_type);
+            expect($winner->competitor->competitor_id)->toBe($firstCompetitor->competitor_id);
         });
 
         test('generates match with last competitor as winner', function () {
@@ -247,8 +247,8 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             $lastCompetitor = $match->competitors->reverse()->firstOrFail();
             $winner = $match->result->winners->firstOrFail();
 
-            expect($winner->winner_type)->toBe($lastCompetitor->competitor_type);
-            expect($winner->winner_id)->toBe($lastCompetitor->competitor_id);
+            expect($winner->competitor->competitor_type)->toBe($lastCompetitor->competitor_type);
+            expect($winner->competitor->competitor_id)->toBe($lastCompetitor->competitor_id);
         });
 
         test('generates match with multiple winners', function () {
@@ -383,7 +383,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
 
             // Challenger should win (last competitor strategy)
             $winner = $match->result->winners->firstOrFail();
-            expect($winner->winner_id)->toBe($challenger->id);
+            expect($winner->competitor->competitor_id)->toBe($challenger->id);
         });
 
         test('generates multi-title unification match', function () {

@@ -137,7 +137,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function allBookable(): bool
     {
-        return $this->every(fn (MatchCompetitor $competitor) => RosterBookingEligibility::allows($competitor->getCompetitor()));
+        return $this->every(fn (MatchCompetitor $competitor) => RosterBookingEligibility::allows($competitor->competitor));
     }
 
     /**
@@ -168,7 +168,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function mapToCompetitorInstances(): BaseCollection
     {
-        return $this->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor());
+        return $this->map(fn (MatchCompetitor $competitor) => $competitor->competitor);
     }
 
     /**
@@ -183,7 +183,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function onlyWrestlers(): static
     {
-        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->getCompetitor() instanceof Wrestler
+        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->competitor instanceof Wrestler
         );
     }
 
@@ -199,7 +199,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function onlyTagTeams(): static
     {
-        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->getCompetitor() instanceof TagTeam
+        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->competitor instanceof TagTeam
         );
     }
 
@@ -231,7 +231,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function pluckCompetitors(): BaseCollection
     {
-        return $this->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor());
+        return $this->map(fn (MatchCompetitor $competitor) => $competitor->competitor);
     }
 
     /**
@@ -246,8 +246,8 @@ class MatchCompetitorsCollection extends Collection
      */
     public function pluckWrestlers(): BaseCollection
     {
-        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->getCompetitor() instanceof Wrestler
-        )->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor());
+        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->competitor instanceof Wrestler
+        )->map(fn (MatchCompetitor $competitor) => $competitor->competitor);
     }
 
     /**
@@ -262,8 +262,8 @@ class MatchCompetitorsCollection extends Collection
      */
     public function pluckTagTeams(): BaseCollection
     {
-        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->getCompetitor() instanceof TagTeam
-        )->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor());
+        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->competitor instanceof TagTeam
+        )->map(fn (MatchCompetitor $competitor) => $competitor->competitor);
     }
 
     /**
@@ -282,7 +282,7 @@ class MatchCompetitorsCollection extends Collection
         return $this->groupBy('side_number')
             ->map(function (MatchCompetitorsCollection $competitorsOnSide) {
                 return collect($competitorsOnSide)
-                    ->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor())
+                    ->map(fn (MatchCompetitor $competitor) => $competitor->competitor)
                     ->values(); // Reset keys to sequential integers
             });
     }
@@ -301,7 +301,7 @@ class MatchCompetitorsCollection extends Collection
     public function getCompetitorsForSide(int $side): BaseCollection
     {
         return $this->where('side_number', $side)
-            ->map(fn (MatchCompetitor $competitor) => $competitor->getCompetitor())
+            ->map(fn (MatchCompetitor $competitor) => $competitor->competitor)
             ->values();
     }
 }

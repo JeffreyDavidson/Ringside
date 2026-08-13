@@ -70,15 +70,4 @@ class MatchCompetitor extends MorphPivot
     {
         return $this->morphTo();
     }
-
-    /**
-     * Get the resolved competitor instance (must be Wrestler or TagTeam).
-     */
-    public function getCompetitor(): Wrestler|TagTeam
-    {
-        /** @var Wrestler|TagTeam $competitor */
-        $competitor = $this->competitor;
-
-        return $competitor;
-    }
 }
