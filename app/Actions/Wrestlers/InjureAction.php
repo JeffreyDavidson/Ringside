@@ -6,6 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
+use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
@@ -14,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class InjureAction
 {
-    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+    public function __construct(
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly IndividualInjuryEligibility $eligibility,
+    ) {}
 
     /**
      * Injure a wrestler and make them unavailable for competition.
@@ -35,11 +39,10 @@ class InjureAction
 
         DB::transaction(function () use ($wrestler, $injuryDate): void {
             $lockedWrestler = Wrestler::query()
-                ->withTrashed()
                 ->lockForUpdate()
                 ->findOrFail($wrestler->getKey());
 
-            $lockedWrestler->ensureCanBeInjured();
+            $this->eligibility->ensureCanInjure($lockedWrestler);
 
             $this->injuryPeriods->start($lockedWrestler, $injuryDate, LifecycleTransitionType::Injured);
         });

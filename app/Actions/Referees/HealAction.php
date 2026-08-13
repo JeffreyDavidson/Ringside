@@ -6,14 +6,19 @@ namespace App\Actions\Referees;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HealAction
 {
-    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+    public function __construct(
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly IndividualInjuryEligibility $eligibility,
+    ) {}
 
     /**
      * Heal a referee from injury and return them to active officiating.
@@ -31,10 +36,13 @@ class HealAction
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
-        $referee->ensureCanBeHealed();
-
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
-        $this->injuryPeriods->end($referee, $recoveryDate, LifecycleTransitionType::Healed);
+        DB::transaction(function () use ($referee, $recoveryDate): void {
+            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $this->eligibility->ensureCanHeal($lockedReferee);
+
+            $this->injuryPeriods->end($lockedReferee, $recoveryDate, LifecycleTransitionType::Healed);
+        });
     }
 }

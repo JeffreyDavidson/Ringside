@@ -6,14 +6,19 @@ namespace App\Actions\Managers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HealAction
 {
-    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+    public function __construct(
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly IndividualInjuryEligibility $eligibility,
+    ) {}
 
     /**
      * Heal a manager from injury and return them to active management.
@@ -31,10 +36,13 @@ class HealAction
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void
     {
-        $manager->ensureCanBeHealed();
-
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
-        $this->injuryPeriods->end($manager, $recoveryDate, LifecycleTransitionType::Healed);
+        DB::transaction(function () use ($manager, $recoveryDate): void {
+            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $this->eligibility->ensureCanHeal($lockedManager);
+
+            $this->injuryPeriods->end($lockedManager, $recoveryDate, LifecycleTransitionType::Healed);
+        });
     }
 }

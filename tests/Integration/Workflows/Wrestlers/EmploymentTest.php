@@ -11,6 +11,7 @@ use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
+use App\Lifecycle\IndividualInjuryEligibility;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
@@ -246,7 +247,7 @@ describe('Wrestler Employment Workflows', function () {
             $healed = freshModel($wrestler);
             resolve(SuspendAction::class)->handle($healed, Carbon::now());
             $suspended = freshModel($wrestler);
-            expect($suspended->canBeInjured())->toBeFalse();
+            expect(resolve(IndividualInjuryEligibility::class)->canInjure($suspended))->toBeFalse();
             expect($suspended->isEmployed())->toBeTrue();
             expect($suspended->isInjured())->toBeFalse();
             expect($suspended->isSuspended())->toBeTrue();
@@ -270,7 +271,7 @@ describe('Wrestler Employment Workflows', function () {
             // Unemployed wrestler has limited capabilities
             expect($wrestler->isBookable())->toBeFalse();
             expect($wrestler->canBeSuspended())->toBeFalse();
-            expect($wrestler->canBeInjured())->toBeFalse();
+            expect(resolve(IndividualInjuryEligibility::class)->canInjure($wrestler))->toBeFalse();
 
             // Employ wrestler
             resolve(EmployAction::class)->handle($wrestler, Carbon::now());
@@ -279,7 +280,7 @@ describe('Wrestler Employment Workflows', function () {
             // Employed wrestler has full capabilities
             expect($employed->isBookable())->toBeTrue();
             expect($employed->canBeSuspended())->toBeTrue();
-            expect($employed->canBeInjured())->toBeTrue();
+            expect(resolve(IndividualInjuryEligibility::class)->canInjure($employed))->toBeTrue();
             expect($employed->canBeEmployed())->toBeFalse(); // Already employed
 
             // Release wrestler
@@ -289,7 +290,7 @@ describe('Wrestler Employment Workflows', function () {
             // Released wrestler has limited capabilities again
             expect($released->isBookable())->toBeFalse();
             expect($released->canBeSuspended())->toBeFalse();
-            expect($released->canBeInjured())->toBeFalse();
+            expect(resolve(IndividualInjuryEligibility::class)->canInjure($released))->toBeFalse();
             expect($released->canBeEmployed())->toBeTrue(); // Can be re-employed
         });
     });

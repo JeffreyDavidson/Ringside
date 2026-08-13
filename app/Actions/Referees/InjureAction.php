@@ -6,14 +6,19 @@ namespace App\Actions\Referees;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
+use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class InjureAction
 {
-    public function __construct(private readonly InjuryPeriodManager $injuryPeriods) {}
+    public function __construct(
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly IndividualInjuryEligibility $eligibility,
+    ) {}
 
     /**
      * Record a referee injury.
@@ -30,10 +35,13 @@ class InjureAction
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void
     {
-        $referee->ensureCanBeInjured();
-
         $injureDate = DateHelper::resolveDate($injureDate);
 
-        $this->injuryPeriods->start($referee, $injureDate, LifecycleTransitionType::Injured);
+        DB::transaction(function () use ($referee, $injureDate): void {
+            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $this->eligibility->ensureCanInjure($lockedReferee);
+
+            $this->injuryPeriods->start($lockedReferee, $injureDate, LifecycleTransitionType::Injured);
+        });
     }
 }
