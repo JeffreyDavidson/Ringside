@@ -6,14 +6,19 @@ namespace App\Actions\Wrestlers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
+use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReinstateAction
 {
-    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualSuspensionEligibility $eligibility,
+    ) {}
 
     /**
      * Reinstate a wrestler and make them available for employment.
@@ -29,10 +34,13 @@ class ReinstateAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
-        $wrestler->ensureCanBeReinstated();
-
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
-        $this->suspensionPeriods->end($wrestler, $reinstatementDate, LifecycleTransitionType::Reinstated);
+        DB::transaction(function () use ($wrestler, $reinstatementDate): void {
+            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $this->eligibility->ensureCanReinstate($lockedWrestler);
+
+            $this->suspensionPeriods->end($lockedWrestler, $reinstatementDate, LifecycleTransitionType::Reinstated);
+        });
     }
 }

@@ -6,6 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
+use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
@@ -14,7 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
-    public function __construct(private readonly SuspensionPeriodManager $suspensionPeriods) {}
+    public function __construct(
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualSuspensionEligibility $eligibility,
+    ) {}
 
     /**
      * Suspend a wrestler and make them unavailable for competition.
@@ -35,11 +39,10 @@ class SuspendAction
 
         DB::transaction(function () use ($wrestler, $suspensionDate): void {
             $lockedWrestler = Wrestler::query()
-                ->withTrashed()
                 ->lockForUpdate()
                 ->findOrFail($wrestler->getKey());
 
-            $lockedWrestler->ensureCanBeSuspended();
+            $this->eligibility->ensureCanSuspend($lockedWrestler);
 
             $this->suspensionPeriods->start($lockedWrestler, $suspensionDate, LifecycleTransitionType::Suspended);
         });

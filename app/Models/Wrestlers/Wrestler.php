@@ -23,7 +23,6 @@ use App\Models\Concerns\ValidatesEmployment;
 use App\Models\Concerns\ValidatesIndividualDeletion;
 use App\Models\Concerns\ValidatesIndividualRestoration;
 use App\Models\Concerns\ValidatesIndividualRetirement;
-use App\Models\Concerns\ValidatesIndividualSuspension;
 use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeATagTeamMember;
@@ -165,7 +164,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     use ValidatesIndividualDeletion;
     use ValidatesIndividualRestoration;
     use ValidatesIndividualRetirement;
-    use ValidatesIndividualSuspension;
 
     /**
      * Get the attributes that should be cast.
