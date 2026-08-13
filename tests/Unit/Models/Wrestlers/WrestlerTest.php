@@ -22,10 +22,8 @@ use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
-use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -95,20 +93,6 @@ describe('Wrestler Model Unit Tests', function () {
             expect(class_uses(Wrestler::class))->toContain(IsSuspendable::class);
             expect(class_uses(Wrestler::class))->toContain(ProvidesDisplayName::class);
             expect(class_uses(Wrestler::class))->toContain(SoftDeletes::class);
-        });
-    });
-
-    describe('user relationship', function () {
-        test('belongs to its owning user', function () {
-            $user = User::factory()->create();
-            $wrestler = Wrestler::factory()->create(['user_id' => $user->id]);
-
-            expect($wrestler->user())
-                ->toBeInstanceOf(BelongsTo::class)
-                ->and($wrestler->user()->getForeignKeyName())
-                ->toBe('user_id')
-                ->and($wrestler->user?->is($user))
-                ->toBeTrue();
         });
     });
 

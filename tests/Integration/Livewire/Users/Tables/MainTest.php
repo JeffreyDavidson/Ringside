@@ -7,7 +7,6 @@ use App\Enums\Users\UserStatus;
 use App\Livewire\Users\Tables\Main;
 use App\Livewire\Users\Tables\UsersTable;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
@@ -366,16 +365,6 @@ describe('UsersTable Component', function () {
             expect($users)->not->toBeEmpty();
         });
 
-        test('component eager loads necessary relationships', function () {
-            $userWithWrestler = User::factory()->create(['first_name' => 'Wrestler', 'last_name' => 'Owner']);
-            Wrestler::factory()->create(['user_id' => $userWithWrestler->id]);
-
-            $component = testLivewire(Main::class);
-
-            $component
-                ->assertOk()
-                ->assertSee('Wrestler Owner');
-        });
     });
 
     describe('user status and role display integration', function () {

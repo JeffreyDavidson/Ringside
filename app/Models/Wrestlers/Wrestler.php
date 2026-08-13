@@ -37,7 +37,6 @@ use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Users\User;
 use App\ValueObjects\Height;
 use Database\Factories\Wrestlers\WrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -47,7 +46,6 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -108,7 +106,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TitleChampionship> $titleChampionships
  * @property-read Collection<int, TitleChampionship> $currentChampionships
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
- * @property-read User|null $user
  *
  * @method string getNameLabel()
  */
@@ -146,12 +143,6 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
 
     use ProvidesDisplayName;
     use SoftDeletes;
-
-    /** @return BelongsTo<User, $this> */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
 
     protected function stableMembershipTable(): string
     {

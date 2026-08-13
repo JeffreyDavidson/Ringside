@@ -143,45 +143,6 @@ describe('UserBuilder Unit Tests', function () {
         expect(true)->toBeTrue();
     });
 
-    describe('relationship query capabilities', function () {
-        test('builder can query with relationships', function () {
-            $usersWithWrestlers = User::query()
-                ->with('wrestlers')
-                ->get();
-
-            expect($usersWithWrestlers)->toBeInstanceOf(Collection::class);
-
-            // Check that the relationship is loaded
-            foreach ($usersWithWrestlers as $user) {
-                expect($user->relationLoaded('wrestlers'))->toBeTrue();
-            }
-        });
-
-        test('builder can filter by relationship existence', function () {
-            $usersWithWrestlers = User::query()
-                ->has('wrestlers')
-                ->get();
-
-            $usersWithoutWrestlers = User::query()
-                ->doesntHave('wrestlers')
-                ->get();
-
-            expect($usersWithWrestlers)->toBeInstanceOf(Collection::class);
-            expect($usersWithoutWrestlers)->toBeInstanceOf(Collection::class);
-        });
-
-        test('builder can perform whereHas queries', function () {
-            $query = User::query()
-                ->whereHas('wrestlers', function ($query) {
-                    $query->where('name', 'like', '%Test%');
-                });
-
-            $users = $query->get();
-            expect($users)->toBeInstanceOf(Collection::class);
-        });
-        expect(true)->toBeTrue();
-    });
-
     describe('future scope foundation', function () {
         test('builder is ready for administrator scope implementation', function () {
             // Test that we can implement administrator scope when needed
