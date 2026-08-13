@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class StableRetirementEligibility
 {
+    public function __construct(private readonly StableFormerMemberEligibility $formerMemberEligibility) {}
+
     public function canRetire(Stable $stable): bool
     {
         try {
@@ -72,7 +74,7 @@ final class StableRetirementEligibility
             return;
         }
 
-        $availableFormerMembers = $stable->getAvailableFormerMembers();
+        $availableFormerMembers = $this->formerMemberEligibility->availableFor($stable);
 
         if ($availableFormerMembers->isEmpty()) {
             throw CannotBeUnretiredException::noAvailableFormerMembers($stable);
@@ -86,7 +88,7 @@ final class StableRetirementEligibility
             );
         }
 
-        $unavailableKeyMembers = $stable->getUnavailableKeyFormerMembers();
+        $unavailableKeyMembers = $this->formerMemberEligibility->unavailableKeyMembersFor($stable);
 
         if ($unavailableKeyMembers->isNotEmpty()) {
             throw CannotBeUnretiredException::keyMembersUnavailable(

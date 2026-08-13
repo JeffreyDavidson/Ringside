@@ -8,7 +8,6 @@ use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Roster\StableBuilder;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Stables\StableStatus;
-use App\Models\Concerns\FindsAvailableStableFormerMembers;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HasMembers;
@@ -108,8 +107,6 @@ use Tests\Unit\Models\Stables\StableTest;
 #[UseEloquentBuilder(StableBuilder::class)]
 class Stable extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
-    use FindsAvailableStableFormerMembers;
-
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 
