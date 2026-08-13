@@ -8,7 +8,6 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
@@ -70,7 +69,6 @@ describe('Referee Model Unit Tests', function () {
             expect(class_uses(Referee::class))->toContain(IsInjurable::class);
             expect(class_uses(Referee::class))->toContain(IsRetirable::class);
             expect(class_uses(Referee::class))->toContain(IsSuspendable::class);
-            expect(class_uses(Referee::class))->toContain(ProvidesDisplayName::class);
             expect(class_uses(Referee::class))->toContain(SoftDeletes::class);
         });
     });

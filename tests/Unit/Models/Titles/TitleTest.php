@@ -7,7 +7,6 @@ use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -63,7 +62,6 @@ describe('Title Model Unit Tests', function () {
             expect(class_uses(Title::class))->toContain(HasFactory::class);
             expect(class_uses(Title::class))->toContain(HasLifecycleTransitions::class);
             expect(class_uses(Title::class))->toContain(IsRetirable::class);
-            expect(class_uses(Title::class))->toContain(ProvidesDisplayName::class);
             expect(class_uses(Title::class))->toContain(SoftDeletes::class);
         });
     });

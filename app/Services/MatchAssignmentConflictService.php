@@ -71,22 +71,19 @@ final class MatchAssignmentConflictService
             return;
         }
 
-        $conflictingRefereeId = EventMatch::query()
+        $conflictingReferee = EventMatch::query()
             ->whereIn('event_id', $conflictingEventIds)
             ->whereHas('referees', fn (Builder $query) => $query->whereKey($referees->pluck('id')))
-            ->with('referees:id,first_name,last_name')
+            ->with('referees:id,first_name,last_name,full_name')
             ->get()
             ->flatMap->referees
-            ->first(fn (Referee $referee): bool => $referees->contains('id', $referee->id))
-            ?->id;
+            ->first(fn (Referee $referee): bool => $referees->contains('id', $referee->id));
 
-        if ($conflictingRefereeId === null) {
+        if ($conflictingReferee === null) {
             return;
         }
 
-        $referee = $referees->firstWhere('id', $conflictingRefereeId);
-
-        throw SchedulingConflictException::refereeAlreadyAssigned($referee?->getDisplayName() ?? "ID: {$conflictingRefereeId}");
+        throw SchedulingConflictException::refereeAlreadyAssigned($conflictingReferee->full_name);
     }
 
     /**

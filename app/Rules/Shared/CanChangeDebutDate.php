@@ -40,10 +40,6 @@ class CanChangeDebutDate implements ValidationRule
 
     private function getModelName(): string
     {
-        if (method_exists($this->model, 'getDisplayName')) {
-            return $this->model->getDisplayName();
-        }
-
         $name = $this->model->getAttribute('name');
         if ($name !== null) {
             return $name;

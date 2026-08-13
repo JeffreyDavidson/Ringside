@@ -6,7 +6,9 @@ Title matches and championship validation rules.
 
 The championship system manages title matches and ensures proper competitor validation.
 
-`Title` owns only the championship relationships. Current, previous, first, longest, vacancy, and reign-count reporting is provided by `TitleChampionshipQuery`, keeping reporting queries and in-memory summaries outside the Eloquent model.
+`Title` owns only the championship relationships. Current, previous, first, longest, vacancy, reign-count, and reign-length reporting is provided by `TitleChampionshipQuery`, keeping reporting queries and in-memory summaries outside the Eloquent model.
+
+Models expose their explicit persisted naming fields: `name` for wrestlers and titles, and the database-generated `full_name` for managers and referees. They do not infer or append a generic `display_name` attribute through a shared model contract.
 
 ## Title Type Matching
 

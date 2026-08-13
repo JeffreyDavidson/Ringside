@@ -11,9 +11,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\SoftDeletable;
@@ -73,7 +71,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Suspension> $previousSuspensions
  * @property-read Collection<int, EventMatch> $matches
  * @property-read Collection<int, EventMatch> $previousMatches
- * @property-read mixed $display_name
  *
  * @method static RefereeBuilder<static>|Referee available()
  * @method static RefereeBuilder<static>|Referee availableOn(\Carbon\Carbon $date)
@@ -100,7 +97,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(RefereeFactory::class)]
 #[UseEloquentBuilder(RefereeBuilder::class)]
-class Referee extends Model implements Employable, HasDisplayName, Injurable, Retirable, SoftDeletable, Suspendable
+class Referee extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
     use HasComputedEmploymentStatus;
 
@@ -119,7 +116,6 @@ class Referee extends Model implements Employable, HasDisplayName, Injurable, Re
     /** @use IsSuspendable<static> */
     use IsSuspendable;
 
-    use ProvidesDisplayName;
     use SoftDeletes;
 
     /** @return BelongsToMany<EventMatch, $this> */

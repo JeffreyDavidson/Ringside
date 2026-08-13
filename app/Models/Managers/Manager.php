@@ -12,9 +12,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\SoftDeletable;
@@ -78,7 +76,6 @@ use Tests\Unit\Models\Managers\ManagerTest;
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, TagTeam> $currentTagTeams
  * @property-read Collection<int, TagTeam> $previousTagTeams
- * @property-read mixed $display_name
  *
  * @method static ManagerBuilder<static>|Manager available()
  * @method static ManagerBuilder<static>|Manager availableOn(\Carbon\Carbon $date)
@@ -106,7 +103,7 @@ use Tests\Unit\Models\Managers\ManagerTest;
 #[Appends('status')]
 #[UseFactory(ManagerFactory::class)]
 #[UseEloquentBuilder(ManagerBuilder::class)]
-class Manager extends Model implements Employable, HasDisplayName, Injurable, Retirable, SoftDeletable, Suspendable
+class Manager extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
     use DefinesManagedAliases;
     use HasComputedEmploymentStatus;
@@ -126,6 +123,5 @@ class Manager extends Model implements Employable, HasDisplayName, Injurable, Re
     /** @use IsSuspendable<static> */
     use IsSuspendable;
 
-    use ProvidesDisplayName;
     use SoftDeletes;
 }

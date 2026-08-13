@@ -48,8 +48,15 @@ final class TitleChampionshipQuery
     {
         return $title->championships()
             ->get()
-            ->sortByDesc(fn (TitleChampionship $championship): int => $championship->lengthInDays())
+            ->sortByDesc(self::reignLengthInDays(...))
             ->first();
+    }
+
+    public static function reignLengthInDays(TitleChampionship $championship): int
+    {
+        $reignEnd = $championship->lost_at ?? now();
+
+        return (int) $championship->won_at->diffInDays($reignEnd);
     }
 
     public static function longestChampion(Title $title): ?Model

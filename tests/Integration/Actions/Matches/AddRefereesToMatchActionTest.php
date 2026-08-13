@@ -39,9 +39,10 @@ test('it rejects a referee assigned to another event at the same time', function
     $referee = Referee::factory()->bookable()->create();
 
     $existingMatch->referees()->attach($referee);
+    $referee->refresh();
 
     expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($targetMatch, $referee->newCollection([$referee])))
-        ->toThrow(SchedulingConflictException::class, "Referee [{$referee->getDisplayName()}] is already assigned to another event at this time.");
+        ->toThrow(SchedulingConflictException::class, "Referee [{$referee->full_name}] is already assigned to another event at this time.");
 
     expect($targetMatch->referees()->count())->toBe(0);
 });

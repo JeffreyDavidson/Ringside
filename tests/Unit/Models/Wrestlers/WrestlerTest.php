@@ -13,11 +13,9 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
@@ -91,7 +89,6 @@ describe('Wrestler Model Unit Tests', function () {
             expect(class_uses(Wrestler::class))->toContain(IsInjurable::class);
             expect(class_uses(Wrestler::class))->toContain(IsRetirable::class);
             expect(class_uses(Wrestler::class))->toContain(IsSuspendable::class);
-            expect(class_uses(Wrestler::class))->toContain(ProvidesDisplayName::class);
             expect(class_uses(Wrestler::class))->toContain(SoftDeletes::class);
         });
     });
@@ -103,7 +100,6 @@ describe('Wrestler Model Unit Tests', function () {
             expect($interfaces)->toContain(CanBeAStableMember::class);
             expect($interfaces)->toContain(CanBeChampion::class);
             expect($interfaces)->toContain(Employable::class);
-            expect($interfaces)->toContain(HasDisplayName::class);
             expect($interfaces)->toContain(Injurable::class);
             expect($interfaces)->toContain(Manageable::class);
             expect($interfaces)->toContain(Retirable::class);

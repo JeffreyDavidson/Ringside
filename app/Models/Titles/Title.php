@@ -11,9 +11,7 @@ use App\Enums\Titles\TitleType;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
-use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\SoftDeletable;
 use App\Models\Lifecycle\ActivityPeriod;
@@ -60,7 +58,6 @@ use Illuminate\Support\Carbon;
  *
  * @property-read Collection<int, ActivityPeriod> $activityPeriods
  * @property-read ActivityPeriod|null $currentActivityPeriod
- * @property-read mixed $display_name
  * @property-read ActivityPeriod|null $firstActivityPeriod
  * @property-read ActivityPeriod|null $futureActivityPeriod
  * @property-read ActivityPeriod|null $previousActivityPeriod
@@ -100,7 +97,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(TitleFactory::class)]
 #[UseEloquentBuilder(TitleBuilder::class)]
-class Title extends Model implements HasActivityPeriodsContract, HasDisplayName, Retirable, SoftDeletable
+class Title extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
@@ -114,7 +111,6 @@ class Title extends Model implements HasActivityPeriodsContract, HasDisplayName,
     /** @use IsRetirable<static> */
     use IsRetirable;
 
-    use ProvidesDisplayName;
     use SoftDeletes;
 
     /** @return HasMany<TitleChampionship, $this> */

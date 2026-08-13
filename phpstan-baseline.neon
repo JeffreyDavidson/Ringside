@@ -473,9 +473,3 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionships.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between Illuminate\\Support\\Carbon and null will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Models/Titles/TitleChampionship.php
