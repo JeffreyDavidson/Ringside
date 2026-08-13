@@ -278,10 +278,5 @@ describe('StableWrestler Pivot Model', function () {
             expect($stableIds)->toContain($this->secondStable->id);
         });
 
-        test('isNotCurrentlyInStable method works correctly', function () {
-            // Wrestler is currently in secondStable, not in stable
-            expect($this->wrestler->isNotCurrentlyInStable($this->stable))->toBeTrue();
-            expect($this->wrestler->isNotCurrentlyInStable($this->secondStable))->toBeFalse();
-        });
     });
 });

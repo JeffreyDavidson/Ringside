@@ -59,7 +59,7 @@ app/Livewire/{Domain}/
 
 ### Use descriptive verbs:
 - `OfficiatesMatches` - for entities that officiate matches
-- `IsBookableCompetitor` - for entities that compete in matches
+- `HasMatchParticipations` - for entities with persisted competitor-match relationships
 - `ManagesEntities` - for entities that manage other entities
 
 ## Interface Implementation Strategy
@@ -76,4 +76,4 @@ app/Livewire/{Domain}/
 - Implementation is model-specific
 - Trait would be overly specific
 
-**Example:** `EventMatchPolicy` is implemented directly since only EventMatch needs it, while `IsBookableCompetitor` is a trait since multiple competitor types use it.
+**Example:** `EventMatchPolicy` is implemented directly since only EventMatch needs it, while `HasMatchParticipations` is a trait since multiple competitor types expose match participation relationships.

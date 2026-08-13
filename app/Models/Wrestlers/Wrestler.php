@@ -9,18 +9,16 @@ use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanJoinStables;
-use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasComputedEmploymentStatus;
-use App\Models\Concerns\IsBookableCompetitor;
+use App\Models\Concerns\HasMatchParticipations;
+use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\CanBeAStableMember;
-use App\Models\Contracts\CanBeATagTeamMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
@@ -49,6 +47,8 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -57,7 +57,6 @@ use Illuminate\Support\Carbon;
  *
  * @implements CanBeChampion<TitleChampionship>
  * @implements CanBeAStableMember<StableWrestler, $this>
- * @implements CanBeATagTeamMember<TagTeamWrestler, $this>
  * @implements Employable<static>
  * @implements Injurable<static>
  * @implements Manageable<WrestlerManager, static>
@@ -116,18 +115,12 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
-class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
+class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
     use BelongsToUser;
 
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
-
-    /** @use CanJoinStables<StableWrestler, $this> */
-    use CanJoinStables;
-
-    /** @use CanJoinTagTeams<TagTeamWrestler, $this> */
-    use CanJoinTagTeams;
 
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
@@ -137,7 +130,10 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember,
     /** @use HasFactory<WrestlerFactory> */
     use HasFactory;
 
-    use IsBookableCompetitor;
+    use HasMatchParticipations;
+
+    /** @use HasStableMemberships<StableWrestler, $this> */
+    use HasStableMemberships;
 
     /** @use IsEmployable<static> */
     use IsEmployable;
@@ -167,6 +163,57 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember,
     protected function stableMembershipPivotModel(): string
     {
         return StableWrestler::class;
+    }
+
+    /**
+     * @return BelongsToMany<TagTeam, $this, TagTeamWrestler>
+     */
+    public function tagTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(TagTeam::class, 'tag_teams_wrestlers', 'wrestler_id', 'tag_team_id')
+            ->withPivot(['joined_at', 'left_at'])
+            ->using(TagTeamWrestler::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<TagTeam, $this, TagTeamWrestler>
+     */
+    public function previousTagTeams(): BelongsToMany
+    {
+        return $this->tagTeams()->wherePivotNotNull('left_at');
+    }
+
+    /**
+     * @return HasOneThrough<TagTeam, TagTeamWrestler, $this>
+     */
+    public function currentTagTeam(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            TagTeam::class,
+            TagTeamWrestler::class,
+            'wrestler_id',
+            'id',
+            'id',
+            'tag_team_id',
+        )->whereNull('tag_teams_wrestlers.left_at');
+    }
+
+    /**
+     * @return HasOneThrough<TagTeam, TagTeamWrestler, $this>
+     */
+    public function previousTagTeam(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            TagTeam::class,
+            TagTeamWrestler::class,
+            'wrestler_id',
+            'id',
+            'id',
+            'tag_team_id',
+        )
+            ->whereNotNull('tag_teams_wrestlers.left_at')
+            ->latest('tag_teams_wrestlers.left_at');
     }
 
     /**

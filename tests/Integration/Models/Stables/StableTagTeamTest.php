@@ -276,10 +276,5 @@ describe('StableTagTeam Pivot Model', function () {
             expect($stableIds)->toContain($this->secondStable->id);
         });
 
-        test('isNotCurrentlyInStable method works correctly', function () {
-            // TagTeam is currently in secondStable, not in stable
-            expect($this->tagTeam->isNotCurrentlyInStable($this->stable))->toBeTrue();
-            expect($this->tagTeam->isNotCurrentlyInStable($this->secondStable))->toBeFalse();
-        });
     });
 });

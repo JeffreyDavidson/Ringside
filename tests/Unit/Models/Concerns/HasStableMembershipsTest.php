@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Tests\Unit\Models\Concerns\Support\ConfiguredStableMemberModel;
 
-dataset('stable members', [
+dataset('stable membership owners', [
     'wrestler' => [fn (): Wrestler => Wrestler::factory()->make()],
     'tag team' => [fn (): TagTeam => TagTeam::factory()->make()],
 ]);
@@ -43,7 +43,7 @@ it('defines all stable relationships', function (Wrestler|TagTeam $member) {
         ->and($stables->getRelated())->toBeInstanceOf(Stable::class)
         ->and($currentStable->getRelated())->toBeInstanceOf(Stable::class)
         ->and($previousStables->getRelated())->toBeInstanceOf(Stable::class);
-})->with('stable members');
+})->with('stable membership owners');
 
 it('uses the configured stable membership table and pivot model', function (
     Wrestler|TagTeam $member,
@@ -63,7 +63,7 @@ it('uses the configured stable membership table and pivot model', function (
 it('includes stable membership dates and timestamps', function (Wrestler|TagTeam $member) {
     expect($member->stables()->getPivotColumns())
         ->toContain('joined_at', 'left_at', 'created_at', 'updated_at');
-})->with('stable members');
+})->with('stable membership owners');
 
 it('filters current and previous stable memberships by the departure date', function (
     Wrestler|TagTeam $member,

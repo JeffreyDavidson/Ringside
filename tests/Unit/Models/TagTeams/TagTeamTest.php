@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanWinTitles;
-use App\Models\Concerns\IsBookableCompetitor;
+use App\Models\Concerns\HasMatchParticipations;
+use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
@@ -73,10 +73,10 @@ describe('TagTeam Model Unit Tests', function () {
     describe('trait integration', function () {
         test('uses all required traits', function () {
             expect(class_uses(TagTeam::class))->toContain(CanBeManaged::class);
-            expect(class_uses(TagTeam::class))->toContain(CanJoinStables::class);
+            expect(class_uses(TagTeam::class))->toContain(HasStableMemberships::class);
             expect(class_uses(TagTeam::class))->toContain(CanWinTitles::class);
             expect(class_uses(TagTeam::class))->toContain(HasFactory::class);
-            expect(class_uses(TagTeam::class))->toContain(IsBookableCompetitor::class);
+            expect(class_uses(TagTeam::class))->toContain(HasMatchParticipations::class);
             expect(class_uses(TagTeam::class))->toContain(IsEmployable::class);
             expect(class_uses(TagTeam::class))->toContain(IsRetirable::class);
             expect(class_uses(TagTeam::class))->toContain(IsSuspendable::class);
