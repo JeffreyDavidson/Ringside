@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Events;
 
+use App\Enums\EventStatus;
 use App\Models\Events\Event;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -14,7 +15,7 @@ class DateCanBeChanged implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->event && $this->event->hasPastDate()) {
+        if ($this->event?->status === EventStatus::Past) {
             $fail('Cannot change the date of an event that has already occurred.');
         }
     }
