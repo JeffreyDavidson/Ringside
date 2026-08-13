@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use Ankurk91\Eloquent\HasBelongsToOne;
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Contracts\CanBeATagTeamMember;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use LogicException;
 
@@ -39,8 +38,6 @@ use LogicException;
  */
 trait CanJoinTagTeams
 {
-    use HasBelongsToOne;
-
     /**
      * The resolved tag team pivot model class name.
      *
@@ -74,8 +71,8 @@ trait CanJoinTagTeams
      * Returns all tag team relationships regardless of their current status
      * (active or completed). Includes pivot data for join/leave tracking.
      *
-     * @return BelongsToMany<TagTeam, static, TPivotModel>
-     *                                                     A relationship instance for accessing all tag teams
+     * @return BelongsToMany<TagTeam, $this, TPivotModel>
+     *                                                    A relationship instance for accessing all tag teams
      *
      * @example
      * ```php
@@ -86,7 +83,7 @@ trait CanJoinTagTeams
      */
     public function tagTeams(): BelongsToMany
     {
-        /** @var BelongsToMany<TagTeam, static, TPivotModel> $relation */
+        /** @var BelongsToMany<TagTeam, $this, TPivotModel> $relation */
         $relation = $this->belongsToMany(TagTeam::class, $this->getTagTeamPivotTable())
             ->withPivot(['joined_at', 'left_at'])
             ->using($this->resolveTagTeamPivotModel())
@@ -101,8 +98,8 @@ trait CanJoinTagTeams
      * Returns tag teams that the model has left (where 'left_at' is set).
      * These represent completed tag team memberships.
      *
-     * @return BelongsToMany<TagTeam, static, TPivotModel>
-     *                                                     A relationship instance for accessing previous tag teams
+     * @return BelongsToMany<TagTeam, $this, TPivotModel>
+     *                                                    A relationship instance for accessing previous tag teams
      *
      * @example
      * ```php
@@ -113,7 +110,7 @@ trait CanJoinTagTeams
      */
     public function previousTagTeams(): BelongsToMany
     {
-        /** @var BelongsToMany<TagTeam, static, TPivotModel> $relation */
+        /** @var BelongsToMany<TagTeam, $this, TPivotModel> $relation */
         $relation = $this->belongsToMany(TagTeam::class, $this->getTagTeamPivotTable())
             ->withPivot(['joined_at', 'left_at'])
             ->using($this->resolveTagTeamPivotModel())
@@ -127,10 +124,6 @@ trait CanJoinTagTeams
      * Get the most recent previous tag team the model was part of.
      *
      * Returns the most recently left tag team based on the 'left_at' date.
-     * Uses BelongsToOne for a single result.
-     *
-     * @return BelongsToOne
-     *                      A relationship instance for accessing the most recent previous tag team
      *
      * @example
      * ```php
@@ -142,23 +135,27 @@ trait CanJoinTagTeams
      * }
      * ```
      */
-    public function previousTagTeam(): BelongsToOne
+    public function previousTagTeam(): HasOneThrough
     {
-        return $this->belongsToOne(TagTeam::class, $this->getTagTeamPivotTable())
-            ->wherePivotNotNull('left_at')
-            ->withPivot(['joined_at', 'left_at'])
-            ->orderByPivot('left_at', 'desc')
-            ->withTimestamps();
+        $pivotModel = $this->resolveTagTeamPivotModel();
+        $pivotTable = (new $pivotModel())->getTable();
+
+        return $this->hasOneThrough(
+            TagTeam::class,
+            $pivotModel,
+            $this->getTagTeamPivotForeignKey(),
+            'id',
+            'id',
+            'tag_team_id'
+        )
+            ->whereNotNull("{$pivotTable}.left_at")
+            ->latest("{$pivotTable}.left_at");
     }
 
     /**
      * Get the current tag team the model belongs to.
      *
      * Returns the active tag team membership (where 'left_at' is null).
-     * Uses BelongsToOne since a model should only have one current tag team.
-     *
-     * @return BelongsToOne
-     *                      A relationship instance for accessing the current tag team
      *
      * @example
      * ```php
@@ -170,13 +167,24 @@ trait CanJoinTagTeams
      * }
      * ```
      */
-    public function currentTagTeam(): BelongsToOne
+    public function currentTagTeam(): HasOneThrough
     {
-        return $this->belongsToOne(TagTeam::class, $this->getTagTeamPivotTable())
-            ->wherePivotNull('left_at')
-            ->withPivot(['joined_at', 'left_at'])
-            ->using($this->resolveTagTeamPivotModel())
-            ->withTimestamps();
+        $pivotModel = $this->resolveTagTeamPivotModel();
+        $pivotTable = (new $pivotModel())->getTable();
+
+        return $this->hasOneThrough(
+            TagTeam::class,
+            $pivotModel,
+            $this->getTagTeamPivotForeignKey(),
+            'id',
+            'id',
+            'tag_team_id'
+        )->whereNull("{$pivotTable}.left_at");
+    }
+
+    private function getTagTeamPivotForeignKey(): string
+    {
+        return str(class_basename(static::class))->snake().'_id';
     }
 
     /**

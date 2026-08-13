@@ -495,7 +495,7 @@ describe('TagTeamWrestler Pivot Model', function () {
             expect($this->wrestler->relationLoaded('tagTeams'))->toBeFalse();
         });
 
-        test('BelongsToOne relationships work efficiently for single results', function () {
+        test('native through relationships return single results', function () {
             createTagTeamHistory($this->wrestler, [
                 [
                     'tag_team' => $this->tagTeam,
@@ -509,7 +509,7 @@ describe('TagTeamWrestler Pivot Model', function () {
                 ],
             ]);
 
-            // Test BelongsToOne relationships return single models, not collections
+            // Single-result relationships return models, not collections.
             $currentTagTeam = requiredModel($this->wrestler->currentTagTeam);
             $previousTagTeam = $this->wrestler->previousTagTeam;
 

@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Models\Concerns;
 
-use Ankurk91\Eloquent\Relations\BelongsToOne;
 use App\Models\Stables\Stable;
 use App\Models\Stables\StableTagTeam;
 use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use LogicException;
-use Tests\Unit\Models\Concerns\Support\UnsupportedStableMemberModel;
+use Tests\Unit\Models\Concerns\Support\ConfiguredStableMemberModel;
 
 dataset('stable members', [
     'wrestler' => [fn (): Wrestler => Wrestler::factory()->make()],
@@ -25,11 +24,12 @@ dataset('stable relationship configurations', [
     'tag team' => [fn (): TagTeam => TagTeam::factory()->make(), 'stables_tag_teams', 'tag_team_id', StableTagTeam::class],
 ]);
 
-it('reports unsupported trait hosts as logic errors', function () {
-    $member = new UnsupportedStableMemberModel();
+it('allows models to define their stable membership persistence metadata', function () {
+    $member = new ConfiguredStableMemberModel();
 
-    expect(fn () => $member->stables())
-        ->toThrow(LogicException::class, 'Unsupported stable member type');
+    expect($member->stables()->getTable())->toBe('stables_wrestlers')
+        ->and($member->stables()->getForeignPivotKeyName())->toBe('wrestler_id')
+        ->and($member->currentStable()->toRawSql())->toContain('stables_wrestlers');
 });
 
 it('defines all stable relationships', function (Wrestler|TagTeam $member) {
@@ -38,7 +38,7 @@ it('defines all stable relationships', function (Wrestler|TagTeam $member) {
     $previousStables = $member->previousStables();
 
     expect($stables)->toBeInstanceOf(BelongsToMany::class)
-        ->and($currentStable)->toBeInstanceOf(BelongsToOne::class)
+        ->and($currentStable)->toBeInstanceOf(HasOneThrough::class)
         ->and($previousStables)->toBeInstanceOf(BelongsToMany::class)
         ->and($stables->getRelated())->toBeInstanceOf(Stable::class)
         ->and($currentStable->getRelated())->toBeInstanceOf(Stable::class)

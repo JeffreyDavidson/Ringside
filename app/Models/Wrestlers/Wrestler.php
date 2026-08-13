@@ -57,8 +57,8 @@ use Illuminate\Support\Carbon;
  * @mixin \Eloquent
  *
  * @implements CanBeChampion<TitleChampionship>
- * @implements CanBeAStableMember<StableWrestler, static>
- * @implements CanBeATagTeamMember<TagTeamWrestler, static>
+ * @implements CanBeAStableMember<StableWrestler, $this>
+ * @implements CanBeATagTeamMember<TagTeamWrestler, $this>
  * @implements Employable<static>
  * @implements Injurable<static>
  * @implements Manageable<WrestlerManager, static>
@@ -124,10 +124,10 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember,
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableWrestler, static> */
+    /** @use CanJoinStables<StableWrestler, $this> */
     use CanJoinStables;
 
-    /** @use CanJoinTagTeams<TagTeamWrestler, static> */
+    /** @use CanJoinTagTeams<TagTeamWrestler, $this> */
     use CanJoinTagTeams;
 
     /** @use CanWinTitles<TitleChampionship> */
@@ -157,6 +157,21 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember,
 
     use ProvidesDisplayName;
     use SoftDeletes;
+
+    protected function stableMembershipTable(): string
+    {
+        return (new StableWrestler())->getTable();
+    }
+
+    protected function stableMembershipForeignKey(): string
+    {
+        return 'wrestler_id';
+    }
+
+    protected function stableMembershipPivotModel(): string
+    {
+        return StableWrestler::class;
+    }
 
     /**
      * Get the attributes that should be cast.
