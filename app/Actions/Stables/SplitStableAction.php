@@ -87,11 +87,7 @@ class SplitStableAction
             throw CannotBeSplitException::membersDoNotBelongToStable($nonMemberNames);
         }
 
-        $unavailableMemberNames = $membersForNewStable->getUnavailableMemberNames();
-
-        if ($unavailableMemberNames !== []) {
-            throw CannotBeSplitException::membersUnavailable($unavailableMemberNames);
-        }
+        $this->eligibility->ensureSplitMembersAvailable($membersForNewStable);
 
         $newStableMemberCount = $membersForNewStable->getTotalMemberCount();
         $remainingMemberCount = $currentMembers->getTotalMemberCount() - $newStableMemberCount;
