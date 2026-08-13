@@ -6,15 +6,13 @@ namespace App\Models\Referees;
 
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\OfficiatesMatches;
 use App\Models\Concerns\ProvidesDisplayName;
-use App\Models\Concerns\ValidatesIndividualDeletion;
-use App\Models\Concerns\ValidatesIndividualRestoration;
-use App\Models\Contracts\Bookable;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
@@ -31,7 +29,6 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -102,8 +99,10 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(RefereeFactory::class)]
 #[UseEloquentBuilder(RefereeBuilder::class)]
-class Referee extends Model implements Bookable, Employable, HasDisplayName, Injurable, Retirable, SoftDeletable, Suspendable
+class Referee extends Model implements Employable, HasDisplayName, Injurable, Retirable, SoftDeletable, Suspendable
 {
+    use HasComputedEmploymentStatus;
+
     /** @use HasFactory<RefereeFactory> */
     use HasFactory;
 
@@ -122,66 +121,7 @@ class Referee extends Model implements Bookable, Employable, HasDisplayName, Inj
     use OfficiatesMatches;
     use ProvidesDisplayName;
     use SoftDeletes;
-    use ValidatesIndividualDeletion;
-    use ValidatesIndividualRestoration;
-
-    /**
-     * Get the computed status attribute.
-     *
-     * Computes the employment status based on the referee's current relationships:
-     * - Retired: Has active retirement record
-     * - Employed: Has active employment (started <= now)
-     * - FutureEmployment: Has employment starting in future
-     * - Released: Has previous employment but no current employment
-     * - Unemployed: No employment history
-     *
-     * @return Attribute<EmploymentStatus, never>
-     */
-    protected function status(): Attribute
-    {
-        return Attribute::make(
-            get: function (): EmploymentStatus {
-                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
-                if ($this->isRetired()) {
-                    return EmploymentStatus::Retired;
-                }
-
-                if ($this->currentEmployment) {
-                    return EmploymentStatus::Employed;
-                }
-
-                if ($this->futureEmployment) {
-                    return EmploymentStatus::FutureEmployment;
-                }
-
-                if ($this->previousEmployments()->exists()) {
-                    return EmploymentStatus::Released;
-                }
-
-                return EmploymentStatus::Unemployed;
-            }
-        );
-    }
 
     // full_name is handled by virtual column in database
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => EmploymentStatus::class,
-        ];
-    }
-
-    /**
-     * Check to see if the model is bookable.
-     */
-    public function isBookable(): bool
-    {
-        return ! ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
-    }
 }

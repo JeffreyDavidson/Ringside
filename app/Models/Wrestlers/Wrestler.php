@@ -12,6 +12,7 @@ use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
+use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\HasEnumStatus;
 use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
@@ -19,9 +20,6 @@ use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesDisplayName;
-use App\Models\Concerns\ValidatesIndividualDeletion;
-use App\Models\Concerns\ValidatesIndividualRestoration;
-use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeATagTeamMember;
 use App\Models\Contracts\CanBeChampion;
@@ -49,7 +47,6 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -120,7 +117,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
-class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
+class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
     use BelongsToUser;
 
@@ -135,6 +132,8 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
 
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
+
+    use HasComputedEmploymentStatus;
 
     /** @use HasEnumStatus<EmploymentStatus> */
     use HasEnumStatus;
@@ -158,8 +157,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
 
     use ProvidesDisplayName;
     use SoftDeletes;
-    use ValidatesIndividualDeletion;
-    use ValidatesIndividualRestoration;
 
     /**
      * Get the attributes that should be cast.
@@ -170,53 +167,6 @@ class Wrestler extends Model implements Bookable, CanBeAStableMember, CanBeATagT
     {
         return [
             'height' => HeightCast::class,
-            // Status is computed attribute that already returns EmploymentStatus enum
         ];
-    }
-
-    /**
-     * Get the computed status attribute.
-     *
-     * Computes the employment status based on the tag team's current relationships:
-     * - Retired: Has active retirement record
-     * - Employed: Has active employment (started <= now)
-     * - FutureEmployment: Has employment starting in future
-     * - Released: Has previous employment but no current employment
-     * - Unemployed: No employment history
-     *
-     * @return Attribute<EmploymentStatus, never>
-     */
-    protected function status(): Attribute
-    {
-        return Attribute::make(
-            get: function (): EmploymentStatus {
-                // Priority: Retired > Employed > FutureEmployment > Released > Unemployed
-                if ($this->isRetired()) {
-                    return EmploymentStatus::Retired;
-                }
-
-                if ($this->currentEmployment) {
-                    return EmploymentStatus::Employed;
-                }
-
-                if ($this->futureEmployment) {
-                    return EmploymentStatus::FutureEmployment;
-                }
-
-                if ($this->previousEmployments()->exists()) {
-                    return EmploymentStatus::Released;
-                }
-
-                return EmploymentStatus::Unemployed;
-            }
-        );
-    }
-
-    /**
-     * Check to see if the model is bookable.
-     */
-    public function isBookable(): bool
-    {
-        return ! ($this->isNotInEmployment() || $this->isSuspended() || $this->isInjured() || $this->hasFutureEmployment());
     }
 }

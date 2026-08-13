@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Collections;
 
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
@@ -136,7 +137,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function allBookable(): bool
     {
-        return $this->every(fn (MatchCompetitor $competitor) => $competitor->getCompetitor()->isBookable());
+        return $this->every(fn (MatchCompetitor $competitor) => RosterBookingEligibility::allows($competitor->getCompetitor()));
     }
 
     /**

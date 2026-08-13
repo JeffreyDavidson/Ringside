@@ -12,7 +12,6 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesTagTeamWrestlers;
-use App\Models\Contracts\Bookable;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
@@ -88,7 +87,6 @@ describe('TagTeam Model Unit Tests', function () {
 
     describe('interface implementation', function () {
         test('implements all required interfaces', function () {
-            expect(TagTeam::class)->toImplement(Bookable::class);
             expect(TagTeam::class)->toImplement(CanBeAStableMember::class);
             expect(TagTeam::class)->toImplement(CanBeChampion::class);
             expect(TagTeam::class)->toImplement(Employable::class);

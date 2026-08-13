@@ -23,6 +23,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
+use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -141,7 +142,7 @@ class Main extends BaseTable
                 ->label(fn (Title $row) => $row->status->label())
                 ->excludeFromColumnSelect(),
             Column::make(__('titles.current_champion'), 'champion_name')
-                ->label(fn (Title $row) => $row->currentChampion()->name ?? 'Vacant'),
+                ->label(fn (Title $row) => TitleChampionshipQuery::currentChampion($row)->name ?? 'Vacant'),
             FirstActivityPeriodColumn::make(__('activations.started_at')),
         ];
     }

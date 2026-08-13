@@ -6,6 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Services\MatchAssignmentConflictService;
@@ -88,7 +89,7 @@ class AddTagTeamsToMatchAction
     private function isTagTeamEligibleForMatch(TagTeam $tagTeam, EventMatch $eventMatch): bool
     {
         // Basic availability checks - tag team must be active and available
-        if (! $tagTeam->isBookable()) {
+        if (! RosterBookingEligibility::allows($tagTeam)) {
             return false;
         }
 

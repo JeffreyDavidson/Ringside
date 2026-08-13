@@ -6,6 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -17,6 +18,7 @@ class DeleteAction
         private readonly DeletionPeriodCloser $periods,
         private readonly DeletionStateManager $deletionState,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -41,7 +43,7 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        $wrestler->ensureCanBeDeleted();
+        $this->eligibility->ensureCanDelete($wrestler);
 
         $deletionDate = DateHelper::resolveDate($deletionDate);
 

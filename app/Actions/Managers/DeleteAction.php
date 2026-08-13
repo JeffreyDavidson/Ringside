@@ -6,6 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -17,6 +18,7 @@ class DeleteAction
         private readonly DeletionPeriodCloser $periods,
         private readonly DeletionStateManager $deletionState,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
+        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -43,7 +45,7 @@ class DeleteAction
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
-        $manager->ensureCanBeDeleted();
+        $this->eligibility->ensureCanDelete($manager);
 
         $deletionDate = DateHelper::resolveDate($deletionDate);
 

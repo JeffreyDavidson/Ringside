@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
+use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\Wrestlers\Wrestler;
@@ -16,8 +17,8 @@ describe('individual restoration validation', function () {
             default => throw new InvalidArgumentException("Unsupported individual type [{$individualType}]."),
         };
 
-        expect($individual->canBeRestored())->toBeFalse();
-        expect(fn () => $individual->ensureCanBeRestored())
+        expect(resolve(IndividualDeletionEligibility::class)->canRestore($individual))->toBeFalse();
+        expect(fn () => resolve(IndividualDeletionEligibility::class)->ensureCanRestore($individual))
             ->toThrow(CannotBeRestoredException::class);
     })->with([
         Wrestler::class,
@@ -37,15 +38,15 @@ describe('individual restoration validation', function () {
             $individual->delete();
         }
 
-        expect($individual->canBeRestored())->toBe($canBeRestored);
+        expect(resolve(IndividualDeletionEligibility::class)->canRestore($individual))->toBe($canBeRestored);
 
         if ($canBeRestored) {
-            expect(fn () => $individual->ensureCanBeRestored())->not->toThrow(CannotBeRestoredException::class);
+            expect(fn () => resolve(IndividualDeletionEligibility::class)->ensureCanRestore($individual))->not->toThrow(CannotBeRestoredException::class);
 
             return;
         }
 
-        expect(fn () => $individual->ensureCanBeRestored())
+        expect(fn () => resolve(IndividualDeletionEligibility::class)->ensureCanRestore($individual))
             ->toThrow(CannotBeRestoredException::class);
     })->with([
         'existing wrestler' => [Wrestler::class, 'existing', false],

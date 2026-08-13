@@ -8,6 +8,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
+use App\Queries\Titles\TitleChampionshipQuery;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -43,7 +44,7 @@ class ChampionInMatch implements DataAwareRule, ValidationRule
         $titles = Title::findMany($titleIds);
 
         foreach ($titles as $title) {
-            if ($title->isVacant()) {
+            if (TitleChampionshipQuery::isVacant($title)) {
                 continue;
             }
 

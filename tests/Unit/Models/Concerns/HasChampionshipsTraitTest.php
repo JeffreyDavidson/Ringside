@@ -7,6 +7,7 @@ namespace Tests\Unit\Models\Concerns;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
+use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -48,13 +49,13 @@ describe('HasChampionships Trait Unit Tests', function () {
             ]);
 
             $model->load('championships');
-            expect($model->getCurrentChampionship())->not->toBeNull();
-            expect(requiredModel($model->getCurrentChampionship())->lost_at)->toBeNull();
+            expect(TitleChampionshipQuery::currentChampionship($model))->not->toBeNull();
+            expect(requiredModel(TitleChampionshipQuery::currentChampionship($model))->lost_at)->toBeNull();
         });
 
         test('model without current championship returns null', function () {
             $model = $this->model;
-            expect($model->getCurrentChampionship())->toBeNull();
+            expect(TitleChampionshipQuery::currentChampionship($model))->toBeNull();
         });
 
         test('currentChampion returns the champion model', function () {
@@ -68,13 +69,13 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => null,
             ]);
 
-            expect($model->currentChampion())->not->toBeNull();
-            expect(requiredModel($model->currentChampion())->getKey())->toBe($champion->id);
+            expect(TitleChampionshipQuery::currentChampion($model))->not->toBeNull();
+            expect(requiredModel(TitleChampionshipQuery::currentChampion($model))->getKey())->toBe($champion->id);
         });
 
         test('currentChampion returns null when no current championship', function () {
             $model = $this->model;
-            expect($model->currentChampion())->toBeNull();
+            expect(TitleChampionshipQuery::currentChampion($model))->toBeNull();
         });
     });
 
@@ -102,7 +103,7 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => null,
             ]);
 
-            $previous = $model->previousChampionship();
+            $previous = TitleChampionshipQuery::previousChampionship($model);
             expect($previous)
                 ->not->toBeNull()
                 ->champion_id->toBe($champion1->id);
@@ -110,7 +111,7 @@ describe('HasChampionships Trait Unit Tests', function () {
 
         test('previousChampionship returns null when no previous reigns', function () {
             $model = $this->model;
-            expect($model->previousChampionship())->toBeNull();
+            expect(TitleChampionshipQuery::previousChampionship($model))->toBeNull();
         });
 
         test('previousChampion returns the previous champion model', function () {
@@ -134,13 +135,13 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => null,
             ]);
 
-            expect($model->previousChampion())->not->toBeNull();
-            expect(requiredModel($model->previousChampion())->getKey())->toBe($champion1->id);
+            expect(TitleChampionshipQuery::previousChampion($model))->not->toBeNull();
+            expect(requiredModel(TitleChampionshipQuery::previousChampion($model))->getKey())->toBe($champion1->id);
         });
 
         test('previousChampion returns null when no previous reigns', function () {
             $model = $this->model;
-            expect($model->previousChampion())->toBeNull();
+            expect(TitleChampionshipQuery::previousChampion($model))->toBeNull();
         });
     });
 
@@ -168,7 +169,7 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => now()->subMonth(),
             ]);
 
-            $first = $model->firstChampionship();
+            $first = TitleChampionshipQuery::firstChampionship($model);
             expect($first)
                 ->not->toBeNull()
                 ->champion_id->toBe($champion1->id);
@@ -176,7 +177,7 @@ describe('HasChampionships Trait Unit Tests', function () {
 
         test('firstChampionship returns null when no championships', function () {
             $model = $this->model;
-            expect($model->firstChampionship())->toBeNull();
+            expect(TitleChampionshipQuery::firstChampionship($model))->toBeNull();
         });
 
         test('firstChampion returns the first champion model', function () {
@@ -200,12 +201,12 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => now()->subMonth(),
             ]);
 
-            expect(requiredModel($model->firstChampion())->getKey())->toBe($champion1->id);
+            expect(requiredModel(TitleChampionshipQuery::firstChampion($model))->getKey())->toBe($champion1->id);
         });
 
         test('firstChampion returns null when no championships', function () {
             $model = $this->model;
-            expect($model->firstChampion())->toBeNull();
+            expect(TitleChampionshipQuery::firstChampion($model))->toBeNull();
         });
     });
 
@@ -233,7 +234,7 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => now()->subMonth(),
             ]);
 
-            $longest = $model->longestChampionship();
+            $longest = TitleChampionshipQuery::longestChampionship($model);
             expect($longest)
                 ->not->toBeNull()
                 ->champion_id->toBe($champion2->id);
@@ -241,7 +242,7 @@ describe('HasChampionships Trait Unit Tests', function () {
 
         test('longestChampionship returns null when no championships', function () {
             $model = $this->model;
-            expect($model->longestChampionship())->toBeNull();
+            expect(TitleChampionshipQuery::longestChampionship($model))->toBeNull();
         });
 
         test('longestChampion returns the longest reigning champion model', function () {
@@ -265,29 +266,29 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => now()->subMonth(),
             ]);
 
-            expect(requiredModel($model->longestChampion())->getKey())->toBe($champion2->id);
+            expect(requiredModel(TitleChampionshipQuery::longestChampion($model))->getKey())->toBe($champion2->id);
         });
 
         test('longestChampion returns null when no championships', function () {
             $model = $this->model;
-            expect($model->longestChampion())->toBeNull();
+            expect(TitleChampionshipQuery::longestChampion($model))->toBeNull();
         });
     });
 
     describe('utility methods', function () {
         test('reignCount returns correct number of reigns', function () {
             $model = $this->model;
-            expect($model->reignCount())->toBe(0);
+            expect(TitleChampionshipQuery::reignCount($model))->toBe(0);
 
             TitleChampionship::factory()->create(['title_id' => $model->id]);
             TitleChampionship::factory()->create(['title_id' => $model->id]);
 
-            expect($model->reignCount())->toBe(2);
+            expect(TitleChampionshipQuery::reignCount($model))->toBe(2);
         });
 
         test('isVacant returns true when no current champion', function () {
             $model = $this->model;
-            expect($model->isVacant())->toBeTrue();
+            expect(TitleChampionshipQuery::isVacant($model))->toBeTrue();
         });
 
         test('isVacant returns false when has current champion', function () {
@@ -301,7 +302,7 @@ describe('HasChampionships Trait Unit Tests', function () {
                 'lost_at' => null,
             ]);
 
-            expect($model->isVacant())->toBeFalse();
+            expect(TitleChampionshipQuery::isVacant($model))->toBeFalse();
         });
     });
 
@@ -326,14 +327,14 @@ describe('HasChampionships Trait Unit Tests', function () {
             $model->load('championships');
 
             expect($model->championships)->toHaveCount(2);
-            expect($model->getCurrentChampionship())->not->toBeNull();
-            expect(requiredModel($model->getCurrentChampionship())->lost_at)->toBeNull();
+            expect(TitleChampionshipQuery::currentChampionship($model))->not->toBeNull();
+            expect(requiredModel(TitleChampionshipQuery::currentChampionship($model))->lost_at)->toBeNull();
         });
 
         test('model can exist without championships', function () {
             $model = $this->model;
             expect($model->championships()->count())->toBe(0);
-            expect($model->getCurrentChampionship())->toBeNull();
+            expect(TitleChampionshipQuery::currentChampionship($model))->toBeNull();
         });
 
         test('model maintains relationship integrity when championships are deleted', function () {

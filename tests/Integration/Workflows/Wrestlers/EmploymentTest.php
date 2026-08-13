@@ -14,6 +14,7 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\IndividualSuspensionEligibility;
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
@@ -86,21 +87,21 @@ describe('Wrestler Employment Workflows', function () {
             resolve(EmployAction::class)->handle($wrestler, Carbon::now());
             $employed = freshModel($wrestler);
             expect($employed->isEmployed())->toBeTrue();
-            expect($employed->isBookable())->toBeTrue();
+            expect(RosterBookingEligibility::allows($employed))->toBeTrue();
 
             // Injure wrestler
             resolve(InjureAction::class)->handle($employed, Carbon::now());
             $injured = freshModel($wrestler);
             expect($injured->isEmployed())->toBeTrue(); // Still employed
             expect($injured->isInjured())->toBeTrue();
-            expect($injured->isBookable())->toBeFalse(); // Not bookable when injured
+            expect(RosterBookingEligibility::allows($injured))->toBeFalse(); // Not bookable when injured
 
             // Heal wrestler
             resolve(HealAction::class)->handle($injured, Carbon::now());
             $healed = freshModel($wrestler);
             expect($healed->isEmployed())->toBeTrue();
             expect($healed->isInjured())->toBeFalse();
-            expect($healed->isBookable())->toBeTrue(); // Bookable again
+            expect(RosterBookingEligibility::allows($healed))->toBeTrue(); // Bookable again
         });
 
         test('employ then suspend then reinstate workflow maintains employment', function () {
@@ -110,21 +111,21 @@ describe('Wrestler Employment Workflows', function () {
             resolve(EmployAction::class)->handle($wrestler, Carbon::now());
             $employed = freshModel($wrestler);
             expect($employed->isEmployed())->toBeTrue();
-            expect($employed->isBookable())->toBeTrue();
+            expect(RosterBookingEligibility::allows($employed))->toBeTrue();
 
             // Suspend wrestler
             resolve(SuspendAction::class)->handle($employed, Carbon::now());
             $suspended = freshModel($wrestler);
             expect($suspended->isEmployed())->toBeTrue(); // Still employed
             expect($suspended->isSuspended())->toBeTrue();
-            expect($suspended->isBookable())->toBeFalse(); // Not bookable when suspended
+            expect(RosterBookingEligibility::allows($suspended))->toBeFalse(); // Not bookable when suspended
 
             // Reinstate wrestler
             resolve(ReinstateAction::class)->handle($suspended, Carbon::now());
             $reinstated = freshModel($wrestler);
             expect($reinstated->isEmployed())->toBeTrue();
             expect($reinstated->isSuspended())->toBeFalse();
-            expect($reinstated->isBookable())->toBeTrue(); // Bookable again
+            expect(RosterBookingEligibility::allows($reinstated))->toBeTrue(); // Bookable again
         });
 
         test('employ then retire then unretire workflow changes employment status', function () {
@@ -204,31 +205,31 @@ describe('Wrestler Employment Workflows', function () {
             $wrestler = Wrestler::factory()->released()->create();
 
             // Released wrestler should not be bookable
-            expect($wrestler->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows($wrestler))->toBeFalse();
 
             // Employ makes wrestler bookable
             resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->isBookable())->toBeTrue();
+            expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeTrue();
 
             // Injury makes employed wrestler not bookable
             resolve(InjureAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeFalse();
 
             // Healing makes wrestler bookable again
             resolve(HealAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->isBookable())->toBeTrue();
+            expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeTrue();
 
             // Suspension makes wrestler not bookable
             resolve(SuspendAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeFalse();
 
             // Reinstatement makes wrestler bookable again
             resolve(ReinstateAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->isBookable())->toBeTrue();
+            expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeTrue();
 
             // Release makes wrestler not bookable
             resolve(ReleaseAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeFalse();
         });
 
         test('status combination workflow validation maintains business rules', function () {
@@ -271,7 +272,7 @@ describe('Wrestler Employment Workflows', function () {
             $wrestler = Wrestler::factory()->unemployed()->create();
 
             // Unemployed wrestler has limited capabilities
-            expect($wrestler->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows($wrestler))->toBeFalse();
             expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($wrestler))->toBeFalse();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($wrestler))->toBeFalse();
 
@@ -280,7 +281,7 @@ describe('Wrestler Employment Workflows', function () {
             $employed = freshModel($wrestler);
 
             // Employed wrestler has full capabilities
-            expect($employed->isBookable())->toBeTrue();
+            expect(RosterBookingEligibility::allows($employed))->toBeTrue();
             expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($employed))->toBeTrue();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($employed))->toBeTrue();
             expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($employed))->toBeFalse(); // Already employed
@@ -290,7 +291,7 @@ describe('Wrestler Employment Workflows', function () {
             $released = freshModel($wrestler);
 
             // Released wrestler has limited capabilities again
-            expect($released->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows($released))->toBeFalse();
             expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($released))->toBeFalse();
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($released))->toBeFalse();
             expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($released))->toBeTrue(); // Can be re-employed

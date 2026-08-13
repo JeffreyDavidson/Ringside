@@ -50,7 +50,7 @@ describe('Referee Model Unit Tests', function () {
             $referee = new Referee();
             $casts = $referee->getCasts();
 
-            expect($casts['status'])->toBe(EmploymentStatus::class);
+            expect($casts)->not->toHaveKey('status');
         });
 
         test('has custom eloquent builder', function () {

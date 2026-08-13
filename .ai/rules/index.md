@@ -4,6 +4,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 
 | Applies to | Rule file |
 | --- | --- |
+| app/{Actions,Collections,Lifecycle,Models,Rules}/** | .ai/rules/actions-collections-lifecycle-models-rules.md |
 | app/{Actions,Lifecycle,Models}/** | .ai/rules/actions-lifecycle-models.md |
 | app/Actions/** | .ai/rules/actions.md |
 | app/** | .ai/rules/app.md |
@@ -31,6 +32,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Actions/Stables/**,Lifecycle/Stable*Eligibility.php} | .ai/rules/stables.md |
 | app/{Actions,Lifecycle}/TagTeams/** | .ai/rules/tag-teams.md |
 | tests/** | .ai/rules/tests.md |
+| app/{Models,Queries}/Titles/** | .ai/rules/titles.md |
 | tests/Unit/** | .ai/rules/unit.md |
 | resources/views/livewire/** | .ai/rules/views-livewire.md |
 | resources/views/** | .ai/rules/views.md |

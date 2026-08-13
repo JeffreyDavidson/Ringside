@@ -8,6 +8,7 @@ use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\IndividualEmploymentEligibility;
+use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Referees\Referee;
 use Illuminate\Support\Carbon;
 
@@ -119,19 +120,19 @@ describe('Referee Employment Workflows', function () {
             // Verify business rule compliance
             expect($refreshedReferee->isEmployed())->toBeTrue();
             expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($refreshedReferee))->toBeFalse(); // Already employed
-            expect($refreshedReferee->isBookable())->toBeTrue(); // Can be booked when employed
+            expect(RosterBookingEligibility::allows($refreshedReferee))->toBeTrue(); // Can be booked when employed
         });
 
         test('employment enables officiating capability', function () {
             $referee = Referee::factory()->released()->create();
 
             // Released referee should not be bookable
-            expect($referee->isBookable())->toBeFalse();
+            expect(RosterBookingEligibility::allows($referee))->toBeFalse();
 
             resolve(EmployAction::class)->handle($referee, Carbon::now());
 
             // Employed referee should be bookable
-            expect(freshModel($referee)->isBookable())->toBeTrue();
+            expect(RosterBookingEligibility::allows(freshModel($referee)))->toBeTrue();
         });
 
         test('complex multi-action employment workflows maintain data consistency', function () {
