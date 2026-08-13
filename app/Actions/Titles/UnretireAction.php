@@ -7,13 +7,17 @@ namespace App\Actions\Titles;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
-    public function __construct(private readonly RetirementPeriodManager $retirementPeriods) {}
+    public function __construct(
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly TitleLifecycleEligibility $eligibility,
+    ) {}
 
     /**
      * Unretire a retired title and make it available for future competition.
@@ -32,12 +36,16 @@ class UnretireAction
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void
     {
-        $title->ensureCanBeUnretired();
-
         $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($title, $unretiredDate): void {
-            $this->retirementPeriods->end($title, $unretiredDate, LifecycleTransitionType::Unretired);
+            $lockedTitle = Title::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($title->getKey());
+
+            $this->eligibility->ensureCanUnretire($lockedTitle);
+            $this->retirementPeriods->end($lockedTitle, $unretiredDate, LifecycleTransitionType::Unretired);
         });
     }
 }

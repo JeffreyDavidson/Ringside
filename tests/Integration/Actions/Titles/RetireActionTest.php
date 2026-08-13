@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RetireAction;
+use App\Actions\Titles\UnretireAction;
 use App\Exceptions\Titles\CannotBeReinstatedException;
+use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Models\Titles\Title;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -43,4 +45,15 @@ test('reinstatement revalidates after retirement wins the title lock', function 
         ->toThrow(CannotBeReinstatedException::class)
         ->and($title->currentActivityPeriod()->doesntExist())->toBeTrue()
         ->and($title->currentRetirement()->exists())->toBeTrue();
+});
+
+test('unretirement rejects a deleted title through the typed eligibility boundary', function () {
+    $title = Title::factory()->retired()->create();
+    $title->delete();
+
+    expect(fn () => resolve(UnretireAction::class)->handle($title))
+        ->toThrow(
+            CannotBeUnretiredException::class,
+            CannotBeUnretiredException::deleted($title)->getMessage(),
+        );
 });

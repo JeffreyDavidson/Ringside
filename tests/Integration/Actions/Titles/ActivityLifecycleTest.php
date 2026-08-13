@@ -7,6 +7,7 @@ use App\Actions\Titles\PullAction;
 use App\Actions\Titles\ReinstateAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBePulledException;
+use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 
 test('title activity actions preserve an attributed transition history', function () {
@@ -42,3 +43,25 @@ test('a failed title activity transition does not write an audit record', functi
     expect(fn () => resolve(PullAction::class)->handle($title))->toThrow(CannotBePulledException::class);
     expect($title->lifecycleTransitions()->doesntExist())->toBeTrue();
 });
+
+test('pull eligibility stays aligned with its guard', function (string $factoryState, bool $canPull) {
+    $eligibility = new TitleLifecycleEligibility();
+    $title = Title::factory()->{$factoryState}()->create();
+
+    expect($eligibility->canPull($title))->toBe($canPull);
+
+    if ($canPull) {
+        expect(fn () => $eligibility->ensureCanPull($title))
+            ->not->toThrow(CannotBePulledException::class);
+
+        return;
+    }
+
+    expect(fn () => $eligibility->ensureCanPull($title))
+        ->toThrow(CannotBePulledException::class);
+})->with([
+    'active' => ['active', true],
+    'inactive' => ['inactive', false],
+    'undebuted' => ['undebuted', false],
+    'retired' => ['retired', false],
+]);

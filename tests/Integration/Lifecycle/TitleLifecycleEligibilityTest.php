@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Exceptions\Titles\CannotBeUnretiredException;
+use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 
-describe('title retirement validation', function () {
+describe('title lifecycle eligibility', function () {
     test('keeps the retirement predicate aligned with its guard', function (string $factoryState, bool $canBeRetired) {
+        $eligibility = new TitleLifecycleEligibility();
         $title = Title::factory()->{$factoryState}()->create();
 
-        expect($title->canBeRetired())->toBe($canBeRetired);
+        expect($eligibility->canRetire($title))->toBe($canBeRetired);
 
         if ($canBeRetired) {
-            expect(fn () => $title->ensureCanBeRetired())
+            expect(fn () => $eligibility->ensureCanRetire($title))
                 ->not->toThrow(CannotBeRetiredException::class);
 
             return;
         }
 
-        expect(fn () => $title->ensureCanBeRetired())
+        expect(fn () => $eligibility->ensureCanRetire($title))
             ->toThrow(CannotBeRetiredException::class);
     })->with([
         'active' => ['active', true],
@@ -31,11 +33,12 @@ describe('title retirement validation', function () {
     ]);
 
     test('rejects unretiring a deleted retired title consistently', function () {
+        $eligibility = new TitleLifecycleEligibility();
         $title = Title::factory()->retired()->create();
         $title->delete();
 
-        expect($title->canBeUnretired())->toBeFalse()
-            ->and(fn () => $title->ensureCanBeUnretired())
+        expect($eligibility->canUnretire($title))->toBeFalse()
+            ->and(fn () => $eligibility->ensureCanUnretire($title))
             ->toThrow(
                 CannotBeUnretiredException::class,
                 CannotBeUnretiredException::deleted($title)->getMessage(),
@@ -43,18 +46,19 @@ describe('title retirement validation', function () {
     });
 
     test('keeps the unretirement predicate aligned with its guard', function (string $factoryState, bool $canBeUnretired) {
+        $eligibility = new TitleLifecycleEligibility();
         $title = Title::factory()->{$factoryState}()->create();
 
-        expect($title->canBeUnretired())->toBe($canBeUnretired);
+        expect($eligibility->canUnretire($title))->toBe($canBeUnretired);
 
         if ($canBeUnretired) {
-            expect(fn () => $title->ensureCanBeUnretired())
+            expect(fn () => $eligibility->ensureCanUnretire($title))
                 ->not->toThrow(CannotBeUnretiredException::class);
 
             return;
         }
 
-        expect(fn () => $title->ensureCanBeUnretired())
+        expect(fn () => $eligibility->ensureCanUnretire($title))
             ->toThrow(
                 CannotBeUnretiredException::class,
                 CannotBeUnretiredException::notRetired($title)->getMessage(),
