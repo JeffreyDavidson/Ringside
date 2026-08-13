@@ -13,7 +13,6 @@ use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasComputedEmploymentStatus;
-use App\Models\Concerns\HasEnumStatus;
 use App\Models\Concerns\IsBookableCompetitor;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
@@ -134,9 +133,6 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember,
     use CanWinTitles;
 
     use HasComputedEmploymentStatus;
-
-    /** @use HasEnumStatus<EmploymentStatus> */
-    use HasEnumStatus;
 
     /** @use HasFactory<WrestlerFactory> */
     use HasFactory;
