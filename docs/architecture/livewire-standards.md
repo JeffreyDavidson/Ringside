@@ -55,10 +55,9 @@ app/Livewire/{Domain}/
 
 ### Avoid redundant names:
 - ❌ `IsBookableReferee` (redundant if only used by Referee model)
-- ✅ `OfficiatesMatches` (descriptive and potentially reusable)
+- ✅ Define referee-only persistence relationships directly on `Referee`
 
 ### Use descriptive verbs:
-- `OfficiatesMatches` - for entities that officiate matches
 - `HasMatchParticipations` - for entities with persisted competitor-match relationships
 - `ManagesEntities` - for entities that manage other entities
 
