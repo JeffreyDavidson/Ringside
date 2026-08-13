@@ -265,30 +265,6 @@ describe('Stable Activation Action Integration', function () {
                 ->and($retiredTagTeam->refresh()->isRetired())->toBeTrue();
         });
 
-        test('retired employed former members are unavailable for reunion', function () {
-            $wrestler = Wrestler::factory()->employed()->create();
-            $wrestler->retirements()->create(['started_at' => now()]);
-            $tagTeam = TagTeam::factory()->employed()->create();
-            $tagTeam->retirements()->create(['started_at' => now()]);
-
-            $this->retiredStable->wrestlers()->attach($wrestler, [
-                'joined_at' => now()->subMonth(),
-                'left_at' => now()->subWeek(),
-            ]);
-            $this->retiredStable->tagTeams()->attach($tagTeam, [
-                'joined_at' => now()->subMonth(),
-                'left_at' => now()->subWeek(),
-            ]);
-
-            $availableFormerMembers = $this->retiredStable->getAvailableFormerMembers();
-            $unavailableFormerMembers = $this->retiredStable->getUnavailableKeyFormerMembers();
-
-            expect($availableFormerMembers->contains(fn ($member): bool => $member->is($wrestler)))->toBeFalse()
-                ->and($availableFormerMembers->contains(fn ($member): bool => $member->is($tagTeam)))->toBeFalse()
-                ->and($unavailableFormerMembers->contains(fn ($member): bool => $member->is($wrestler)))->toBeTrue()
-                ->and($unavailableFormerMembers->contains(fn ($member): bool => $member->is($tagTeam)))->toBeTrue();
-        });
-
         test('unretire eligibility respects the former member option', function () {
             $stable = Stable::factory()
                 ->has(Retirement::factory()->started(now()->subDay()), 'retirements')

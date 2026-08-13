@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
-use App\Models\Concerns\FindsAvailableStableFormerMembers;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HasMembers;
@@ -66,7 +65,6 @@ describe('Stable Model Unit Tests', function () {
             expect(class_uses(Stable::class))->toContain(HasMembers::class);
             expect(class_uses(Stable::class))->toContain(HasLifecycleTransitions::class);
             expect(class_uses(Stable::class))->toContain(HasStatusScopes::class);
-            expect(class_uses(Stable::class))->toContain(FindsAvailableStableFormerMembers::class);
             expect(class_uses(Stable::class))->toContain(IsRetirable::class);
             expect(class_uses(Stable::class))->toContain(SoftDeletes::class);
         });

@@ -11,6 +11,8 @@ use App\Models\Stables\Stable;
 
 final class StableActivityEligibility
 {
+    public function __construct(private readonly StableFormerMemberEligibility $formerMemberEligibility) {}
+
     public function canEstablish(Stable $stable): bool
     {
         try {
@@ -100,7 +102,7 @@ final class StableActivityEligibility
             throw CannotBeReunitedException::retired($stable);
         }
 
-        $availableFormerMembers = $stable->getAvailableFormerMembers();
+        $availableFormerMembers = $this->formerMemberEligibility->availableFor($stable);
         if ($availableFormerMembers->count() < Stable::MIN_MEMBERS_COUNT) {
             throw CannotBeReunitedException::insufficientFormerMembers(
                 $stable,
@@ -109,7 +111,7 @@ final class StableActivityEligibility
             );
         }
 
-        $unavailableKeyMembers = $stable->getUnavailableKeyFormerMembers();
+        $unavailableKeyMembers = $this->formerMemberEligibility->unavailableKeyMembersFor($stable);
         if ($unavailableKeyMembers->isNotEmpty()) {
             throw CannotBeReunitedException::keyMembersUnavailable(
                 $stable,
