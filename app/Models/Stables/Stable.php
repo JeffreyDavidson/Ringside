@@ -6,7 +6,6 @@ namespace App\Models\Stables;
 
 use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Roster\StableBuilder;
-use App\Data\Stables\StableMembershipData;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
@@ -167,113 +166,5 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
                 return StableStatus::Unformed;
             }
         );
-    }
-
-    /**
-     * Check if the stable is currently active.
-     */
-    public function isActive(): bool
-    {
-        return $this->status === StableStatus::Active;
-    }
-
-    /**
-     * Check if the stable is disbanded (inactive status).
-     */
-    public function isDisbanded(): bool
-    {
-        return $this->status === StableStatus::Inactive;
-    }
-
-    /**
-     * Determine if the stable has a future establishment scheduled.
-     */
-    public function hasFutureEstablishment(): bool
-    {
-        return $this->hasFutureActivity();
-    }
-
-    /**
-     * Get current members as a StableMembershipData DTO.
-     *
-     * This provides a convenient way to access current members
-     * in a structured format for business operations.
-     */
-    public function getCurrentMembersData(): StableMembershipData
-    {
-        return new StableMembershipData(
-            wrestlers: $this->currentWrestlers,
-            tagTeams: $this->currentTagTeams
-        );
-    }
-
-    /**
-     * Get only employed current members as a StableMembershipData DTO.
-     *
-     * Filters out any members who are not currently employed.
-     */
-    public function getEmployedMembersData(): StableMembershipData
-    {
-        return $this->getCurrentMembersData()->filterEmployedMembers();
-    }
-
-    /**
-     * Get members who can be retired (not already retired).
-     *
-     * Returns a StableMembershipData containing only members
-     * who are eligible for retirement.
-     */
-    public function getMembersToRetire(): StableMembershipData
-    {
-        $currentMembers = $this->getCurrentMembersData();
-
-        return new StableMembershipData(
-            wrestlers: $currentMembers->getWrestlersToRetire(),
-            tagTeams: $currentMembers->getTagTeamsToRetire()
-        );
-    }
-
-    /**
-     * Get members who can be unretired (currently retired).
-     *
-     * Returns a StableMembershipData containing only members
-     * who are eligible for unretirement.
-     */
-    public function getMembersToUnretire(): StableMembershipData
-    {
-        $currentMembers = $this->getCurrentMembersData();
-
-        return new StableMembershipData(
-            wrestlers: $currentMembers->getWrestlersToUnretire(),
-            tagTeams: $currentMembers->getTagTeamsToUnretire()
-        );
-    }
-
-    /**
-     * Check if the stable has any current members.
-     */
-    public function hasCurrentMembers(): bool
-    {
-        return $this->getCurrentMembersData()->isNotEmpty();
-    }
-
-    /**
-     * Get the total count of current members.
-     */
-    public function getCurrentMemberCount(): int
-    {
-        return $this->getCurrentMembersData()->getTotalMemberCount();
-    }
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'status' => StableStatus::class,
-        ];
     }
 }

@@ -19,6 +19,7 @@ use App\Models\Lifecycle\Retirement;
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 
 /**
@@ -98,7 +99,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(DisbandAction::class)->handle($this->activeStable, $disbandDate);
 
             $refreshedStable = freshModel($this->activeStable);
-            expect($refreshedStable->isDisbanded())->toBeTrue();
+            expect($refreshedStable->status === StableStatus::Inactive)->toBeTrue();
             expect($refreshedStable->status)->toBe(StableStatus::Inactive);
 
             // Verify activity period is ended
@@ -123,7 +124,7 @@ describe('Stable Activation Action Integration', function () {
 
         test('disband action rolls back when the end date precedes the activity period', function () {
             $currentActivityPeriod = $this->activeStable->currentActivityPeriod()->firstOrFail();
-            $currentMemberCount = $this->activeStable->getCurrentMembersData()->getTotalMemberCount();
+            $currentMemberCount = resolve(StableMembershipService::class)->currentMembers($this->activeStable)->getTotalMemberCount();
 
             expect(fn () => resolve(DisbandAction::class)->handle(
                 $this->activeStable,
@@ -133,7 +134,7 @@ describe('Stable Activation Action Integration', function () {
             $refreshedStable = freshModel($this->activeStable);
 
             expect($refreshedStable->isCurrentlyActive())->toBeTrue()
-                ->and($refreshedStable->getCurrentMembersData()->getTotalMemberCount())->toBe($currentMemberCount);
+                ->and(resolve(StableMembershipService::class)->currentMembers($refreshedStable)->getTotalMemberCount())->toBe($currentMemberCount);
         });
     });
 
@@ -302,7 +303,7 @@ describe('Stable Activation Action Integration', function () {
             // Disband
             $disbandDate = Carbon::now()->subMonths(6);
             resolve(DisbandAction::class)->handle($stable, $disbandDate);
-            expect(freshModel($stable)->isDisbanded())->toBeTrue();
+            expect(freshModel($stable)->status === StableStatus::Inactive)->toBeTrue();
 
             // Reunite
             $reuniteDate = Carbon::now()->subMonths(3);

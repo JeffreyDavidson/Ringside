@@ -40,13 +40,6 @@ describe('Stable Model Unit Tests', function () {
             ]);
         });
 
-        test('has correct casts configuration', function () {
-            $stable = new Stable();
-            $casts = $stable->getCasts();
-
-            expect($casts['status'])->toBe(StableStatus::class);
-        });
-
         test('has custom eloquent builder', function () {
             $stable = new Stable();
             expect($stable->query())->toBeInstanceOf(StableBuilder::class);

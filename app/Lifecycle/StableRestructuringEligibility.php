@@ -7,9 +7,12 @@ namespace App\Lifecycle;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Models\Stables\Stable;
+use App\Services\StableMembershipService;
 
 final class StableRestructuringEligibility
 {
+    public function __construct(private readonly StableMembershipService $membershipService) {}
+
     public function canSplit(Stable $stable): bool
     {
         try {
@@ -32,7 +35,7 @@ final class StableRestructuringEligibility
         }
 
         $minimumMemberCount = Stable::MIN_MEMBERS_COUNT * 2;
-        $currentMemberCount = $stable->getCurrentMembersData()->getTotalMemberCount();
+        $currentMemberCount = $this->membershipService->currentMembers($stable)->getTotalMemberCount();
 
         if ($currentMemberCount < $minimumMemberCount) {
             throw CannotBeSplitException::insufficientMembers($stable, $currentMemberCount, $minimumMemberCount);

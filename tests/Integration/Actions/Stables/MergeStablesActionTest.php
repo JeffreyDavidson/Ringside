@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stables\MergeStablesAction;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Models\Stables\Stable;
+use App\Services\StableMembershipService;
 
 it('moves current members to the primary stable and preserves secondary history', function () {
     $primaryStable = Stable::factory()->active()->create();
@@ -46,8 +47,8 @@ it('rejects unavailable secondary members without changing either stable', funct
     $secondaryStable = Stable::factory()->active()->create();
     $secondaryWrestler = $secondaryStable->currentWrestlers()->firstOrFail();
     $secondaryWrestler->suspensions()->create(['started_at' => now()]);
-    $primaryMemberCount = $primaryStable->getCurrentMemberCount();
-    $secondaryMemberCount = $secondaryStable->getCurrentMemberCount();
+    $primaryMemberCount = resolve(StableMembershipService::class)->currentMembers($primaryStable)->getTotalMemberCount();
+    $secondaryMemberCount = resolve(StableMembershipService::class)->currentMembers($secondaryStable)->getTotalMemberCount();
 
     expect(fn () => resolve(MergeStablesAction::class)->handle(
         $primaryStable,
@@ -55,8 +56,8 @@ it('rejects unavailable secondary members without changing either stable', funct
         now(),
     ))->toThrow(CannotBeMergedException::class);
 
-    expect($primaryStable->getCurrentMemberCount())->toBe($primaryMemberCount)
-        ->and($secondaryStable->getCurrentMemberCount())->toBe($secondaryMemberCount)
+    expect(resolve(StableMembershipService::class)->currentMembers($primaryStable)->getTotalMemberCount())->toBe($primaryMemberCount)
+        ->and(resolve(StableMembershipService::class)->currentMembers($secondaryStable)->getTotalMemberCount())->toBe($secondaryMemberCount)
         ->and($secondaryStable->currentActivityPeriod()->exists())->toBeTrue()
         ->and($secondaryStable->trashed())->toBeFalse();
 });

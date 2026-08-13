@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Stables\StableStatus;
 use App\Livewire\Stables\Tables\Main;
 use App\Livewire\Stables\Tables\StablesTable;
 use App\Models\Stables\Stable;
@@ -178,7 +179,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is disbanded
-            expect(freshModel($activeStable)->isDisbanded())->toBeTrue();
+            expect(freshModel($activeStable)->status === StableStatus::Inactive)->toBeTrue();
         });
 
         test('retire action integration works correctly', function () {
@@ -270,7 +271,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable status unchanged
-            expect(freshModel($activeStable)->isActive())->toBeTrue();
+            expect(freshModel($activeStable)->isCurrentlyActive())->toBeTrue();
         });
 
         test('disband action fails for inappropriate stable status', function () {
@@ -298,7 +299,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable status unchanged
-            expect(freshModel($activeStable)->isActive())->toBeTrue();
+            expect(freshModel($activeStable)->isCurrentlyActive())->toBeTrue();
         });
 
         test('actions respect stable business constraints', function () {
@@ -312,7 +313,7 @@ describe('StablesTable Component', function () {
             $component->call('disband', $disbandedStable)
                 ->assertRedirect();
 
-            expect(freshModel($disbandedStable)->isDisbanded())->toBeTrue();
+            expect(freshModel($disbandedStable)->status === StableStatus::Inactive)->toBeTrue();
         });
     });
 

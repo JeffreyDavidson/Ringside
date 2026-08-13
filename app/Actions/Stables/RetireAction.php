@@ -7,14 +7,15 @@ namespace App\Actions\Stables;
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
+use App\Data\Stables\StableMembershipData;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\StableRetirementEligibility;
 use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Stables\Stable;
+use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -32,6 +33,7 @@ class RetireAction
         protected IndividualRetirementEligibility $individualRetirementEligibility,
         protected StableRetirementEligibility $eligibility,
         protected TagTeamRetirementEligibility $tagTeamRetirementEligibility,
+        protected StableMembershipService $membershipService,
     ) {}
 
     /**
@@ -67,8 +69,11 @@ class RetireAction
                 $this->endActivityPeriodAction->handle($lockedStable, $operationalDate);
             }
 
-            $currentMembers = $lockedStable->getCurrentMembersData();
-            $membersToRetire = $lockedStable->getMembersToRetire();
+            $currentMembers = $this->membershipService->currentMembers($lockedStable);
+            $membersToRetire = new StableMembershipData(
+                wrestlers: $currentMembers->getWrestlersToRetire(),
+                tagTeams: $currentMembers->getTagTeamsToRetire(),
+            );
 
             $this->removeStableMembersAction->handle($lockedStable, $currentMembers, $operationalDate);
 
@@ -90,7 +95,6 @@ class RetireAction
 
             $this->retirementPeriods->start($lockedStable, $retirementDate, LifecycleTransitionType::Retired);
 
-            $lockedStable->update(['status' => StableStatus::Retired]);
         });
     }
 }
