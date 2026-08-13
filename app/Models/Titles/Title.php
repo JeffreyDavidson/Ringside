@@ -13,8 +13,6 @@ use App\Models\Concerns\HasChampionships;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\ProvidesDisplayName;
-use App\Models\Concerns\ValidatesTitleLifecycle;
-use App\Models\Concerns\ValidatesTitleRetirement;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Retirable;
@@ -119,8 +117,6 @@ class Title extends Model implements HasActivityPeriodsContract, HasDisplayName,
 
     use ProvidesDisplayName;
     use SoftDeletes;
-    use ValidatesTitleLifecycle;
-    use ValidatesTitleRetirement;
 
     /**
      * Get the computed status attribute.

@@ -8,6 +8,7 @@ use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ class RetireAction
     public function __construct(
         private readonly EndActivityPeriodAction $endActivityPeriod,
         private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly TitleLifecycleEligibility $eligibility,
     ) {}
 
     /**
@@ -44,7 +46,7 @@ class RetireAction
                 ->lockForUpdate()
                 ->findOrFail($title->getKey());
 
-            $lockedTitle->ensureCanBeRetired();
+            $this->eligibility->ensureCanRetire($lockedTitle);
 
             if ($lockedTitle->hasActivityPeriods() && $lockedTitle->isCurrentlyActive()) {
                 $this->endActivityPeriod->handle($lockedTitle, $operationalDate);

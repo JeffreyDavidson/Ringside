@@ -9,6 +9,7 @@ use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeReinstatedException;
+use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ class ReinstateAction
     public function __construct(
         private StartActivityPeriodAction $startActivityPeriod,
         private RecordLifecycleTransitionAction $recordLifecycleTransition,
+        private TitleLifecycleEligibility $eligibility,
     ) {}
 
     /**
@@ -44,7 +46,7 @@ class ReinstateAction
                 ->lockForUpdate()
                 ->findOrFail($title->getKey());
 
-            $lockedTitle->ensureCanBeReinstated();
+            $this->eligibility->ensureCanReinstate($lockedTitle);
 
             $this->startActivityPeriod->handle($lockedTitle, $reinstateDate, rescheduleFuturePeriod: true);
             $this->recordLifecycleTransition->handle(

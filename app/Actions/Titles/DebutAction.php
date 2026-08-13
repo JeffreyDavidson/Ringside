@@ -9,6 +9,7 @@ use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeDebutedException;
+use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ class DebutAction
     public function __construct(
         private StartActivityPeriodAction $startActivityPeriod,
         private RecordLifecycleTransitionAction $recordLifecycleTransition,
+        private TitleLifecycleEligibility $eligibility,
     ) {}
 
     /**
@@ -44,7 +46,7 @@ class DebutAction
                 ->lockForUpdate()
                 ->findOrFail($title->getKey());
 
-            $lockedTitle->ensureCanBeDebuted();
+            $this->eligibility->ensureCanDebut($lockedTitle);
 
             $this->startActivityPeriod->handle($lockedTitle, $debutDate, rescheduleFuturePeriod: true);
             $this->recordLifecycleTransition->handle(

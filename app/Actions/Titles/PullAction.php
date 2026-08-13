@@ -9,6 +9,7 @@ use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBePulledException;
+use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ class PullAction
     public function __construct(
         private EndActivityPeriodAction $endActivityPeriod,
         private RecordLifecycleTransitionAction $recordLifecycleTransition,
+        private TitleLifecycleEligibility $eligibility,
     ) {}
 
     /**
@@ -46,7 +48,7 @@ class PullAction
                 ->lockForUpdate()
                 ->findOrFail($title->getKey());
 
-            $this->ensureCanBePulled($lockedTitle);
+            $this->eligibility->ensureCanPull($lockedTitle);
             $this->endActivityPeriod->handle($lockedTitle, $pullDate);
             $this->recordLifecycleTransition->handle(
                 $lockedTitle,
@@ -56,24 +58,5 @@ class PullAction
                 array_filter(['notes' => $notes]),
             );
         });
-    }
-
-    /**
-     * Ensure the title can be pulled from active competition.
-     *
-     * @param  Title  $title  The title to validate
-     * @throws CannotBePulledException When the title cannot be pulled
-     */
-    private function ensureCanBePulled(Title $title): void
-    {
-        // A title can only be pulled if it's currently active
-        if (! $title->isCurrentlyActive()) {
-            throw CannotBePulledException::notActive($title);
-        }
-
-        // Cannot pull a retired title
-        if ($title->isRetired()) {
-            throw CannotBePulledException::retired($title);
-        }
     }
 }
