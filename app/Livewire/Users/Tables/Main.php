@@ -45,7 +45,7 @@ class Main extends BaseTable
             Column::make(__('users.email'), 'email')
                 ->searchable(),
             Column::make(__('users.phone'), 'phone_number')
-                ->label(fn (User $row, Column $column): string => $row->formatted_phone_number),
+                ->label(fn (User $row, Column $column): string => $row->phone_number?->formatted() ?? ''),
         ];
     }
 }
