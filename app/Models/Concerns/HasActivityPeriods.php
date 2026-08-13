@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Enums\Shared\ActivationStatus;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
 use App\Models\Lifecycle\ActivityPeriod;
@@ -22,9 +21,6 @@ use Illuminate\Support\Carbon;
  */
 trait HasActivityPeriods
 {
-    /** @use HasEnumStatus<ActivationStatus> */
-    use HasEnumStatus;
-
     /** @return MorphMany<ActivityPeriod, TModel> */
     public function activityPeriods(): MorphMany
     {

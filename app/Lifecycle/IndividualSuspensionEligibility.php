@@ -26,7 +26,7 @@ final class IndividualSuspensionEligibility
 
     public function ensureCanSuspend(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->hasStatus(EmploymentStatus::Unemployed)) {
+        if ($individual->status === EmploymentStatus::Unemployed) {
             throw CannotBeSuspendedException::unemployed($individual);
         }
 

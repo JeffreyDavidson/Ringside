@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
-use App\Enums\Shared\EmploymentStatus;
 use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Model;
@@ -42,9 +41,6 @@ use Illuminate\Support\Carbon;
  */
 trait IsEmployable
 {
-    /** @use HasEnumStatus<EmploymentStatus> */
-    use HasEnumStatus;
-
     use HasLifecycleTransitions;
 
     /**

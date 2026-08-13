@@ -26,7 +26,7 @@ class IndividualRetirementEligibility
 
     public function ensureCanRetire(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->hasStatus(EmploymentStatus::Unemployed)) {
+        if ($individual->status === EmploymentStatus::Unemployed) {
             throw CannotBeRetiredException::unemployed($individual);
         }
 
