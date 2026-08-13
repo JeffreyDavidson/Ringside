@@ -7,7 +7,6 @@ namespace App\Models\Wrestlers;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
@@ -38,6 +37,7 @@ use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Titles\TitleChampionship;
+use App\Models\Users\User;
 use App\ValueObjects\Height;
 use Database\Factories\Wrestlers\WrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
@@ -47,6 +47,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -107,6 +108,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TitleChampionship> $titleChampionships
  * @property-read Collection<int, TitleChampionship> $currentChampionships
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
+ * @property-read User|null $user
  *
  * @method string getNameLabel()
  */
@@ -116,8 +118,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
-    use BelongsToUser;
-
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
 
@@ -146,6 +146,12 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
 
     use ProvidesDisplayName;
     use SoftDeletes;
+
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     protected function stableMembershipTable(): string
     {
