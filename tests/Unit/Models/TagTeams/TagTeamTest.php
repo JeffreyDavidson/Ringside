@@ -13,8 +13,6 @@ use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
 use App\Models\Concerns\ProvidesTagTeamWrestlers;
 use App\Models\Concerns\ValidatesTagTeamDeletion;
-use App\Models\Concerns\ValidatesTagTeamEmployment;
-use App\Models\Concerns\ValidatesTagTeamRelease;
 use App\Models\Concerns\ValidatesTagTeamRetirement;
 use App\Models\Concerns\ValidatesTagTeamSuspension;
 use App\Models\Contracts\Bookable;
@@ -89,8 +87,6 @@ describe('TagTeam Model Unit Tests', function () {
             expect(class_uses(TagTeam::class))->toContain(ProvidesTagTeamWrestlers::class);
             expect(class_uses(TagTeam::class))->toContain(SoftDeletes::class);
             expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamDeletion::class);
-            expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamEmployment::class);
-            expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamRelease::class);
             expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamRetirement::class);
             expect(class_uses(TagTeam::class))->toContain(ValidatesTagTeamSuspension::class);
         });

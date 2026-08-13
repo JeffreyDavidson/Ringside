@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\ReleaseAction;
+use App\Lifecycle\TagTeamEmploymentEligibility;
 use App\Models\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -15,13 +16,13 @@ test('it releases an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     expect($tagTeam->isEmployed())->toBeTrue()
-        ->and($tagTeam->canBeReleased())->toBeTrue();
+        ->and(resolve(TagTeamEmploymentEligibility::class)->canRelease($tagTeam))->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->isEmployed())->toBeFalse()
-        ->and($tagTeam->canBeReleased())->toBeFalse();
+        ->and(resolve(TagTeamEmploymentEligibility::class)->canRelease($tagTeam))->toBeFalse();
 
     // Verify employment record was ended
     $this->assertDatabaseHas('employments', [

@@ -8,7 +8,7 @@ use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\TagTeamEmploymentEligibility;
 use App\Models\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
@@ -18,9 +18,9 @@ class EmployAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
         private readonly EmployCurrentWrestlersAction $employCurrentWrestlers,
         private readonly EmployCurrentManagersAction $employCurrentManagers,
+        private readonly TagTeamEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -28,7 +28,6 @@ class EmployAction
      *
      * This handles the complete tag team employment workflow:
      * - Validates the tag team can be employed (not retired, not already employed)
-     * - Ends retirement if currently retired
      * - Creates the employment record through the shared lifecycle component
      * - Employs all current wrestlers through cascading
      * - Employs all current managers through cascading
@@ -40,18 +39,15 @@ class EmployAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
-        $tagTeam->ensureCanBeEmployed();
-
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
-            if ($tagTeam->isRetired()) {
-                $this->retirementPeriods->end($tagTeam, $employmentDate, LifecycleTransitionType::Unretired);
-            }
+            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $this->eligibility->ensureCanEmploy($lockedTagTeam);
 
-            $this->employmentPeriods->start($tagTeam, $employmentDate, LifecycleTransitionType::Employed);
-            $this->employCurrentWrestlers->handle($tagTeam, $employmentDate);
-            $this->employCurrentManagers->handle($tagTeam, $employmentDate);
+            $this->employmentPeriods->start($lockedTagTeam, $employmentDate, LifecycleTransitionType::Employed);
+            $this->employCurrentWrestlers->handle($lockedTagTeam, $employmentDate);
+            $this->employCurrentManagers->handle($lockedTagTeam, $employmentDate);
         });
     }
 }
