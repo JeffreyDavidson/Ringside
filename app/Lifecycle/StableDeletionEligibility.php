@@ -7,9 +7,12 @@ namespace App\Lifecycle;
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Models\Stables\Stable;
+use App\Services\StableMembershipService;
 
 final class StableDeletionEligibility
 {
+    public function __construct(private readonly StableMembershipService $membershipService) {}
+
     public function canDelete(Stable $stable): bool
     {
         try {
@@ -35,10 +38,12 @@ final class StableDeletionEligibility
             throw CannotBeDeletedException::futureEstablishmentScheduled($stable);
         }
 
-        if ($stable->hasCurrentMembers()) {
+        $currentMembers = $this->membershipService->currentMembers($stable);
+
+        if ($currentMembers->isNotEmpty()) {
             throw CannotBeDeletedException::hasCurrentMembers(
                 $stable,
-                $stable->getCurrentMembersData()->getTotalMemberCount(),
+                $currentMembers->getTotalMemberCount(),
             );
         }
     }

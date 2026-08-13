@@ -77,7 +77,7 @@ class SplitStableAction
             throw CannotBeSplitException::noMembersToMove();
         }
 
-        $currentMembers = $originalStable->getCurrentMembersData();
+        $currentMembers = $this->membershipService->currentMembers($originalStable);
         $nonMemberNames = [
             ...$membersForNewStable->wrestlers?->diff($currentMembers->wrestlers ?? [])->pluck('name')->all() ?? [],
             ...$membersForNewStable->tagTeams?->diff($currentMembers->tagTeams ?? [])->pluck('name')->all() ?? [],

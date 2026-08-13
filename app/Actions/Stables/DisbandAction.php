@@ -11,6 +11,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Lifecycle\StableActivityEligibility;
 use App\Models\Stables\Stable;
+use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -24,6 +25,7 @@ class DisbandAction
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
         protected StableActivityEligibility $eligibility,
+        protected StableMembershipService $membershipService,
     ) {}
 
     /**
@@ -53,10 +55,12 @@ class DisbandAction
             $this->eligibility->ensureCanDisband($lockedStable);
             $this->endActivityPeriodAction->handle($lockedStable, $disbandDate);
 
-            if ($lockedStable->hasCurrentMembers()) {
+            $currentMembers = $this->membershipService->currentMembers($lockedStable);
+
+            if ($currentMembers->isNotEmpty()) {
                 $this->removeStableMembersAction->handle(
                     $lockedStable,
-                    $lockedStable->getCurrentMembersData(),
+                    $currentMembers,
                     $disbandDate,
                 );
             }

@@ -502,10 +502,10 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify both stables meet minimum requirements
-            $newStableMemberCount = $newStable->getCurrentMemberCount();
+            $newStableMemberCount = resolve(StableMembershipService::class)->currentMembers($newStable)->getTotalMemberCount();
 
             $refreshedOriginal = freshModel($this->originalStable);
-            $originalMemberCount = $refreshedOriginal->getCurrentMemberCount();
+            $originalMemberCount = resolve(StableMembershipService::class)->currentMembers($refreshedOriginal)->getTotalMemberCount();
 
             expect($newStableMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);
             expect($originalMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);

@@ -14,6 +14,14 @@ use Illuminate\Support\Carbon;
 
 class StableMembershipService
 {
+    public function currentMembers(Stable $stable): StableMembershipData
+    {
+        return new StableMembershipData(
+            wrestlers: $stable->currentWrestlers,
+            tagTeams: $stable->currentTagTeams,
+        );
+    }
+
     public function addMembers(Stable $stable, StableMembershipData $members, Carbon $date): void
     {
         $this->addMembersToRelationship($stable->wrestlers(), $members->wrestlers, $date);

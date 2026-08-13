@@ -15,4 +15,4 @@ Acquire Action and service collaborators through constructor injection inside se
 Services that persist lifecycle history must not use updateOrCreate() to rewrite an open period. Start a new period only when none is open, and rely on the database uniqueness constraint plus the coordinating Action transaction for exclusivity.
 
 ## Membership services preserve relationship history
-Keep membership Services focused on establishing and synchronizing relationship records while dating ended pivots instead of deleting history. Validate eligibility before Actions, and orchestrate employment or other lifecycle cascades through typed Actions rather than membership Services.
+Keep membership Services focused on reading, establishing, and synchronizing relationship records while dating ended pivots instead of deleting history. Return typed membership data for coordinating Actions instead of adding DTO construction or lifecycle member-selection helpers to Eloquent models. Validate eligibility before Actions, and orchestrate employment or other lifecycle cascades through typed Actions rather than membership Services.
