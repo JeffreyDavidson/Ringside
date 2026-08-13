@@ -166,28 +166,4 @@ class Title extends Model implements HasActivityPeriodsContract, HasDisplayName,
             'type' => TitleType::class,
         ];
     }
-
-    /**
-     * Determine if the title has a future debut scheduled.
-     */
-    public function hasFutureDebut(): bool
-    {
-        return $this->hasFutureActivity();
-    }
-
-    /**
-     * Check if this is a singles title.
-     */
-    public function isSinglesTitle(): bool
-    {
-        return $this->type === TitleType::Singles;
-    }
-
-    /**
-     * Check if this is a tag team title.
-     */
-    public function isTagTeamTitle(): bool
-    {
-        return $this->type === TitleType::TagTeam;
-    }
 }

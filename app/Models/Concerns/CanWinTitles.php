@@ -140,26 +140,4 @@ trait CanWinTitles
 
         return $relation;
     }
-
-    /**
-     * Determine if the model currently holds any title.
-     *
-     * Checks if there are any active championship records (where 'lost_at' is null).
-     * This is a convenience method for quickly checking championship status.
-     *
-     * @return bool True if the model currently holds any title, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     *
-     * if ($wrestler->isChampion()) {
-     *     echo "Wrestler is currently a champion";
-     * }
-     * ```
-     */
-    public function isChampion(): bool
-    {
-        return $this->currentChampionships()->exists();
-    }
 }

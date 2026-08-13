@@ -104,7 +104,7 @@ class TitleLifecycleEligibility
             throw CannotBeRetiredException::unactivated($title);
         }
 
-        if ($title->hasFutureDebut()) {
+        if ($title->futureActivityPeriod()->exists()) {
             throw CannotBeRetiredException::hasFutureDebut($title);
         }
     }

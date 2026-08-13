@@ -42,9 +42,4 @@ interface CanBeChampion
      * @return MorphMany<TitleChampionship, TChampion>
      */
     public function previousTitleChampionships(): MorphMany;
-
-    /**
-     * Determine if the model currently holds any title.
-     */
-    public function isChampion(): bool;
 }
