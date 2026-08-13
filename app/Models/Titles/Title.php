@@ -175,7 +175,6 @@ class Title extends Model implements HasActivityPeriodsContract, HasDisplayName,
     protected function casts(): array
     {
         return [
-            'status' => TitleStatus::class,
             'type' => TitleType::class,
         ];
     }
