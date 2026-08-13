@@ -67,6 +67,10 @@ Wrestlers explicitly define current and historical tag team membership through t
 
 Single current/previous tag team and current Stable lookups use Laravel's native `HasOneThrough` relationships through the persisted membership models. `HasStableMemberships` owns only the current and historical Stable relationship definitions; Stable-joining eligibility remains in validation rules and lifecycle collaborators. Each Stable-member model explicitly supplies its membership table, foreign key, and pivot model to the shared concern; the concern does not infer its host type at runtime. Collection relationships remain `BelongsToMany` so callers can inspect complete history and membership pivot dates. Do not reintroduce the abandoned `ankurk91/laravel-eloquent-relationships` package.
 
+## User and Roster Separation
+
+Application users authenticate and operate the promotion management system; they do not own wrestler or other roster records. User and roster models therefore have no direct Eloquent relationship or foreign key.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)

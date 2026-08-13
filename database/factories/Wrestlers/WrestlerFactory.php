@@ -26,7 +26,6 @@ class WrestlerFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => null,
             'name' => fake()->name(),
             'height' => fake()->numberBetween(60, 95),
             'weight' => fake()->numberBetween(180, 500),

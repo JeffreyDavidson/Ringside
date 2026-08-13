@@ -8,7 +8,6 @@ use App\Builders\Users\UserBuilder;
 use App\Casts\PhoneNumberCast;
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
-use App\Models\Wrestlers\Wrestler;
 use App\ValueObjects\PhoneNumber;
 use Database\Factories\Users\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -16,10 +15,8 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
@@ -45,8 +42,6 @@ use Illuminate\Support\Carbon;
  *
  * @property-read Role $role
  * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
- * @property-read Wrestler|null $wrestler
- * @property-read Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\Users\UserFactory factory($count = null, $state = [])
  * @method static UserBuilder<static>|User newModelQuery()
@@ -105,15 +100,5 @@ class User extends Authenticatable
     public function isAdministrator(): bool
     {
         return $this->role === Role::Administrator;
-    }
-
-    /**
-     * Get all wrestlers owned by this user.
-     *
-     * @return HasMany<Wrestler, $this>
-     */
-    public function wrestlers(): HasMany
-    {
-        return $this->hasMany(Wrestler::class, 'user_id');
     }
 }
