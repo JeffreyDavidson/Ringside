@@ -31,23 +31,22 @@ trait ProvidesDisplayName
      */
     public function getDisplayName(): string
     {
-        if ((array_key_exists('name', $this->getAttributes()) || property_exists($this, 'name')) && ! empty($this->name)) {
-            return $this->name;
+        $attributes = array_merge(get_object_vars($this), $this->getAttributes());
+
+        if (! empty($attributes['name'])) {
+            return (string) $attributes['name'];
         }
 
-        if ((array_key_exists('full_name', $this->getAttributes()) || property_exists($this, 'full_name')) && ! empty($this->full_name)) {
-            return $this->full_name;
+        if (! empty($attributes['full_name'])) {
+            return (string) $attributes['full_name'];
         }
 
-        $hasFirstName = array_key_exists('first_name', $this->getAttributes()) || property_exists($this, 'first_name');
-        $hasLastName = array_key_exists('last_name', $this->getAttributes()) || property_exists($this, 'last_name');
-        if ($hasFirstName && $hasLastName) {
-            $firstName = $this->first_name;
-            $lastName = $this->last_name;
+        if (array_key_exists('first_name', $attributes) && array_key_exists('last_name', $attributes)) {
+            $firstName = $attributes['first_name'];
+            $lastName = $attributes['last_name'];
 
-            // Both null → no display name available, fall through to exception.
             if ($firstName !== null || $lastName !== null) {
-                return mb_trim(($firstName ?? '').' '.($lastName ?? ''));
+                return mb_trim((string) ($firstName ?? '').' '.(string) ($lastName ?? ''));
             }
         }
 

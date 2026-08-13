@@ -499,30 +499,6 @@ parameters:
 			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionships.php
 
 		-
-			message: '#^Variable \$firstName on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/Models/Managers/Manager.php
-
-		-
-			message: '#^Variable \$lastName on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/Models/Managers/Manager.php
-
-		-
-			message: '#^Variable \$firstName on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/Models/Referees/Referee.php
-
-		-
-			message: '#^Variable \$lastName on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/Models/Referees/Referee.php
-
-		-
 			message: '#^Strict comparison using \=\=\= between Illuminate\\Support\\Carbon and null will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
