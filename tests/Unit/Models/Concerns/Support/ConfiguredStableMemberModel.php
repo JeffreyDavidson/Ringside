@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Models\Concerns\Support;
 
-use App\Models\Concerns\CanJoinStables;
+use App\Models\Concerns\HasStableMemberships;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Model;
@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ConfiguredStableMemberModel extends Model implements CanBeAStableMember
 {
-    /** @use CanJoinStables<StableWrestler, self> */
-    use CanJoinStables;
+    /** @use HasStableMemberships<StableWrestler, self> */
+    use HasStableMemberships;
 
     protected function stableMembershipTable(): string
     {

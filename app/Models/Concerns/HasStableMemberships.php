@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @phpstan-require-implements CanBeAStableMember<TPivotModel, TModel>
  */
-trait CanJoinStables
+trait HasStableMemberships
 {
     abstract protected function stableMembershipTable(): string;
 
@@ -90,17 +90,5 @@ trait CanJoinStables
             ->wherePivotNotNull('left_at');
 
         return $relation;
-    }
-
-    public function isNotCurrentlyInStable(Stable $stable): bool
-    {
-        $currentStable = $this->currentStable;
-
-        if (! $currentStable) {
-            return true;
-        }
-
-        /** @phpstan-ignore-next-line */
-        return method_exists($currentStable, 'isNot') && $currentStable->isNot($stable);
     }
 }

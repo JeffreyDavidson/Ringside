@@ -9,11 +9,11 @@ use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanJoinTagTeams;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\HasMatchParticipations;
+use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
@@ -123,9 +123,6 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember,
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableWrestler, $this> */
-    use CanJoinStables;
-
     /** @use CanJoinTagTeams<TagTeamWrestler, $this> */
     use CanJoinTagTeams;
 
@@ -138,6 +135,9 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeATagTeamMember,
     use HasFactory;
 
     use HasMatchParticipations;
+
+    /** @use HasStableMemberships<StableWrestler, $this> */
+    use HasStableMemberships;
 
     /** @use IsEmployable<static> */
     use IsEmployable;

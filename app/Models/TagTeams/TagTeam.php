@@ -7,10 +7,10 @@ namespace App\Models\TagTeams;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\CanBeManaged;
-use App\Models\Concerns\CanJoinStables;
 use App\Models\Concerns\CanWinTitles;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\HasMatchParticipations;
+use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
@@ -126,9 +126,6 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @use CanBeManaged<TagTeamManager, static> */
     use CanBeManaged;
 
-    /** @use CanJoinStables<StableTagTeam, $this> */
-    use CanJoinStables;
-
     /** @use CanWinTitles<TitleChampionship> */
     use CanWinTitles;
 
@@ -138,6 +135,9 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     use HasFactory;
 
     use HasMatchParticipations;
+
+    /** @use HasStableMemberships<StableTagTeam, $this> */
+    use HasStableMemberships;
 
     /** @use IsEmployable<static> */
     use IsEmployable;
