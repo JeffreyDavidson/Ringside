@@ -244,8 +244,8 @@ describe('UserPolicy business context', function () {
         $basic = basicUser();
 
         // Verify the policy respects the user's isAdministrator method
-        expect($admin->isAdministrator())->toBeTrue();
-        expect($basic->isAdministrator())->toBeFalse();
+        expect($admin->role->isAdministrator())->toBeTrue();
+        expect($basic->role->isAdministrator())->toBeFalse();
 
         expect($this->policy->before($admin, 'any-operation'))->toBeTrue();
         expect($this->policy->before($basic, 'any-operation'))->toBeNull();

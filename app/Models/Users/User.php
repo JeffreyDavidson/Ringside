@@ -93,12 +93,4 @@ class User extends Authenticatable
             set: fn (string $value) => bcrypt($value),
         );
     }
-
-    /**
-     * Check to see if the user is an administrator.
-     */
-    public function isAdministrator(): bool
-    {
-        return $this->role === Role::Administrator;
-    }
 }

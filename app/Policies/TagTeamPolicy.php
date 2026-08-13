@@ -26,7 +26,7 @@ class TagTeamPolicy
      */
     public function before(User $user, string $ability): ?bool
     {
-        if ($user->isAdministrator()) {
+        if ($user->role->isAdministrator()) {
             return true;
         }
 
