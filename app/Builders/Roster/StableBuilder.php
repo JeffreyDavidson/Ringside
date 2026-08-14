@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Builders\Roster;
 
 use App\Builders\Concerns\HasActivityPeriodScopes;
-use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
@@ -78,7 +77,6 @@ use Illuminate\Support\Facades\DB;
 class StableBuilder extends Builder
 {
     use HasActivityPeriodScopes;
-    use HasAvailabilityScopes;
     use HasRetirementScopes;
 
     /**
@@ -192,7 +190,7 @@ class StableBuilder extends Builder
     {
         return $this->established()
             ->withMinimumMembers()
-            ->whereNotRetired();
+            ->whereDoesntHave('currentRetirement');
     }
 
     /**

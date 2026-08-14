@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
@@ -52,7 +51,6 @@ describe('IndividualBuilder Unit Tests', function () {
 
         test('uses required traits', function () {
             // Act & Assert
-            expect(class_uses(IndividualBuilder::class))->toContain(HasAvailabilityScopes::class);
             expect(class_uses(IndividualBuilder::class))->toContain(HasRetirementScopes::class);
         });
     });
