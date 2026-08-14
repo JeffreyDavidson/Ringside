@@ -61,18 +61,11 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property-read ActivityPeriod|null $previousActivityPeriod
  * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
  *
- * @method static StableBuilder<static>|Stable activatedAfter(\Carbon\Carbon $date)
- * @method static StableBuilder<static>|Stable activatedBefore(\Carbon\Carbon $date)
- * @method static StableBuilder<static>|Stable activeDuring(\Carbon\Carbon $start, \Carbon\Carbon $end)
  * @method static StableBuilder<static>|Stable available()
  * @method static StableBuilder<static>|Stable belowMinimumMembers()
- * @method static StableBuilder<static>|Stable currentlyActive()
- * @method static StableBuilder<static>|Stable currentlyInactive()
- * @method static StableBuilder<static>|Stable deactivatedAfter(\Carbon\Carbon $date)
  * @method static StableBuilder<static>|Stable disbanded()
  * @method static StableBuilder<static>|Stable established()
  * @method static \Database\Factories\Stables\StableFactory factory($count = null, $state = [])
- * @method static StableBuilder<static>|Stable neverActivated()
  * @method static StableBuilder<static>|Stable newModelQuery()
  * @method static StableBuilder<static>|Stable newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable onlyTrashed()
@@ -83,7 +76,6 @@ use Tests\Unit\Models\Stables\StableTest;
  * @method static StableBuilder<static>|Stable withFutureEstablishment()
  * @method static StableBuilder<static>|Stable withMemberCount(int $min, ?int $max = null)
  * @method static StableBuilder<static>|Stable withMinimumMembers()
- * @method static StableBuilder<static>|Stable withMultiplePeriods(int $minimumPeriods = 2)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable withoutTrashed()
  *
