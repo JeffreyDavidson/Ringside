@@ -24,6 +24,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `StableBuilder` owns stable lifecycle-state filters and historical stable-membership projections for wrestlers and tag teams. The history methods select the persisted membership dates required by the table layer.
 
+`EventBuilder` owns event scheduling-state filters and the canonical event-list ordering: dated events newest first, followed by unscheduled events.
+
 ## Shared Concerns
 
 - `FiltersByEmploymentStatus` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` filters for individual roster members and tag teams.

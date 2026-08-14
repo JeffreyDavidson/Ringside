@@ -4,6 +4,24 @@ declare(strict_types=1);
 
 use App\Models\Events\Event;
 
+test('dated events can be ordered newest first with unscheduled events last', function () {
+    $oldestEvent = Event::factory()->create(['date' => '2025-01-01 19:00:00']);
+    $newestEvent = Event::factory()->create(['date' => '2025-03-01 19:00:00']);
+    $middleEvent = Event::factory()->create(['date' => '2025-02-01 19:00:00']);
+    $unscheduledEvent = Event::factory()->unscheduled()->create();
+
+    $events = Event::query()
+        ->latestDatedFirst()
+        ->get();
+
+    expect($events->modelKeys())->toBe([
+        $newestEvent->id,
+        $middleEvent->id,
+        $oldestEvent->id,
+        $unscheduledEvent->id,
+    ]);
+});
+
 test('scheduled events can be retrieved', function () {
     // Clear any existing events to ensure test isolation
     Event::query()->forceDelete();
