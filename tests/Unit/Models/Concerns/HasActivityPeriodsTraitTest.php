@@ -211,29 +211,6 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
         });
     });
 
-    describe('date checking methods', function () {
-        test('wasActiveOn returns true when current period started on date', function () {
-            $model = Title::factory()->unactivated()->create();
-            $startDate = now()->subWeek();
-            ActivityPeriod::factory()->for($model, 'activeable')->create([
-                'started_at' => $startDate,
-                'ended_at' => null,
-            ]);
-            $model->refresh();
-            expect($model->wasActiveOn($startDate))->toBeTrue();
-        });
-
-        test('wasActiveOn returns false when current period started on different date', function () {
-            $model = $this->model;
-            ActivityPeriod::factory()->for($model, 'activeable')->create([
-                'started_at' => now()->subWeek(),
-                'ended_at' => null,
-            ]);
-            expect($model->wasActiveOn(now()->subMonth()))->toBeFalse();
-        });
-
-    });
-
     describe('utility methods', function () {
         test('first activity period is absent when no periods exist', function () {
             $model = $this->model;

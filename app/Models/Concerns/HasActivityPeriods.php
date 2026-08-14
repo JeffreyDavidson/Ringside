@@ -9,7 +9,6 @@ use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Support\Carbon;
 
 /**
  * @template TModel of Model The parent model class that can have activity periods (e.g., Title)
@@ -125,18 +124,6 @@ trait HasActivityPeriods
     public function isInactive(): bool
     {
         return ! $this->isCurrentlyActive();
-    }
-
-    /**
-     * Check if the current activity period started on a specific date.
-     *
-     * @param  Carbon  $activityDate  The date to check against
-     */
-    public function wasActiveOn(Carbon $activityDate): bool
-    {
-        $currentPeriod = $this->currentActivityPeriod;
-
-        return $currentPeriod ? $currentPeriod->started_at->isSameDay($activityDate) : false;
     }
 
     protected function getActivityPeriodTableName(): string
