@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Builders\Roster\WrestlerBuilder;
 use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\HasChampionshipReigns;
+use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
@@ -80,7 +80,7 @@ describe('Wrestler Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Wrestler::class))->toContain(CanBeManaged::class);
+            expect(class_uses(Wrestler::class))->toContain(HasManagerAssignments::class);
             expect(class_uses(Wrestler::class))->toContain(HasStableMemberships::class);
             expect(class_uses(Wrestler::class))->toContain(HasChampionshipReigns::class);
             expect(class_uses(Wrestler::class))->toContain(HasFactory::class);

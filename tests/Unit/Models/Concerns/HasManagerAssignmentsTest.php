@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Tests\Unit\Models\Concerns\Support\FakeManageableModel;
 use Tests\Unit\Models\Concerns\Support\FakeManagerPivotModel;
 
-describe('CanBeManaged manager relationships', function () {
+describe('HasManagerAssignments relationships', function () {
     beforeEach(function () {
         $this->model = new FakeManageableModel();
     });

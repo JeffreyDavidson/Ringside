@@ -7,9 +7,9 @@ namespace App\Models\Wrestlers;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
+use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
@@ -113,14 +113,14 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
-    /** @use CanBeManaged<WrestlerManager, static> */
-    use CanBeManaged;
-
     use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<WrestlerFactory> */
     use HasFactory;
+
+    /** @use HasManagerAssignments<WrestlerManager, static> */
+    use HasManagerAssignments;
 
     use HasMatchParticipations;
 

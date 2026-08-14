@@ -6,9 +6,9 @@ namespace App\Models\TagTeams;
 
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\CanBeManaged;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
+use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
@@ -119,14 +119,14 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TagTeamBuilder::class)]
 class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, SoftDeletable, Suspendable
 {
-    /** @use CanBeManaged<TagTeamManager, static> */
-    use CanBeManaged;
-
     use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<TagTeamFactory> */
     use HasFactory;
+
+    /** @use HasManagerAssignments<TagTeamManager, static> */
+    use HasManagerAssignments;
 
     use HasMatchParticipations;
 

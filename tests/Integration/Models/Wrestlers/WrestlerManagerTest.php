@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
  * relationships including hiring, ending relationships, querying current
  * and previous managers, and ensuring proper business rule enforcement.
  *
- * Tests cover the CanBeManaged trait implementation and WrestlerManager
+ * Tests cover the HasManagerAssignments trait implementation and WrestlerManager
  * pivot model functionality with real database relationships.
  *
  * @see WrestlerManager

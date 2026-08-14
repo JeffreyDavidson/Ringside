@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Models\Concerns\Support;
 
-use App\Models\Concerns\CanBeManaged;
+use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Contracts\Manageable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Fake model for testing CanBeManaged trait in isolation.
+ * Fake model for testing HasManagerAssignments in isolation.
  *
  * @implements Manageable<FakeManagerPivotModel, self>
  */
@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable('name')]
 class FakeManageableModel extends Model implements Manageable
 {
-    /** @use CanBeManaged<FakeManagerPivotModel, self> */
-    use CanBeManaged;
+    /** @use HasManagerAssignments<FakeManagerPivotModel, self> */
+    use HasManagerAssignments;
 
     protected function managerAssignmentTable(): string
     {

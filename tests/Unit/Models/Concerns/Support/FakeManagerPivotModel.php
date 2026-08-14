@@ -7,7 +7,7 @@ namespace Tests\Unit\Models\Concerns\Support;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * Fake pivot model for testing CanBeManaged trait in isolation.
+ * Fake pivot model for testing HasManagerAssignments in isolation.
  * This ensures trait tests are not coupled to real business models.
  */
 class FakeManagerPivotModel extends Pivot
