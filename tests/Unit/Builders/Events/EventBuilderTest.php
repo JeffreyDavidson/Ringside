@@ -15,9 +15,10 @@ test('scheduled events can be retrieved', function () {
     $scheduledEvents = Event::scheduled()->get();
 
     expect($scheduledEvents)
-        ->toHaveCount(2)
+        ->toHaveCount(1)
         ->and($scheduledEvents->contains($scheduledEvent))->toBeTrue()
-        ->and($scheduledEvents->contains($pastEvent))->toBeTrue();
+        ->and($scheduledEvents->contains($unscheduledEvent))->toBeFalse()
+        ->and($scheduledEvents->contains($pastEvent))->toBeFalse();
 });
 
 test('unscheduled events can be retrieved', function () {

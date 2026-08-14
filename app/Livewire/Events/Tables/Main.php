@@ -7,6 +7,7 @@ namespace App\Livewire\Events\Tables;
 use App\Actions\Events\DeleteAction;
 use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
+use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
@@ -76,34 +77,27 @@ class Main extends BaseTable
      */
     public function filters(): array
     {
-        /** @var array<string, string> $statuses */
-        $statuses = [
-            'scheduled' => 'Scheduled',
-            'unscheduled' => 'Unscheduled',
-            'past' => 'Past',
-            'future' => 'Future',
-        ];
-
         $venues = Venue::query()
             ->alphabetical()
             ->pluck('name', 'id')
             ->toArray();
 
+        $statusOptions = ['' => __('core.all')];
+
+        foreach (EventStatus::cases() as $status) {
+            $statusOptions[$status->value] = $status->label();
+        }
+
         return [
             SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
-                ->options([
-                    '' => __('core.all'),
-                    'schedule' => 'Scheduled',
-                    'past' => 'Past',
-                    'unscheduled' => 'Unscheduled',
-                ])
-                ->filter(function (EventBuilder $builder, string $value) {
+                ->options($statusOptions)
+                ->filter(function (EventBuilder $builder, string $value): void {
                     /** @var EventBuilder<Event> $builder */
-                    match ($value) {
-                        'scheduled' => $builder->scheduled(),
-                        'past' => $builder->past(),
-                        'unscheduled' => $builder->unscheduled(),
+                    match (EventStatus::tryFrom($value)) {
+                        EventStatus::Scheduled => $builder->scheduled(),
+                        EventStatus::Past => $builder->past(),
+                        EventStatus::Unscheduled => $builder->unscheduled(),
                         default => null,
                     };
                 }),
