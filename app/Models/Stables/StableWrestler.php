@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Stables;
 
+use App\Builders\Roster\MembershipPeriodBuilder;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
@@ -22,13 +24,16 @@ use Illuminate\Support\Carbon;
  * @property-read Stable $stable
  * @property-read Wrestler $wrestler
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|StableWrestler newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|StableWrestler newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|StableWrestler query()
+ * @method static MembershipPeriodBuilder<static> current()
+ * @method static MembershipPeriodBuilder<static> ended()
+ * @method static MembershipPeriodBuilder<static> newModelQuery()
+ * @method static MembershipPeriodBuilder<static> newQuery()
+ * @method static MembershipPeriodBuilder<static> query()
  *
  * @mixin \Eloquent
  */
 #[Fillable('stable_id', 'wrestler_id', 'joined_at', 'left_at')]
+#[UseEloquentBuilder(MembershipPeriodBuilder::class)]
 class StableWrestler extends Pivot
 {
     /** @var string */

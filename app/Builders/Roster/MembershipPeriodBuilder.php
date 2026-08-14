@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Builders\Roster;
+
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
+use App\Models\TagTeams\TagTeamWrestler;
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * @template TModel of StableTagTeam|StableWrestler|TagTeamWrestler
+ *
+ * @extends Builder<TModel>
+ */
+class MembershipPeriodBuilder extends Builder
+{
+    public function current(): static
+    {
+        $this->whereNull('left_at');
+
+        return $this;
+    }
+
+    public function ended(): static
+    {
+        $this->whereNotNull('left_at');
+
+        return $this;
+    }
+}

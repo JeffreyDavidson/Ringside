@@ -81,7 +81,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
 
         return TagTeamWrestler::query()
             ->where('wrestler_id', $this->wrestlerId)
-            ->whereNotNull('left_at')
+            ->ended()
             ->orderByDesc('joined_at');
     }
 

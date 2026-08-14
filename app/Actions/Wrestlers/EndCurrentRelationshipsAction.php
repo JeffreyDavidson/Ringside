@@ -16,12 +16,12 @@ class EndCurrentRelationshipsAction
     {
         TagTeamWrestler::query()
             ->where('wrestler_id', $wrestler->id)
-            ->whereNull('left_at')
+            ->current()
             ->update(['left_at' => $effectiveDate]);
 
         StableWrestler::query()
             ->where('wrestler_id', $wrestler->id)
-            ->whereNull('left_at')
+            ->current()
             ->update(['left_at' => $effectiveDate]);
 
         WrestlerManager::query()

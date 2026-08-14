@@ -15,7 +15,7 @@ class EndCurrentRelationshipsAction
     {
         TagTeamWrestler::query()
             ->where('tag_team_id', $tagTeam->id)
-            ->whereNull('left_at')
+            ->current()
             ->update(['left_at' => $effectiveDate]);
 
         TagTeamManager::query()
