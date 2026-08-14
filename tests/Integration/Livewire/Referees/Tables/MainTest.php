@@ -85,6 +85,7 @@ describe('RefereesTable Component', function () {
             Referee::factory()->create(['first_name' => 'Earl', 'last_name' => 'Hebner']);
             Referee::factory()->create(['first_name' => 'Dave', 'last_name' => 'Hebner']);
             Referee::factory()->create(['first_name' => 'Mike', 'last_name' => 'Chioda']);
+            Referee::factory()->create(['first_name' => 'Nick', 'last_name' => 'Hebnerson']);
 
             $component = livewire(Main::class);
 
@@ -93,14 +94,16 @@ describe('RefereesTable Component', function () {
                 ->set('search', 'Hebner')
                 ->assertSee('Earl Hebner')
                 ->assertSee('Dave Hebner')
-                ->assertDontSee('Mike Chioda');
+                ->assertDontSee('Mike Chioda')
+                ->assertDontSee('Nick Hebnerson');
 
             // Test clearing search
             $component
                 ->set('search', '')
                 ->assertSee('Earl Hebner')
                 ->assertSee('Dave Hebner')
-                ->assertSee('Mike Chioda');
+                ->assertSee('Mike Chioda')
+                ->assertSee('Nick Hebnerson');
         });
 
         test('status filter functionality works with real data', function () {

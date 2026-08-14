@@ -164,7 +164,9 @@ abstract class DataTableComponent extends Component
 
         $query->where(function (Builder $q) use ($searchableColumns, $searchTerm): void {
             foreach ($searchableColumns as $column) {
-                $q->orWhere($column->getField(), 'like', "%{$searchTerm}%");
+                $q->orWhere(function (Builder $columnQuery) use ($column, $searchTerm): void {
+                    $column->applySearch($columnQuery, $searchTerm);
+                });
             }
         });
     }

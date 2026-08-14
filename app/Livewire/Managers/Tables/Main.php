@@ -33,7 +33,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Managers\Manager;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 
 class Main extends BaseTable
@@ -70,7 +69,7 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('managers.name'), 'full_name')
-                ->searchable(function (Builder $builder, string $searchTerm) {
+                ->searchable(function (ManagerBuilder $builder, string $searchTerm) {
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')

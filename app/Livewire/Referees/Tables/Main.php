@@ -33,7 +33,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Referees\Referee;
-use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
@@ -71,9 +70,8 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('referees.name'), 'full_name')
-                ->searchable(function (Builder $builder, string $searchTerm) {
-                    $builder->orWhere('first_name', 'like', '%'.$searchTerm.'%')
-                        ->orWhere('last_name', 'like', '%'.$searchTerm.'%');
+                ->searchable(function (RefereeBuilder $builder, string $searchTerm) {
+                    $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')
                 ->label(fn (Referee $row) => $row->status->label())

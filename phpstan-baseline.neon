@@ -139,18 +139,6 @@ parameters:
 			path: app/Livewire/Managers/Components/Actions.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Contracts\\Database\\Query\\Builder\:\:whereNameMatches\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Livewire/Managers/Tables/Main.php
-
-		-
-			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Livewire/Managers/Tables/Main.php
-
-		-
 			message: '#^Return type \(App\\Builders\\Roster\\ManagerBuilder\<App\\Models\\Managers\\Manager\>\) of method App\\Livewire\\Managers\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -215,12 +203,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Livewire/Matches/Tables/MatchesTable.php
-
-		-
-			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Livewire/Referees/Tables/Main.php
 
 		-
 			message: '#^Return type \(App\\Builders\\Roster\\RefereeBuilder\<App\\Models\\Referees\\Referee\>\) of method App\\Livewire\\Referees\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
@@ -395,24 +377,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/Livewire/Titles/Tables/PreviousTitleChampionships.php
-
-		-
-			message: '#^Call to method whereNameMatches\(\) on an unknown class App\\Livewire\\Users\\Tables\\Builder\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/Users/Tables/Main.php
-
-		-
-			message: '#^Method App\\Livewire\\Table\\Column\:\:searchable\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/Livewire/Users/Tables/Main.php
-
-		-
-			message: '#^Parameter \$builder of anonymous function has invalid type App\\Livewire\\Users\\Tables\\Builder\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/Livewire/Users/Tables/Main.php
 
 		-
 			message: '#^Return type \(App\\Builders\\Users\\UserBuilder\<App\\Models\\Users\\User\>\) of method App\\Livewire\\Users\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'

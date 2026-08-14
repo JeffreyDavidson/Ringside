@@ -6,12 +6,15 @@ namespace App\Livewire\Table;
 
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 
 class Column
 {
     protected string $field;
 
     protected bool $searchable = false;
+
+    protected ?Closure $searchCallback = null;
 
     protected bool $sortable = false;
 
@@ -35,11 +38,26 @@ class Column
         return new static($title, $from);
     }
 
-    public function searchable(): static
+    public function searchable(?Closure $callback = null): static
     {
         $this->searchable = true;
+        $this->searchCallback = $callback;
 
         return $this;
+    }
+
+    /**
+     * @param  Builder<*>  $query
+     */
+    public function applySearch(Builder $query, string $searchTerm): void
+    {
+        if ($this->searchCallback !== null) {
+            ($this->searchCallback)($query, $searchTerm);
+
+            return;
+        }
+
+        $query->where($this->field, 'like', "%{$searchTerm}%");
     }
 
     public function sortable(): static
