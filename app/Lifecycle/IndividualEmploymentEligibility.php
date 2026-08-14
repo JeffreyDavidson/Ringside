@@ -51,7 +51,7 @@ final class IndividualEmploymentEligibility
 
     public function ensureCanRelease(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->isNotInEmployment()) {
+        if ($individual->hasNoCurrentOrFutureEmployment()) {
             throw CannotBeReleasedException::unemployed($individual);
         }
 

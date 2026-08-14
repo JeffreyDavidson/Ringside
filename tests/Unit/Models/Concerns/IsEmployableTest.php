@@ -179,6 +179,18 @@ describe('IsEmployable Trait Unit Tests', function () {
             expect($modelWithout->hasFutureEmployment())->toBeFalse();
         });
 
+        test('detects the absence of current and future employment', function () {
+            $withoutEmployment = new EmploymentStateModel();
+            $currentlyEmployed = new EmploymentStateModel();
+            $currentlyEmployed->currentEmploymentExists = true;
+            $futureEmployment = new EmploymentStateModel();
+            $futureEmployment->futureEmploymentExists = true;
+
+            expect($withoutEmployment->hasNoCurrentOrFutureEmployment())->toBeTrue()
+                ->and($currentlyEmployed->hasNoCurrentOrFutureEmployment())->toBeFalse()
+                ->and($futureEmployment->hasNoCurrentOrFutureEmployment())->toBeFalse();
+        });
+
         test('can check if model has employment history', function () {
             $modelWith = new EmploymentStateModel();
             $modelWith->employmentExists = true;
