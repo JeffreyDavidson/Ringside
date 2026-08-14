@@ -64,6 +64,7 @@ Do not add date-specific booking or scheduling methods to a model builder. Those
 ## Guidelines
 
 - Keep reusable filtering and relationship-existence queries on typed builders.
+- Share cohesive public query capabilities through a parent builder or concern; keep one-off relationship fragments explicit in the concrete builder.
 - Keep lifecycle transition rules in the established lifecycle or validation collaborators.
 - Keep match booking eligibility in `RosterBookingEligibility`.
 - Keep tag-team state, minimum-membership, and partner eligibility checks together in `RosterBookingEligibility`.

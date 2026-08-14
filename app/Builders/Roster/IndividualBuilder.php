@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
-use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasNameSearch;
 use App\Builders\Concerns\HasRetirementScopes;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,7 +30,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 abstract class IndividualBuilder extends Builder
 {
-    use HasAvailabilityScopes;
     use HasNameSearch;
     use HasRetirementScopes;
 
@@ -67,10 +65,10 @@ abstract class IndividualBuilder extends Builder
      */
     public function available(): static
     {
-        $this->whereEmployed()
-            ->whereNotInjured()
-            ->whereNotSuspended()
-            ->whereNotRetired();
+        $this->whereHas('currentEmployment')
+            ->whereDoesntHave('currentInjury')
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentRetirement');
 
         return $this;
     }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
-use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
@@ -44,7 +43,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class TagTeamBuilder extends Builder
 {
-    use HasAvailabilityScopes;
     use HasRetirementScopes;
 
     /**
@@ -73,9 +71,9 @@ class TagTeamBuilder extends Builder
      */
     public function available(): static
     {
-        $this->whereEmployed()
-            ->whereNotSuspended()
-            ->whereNotRetired();
+        $this->whereHas('currentEmployment')
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentRetirement');
 
         return $this;
     }
@@ -103,7 +101,11 @@ class TagTeamBuilder extends Builder
      */
     public function unavailable(): static
     {
-        $this->whereBasicUnavailabilityConditions();
+        $this->where(function (Builder $query): void {
+            $query->whereDoesntHave('currentEmployment')
+                ->orWhereHas('currentSuspension')
+                ->orWhereHas('currentRetirement');
+        });
 
         return $this;
     }
