@@ -30,6 +30,4 @@ use Illuminate\Database\Eloquent\Builder;
 class UserBuilder extends Builder
 {
     use HasNameSearch;
-
-    // Users don't extend IndividualBuilder, so they include HasNameSearch directly.
 }

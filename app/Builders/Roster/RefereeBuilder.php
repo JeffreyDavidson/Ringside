@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
+use App\Builders\Concerns\HasNameSearch;
 use App\Models\Referees\Referee;
 
 /**
@@ -35,4 +36,7 @@ use App\Models\Referees\Referee;
  *     ->get();
  * ```
  */
-class RefereeBuilder extends IndividualBuilder {}
+class RefereeBuilder extends IndividualBuilder
+{
+    use HasNameSearch;
+}

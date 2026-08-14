@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
-use App\Builders\Concerns\HasNameSearch;
 use App\Builders\Concerns\HasRetirementScopes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +29,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 abstract class IndividualBuilder extends Builder
 {
-    use HasNameSearch;
     use HasRetirementScopes;
 
     /**
