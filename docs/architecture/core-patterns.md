@@ -27,6 +27,7 @@
 
 - Employment history uses the shared `App\Models\Lifecycle\Employment` model and an `employable` polymorphic owner.
 - Wrestlers, managers, referees, and tag teams expose the same typed employment relationships through `IsEmployable`.
+- Employment state uses one predicate per distinct meaning: `isEmployed()`, `hasFutureEmployment()`, `isReleased()`, and `hasEmploymentHistory()`. Do not add aliases for those states.
 - Employment models are not resolved from entity naming conventions and entity-specific employment record classes must not be introduced.
 - Injury history uses the shared `App\Models\Lifecycle\Injury` model and an `injurable` polymorphic owner.
 - Suspension history uses the shared `App\Models\Lifecycle\Suspension` model and a `suspendable` polymorphic owner.
