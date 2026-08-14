@@ -11,7 +11,7 @@ use App\Models\Wrestlers\Wrestler;
  * INTEGRATION TEST SCOPE:
  * - Builder integration with Model, Database, and Factory layers
  * - Business logic validation through complete data pipeline
- * - Employment status filtering with real data (bookable, futureEmployed, unemployed, released)
+ * - Employment status filtering with real data (available, futureEmployed, unemployed, released)
  * - Status-based filtering with database persistence (suspended, retired, injured)
  * - Query scope accuracy with actual database results
  *
@@ -24,7 +24,7 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
     beforeEach(function () {
         // Create wrestlers in all possible states for comprehensive scope testing
         $this->futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-        $this->bookableWrestler = Wrestler::factory()->bookable()->create();
+        $this->availableWrestler = Wrestler::factory()->bookable()->create();
         $this->suspendedWrestler = Wrestler::factory()->suspended()->create();
         $this->retiredWrestler = Wrestler::factory()->retired()->create();
         $this->releasedWrestler = Wrestler::factory()->released()->create();
@@ -33,14 +33,14 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
     });
 
     describe('employment status scopes', function () {
-        test('bookable wrestlers can be retrieved', function () {
+        test('available wrestlers can be retrieved', function () {
             // Act
-            $bookableWrestlers = Wrestler::bookable()->get();
+            $availableWrestlers = Wrestler::available()->get();
 
             // Assert
-            expect($bookableWrestlers)
+            expect($availableWrestlers)
                 ->toHaveCount(1)
-                ->and($bookableWrestlers->contains($this->bookableWrestler))->toBeTrue();
+                ->and($availableWrestlers->contains($this->availableWrestler))->toBeTrue();
         });
 
         test('future employed wrestlers can be retrieved', function () {

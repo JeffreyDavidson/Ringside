@@ -10,7 +10,7 @@ use App\Models\Referees\Referee;
  *
  * UNIT TEST SCOPE:
  * - Builder class structure and scope functionality
- * - Employment status filtering scopes (bookable, futureEmployed, unemployed, released)
+ * - Employment status filtering scopes (available, futureEmployed, unemployed, released)
  * - Individual roster member status scopes (suspended, retired, injured)
  * - Query scope accuracy and entity isolation
  *
@@ -24,7 +24,7 @@ describe('RefereeQueryBuilder Unit Tests', function () {
     beforeEach(function () {
         // Create referees in all possible states for comprehensive scope testing
         $this->futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-        $this->bookableReferee = Referee::factory()->bookable()->create();
+        $this->availableReferee = Referee::factory()->bookable()->create();
         $this->suspendedReferee = Referee::factory()->suspended()->create();
         $this->retiredReferee = Referee::factory()->retired()->create();
         $this->releasedReferee = Referee::factory()->released()->create();
@@ -33,14 +33,14 @@ describe('RefereeQueryBuilder Unit Tests', function () {
     });
 
     describe('availability status scopes', function () {
-        test('bookable referees can be retrieved', function () {
+        test('available referees can be retrieved', function () {
             // Act
-            $bookableReferees = Referee::bookable()->get();
+            $availableReferees = Referee::available()->get();
 
             // Assert
-            expect($bookableReferees)
+            expect($availableReferees)
                 ->toHaveCount(1)
-                ->and($bookableReferees->contains($this->bookableReferee))->toBeTrue();
+                ->and($availableReferees->contains($this->availableReferee))->toBeTrue();
         });
     });
 

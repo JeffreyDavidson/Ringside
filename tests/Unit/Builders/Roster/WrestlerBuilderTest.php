@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 use App\Models\Wrestlers\Wrestler;
 
-test('bookable wrestlers can be retrieved', function () {
+test('available wrestlers can be retrieved', function () {
     $futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
-    $bookableWrestler = Wrestler::factory()->bookable()->create();
+    $availableWrestler = Wrestler::factory()->bookable()->create();
     $suspendedWrestler = Wrestler::factory()->suspended()->create();
     $retiredWrestler = Wrestler::factory()->retired()->create();
     $releasedWrestler = Wrestler::factory()->released()->create();
     $unemployedWrestler = Wrestler::factory()->unemployed()->create();
     $injuredWrestler = Wrestler::factory()->injured()->create();
 
-    $bookableWrestlers = Wrestler::bookable()->get();
+    $availableWrestlers = Wrestler::available()->get();
 
-    expect($bookableWrestlers)
+    expect($availableWrestlers)
         ->toHaveCount(1)
-        ->and($bookableWrestlers->contains($bookableWrestler))->toBeTrue();
+        ->and($availableWrestlers->contains($availableWrestler))->toBeTrue();
 });
 
 test('future employed wrestlers can be retrieved', function () {

@@ -35,35 +35,4 @@ use App\Models\Referees\Referee;
  *     ->get();
  * ```
  */
-class RefereeBuilder extends IndividualBuilder
-{
-    // Referees inherit all availability, employment, injury, retirement, and suspension scopes from base class
-
-    /**
-     * Scope a query to include bookable referees.
-     *
-     * Filters referees that are currently available for assignment to officiate matches.
-     * Bookable referees must be available (employed, not injured, not suspended,
-     * not retired) and ready for match assignment.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get all bookable referees
-     * $bookableReferees = Referee::query()->bookable()->get();
-     *
-     * // Find referees ready for championship matches
-     * $championshipReferees = Referee::query()
-     *     ->bookable()
-     *     ->whereHas('matches', function ($query) {
-     *         $query->where('type', 'championship');
-     *     })
-     *     ->get();
-     * ```
-     */
-    public function bookable(): static
-    {
-        return $this->available();
-    }
-}
+class RefereeBuilder extends IndividualBuilder {}
