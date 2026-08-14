@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Collections\MatchCompetitorsCollection;
 use App\Enums\MatchType;
 use App\Models\Concerns\HasLifecycleTransitions;
@@ -16,6 +17,7 @@ use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -53,10 +55,11 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Wrestler> $wrestlers
  *
  * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch newQuery()
+ * @method static EventMatchBuilder<static>|EventMatch forPastEvents()
+ * @method static EventMatchBuilder<static>|EventMatch newModelQuery()
+ * @method static EventMatchBuilder<static>|EventMatch newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch query()
+ * @method static EventMatchBuilder<static>|EventMatch query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch withoutTrashed()
  *
@@ -65,6 +68,7 @@ use Illuminate\Support\Carbon;
 #[Table('events_matches')]
 #[Fillable('event_id', 'match_number', 'match_type', 'match_stipulation_id', 'preview')]
 #[UseFactory(MatchFactory::class)]
+#[UseEloquentBuilder(EventMatchBuilder::class)]
 class EventMatch extends Model implements SoftDeletable
 {
     /** @use HasFactory<MatchFactory> */

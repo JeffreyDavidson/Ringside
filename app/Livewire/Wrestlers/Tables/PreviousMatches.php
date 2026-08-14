@@ -31,12 +31,10 @@ class PreviousMatches extends BasePreviousMatchesTable
         $wrestler = Wrestler::find($this->wrestlerId);
 
         return EventMatch::query()
+            ->forPastEvents()
             ->with(['titles', 'result.winner', 'result.decision'])
             ->withWhereHas('competitors', function (Builder $query) use ($wrestler): void {
                 $query->whereMorphedTo('competitor', $wrestler);
-            })
-            ->withWhereHas('event', function (Builder $query): void {
-                $query->whereNotNull('date')->where('date', '<', now()->toDateString());
             })
             ->orderByDesc('date');
     }
