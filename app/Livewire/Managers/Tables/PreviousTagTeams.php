@@ -37,7 +37,7 @@ class PreviousTagTeams extends DataTableComponent
         return TagTeamManager::query()
             ->forManagerId($this->managerId)
             ->ended()
-            ->orderByDesc('hired_at');
+            ->mostRecentlyHiredFirst();
     }
 
     public function configure(): void

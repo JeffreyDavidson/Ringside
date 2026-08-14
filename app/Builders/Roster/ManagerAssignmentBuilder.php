@@ -22,6 +22,13 @@ class ManagerAssignmentBuilder extends Builder
         return $this;
     }
 
+    public function mostRecentlyHiredFirst(): static
+    {
+        $this->orderByDesc('hired_at');
+
+        return $this;
+    }
+
     public function current(): static
     {
         $this->whereNull('fired_at');

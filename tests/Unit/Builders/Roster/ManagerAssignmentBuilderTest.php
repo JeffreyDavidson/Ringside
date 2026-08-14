@@ -87,3 +87,36 @@ test('manager assignments can be queried by manager', function () {
         ->and($tagTeamAssignments)->toHaveCount(1)
         ->and($tagTeamAssignments->firstOrFail()->manager_id)->toBe($manager->id);
 });
+
+test('manager assignments can be ordered by most recent hire', function () {
+    $manager = Manager::factory()->create();
+    $wrestler = Wrestler::factory()->create();
+    $oldestHiredAt = now()->subMonths(3);
+    $newestHiredAt = now()->subMonth();
+    $middleHiredAt = now()->subMonths(2);
+    WrestlerManager::query()->create([
+        'manager_id' => $manager->id,
+        'wrestler_id' => $wrestler->id,
+        'hired_at' => $oldestHiredAt,
+    ]);
+    WrestlerManager::query()->create([
+        'manager_id' => $manager->id,
+        'wrestler_id' => $wrestler->id,
+        'hired_at' => $newestHiredAt,
+    ]);
+    WrestlerManager::query()->create([
+        'manager_id' => $manager->id,
+        'wrestler_id' => $wrestler->id,
+        'hired_at' => $middleHiredAt,
+    ]);
+
+    $assignments = WrestlerManager::query()
+        ->mostRecentlyHiredFirst()
+        ->get();
+
+    expect($assignments->pluck('hired_at')->map->toDateTimeString()->all())->toBe([
+        $newestHiredAt->toDateTimeString(),
+        $middleHiredAt->toDateTimeString(),
+        $oldestHiredAt->toDateTimeString(),
+    ]);
+});
