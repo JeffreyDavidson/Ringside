@@ -7,11 +7,15 @@ use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
-use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Contracts\Retirable;
 use App\Models\Stables\Stable;
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -53,14 +57,28 @@ describe('Stable Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Stable::class))->toContain(HasActivityPeriods::class);
-            expect(class_uses(Stable::class))->toContain(HasFactory::class);
-            expect(class_uses(Stable::class))->toContain(HasMembers::class);
-            expect(class_uses(Stable::class))->toContain(HasLifecycleTransitions::class);
-            expect(class_uses(Stable::class))->toContain(HasStatusScopes::class);
-            expect(class_uses(Stable::class))->toContain(IsRetirable::class);
-            expect(class_uses(Stable::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Stable::class))->toContain(HasActivityPeriods::class)
+                ->and(class_uses(Stable::class))->toContain(HasFactory::class)
+                ->and(class_uses(Stable::class))->toContain(HasLifecycleTransitions::class)
+                ->and(class_uses(Stable::class))->toContain(HasStatusScopes::class)
+                ->and(class_uses(Stable::class))->toContain(IsRetirable::class)
+                ->and(class_uses(Stable::class))->toContain(SoftDeletes::class);
         });
+    });
+
+    test('defines its membership relationships directly', function () {
+        $stable = new Stable();
+
+        expect($stable->wrestlers())->toBeInstanceOf(BelongsToMany::class)
+            ->and($stable->wrestlers()->getRelated())->toBeInstanceOf(Wrestler::class)
+            ->and($stable->wrestlers()->getPivotClass())->toBe(StableWrestler::class)
+            ->and($stable->currentWrestlers())->toBeInstanceOf(BelongsToMany::class)
+            ->and($stable->previousWrestlers())->toBeInstanceOf(BelongsToMany::class)
+            ->and($stable->tagTeams())->toBeInstanceOf(BelongsToMany::class)
+            ->and($stable->tagTeams()->getRelated())->toBeInstanceOf(TagTeam::class)
+            ->and($stable->tagTeams()->getPivotClass())->toBe(StableTagTeam::class)
+            ->and($stable->currentTagTeams())->toBeInstanceOf(BelongsToMany::class)
+            ->and($stable->previousTagTeams())->toBeInstanceOf(BelongsToMany::class);
     });
 
     describe('interface implementation', function () {

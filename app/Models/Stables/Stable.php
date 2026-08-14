@@ -10,7 +10,6 @@ use App\Enums\Stables\StableStatus;
 use App\Lifecycle\StableStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
-use App\Models\Concerns\HasMembers;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
@@ -29,6 +28,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Tests\Unit\Models\Stables\StableTest;
@@ -49,7 +49,6 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property-read Retirement|null $previousRetirement
  * @property-read Collection<int, Retirement> $retirements
  * @property-read Collection<int, Retirement> $previousRetirements
- * t
  * @property-read Collection<int, TagTeam> $tagTeams
  * @property-read Collection<int, TagTeam> $currentTagTeams
  * @property-read Collection<int, TagTeam> $previousTagTeams
@@ -114,13 +113,54 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
     use HasFactory;
 
     use HasLifecycleTransitions;
-    use HasMembers;
     use HasStatusScopes;
 
     /** @use IsRetirable<static> */
     use IsRetirable;
 
     use SoftDeletes;
+
+    /** @return BelongsToMany<Wrestler, $this, StableWrestler, 'pivot'> */
+    public function wrestlers(): BelongsToMany
+    {
+        return $this->belongsToMany(Wrestler::class, (new StableWrestler())->getTable())
+            ->using(StableWrestler::class)
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<Wrestler, $this, StableWrestler, 'pivot'> */
+    public function currentWrestlers(): BelongsToMany
+    {
+        return $this->wrestlers()->wherePivotNull('left_at');
+    }
+
+    /** @return BelongsToMany<Wrestler, $this, StableWrestler, 'pivot'> */
+    public function previousWrestlers(): BelongsToMany
+    {
+        return $this->wrestlers()->wherePivotNotNull('left_at');
+    }
+
+    /** @return BelongsToMany<TagTeam, $this, StableTagTeam, 'pivot'> */
+    public function tagTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(TagTeam::class, (new StableTagTeam())->getTable())
+            ->using(StableTagTeam::class)
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<TagTeam, $this, StableTagTeam, 'pivot'> */
+    public function currentTagTeams(): BelongsToMany
+    {
+        return $this->tagTeams()->wherePivotNull('left_at');
+    }
+
+    /** @return BelongsToMany<TagTeam, $this, StableTagTeam, 'pivot'> */
+    public function previousTagTeams(): BelongsToMany
+    {
+        return $this->tagTeams()->wherePivotNotNull('left_at');
+    }
 
     /** @return Attribute<StableStatus, never> */
     protected function status(): Attribute
