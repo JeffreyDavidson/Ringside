@@ -10,6 +10,7 @@ use App\Builders\Contracts\HasAvailability;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Custom query builder for the Stable model.
@@ -142,7 +143,7 @@ class StableBuilder extends Builder implements HasAvailability
      *
      * Filters stables that have at least the minimum number of members (3)
      * required for a stable to be considered properly formed.
-     * Tag teams count as 2 members each, wrestlers and managers count as 1 each.
+     * Tag teams count as 2 members each and wrestlers count as 1 each.
      *
      * @return static The builder instance for method chaining
      */
@@ -152,8 +153,7 @@ class StableBuilder extends Builder implements HasAvailability
         $result = $this->whereRaw('
             (SELECT
                 COALESCE((SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id AND left_at IS NULL), 0) +
-                COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0) +
-                COALESCE((SELECT COUNT(*) FROM stables_managers WHERE stable_id = stables.id AND fired_at IS NULL), 0)
+                COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0)
             ) >= ?
         ', [StableMembershipData::MINIMUM_MEMBER_COUNT]);
 
@@ -165,7 +165,7 @@ class StableBuilder extends Builder implements HasAvailability
      *
      * Filters stables that have fewer than the minimum number of members
      * and may need additional recruitment or should be disbanded.
-     * Tag teams count as 2 members each, wrestlers and managers count as 1 each.
+     * Tag teams count as 2 members each and wrestlers count as 1 each.
      *
      * @return static The builder instance for method chaining
      */
@@ -175,8 +175,7 @@ class StableBuilder extends Builder implements HasAvailability
         $result = $this->whereRaw('
             (SELECT
                 COALESCE((SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id AND left_at IS NULL), 0) +
-                COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0) +
-                COALESCE((SELECT COUNT(*) FROM stables_managers WHERE stable_id = stables.id AND fired_at IS NULL), 0)
+                COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0)
             ) < ?
         ', [StableMembershipData::MINIMUM_MEMBER_COUNT]);
 
@@ -378,16 +377,15 @@ class StableBuilder extends Builder implements HasAvailability
      */
     public function withMemberCount(int $min, ?int $max = null): static
     {
-        $memberCountSubquery = '(
+        $memberCountExpression = DB::raw('(
             (SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id) +
-            (SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id) +
-            (SELECT COUNT(*) FROM stables_managers WHERE stable_id = stables.id)
-        )';
+            (SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id)
+        )');
 
-        $this->whereRaw("{$memberCountSubquery} >= ?", [$min]);
+        $this->where($memberCountExpression, '>=', $min);
 
         if ($max !== null) {
-            $this->whereRaw("{$memberCountSubquery} <= ?", [$max]);
+            $this->where($memberCountExpression, '<=', $max);
         }
 
         return $this;
