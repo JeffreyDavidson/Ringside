@@ -61,8 +61,6 @@ use Tests\Unit\Models\Stables\StableTest;
  * @property-read ActivityPeriod|null $previousActivityPeriod
  * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
  *
- * @method static StableBuilder<static>|Stable available()
- * @method static StableBuilder<static>|Stable belowMinimumMembers()
  * @method static StableBuilder<static>|Stable disbanded()
  * @method static StableBuilder<static>|Stable established()
  * @method static \Database\Factories\Stables\StableFactory factory($count = null, $state = [])
@@ -71,11 +69,8 @@ use Tests\Unit\Models\Stables\StableTest;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable onlyTrashed()
  * @method static StableBuilder<static>|Stable query()
  * @method static StableBuilder<static>|Stable retired()
- * @method static StableBuilder<static>|Stable unavailable()
  * @method static StableBuilder<static>|Stable unestablished()
  * @method static StableBuilder<static>|Stable withFutureEstablishment()
- * @method static StableBuilder<static>|Stable withMemberCount(int $min, ?int $max = null)
- * @method static StableBuilder<static>|Stable withMinimumMembers()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable withoutTrashed()
  *
