@@ -8,6 +8,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -61,7 +62,8 @@ class TitleChampionshipsTable extends DataTableComponent
             Column::make(__('title_championships.current_champion'), 'current_champion'),
             Column::make(__('title_championships.former_champion'), 'former_champion'),
             Column::make(__('title_championships.dates_held'), 'dates_held'),
-            Column::make(__('title_championships.reign_length'), 'reign_length'),
+            Column::make(__('title_championships.reign_length'))
+                ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
         ];
     }
 }

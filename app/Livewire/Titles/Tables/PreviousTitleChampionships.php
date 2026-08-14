@@ -9,6 +9,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use LogicException;
@@ -56,7 +57,8 @@ class PreviousTitleChampionships extends DataTableComponent
             Column::make(__('championships.new_champion'), 'current_champion'),
             Column::make(__('championships.previous_champion'), 'former_champion'),
             Column::make(__('championships.dates_held'), 'dates_held'),
-            Column::make(__('championships.days_held'), 'reign_length'),
+            Column::make(__('championships.days_held'))
+                ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
         ];
     }
 }
