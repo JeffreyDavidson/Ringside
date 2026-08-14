@@ -12,6 +12,7 @@ use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/** @extends DataTableComponent<Model> */
 class TitleChampionshipsTable extends DataTableComponent
 {
     /**

@@ -6,7 +6,6 @@ namespace App\Livewire\Table;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 abstract class Filter
 {
@@ -53,7 +52,7 @@ abstract class Filter
     /**
      * Apply this filter to the query builder.
      *
-     * @param  Builder<Model>  $builder
+     * @param  Builder<*>  $builder
      */
     public function apply(Builder $builder, mixed $value): void
     {

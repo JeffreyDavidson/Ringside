@@ -11,6 +11,7 @@ use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
+/** @extends BasePreviousManagersTable<Manager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
     public string $databaseTableName = 'managers';

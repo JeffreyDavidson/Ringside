@@ -12,6 +12,7 @@ use App\Models\TagTeams\TagTeamManager;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
+/** @extends DataTableComponent<TagTeamManager> */
 class PreviousTagTeams extends DataTableComponent
 {
     use ShowTableTrait;

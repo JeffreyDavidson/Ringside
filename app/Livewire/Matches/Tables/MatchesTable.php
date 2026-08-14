@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use LogicException;
 
+/** @extends DataTableComponent<EventMatch> */
 class MatchesTable extends DataTableComponent
 {
     use ShowTableTrait;

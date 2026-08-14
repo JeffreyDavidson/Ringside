@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use LogicException;
 
+/** @extends DataTableComponent<TitleChampionship> */
 class PreviousTitleChampionships extends DataTableComponent
 {
     use ShowTableTrait;

@@ -13,6 +13,7 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Events\Event;
 use LogicException;
 
+/** @extends DataTableComponent<Event> */
 class PreviousEvents extends DataTableComponent
 {
     use ShowTableTrait;

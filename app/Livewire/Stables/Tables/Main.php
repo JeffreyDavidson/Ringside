@@ -27,6 +27,7 @@ use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Stable> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

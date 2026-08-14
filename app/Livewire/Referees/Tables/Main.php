@@ -35,6 +35,7 @@ use App\Models\Referees\Referee;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Referee> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

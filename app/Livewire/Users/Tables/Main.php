@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Models\Users\User;
 
+/** @extends BaseTable<User> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

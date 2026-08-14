@@ -209,6 +209,12 @@ class CreateEditForm extends BaseForm
 - **Runtime Safety**: Type hints prevent incorrect usage
 - **Documentation**: Clear contracts for component usage
 
+### Typed Table Rows
+
+`DataTableComponent` is generic over the Eloquent model returned by its `builder()` method. Every concrete table declares that row model through an `@extends` annotation, and generic intermediate table bases forward their model template to `DataTableComponent`.
+
+This keeps search, filters, sorting, and pagination attached to the concrete Builder type instead of widening every table to `Builder<Model>`. Fixed-purpose table bases, such as previous-match and championship-history tables, bind their known row model directly.
+
 ## Integration Patterns
 
 ### Form-Modal Integration

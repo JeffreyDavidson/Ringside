@@ -8,7 +8,13 @@ use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @template TModel of Model
+ *
+ * @extends DataTableComponent<TModel>
+ */
 abstract class BasePreviousWrestlersTable extends DataTableComponent
 {
     use ShowTableTrait;
