@@ -22,7 +22,12 @@ class FakeManageableModel extends Model implements Manageable
     /** @use CanBeManaged<FakeManagerPivotModel, self> */
     use CanBeManaged;
 
-    public function resolveManagersPivotModel(): string
+    protected function managerAssignmentTable(): string
+    {
+        return (new FakeManagerPivotModel())->getTable();
+    }
+
+    protected function managerAssignmentPivotModel(): string
     {
         return FakeManagerPivotModel::class;
     }

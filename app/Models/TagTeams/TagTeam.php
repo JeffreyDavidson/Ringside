@@ -144,6 +144,16 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
 
     use SoftDeletes;
 
+    protected function managerAssignmentTable(): string
+    {
+        return (new TagTeamManager())->getTable();
+    }
+
+    protected function managerAssignmentPivotModel(): string
+    {
+        return TagTeamManager::class;
+    }
+
     /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
     public function wrestlers(): BelongsToMany
     {

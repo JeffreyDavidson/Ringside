@@ -141,6 +141,16 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
 
     use SoftDeletes;
 
+    protected function managerAssignmentTable(): string
+    {
+        return (new WrestlerManager())->getTable();
+    }
+
+    protected function managerAssignmentPivotModel(): string
+    {
+        return WrestlerManager::class;
+    }
+
     protected function stableMembershipTable(): string
     {
         return (new StableWrestler())->getTable();

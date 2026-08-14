@@ -9,7 +9,6 @@ use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use LogicException;
 
 /**
  * Provides manager relationship support for models that can be managed by `Manager` instances.
@@ -37,12 +36,10 @@ use LogicException;
  */
 trait CanBeManaged
 {
-    /**
-     * The resolved manager pivot model class name.
-     *
-     * @var class-string<TPivotModel>|null
-     */
-    protected static ?string $resolvedManagerPivotModel = null;
+    abstract protected function managerAssignmentTable(): string;
+
+    /** @return class-string<TPivotModel> */
+    abstract protected function managerAssignmentPivotModel(): string;
 
     /**
      * Define a BelongsToMany relationship to the model's managers.
@@ -63,8 +60,8 @@ trait CanBeManaged
     public function managers(): BelongsToMany
     {
         /** @var BelongsToMany<Manager, static, TPivotModel> $relation */
-        $relation = $this->belongsToMany(Manager::class, $this->getManagersPivotTable())
-            ->using($this->resolveManagersPivotModel())
+        $relation = $this->belongsToMany(Manager::class, $this->managerAssignmentTable())
+            ->using($this->managerAssignmentPivotModel())
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps();
 
@@ -93,8 +90,8 @@ trait CanBeManaged
     public function currentManagers(): BelongsToMany
     {
         /** @var BelongsToMany<Manager, static, TPivotModel> $relation */
-        $relation = $this->belongsToMany(Manager::class, $this->getManagersPivotTable())
-            ->using($this->resolveManagersPivotModel())
+        $relation = $this->belongsToMany(Manager::class, $this->managerAssignmentTable())
+            ->using($this->managerAssignmentPivotModel())
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps()
             ->wherePivotNull('fired_at');
@@ -121,98 +118,12 @@ trait CanBeManaged
     public function previousManagers(): BelongsToMany
     {
         /** @var BelongsToMany<Manager, static, TPivotModel> $relation */
-        $relation = $this->belongsToMany(Manager::class, $this->getManagersPivotTable())
-            ->using($this->resolveManagersPivotModel())
+        $relation = $this->belongsToMany(Manager::class, $this->managerAssignmentTable())
+            ->using($this->managerAssignmentPivotModel())
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps()
             ->wherePivotNotNull('fired_at');
 
         return $relation;
-    }
-
-    /**
-     * Get the name of the pivot table for the manager relationship.
-     *
-     * The default naming convention is `<model_plural>_managers`,
-     * e.g., `wrestlers_managers` or `tag_teams_managers`.
-     *
-     * Override this method in the model to customize the pivot table name.
-     *
-     * @return string The pivot table name
-     *
-     * @example
-     * For a Wrestler model, this returns 'wrestlers_managers'
-     */
-    protected function getManagersPivotTable(): string
-    {
-        return str(class_basename($this))
-            ->plural()
-            ->snake()
-            ->append('_managers')
-            ->toString(); // e.g., "wrestlers_managers" or "tag_teams_managers"
-    }
-
-    /**
-     * Resolve the pivot model class for manager relationships.
-     *
-     * This method automatically determines the pivot model class based on naming
-     * conventions. For example, if the parent model is 'Wrestler', it will look for
-     * a 'WrestlerManager' pivot model class.
-     *
-     *
-     * @throws LogicException If the resolved model class doesn't exist
-     * @return class-string<TPivotModel> The fully qualified class name of the pivot model
-     *
-     * @example
-     * For a 'Wrestler' model, this will resolve to 'App\\Models\\WrestlerManager'
-     */
-    protected function resolveManagersPivotModel(): string
-    {
-        if (static::$resolvedManagerPivotModel !== null) {
-            return static::$resolvedManagerPivotModel;
-        }
-
-        return $this->resolveManagersPivotModelInternal();
-    }
-
-    /**
-     * Internal method to resolve manager pivot model class.
-     *
-     * @return class-string<TPivotModel>
-     */
-    private function resolveManagersPivotModelInternal(): string
-    {
-        $declaring = static::class;
-        $baseName = class_basename($declaring);
-
-        // Build the related model class name by replacing only the class name, not the namespace
-        $relatedModelName = $baseName.'Manager';
-        $namespace = mb_substr($declaring, 0, mb_strrpos($declaring, '\\'));
-        $resolved = $namespace.'\\'.$relatedModelName;
-
-        if (! class_exists($resolved)) {
-            throw new LogicException("Related pivot model [{$resolved}] not found for [{$declaring}]. Override the resolution method or ensure the class exists.");
-        }
-
-        /** @var class-string<TPivotModel> */
-        return $resolved;
-    }
-
-    /**
-     * Override the resolved pivot model class for testing or customization.
-     *
-     * @param  class-string<TPivotModel>|null  $class  The fully qualified class name to use, or null to reset
-     *
-     * @example
-     * ```php
-     * // In a test:
-     * Wrestler::fakeManagerPivotModel(MockWrestlerManager::class);
-     * // Reset:
-     * Wrestler::fakeManagerPivotModel(null);
-     * ```
-     */
-    public static function fakeManagerPivotModel(?string $class): void
-    {
-        static::$resolvedManagerPivotModel = $class;
     }
 }
