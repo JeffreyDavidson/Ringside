@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -11,7 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  *
  * UNIT TEST SCOPE:
  * - Model attribute configuration (fillable, casts, defaults)
- * - Custom builder class verification
  * - Trait integration verification
  * - Interface implementation verification
  *
@@ -46,11 +44,6 @@ describe('TitleChampionship Model Unit Tests', function () {
             expect($casts['won_at'])->toBe('datetime');
             expect($casts['lost_at'])->toBe('datetime');
             expect($casts['last_held_reign'])->toBe('datetime');
-        });
-
-        test('title championship has custom eloquent builder', function () {
-            $titleChampionship = new TitleChampionship();
-            expect($titleChampionship->query())->toBeInstanceOf(TitleChampionshipBuilder::class);
         });
 
         test('title championship has correct default values', function () {

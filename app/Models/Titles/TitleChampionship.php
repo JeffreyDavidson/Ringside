@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Titles;
 
-use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
-use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +28,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
  *
- * @property-read int|string|null $reign_length
  * @property-read EventMatch|null $wonEventMatch
  * @property-read EventMatch|null $lostEventMatch
  * @property-read Title|null $title
@@ -39,22 +36,16 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
- * @method static TitleChampionshipBuilder<static>|static current()
  * @method static \Database\Factories\Titles\TitleChampionshipFactory factory($count = null, $state = [])
- * @method static TitleChampionshipBuilder<static>|static latestLost()
- * @method static TitleChampionshipBuilder<static>|static latestWon()
- * @method static TitleChampionshipBuilder<static>|static newModelQuery()
- * @method static TitleChampionshipBuilder<static>|static newQuery()
- * @method static TitleChampionshipBuilder<static>|static previous()
- * @method static TitleChampionshipBuilder<static>|static query()
- * @method static TitleChampionshipBuilder<static>|static withReignLength()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship query()
  *
  * @mixin \Eloquent
  */
 #[Table('titles_championships')]
 #[Fillable('title_id', 'champion_type', 'champion_id', 'won_match_id', 'lost_match_id', 'won_at', 'lost_at')]
 #[UseFactory(TitleChampionshipFactory::class)]
-#[UseEloquentBuilder(TitleChampionshipBuilder::class)]
 class TitleChampionship extends Model
 {
     /** @use HasFactory<TitleChampionshipFactory> */
