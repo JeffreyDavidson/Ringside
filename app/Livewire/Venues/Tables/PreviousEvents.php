@@ -35,7 +35,7 @@ class PreviousEvents extends DataTableComponent
 
         return Event::query()
             ->where('venue_id', $this->venueId)
-            ->orderByDesc('date');
+            ->latestDatedFirst();
     }
 
     public function configure(): void {}
