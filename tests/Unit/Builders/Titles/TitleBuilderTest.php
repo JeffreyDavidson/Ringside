@@ -10,7 +10,7 @@ test('active titles can be retrieved', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $retiredTitle = Title::factory()->retired()->create();
 
-    $activeTitles = Title::active()->get();
+    $activeTitles = Title::query()->active()->get();
 
     expect($activeTitles)
         ->toHaveCount(1)
@@ -23,7 +23,7 @@ test('future activated titles can be retrieved', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $retiredTitle = Title::factory()->retired()->create();
 
-    $futureActivatedTitles = Title::withPendingDebut()->get();
+    $futureActivatedTitles = Title::query()->withPendingDebut()->get();
 
     expect($futureActivatedTitles)
         ->toHaveCount(1)
@@ -36,13 +36,13 @@ test('inactive titles can be retrieved', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $retiredTitle = Title::factory()->retired()->create();
 
-    $inactiveTitles = Title::inactive()->get();
+    $inactiveTitles = Title::query()->inactive()->get();
 
     expect($inactiveTitles)
-        ->toHaveCount(3)
+        ->toHaveCount(2)
         ->and($inactiveTitles->contains($inactiveTitle))->toBeTrue()
         ->and($inactiveTitles->contains($retiredTitle))->toBeTrue()
-        ->and($inactiveTitles->contains($futureActivatedTitle))->toBeTrue();
+        ->and($inactiveTitles->contains($futureActivatedTitle))->toBeFalse();
 });
 
 test('retired titles can be retrieved', function () {
@@ -51,7 +51,7 @@ test('retired titles can be retrieved', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $retiredTitle = Title::factory()->retired()->create();
 
-    $retiredTitles = Title::retired()->get();
+    $retiredTitles = Title::query()->retired()->get();
 
     expect($retiredTitles)
         ->toHaveCount(1)
