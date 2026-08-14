@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\TagTeams;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
@@ -22,13 +24,16 @@ use Illuminate\Support\Carbon;
  * @property-read Manager|null $manager
  * @property-read TagTeam|null $tagTeam
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamManager newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamManager newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamManager query()
+ * @method static ManagerAssignmentBuilder<static> current()
+ * @method static ManagerAssignmentBuilder<static> ended()
+ * @method static ManagerAssignmentBuilder<static> newModelQuery()
+ * @method static ManagerAssignmentBuilder<static> newQuery()
+ * @method static ManagerAssignmentBuilder<static> query()
  *
  * @mixin \Eloquent
  */
 #[Fillable('tag_team_id', 'manager_id', 'hired_at', 'fired_at')]
+#[UseEloquentBuilder(ManagerAssignmentBuilder::class)]
 class TagTeamManager extends Pivot
 {
     protected $table = 'tag_teams_managers';

@@ -31,7 +31,7 @@ class PreviousManagers extends BasePreviousManagersTable
             ->with('manager')
             ->whereHas('manager') // Only include records where manager exists (not soft deleted)
             ->where('wrestler_id', $this->wrestlerId)
-            ->whereNotNull('fired_at')
+            ->ended()
             ->orderByDesc('hired_at');
     }
 

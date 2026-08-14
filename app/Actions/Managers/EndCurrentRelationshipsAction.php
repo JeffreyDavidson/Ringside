@@ -15,12 +15,12 @@ class EndCurrentRelationshipsAction
     {
         WrestlerManager::query()
             ->where('manager_id', $manager->id)
-            ->whereNull('fired_at')
+            ->current()
             ->update(['fired_at' => $effectiveDate]);
 
         TagTeamManager::query()
             ->where('manager_id', $manager->id)
-            ->whereNull('fired_at')
+            ->current()
             ->update(['fired_at' => $effectiveDate]);
     }
 }

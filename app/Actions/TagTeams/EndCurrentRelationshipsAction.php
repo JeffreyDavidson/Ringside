@@ -20,7 +20,7 @@ class EndCurrentRelationshipsAction
 
         TagTeamManager::query()
             ->where('tag_team_id', $tagTeam->id)
-            ->whereNull('fired_at')
+            ->current()
             ->update(['fired_at' => $effectiveDate]);
     }
 }

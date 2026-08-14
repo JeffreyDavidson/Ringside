@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Wrestlers;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
@@ -22,13 +24,16 @@ use Illuminate\Support\Carbon;
  * @property-read Manager $manager
  * @property-read Wrestler $wrestler
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|WrestlerManager newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|WrestlerManager newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|WrestlerManager query()
+ * @method static ManagerAssignmentBuilder<static> current()
+ * @method static ManagerAssignmentBuilder<static> ended()
+ * @method static ManagerAssignmentBuilder<static> newModelQuery()
+ * @method static ManagerAssignmentBuilder<static> newQuery()
+ * @method static ManagerAssignmentBuilder<static> query()
  *
  * @mixin \Eloquent
  */
 #[Fillable('wrestler_id', 'manager_id', 'hired_at', 'fired_at')]
+#[UseEloquentBuilder(ManagerAssignmentBuilder::class)]
 class WrestlerManager extends Pivot
 {
     protected $table = 'wrestlers_managers';

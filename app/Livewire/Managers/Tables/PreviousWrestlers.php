@@ -33,7 +33,7 @@ class PreviousWrestlers extends DataTableComponent
 
         return WrestlerManager::query()
             ->where('manager_id', $this->managerId)
-            ->whereNotNull('fired_at')
+            ->ended()
             ->orderByDesc('hired_at');
     }
 

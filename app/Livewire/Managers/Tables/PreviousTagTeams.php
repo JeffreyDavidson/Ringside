@@ -36,7 +36,7 @@ class PreviousTagTeams extends DataTableComponent
 
         return TagTeamManager::query()
             ->where('manager_id', $this->managerId)
-            ->whereNotNull('fired_at')
+            ->ended()
             ->orderByDesc('hired_at');
     }
 
