@@ -30,6 +30,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `TitleChampionshipBuilder` owns current and previous reign constraints and the polymorphic champion constraint. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.
 
+`MatchCompetitorBuilder` owns persisted competitor-record filters by competitor model type, competitor identifiers, and event identifiers. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
+
 ## Boundaries
 
 Builders express database queries over relationships and stored lifecycle periods. They may:

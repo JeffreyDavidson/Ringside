@@ -24,9 +24,8 @@ final class MatchAssignmentConflictService
     {
         $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
         $conflictingWrestlerId = MatchCompetitor::query()
-            ->where('competitor_type', Wrestler::class)
-            ->whereIn('competitor_id', $wrestlers->pluck('id'))
-            ->whereHas('eventMatch', fn (Builder $query) => $query->whereIn('event_id', $conflictingEventIds))
+            ->forCompetitorIds(Wrestler::class, $wrestlers->pluck('id'))
+            ->forEventIds($conflictingEventIds)
             ->value('competitor_id');
 
         if ($conflictingWrestlerId === null) {
@@ -45,9 +44,8 @@ final class MatchAssignmentConflictService
     {
         $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
         $conflictingTagTeamId = MatchCompetitor::query()
-            ->where('competitor_type', TagTeam::class)
-            ->whereIn('competitor_id', $tagTeams->pluck('id'))
-            ->whereHas('eventMatch', fn (Builder $query) => $query->whereIn('event_id', $conflictingEventIds))
+            ->forCompetitorIds(TagTeam::class, $tagTeams->pluck('id'))
+            ->forEventIds($conflictingEventIds)
             ->value('competitor_id');
 
         if ($conflictingTagTeamId === null) {
