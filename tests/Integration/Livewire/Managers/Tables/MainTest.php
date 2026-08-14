@@ -118,6 +118,22 @@ describe('ManagersTable Component', function () {
                 ->assertSee('Retired Manager')
                 ->assertSee('Injured Manager');
         });
+
+        test('future employment filter returns only managers awaiting employment', function () {
+            $futureManager = Manager::factory()->withFutureEmployment()->create([
+                'first_name' => 'Future',
+                'last_name' => 'Manager',
+            ]);
+            Manager::factory()->employed()->create([
+                'first_name' => 'Employed',
+                'last_name' => 'Manager',
+            ]);
+
+            livewire(Main::class)
+                ->set('filterValues.status', 'future_employment')
+                ->assertSee($futureManager->full_name)
+                ->assertDontSee('Employed Manager');
+        });
     });
 
     describe('action integration', function () {

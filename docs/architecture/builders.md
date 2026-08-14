@@ -1,72 +1,48 @@
 # Builder Architecture
 
-## Responsibility
-
-Ringside uses typed Eloquent builders for reusable queries over persisted state. Builders answer questions such as whether a roster member is currently employed, injured, suspended, retired, or generally available. They do not decide whether a model may perform a lifecycle transition or be assigned to a match.
-
-Models bind their builders with Laravel's `#[UseEloquentBuilder]` attribute. Reusable builder behavior is shared through typed parent builders and concerns rather than local model scopes.
+Ringside uses typed custom Eloquent builders for reusable persisted-state queries. Models bind their builders with `#[UseEloquentBuilder]`; local model scopes and repository wrappers are not used.
 
 ## Organization
 
 ```text
 app/Builders/
-├── Concerns/           # Shared query behavior
-├── Events/             # Event and venue builders
-├── Roster/             # Roster and stable builders
-├── Titles/             # Title builders
-└── Users/              # User builders
+├── Concerns/
+├── Events/
+├── Roster/
+├── Titles/
+└── Users/
 ```
 
-`IndividualBuilder` contains persisted-state queries shared by wrestlers, managers, and referees. `WrestlerBuilder`, `ManagerBuilder`, and `RefereeBuilder` provide the model-specific builder types. Tag teams, stables, events, venues, titles, and users each have their own typed builder. Championship reporting is coordinated by `TitleChampionshipQuery`; `TitleChampionship` uses Laravel's standard Eloquent builder.
+Builders are grouped by technical layer first and wrestling entity second. A concrete builder belongs to the model it queries. A concern is appropriate only when multiple builders share the same query semantics.
 
-## Persisted-State Queries
+## Shared Concerns
 
-Builders may compose database relationships to select records in a known state:
+- `HasEmploymentScopes` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` queries for individual roster members and tag teams.
+- `HasRetirementScopes` provides the shared `retired()` query.
+- `HasNameSearch` provides first-name and last-name matching for models that store those columns.
+
+## Boundaries
+
+Builders express database queries over relationships and stored lifecycle periods. They may:
+
+- filter current, previous, or future lifecycle relationships;
+- compose reusable relationship-existence constraints;
+- define stable ordering used by multiple callers;
+- return the concrete typed builder for fluent composition.
+
+Builders do not decide whether a transition may occur, validate commands, or determine match-booking eligibility. Those rules belong to lifecycle eligibility classes, validation rules, Actions, and Services. Reporting projections that calculate derived values across records belong in focused query classes under `app/Queries`.
+
+## Usage
 
 ```php
-$availableWrestlers = Wrestler::query()
-    ->available()
-    ->orderBy('last_name')
-    ->get();
-
-$injuredWrestlers = Wrestler::query()
-    ->injured()
-    ->get();
-
-$activeStables = Stable::query()
-    ->established()
-    ->get();
-
-$structurallyCompleteTagTeams = TagTeam::query()
-    ->available()
-    ->withMinimumWrestlers()
+$futureWrestlers = Wrestler::query()
+    ->futureEmployed()
+    ->oldest('name')
     ->get();
 ```
 
-Stable and title builders use domain-specific activity queries. For example, stables expose `established()` and `disbanded()`, while titles expose `active()` and `inactive()`.
+Callers should use an existing builder method instead of repeating its relationship constraints or querying a computed model attribute as though it were a database column.
 
-## Booking Boundary
+## Testing
 
-`available()` narrows a query to roster members whose persisted lifecycle state makes them candidates for booking. Tag-team builders additionally expose `withMinimumWrestlers()` and `belowMinimumWrestlers()` for structural queries. None of these methods makes the final assignment decision.
-
-Use `App\Lifecycle\RosterBookingEligibility` to decide whether a loaded wrestler, referee, or tag team satisfies booking rules. Use `App\Services\MatchAssignmentConflictService` when assigning models to a match so conflicts with existing event and match assignments are checked transactionally.
-
-```php
-$candidates = Wrestler::query()
-    ->available()
-    ->get()
-    ->filter(RosterBookingEligibility::allows(...));
-```
-
-Do not add date-specific booking or scheduling methods to a model builder. Those decisions depend on the assignment context and belong in the booking eligibility and scheduling collaborators.
-
-## Guidelines
-
-- Keep reusable filtering and relationship-existence queries on typed builders.
-- Share cohesive public query capabilities through a parent builder or concern; keep one-off relationship fragments explicit in the concrete builder.
-- Keep lifecycle transition rules in the established lifecycle or validation collaborators.
-- Keep match booking eligibility in `RosterBookingEligibility`.
-- Keep tag-team state, minimum-membership, and partner eligibility checks together in `RosterBookingEligibility`.
-- Keep event and match assignment conflicts in `MatchAssignmentConflictService`.
-- Eager-load relationships on the query that consumes them rather than adding model-level eager-loading defaults.
-- Test builders against realistic factory states and assert the exact records returned.
+Builder behavior that depends on persisted relationships is tested in `tests/Integration/Builders`. A production integration such as a Livewire filter also receives focused coverage proving that it composes the intended builder method.

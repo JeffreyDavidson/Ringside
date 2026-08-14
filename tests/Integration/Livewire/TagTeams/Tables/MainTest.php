@@ -117,6 +117,16 @@ describe('TagTeamsTable Component', function () {
                 ->assertSee('Retired Tag Team')
                 ->assertSee('Suspended Tag Team');
         });
+
+        test('future employment filter returns only tag teams awaiting employment', function () {
+            $futureTagTeam = TagTeam::factory()->withFutureEmployment()->create(['name' => 'Future Tag Team']);
+            TagTeam::factory()->employed()->create(['name' => 'Employed Tag Team']);
+
+            livewire(Main::class)
+                ->set('filterValues.status', 'future_employment')
+                ->assertSee($futureTagTeam->name)
+                ->assertDontSee('Employed Tag Team');
+        });
     });
 
     describe('action integration', function () {

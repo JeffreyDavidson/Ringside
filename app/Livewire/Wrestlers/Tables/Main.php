@@ -7,7 +7,6 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Actions\Wrestlers\DeleteAction;
 use App\Actions\Wrestlers\RestoreAction;
 use App\Builders\Roster\WrestlerBuilder;
-use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
@@ -78,7 +77,7 @@ class Main extends BaseTable
                 ->filter(function (WrestlerBuilder $builder, string $value) {
                     match ($value) {
                         'employed' => $builder->employed(),
-                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'future_employment' => $builder->futureEmployed(),
                         'released' => $builder->released(),
                         'unemployed' => $builder->unemployed(),
                         'retired' => $builder->retired(),

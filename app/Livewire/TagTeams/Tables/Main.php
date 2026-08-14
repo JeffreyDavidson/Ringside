@@ -13,7 +13,6 @@ use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
 use App\Builders\Roster\TagTeamBuilder;
-use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
@@ -94,7 +93,7 @@ class Main extends BaseTable
                     /** @var TagTeamBuilder<TagTeam> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
-                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'future_employment' => $builder->futureEmployed(),
                         'released' => $builder->released(),
                         'unemployed' => $builder->unemployed(),
                         'retired' => $builder->retired(),
