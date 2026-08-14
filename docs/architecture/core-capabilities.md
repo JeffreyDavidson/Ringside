@@ -37,6 +37,10 @@ Core capabilities define what each entity type can do within the wrestling promo
 - **Not Eligible**: Titles, Stables
 - **Rationale**: Employment represents a working relationship
 
+Employment periods remain the authoritative persisted state. Employable models expose
+relationship-backed state facts, while `EmploymentStatusResolver` maps those facts to
+the computed `EmploymentStatus` presented through each model's `status` attribute.
+
 ## Pull Capability
 
 ### Pull Rules
