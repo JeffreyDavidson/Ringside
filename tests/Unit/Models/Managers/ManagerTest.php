@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\DefinesManagedAliases;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
@@ -57,7 +56,6 @@ describe('Manager Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Manager::class))->toContain(DefinesManagedAliases::class);
             expect(class_uses(Manager::class))->toContain(HasFactory::class);
             expect(class_uses(Manager::class))->toContain(IsEmployable::class);
             expect(class_uses(Manager::class))->toContain(IsInjurable::class);

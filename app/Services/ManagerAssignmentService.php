@@ -7,7 +7,9 @@ namespace App\Services;
 use App\Models\Contracts\Manageable;
 use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
 class ManagerAssignmentService
@@ -57,7 +59,11 @@ class ManagerAssignmentService
     }
 
     /**
-     * @param  BelongsToMany<*, *>  $relationship
+     * @template TRelatedModel of Model
+     * @template TDeclaringModel of Model
+     * @template TPivotModel of Pivot
+     *
+     * @param  BelongsToMany<TRelatedModel, TDeclaringModel, TPivotModel>  $relationship
      */
     private function endCurrentRelationship(BelongsToMany $relationship, Carbon $date): void
     {

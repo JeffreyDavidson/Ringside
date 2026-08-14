@@ -59,7 +59,9 @@ app/Livewire/{Domain}/
 
 ### Use descriptive verbs:
 - `HasMatchParticipations` - for entities with persisted competitor-match relationships
-- `ManagesEntities` - for entities that manage other entities
+- `CanBeManaged` - for Wrestlers and Tag Teams that share persisted manager relationships
+
+Manager defines its inverse Wrestler and Tag Team relationships directly because no other model owns that exact relationship set.
 
 ## Interface Implementation Strategy
 

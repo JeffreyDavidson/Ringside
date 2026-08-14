@@ -6,7 +6,6 @@ namespace App\Models\Managers;
 
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Concerns\DefinesManagedAliases;
 use App\Models\Concerns\HasComputedEmploymentStatus;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
@@ -22,7 +21,9 @@ use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\TagTeams\TagTeam;
+use App\Models\TagTeams\TagTeamManager;
 use App\Models\Wrestlers\Wrestler;
+use App\Models\Wrestlers\WrestlerManager;
 use Database\Factories\Managers\ManagerFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Tests\Unit\Models\Managers\ManagerTest;
@@ -105,7 +107,6 @@ use Tests\Unit\Models\Managers\ManagerTest;
 #[UseEloquentBuilder(ManagerBuilder::class)]
 class Manager extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
-    use DefinesManagedAliases;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<ManagerFactory> */
@@ -124,4 +125,46 @@ class Manager extends Model implements Employable, Injurable, Retirable, SoftDel
     use IsSuspendable;
 
     use SoftDeletes;
+
+    /** @return BelongsToMany<Wrestler, $this, WrestlerManager> */
+    public function wrestlers(): BelongsToMany
+    {
+        return $this->belongsToMany(Wrestler::class, 'wrestlers_managers')
+            ->using(WrestlerManager::class)
+            ->withPivot(['hired_at', 'fired_at'])
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<Wrestler, $this, WrestlerManager> */
+    public function currentWrestlers(): BelongsToMany
+    {
+        return $this->wrestlers()->wherePivotNull('fired_at');
+    }
+
+    /** @return BelongsToMany<Wrestler, $this, WrestlerManager> */
+    public function previousWrestlers(): BelongsToMany
+    {
+        return $this->wrestlers()->wherePivotNotNull('fired_at');
+    }
+
+    /** @return BelongsToMany<TagTeam, $this, TagTeamManager> */
+    public function tagTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(TagTeam::class, 'tag_teams_managers')
+            ->using(TagTeamManager::class)
+            ->withPivot(['hired_at', 'fired_at'])
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<TagTeam, $this, TagTeamManager> */
+    public function currentTagTeams(): BelongsToMany
+    {
+        return $this->tagTeams()->wherePivotNull('fired_at');
+    }
+
+    /** @return BelongsToMany<TagTeam, $this, TagTeamManager> */
+    public function previousTagTeams(): BelongsToMany
+    {
+        return $this->tagTeams()->wherePivotNotNull('fired_at');
+    }
 }
