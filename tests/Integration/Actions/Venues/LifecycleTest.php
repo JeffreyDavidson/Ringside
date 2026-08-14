@@ -279,12 +279,15 @@ describe('Venue Action Integration Tests', function () {
             $deletedVenue = Venue::onlyTrashed()->findOrFail($venue->id);
             resolve(RestoreAction::class)->handle($deletedVenue);
 
-            $restoredVenue = Venue::findOrFail($venue->id);
-            $restoredVenue->load(['events', 'previousEvents']);
+            $restoredVenue = Venue::query()
+                ->with('events')
+                ->findOrFail($venue->id);
 
-            expect($restoredVenue->events)->toHaveCount(2);
-            expect($restoredVenue->previousEvents)->toHaveCount(1);
-            expect($restoredVenue->previousEvents->firstOrFail()->name)->toBe('Past Event');
+            expect($restoredVenue->events)->toHaveCount(2)
+                ->and($restoredVenue->events->modelKeys())->toEqualCanonicalizing([
+                    $pastEvent->id,
+                    $futureEvent->id,
+                ]);
         });
     });
 

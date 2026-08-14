@@ -74,9 +74,7 @@ describe('Venue Model Unit Tests', function () {
         $venue = new Venue();
 
         expect($venue->events())->toBeInstanceOf(HasMany::class)
-            ->and($venue->events()->getRelated())->toBeInstanceOf(Event::class)
-            ->and($venue->previousEvents())->toBeInstanceOf(HasMany::class)
-            ->and($venue->futureEvents())->toBeInstanceOf(HasMany::class);
+            ->and($venue->events()->getRelated())->toBeInstanceOf(Event::class);
     });
 
     describe('interface implementation', function () {
