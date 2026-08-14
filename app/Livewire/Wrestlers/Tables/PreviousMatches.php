@@ -28,14 +28,12 @@ class PreviousMatches extends BasePreviousMatchesTable
             throw new LogicException('A wrestler was not provided.');
         }
 
-        $wrestler = Wrestler::find($this->wrestlerId);
+        $wrestler = Wrestler::query()->findOrFail($this->wrestlerId);
 
         return EventMatch::query()
             ->forPastEvents()
             ->with(['titles', 'result.winner', 'result.decision'])
-            ->withWhereHas('competitors', function (Builder $query) use ($wrestler): void {
-                $query->whereMorphedTo('competitor', $wrestler);
-            })
+            ->forCompetitor($wrestler)
             ->orderByDesc('date');
     }
 }
