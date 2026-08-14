@@ -3,8 +3,8 @@
 ## Relationship Patterns
 
 ### Employment Relationships (hired/fired)
-- Managers ↔ Wrestlers: `managers_wrestlers` table with `hired_at`/`fired_at`
-- Managers ↔ Tag Teams: `managers_tag_teams` table with `hired_at`/`fired_at`
+- Managers ↔ Wrestlers: `wrestlers_managers` table with `hired_at`/`fired_at`
+- Managers ↔ Tag Teams: `tag_teams_managers` table with `hired_at`/`fired_at`
 - These represent business employment contracts
 - **Business Rule**: Both entities must be employed, but managed entity doesn't need to be bookable
   - Injured/suspended wrestlers can still have managers
