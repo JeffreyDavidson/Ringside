@@ -19,7 +19,14 @@ test('displays championship reign length from its dates', function () {
 
 test('only retrieves previous championships for the selected title', function () {
     $title = Title::factory()->create();
-    $previousChampionship = TitleChampionship::factory()->for($title)->ended()->create();
+    $olderChampionship = TitleChampionship::factory()->for($title)->ended()->create([
+        'won_at' => now()->subYears(4),
+        'lost_at' => now()->subYears(3),
+    ]);
+    $latestChampionship = TitleChampionship::factory()->for($title)->ended()->create([
+        'won_at' => now()->subYears(2),
+        'lost_at' => now()->subYear(),
+    ]);
     TitleChampionship::factory()->for($title)->current()->create();
     TitleChampionship::factory()->ended()->create();
     $table = new PreviousTitleChampionships();
@@ -27,6 +34,8 @@ test('only retrieves previous championships for the selected title', function ()
 
     $championships = $table->builder()->get();
 
-    expect($championships)->toHaveCount(1)
-        ->and($championships->firstOrFail()->is($previousChampionship))->toBeTrue();
+    expect($championships->modelKeys())->toBe([
+        $latestChampionship->id,
+        $olderChampionship->id,
+    ]);
 });

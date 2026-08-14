@@ -36,7 +36,7 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `EventMatchBuilder` owns reusable match-history and persisted assignment queries for event identifiers, matches on past events, competitors, referees, titles, and ordering by the related event date. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
 
-`TitleChampionshipBuilder` owns current and previous reign constraints and the polymorphic champion constraint. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.
+`TitleChampionshipBuilder` owns current and previous reign constraints, title and polymorphic champion filters, and persisted win/loss ordering. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.
 
 `MatchCompetitorBuilder` owns persisted competitor-record filters by competitor model type, competitor identifiers, and event identifiers. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
 

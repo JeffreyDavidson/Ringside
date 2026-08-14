@@ -40,7 +40,10 @@ use Illuminate\Support\Carbon;
  *
  * @method static \Database\Factories\Titles\TitleChampionshipFactory factory($count = null, $state = [])
  * @method static TitleChampionshipBuilder<static>|TitleChampionship current()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship earliestWonFirst()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship forChampion(Wrestler|TagTeam $champion)
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship forTitleId(int $titleId)
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship mostRecentlyLostFirst()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship newModelQuery()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship newQuery()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship previous()
