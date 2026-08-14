@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
+use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
@@ -103,11 +104,11 @@ final class StableActivityEligibility
         }
 
         $availableFormerMembers = $this->formerMemberEligibility->availableFor($stable);
-        if ($availableFormerMembers->count() < Stable::MIN_MEMBERS_COUNT) {
+        if ($availableFormerMembers->count() < StableMembershipData::MINIMUM_MEMBER_COUNT) {
             throw CannotBeReunitedException::insufficientFormerMembers(
                 $stable,
                 $availableFormerMembers->count(),
-                Stable::MIN_MEMBERS_COUNT,
+                StableMembershipData::MINIMUM_MEMBER_COUNT,
             );
         }
 

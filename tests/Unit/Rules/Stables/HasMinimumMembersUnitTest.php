@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Stables\Stable;
+use App\Data\Stables\StableMembershipData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\Rules\Stables\HasMinimumMembers;
@@ -14,7 +14,7 @@ use Illuminate\Support\Collection;
  * UNIT TEST SCOPE:
  * - Mathematical calculation logic (tag teams * 2 + wrestlers)
  * - Collection counting and member calculation
- * - Minimum member threshold validation against Stable constant
+ * - Minimum member threshold validation against the membership policy
  * - Error message formatting with dynamic counts
  * - Edge cases (empty collections, various combinations)
  *
@@ -174,7 +174,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $rule->validate('members', 'test', validationFailureCallback($failCallback));
 
             // Assert
-            expect($failMessage)->toContain((string) Stable::MIN_MEMBERS_COUNT);
+            expect($failMessage)->toContain((string) StableMembershipData::MINIMUM_MEMBER_COUNT);
         });
 
         test('error message includes actual member count', function () {
@@ -210,7 +210,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
             $rule->validate('members', 'test', validationFailureCallback($failCallback));
 
             // Assert
-            $expectedMessage = 'A stable must have at least '.Stable::MIN_MEMBERS_COUNT.' members. Currently adding 0 members.';
+            $expectedMessage = 'A stable must have at least '.StableMembershipData::MINIMUM_MEMBER_COUNT.' members. Currently adding 0 members.';
             expect($failMessage)->toBe($expectedMessage);
         });
     });
@@ -277,7 +277,7 @@ describe('HasMinimumMembers Validation Rule Unit Tests', function () {
     describe('constant integration', function () {
         test('uses correct minimum members constant', function () {
             // This test ensures we're using the right constant value
-            expect(Stable::MIN_MEMBERS_COUNT)->toBe(3);
+            expect(StableMembershipData::MINIMUM_MEMBER_COUNT)->toBe(3);
         });
 
         test('calculation logic aligns with business rules', function () {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Builders\Stables\StableBuilder;
 use App\Models\Stables\Stable;
+use App\Models\Wrestlers\Wrestler;
 
 /**
  * Unit tests for StableQueryBuilder query scopes and methods.
@@ -82,5 +83,21 @@ describe('StableQueryBuilder Unit Tests', function () {
                 ->toHaveCount(1)
                 ->and($retiredStables->contains($this->retiredStable))->toBeTrue();
         });
+    });
+
+    test('stables can be filtered by a member count range', function () {
+        $belowRange = Stable::factory()->create();
+        $withinRange = Stable::factory()->create();
+        $aboveRange = Stable::factory()->create();
+
+        $belowRange->wrestlers()->attach(Wrestler::factory()->create(), ['joined_at' => now()]);
+        $withinRange->wrestlers()->attach(Wrestler::factory()->count(2)->create(), ['joined_at' => now()]);
+        $aboveRange->wrestlers()->attach(Wrestler::factory()->count(3)->create(), ['joined_at' => now()]);
+
+        $stables = Stable::query()->withMemberCount(2, 2)->get();
+
+        expect($stables)
+            ->toHaveCount(1)
+            ->and($stables->contains($withinRange))->toBeTrue();
     });
 });

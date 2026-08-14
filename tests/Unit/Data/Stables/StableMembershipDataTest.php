@@ -24,3 +24,17 @@ it('reports whether the payload contains members', function () {
         ->and($members->isEmpty())->toBeFalse()
         ->and($members->isNotEmpty())->toBeTrue();
 });
+
+it('reports whether the weighted headcount meets the minimum', function () {
+    $belowMinimum = new StableMembershipData(
+        wrestlers: Wrestler::factory()->count(2)->make(),
+    );
+    $atMinimum = new StableMembershipData(
+        wrestlers: Wrestler::factory()->count(1)->make(),
+        tagTeams: TagTeam::factory()->count(1)->make(),
+    );
+
+    expect(StableMembershipData::MINIMUM_MEMBER_COUNT)->toBe(3)
+        ->and($belowMinimum->hasMinimumMembers())->toBeFalse()
+        ->and($atMinimum->hasMinimumMembers())->toBeTrue();
+});

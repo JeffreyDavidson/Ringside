@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
+use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Stables\Stable;
@@ -80,11 +81,11 @@ final class StableRetirementEligibility
             throw CannotBeUnretiredException::noAvailableFormerMembers($stable);
         }
 
-        if ($availableFormerMembers->count() < Stable::MIN_MEMBERS_COUNT) {
+        if ($availableFormerMembers->count() < StableMembershipData::MINIMUM_MEMBER_COUNT) {
             throw CannotBeUnretiredException::insufficientFormerMembers(
                 $stable,
                 $availableFormerMembers->count(),
-                Stable::MIN_MEMBERS_COUNT,
+                StableMembershipData::MINIMUM_MEMBER_COUNT,
             );
         }
 

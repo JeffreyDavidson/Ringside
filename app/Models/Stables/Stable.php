@@ -122,11 +122,6 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
     use SoftDeletes;
 
     /**
-     * The minimum number of members allowed on a tag team.
-     */
-    public const int MIN_MEMBERS_COUNT = 3;
-
-    /**
      * Get the computed status attribute.
      *
      * Computes the stable status based on activity periods and retirement state:

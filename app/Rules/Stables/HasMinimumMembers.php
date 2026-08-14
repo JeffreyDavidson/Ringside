@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Stables;
 
-use App\Models\Stables\Stable;
+use App\Data\Stables\StableMembershipData;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Closure;
@@ -27,15 +27,11 @@ class HasMinimumMembers implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $tagTeamsCountFromRequest = $this->tagTeams->count();
-        $wrestlersCountFromRequest = $this->wrestlers->count();
+        $members = new StableMembershipData($this->wrestlers, $this->tagTeams);
+        $totalMembersCount = $members->getTotalMemberCount();
 
-        // Each tag team counts as 2 members (minimum for a tag team)
-        $tagTeamMembersCount = $tagTeamsCountFromRequest * 2;
-        $totalMembersCount = $tagTeamMembersCount + $wrestlersCountFromRequest;
-
-        if ($totalMembersCount < Stable::MIN_MEMBERS_COUNT) {
-            $fail('A stable must have at least '.Stable::MIN_MEMBERS_COUNT." members. Currently adding {$totalMembersCount} members.");
+        if (! $members->hasMinimumMembers()) {
+            $fail('A stable must have at least '.StableMembershipData::MINIMUM_MEMBER_COUNT." members. Currently adding {$totalMembersCount} members.");
         }
     }
 }
