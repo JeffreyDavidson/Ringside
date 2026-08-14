@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Models\Concerns\HasActivityPeriods;
@@ -60,7 +59,6 @@ describe('Stable Model Unit Tests', function () {
             expect(class_uses(Stable::class))->toContain(HasActivityPeriods::class)
                 ->and(class_uses(Stable::class))->toContain(HasFactory::class)
                 ->and(class_uses(Stable::class))->toContain(HasLifecycleTransitions::class)
-                ->and(class_uses(Stable::class))->toContain(HasStatusScopes::class)
                 ->and(class_uses(Stable::class))->toContain(IsRetirable::class)
                 ->and(class_uses(Stable::class))->toContain(SoftDeletes::class);
         });

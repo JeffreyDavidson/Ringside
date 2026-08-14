@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
+use App\Builders\Concerns\HasActivityPeriodScopes;
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Builders\Contracts\HasAvailability;
@@ -80,6 +81,7 @@ use Illuminate\Support\Facades\DB;
  */
 class StableBuilder extends Builder implements HasAvailability
 {
+    use HasActivityPeriodScopes;
     use HasAvailabilityScopes;
     use HasRetirementScopes;
 
