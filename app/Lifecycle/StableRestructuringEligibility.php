@@ -37,7 +37,7 @@ final class StableRestructuringEligibility
             throw CannotBeSplitException::notActive($stable);
         }
 
-        $minimumMemberCount = Stable::MIN_MEMBERS_COUNT * 2;
+        $minimumMemberCount = StableMembershipData::MINIMUM_MEMBER_COUNT * 2;
         $currentMemberCount = $this->membershipService->currentMembers($stable)->getTotalMemberCount();
 
         if ($currentMemberCount < $minimumMemberCount) {

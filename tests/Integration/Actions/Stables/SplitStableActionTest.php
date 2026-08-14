@@ -507,8 +507,8 @@ describe('SplitStableAction Integration Tests', function () {
             $refreshedOriginal = freshModel($this->originalStable);
             $originalMemberCount = resolve(StableMembershipService::class)->currentMembers($refreshedOriginal)->getTotalMemberCount();
 
-            expect($newStableMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);
-            expect($originalMemberCount)->toBeGreaterThanOrEqual(Stable::MIN_MEMBERS_COUNT);
+            expect($newStableMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT);
+            expect($originalMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT);
         });
 
         test('split validates member employment status', function () {

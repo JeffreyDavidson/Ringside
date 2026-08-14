@@ -7,6 +7,7 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Builders\Contracts\HasAvailability;
+use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -154,7 +155,7 @@ class StableBuilder extends Builder implements HasAvailability
                 COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0) +
                 COALESCE((SELECT COUNT(*) FROM stables_managers WHERE stable_id = stables.id AND fired_at IS NULL), 0)
             ) >= ?
-        ', [Stable::MIN_MEMBERS_COUNT]);
+        ', [StableMembershipData::MINIMUM_MEMBER_COUNT]);
 
         return $result;
     }
@@ -177,7 +178,7 @@ class StableBuilder extends Builder implements HasAvailability
                 COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0) +
                 COALESCE((SELECT COUNT(*) FROM stables_managers WHERE stable_id = stables.id AND fired_at IS NULL), 0)
             ) < ?
-        ', [Stable::MIN_MEMBERS_COUNT]);
+        ', [StableMembershipData::MINIMUM_MEMBER_COUNT]);
 
         return $result;
     }

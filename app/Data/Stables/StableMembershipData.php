@@ -6,7 +6,7 @@ namespace App\Data\Stables;
 
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 /**
  * Data object for stable membership information.
@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Collection;
  */
 readonly class StableMembershipData
 {
+    public const int MINIMUM_MEMBER_COUNT = 3;
+
     /**
      * Create a new stable membership data instance.
      *
@@ -53,5 +55,10 @@ readonly class StableMembershipData
         $tagTeamCount = $this->tagTeams?->count() ?? 0;
 
         return $wrestlerCount + ($tagTeamCount * 2);
+    }
+
+    public function hasMinimumMembers(): bool
+    {
+        return $this->getTotalMemberCount() >= self::MINIMUM_MEMBER_COUNT;
     }
 }

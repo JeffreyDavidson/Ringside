@@ -96,12 +96,12 @@ class SplitStableAction
             throw CannotBeSplitException::allMembersMoving();
         }
 
-        if ($newStableMemberCount < Stable::MIN_MEMBERS_COUNT) {
-            throw CannotBeSplitException::resultingStableBelowMinimum('new', $newStableMemberCount, Stable::MIN_MEMBERS_COUNT);
+        if ($newStableMemberCount < StableMembershipData::MINIMUM_MEMBER_COUNT) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('new', $newStableMemberCount, StableMembershipData::MINIMUM_MEMBER_COUNT);
         }
 
-        if ($remainingMemberCount < Stable::MIN_MEMBERS_COUNT) {
-            throw CannotBeSplitException::resultingStableBelowMinimum('original', $remainingMemberCount, Stable::MIN_MEMBERS_COUNT);
+        if ($remainingMemberCount < StableMembershipData::MINIMUM_MEMBER_COUNT) {
+            throw CannotBeSplitException::resultingStableBelowMinimum('original', $remainingMemberCount, StableMembershipData::MINIMUM_MEMBER_COUNT);
         }
     }
 }

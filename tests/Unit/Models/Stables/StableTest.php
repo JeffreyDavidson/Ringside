@@ -72,21 +72,4 @@ describe('Stable Model Unit Tests', function () {
         });
     });
 
-    describe('model constants', function () {
-        test('has MIN_MEMBERS_COUNT constant defined', function () {
-            $reflection = new ReflectionClass(Stable::class);
-            $constants = $reflection->getConstants();
-
-            // Filter out inherited constants from parent classes
-            $modelConstants = array_filter($constants, function ($value, $key) use ($reflection) {
-                $constant = $reflection->getReflectionConstant($key);
-
-                return $constant && $constant->getDeclaringClass()->getName() === Stable::class;
-            }, ARRAY_FILTER_USE_BOTH);
-
-            expect($modelConstants)->toHaveKey('MIN_MEMBERS_COUNT');
-            expect($modelConstants['MIN_MEMBERS_COUNT'])->toBe(3);
-        });
-    });
-
 });
