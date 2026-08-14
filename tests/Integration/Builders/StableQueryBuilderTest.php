@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Builders\Stables\StableBuilder;
+use App\Builders\Roster\StableBuilder;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Stables\Stable;
 use App\Models\Wrestlers\Wrestler;
 
@@ -34,7 +35,7 @@ describe('StableQueryBuilder Unit Tests', function () {
     describe('activity period scopes', function () {
         test('active stables can be retrieved', function () {
             // Act
-            $activeStables = Stable::active()->get();
+            $activeStables = Stable::query()->established()->get();
 
             // Assert
             expect($activeStables)
@@ -44,7 +45,7 @@ describe('StableQueryBuilder Unit Tests', function () {
 
         test('future activated stables can be retrieved', function () {
             // Act
-            $futureActivatedStables = Stable::withFutureActivation()->get();
+            $futureActivatedStables = Stable::query()->withFutureEstablishment()->get();
 
             // Assert
             expect($futureActivatedStables)
@@ -54,7 +55,7 @@ describe('StableQueryBuilder Unit Tests', function () {
 
         test('inactive stables can be retrieved', function () {
             // Act
-            $inactiveStables = Stable::inactive()->get();
+            $inactiveStables = Stable::query()->disbanded()->get();
 
             // Assert
             expect($inactiveStables)
@@ -64,7 +65,7 @@ describe('StableQueryBuilder Unit Tests', function () {
 
         test('unactivated stables can be retrieved', function () {
             // Act
-            $unactivatedStables = Stable::unactivated()->get();
+            $unactivatedStables = Stable::query()->unestablished()->get();
 
             // Assert
             expect($unactivatedStables)
@@ -89,15 +90,46 @@ describe('StableQueryBuilder Unit Tests', function () {
         $belowRange = Stable::factory()->create();
         $withinRange = Stable::factory()->create();
         $aboveRange = Stable::factory()->create();
+        $historicalOnly = Stable::factory()->create();
 
         $belowRange->wrestlers()->attach(Wrestler::factory()->create(), ['joined_at' => now()]);
         $withinRange->wrestlers()->attach(Wrestler::factory()->count(2)->create(), ['joined_at' => now()]);
         $aboveRange->wrestlers()->attach(Wrestler::factory()->count(3)->create(), ['joined_at' => now()]);
+        $historicalOnly->wrestlers()->attach(Wrestler::factory()->count(2)->create(), [
+            'joined_at' => now()->subMonth(),
+            'left_at' => now()->subDay(),
+        ]);
 
         $stables = Stable::query()->withMemberCount(2, 2)->get();
 
         expect($stables)
             ->toHaveCount(1)
-            ->and($stables->contains($withinRange))->toBeTrue();
+            ->and($stables->contains($withinRange))->toBeTrue()
+            ->and($stables->contains($historicalOnly))->toBeFalse();
+    });
+
+    test('availability uses the current weighted member count', function () {
+        $availableStable = Stable::factory()->has(ActivityPeriod::factory(), 'activityPeriods')->create();
+        $belowMinimumStable = Stable::factory()->has(ActivityPeriod::factory(), 'activityPeriods')->create();
+        $historicalOnlyStable = Stable::factory()->has(ActivityPeriod::factory(), 'activityPeriods')->create();
+
+        $availableStable->wrestlers()->attach(Wrestler::factory()->count(3)->create(), ['joined_at' => now()]);
+        $belowMinimumStable->wrestlers()->attach(Wrestler::factory()->count(2)->create(), ['joined_at' => now()]);
+        $historicalOnlyStable->wrestlers()->attach(Wrestler::factory()->count(3)->create(), [
+            'joined_at' => now()->subMonth(),
+            'left_at' => now()->subDay(),
+        ]);
+
+        $availableStables = Stable::query()->available()->get();
+        $unavailableStables = Stable::query()->unavailable()->get();
+
+        expect($availableStables->pluck('id'))
+            ->toContain($availableStable->id)
+            ->not->toContain($belowMinimumStable->id)
+            ->not->toContain($historicalOnlyStable->id)
+            ->and($unavailableStables->pluck('id'))
+            ->not->toContain($availableStable->id)
+            ->toContain($belowMinimumStable->id)
+            ->toContain($historicalOnlyStable->id);
     });
 });
