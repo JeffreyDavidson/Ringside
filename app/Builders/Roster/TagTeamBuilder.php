@@ -7,7 +7,6 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Models\TagTeams\TagTeam;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -162,9 +161,7 @@ class TagTeamBuilder extends Builder
      */
     public function employed(): static
     {
-        $this->whereHas('currentEmployment', function (Builder $query) {
-            $query->where('started_at', '<=', now());
-        });
+        $this->whereHas('currentEmployment');
 
         return $this;
     }
@@ -261,41 +258,6 @@ class TagTeamBuilder extends Builder
     }
 
     /**
-     * Scope a query to include tag teams with available wrestlers.
-     *
-     * Filters tag teams where all current wrestler partners are available
-     * (employed, not injured, not suspended, not retired). This ensures
-     * the team has a complete roster ready for competition.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get tag teams with all wrestlers available
-     * $teamsWithAvailableWrestlers = TagTeam::query()
-     *     ->withAvailableWrestlers()
-     *     ->get();
-     *
-     * // Find teams ready for immediate booking
-     * $immediatelyBookable = TagTeam::query()
-     *     ->available()
-     *     ->withAvailableWrestlers()
-     *     ->get();
-     * ```
-     */
-    public function withAvailableWrestlers(): static
-    {
-        $this->whereHas('currentWrestlers', function (Builder $query) {
-            $query->whereEmployed()
-                ->whereNotInjured()
-                ->whereNotSuspended()
-                ->whereNotRetired();
-        });
-
-        return $this;
-    }
-
-    /**
      * Scope a query to include tag teams with minimum wrestler count.
      *
      * Filters tag teams that have at least the specified number of current
@@ -321,38 +283,11 @@ class TagTeamBuilder extends Builder
     }
 
     /**
-     * Scope a query to include tag teams ready for booking.
-     *
-     * Filters tag teams that are completely ready for match booking.
-     * This combines team-level availability with wrestler-level availability
-     * to ensure the entire unit is ready for competition.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get all teams ready for immediate booking
-     * $readyTeams = TagTeam::query()->readyForBooking()->get();
-     *
-     * // Find teams ready for title matches
-     * $titleReadyTeams = TagTeam::query()
-     *     ->readyForBooking()
-     *     ->whereDoesntHave('currentChampionships')
-     *     ->get();
-     * ```
-     */
-    public function readyForBooking(): static
-    {
-        return $this->available()
-            ->withMinimumWrestlers();
-    }
-
-    /**
      * Scope a query to include bookable tag teams.
      *
-     * Filters tag teams that are currently available for booking in matches.
-     * Bookable tag teams must be ready for booking (team available, wrestlers
-     * available, minimum wrestler count met).
+     * Filters tag teams that satisfy the persisted team-level prerequisites for
+     * booking: current employment, no suspension or retirement, and at least two
+     * current wrestlers. Per-wrestler eligibility remains a lifecycle concern.
      *
      * @return static The builder instance for method chaining
      *
@@ -370,70 +305,26 @@ class TagTeamBuilder extends Builder
      */
     public function bookable(): static
     {
-        return $this->readyForBooking();
-    }
-
-    /**
-     * Scope a query to include tag teams available on a specific date.
-     *
-     * Filters tag teams that are available for booking on the given date,
-     * considering both team availability and existing match bookings.
-     *
-     * @param  Carbon  $date  The date to check availability for
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get tag teams available for a specific event date
-     * $availableTeams = TagTeam::query()
-     *     ->availableOn(Carbon::parse('2024-12-31'))
-     *     ->get();
-     * ```
-     */
-    public function availableOn(Carbon $date): static
-    {
-        return $this->bookable()
-            ->notBookedOn($date);
-    }
-
-    /**
-     * Scope a query to exclude tag teams already booked on a specific date.
-     *
-     * Filters out tag teams that have existing match bookings on the given
-     * date to prevent double-booking conflicts.
-     *
-     * @param  Carbon  $date  The date to check for existing bookings
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get tag teams not already booked for New Year's Eve
-     * $unbookedTeams = TagTeam::query()
-     *     ->notBookedOn(Carbon::parse('2024-12-31'))
-     *     ->get();
-     * ```
-     */
-    public function notBookedOn(Carbon $date): static
-    {
-        $this->whereDoesntHave('matches', function (Builder $query) use ($date) {
-            $query->whereHas('event', function (Builder $eventQuery) use ($date) {
-                $eventQuery->whereDate('date', $date->toDateString());
-            });
-        });
-
-        return $this;
+        return $this->available()
+            ->withMinimumWrestlers();
     }
 
     /**
      * Scope a query to include unbookable tag teams.
      *
-     * Alias for unavailable() method. Filters tag teams that cannot currently
-     * be booked for matches due to employment, suspension, or retirement status.
+     * Filters tag teams that fail a persisted team-level booking prerequisite.
+     * This is the inverse of bookable() and includes teams with fewer than two
+     * current wrestlers.
      *
      * @return static The builder instance for method chaining
      */
     public function unbookable(): static
     {
-        return $this->unavailable();
+        return $this->where(function (Builder $query): void {
+            $query->whereDoesntHave('currentEmployment')
+                ->orWhereHas('currentSuspension')
+                ->orWhereHas('currentRetirement')
+                ->orHas('currentWrestlers', '<', 2);
+        });
     }
 }
