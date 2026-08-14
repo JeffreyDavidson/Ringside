@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Stables;
 
-use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Lifecycle\StableStatusResolver;
@@ -113,7 +112,6 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
     use HasFactory;
 
     use HasLifecycleTransitions;
-    use HasStatusScopes;
 
     /** @use IsRetirable<static> */
     use IsRetirable;

@@ -4,6 +4,8 @@
 
 Ringside uses a comprehensive builder pattern for constructing complex Eloquent queries with wrestling-specific business logic. All builders are organized by domain in `app/Builders/{Domain}/` and extend Laravel's base query builder functionality.
 
+Shared activity-period queries remain in `App\Builders\Concerns\HasActivityPeriodScopes` and are composed by the typed `StableBuilder` and `TitleBuilder`. Eloquent models do not define local query scopes.
+
 ## Builder Organization
 
 ### Domain Structure

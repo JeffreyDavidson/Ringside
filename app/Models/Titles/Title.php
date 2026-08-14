@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Titles;
 
-use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
@@ -107,7 +106,6 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
     use HasFactory;
 
     use HasLifecycleTransitions;
-    use HasStatusScopes;
 
     /** @use IsRetirable<static> */
     use IsRetirable;
