@@ -8,7 +8,6 @@ use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Support\Carbon;
 
 /**
  * Contract for models that have activity periods (activation/deactivation cycles).
@@ -40,14 +39,6 @@ interface HasActivityPeriods
      * @return bool True if the model is not currently active
      */
     public function isInactive(): bool;
-
-    /**
-     * Check if the model was active on a given date.
-     *
-     * @param  Carbon  $date  The date to check against
-     * @return bool True if the model was active on the given date
-     */
-    public function wasActiveOn(Carbon $date): bool;
 
     /**
      * Get all activity periods for this model.

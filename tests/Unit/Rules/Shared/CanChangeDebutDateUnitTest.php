@@ -2,561 +2,80 @@
 
 declare(strict_types=1);
 
+use App\Models\Lifecycle\ActivityPeriod;
+use App\Models\Stables\Stable;
+use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
-/**
- * Unit tests for CanChangeDebutDate validation rule.
- *
- * UNIT TEST SCOPE:
- * - Method existence checking logic (isCurrentlyActive, wasActiveOn methods)
- * - Activity status validation with mocked dependencies
- * - Date parsing and comparison logic
- * - Model name resolution strategies (getDisplayName, name property, class_basename)
- * - Error message formatting with dynamic model names
- * - Edge cases (null models, missing methods, various date formats)
- *
- * These tests verify the CanChangeDebutDate rule logic independently
- * of models, database, or Laravel's validation framework.
- *
- * @see CanChangeDebutDate
- */
-describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
-    describe('model validation with activity methods', function () {
-        test('validation passes when model is not currently active', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return false;
-                }
-
-                public function wasActiveOn(): bool
-                {
-                    return true;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation fails when model is currently active and was not active on target date', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Championship Belt' : null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failMessage = '';
-            $failCallback = function (string $message) use (&$failCalled, &$failMessage) {
-                $failCalled = true;
-                $failMessage = $message;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addMonth(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeTrue();
-            expect($failMessage)->toBe('The debut date cannot be changed while Championship Belt is currently active.');
-        });
-
-        test('validation passes when model is currently active and was active on target date', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return true;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Championship Belt' : null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addMonth(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation passes when model is currently active but lacks wasActiveOn method', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-    });
-
-    describe('method existence checking logic', function () {
-        test('validation passes when model lacks isCurrentlyActive method', function () {
-            // Arrange
-            $model = new class extends Model {};
-            // Note: No isCurrentlyActive method mocked - simulates method_exists() returning false
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation passes when model lacks wasActiveOn method', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-            };
-            // Note: No wasActiveOn method mocked - simulates method_exists() returning false
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation passes when model lacks both activity methods', function () {
-            // Arrange
-            $model = new class extends Model {};
-            // Note: No activity methods mocked - simulates method_exists() returning false for both
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation passes when no model provided', function () {
-            // Arrange
-            $rule = new CanChangeDebutDate(null);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-    });
-
-    describe('model name resolution strategies', function () {
-        test('uses the model name property', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Model Name Property' : null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failMessage = '';
-            $failCallback = function (string $message) use (&$failMessage) {
-                $failMessage = $message;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failMessage)->toContain('Model Name Property');
-        });
-
-        test('uses class basename when no name methods available', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failMessage = '';
-            $failCallback = function (string $message) use (&$failMessage) {
-                $failMessage = $message;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failMessage)->toMatch('/The debut date cannot be changed while .+ is currently active\./');
-        });
-    });
-
-    describe('date parsing and handling', function () {
-        test('handles Carbon date instances', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Model' : null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeTrue();
-        });
-
-        test('handles string date values', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Model' : null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', '2024-12-25', validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeTrue();
-        });
-
-        test('correctly passes parsed date to wasActiveOn method', function () {
-            // Arrange
-            $targetDate = now()->addWeek();
-            $model = new class extends Model
-            {
-                public ?Carbon $receivedDate = null;
-
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    $this->receivedDate = $date;
-
-                    return true;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', $targetDate, validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-            expect($model->receivedDate?->equalTo($targetDate))->toBeTrue();
-        });
-    });
-
-    describe('interface compliance', function () {
-        test('rule implements ValidationRule interface', function () {
-            // Arrange
-            $rule = new CanChangeDebutDate(null);
-
-            // Assert
-            expect($rule)->toBeInstanceOf(ValidationRule::class);
-        });
-
-        test('validate method signature matches interface', function () {
-            // Arrange
-            $rule = new CanChangeDebutDate(null);
-            $reflection = new ReflectionMethod($rule, 'validate');
-
-            // Assert
-            expect($reflection->getParameters())->toHaveCount(3);
-            expect($reflection->getParameters()[0]->getName())->toBe('attribute');
-            expect($reflection->getParameters()[1]->getName())->toBe('value');
-            expect($reflection->getParameters()[2]->getName())->toBe('fail');
-        });
-    });
-
-    describe('error message consistency', function () {
-        test('error message format is consistent across different models', function () {
-            // Arrange
-            $model1 = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'First Title' : null;
-                }
-            };
-            $model2 = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Second Title' : null;
-                }
-            };
-            $messages = [];
-            $failCallback = function (string $message) use (&$messages) {
-                $messages[] = $message;
-            };
-            // Act
-            (new CanChangeDebutDate($model1))->validate('debuted_at', now(), validationFailureCallback($failCallback));
-            (new CanChangeDebutDate($model2))->validate('debuted_at', now(), validationFailureCallback($failCallback));
-            // Assert
-            expect($messages)->toHaveCount(2);
-            expect($messages[0])->toBe('The debut date cannot be changed while First Title is currently active.');
-            expect($messages[1])->toBe('The debut date cannot be changed while Second Title is currently active.');
-        });
-        test('attribute name does not affect validation logic', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Model' : null;
-                }
-            };
-            $rule = new CanChangeDebutDate($model);
-            $failCallCount = 0;
-            $failCallback = function () use (&$failCallCount) {
-                $failCallCount++;
-            };
-            // Act
-            $rule->validate('debuted_at', now(), validationFailureCallback($failCallback));
-            $rule->validate('debut_date', now(), validationFailureCallback($failCallback));
-            $rule->validate('introduced_at', now(), validationFailureCallback($failCallback));
-            // Assert
-            expect($failCallCount)->toBe(3);
-        });
-    });
-
-    describe('combined validation logic edge cases', function () {
-        test('validation handles complex method existence scenarios', function () {
-            // Arrange - Model has isCurrentlyActive but not wasActiveOn
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-            };
-            // Note: wasActiveOn method not mocked to simulate method_exists() returning false
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse(); // Should pass when wasActiveOn method doesn't exist
-        });
-
-        test('validation correctly evaluates combined boolean conditions', function () {
-            // Arrange - Model is active AND was not active on target date (both conditions true for failure)
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Title' : null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeTrue(); // Should fail when both conditions are met
-        });
-    });
-
-    afterEach(function () {
-        Mockery::close();
-    });
+test('allows a debut date when no model is being edited', function () {
+    $failed = false;
+
+    (new CanChangeDebutDate(null))->validate(
+        'debut_date',
+        now(),
+        validationFailureCallback(function () use (&$failed): void {
+            $failed = true;
+        }),
+    );
+
+    expect($failed)->toBeFalse();
 });
+
+test('allows changing the date of an inactive model', function (string $modelClass) {
+    $model = $modelClass::factory()->create();
+    $failed = false;
+
+    (new CanChangeDebutDate($model))->validate(
+        'debut_date',
+        now(),
+        validationFailureCallback(function () use (&$failed): void {
+            $failed = true;
+        }),
+    );
+
+    expect($failed)->toBeFalse();
+})->with([
+    'stable' => Stable::class,
+    'title' => Title::class,
+]);
+
+test('allows retaining the current activity start date', function (string $modelClass) {
+    $startedAt = now()->subWeek();
+    $model = $modelClass::factory()
+        ->has(ActivityPeriod::factory()->started($startedAt), 'activityPeriods')
+        ->create();
+    $failed = false;
+
+    (new CanChangeDebutDate($model))->validate(
+        'debut_date',
+        $startedAt->toDateString(),
+        validationFailureCallback(function () use (&$failed): void {
+            $failed = true;
+        }),
+    );
+
+    expect($failed)->toBeFalse();
+})->with([
+    'stable' => Stable::class,
+    'title' => Title::class,
+]);
+
+test('rejects changing the start date of an active model', function (string $modelClass) {
+    $model = $modelClass::factory()
+        ->has(ActivityPeriod::factory()->started(now()->subWeek()), 'activityPeriods')
+        ->create();
+    $message = null;
+
+    (new CanChangeDebutDate($model))->validate(
+        'debut_date',
+        now(),
+        validationFailureCallback(function (string $failure) use (&$message): void {
+            $message = $failure;
+        }),
+    );
+
+    expect($message)->toBe("The debut date cannot be changed while {$model->name} is currently active.");
+})->with([
+    'stable' => Stable::class,
+    'title' => Title::class,
+]);
