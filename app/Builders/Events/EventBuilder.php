@@ -10,10 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * Custom query builder for the Event model.
  *
- * Provides specialized query methods for filtering events by their status and date conditions,
- * including scheduled, past, unscheduled, future dated, and past dated events. This builder
- * enables easy filtering of events based on their scheduling status and temporal relationships
- * for event management and booking systems.
+ * Provides query methods for filtering events by their scheduling state.
  *
  * @template TModel of Event
  *
@@ -24,12 +21,9 @@ use Illuminate\Database\Eloquent\Builder;
  * // Get all scheduled events
  * $scheduledEvents = Event::query()->scheduled()->get();
  *
- * // Get events with future dates for upcoming shows
- * $upcomingEvents = Event::query()->withFutureDate()->get();
- *
- * // Chain conditions for complex queries
+ * // Get recent past events
  * $recentPastEvents = Event::query()
- *     ->withPastDate()
+ *     ->past()
  *     ->where('date', '>=', now()->subMonths(3))
  *     ->orderBy('date', 'desc')
  *     ->get();
@@ -94,49 +88,6 @@ class EventBuilder extends Builder
     public function unscheduled(): static
     {
         $this->whereNull('date');
-
-        return $this;
-    }
-
-    /**
-     * Scope a query to include events with future dates.
-     *
-     * Filters events that have a confirmed date in the future.
-     * This is useful for finding upcoming events that need preparation,
-     * promotion, or booking activities.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $upcomingEvents = Event::query()->withFutureDate()->get();
-     * ```
-     */
-    public function withFutureDate(): static
-    {
-        $this->whereNotNull('date')
-            ->where('date', '>=', now()->toDateString());
-
-        return $this;
-    }
-
-    /**
-     * Scope a query to include events with past dates.
-     *
-     * Filters events that have a confirmed date in the past.
-     * This is useful for historical analysis and reporting.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $historicalEvents = Event::query()->withPastDate()->get();
-     * ```
-     */
-    public function withPastDate(): static
-    {
-        $this->whereNotNull('date')
-            ->where('date', '<', now()->toDateString());
 
         return $this;
     }

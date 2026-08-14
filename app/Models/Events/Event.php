@@ -45,8 +45,6 @@ use Illuminate\Support\Carbon;
  * @method static EventBuilder<static>|Event query()
  * @method static EventBuilder<static>|Event scheduled()
  * @method static EventBuilder<static>|Event unscheduled()
- * @method static EventBuilder<static>|Event withFutureDate()
- * @method static EventBuilder<static>|Event withPastDate()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Event withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Event withoutTrashed()
  *
