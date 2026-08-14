@@ -26,14 +26,11 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             throw new LogicException('A tag team was not provided.');
         }
 
+        $tagTeam = TagTeam::query()->findOrFail($this->tagTeamId);
+
         return TitleChampionship::query()
-            ->whereHasMorph(
-                'champion',
-                [TagTeam::class],
-                function (Builder $query): void {
-                    $query->whereIn('id', [$this->tagTeamId]);
-                }
-            )
-            ->whereNotNull('lost_at');
+            ->forChampion($tagTeam)
+            ->previous()
+            ->with('title');
     }
 }

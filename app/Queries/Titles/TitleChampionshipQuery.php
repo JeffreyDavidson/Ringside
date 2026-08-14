@@ -22,9 +22,9 @@ final class TitleChampionshipQuery
 
     public static function previousChampionship(Title $title): ?TitleChampionship
     {
-        return $title->championships()
-            ->whereNotNull('lost_at')
-            ->reorder()
+        return TitleChampionship::query()
+            ->whereBelongsTo($title)
+            ->previous()
             ->latest('lost_at')
             ->first();
     }

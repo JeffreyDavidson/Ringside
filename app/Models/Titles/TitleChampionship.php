@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models\Titles;
 
+use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,14 +39,18 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  *
  * @method static \Database\Factories\Titles\TitleChampionshipFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship query()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship current()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship forChampion(Wrestler|TagTeam $champion)
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship newModelQuery()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship newQuery()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship previous()
+ * @method static TitleChampionshipBuilder<static>|TitleChampionship query()
  *
  * @mixin \Eloquent
  */
 #[Table('titles_championships')]
 #[Fillable('title_id', 'champion_type', 'champion_id', 'won_match_id', 'lost_match_id', 'won_at', 'lost_at')]
+#[UseEloquentBuilder(TitleChampionshipBuilder::class)]
 #[UseFactory(TitleChampionshipFactory::class)]
 class TitleChampionship extends Model
 {

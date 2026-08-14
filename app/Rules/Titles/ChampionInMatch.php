@@ -49,8 +49,8 @@ class ChampionInMatch implements DataAwareRule, ValidationRule
             }
 
             $currentChampionship = TitleChampionship::query()
-                ->where('title_id', $title->id)
-                ->whereNull('lost_at')
+                ->whereBelongsTo($title)
+                ->current()
                 ->with('champion')
                 ->first();
 

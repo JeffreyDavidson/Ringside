@@ -43,6 +43,7 @@ class PreviousTitleChampionships extends DataTableComponent
 
         return TitleChampionship::query()
             ->where('title_id', $this->titleId)
+            ->previous()
             ->orderByDesc('lost_at');
     }
 
