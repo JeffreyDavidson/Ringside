@@ -2,6 +2,10 @@
 
 ## Relationship Patterns
 
+Events define their match relationship directly, and venues define their event history
+relationships directly. These relationships have one model owner and do not use
+single-consumer relationship traits or speculative override helpers.
+
 ### Employment Relationships (hired/fired)
 - Managers ↔ Wrestlers: `managers_wrestlers` table with `hired_at`/`fired_at`
 - Managers ↔ Tag Teams: `managers_tag_teams` table with `hired_at`/`fired_at`

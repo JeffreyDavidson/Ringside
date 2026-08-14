@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 use App\Builders\Events\EventBuilder;
-use App\Models\Concerns\HasMatches;
 use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -59,10 +60,16 @@ describe('Event Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Event::class))->toContain(HasFactory::class);
-            expect(class_uses(Event::class))->toContain(HasMatches::class);
-            expect(class_uses(Event::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Event::class))->toContain(HasFactory::class)
+                ->and(class_uses(Event::class))->toContain(SoftDeletes::class);
         });
+    });
+
+    test('defines its match relationship directly', function () {
+        $relation = (new Event())->matches();
+
+        expect($relation)->toBeInstanceOf(HasMany::class)
+            ->and($relation->getRelated())->toBeInstanceOf(EventMatch::class);
     });
 
     describe('interface implementation', function () {

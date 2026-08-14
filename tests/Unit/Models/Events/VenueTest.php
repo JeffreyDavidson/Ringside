@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 use App\Builders\Events\VenueBuilder;
 use App\Casts\AddressCast;
-use App\Models\Concerns\HoldsEvents;
+use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -64,10 +65,18 @@ describe('Venue Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Venue::class))->toContain(HasFactory::class);
-            expect(class_uses(Venue::class))->toContain(HoldsEvents::class);
-            expect(class_uses(Venue::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Venue::class))->toContain(HasFactory::class)
+                ->and(class_uses(Venue::class))->toContain(SoftDeletes::class);
         });
+    });
+
+    test('defines its event relationships directly', function () {
+        $venue = new Venue();
+
+        expect($venue->events())->toBeInstanceOf(HasMany::class)
+            ->and($venue->events()->getRelated())->toBeInstanceOf(Event::class)
+            ->and($venue->previousEvents())->toBeInstanceOf(HasMany::class)
+            ->and($venue->futureEvents())->toBeInstanceOf(HasMany::class);
     });
 
     describe('interface implementation', function () {

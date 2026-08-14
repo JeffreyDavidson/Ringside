@@ -7,7 +7,6 @@ namespace App\Models\Events;
 use App\Builders\Events\VenueBuilder;
 use App\Casts\AddressCast;
 use App\Models\Concerns\HasLifecycleTransitions;
-use App\Models\Concerns\HoldsEvents;
 use App\Models\Contracts\SoftDeletable;
 use App\ValueObjects\Address;
 use Database\Factories\Events\VenueFactory;
@@ -17,6 +16,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -59,8 +59,25 @@ class Venue extends Model implements SoftDeletable
     use HasFactory;
 
     use HasLifecycleTransitions;
-    use HoldsEvents;
     use SoftDeletes;
+
+    /** @return HasMany<Event, $this> */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    /** @return HasMany<Event, $this> */
+    public function previousEvents(): HasMany
+    {
+        return $this->events()->where('date', '<', today());
+    }
+
+    /** @return HasMany<Event, $this> */
+    public function futureEvents(): HasMany
+    {
+        return $this->events()->where('date', '>', today());
+    }
 
     /** @return array<string, string> */
     protected function casts(): array

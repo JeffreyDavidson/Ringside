@@ -7,7 +7,6 @@ namespace App\Models\Events;
 use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
 use App\Models\Concerns\HasLifecycleTransitions;
-use App\Models\Concerns\HasMatches;
 use App\Models\Contracts\SoftDeletable;
 use App\Models\Matches\EventMatch;
 use Database\Factories\Events\EventFactory;
@@ -20,6 +19,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -62,7 +62,6 @@ class Event extends Model implements SoftDeletable
     use HasFactory;
 
     use HasLifecycleTransitions;
-    use HasMatches;
     use SoftDeletes;
 
     /**
@@ -85,6 +84,12 @@ class Event extends Model implements SoftDeletable
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    /** @return HasMany<EventMatch, $this> */
+    public function matches(): HasMany
+    {
+        return $this->hasMany(EventMatch::class);
     }
 
     /**
