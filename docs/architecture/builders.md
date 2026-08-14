@@ -21,7 +21,7 @@ app/Builders/
 ### Builder Hierarchy
 
 **Base Builders:**
-- `SingleRosterMemberBuilder` - Base for individual roster members (wrestlers, managers, referees)
+- `IndividualBuilder` - Base for individual roster members (wrestlers, managers, referees)
 - `BaseRepository` - Foundation for repository pattern implementation
 
 **Domain-Specific Builders:**

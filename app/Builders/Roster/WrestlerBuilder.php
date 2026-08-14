@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @template TModel of Wrestler
  *
- * @extends SingleRosterMemberBuilder<TModel>
+ * @extends IndividualBuilder<TModel>
  *
  * @example
  * ```php
@@ -34,7 +34,7 @@ use Illuminate\Database\Eloquent\Builder;
  *     ->get();
  * ```
  */
-class WrestlerBuilder extends SingleRosterMemberBuilder
+class WrestlerBuilder extends IndividualBuilder
 {
     // Wrestlers inherit all availability, employment, injury, retirement, and suspension scopes from base class
 

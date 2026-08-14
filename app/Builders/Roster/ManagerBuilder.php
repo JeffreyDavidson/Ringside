@@ -16,7 +16,7 @@ use App\Models\Managers\Manager;
  *
  * @template TModel of Manager
  *
- * @extends SingleRosterMemberBuilder<TModel>
+ * @extends IndividualBuilder<TModel>
  *
  * @example
  * ```php
@@ -33,7 +33,7 @@ use App\Models\Managers\Manager;
  *     ->get();
  * ```
  */
-class ManagerBuilder extends SingleRosterMemberBuilder
+class ManagerBuilder extends IndividualBuilder
 {
     // Managers don't need booking scopes - they are not booked for matches
 }

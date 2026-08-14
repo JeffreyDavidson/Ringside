@@ -7,7 +7,6 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasNameSearch;
 use App\Builders\Concerns\HasRetirementScopes;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,31 +25,11 @@ use Illuminate\Database\Eloquent\Model;
  * - Retirement lifecycle management
  * - Suspension and reinstatement processes
  *
- * DESIGN PATTERN:
- * Template method pattern - Defines common structure with extensible
- * behavior in child classes for entity-specific requirements.
- *
  * @template TModel of Model The individual roster member model type
- *
- * @example
- * ```php
- * // Usage in child builders
- * class WrestlerBuilder extends SingleRosterMemberBuilder
- * {
- *     use HasBookingScopes; // Wrestlers can be booked
- * }
- *
- * class ManagerBuilder extends SingleRosterMemberBuilder
- * {
- *     // Managers don't need booking scopes
- * }
- * ```
- *
- * @template TModel of Model
  *
  * @extends Builder<TModel>
  */
-abstract class SingleRosterMemberBuilder extends Builder
+abstract class IndividualBuilder extends Builder
 {
     use HasAvailabilityScopes;
     use HasNameSearch;
@@ -180,9 +159,7 @@ abstract class SingleRosterMemberBuilder extends Builder
      */
     public function employed(): static
     {
-        $this->whereHas('currentEmployment', function (Builder $query) {
-            $query->where('started_at', '<=', now());
-        });
+        $this->whereHas('currentEmployment');
 
         return $this;
     }
@@ -294,41 +271,5 @@ abstract class SingleRosterMemberBuilder extends Builder
         $this->whereHas('currentSuspension');
 
         return $this;
-    }
-
-    /**
-     * Scope a query to include entities available on a specific date.
-     *
-     * Filters individual roster members that are available for general duties
-     * on the given date. Note: Match booking availability should be handled
-     * in specific builders (WrestlerBuilder, TagTeamBuilder) as only wrestlers
-     * and tag teams can be booked for matches.
-     *
-     * For managers and referees, the date parameter is not used since they
-     * are not booked for matches, but the signature is kept for consistency.
-     *
-     * @param  Carbon  $date  The date to check availability for (unused for non-bookable entities)
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get managers available for assignment on a specific date
-     * $availableManagers = Manager::query()
-     *     ->availableOn(now()->addWeek())
-     *     ->get();
-     *
-     * // Get referees available for general duties
-     * $availableReferees = Referee::query()
-     *     ->availableOn(Carbon::parse('2024-12-31'))
-     *     ->get();
-     * ```
-     *
-     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
-     */
-    public function availableOn(Carbon $date): static
-    {
-        // Note: $date parameter is intentionally unused for managers/referees
-        // as they are not booked for matches. Method signature kept for consistency.
-        return $this->available();
     }
 }

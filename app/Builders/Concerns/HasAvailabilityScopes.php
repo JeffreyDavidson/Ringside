@@ -68,9 +68,7 @@ trait HasAvailabilityScopes
      */
     protected function whereEmployed(): static
     {
-        $this->whereHas('currentEmployment', function ($query) {
-            $query->where('started_at', '<=', now());
-        });
+        $this->whereHas('currentEmployment');
 
         return $this;
     }

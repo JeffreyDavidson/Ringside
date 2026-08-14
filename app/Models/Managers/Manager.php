@@ -80,7 +80,6 @@ use Tests\Unit\Models\Managers\ManagerTest;
  * @property-read Collection<int, TagTeam> $previousTagTeams
  *
  * @method static ManagerBuilder<static>|Manager available()
- * @method static ManagerBuilder<static>|Manager availableOn(\Carbon\Carbon $date)
  * @method static ManagerBuilder<static>|Manager employed()
  * @method static \Database\Factories\Managers\ManagerFactory factory($count = null, $state = [])
  * @method static ManagerBuilder<static>|Manager futureEmployed()
