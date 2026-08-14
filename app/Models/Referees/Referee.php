@@ -73,7 +73,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, EventMatch> $previousMatches
  *
  * @method static RefereeBuilder<static>|Referee available()
- * @method static RefereeBuilder<static>|Referee bookable()
  * @method static RefereeBuilder<static>|Referee employed()
  * @method static \Database\Factories\Referees\RefereeFactory factory($count = null, $state = [])
  * @method static RefereeBuilder<static>|Referee futureEmployed()

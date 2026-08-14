@@ -202,14 +202,18 @@ private function getMatchTypeSpecificRules(MatchType $matchType): array
 public function getWrestlers(): Collection
 {
     return Cache::remember('bookable_wrestlers', 300, function () {
-        return Wrestler::bookable()
+        return Wrestler::query()
+            ->available()
             ->select(['id', 'first_name', 'last_name'])
             ->orderBy('last_name')
             ->get()
+            ->filter(RosterBookingEligibility::allows(...))
             ->mapWithKeys(fn($wrestler) => [$wrestler->id => $wrestler->full_name]);
     });
 }
 ```
+
+The availability query only selects candidates from persisted roster state. Assignment actions must still use `RosterBookingEligibility` and `MatchAssignmentConflictService` before attaching a wrestler to a match.
 
 ## Testing Strategy
 

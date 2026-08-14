@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 use App\Models\Referees\Referee;
 
-test('bookable referees can be retrieved', function () {
+test('available referees can be retrieved', function () {
     $futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();
-    $bookableReferee = Referee::factory()->bookable()->create();
+    $availableReferee = Referee::factory()->bookable()->create();
     $suspendedReferee = Referee::factory()->suspended()->create();
     $retiredReferee = Referee::factory()->retired()->create();
     $releasedReferee = Referee::factory()->released()->create();
     $unemployedReferee = Referee::factory()->unemployed()->create();
     $injuredReferee = Referee::factory()->injured()->create();
 
-    $bookableReferees = Referee::bookable()->get();
+    $availableReferees = Referee::available()->get();
 
-    expect($bookableReferees)
+    expect($availableReferees)
         ->toHaveCount(1)
-        ->and($bookableReferees->contains($bookableReferee))->toBeTrue();
+        ->and($availableReferees->contains($availableReferee))->toBeTrue();
 });
 
 test('future employed referees can be retrieved', function () {
