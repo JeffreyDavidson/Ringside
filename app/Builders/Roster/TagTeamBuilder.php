@@ -283,48 +283,18 @@ class TagTeamBuilder extends Builder
     }
 
     /**
-     * Scope a query to include bookable tag teams.
+     * Scope a query to include tag teams below a minimum wrestler count.
      *
-     * Filters tag teams that satisfy the persisted team-level prerequisites for
-     * booking: current employment, no suspension or retirement, and at least two
-     * current wrestlers. Per-wrestler eligibility remains a lifecycle concern.
+     * Filters tag teams that have fewer than the specified number of current
+     * wrestler partners. Defaults to fewer than two wrestlers.
      *
+     * @param  int  $count  Minimum number of wrestlers required
      * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get all bookable tag teams
-     * $bookableTeams = TagTeam::query()->bookable()->get();
-     *
-     * // Find bookable teams for title matches
-     * $titleBookableTeams = TagTeam::query()
-     *     ->bookable()
-     *     ->whereDoesntHave('currentChampionships')
-     *     ->get();
-     * ```
      */
-    public function bookable(): static
+    public function belowMinimumWrestlers(int $count = 2): static
     {
-        return $this->available()
-            ->withMinimumWrestlers();
-    }
+        $this->has('currentWrestlers', '<', $count);
 
-    /**
-     * Scope a query to include unbookable tag teams.
-     *
-     * Filters tag teams that fail a persisted team-level booking prerequisite.
-     * This is the inverse of bookable() and includes teams with fewer than two
-     * current wrestlers.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function unbookable(): static
-    {
-        return $this->where(function (Builder $query): void {
-            $query->whereDoesntHave('currentEmployment')
-                ->orWhereHas('currentSuspension')
-                ->orWhereHas('currentRetirement')
-                ->orHas('currentWrestlers', '<', 2);
-        });
+        return $this;
     }
 }

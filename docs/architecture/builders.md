@@ -37,13 +37,18 @@ $activeStables = Stable::query()
     ->currentlyActive()
     ->withMinimumMembers()
     ->get();
+
+$structurallyCompleteTagTeams = TagTeam::query()
+    ->available()
+    ->withMinimumWrestlers()
+    ->get();
 ```
 
 Shared activity-period queries live in `App\Builders\Concerns\HasActivityPeriodScopes` and are composed by `StableBuilder` and `TitleBuilder`.
 
 ## Booking Boundary
 
-`available()` narrows a query to roster members whose persisted lifecycle state makes them candidates for booking. It is not the final assignment decision.
+`available()` narrows a query to roster members whose persisted lifecycle state makes them candidates for booking. Tag-team builders additionally expose `withMinimumWrestlers()` and `belowMinimumWrestlers()` for structural queries. None of these methods makes the final assignment decision.
 
 Use `App\Lifecycle\RosterBookingEligibility` to decide whether a loaded wrestler, referee, or tag team satisfies booking rules. Use `App\Services\MatchAssignmentConflictService` when assigning models to a match so conflicts with existing event and match assignments are checked transactionally.
 
@@ -61,6 +66,7 @@ Do not add date-specific booking or scheduling methods to a model builder. Those
 - Keep reusable filtering and relationship-existence queries on typed builders.
 - Keep lifecycle transition rules in the established lifecycle or validation collaborators.
 - Keep match booking eligibility in `RosterBookingEligibility`.
+- Keep tag-team state, minimum-membership, and partner eligibility checks together in `RosterBookingEligibility`.
 - Keep event and match assignment conflicts in `MatchAssignmentConflictService`.
 - Eager-load relationships on the query that consumes them rather than adding model-level eager-loading defaults.
 - Test builders against realistic factory states and assert the exact records returned.

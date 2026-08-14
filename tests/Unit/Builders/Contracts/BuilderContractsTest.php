@@ -30,6 +30,6 @@ test('shared roster query methods retain each concrete builder type', function (
 
 test('domain-specific query methods retain their concrete builder types', function () {
     expect(Wrestler::query()->available())->toBeInstanceOf(WrestlerBuilder::class)
-        ->and(TagTeam::query()->bookable())->toBeInstanceOf(TagTeamBuilder::class)
+        ->and(TagTeam::query()->withMinimumWrestlers())->toBeInstanceOf(TagTeamBuilder::class)
         ->and(Title::query()->vacant())->toBeInstanceOf(TitleBuilder::class);
 });
