@@ -9,9 +9,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
@@ -65,7 +63,6 @@ describe('Manager Model Unit Tests', function () {
             expect(class_uses(Manager::class))->toContain(IsInjurable::class);
             expect(class_uses(Manager::class))->toContain(IsRetirable::class);
             expect(class_uses(Manager::class))->toContain(IsSuspendable::class);
-            expect(class_uses(Manager::class))->toContain(ProvidesDisplayName::class);
             expect(class_uses(Manager::class))->toContain(SoftDeletes::class);
         });
     });
@@ -75,7 +72,6 @@ describe('Manager Model Unit Tests', function () {
             $interfaces = class_implements(Manager::class);
 
             expect($interfaces)->toContain(Employable::class);
-            expect($interfaces)->toContain(HasDisplayName::class);
             expect($interfaces)->toContain(Injurable::class);
             expect($interfaces)->toContain(Retirable::class);
             expect($interfaces)->toContain(Suspendable::class);

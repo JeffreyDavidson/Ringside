@@ -530,18 +530,17 @@ describe('ManagersActions Integration Tests', function () {
             expect(true)->toBeTrue();
         });
 
-        test('manager display name consistency maintained', function () {
+        test('manager full name consistency maintained', function () {
             actingAs($this->admin);
 
             $component = livewire(Actions::class, ['manager' => $this->manager]);
 
-            $originalDisplayName = $this->manager->display_name;
+            $originalFullName = freshModel($this->manager)->full_name;
 
             $component->call('suspend');
 
-            // Display name should remain consistent
-            expect($component->get('manager')->display_name)->toBe($originalDisplayName);
-            expect(freshModel($this->manager)->display_name)->toBe($originalDisplayName);
+            expect($component->get('manager')->full_name)->toBe($originalFullName);
+            expect(freshModel($this->manager)->full_name)->toBe($originalFullName);
             expect(true)->toBeTrue();
         });
     });

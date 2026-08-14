@@ -16,11 +16,9 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
-use App\Models\Concerns\ProvidesDisplayName;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
-use App\Models\Contracts\HasDisplayName;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
@@ -113,7 +111,7 @@ use Illuminate\Support\Carbon;
 #[Appends('status')]
 #[UseFactory(WrestlerFactory::class)]
 #[UseEloquentBuilder(WrestlerBuilder::class)]
-class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, HasDisplayName, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
+class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
     /** @use CanBeManaged<WrestlerManager, static> */
     use CanBeManaged;
@@ -141,7 +139,6 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     /** @use IsSuspendable<static> */
     use IsSuspendable;
 
-    use ProvidesDisplayName;
     use SoftDeletes;
 
     protected function stableMembershipTable(): string

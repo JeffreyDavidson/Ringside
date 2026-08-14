@@ -23,8 +23,7 @@ class CanChangeActivationDate implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($this->model && ($this->model->isCurrentlyActive() && ! $this->model->wasActiveOn(Carbon::parse($value)))) {
-            $nameLabel = $this->model instanceof Title ? $this->model->getDisplayName() : $this->model->name;
-            $fail('activations.validation.activation_active')->translate(['name' => $nameLabel]);
+            $fail('activations.validation.activation_active')->translate(['name' => $this->model->name]);
         }
     }
 }

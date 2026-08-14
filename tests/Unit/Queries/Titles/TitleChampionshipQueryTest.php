@@ -6,6 +6,7 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use App\Queries\Titles\TitleChampionshipQuery;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     $this->title = Title::factory()->create();
@@ -47,6 +48,32 @@ test('returns first and longest championship records and champions', function ()
         ->and(TitleChampionshipQuery::firstChampion($this->title)?->is($this->firstChampion))->toBeTrue()
         ->and(TitleChampionshipQuery::longestChampionship($this->title)?->is($this->previousChampionship))->toBeTrue()
         ->and(TitleChampionshipQuery::longestChampion($this->title)?->is($this->previousChampion))->toBeTrue();
+});
+
+test('calculates the length of an ended championship reign', function () {
+    $championship = TitleChampionship::factory()
+        ->for($this->title)
+        ->forWrestler($this->firstChampion)
+        ->wonOn('2025-01-01')
+        ->lostOn('2025-01-11')
+        ->make();
+
+    expect(TitleChampionshipQuery::reignLengthInDays($championship))->toBe(10);
+});
+
+test('calculates the length of a current championship reign', function () {
+    Carbon::setTestNow('2025-01-11');
+
+    $championship = TitleChampionship::factory()
+        ->for($this->title)
+        ->forWrestler($this->firstChampion)
+        ->wonOn('2025-01-01')
+        ->current()
+        ->make();
+
+    expect(TitleChampionshipQuery::reignLengthInDays($championship))->toBe(10);
+
+    Carbon::setTestNow();
 });
 
 test('counts reigns and reports vacancy from the current relationship', function () {

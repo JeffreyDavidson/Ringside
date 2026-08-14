@@ -224,45 +224,7 @@ describe('CanChangeDebutDate Validation Rule Unit Tests', function () {
     });
 
     describe('model name resolution strategies', function () {
-        test('uses getDisplayName when available', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isCurrentlyActive(): bool
-                {
-                    return true;
-                }
-
-                public function wasActiveOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getDisplayName(): string
-                {
-                    return 'Custom Display Name';
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Regular Name' : null;
-                }
-            };
-
-            $rule = new CanChangeDebutDate($model);
-            $failMessage = '';
-            $failCallback = function (string $message) use (&$failMessage) {
-                $failMessage = $message;
-            };
-
-            // Act
-            $rule->validate('debuted_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failMessage)->toContain('Custom Display Name');
-        });
-
-        test('uses name property when getDisplayName not available', function () {
+        test('uses the model name property', function () {
             // Arrange
             $model = new class extends Model
             {

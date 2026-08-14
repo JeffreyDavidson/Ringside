@@ -113,19 +113,4 @@ class TitleChampionship extends Model
     {
         return $this->belongsTo(EventMatch::class, 'lost_match_id');
     }
-
-    /**
-     * Retrieve the number of days for a title championship reign.
-     */
-    public function lengthInDays(): int
-    {
-        if ($this->won_at === null) {
-            return 0;
-        }
-
-        /** @var Carbon $datetime */
-        $datetime = $this->lost_at ?? now();
-
-        return (int) ($this->won_at->diffInDays($datetime));
-    }
 }
