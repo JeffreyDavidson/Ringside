@@ -22,10 +22,10 @@ trait HasNameSearch
         $trimmedTerm = mb_trim($searchTerm);
 
         return $this->where(function ($query) use ($trimmedTerm) {
-            $query->whereRaw('LOWER(first_name) = LOWER(?)', [$trimmedTerm])
-                ->orWhereRaw('LOWER(last_name) = LOWER(?)', [$trimmedTerm])
-                ->orWhereRaw('LOWER(first_name) LIKE LOWER(?)', [$trimmedTerm.' %'])
-                ->orWhereRaw('LOWER(last_name) LIKE LOWER(?)', [$trimmedTerm.' %']);
+            $query->whereLike('first_name', $trimmedTerm)
+                ->orWhereLike('last_name', $trimmedTerm)
+                ->orWhereLike('first_name', $trimmedTerm.' %')
+                ->orWhereLike('last_name', $trimmedTerm.' %');
         });
     }
 }
