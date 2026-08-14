@@ -16,7 +16,7 @@ app/Builders/
 
 Builders are grouped by technical layer first and wrestling entity second. A concrete builder belongs to the model it queries. A concern is appropriate only when multiple builders share the same query semantics.
 
-`ManagerAssignmentBuilder` owns the shared `current()` and `ended()` persistence queries for wrestler and tag-team manager assignment records.
+`ManagerAssignmentBuilder` owns the shared manager filter and `current()` and `ended()` persistence queries for wrestler and tag-team manager assignment records.
 
 `MembershipPeriodBuilder` owns the shared `current()` and `ended()` persistence queries for tag-team and stable membership records.
 
