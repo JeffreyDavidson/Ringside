@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @method static TagTeamMembershipBuilder<static> excludingWrestlerId(int $wrestlerId)
  * @method static TagTeamMembershipBuilder<static> forTagTeamId(int $tagTeamId)
  * @method static TagTeamMembershipBuilder<static> forWrestlerId(int $wrestlerId)
+ * @method static TagTeamMembershipBuilder<static> mostRecentlyJoinedFirst()
  * @method static TagTeamMembershipBuilder<static> newModelQuery()
  * @method static TagTeamMembershipBuilder<static> newQuery()
  * @method static TagTeamMembershipBuilder<static> overlappingPeriod(Carbon $periodStart, Carbon $periodEnd)

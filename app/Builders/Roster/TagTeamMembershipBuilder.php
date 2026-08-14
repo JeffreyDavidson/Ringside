@@ -46,4 +46,11 @@ class TagTeamMembershipBuilder extends MembershipPeriodBuilder
 
         return $this;
     }
+
+    public function mostRecentlyJoinedFirst(): static
+    {
+        $this->orderByDesc('joined_at');
+
+        return $this;
+    }
 }

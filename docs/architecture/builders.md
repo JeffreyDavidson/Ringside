@@ -20,7 +20,7 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `MembershipPeriodBuilder` owns the shared `current()` and `ended()` persistence queries for tag-team and stable membership records.
 
-`TagTeamMembershipBuilder` extends the shared membership-period queries with tag-team and wrestler filters and historical period-overlap constraints specific to `TagTeamWrestler` records.
+`TagTeamMembershipBuilder` extends the shared membership-period queries with tag-team and wrestler filters, historical period-overlap constraints, and most-recent-join ordering specific to `TagTeamWrestler` records.
 
 `StableBuilder` owns stable lifecycle-state filters and historical stable-membership projections for wrestlers and tag teams. The history methods select the persisted membership dates required by the table layer.
 
