@@ -14,6 +14,16 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class EventBuilder extends Builder
 {
+    public function latestDatedFirst(): static
+    {
+        $dateColumn = $this->getModel()->qualifyColumn('date');
+
+        $this->orderByRaw("{$dateColumn} IS NULL")
+            ->orderByDesc($dateColumn);
+
+        return $this;
+    }
+
     public function scheduled(): static
     {
         $this->where('date', '>=', now());

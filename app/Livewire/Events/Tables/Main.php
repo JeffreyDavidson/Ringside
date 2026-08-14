@@ -18,7 +18,6 @@ use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class Main extends BaseTable
@@ -37,8 +36,8 @@ class Main extends BaseTable
     public function builder(): EventBuilder
     {
         return Event::query()
-            ->with(['venue'])
-            ->orderBy(DB::raw('date IS NOT NULL, date'), 'desc');
+            ->latestDatedFirst()
+            ->with(['venue']);
     }
 
     public function configure(): void
