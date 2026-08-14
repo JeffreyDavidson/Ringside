@@ -1090,11 +1090,11 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
 
             // Retirement trait methods
             'retirements', 'currentRetirement', 'previousRetirements', 'previousRetirement',
-            'isRetired', 'hasRetirements',
+            'isRetired',
 
             // Suspension trait methods
             'suspensions', 'currentSuspension', 'previousSuspensions', 'previousSuspension',
-            'isSuspended', 'hasSuspensions',
+            'isSuspended',
 
         ];
 

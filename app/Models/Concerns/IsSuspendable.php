@@ -63,9 +63,4 @@ trait IsSuspendable
     {
         return $this->currentSuspension()->exists();
     }
-
-    public function hasSuspensions(): bool
-    {
-        return $this->suspensions()->exists();
-    }
 }

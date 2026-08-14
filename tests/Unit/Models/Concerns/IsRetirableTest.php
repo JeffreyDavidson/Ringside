@@ -25,8 +25,6 @@ final class RetirementStateModel extends Model implements Retirable
 
     public bool $currentRetirementExists = false;
 
-    public bool $retirementExists = false;
-
     /** @return MorphOne<Retirement, self> */
     public function currentRetirement(): MorphOne
     {
@@ -36,7 +34,7 @@ final class RetirementStateModel extends Model implements Retirable
     /** @return MorphMany<Retirement, self> */
     public function retirements(): MorphMany
     {
-        $builder = $this->retirementBuilder($this->retirementExists);
+        $builder = $this->retirementBuilder(false);
 
         return new MorphMany($builder, new self(), 'retirable_type', 'retirable_id', 'id');
     }
@@ -75,17 +73,14 @@ describe('IsRetirable', function () {
             ->and($model->retirements()->getRelated())->toBeInstanceOf(Retirement::class);
     });
 
-    test('checks current and historical retirement state', function () {
+    test('checks current retirement state', function () {
         $model = new RetirementStateModel();
 
-        expect($model->isRetired())->toBeFalse()
-            ->and($model->hasRetirements())->toBeFalse();
+        expect($model->isRetired())->toBeFalse();
 
         $model->currentRetirementExists = true;
-        $model->retirementExists = true;
 
-        expect($model->isRetired())->toBeTrue()
-            ->and($model->hasRetirements())->toBeTrue();
+        expect($model->isRetired())->toBeTrue();
     });
 
     test('constrains current and previous retirement relationships', function () {
