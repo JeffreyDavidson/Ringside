@@ -7,7 +7,6 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\HasActivityPeriodScopes;
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Contracts\HasAvailability;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
@@ -79,7 +78,7 @@ use Illuminate\Support\Facades\DB;
  *
  * @extends Builder<TModel>
  */
-class StableBuilder extends Builder implements HasAvailability
+class StableBuilder extends Builder
 {
     use HasActivityPeriodScopes;
     use HasAvailabilityScopes;

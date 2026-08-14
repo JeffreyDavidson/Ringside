@@ -6,11 +6,6 @@ namespace App\Builders\Roster;
 
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Contracts\HasAvailability;
-use App\Builders\Contracts\HasBooking;
-use App\Builders\Contracts\HasEmployment;
-use App\Builders\Contracts\HasRetirement;
-use App\Builders\Contracts\HasSuspension;
 use App\Models\TagTeams\TagTeam;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,7 +43,7 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @extends Builder<TModel>
  */
-class TagTeamBuilder extends Builder implements HasAvailability, HasBooking, HasEmployment, HasRetirement, HasSuspension
+class TagTeamBuilder extends Builder
 {
     use HasAvailabilityScopes;
     use HasRetirementScopes;
