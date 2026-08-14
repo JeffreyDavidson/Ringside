@@ -43,7 +43,7 @@ describe('Title Model Unit Tests', function () {
             $casts = $title->getCasts();
 
             expect($casts['type'])->toBe(TitleType::class);
-            expect($casts['status'])->toBe(TitleStatus::class);
+            expect($casts)->not->toHaveKey('status');
         });
 
         test('has custom eloquent builder', function () {

@@ -171,7 +171,6 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
     protected function casts(): array
     {
         return [
-            'status' => TitleStatus::class,
             'type' => TitleType::class,
         ];
     }

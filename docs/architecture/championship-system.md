@@ -22,6 +22,8 @@ Models expose their explicit persisted naming fields: `name` for wrestlers and t
 
 `TitleType` is the canonical classification value; consumers compare the model's cast `type` attribute with its enum cases instead of relying on model predicate aliases. Wrestlers and tag teams implement `CanBeChampion` and share their polymorphic championship-history relationships through `HasChampionshipReigns`. Because either champion type may hold multiple titles simultaneously, `currentChampionships` is the authoritative current-state relationship; champion models do not expose a singular `currentChampionship` relationship. A `Title` owns its `championships` and singular `currentChampionship` relationships directly because each title has at most one current reign.
 
+`Title::status` is computed from activity-period relationships and is not a stored or cast database attribute. Only the persisted title `type` value is enum-cast.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)
