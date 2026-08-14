@@ -12,13 +12,15 @@ test('it ends only the tag teams current relationships', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $manager = Manager::factory()->employed()->create();
     $effectiveDate = now();
+    $formerMembershipEndedAt = now()->subWeek();
+    $currentMembershipStartedAt = now()->subDay();
 
     $tagTeam->wrestlers()->attach($wrestler, [
         'joined_at' => now()->subMonth(),
-        'left_at' => now()->subWeek(),
+        'left_at' => $formerMembershipEndedAt,
     ]);
-    $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => now()->subDay()]);
-    $tagTeam->managers()->attach($manager, ['hired_at' => now()->subDay()]);
+    $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => $currentMembershipStartedAt]);
+    $tagTeam->managers()->attach($manager, ['hired_at' => $currentMembershipStartedAt]);
 
     resolve(EndCurrentRelationshipsAction::class)
         ->handle($tagTeam, $effectiveDate);
@@ -31,12 +33,12 @@ test('it ends only the tag teams current relationships', function () {
     $this->assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestler->id,
-        'left_at' => now()->subWeek()->toDateTimeString(),
+        'left_at' => $formerMembershipEndedAt->toDateTimeString(),
     ]);
     $this->assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
         'wrestler_id' => $wrestler->id,
-        'joined_at' => now()->subDay()->toDateTimeString(),
+        'joined_at' => $currentMembershipStartedAt->toDateTimeString(),
         'left_at' => $effectiveDate->toDateTimeString(),
     ]);
     $this->assertDatabaseHas('tag_teams_managers', [

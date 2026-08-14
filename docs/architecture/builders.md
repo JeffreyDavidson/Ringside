@@ -16,6 +16,8 @@ app/Builders/
 
 Builders are grouped by technical layer first and wrestling entity second. A concrete builder belongs to the model it queries. A concern is appropriate only when multiple builders share the same query semantics.
 
+`ManagerAssignmentBuilder` owns the shared `current()` and `ended()` persistence queries for wrestler and tag-team manager assignment records.
+
 ## Shared Concerns
 
 - `HasEmploymentScopes` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` queries for individual roster members and tag teams.

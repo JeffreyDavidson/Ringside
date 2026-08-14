@@ -26,7 +26,7 @@ class EndCurrentRelationshipsAction
 
         WrestlerManager::query()
             ->where('wrestler_id', $wrestler->id)
-            ->whereNull('fired_at')
+            ->current()
             ->update(['fired_at' => $effectiveDate]);
 
         $wrestler->currentChampionships()->update([
