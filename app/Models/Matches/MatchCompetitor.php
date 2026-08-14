@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Builders\Matches\MatchCompetitorBuilder;
 use App\Collections\MatchCompetitorsCollection;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchCompetitorFactory;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,14 +34,17 @@ use Illuminate\Support\Carbon;
  * @method static MatchCompetitorsCollection<int, static> all($columns = ['*'])
  * @method static MatchCompetitorsCollection<int, static> get($columns = ['*'])
  * @method static \Database\Factories\Matches\MatchCompetitorFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|MatchCompetitor query()
+ * @method static MatchCompetitorBuilder<static>|MatchCompetitor forCompetitorIds(string $competitorType, \Illuminate\Support\Collection<int, int> $competitorIds)
+ * @method static MatchCompetitorBuilder<static>|MatchCompetitor forEventIds(\Illuminate\Support\Collection<int, int> $eventIds)
+ * @method static MatchCompetitorBuilder<static>|MatchCompetitor newModelQuery()
+ * @method static MatchCompetitorBuilder<static>|MatchCompetitor newQuery()
+ * @method static MatchCompetitorBuilder<static>|MatchCompetitor query()
  *
  * @mixin \Eloquent
  */
 #[CollectedBy(MatchCompetitorsCollection::class)]
 #[Fillable('match_id', 'competitor_id', 'competitor_type', 'side_number')]
+#[UseEloquentBuilder(MatchCompetitorBuilder::class)]
 #[UseFactory(MatchCompetitorFactory::class)]
 class MatchCompetitor extends MorphPivot
 {
