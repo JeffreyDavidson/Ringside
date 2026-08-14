@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Builders\Concerns\HasRetirementScopes;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Models\Wrestlers\Wrestler;
@@ -49,10 +48,6 @@ describe('IndividualBuilder Unit Tests', function () {
             expect($builder)->toBeInstanceOf(IndividualBuilder::class);
         });
 
-        test('uses required traits', function () {
-            // Act & Assert
-            expect(class_uses(IndividualBuilder::class))->toContain(HasRetirementScopes::class);
-        });
     });
 
     describe('employment status scopes', function () {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
-use App\Builders\Concerns\HasEmploymentScopes;
-use App\Builders\Concerns\HasRetirementScopes;
+use App\Builders\Concerns\FiltersByEmploymentStatus;
+use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -16,6 +16,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class TagTeamBuilder extends Builder
 {
-    use HasEmploymentScopes;
-    use HasRetirementScopes;
+    use FiltersByEmploymentStatus;
+    use FiltersByRetirementStatus;
 }

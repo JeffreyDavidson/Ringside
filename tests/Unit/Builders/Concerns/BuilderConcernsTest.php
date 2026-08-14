@@ -2,145 +2,83 @@
 
 declare(strict_types=1);
 
-use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Roster\IndividualBuilder;
-use App\Builders\Roster\TagTeamBuilder;
-use App\Builders\Roster\WrestlerBuilder;
+use App\Models\Managers\Manager;
+use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Builder;
 
-/**
- * Unit tests for Builder Concerns/Traits.
- *
- * UNIT TEST SCOPE:
- * - Trait integration with concrete builders
- * - Query building logic and SQL generation
- * - Method chaining and fluent interface patterns
- *
- * These tests verify that Builder concerns/traits provide consistent
- * shared public query functionality across different builder implementations.
- *
- * @see HasRetirementScopes
- */
-describe('Builder Concerns Unit Tests', function () {
-    describe('HasRetirementScopes trait functionality', function () {
-        test('trait is used by builders or base classes', function () {
-            // Act & Assert - Verify trait usage (directly or through inheritance)
-            expect(class_uses(IndividualBuilder::class))->toContain(HasRetirementScopes::class);
-            expect(class_uses(TagTeamBuilder::class))->toContain(HasRetirementScopes::class);
-        });
+test('wrestlers may be filtered by employment status', function (): void {
+    $employed = Wrestler::factory()->employed()->create();
+    $unemployed = Wrestler::factory()->unemployed()->create();
+    $released = Wrestler::factory()->released()->create();
+    $futureEmployed = Wrestler::factory()->withFutureEmployment()->create();
 
-        test('retired method generates correct query conditions', function () {
-            // Arrange
-            $builder = Wrestler::query();
+    expect(Wrestler::query()->employed()->pluck('id')->all())->toBe([$employed->id])
+        ->and(Wrestler::query()->unemployed()->pluck('id')->all())->toBe([$unemployed->id])
+        ->and(Wrestler::query()->released()->pluck('id')->all())->toBe([$released->id])
+        ->and(Wrestler::query()->futureEmployed()->pluck('id')->all())->toBe([$futureEmployed->id]);
+});
 
-            // Act
-            $retiredBuilder = $builder->retired();
+test('managers may be filtered by employment status', function (): void {
+    $employed = Manager::factory()->employed()->create();
+    $unemployed = Manager::factory()->unemployed()->create();
+    $released = Manager::factory()->released()->create();
+    $futureEmployed = Manager::factory()->withFutureEmployment()->create();
 
-            // Assert
-            $sql = $retiredBuilder->toSql();
-            expect($sql)->toContain('where exists');
-            expect($sql)->toContain('retirements');
-            expect($sql)->toContain('ended_at" is null');
-        });
+    expect(Manager::query()->employed()->pluck('id')->all())->toBe([$employed->id])
+        ->and(Manager::query()->unemployed()->pluck('id')->all())->toBe([$unemployed->id])
+        ->and(Manager::query()->released()->pluck('id')->all())->toBe([$released->id])
+        ->and(Manager::query()->futureEmployed()->pluck('id')->all())->toBe([$futureEmployed->id]);
+});
 
-        test('retired method returns correct builder instance', function () {
-            // Arrange
-            $wrestlerBuilder = Wrestler::query();
-            $tagTeamBuilder = TagTeam::query();
+test('referees may be filtered by employment status', function (): void {
+    $employed = Referee::factory()->employed()->create();
+    $unemployed = Referee::factory()->unemployed()->create();
+    $released = Referee::factory()->released()->create();
+    $futureEmployed = Referee::factory()->withFutureEmployment()->create();
 
-            // Act
-            $retiredWrestlerBuilder = $wrestlerBuilder->retired();
-            $retiredTagTeamBuilder = $tagTeamBuilder->retired();
+    expect(Referee::query()->employed()->pluck('id')->all())->toBe([$employed->id])
+        ->and(Referee::query()->unemployed()->pluck('id')->all())->toBe([$unemployed->id])
+        ->and(Referee::query()->released()->pluck('id')->all())->toBe([$released->id])
+        ->and(Referee::query()->futureEmployed()->pluck('id')->all())->toBe([$futureEmployed->id]);
+});
 
-            // Assert
-            expect($retiredWrestlerBuilder)->toBeInstanceOf(WrestlerBuilder::class);
-            expect($retiredTagTeamBuilder)->toBeInstanceOf(TagTeamBuilder::class);
-        });
+test('tag teams may be filtered by employment status', function (): void {
+    $employed = TagTeam::factory()->employed()->create();
+    $unemployed = TagTeam::factory()->unemployed()->create();
+    $released = TagTeam::factory()->released()->create();
+    $futureEmployed = TagTeam::factory()->withFutureEmployment()->create();
 
-        test('retired method works polymorphically across entity types', function () {
-            // Arrange
-            $builders = [
-                ['builder' => Wrestler::query(), 'table' => 'retirements'],
-                ['builder' => TagTeam::query(), 'table' => 'retirements'],
-            ];
+    expect(TagTeam::query()->employed()->pluck('id')->all())->toBe([$employed->id])
+        ->and(TagTeam::query()->unemployed()->pluck('id')->all())->toBe([$unemployed->id])
+        ->and(TagTeam::query()->released()->pluck('id')->all())->toBe([$released->id])
+        ->and(TagTeam::query()->futureEmployed()->pluck('id')->all())->toBe([$futureEmployed->id]);
+});
 
-            // Act & Assert
-            foreach ($builders as $builderData) {
-                $builder = $builderData['builder'];
-                $expectedTable = $builderData['table'];
+test('wrestlers may be filtered by retirement status', function (): void {
+    $retired = Wrestler::factory()->retired()->create();
+    Wrestler::factory()->unemployed()->create();
 
-                $retiredBuilder = $builder->retired();
-                $sql = $retiredBuilder->toSql();
+    expect(Wrestler::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
+});
 
-                expect($sql)->toContain('where exists');
-                expect($sql)->toContain($expectedTable);
-                expect($sql)->toContain('ended_at" is null');
-            }
-        });
+test('managers may be filtered by retirement status', function (): void {
+    $retired = Manager::factory()->retired()->create();
+    Manager::factory()->unemployed()->create();
 
-        test('trait methods can be chained with other builder methods', function () {
-            // Arrange
-            $builder = Wrestler::query();
+    expect(Manager::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
+});
 
-            // Act
-            $chainedBuilder = $builder
-                ->retired()
-                ->where('name', 'like', '%Test%')
-                ->orderBy('created_at', 'desc');
+test('referees may be filtered by retirement status', function (): void {
+    $retired = Referee::factory()->retired()->create();
+    Referee::factory()->unemployed()->create();
 
-            // Assert
-            expect($chainedBuilder)->toBeInstanceOf(WrestlerBuilder::class);
+    expect(Referee::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
+});
 
-            $sql = $chainedBuilder->toSql();
-            expect($sql)->toContain('where exists');
-            expect($sql)->toContain('retirements');
-            expect($sql)->toContain('"name" like ?');
-            expect($sql)->toContain('order by "created_at" desc');
-        });
-    });
+test('tag teams may be filtered by retirement status', function (): void {
+    $retired = TagTeam::factory()->retired()->create();
+    TagTeam::factory()->unemployed()->create();
 
-    describe('trait integration and consistency', function () {
-        test('traits provide consistent method signatures across builders', function () {
-            // Arrange
-            $builders = [
-                Wrestler::query(),
-                TagTeam::query(),
-            ];
-
-            // Act & Assert
-            foreach ($builders as $builder) {
-                // Test HasRetirementScopes trait methods
-                expect(method_exists($builder, 'retired'))->toBeTrue();
-            }
-        });
-
-        test('trait methods maintain public visibility', function () {
-            // Arrange
-            $builder = Wrestler::query();
-            $reflection = new ReflectionClass($builder);
-
-            $method = $reflection->getMethod('retired');
-
-            expect($method->isPublic())->toBeTrue();
-        });
-
-        test('trait methods generate SQL compatible with all supported databases', function () {
-            // Arrange
-            $builder = Wrestler::query();
-
-            // Act
-            $retiredBuilder = $builder->retired();
-
-            // Assert - Test that generated SQL uses standard patterns
-            $sql = $retiredBuilder->toSql();
-
-            // Should use standard SQL patterns that work across databases
-            expect($sql)->toContain('where exists');
-            expect($sql)->toContain('is null');
-            expect($sql)->not->toContain('LIMIT'); // No database-specific syntax
-            expect($sql)->not->toContain('ISNULL'); // No MySQL-specific functions
-        });
-    });
+    expect(TagTeam::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
 });

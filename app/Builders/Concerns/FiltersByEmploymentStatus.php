@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Concerns;
 
-trait HasEmploymentScopes
+trait FiltersByEmploymentStatus
 {
     public function unemployed(): static
     {
