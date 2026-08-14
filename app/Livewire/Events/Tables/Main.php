@@ -84,8 +84,10 @@ class Main extends BaseTable
             'future' => 'Future',
         ];
 
-        /** @var array<int, Venue> $venues */
-        $venues = Venue::query()->orderBy('name')->pluck('name', 'id')->toArray();
+        $venues = Venue::query()
+            ->alphabetical()
+            ->pluck('name', 'id')
+            ->toArray();
 
         return [
             SelectFilter::make(__('core.status'))

@@ -29,7 +29,7 @@ class Main extends BaseTable
     public function builder(): Builder
     {
         return Venue::query()
-            ->orderBy('name');
+            ->alphabetical();
     }
 
     public function configure(): void

@@ -33,19 +33,14 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $deleted_at
  *
  * @property-read Collection<int, Event> $events
- * @property-read Collection<int, Event> $previousEvents
- * @property-read Collection<int, Event> $futureEvents
  *
  * @method static \Database\Factories\Events\VenueFactory factory($count = null, $state = [])
  * @method static VenueBuilder<static>|Venue newModelQuery()
  * @method static VenueBuilder<static>|Venue newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue onlyTrashed()
  * @method static VenueBuilder<static>|Venue query()
- * @method static VenueBuilder<static>|Venue withEvents()
- * @method static VenueBuilder<static>|Venue withFutureEvents()
- * @method static VenueBuilder<static>|Venue withPastEvents()
+ * @method static VenueBuilder<static>|Venue alphabetical()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue withTrashed()
- * @method static VenueBuilder<static>|Venue withoutEvents()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Venue withoutTrashed()
  *
  * @mixin \Eloquent
@@ -65,18 +60,6 @@ class Venue extends Model implements SoftDeletable
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
-    }
-
-    /** @return HasMany<Event, $this> */
-    public function previousEvents(): HasMany
-    {
-        return $this->events()->where('date', '<', today());
-    }
-
-    /** @return HasMany<Event, $this> */
-    public function futureEvents(): HasMany
-    {
-        return $this->events()->where('date', '>', today());
     }
 
     /** @return array<string, string> */

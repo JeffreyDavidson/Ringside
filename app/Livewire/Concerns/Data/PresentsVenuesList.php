@@ -15,6 +15,10 @@ trait PresentsVenuesList
     #[Computed(cache: true, key: 'venues-list', seconds: 180)]
     public function getVenues(): array
     {
-        return Venue::select('id', 'name')->pluck('name', 'id')->toArray();
+        return Venue::query()
+            ->alphabetical()
+            ->select('id', 'name')
+            ->pluck('name', 'id')
+            ->toArray();
     }
 }
