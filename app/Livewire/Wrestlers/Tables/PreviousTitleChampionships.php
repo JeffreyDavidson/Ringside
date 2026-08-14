@@ -30,23 +30,11 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             throw new LogicException('A wrestler was not provided.');
         }
 
-        // dd(TitleChampionship::query()
-        //     ->whereHasMorph(
-        //         'previousChampion',
-        //         [Wrestler::class],
-        //         function (Builder $query) {
-        //             $query->whereIn('id', [$this->wrestlerId]);
-        //         }
-        //     )->get());
+        $wrestler = Wrestler::query()->findOrFail($this->wrestlerId);
 
         return TitleChampionship::query()
-            ->whereHasMorph(
-                'champion',
-                [Wrestler::class],
-                function (Builder $query): void {
-                    $query->whereIn('id', [$this->wrestlerId]);
-                }
-            )
-            ->whereNotNull('lost_at');
+            ->forChampion($wrestler)
+            ->previous()
+            ->with('title');
     }
 }

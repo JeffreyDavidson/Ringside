@@ -26,6 +26,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `EventMatchBuilder` owns reusable match-history queries for matches on past events and matches involving a specific wrestler or tag team.
 
+`TitleChampionshipBuilder` owns current and previous reign constraints and the polymorphic champion constraint. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.
+
 ## Boundaries
 
 Builders express database queries over relationships and stored lifecycle periods. They may:
