@@ -24,6 +24,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 - `HasRetirementScopes` provides the shared `retired()` query for individual roster members and tag teams whose tables filter retirement directly.
 - `HasNameSearch` provides first-name and last-name matching for models that store those columns.
 
+`EventMatchBuilder` owns reusable match-history queries for matches on past events and matches involving a specific wrestler or tag team.
+
 ## Boundaries
 
 Builders express database queries over relationships and stored lifecycle periods. They may:

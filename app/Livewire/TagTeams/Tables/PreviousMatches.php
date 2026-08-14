@@ -30,14 +30,12 @@ class PreviousMatches extends BasePreviousMatchesTable
             throw new LogicException('A tag team was not provided.');
         }
 
-        $tagTeam = TagTeam::find($this->tagTeamId);
+        $tagTeam = TagTeam::query()->findOrFail($this->tagTeamId);
 
         return EventMatch::query()
             ->forPastEvents()
             ->with(['titles', 'result.winner', 'result.decision'])
-            ->withWhereHas('competitors', function (Builder $query) use ($tagTeam): void {
-                $query->whereMorphedTo('competitor', $tagTeam);
-            })
+            ->forCompetitor($tagTeam)
             ->orderByDesc('date');
     }
 }
