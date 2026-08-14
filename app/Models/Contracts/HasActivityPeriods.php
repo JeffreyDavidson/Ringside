@@ -27,13 +27,6 @@ interface HasActivityPeriods
     public function isCurrentlyActive(): bool;
 
     /**
-     * Check if the model has never been activated.
-     *
-     * @return bool True if the model has no activity periods
-     */
-    public function isUnactivated(): bool;
-
-    /**
      * Check if the model is inactive (not currently active).
      *
      * @return bool True if the model is not currently active

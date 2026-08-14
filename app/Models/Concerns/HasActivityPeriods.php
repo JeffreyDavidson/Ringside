@@ -116,18 +116,8 @@ trait HasActivityPeriods
         return $this->futureActivityPeriod()->exists();
     }
 
-    public function isUnactivated(): bool
-    {
-        return ! $this->hasActivityPeriods();
-    }
-
     public function isInactive(): bool
     {
         return ! $this->isCurrentlyActive();
-    }
-
-    protected function getActivityPeriodTableName(): string
-    {
-        return (new ActivityPeriod())->getTable();
     }
 }
