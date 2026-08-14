@@ -80,7 +80,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
         }
 
         return TagTeamWrestler::query()
-            ->where('wrestler_id', $this->wrestlerId)
+            ->forWrestlerId($this->wrestlerId)
             ->ended()
             ->orderByDesc('joined_at');
     }
@@ -132,14 +132,10 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      */
     private function getPartner(TagTeamWrestler $row): ?Wrestler
     {
-        // Find the other wrestler in this tag team during the same time period
-        $partnerRecord = TagTeamWrestler::where('tag_team_id', $row->tag_team_id)
-            ->where('wrestler_id', '!=', $row->wrestler_id)
-            ->where('joined_at', '<=', $row->left_at ?? now())
-            ->where(function (Builder $query) use ($row) {
-                $query->whereNull('left_at')
-                    ->orWhere('left_at', '>=', $row->joined_at);
-            })
+        $partnerRecord = TagTeamWrestler::query()
+            ->forTagTeamId($row->tag_team_id)
+            ->excludingWrestlerId($row->wrestler_id)
+            ->overlappingPeriod($row->joined_at, $row->left_at ?? now())
             ->with('wrestler')
             ->first();
 

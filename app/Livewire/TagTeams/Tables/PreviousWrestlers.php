@@ -34,7 +34,7 @@ class PreviousWrestlers extends DataTableComponent
 
         return TagTeamWrestler::query()
             ->with('wrestler')
-            ->where('tag_teams_wrestlers.tag_team_id', $this->tagTeamId)
+            ->forTagTeamId($this->tagTeamId)
             ->ended()
             ->orderByDesc('tag_teams_wrestlers.joined_at');
     }

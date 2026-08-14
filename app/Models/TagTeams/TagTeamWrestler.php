@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\TagTeams;
 
-use App\Builders\Roster\MembershipPeriodBuilder;
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamWrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,16 +27,20 @@ use Illuminate\Support\Carbon;
  * @property-read TagTeam|null $tagTeam
  * @property-read Wrestler|null $wrestler
  *
- * @method static MembershipPeriodBuilder<static> current()
- * @method static MembershipPeriodBuilder<static> ended()
- * @method static MembershipPeriodBuilder<static> newModelQuery()
- * @method static MembershipPeriodBuilder<static> newQuery()
- * @method static MembershipPeriodBuilder<static> query()
+ * @method static TagTeamMembershipBuilder<static> current()
+ * @method static TagTeamMembershipBuilder<static> ended()
+ * @method static TagTeamMembershipBuilder<static> excludingWrestlerId(int $wrestlerId)
+ * @method static TagTeamMembershipBuilder<static> forTagTeamId(int $tagTeamId)
+ * @method static TagTeamMembershipBuilder<static> forWrestlerId(int $wrestlerId)
+ * @method static TagTeamMembershipBuilder<static> newModelQuery()
+ * @method static TagTeamMembershipBuilder<static> newQuery()
+ * @method static TagTeamMembershipBuilder<static> overlappingPeriod(Carbon $periodStart, Carbon $periodEnd)
+ * @method static TagTeamMembershipBuilder<static> query()
  *
  * @mixin \Eloquent
  */
 #[Fillable('tag_team_id', 'wrestler_id', 'joined_at', 'left_at')]
-#[UseEloquentBuilder(MembershipPeriodBuilder::class)]
+#[UseEloquentBuilder(TagTeamMembershipBuilder::class)]
 #[UseFactory(TagTeamWrestlerFactory::class)]
 class TagTeamWrestler extends Pivot
 {

@@ -20,6 +20,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `MembershipPeriodBuilder` owns the shared `current()` and `ended()` persistence queries for tag-team and stable membership records.
 
+`TagTeamMembershipBuilder` extends the shared membership-period queries with tag-team and wrestler filters and historical period-overlap constraints specific to `TagTeamWrestler` records.
+
 ## Shared Concerns
 
 - `FiltersByEmploymentStatus` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` filters for individual roster members and tag teams.
