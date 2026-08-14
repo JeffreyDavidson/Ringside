@@ -70,8 +70,8 @@ final class MatchAssignmentConflictService
         }
 
         $conflictingReferee = EventMatch::query()
-            ->whereIn('event_id', $conflictingEventIds)
-            ->whereHas('referees', fn (Builder $query) => $query->whereKey($referees->pluck('id')))
+            ->forEventIds($conflictingEventIds)
+            ->withAnyRefereeIds($referees->pluck('id'))
             ->with('referees:id,first_name,last_name,full_name')
             ->get()
             ->flatMap->referees
@@ -91,8 +91,8 @@ final class MatchAssignmentConflictService
     {
         $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
         $conflictingTitleId = EventMatch::query()
-            ->whereIn('event_id', $conflictingEventIds)
-            ->whereHas('titles', fn (Builder $query) => $query->whereKey($titles->pluck('id')))
+            ->forEventIds($conflictingEventIds)
+            ->withAnyTitleIds($titles->pluck('id'))
             ->with('titles:id,name')
             ->get()
             ->flatMap->titles

@@ -6,7 +6,22 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
+
+it('retrieves matches for selected events', function () {
+    $selectedEvent = Event::factory()->create();
+    $otherEvent = Event::factory()->create();
+    $selectedMatch = EventMatch::factory()->forEvent($selectedEvent)->create();
+    EventMatch::factory()->forEvent($otherEvent)->create();
+
+    $matches = EventMatch::query()
+        ->forEventIds(collect([$selectedEvent->id]))
+        ->get();
+
+    expect($matches)->toHaveCount(1)
+        ->and($matches->firstOrFail()->is($selectedMatch))->toBeTrue();
+});
 
 it('retrieves matches for past events and eager loads their events', function () {
     $pastEvent = Event::factory()->past()->create();
@@ -65,6 +80,36 @@ it('retrieves matches officiated by a referee and eager loads every assigned ref
         ->and($matches->firstOrFail()->is($officiatedMatch))->toBeTrue()
         ->and($matches->firstOrFail()->relationLoaded('referees'))->toBeTrue()
         ->and($matches->firstOrFail()->referees)->toHaveCount(2);
+});
+
+it('retrieves matches assigned to any selected referee', function () {
+    $selectedReferee = Referee::factory()->create();
+    $otherReferee = Referee::factory()->create();
+    $selectedMatch = EventMatch::factory()->create();
+    $selectedMatch->referees()->attach($selectedReferee);
+    EventMatch::factory()->create()->referees()->attach($otherReferee);
+
+    $matches = EventMatch::query()
+        ->withAnyRefereeIds(collect([$selectedReferee->id]))
+        ->get();
+
+    expect($matches)->toHaveCount(1)
+        ->and($matches->firstOrFail()->is($selectedMatch))->toBeTrue();
+});
+
+it('retrieves matches assigned to any selected title', function () {
+    $selectedTitle = Title::factory()->create();
+    $otherTitle = Title::factory()->create();
+    $selectedMatch = EventMatch::factory()->create();
+    $selectedMatch->titles()->attach($selectedTitle);
+    EventMatch::factory()->create()->titles()->attach($otherTitle);
+
+    $matches = EventMatch::query()
+        ->withAnyTitleIds(collect([$selectedTitle->id]))
+        ->get();
+
+    expect($matches)->toHaveCount(1)
+        ->and($matches->firstOrFail()->is($selectedMatch))->toBeTrue();
 });
 
 it('orders matches by their event date with the latest event first', function () {

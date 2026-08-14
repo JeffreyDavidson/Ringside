@@ -26,7 +26,7 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 - `FiltersByRetirementStatus` provides the shared `retired()` filter for individual roster members and tag teams.
 - `HasNameSearch` provides first-name and last-name matching for models that store those columns.
 
-`EventMatchBuilder` owns reusable match-history queries for matches on past events, matches involving a specific wrestler or tag team, matches officiated by a specific referee, and ordering by the related event date.
+`EventMatchBuilder` owns reusable match-history and persisted assignment queries for event identifiers, matches on past events, competitors, referees, titles, and ordering by the related event date. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
 
 `TitleChampionshipBuilder` owns current and previous reign constraints and the polymorphic champion constraint. Championship reporting and derived reign calculations remain in `TitleChampionshipQuery`.
 
