@@ -66,6 +66,8 @@ use Tests\Unit\Models\Stables\StableTest;
  * @method static \Database\Factories\Stables\StableFactory factory($count = null, $state = [])
  * @method static StableBuilder<static>|Stable newModelQuery()
  * @method static StableBuilder<static>|Stable newQuery()
+ * @method static StableBuilder<static>|Stable previousForTagTeamId(int $tagTeamId)
+ * @method static StableBuilder<static>|Stable previousForWrestlerId(int $wrestlerId)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable onlyTrashed()
  * @method static StableBuilder<static>|Stable query()
  * @method static StableBuilder<static>|Stable retired()

@@ -22,6 +22,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `TagTeamMembershipBuilder` extends the shared membership-period queries with tag-team and wrestler filters and historical period-overlap constraints specific to `TagTeamWrestler` records.
 
+`StableBuilder` owns stable lifecycle-state filters and historical stable-membership projections for wrestlers and tag teams. The history methods select the persisted membership dates required by the table layer.
+
 ## Shared Concerns
 
 - `FiltersByEmploymentStatus` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` filters for individual roster members and tag teams.
