@@ -13,11 +13,11 @@ app/Builders/
 ├── Concerns/           # Shared query behavior
 ├── Events/             # Event and venue builders
 ├── Roster/             # Roster and stable builders
-├── Titles/             # Title and championship builders
+├── Titles/             # Title builders
 └── Users/              # User builders
 ```
 
-`IndividualBuilder` contains persisted-state queries shared by wrestlers, managers, and referees. `WrestlerBuilder`, `ManagerBuilder`, and `RefereeBuilder` provide the model-specific builder types. Tag teams, stables, events, venues, titles, title championships, and users each have their own typed builder.
+`IndividualBuilder` contains persisted-state queries shared by wrestlers, managers, and referees. `WrestlerBuilder`, `ManagerBuilder`, and `RefereeBuilder` provide the model-specific builder types. Tag teams, stables, events, venues, titles, and users each have their own typed builder. Championship reporting is coordinated by `TitleChampionshipQuery`; `TitleChampionship` uses Laravel's standard Eloquent builder.
 
 ## Persisted-State Queries
 
