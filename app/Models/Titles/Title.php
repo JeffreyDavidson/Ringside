@@ -64,7 +64,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
  *
  * @method static TitleBuilder<static>|Title active()
- * @method static TitleBuilder<static>|Title available()
  * @method static \Database\Factories\Titles\TitleFactory factory($count = null, $state = [])
  * @method static TitleBuilder<static>|Title inactive()
  * @method static TitleBuilder<static>|Title newModelQuery()
@@ -72,9 +71,7 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Title onlyTrashed()
  * @method static TitleBuilder<static>|Title query()
  * @method static TitleBuilder<static>|Title retired()
- * @method static TitleBuilder<static>|Title unavailable()
  * @method static TitleBuilder<static>|Title undebuted()
- * @method static TitleBuilder<static>|Title vacant()
  * @method static TitleBuilder<static>|Title withPendingDebut()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Title withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Title withoutTrashed()
