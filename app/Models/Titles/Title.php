@@ -63,17 +63,10 @@ use Illuminate\Support\Carbon;
  * @property-read ActivityPeriod|null $previousActivityPeriod
  * @property-read Collection<int, ActivityPeriod> $previousActivityPeriods
  *
- * @method static TitleBuilder<static>|Title activatedAfter(\Carbon\Carbon $date)
- * @method static TitleBuilder<static>|Title activatedBefore(\Carbon\Carbon $date)
  * @method static TitleBuilder<static>|Title active()
- * @method static TitleBuilder<static>|Title activeDuring(\Carbon\Carbon $start, \Carbon\Carbon $end)
  * @method static TitleBuilder<static>|Title available()
- * @method static TitleBuilder<static>|Title currentlyActive()
- * @method static TitleBuilder<static>|Title currentlyInactive()
- * @method static TitleBuilder<static>|Title deactivatedAfter(\Carbon\Carbon $date)
  * @method static \Database\Factories\Titles\TitleFactory factory($count = null, $state = [])
  * @method static TitleBuilder<static>|Title inactive()
- * @method static TitleBuilder<static>|Title neverActivated()
  * @method static TitleBuilder<static>|Title newModelQuery()
  * @method static TitleBuilder<static>|Title newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Title onlyTrashed()
@@ -82,7 +75,6 @@ use Illuminate\Support\Carbon;
  * @method static TitleBuilder<static>|Title unavailable()
  * @method static TitleBuilder<static>|Title undebuted()
  * @method static TitleBuilder<static>|Title vacant()
- * @method static TitleBuilder<static>|Title withMultiplePeriods(int $minimumPeriods = 2)
  * @method static TitleBuilder<static>|Title withPendingDebut()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Title withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Title withoutTrashed()

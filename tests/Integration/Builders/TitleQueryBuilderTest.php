@@ -36,72 +36,21 @@ describe('TitleBuilder Query Scopes', function () {
         $this->newTitle = Title::factory()->active()->create(['name' => 'New Title']);
     });
 
-    describe('shared activity period scopes', function () {
-        test('active titles can be retrieved', function () {
-            $activeTitle = Title::factory()->active()->create();
-            $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
-            $inactiveTitle = Title::factory()->inactive()->create();
-            $retiredTitle = Title::factory()->retired()->create();
-
-            $activeTitles = Title::query()->currentlyActive()->get();
-
-            expect($activeTitles->pluck('id'))->toContain($activeTitle->id);
-        });
-
+    describe('activity state scopes', function () {
         test('future activated titles can be retrieved', function () {
-            $activeTitle = Title::factory()->active()->create();
             $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
-            $inactiveTitle = Title::factory()->inactive()->create();
-            $retiredTitle = Title::factory()->retired()->create();
 
             $futureActivatedTitles = Title::query()->withPendingDebut()->get();
 
             expect($futureActivatedTitles->pluck('id'))->toContain($futureActivatedTitle->id);
         });
 
-        test('inactive titles can be retrieved', function () {
-            $activeTitle = Title::factory()->active()->create();
-            $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
-            $inactiveTitle = Title::factory()->inactive()->create();
-            $retiredTitle = Title::factory()->retired()->create();
-
-            $inactiveTitles = Title::query()->currentlyInactive()->get();
-
-            expect($inactiveTitles->pluck('id'))->toContain($inactiveTitle->id);
-        });
-
         test('retired titles can be retrieved', function () {
-            $activeTitle = Title::factory()->active()->create();
-            $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
-            $inactiveTitle = Title::factory()->inactive()->create();
             $retiredTitle = Title::factory()->retired()->create();
 
             $retiredTitles = Title::query()->retired()->get();
 
             expect($retiredTitles->pluck('id'))->toContain($retiredTitle->id);
-        });
-
-        test('active during includes every activity period overlapping the range', function () {
-            $rangeStart = now()->subMonth();
-            $rangeEnd = now()->subWeek();
-            $startedBeforeRange = Title::factory()
-                ->withActivationPeriod($rangeStart->copy()->subWeek(), $rangeStart->copy()->addDay())
-                ->create();
-            $endedBeforeRange = Title::factory()
-                ->withActivationPeriod($rangeStart->copy()->subMonth(), $rangeStart->copy()->subDay())
-                ->create();
-            $startedAfterRange = Title::factory()
-                ->withActivationPeriod($rangeEnd->copy()->addDay(), $rangeEnd->copy()->addWeek())
-                ->create();
-
-            $activeTitles = Title::query()
-                ->activeDuring($rangeStart, $rangeEnd)
-                ->get();
-
-            expect($activeTitles->pluck('id'))
-                ->toContain($startedBeforeRange->id)
-                ->not->toContain($endedBeforeRange->id)
-                ->not->toContain($startedAfterRange->id);
         });
     });
 

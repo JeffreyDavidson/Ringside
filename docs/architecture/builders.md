@@ -34,8 +34,7 @@ $injuredWrestlers = Wrestler::query()
     ->get();
 
 $activeStables = Stable::query()
-    ->currentlyActive()
-    ->withMinimumMembers()
+    ->established()
     ->get();
 
 $structurallyCompleteTagTeams = TagTeam::query()
@@ -44,7 +43,7 @@ $structurallyCompleteTagTeams = TagTeam::query()
     ->get();
 ```
 
-Shared activity-period queries live in `App\Builders\Concerns\HasActivityPeriodScopes` and are composed by `StableBuilder` and `TitleBuilder`.
+Stable and title builders use domain-specific activity queries. For example, stables expose `established()` and `disbanded()`, while titles expose `active()` and `inactive()`.
 
 ## Booking Boundary
 
