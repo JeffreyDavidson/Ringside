@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Contracts\HasAvailability;
-use App\Builders\Contracts\HasEmployment;
-use App\Builders\Contracts\HasRetirement;
-use App\Builders\Contracts\HasSuspension;
 use App\Builders\Roster\SingleRosterMemberBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Models\Wrestlers\Wrestler;
@@ -52,17 +48,6 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
             // Assert
             expect($builder)->toBeInstanceOf(WrestlerBuilder::class);
             expect($builder)->toBeInstanceOf(SingleRosterMemberBuilder::class);
-        });
-
-        test('implements all required contracts', function () {
-            // Arrange
-            $builder = Wrestler::query();
-
-            // Assert
-            expect($builder)->toBeInstanceOf(HasAvailability::class);
-            expect($builder)->toBeInstanceOf(HasEmployment::class);
-            expect($builder)->toBeInstanceOf(HasRetirement::class);
-            expect($builder)->toBeInstanceOf(HasSuspension::class);
         });
 
         test('uses required traits', function () {

@@ -7,10 +7,6 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasNameSearch;
 use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Contracts\HasAvailability;
-use App\Builders\Contracts\HasEmployment;
-use App\Builders\Contracts\HasRetirement;
-use App\Builders\Contracts\HasSuspension;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -54,7 +50,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @extends Builder<TModel>
  */
-abstract class SingleRosterMemberBuilder extends Builder implements HasAvailability, HasEmployment, HasRetirement, HasSuspension
+abstract class SingleRosterMemberBuilder extends Builder
 {
     use HasAvailabilityScopes;
     use HasNameSearch;

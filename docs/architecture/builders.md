@@ -10,7 +10,6 @@ Ringside uses a comprehensive builder pattern for constructing complex Eloquent 
 ```
 app/Builders/
 ├── Concerns/           # Shared builder traits and contracts
-├── Contracts/          # Builder interfaces
 ├── Events/            # Event and venue builders
 ├── Roster/            # Wrestling roster member builders  
 ├── Titles/            # Title and championship builders
@@ -92,17 +91,6 @@ Provides retirement status filtering for entities that can be retired.
 - `retired()` - Currently retired
 - `notRetired()` - Not retired (active)
 - `retiredBetween($start, $end)` - Retired within date range
-
-## Builder Contracts
-
-### HasAvailability
-Defines availability-related query methods for bookable entities.
-
-### HasEmployment
-Defines employment status query methods for employable entities.
-
-### HasRetirement
-Defines retirement status query methods for retirable entities.
 
 ## Usage Examples
 
