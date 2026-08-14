@@ -151,8 +151,20 @@ describe('EventsTable Component Integration', function () {
                 ->assertSee('Unscheduled Event')
                 ->assertSee('Past Event');
 
-            // Test filtering (exact filter implementation depends on component)
-            $component->assertOk();
+            $component->set('filterValues.status', EventStatus::Scheduled->value)
+                ->assertSee('Scheduled Event')
+                ->assertDontSee('Unscheduled Event')
+                ->assertDontSee('Past Event');
+
+            $component->set('filterValues.status', EventStatus::Past->value)
+                ->assertDontSee('Scheduled Event')
+                ->assertDontSee('Unscheduled Event')
+                ->assertSee('Past Event');
+
+            $component->set('filterValues.status', EventStatus::Unscheduled->value)
+                ->assertDontSee('Scheduled Event')
+                ->assertSee('Unscheduled Event')
+                ->assertDontSee('Past Event');
         });
 
         test('venue filter functionality', function () {

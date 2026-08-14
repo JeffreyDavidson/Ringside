@@ -32,7 +32,10 @@ describe('EventQueryBuilder Unit Tests', function () {
             $scheduledEvents = Event::scheduled()->get();
 
             // Assert
-            expect($scheduledEvents->pluck('id'))->toContain($this->scheduledEvent->id);
+            expect($scheduledEvents->pluck('id'))
+                ->toContain($this->scheduledEvent->id)
+                ->not->toContain($this->unscheduledEvent->id)
+                ->not->toContain($this->pastEvent->id);
         });
 
         test('unscheduled events can be retrieved', function () {
@@ -40,7 +43,10 @@ describe('EventQueryBuilder Unit Tests', function () {
             $unscheduledEvents = Event::unscheduled()->get();
 
             // Assert
-            expect($unscheduledEvents->pluck('id'))->toContain($this->unscheduledEvent->id);
+            expect($unscheduledEvents->pluck('id'))
+                ->toContain($this->unscheduledEvent->id)
+                ->not->toContain($this->scheduledEvent->id)
+                ->not->toContain($this->pastEvent->id);
         });
 
         test('past events can be retrieved', function () {
@@ -48,7 +54,10 @@ describe('EventQueryBuilder Unit Tests', function () {
             $pastEvents = Event::past()->get();
 
             // Assert
-            expect($pastEvents->pluck('id'))->toContain($this->pastEvent->id);
+            expect($pastEvents->pluck('id'))
+                ->toContain($this->pastEvent->id)
+                ->not->toContain($this->scheduledEvent->id)
+                ->not->toContain($this->unscheduledEvent->id);
         });
     });
 });
