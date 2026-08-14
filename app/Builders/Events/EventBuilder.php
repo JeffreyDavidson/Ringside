@@ -16,10 +16,8 @@ class EventBuilder extends Builder
 {
     public function latestDatedFirst(): static
     {
-        $dateColumn = $this->getModel()->qualifyColumn('date');
-
-        $this->orderByRaw("{$dateColumn} IS NULL")
-            ->orderByDesc($dateColumn);
+        $this->orderByRaw('CASE WHEN date IS NULL THEN 1 ELSE 0 END')
+            ->orderByDesc('date');
 
         return $this;
     }
