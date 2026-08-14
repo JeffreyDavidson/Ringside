@@ -9,7 +9,6 @@ use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Support\Carbon;
 
 /**
  * Adds employment-related behavior to a model.
@@ -201,29 +200,6 @@ trait IsEmployable
     }
 
     /**
-     * Determine if the model has any employments at all.
-     *
-     * Checks if there are any employment records associated with this model,
-     * regardless of their status (active or completed). This is useful for
-     * determining if a model has an employment history.
-     *
-     * @return bool True if the model has any employments, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     *
-     * if ($wrestler->hasEmployments()) {
-     *     echo "This wrestler has an employment history";
-     * }
-     * ```
-     */
-    public function hasEmployments(): bool
-    {
-        return $this->employments()->exists();
-    }
-
-    /**
      * Determine if the model is currently employed.
      *
      * Checks if there is an active employment (one with a null 'ended_at' field).
@@ -244,31 +220,6 @@ trait IsEmployable
     public function isEmployed(): bool
     {
         return $this->currentEmployment()->exists();
-    }
-
-    /**
-     * Check if the model is currently employed (alias for consistency).
-     *
-     * This method provides a consistent naming convention with other status methods
-     * like isInjured(), isSuspended(), isRetired().
-     *
-     * @return bool True if currently employed, false otherwise
-     */
-    public function isCurrentlyEmployed(): bool
-    {
-        return $this->isEmployed();
-    }
-
-    /**
-     * Check if the model is currently unemployed.
-     *
-     * This method provides the opposite of isEmployed() for clearer test logic.
-     *
-     * @return bool True if currently unemployed, false otherwise
-     */
-    public function isUnemployed(): bool
-    {
-        return ! $this->isEmployed();
     }
 
     /**
@@ -334,52 +285,6 @@ trait IsEmployable
     public function isReleased(): bool
     {
         return ! $this->isEmployed() && ! $this->isRetired() && $this->previousEmployments()->exists();
-    }
-
-    /**
-     * Check if the current employment started on a specific date.
-     *
-     * @param  Carbon  $employmentDate  The date to check against
-     * @return bool True if employed on the specified date, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     * $targetDate = Carbon::parse('2024-01-15');
-     *
-     * if ($wrestler->employmentStartedOn($targetDate)) {
-     *     echo "Wrestler was employed exactly on January 15, 2024";
-     * }
-     * ```
-     */
-    public function employmentStartedOn(Carbon $employmentDate): bool
-    {
-        $currentEmployment = $this->currentEmployment;
-
-        return $currentEmployment ? $currentEmployment->started_at->eq($employmentDate) : false;
-    }
-
-    /**
-     * Check if the current employment started on or before a specific date.
-     *
-     * @param  Carbon  $employmentDate  The date to check against
-     * @return bool True if employed before or on the specified date, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     * $targetDate = Carbon::parse('2024-01-15');
-     *
-     * if ($wrestler->employmentStartedBefore($targetDate)) {
-     *     echo "Wrestler was employed before January 15, 2024";
-     * }
-     * ```
-     */
-    public function employmentStartedBefore(Carbon $employmentDate): bool
-    {
-        $currentEmployment = $this->currentEmployment;
-
-        return $currentEmployment ? $currentEmployment->started_at->lte($employmentDate) : false;
     }
 
     /**

@@ -136,7 +136,7 @@ class CreateEditForm extends BaseForm
         }
 
         // Load employment start date from relationship (with type safety)
-        if ($this->formModel->hasEmployments()) {
+        if ($this->formModel->hasEmploymentHistory()) {
             $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
         }
 

@@ -170,15 +170,6 @@ describe('IsEmployable Trait Unit Tests', function () {
             expect($model->isEmployed())->toBeFalse();
         });
 
-        test('can check if model has employments', function () {
-            $modelWith = new EmploymentStateModel();
-            $modelWith->employmentExists = true;
-            $modelWithout = new EmploymentStateModel();
-
-            expect($modelWith->hasEmployments())->toBeTrue();
-            expect($modelWithout->hasEmployments())->toBeFalse();
-        });
-
         test('can check if model has future employment', function () {
             $modelWith = new EmploymentStateModel();
             $modelWith->futureEmploymentExists = true;
