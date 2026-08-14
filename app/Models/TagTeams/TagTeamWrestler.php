@@ -6,6 +6,7 @@ namespace App\Models\TagTeams;
 
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamWrestlerFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,24 +31,17 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[Fillable('tag_team_id', 'wrestler_id', 'joined_at', 'left_at')]
 #[UseFactory(TagTeamWrestlerFactory::class)]
 class TagTeamWrestler extends Pivot
 {
     /** @use HasFactory<TagTeamWrestlerFactory> */
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
+    /** @var string */
     protected $table = 'tag_teams_wrestlers';
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [
@@ -56,21 +50,13 @@ class TagTeamWrestler extends Pivot
         ];
     }
 
-    /**
-     * Get the tag team associated with this tag team partner.
-     *
-     * @return BelongsTo<TagTeam, $this>
-     */
+    /** @return BelongsTo<TagTeam, $this> */
     public function tagTeam(): BelongsTo
     {
         return $this->belongsTo(TagTeam::class);
     }
 
-    /**
-     * Get the wrestler associated with this tag team relationship.
-     *
-     * @return BelongsTo<Wrestler, $this>
-     */
+    /** @return BelongsTo<Wrestler, $this> */
     public function wrestler(): BelongsTo
     {
         return $this->belongsTo(Wrestler::class, 'wrestler_id');
