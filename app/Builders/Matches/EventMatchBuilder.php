@@ -11,6 +11,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 
 /**
  * @template TModel of EventMatch
@@ -19,6 +20,16 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class EventMatchBuilder extends Builder
 {
+    /**
+     * @param  Collection<int, int>  $eventIds
+     */
+    public function forEventIds(Collection $eventIds): static
+    {
+        $this->whereIn('event_id', $eventIds);
+
+        return $this;
+    }
+
     public function forPastEvents(): static
     {
         $this->withWhereHas('event', function (Builder|Relation $query): void {
@@ -42,6 +53,30 @@ class EventMatchBuilder extends Builder
         $this->whereHas('referees', function (Builder $query) use ($referee): void {
             $query->whereKey($referee->getKey());
         })->with('referees');
+
+        return $this;
+    }
+
+    /**
+     * @param  Collection<int, int>  $refereeIds
+     */
+    public function withAnyRefereeIds(Collection $refereeIds): static
+    {
+        $this->whereHas('referees', function (Builder $query) use ($refereeIds): void {
+            $query->whereKey($refereeIds);
+        });
+
+        return $this;
+    }
+
+    /**
+     * @param  Collection<int, int>  $titleIds
+     */
+    public function withAnyTitleIds(Collection $titleIds): static
+    {
+        $this->whereHas('titles', function (Builder $query) use ($titleIds): void {
+            $query->whereKey($titleIds);
+        });
 
         return $this;
     }
