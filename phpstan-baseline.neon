@@ -229,19 +229,13 @@ parameters:
 			path: app/Livewire/Stables/Tables/PreviousManagers.php
 
 		-
-			message: '#^Parameter \#1 \$relations of method Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeam\>\:\:with\(\) expects array\<array\|\(Closure\(Illuminate\\Database\\Eloquent\\Relations\\Relation\<\*, \*, \*\>\)\: mixed\)\|string\>\|string, array\{stables\: Closure\(Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany\)\: void\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Livewire/Stables/Tables/PreviousTagTeams.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeam\>\) of method App\\Livewire\\Stables\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\StableTagTeam\>\) of method App\\Livewire\\Stables\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: app/Livewire/Stables/Tables/PreviousTagTeams.php
 
 		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Wrestlers\\Wrestler\>\) of method App\\Livewire\\Stables\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
+			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\StableWrestler\>\) of method App\\Livewire\\Stables\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
 			identifier: method.childReturnType
 			count: 1
 			path: app/Livewire/Stables/Tables/PreviousWrestlers.php

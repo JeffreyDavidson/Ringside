@@ -18,9 +18,11 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `ManagerAssignmentBuilder` owns the shared manager filter, lifecycle-state constraints, and most-recent-hire ordering for wrestler and tag-team manager assignment records.
 
-`MembershipPeriodBuilder` owns the shared `current()` and `ended()` persistence queries for tag-team and stable membership records.
+`MembershipPeriodBuilder` owns the shared `current()`, `ended()`, and most-recent-join ordering queries for tag-team and stable membership records.
 
-`TagTeamMembershipBuilder` extends the shared membership-period queries with tag-team and wrestler filters, historical period-overlap constraints, and most-recent-join ordering specific to `TagTeamWrestler` records.
+`TagTeamMembershipBuilder` extends the shared membership-period queries with tag-team and wrestler filters and historical period-overlap constraints specific to `TagTeamWrestler` records.
+
+`StableMembershipBuilder` extends the shared membership-period queries with stable filtering for both `StableWrestler` and `StableTagTeam` records. Stable membership-history tables query these typed records directly so membership dates remain first-class persisted data rather than manually extracted pivot attributes.
 
 `StableBuilder` owns stable lifecycle-state filters and historical stable-membership projections for wrestlers and tag teams. The history methods select the persisted membership dates required by the table layer.
 
