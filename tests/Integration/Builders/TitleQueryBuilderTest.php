@@ -165,14 +165,6 @@ describe('TitleBuilder Query Scopes', function () {
             expect($unavailableTitles->pluck('id'))->not->toContain($this->titleWithChampion->id);
         });
 
-        test('competable scope returns active titles', function () {
-            $competableTitles = Title::query()->competable()->get();
-
-            expect($competableTitles->pluck('id'))->toContain($this->activeTitle->id);
-            expect($competableTitles->pluck('id'))->toContain($this->titleWithChampion->id);
-            expect($competableTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
-            expect($competableTitles->pluck('id'))->not->toContain($this->retiredTitle->id);
-        });
     });
 
     describe('championship scopes', function () {
@@ -186,23 +178,6 @@ describe('TitleBuilder Query Scopes', function () {
             expect($vacantTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
         });
 
-        test('defended scope returns titles with championship history', function () {
-            $defendedTitles = Title::query()->defended()->get();
-
-            expect($defendedTitles->pluck('id'))->toContain($this->titleWithChampion->id);
-            expect($defendedTitles->pluck('id'))->not->toContain($this->newTitle->id);
-            expect($defendedTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
-        });
-
-        test('newTitles scope returns titles without championship history', function () {
-            $newTitles = Title::query()->newTitles()->get();
-
-            expect($newTitles->pluck('id'))->toContain($this->newTitle->id);
-            expect($newTitles->pluck('id'))->toContain($this->vacantTitle->id);
-            expect($newTitles->pluck('id'))->toContain($this->activeTitle->id);
-            expect($newTitles->pluck('id'))->toContain($this->undebutedTitle->id);
-            expect($newTitles->pluck('id'))->not->toContain($this->titleWithChampion->id);
-        });
     });
 
     describe('retirement scopes', function () {
@@ -214,14 +189,6 @@ describe('TitleBuilder Query Scopes', function () {
             expect($retiredTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
         });
 
-        test('unretired scope returns titles without current retirement', function () {
-            $unretiredTitles = Title::query()->unretired()->get();
-
-            expect($unretiredTitles->pluck('id'))->toContain($this->activeTitle->id);
-            expect($unretiredTitles->pluck('id'))->toContain($this->undebutedTitle->id);
-            expect($unretiredTitles->pluck('id'))->toContain($this->inactiveTitle->id);
-            expect($unretiredTitles->pluck('id'))->not->toContain($this->retiredTitle->id);
-        });
     });
 
     describe('scope method chaining', function () {
@@ -235,17 +202,6 @@ describe('TitleBuilder Query Scopes', function () {
             expect($activeVacantTitles->pluck('id'))->toContain($this->newTitle->id);
             expect($activeVacantTitles->pluck('id'))->not->toContain($this->titleWithChampion->id);
             expect($activeVacantTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
-        });
-
-        test('can chain available and defended scopes', function () {
-            $availableDefendedTitles = Title::query()
-                ->available()
-                ->defended()
-                ->get();
-
-            expect($availableDefendedTitles->pluck('id'))->toContain($this->titleWithChampion->id);
-            expect($availableDefendedTitles->pluck('id'))->not->toContain($this->newTitle->id);
-            expect($availableDefendedTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
         });
 
         test('can chain scopes with additional filters', function () {
@@ -320,10 +276,7 @@ describe('TitleBuilder Query Scopes', function () {
             expect($builder->inactive())->toBeInstanceOf(get_class($builder));
             expect($builder->available())->toBeInstanceOf(get_class($builder));
             expect($builder->unavailable())->toBeInstanceOf(get_class($builder));
-            expect($builder->competable())->toBeInstanceOf(get_class($builder));
             expect($builder->vacant())->toBeInstanceOf(get_class($builder));
-            expect($builder->defended())->toBeInstanceOf(get_class($builder));
-            expect($builder->newTitles())->toBeInstanceOf(get_class($builder));
         });
 
         test('scopes maintain query builder functionality', function () {

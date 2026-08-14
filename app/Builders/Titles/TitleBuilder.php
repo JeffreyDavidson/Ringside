@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Builder;
  * Titles have simplified status compared to roster members:
  * - Only activation/deactivation and retirement states matter
  * - No employment, injury, or suspension concepts
- * - Competable = Active (can be defended or won)
+ * - Available = Active (can be defended or won)
  *
  * ## Key Architecture Decisions
  *
@@ -48,9 +48,6 @@ use Illuminate\Database\Eloquent\Builder;
  * $activeTitles = Title::query()->active()->get();
  * $undebutedTitles = Title::query()->undebuted()->get();
  * $inactiveTitles = Title::query()->inactive()->get();
- *
- * // Championship availability
- * $competableTitles = Title::query()->competable()->get();
  *
  * // Future debuts
  * $futureTitles = Title::query()->withPendingDebut()->get();
@@ -107,8 +104,9 @@ class TitleBuilder extends Builder
      */
     public function inactive(): static
     {
-        return $this->whereHas('activityPeriods')
-            ->whereDoesntHave('currentActivityPeriod');
+        return $this->whereHas('previousActivityPeriods')
+            ->whereDoesntHave('currentActivityPeriod')
+            ->whereDoesntHave('futureActivityPeriod');
     }
 
     /**
@@ -173,35 +171,7 @@ class TitleBuilder extends Builder
      */
     public function unavailable(): static
     {
-        $this->where(function (Builder $query) {
-            $query->whereDoesntHave('activityPeriods') // Never debuted
-                ->orWhere(function (Builder $subQuery) {
-                    $subQuery->whereHas('activityPeriods')
-                        ->whereDoesntHave('currentActivityPeriod'); // Inactive
-                })
-                ->orWhereHas('currentRetirement'); // Retired
-        });
-
-        return $this;
-    }
-
-    /**
-     * Scope a query to include competable titles.
-     *
-     * Filters titles that are currently active and available for competition.
-     * Competable titles can be defended in matches and awarded to new champions.
-     * This method provides semantic clarity for match booking contexts.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * $competableTitles = Title::query()->competable()->get();
-     * ```
-     */
-    public function competable(): static
-    {
-        return $this->active();
+        return $this->whereDoesntHave('currentActivityPeriod');
     }
 
     /**
@@ -228,72 +198,5 @@ class TitleBuilder extends Builder
     {
         return $this->active()
             ->whereDoesntHave('currentChampionship');
-    }
-
-    /**
-     * Scope a query to include titles with championship history.
-     *
-     * Filters titles that have been defended at least once, meaning they have
-     * had championship reigns in the past. This excludes newly created titles
-     * that have never been awarded.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get all titles with championship history
-     * $defendedTitles = Title::query()->defended()->get();
-     *
-     * // Find titles with recent championship activity
-     * $activeTitles = Title::query()
-     *     ->defended()
-     *     ->whereHas('championships', function ($query) {
-     *         $query->where('started_at', '>', now()->subYear());
-     *     })
-     *     ->get();
-     * ```
-     */
-    public function defended(): static
-    {
-        return $this->whereHas('championships');
-    }
-
-    /**
-     * Scope a query to include new titles without championship history.
-     *
-     * Filters titles that have never been awarded to any champion.
-     * These are newly created titles that are ready for their inaugural
-     * championship reign.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get all new titles ready for first champions
-     * $newTitles = Title::query()->newTitles()->get();
-     *
-     * // Find active new titles for debut matches
-     * $debutTitles = Title::query()
-     *     ->newTitles()
-     *     ->active()
-     *     ->get();
-     * ```
-     */
-    public function newTitles(): static
-    {
-        return $this->whereDoesntHave('championships');
-    }
-
-    /**
-     * Scope a query to include unretired titles.
-     *
-     * Filters titles that are not currently retired and can potentially
-     * be used in competition or reactivated.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function unretired(): static
-    {
-        return $this->whereDoesntHave('currentRetirement');
     }
 }
