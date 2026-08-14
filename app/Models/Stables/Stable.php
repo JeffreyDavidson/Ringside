@@ -7,6 +7,7 @@ namespace App\Models\Stables;
 use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
+use App\Lifecycle\StableStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\HasMembers;
@@ -121,45 +122,14 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
 
     use SoftDeletes;
 
-    /**
-     * Get the computed status attribute.
-     *
-     * Computes the stable status based on activity periods and retirement state:
-     * - Retired: Has active retirement record
-     * - Active: Has current activity period
-     * - PendingEstablishment: Has future activity period
-     * - Inactive: Has previous activity periods but no current activity
-     * - Unformed: No activity periods at all
-     *
-     * @return Attribute<StableStatus, never>
-     */
+    /** @return Attribute<StableStatus, never> */
     protected function status(): Attribute
     {
-        return Attribute::make(
-            get: function (): StableStatus {
-                // Check for retirement first
-                if ($this->isRetired()) {
-                    return StableStatus::Retired;
-                }
-
-                // Check for current activity
-                if ($this->isCurrentlyActive()) {
-                    return StableStatus::Active;
-                }
-
-                // Check for future activity
-                if ($this->hasFutureActivity()) {
-                    return StableStatus::PendingEstablishment;
-                }
-
-                // Check for previous activity periods
-                if ($this->hasActivityPeriods()) {
-                    return StableStatus::Inactive;
-                }
-
-                // No activity periods at all
-                return StableStatus::Unformed;
-            }
-        );
+        return Attribute::get(fn (): StableStatus => StableStatusResolver::resolve(
+            isRetired: $this->isRetired(),
+            isCurrentlyActive: $this->isCurrentlyActive(),
+            hasFutureActivity: $this->hasFutureActivity(),
+            hasActivityHistory: $this->hasActivityPeriods(),
+        ));
     }
 }

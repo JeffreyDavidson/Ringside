@@ -8,6 +8,7 @@ use App\Builders\Concerns\HasStatusScopes;
 use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
+use App\Lifecycle\TitleStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
@@ -127,40 +128,14 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
             ->latest('won_at');
     }
 
-    /**
-     * Get the computed status attribute.
-     *
-     * Computes the title status based on activity periods and retirement state:
-     * - Active: Has current activity period
-     * - PendingDebut: Has future activity period
-     * - Inactive: Has previous activity periods but no current activity
-     * - Undebuted: No activity periods at all
-     *
-     * @return Attribute<TitleStatus, never>
-     */
+    /** @return Attribute<TitleStatus, never> */
     protected function status(): Attribute
     {
-        return Attribute::make(
-            get: function (): TitleStatus {
-                // Check for current activity first
-                if ($this->isCurrentlyActive()) {
-                    return TitleStatus::Active;
-                }
-
-                // Check for future activity
-                if ($this->hasFutureActivity()) {
-                    return TitleStatus::PendingDebut;
-                }
-
-                // Check for previous activity periods
-                if ($this->hasActivityPeriods()) {
-                    return TitleStatus::Inactive;
-                }
-
-                // No activity periods at all
-                return TitleStatus::Undebuted;
-            }
-        );
+        return Attribute::get(fn (): TitleStatus => TitleStatusResolver::resolve(
+            isCurrentlyActive: $this->isCurrentlyActive(),
+            hasFutureActivity: $this->hasFutureActivity(),
+            hasActivityHistory: $this->hasActivityPeriods(),
+        ));
     }
 
     /**
