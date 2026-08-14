@@ -25,8 +25,6 @@ final class SuspensionStateModel extends Model implements Suspendable
 
     public bool $currentSuspensionExists = false;
 
-    public bool $suspensionExists = false;
-
     /** @return MorphOne<Suspension, self> */
     public function currentSuspension(): MorphOne
     {
@@ -36,7 +34,7 @@ final class SuspensionStateModel extends Model implements Suspendable
     /** @return MorphMany<Suspension, self> */
     public function suspensions(): MorphMany
     {
-        $builder = $this->suspensionBuilder($this->suspensionExists);
+        $builder = $this->suspensionBuilder(false);
 
         return new MorphMany($builder, new self(), 'suspendable_type', 'suspendable_id', 'id');
     }
@@ -75,17 +73,14 @@ describe('IsSuspendable', function () {
             ->and($model->suspensions()->getRelated())->toBeInstanceOf(Suspension::class);
     });
 
-    test('checks current and historical suspension state', function () {
+    test('checks current suspension state', function () {
         $model = new SuspensionStateModel();
 
-        expect($model->isSuspended())->toBeFalse()
-            ->and($model->hasSuspensions())->toBeFalse();
+        expect($model->isSuspended())->toBeFalse();
 
         $model->currentSuspensionExists = true;
-        $model->suspensionExists = true;
 
-        expect($model->isSuspended())->toBeTrue()
-            ->and($model->hasSuspensions())->toBeTrue();
+        expect($model->isSuspended())->toBeTrue();
     });
 
     test('constrains current and previous suspension relationships', function () {

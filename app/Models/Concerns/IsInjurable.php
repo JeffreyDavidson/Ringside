@@ -63,9 +63,4 @@ trait IsInjurable
     {
         return $this->currentInjury()->exists();
     }
-
-    public function hasInjuries(): bool
-    {
-        return $this->injuries()->exists();
-    }
 }

@@ -25,8 +25,6 @@ final class InjuryStateModel extends Model implements Injurable
 
     public bool $currentInjuryExists = false;
 
-    public bool $injuryExists = false;
-
     /** @return MorphOne<Injury, self> */
     public function currentInjury(): MorphOne
     {
@@ -36,7 +34,7 @@ final class InjuryStateModel extends Model implements Injurable
     /** @return MorphMany<Injury, self> */
     public function injuries(): MorphMany
     {
-        $builder = $this->injuryBuilder($this->injuryExists);
+        $builder = $this->injuryBuilder(false);
 
         return new MorphMany($builder, new self(), 'injurable_type', 'injurable_id', 'id');
     }
@@ -75,17 +73,14 @@ describe('IsInjurable', function () {
             ->and($model->injuries()->getRelated())->toBeInstanceOf(Injury::class);
     });
 
-    test('checks current and historical injury state', function () {
+    test('checks current injury state', function () {
         $model = new InjuryStateModel();
 
-        expect($model->isInjured())->toBeFalse()
-            ->and($model->hasInjuries())->toBeFalse();
+        expect($model->isInjured())->toBeFalse();
 
         $model->currentInjuryExists = true;
-        $model->injuryExists = true;
 
-        expect($model->isInjured())->toBeTrue()
-            ->and($model->hasInjuries())->toBeTrue();
+        expect($model->isInjured())->toBeTrue();
     });
 
     test('constrains current and previous injury relationships', function () {

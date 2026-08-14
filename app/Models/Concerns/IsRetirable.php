@@ -63,9 +63,4 @@ trait IsRetirable
     {
         return $this->currentRetirement()->exists();
     }
-
-    public function hasRetirements(): bool
-    {
-        return $this->retirements()->exists();
-    }
 }
