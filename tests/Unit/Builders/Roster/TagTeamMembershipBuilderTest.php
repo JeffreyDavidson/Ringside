@@ -87,3 +87,27 @@ test('tag team memberships can be filtered by overlapping periods', function () 
     expect($memberships)->toHaveCount(1)
         ->and($memberships->firstOrFail()->wrestler_id)->toBe($overlappingWrestler->id);
 });
+
+test('tag team memberships can be ordered by most recent join', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $oldestJoinedAt = now()->subMonths(3);
+    $newestJoinedAt = now()->subMonth();
+    $middleJoinedAt = now()->subMonths(2);
+
+    foreach ([$oldestJoinedAt, $newestJoinedAt, $middleJoinedAt] as $joinedAt) {
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => $tagTeam->id,
+            'joined_at' => $joinedAt,
+        ]);
+    }
+
+    $memberships = TagTeamWrestler::query()
+        ->mostRecentlyJoinedFirst()
+        ->get();
+
+    expect($memberships->pluck('joined_at')->map->toDateTimeString()->all())->toBe([
+        $newestJoinedAt->toDateTimeString(),
+        $middleJoinedAt->toDateTimeString(),
+        $oldestJoinedAt->toDateTimeString(),
+    ]);
+});

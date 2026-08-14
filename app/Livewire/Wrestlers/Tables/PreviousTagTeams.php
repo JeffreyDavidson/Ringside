@@ -82,7 +82,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
         return TagTeamWrestler::query()
             ->forWrestlerId($this->wrestlerId)
             ->ended()
-            ->orderByDesc('joined_at');
+            ->mostRecentlyJoinedFirst();
     }
 
     /**

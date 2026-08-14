@@ -36,7 +36,7 @@ class PreviousWrestlers extends DataTableComponent
             ->with('wrestler')
             ->forTagTeamId($this->tagTeamId)
             ->ended()
-            ->orderByDesc('tag_teams_wrestlers.joined_at');
+            ->mostRecentlyJoinedFirst();
     }
 
     /**
