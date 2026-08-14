@@ -18,32 +18,4 @@ abstract class IndividualBuilder extends Builder
 {
     use HasEmploymentScopes;
     use HasRetirementScopes;
-
-    public function available(): static
-    {
-        return $this->whereHas('currentEmployment')
-            ->whereDoesntHave('currentInjury')
-            ->whereDoesntHave('currentSuspension')
-            ->whereDoesntHave('currentRetirement');
-    }
-
-    public function unavailable(): static
-    {
-        return $this->where(function (Builder $query): void {
-            $query->whereDoesntHave('currentEmployment')
-                ->orWhereHas('currentInjury')
-                ->orWhereHas('currentSuspension')
-                ->orWhereHas('currentRetirement');
-        });
-    }
-
-    public function injured(): static
-    {
-        return $this->whereHas('currentInjury');
-    }
-
-    public function suspended(): static
-    {
-        return $this->whereHas('currentSuspension');
-    }
 }

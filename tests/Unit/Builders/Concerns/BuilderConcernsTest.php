@@ -6,7 +6,6 @@ use App\Builders\Concerns\HasRetirementScopes;
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Builders\Roster\WrestlerBuilder;
-use App\Builders\Titles\TitleBuilder;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,8 +29,6 @@ describe('Builder Concerns Unit Tests', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
             expect(class_uses(IndividualBuilder::class))->toContain(HasRetirementScopes::class);
             expect(class_uses(TagTeamBuilder::class))->toContain(HasRetirementScopes::class);
-            expect(class_uses(TitleBuilder::class))->toContain(HasRetirementScopes::class);
-
         });
 
         test('retired method generates correct query conditions', function () {

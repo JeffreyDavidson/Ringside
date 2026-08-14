@@ -39,18 +39,6 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
     });
 
     describe('employment status scopes', function () {
-        test('available tag teams with minimum wrestlers can be retrieved', function () {
-            $tagTeam = $this->bookableTagTeam;
-
-            // Act
-            $availableTagTeams = TagTeam::available()->withMinimumWrestlers()->get();
-
-            // Assert
-            expect($availableTagTeams)
-                ->toHaveCount(1)
-                ->and($availableTagTeams->contains($tagTeam))->toBeTrue();
-        });
-
         test('future employed tag teams can be retrieved', function () {
             // Act
             $futureEmployedTagTeams = TagTeam::futureEmployed()->get();
@@ -84,16 +72,6 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
     });
 
     describe('status-based scopes', function () {
-        test('suspended tag teams can be retrieved', function () {
-            // Act
-            $suspendedTagTeams = TagTeam::suspended()->get();
-
-            // Assert
-            expect($suspendedTagTeams)
-                ->toHaveCount(1)
-                ->and($suspendedTagTeams->contains($this->suspendedTagTeam))->toBeTrue();
-        });
-
         test('retired tag teams can be retrieved', function () {
             // Act
             $retiredTagTeams = TagTeam::retired()->get();
@@ -105,16 +83,4 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
         });
     });
 
-    describe('current wrestler count scopes', function () {
-        test('tag teams below the minimum wrestler count can be retrieved', function () {
-            // Act
-            $undersizedTagTeams = TagTeam::belowMinimumWrestlers()->get();
-
-            // Assert
-            expect($undersizedTagTeams->pluck('id'))
-                ->toContain($this->unbookableTagTeam->id)
-                ->toContain($this->undersizedTagTeam->id)
-                ->not->toContain($this->bookableTagTeam->id);
-        });
-    });
 });

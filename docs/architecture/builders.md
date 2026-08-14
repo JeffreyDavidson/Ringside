@@ -18,7 +18,7 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 ## Shared Concerns
 
 - `HasEmploymentScopes` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` queries for individual roster members and tag teams.
-- `HasRetirementScopes` provides the shared `retired()` query.
+- `HasRetirementScopes` provides the shared `retired()` query for individual roster members and tag teams whose tables filter retirement directly.
 - `HasNameSearch` provides first-name and last-name matching for models that store those columns.
 
 ## Boundaries

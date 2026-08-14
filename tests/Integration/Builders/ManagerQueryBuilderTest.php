@@ -32,18 +32,6 @@ describe('ManagerQueryBuilder Unit Tests', function () {
         $this->injuredManager = Manager::factory()->injured()->create();
     });
 
-    describe('availability status scopes', function () {
-        test('employed managers can be retrieved', function () {
-            // Act
-            $availableManagers = Manager::available()->get();
-
-            // Assert
-            expect($availableManagers)
-                ->toHaveCount(1)
-                ->and($availableManagers->contains($this->availableManager))->toBeTrue();
-        });
-    });
-
     describe('employment status scopes', function () {
         test('future employed managers can be retrieved', function () {
             // Act
@@ -77,16 +65,6 @@ describe('ManagerQueryBuilder Unit Tests', function () {
     });
 
     describe('individual roster member status scopes', function () {
-        test('suspended managers can be retrieved', function () {
-            // Act
-            $suspendedManagers = Manager::suspended()->get();
-
-            // Assert
-            expect($suspendedManagers)
-                ->toHaveCount(1)
-                ->and($suspendedManagers->contains($this->suspendedManager))->toBeTrue();
-        });
-
         test('retired managers can be retrieved', function () {
             // Act
             $retiredManagers = Manager::retired()->get();
@@ -97,14 +75,5 @@ describe('ManagerQueryBuilder Unit Tests', function () {
                 ->and($retiredManagers->contains($this->retiredManager))->toBeTrue();
         });
 
-        test('injured managers can be retrieved', function () {
-            // Act
-            $injuredManagers = Manager::injured()->get();
-
-            // Assert
-            expect($injuredManagers)
-                ->toHaveCount(1)
-                ->and($injuredManagers->contains($this->injuredManager))->toBeTrue();
-        });
     });
 });

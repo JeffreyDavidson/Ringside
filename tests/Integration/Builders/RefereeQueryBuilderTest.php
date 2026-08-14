@@ -32,18 +32,6 @@ describe('RefereeQueryBuilder Unit Tests', function () {
         $this->injuredReferee = Referee::factory()->injured()->create();
     });
 
-    describe('availability status scopes', function () {
-        test('available referees can be retrieved', function () {
-            // Act
-            $availableReferees = Referee::available()->get();
-
-            // Assert
-            expect($availableReferees)
-                ->toHaveCount(1)
-                ->and($availableReferees->contains($this->availableReferee))->toBeTrue();
-        });
-    });
-
     describe('employment status scopes', function () {
         test('future employed referees can be retrieved', function () {
             // Act
@@ -77,16 +65,6 @@ describe('RefereeQueryBuilder Unit Tests', function () {
     });
 
     describe('individual roster member status scopes', function () {
-        test('suspended referees can be retrieved', function () {
-            // Act
-            $suspendedReferees = Referee::suspended()->get();
-
-            // Assert
-            expect($suspendedReferees)
-                ->toHaveCount(1)
-                ->and($suspendedReferees->contains($this->suspendedReferee))->toBeTrue();
-        });
-
         test('retired referees can be retrieved', function () {
             // Act
             $retiredReferees = Referee::retired()->get();
@@ -97,14 +75,5 @@ describe('RefereeQueryBuilder Unit Tests', function () {
                 ->and($retiredReferees->contains($this->retiredReferee))->toBeTrue();
         });
 
-        test('injured referees can be retrieved', function () {
-            // Act
-            $injuredReferees = Referee::injured()->get();
-
-            // Assert
-            expect($injuredReferees)
-                ->toHaveCount(1)
-                ->and($injuredReferees->contains($this->injuredReferee))->toBeTrue();
-        });
     });
 });

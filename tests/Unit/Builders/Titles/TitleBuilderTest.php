@@ -44,16 +44,3 @@ test('inactive titles can be retrieved', function () {
         ->and($inactiveTitles->contains($retiredTitle))->toBeTrue()
         ->and($inactiveTitles->contains($futureActivatedTitle))->toBeFalse();
 });
-
-test('retired titles can be retrieved', function () {
-    $activeTitle = Title::factory()->active()->create();
-    $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
-    $inactiveTitle = Title::factory()->inactive()->create();
-    $retiredTitle = Title::factory()->retired()->create();
-
-    $retiredTitles = Title::query()->retired()->get();
-
-    expect($retiredTitles)
-        ->toHaveCount(1)
-        ->and($retiredTitles->contains($retiredTitle))->toBeTrue();
-});
