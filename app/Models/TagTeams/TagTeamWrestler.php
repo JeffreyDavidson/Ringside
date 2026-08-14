@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models\TagTeams;
 
+use App\Builders\Roster\MembershipPeriodBuilder;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamWrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,13 +27,16 @@ use Illuminate\Support\Carbon;
  * @property-read TagTeam|null $tagTeam
  * @property-read Wrestler|null $wrestler
  *
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamWrestler newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamWrestler newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeamWrestler query()
+ * @method static MembershipPeriodBuilder<static> current()
+ * @method static MembershipPeriodBuilder<static> ended()
+ * @method static MembershipPeriodBuilder<static> newModelQuery()
+ * @method static MembershipPeriodBuilder<static> newQuery()
+ * @method static MembershipPeriodBuilder<static> query()
  *
  * @mixin \Eloquent
  */
 #[Fillable('tag_team_id', 'wrestler_id', 'joined_at', 'left_at')]
+#[UseEloquentBuilder(MembershipPeriodBuilder::class)]
 #[UseFactory(TagTeamWrestlerFactory::class)]
 class TagTeamWrestler extends Pivot
 {
