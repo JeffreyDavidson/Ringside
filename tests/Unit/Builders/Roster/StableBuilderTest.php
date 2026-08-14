@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 
 test('established stables can be retrieved', function () {
     $activeStable = Stable::factory()->active()->create();
@@ -58,4 +60,48 @@ test('unestablished stables can be retrieved', function () {
     expect($unactivatedStables)
         ->toHaveCount(1)
         ->and($unactivatedStables->contains($unactivatedStable))->toBeTrue();
+});
+
+test('previous stables can be retrieved for a wrestler', function () {
+    $wrestler = Wrestler::factory()->create();
+    $previousStable = Stable::factory()->create();
+    $currentStable = Stable::factory()->create();
+    $previousStable->wrestlers()->attach($wrestler, [
+        'joined_at' => now()->subMonths(2),
+        'left_at' => now()->subMonth(),
+    ]);
+    $currentStable->wrestlers()->attach($wrestler, [
+        'joined_at' => now(),
+    ]);
+
+    $stables = Stable::query()
+        ->previousForWrestlerId($wrestler->id)
+        ->get();
+
+    expect($stables)->toHaveCount(1)
+        ->and($stables->firstOrFail()->is($previousStable))->toBeTrue()
+        ->and($stables->firstOrFail()->getAttribute('joined_at'))->not->toBeNull()
+        ->and($stables->firstOrFail()->getAttribute('left_at'))->not->toBeNull();
+});
+
+test('previous stables can be retrieved for a tag team', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $previousStable = Stable::factory()->create();
+    $currentStable = Stable::factory()->create();
+    $previousStable->tagTeams()->attach($tagTeam, [
+        'joined_at' => now()->subMonths(2),
+        'left_at' => now()->subMonth(),
+    ]);
+    $currentStable->tagTeams()->attach($tagTeam, [
+        'joined_at' => now(),
+    ]);
+
+    $stables = Stable::query()
+        ->previousForTagTeamId($tagTeam->id)
+        ->get();
+
+    expect($stables)->toHaveCount(1)
+        ->and($stables->firstOrFail()->is($previousStable))->toBeTrue()
+        ->and($stables->firstOrFail()->getAttribute('joined_at'))->not->toBeNull()
+        ->and($stables->firstOrFail()->getAttribute('left_at'))->not->toBeNull();
 });
