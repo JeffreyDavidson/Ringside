@@ -33,12 +33,10 @@ class PreviousMatches extends BasePreviousMatchesTable
         $tagTeam = TagTeam::find($this->tagTeamId);
 
         return EventMatch::query()
+            ->forPastEvents()
             ->with(['titles', 'result.winner', 'result.decision'])
             ->withWhereHas('competitors', function (Builder $query) use ($tagTeam): void {
                 $query->whereMorphedTo('competitor', $tagTeam);
-            })
-            ->withWhereHas('event', function (Builder $query): void {
-                $query->whereNotNull('date')->where('date', '<', now()->toDateString());
             })
             ->orderByDesc('date');
     }
