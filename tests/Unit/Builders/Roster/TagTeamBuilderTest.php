@@ -12,6 +12,11 @@ test('bookable tag teams can be retrieved', function () {
     $releasedTagTeam = TagTeam::factory()->released()->create();
     $unemployedTagTeam = TagTeam::factory()->unemployed()->create();
     $unbookableTagTeam = TagTeam::factory()->unbookable()->create();
+    $undersizedTagTeam = TagTeam::factory()->employed()->create();
+    $undersizedTagTeam->currentWrestlers()->updateExistingPivot(
+        $undersizedTagTeam->currentWrestlers()->firstOrFail(),
+        ['left_at' => now()],
+    );
 
     $bookableTagTeams = TagTeam::bookable()->get();
 
@@ -44,17 +49,23 @@ test('unbookable tag teams can be retrieved', function () {
     $releasedTagTeam = TagTeam::factory()->released()->create();
     $unemployedTagTeam = TagTeam::factory()->unemployed()->create();
     $unbookableTagTeam = TagTeam::factory()->unbookable()->create();
+    $undersizedTagTeam = TagTeam::factory()->employed()->create();
+    $undersizedTagTeam->currentWrestlers()->updateExistingPivot(
+        $undersizedTagTeam->currentWrestlers()->firstOrFail(),
+        ['left_at' => now()],
+    );
 
     $unbookableTagTeams = TagTeam::unbookable()->get();
 
     expect($unbookableTagTeams)
-        ->toHaveCount(6)
+        ->toHaveCount(7)
         ->and($unbookableTagTeams->contains($futureEmployedTagTeam))->toBeTrue()
         ->and($unbookableTagTeams->contains($suspendedTagTeam))->toBeTrue()
         ->and($unbookableTagTeams->contains($retiredTagTeam))->toBeTrue()
         ->and($unbookableTagTeams->contains($releasedTagTeam))->toBeTrue()
         ->and($unbookableTagTeams->contains($unemployedTagTeam))->toBeTrue()
-        ->and($unbookableTagTeams->contains($unbookableTagTeam))->toBeTrue();
+        ->and($unbookableTagTeams->contains($unbookableTagTeam))->toBeTrue()
+        ->and($unbookableTagTeams->contains($undersizedTagTeam))->toBeTrue();
 });
 
 test('released tag teams can be retrieved', function () {
