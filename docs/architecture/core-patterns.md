@@ -48,7 +48,7 @@ single-consumer relationship traits or speculative override helpers.
 - Models use computed attributes: `protected function status(): Attribute`
 - Membership-derived calculations belong to typed membership data objects. For example, `TagTeamMembershipData` calculates combined wrestler weight without adding a presentation aggregate to the Eloquent model.
 - Factory methods NEVER set status fields manually
-- Activity-period state uses the canonical predicates `isCurrentlyActive()`, `isInactive()`, `isUnactivated()`, and `hasFutureActivity()` without duplicate aliases. Date-change validation compares the requested date with the current activity-period record inside its typed validation rule rather than exposing validation-specific helpers on models.
+- Activity-period state uses the canonical predicates `hasActivityPeriods()`, `isCurrentlyActive()`, `isInactive()`, and `hasFutureActivity()` without duplicate aliases. Date-change validation compares the requested date with the current activity-period record inside its typed validation rule rather than exposing validation-specific helpers on models.
 - Status computed from relationships (employment, retirement, injury, suspension)
 - Priority order: Retired > Employed > FutureEmployment > Released > Unemployed
 
