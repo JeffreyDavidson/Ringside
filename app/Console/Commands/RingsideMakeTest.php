@@ -1074,7 +1074,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             'forceDeleting', 'forceDeleted', 'isForceDeleting',
 
             // Relationship trait methods (common patterns)
-            'managers', 'currentManagers', 'previousManagers', 'fakeManagerPivotModel',
+            'managers', 'currentManagers', 'previousManagers',
             'stables', 'currentStable', 'previousStables',
             'tagTeams', 'currentTagTeam', 'previousTagTeam', 'previousTagTeams',
             'titleChampionships', 'currentChampionships', 'previousTitleChampionships',
