@@ -35,7 +35,6 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -55,9 +54,6 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property string|null $signature_move
  * @property EmploymentStatus $status
- *
- * @property-read int $combined_weight
- *
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -167,12 +163,6 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     public function previousWrestlers(): BelongsToMany
     {
         return $this->wrestlers()->wherePivotNotNull('left_at');
-    }
-
-    /** @return Attribute<int, never> */
-    protected function combinedWeight(): Attribute
-    {
-        return Attribute::get(fn (): int => (int) $this->currentWrestlers->sum('weight'));
     }
 
     protected function stableMembershipTable(): string

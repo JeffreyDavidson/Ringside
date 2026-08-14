@@ -40,6 +40,7 @@
 ## Computed Status Pattern
 - **Status fields are computed, not stored** - eliminates data inconsistency
 - Models use computed attributes: `protected function status(): Attribute`
+- Membership-derived calculations belong to typed membership data objects. For example, `TagTeamMembershipData` calculates combined wrestler weight without adding a presentation aggregate to the Eloquent model.
 - Factory methods NEVER set status fields manually
 - Activity-period state uses the canonical predicates `isCurrentlyActive()`, `isInactive()`, `isUnactivated()`, `hasFutureActivity()`, and `wasActiveOn()` without duplicate aliases.
 - Status computed from relationships (employment, retirement, injury, suspension)

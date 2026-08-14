@@ -40,6 +40,8 @@ readonly class TagTeamMembershipData
 
     /**
      * Get the wrestlers collection, defaulting to empty Eloquent collection.
+     *
+     * @return Collection<int, Wrestler>
      */
     public function getWrestlers(): Collection
     {
@@ -68,5 +70,12 @@ readonly class TagTeamMembershipData
     public function hasManagers(): bool
     {
         return $this->managers !== null && $this->managers->isNotEmpty();
+    }
+
+    public function combinedWeightInPounds(): int
+    {
+        return (int) $this->getWrestlers()->sum(
+            fn (Wrestler $wrestler): int => $wrestler->weight
+        );
     }
 }
