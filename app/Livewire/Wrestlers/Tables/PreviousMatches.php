@@ -34,6 +34,6 @@ class PreviousMatches extends BasePreviousMatchesTable
             ->forPastEvents()
             ->with(['titles', 'result.winner', 'result.decision'])
             ->forCompetitor($wrestler)
-            ->orderByDesc('date');
+            ->latestEventFirst();
     }
 }

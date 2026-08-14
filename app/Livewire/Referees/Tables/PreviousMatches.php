@@ -6,6 +6,7 @@ namespace App\Livewire\Referees\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
+use App\Models\Referees\Referee;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
@@ -29,12 +30,12 @@ class PreviousMatches extends BasePreviousMatchesTable
             throw new LogicException('A referee was not provided.');
         }
 
+        $referee = Referee::query()->findOrFail($this->refereeId);
+
         return EventMatch::query()
             ->forPastEvents()
             ->with(['titles', 'competitors', 'result.winner', 'result.decision'])
-            ->withWhereHas('referees', function (Builder $query): void {
-                $query->whereIn('referee_id', [$this->refereeId]);
-            })
-            ->orderByDesc('date');
+            ->forReferee($referee)
+            ->latestEventFirst();
     }
 }
