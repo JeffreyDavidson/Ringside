@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
-use App\Models\Contracts\Retirable;
 use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -118,19 +117,6 @@ trait HasActivityPeriods
         return $this->futureActivityPeriod()->exists();
     }
 
-    public function isNotCurrentlyActive(): bool
-    {
-        if ($this->isInactive()) {
-            return true;
-        }
-
-        if ($this->hasFutureActivity()) {
-            return true;
-        }
-
-        return $this instanceof Retirable && $this->isRetired();
-    }
-
     public function isUnactivated(): bool
     {
         return ! $this->hasActivityPeriods();
@@ -151,23 +137,6 @@ trait HasActivityPeriods
         $currentPeriod = $this->currentActivityPeriod;
 
         return $currentPeriod ? $currentPeriod->started_at->isSameDay($activityDate) : false;
-    }
-
-    /**
-     * Check if the current activity period started on or before a specific date.
-     *
-     * @param  Carbon  $activityDate  The date to check against
-     */
-    public function wasActiveBefore(Carbon $activityDate): bool
-    {
-        $currentPeriod = $this->currentActivityPeriod;
-
-        return $currentPeriod ? $currentPeriod->started_at->lte($activityDate) : false;
-    }
-
-    public function hasFutureActivation(): bool
-    {
-        return $this->futureActivityPeriod()->exists();
     }
 
     protected function getActivityPeriodTableName(): string
