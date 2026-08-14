@@ -18,6 +18,7 @@ single-consumer relationship traits or speculative override helpers.
 - Stables ↔ Wrestlers: `stables_wrestlers` table with `joined_at`/`left_at`
 - Stables ↔ Tag Teams: `stables_tag_teams` table with `joined_at`/`left_at`
 - These represent stable membership relationships
+- The nullable `left_at` column is the authoritative current/previous membership state; pivot models do not expose duplicate state aliases.
 - **DECISION: Use separate tables (not polymorphic)** for type safety and clear relationships
 
 ## Key Architecture Decisions
