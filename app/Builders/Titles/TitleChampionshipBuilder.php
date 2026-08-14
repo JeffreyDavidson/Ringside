@@ -18,12 +18,16 @@ class TitleChampionshipBuilder extends Builder
 {
     public function current(): static
     {
-        return $this->whereNull('lost_at');
+        $this->whereNull('lost_at');
+
+        return $this;
     }
 
     public function previous(): static
     {
-        return $this->whereNotNull('lost_at');
+        $this->whereNotNull('lost_at');
+
+        return $this;
     }
 
     public function forChampion(Wrestler|TagTeam $champion): static
