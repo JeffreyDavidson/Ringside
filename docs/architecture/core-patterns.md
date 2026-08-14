@@ -40,6 +40,7 @@
 - **Status fields are computed, not stored** - eliminates data inconsistency
 - Models use computed attributes: `protected function status(): Attribute`
 - Factory methods NEVER set status fields manually
+- Activity-period state uses the canonical predicates `isCurrentlyActive()`, `isInactive()`, `isUnactivated()`, `hasFutureActivity()`, and `wasActiveOn()` without duplicate aliases.
 - Status computed from relationships (employment, retirement, injury, suspension)
 - Priority order: Retired > Employed > FutureEmployment > Released > Unemployed
 

@@ -28,13 +28,6 @@ interface HasActivityPeriods
     public function isCurrentlyActive(): bool;
 
     /**
-     * Check if the model is not currently active.
-     *
-     * @return bool True if the model does not have an active period
-     */
-    public function isNotCurrentlyActive(): bool;
-
-    /**
      * Check if the model has never been activated.
      *
      * @return bool True if the model has no activity periods
@@ -55,14 +48,6 @@ interface HasActivityPeriods
      * @return bool True if the model was active on the given date
      */
     public function wasActiveOn(Carbon $date): bool;
-
-    /**
-     * Check if the model was active before a given date.
-     *
-     * @param  Carbon  $date  The date to check against
-     * @return bool True if the model was active before the given date
-     */
-    public function wasActiveBefore(Carbon $date): bool;
 
     /**
      * Get all activity periods for this model.

@@ -182,20 +182,6 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             expect($model->hasFutureActivity())->toBeFalse();
         });
 
-        test('isNotCurrentlyActive returns true when model is not active', function () {
-            $model = Title::factory()->unactivated()->create();
-            expect($model->isNotCurrentlyActive())->toBeTrue();
-        });
-
-        test('isNotCurrentlyActive returns false when model is active', function () {
-            $model = $this->model;
-            ActivityPeriod::factory()->for($model, 'activeable')->create([
-                'started_at' => now()->subWeek(),
-                'ended_at' => null,
-            ]);
-            expect($model->isNotCurrentlyActive())->toBeFalse();
-        });
-
         test('isUnactivated returns true when model has no periods', function () {
             $model = Title::factory()->unactivated()->create();
             expect($model->isUnactivated())->toBeTrue();
@@ -246,23 +232,6 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             expect($model->wasActiveOn(now()->subMonth()))->toBeFalse();
         });
 
-        test('wasActiveBefore returns true when current period started before date', function () {
-            $model = $this->model;
-            ActivityPeriod::factory()->for($model, 'activeable')->create([
-                'started_at' => now()->subMonth(),
-                'ended_at' => null,
-            ]);
-            expect($model->wasActiveBefore(now()->subWeek()))->toBeTrue();
-        });
-
-        test('wasActiveBefore returns false when current period started after date', function () {
-            $model = $this->model;
-            ActivityPeriod::factory()->for($model, 'activeable')->create([
-                'started_at' => now()->subWeek(),
-                'ended_at' => null,
-            ]);
-            expect($model->wasActiveBefore(now()->subMonth()))->toBeFalse();
-        });
     });
 
     describe('utility methods', function () {
