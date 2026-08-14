@@ -15,6 +15,13 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class ManagerAssignmentBuilder extends Builder
 {
+    public function forManagerId(int $managerId): static
+    {
+        $this->where('manager_id', $managerId);
+
+        return $this;
+    }
+
     public function current(): static
     {
         $this->whereNull('fired_at');

@@ -26,6 +26,7 @@ use Illuminate\Support\Carbon;
  *
  * @method static ManagerAssignmentBuilder<static> current()
  * @method static ManagerAssignmentBuilder<static> ended()
+ * @method static ManagerAssignmentBuilder<static> forManagerId(int $managerId)
  * @method static ManagerAssignmentBuilder<static> newModelQuery()
  * @method static ManagerAssignmentBuilder<static> newQuery()
  * @method static ManagerAssignmentBuilder<static> query()

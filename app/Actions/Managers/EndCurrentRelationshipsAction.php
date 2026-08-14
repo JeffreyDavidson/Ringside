@@ -14,12 +14,12 @@ class EndCurrentRelationshipsAction
     public function handle(Manager $manager, Carbon $effectiveDate): void
     {
         WrestlerManager::query()
-            ->where('manager_id', $manager->id)
+            ->forManagerId($manager->id)
             ->current()
             ->update(['fired_at' => $effectiveDate]);
 
         TagTeamManager::query()
-            ->where('manager_id', $manager->id)
+            ->forManagerId($manager->id)
             ->current()
             ->update(['fired_at' => $effectiveDate]);
     }
