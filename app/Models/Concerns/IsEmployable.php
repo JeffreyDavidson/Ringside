@@ -243,24 +243,7 @@ trait IsEmployable
         return $this->futureEmployment()->exists();
     }
 
-    /**
-     * Determine if the model is not currently employed.
-     *
-     * Considers a model as not employed if they are explicitly marked
-     * as unemployed, released, or retired.
-     *
-     * @return bool True if the model is not in employment, false otherwise
-     *
-     * @example
-     * ```php
-     * $wrestler = Wrestler::find(1);
-     *
-     * if ($wrestler->isNotInEmployment()) {
-     *     echo "Wrestler is not currently available";
-     * }
-     * ```
-     */
-    public function isNotInEmployment(): bool
+    public function hasNoCurrentOrFutureEmployment(): bool
     {
         return ! $this->isEmployed() && ! $this->hasFutureEmployment();
     }

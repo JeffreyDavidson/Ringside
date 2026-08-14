@@ -1084,7 +1084,7 @@ describe(\'{{ modelClass }} Model Unit Tests\', function () {
             // Employment trait methods
             'employments', 'currentEmployment', 'futureEmployment', 'previousEmployments', 'previousEmployment',
             'firstEmployment', 'isEmployed', 'hasFutureEmployment',
-            'isNotInEmployment', 'isReleased',
+            'hasNoCurrentOrFutureEmployment', 'isReleased',
             'hasEmploymentHistory', 'hasStatus',
             'hasAnyStatus', 'doesNotHaveStatus', 'hasNoneOfStatuses',
 

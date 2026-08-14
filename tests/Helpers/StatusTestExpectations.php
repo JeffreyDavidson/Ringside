@@ -54,7 +54,7 @@ function expectToBeBookable(Wrestler|Referee|TagTeam $entity): void
     $entity = freshModel($entity);
     expect($entity->isEmployed())->toBeTrue();
     expect(RosterBookingEligibility::allows($entity))->toBeTrue();
-    expect($entity->isNotInEmployment())->toBeFalse();
+    expect($entity->hasNoCurrentOrFutureEmployment())->toBeFalse();
 }
 
 /**

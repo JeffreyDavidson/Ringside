@@ -72,7 +72,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeReinstatedException::available($individual);
         }
 
-        if ($individual->isNotInEmployment()) {
+        if ($individual->hasNoCurrentOrFutureEmployment()) {
             throw CannotBeReinstatedException::unemployed($individual);
         }
 

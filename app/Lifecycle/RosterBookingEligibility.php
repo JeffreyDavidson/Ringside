@@ -19,7 +19,7 @@ final class RosterBookingEligibility
         }
 
         return ! (
-            $rosterMember->isNotInEmployment()
+            $rosterMember->hasNoCurrentOrFutureEmployment()
             || $rosterMember->isSuspended()
             || $rosterMember->isInjured()
             || $rosterMember->hasFutureEmployment()
