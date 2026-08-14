@@ -116,6 +116,22 @@ describe('RefereesTable Component', function () {
                 ->assertSee('Retired Referee')
                 ->assertSee('Injured Referee');
         });
+
+        test('future employment filter returns only referees awaiting employment', function () {
+            $futureReferee = Referee::factory()->withFutureEmployment()->create([
+                'first_name' => 'Future',
+                'last_name' => 'Referee',
+            ]);
+            Referee::factory()->employed()->create([
+                'first_name' => 'Employed',
+                'last_name' => 'Referee',
+            ]);
+
+            livewire(Main::class)
+                ->set('filterValues.status', 'future_employment')
+                ->assertSee($futureReferee->full_name)
+                ->assertDontSee('Employed Referee');
+        });
     });
 
     describe('action integration', function () {

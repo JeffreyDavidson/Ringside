@@ -72,15 +72,4 @@ describe('StableQueryBuilder Unit Tests', function () {
         });
     });
 
-    describe('status-based scopes', function () {
-        test('retired stables can be retrieved', function () {
-            // Act
-            $retiredStables = Stable::retired()->get();
-
-            // Assert
-            expect($retiredStables)
-                ->toHaveCount(1)
-                ->and($retiredStables->contains($this->retiredStable))->toBeTrue();
-        });
-    });
 });

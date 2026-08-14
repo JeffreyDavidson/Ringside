@@ -12,8 +12,8 @@ use App\Models\Wrestlers\Wrestler;
  *
  * UNIT TEST SCOPE:
  * - Abstract base class functionality through concrete WrestlerBuilder implementation
- * - Common roster member query scopes (available, unavailable, employed, unemployed)
- * - Individual roster member status filtering (injured, suspended, retired)
+ * - Common roster member employment query scopes
+ * - Individual roster member retirement filtering
  * - Employment status management for individual entities
  * - Abstract class architecture and contract implementation
  *
@@ -52,29 +52,6 @@ describe('IndividualBuilder Unit Tests', function () {
         test('uses required traits', function () {
             // Act & Assert
             expect(class_uses(IndividualBuilder::class))->toContain(HasRetirementScopes::class);
-        });
-    });
-
-    describe('availability status scopes', function () {
-        test('available wrestlers can be retrieved', function () {
-            // Act
-            $availableWrestlers = Wrestler::available()->get();
-
-            // Assert - Available means employed, not injured, not suspended, not retired
-            expect($availableWrestlers)
-                ->toHaveCount(1)
-                ->and($availableWrestlers->contains($this->availableWrestler))->toBeTrue();
-        });
-
-        test('unavailable wrestlers can be retrieved', function () {
-            // Act
-            $unavailableWrestlers = Wrestler::unavailable()->get();
-
-            // Assert - Unavailable includes injured, suspended, retired, and unemployed
-            expect($unavailableWrestlers->pluck('id'))->toContain($this->injuredWrestler->id);
-            expect($unavailableWrestlers->pluck('id'))->toContain($this->suspendedWrestler->id);
-            expect($unavailableWrestlers->pluck('id'))->toContain($this->retiredWrestler->id);
-            expect($unavailableWrestlers->pluck('id'))->toContain($this->unemployedWrestler->id);
         });
     });
 
@@ -124,26 +101,6 @@ describe('IndividualBuilder Unit Tests', function () {
     });
 
     describe('individual roster member status scopes', function () {
-        test('injured wrestlers can be retrieved', function () {
-            // Act
-            $injuredWrestlers = Wrestler::injured()->get();
-
-            // Assert
-            expect($injuredWrestlers)
-                ->toHaveCount(1)
-                ->and($injuredWrestlers->contains($this->injuredWrestler))->toBeTrue();
-        });
-
-        test('suspended wrestlers can be retrieved', function () {
-            // Act
-            $suspendedWrestlers = Wrestler::suspended()->get();
-
-            // Assert
-            expect($suspendedWrestlers)
-                ->toHaveCount(1)
-                ->and($suspendedWrestlers->contains($this->suspendedWrestler))->toBeTrue();
-        });
-
         test('retired wrestlers can be retrieved', function () {
             // Act
             $retiredWrestlers = Wrestler::retired()->get();
@@ -158,7 +115,7 @@ describe('IndividualBuilder Unit Tests', function () {
     describe('query builder inheritance verification', function () {
         test('query scope methods return correct builder instance', function () {
             // Act
-            $builder = Wrestler::available();
+            $builder = Wrestler::employed();
 
             // Assert
             expect($builder)->toBeInstanceOf(WrestlerBuilder::class);
@@ -167,8 +124,7 @@ describe('IndividualBuilder Unit Tests', function () {
 
         test('chained scopes maintain builder type', function () {
             // Act
-            $builder = Wrestler::available()
-                ->employed()
+            $builder = Wrestler::employed()
                 ->whereNotNull('name');
 
             // Assert
@@ -177,31 +133,4 @@ describe('IndividualBuilder Unit Tests', function () {
         });
     });
 
-    describe('shared functionality consistency', function () {
-        test('availability scope combines all required conditions', function () {
-            // Arrange
-            $builder = Wrestler::available();
-
-            // Act
-            $sql = $builder->toSql();
-            $bindings = $builder->getBindings();
-
-            // Assert - Verify that available() combines employment, injury, suspension, and retirement checks
-            expect($sql)->toContain('where exists');
-            expect($sql)->toContain('and not exists');
-            expect($bindings)->toBeArray();
-        });
-
-        test('unavailable scope uses proper OR logic for exclusions', function () {
-            // Arrange
-            $builder = Wrestler::unavailable();
-
-            // Act
-            $sql = $builder->toSql();
-
-            // Assert - Verify OR logic for multiple unavailability conditions
-            expect($sql)->toContain('where (');
-            expect($sql)->toContain('or ');
-        });
-    });
 });

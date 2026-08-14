@@ -22,14 +22,14 @@ test('models resolve their concrete typed builders', function () {
 });
 
 test('shared roster query methods retain each concrete builder type', function () {
-    expect(Wrestler::query()->available())->toBeInstanceOf(WrestlerBuilder::class)
+    expect(Wrestler::query()->employed())->toBeInstanceOf(WrestlerBuilder::class)
         ->and(Manager::query()->employed())->toBeInstanceOf(ManagerBuilder::class)
-        ->and(Referee::query()->suspended())->toBeInstanceOf(RefereeBuilder::class)
+        ->and(Referee::query()->unemployed())->toBeInstanceOf(RefereeBuilder::class)
         ->and(TagTeam::query()->retired())->toBeInstanceOf(TagTeamBuilder::class);
 });
 
 test('domain-specific query methods retain their concrete builder types', function () {
-    expect(Wrestler::query()->available())->toBeInstanceOf(WrestlerBuilder::class)
-        ->and(TagTeam::query()->withMinimumWrestlers())->toBeInstanceOf(TagTeamBuilder::class)
+    expect(Wrestler::query()->retired())->toBeInstanceOf(WrestlerBuilder::class)
+        ->and(TagTeam::query()->futureEmployed())->toBeInstanceOf(TagTeamBuilder::class)
         ->and(Title::query()->active())->toBeInstanceOf(TitleBuilder::class);
 });

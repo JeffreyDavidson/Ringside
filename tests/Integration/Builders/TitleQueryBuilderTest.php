@@ -23,13 +23,6 @@ describe('TitleBuilder Query Scopes', function () {
             expect($futureActivatedTitles->pluck('id'))->toContain($futureActivatedTitle->id);
         });
 
-        test('retired titles can be retrieved', function () {
-            $retiredTitle = Title::factory()->retired()->create();
-
-            $retiredTitles = Title::query()->retired()->get();
-
-            expect($retiredTitles->pluck('id'))->toContain($retiredTitle->id);
-        });
     });
 
     describe('basic activity scopes', function () {
@@ -65,17 +58,6 @@ describe('TitleBuilder Query Scopes', function () {
             expect($pendingTitles->pluck('id'))->not->toContain($this->activeTitle->id);
             expect($pendingTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
         });
-    });
-
-    describe('retirement scopes', function () {
-        test('retired scope returns titles with current retirement', function () {
-            $retiredTitles = Title::query()->retired()->get();
-
-            expect($retiredTitles->pluck('id'))->toContain($this->retiredTitle->id);
-            expect($retiredTitles->pluck('id'))->not->toContain($this->activeTitle->id);
-            expect($retiredTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
-        });
-
     });
 
     describe('scope method chaining', function () {

@@ -15,7 +15,6 @@ use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Builders\Roster\RefereeBuilder;
-use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
@@ -104,7 +103,7 @@ class Main extends BaseTable
                     /** @var RefereeBuilder<Referee> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
-                        'future_employment' => $builder->where('status', EmploymentStatus::FutureEmployment),
+                        'future_employment' => $builder->futureEmployed(),
                         'released' => $builder->released(),
                         'unemployed' => $builder->unemployed(),
                         'retired' => $builder->retired(),

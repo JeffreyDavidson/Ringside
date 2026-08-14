@@ -117,6 +117,16 @@ describe('Main Component Integration', function () {
                 ->assertSee('Retired Wrestler')
                 ->assertSee('Injured Wrestler');
         });
+
+        test('future employment filter returns only wrestlers awaiting employment', function () {
+            $futureWrestler = Wrestler::factory()->withFutureEmployment()->create(['name' => 'Future Wrestler']);
+            Wrestler::factory()->employed()->create(['name' => 'Employed Wrestler']);
+
+            livewire(Main::class)
+                ->set('filterValues.status', 'future_employment')
+                ->assertSee($futureWrestler->name)
+                ->assertDontSee('Employed Wrestler');
+        });
     });
 
     describe('action integration', function () {

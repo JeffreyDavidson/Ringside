@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Builders\Titles;
 
-use App\Builders\Concerns\HasRetirementScopes;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -15,8 +14,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class TitleBuilder extends Builder
 {
-    use HasRetirementScopes;
-
     public function undebuted(): static
     {
         return $this->whereDoesntHave('activityPeriods');

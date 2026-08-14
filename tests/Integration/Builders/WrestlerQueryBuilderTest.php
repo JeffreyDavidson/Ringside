@@ -33,16 +33,6 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
     });
 
     describe('employment status scopes', function () {
-        test('available wrestlers can be retrieved', function () {
-            // Act
-            $availableWrestlers = Wrestler::available()->get();
-
-            // Assert
-            expect($availableWrestlers)
-                ->toHaveCount(1)
-                ->and($availableWrestlers->contains($this->availableWrestler))->toBeTrue();
-        });
-
         test('future employed wrestlers can be retrieved', function () {
             // Act
             $futureEmployedWrestlers = Wrestler::futureEmployed()->get();
@@ -75,16 +65,6 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
     });
 
     describe('status-based scopes', function () {
-        test('suspended wrestlers can be retrieved', function () {
-            // Act
-            $suspendedWrestlers = Wrestler::suspended()->get();
-
-            // Assert
-            expect($suspendedWrestlers)
-                ->toHaveCount(1)
-                ->and($suspendedWrestlers->contains($this->suspendedWrestler))->toBeTrue();
-        });
-
         test('retired wrestlers can be retrieved', function () {
             // Act
             $retiredWrestlers = Wrestler::retired()->get();
@@ -95,14 +75,5 @@ describe('WrestlerQueryBuilder Integration Tests', function () {
                 ->and($retiredWrestlers->contains($this->retiredWrestler))->toBeTrue();
         });
 
-        test('injured wrestlers can be retrieved', function () {
-            // Act
-            $injuredWrestlers = Wrestler::injured()->get();
-
-            // Assert
-            expect($injuredWrestlers)
-                ->toHaveCount(1)
-                ->and($injuredWrestlers->contains($this->injuredWrestler))->toBeTrue();
-        });
     });
 });

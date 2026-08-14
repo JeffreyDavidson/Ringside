@@ -46,20 +46,6 @@ test('disbanded stables can be retrieved', function () {
         ->and($inactiveStables->contains($inactiveStable))->toBeTrue();
 });
 
-test('retired stables can be retrieved', function () {
-    $activeStable = Stable::factory()->active()->create();
-    $futureActivatedStable = Stable::factory()->withFutureActivation()->create();
-    $inactiveStable = Stable::factory()->inactive()->create();
-    $retiredStable = Stable::factory()->retired()->create();
-    $unactivatedStable = Stable::factory()->unactivated()->create();
-
-    $retiredStables = Stable::retired()->get();
-
-    expect($retiredStables)
-        ->toHaveCount(1)
-        ->and($retiredStables->contains($retiredStable))->toBeTrue();
-});
-
 test('unestablished stables can be retrieved', function () {
     $activeStable = Stable::factory()->active()->create();
     $futureActivatedStable = Stable::factory()->withFutureActivation()->create();
