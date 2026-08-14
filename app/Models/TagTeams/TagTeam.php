@@ -89,7 +89,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
  *
  * @method static TagTeamBuilder<static>|TagTeam available()
- * @method static TagTeamBuilder<static>|TagTeam bookable()
+ * @method static TagTeamBuilder<static>|TagTeam belowMinimumWrestlers(int $count = 2)
  * @method static TagTeamBuilder<static>|TagTeam employed()
  * @method static \Database\Factories\TagTeams\TagTeamFactory factory($count = null, $state = [])
  * @method static TagTeamBuilder<static>|TagTeam futureEmployed()
@@ -101,7 +101,6 @@ use Illuminate\Support\Carbon;
  * @method static TagTeamBuilder<static>|TagTeam retired()
  * @method static TagTeamBuilder<static>|TagTeam suspended()
  * @method static TagTeamBuilder<static>|TagTeam unavailable()
- * @method static TagTeamBuilder<static>|TagTeam unbookable()
  * @method static TagTeamBuilder<static>|TagTeam unemployed()
  * @method static TagTeamBuilder<static>|TagTeam withMinimumWrestlers(int $count = 2)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|TagTeam withTrashed()

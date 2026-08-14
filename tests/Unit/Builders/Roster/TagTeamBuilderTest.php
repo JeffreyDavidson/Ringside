@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\TagTeams\TagTeam;
 
-test('bookable tag teams can be retrieved', function () {
+test('available tag teams with minimum wrestlers can be retrieved', function () {
     $futureEmployedTagTeam = TagTeam::factory()->withFutureEmployment()->create();
     $bookableTagTeam = TagTeam::factory()->bookable()->create();
     $suspendedTagTeam = TagTeam::factory()->suspended()->create();
@@ -18,11 +18,11 @@ test('bookable tag teams can be retrieved', function () {
         ['left_at' => now()],
     );
 
-    $bookableTagTeams = TagTeam::bookable()->get();
+    $availableTagTeams = TagTeam::available()->withMinimumWrestlers()->get();
 
-    expect($bookableTagTeams)
+    expect($availableTagTeams)
         ->toHaveCount(1)
-        ->and($bookableTagTeams->contains($bookableTagTeam))->toBeTrue();
+        ->and($availableTagTeams->contains($bookableTagTeam))->toBeTrue();
 });
 
 test('future employed tag teams can be retrieved', function () {
@@ -41,7 +41,7 @@ test('future employed tag teams can be retrieved', function () {
         ->and($futureEmployedTagTeams->contains($futureEmployedTagTeam))->toBeTrue();
 });
 
-test('unbookable tag teams can be retrieved', function () {
+test('tag teams below the minimum wrestler count can be retrieved', function () {
     $futureEmployedTagTeam = TagTeam::factory()->withFutureEmployment()->create();
     $bookableTagTeam = TagTeam::factory()->bookable()->create();
     $suspendedTagTeam = TagTeam::factory()->suspended()->create();
@@ -55,17 +55,12 @@ test('unbookable tag teams can be retrieved', function () {
         ['left_at' => now()],
     );
 
-    $unbookableTagTeams = TagTeam::unbookable()->get();
+    $undersizedTagTeams = TagTeam::belowMinimumWrestlers()->get();
 
-    expect($unbookableTagTeams)
-        ->toHaveCount(7)
-        ->and($unbookableTagTeams->contains($futureEmployedTagTeam))->toBeTrue()
-        ->and($unbookableTagTeams->contains($suspendedTagTeam))->toBeTrue()
-        ->and($unbookableTagTeams->contains($retiredTagTeam))->toBeTrue()
-        ->and($unbookableTagTeams->contains($releasedTagTeam))->toBeTrue()
-        ->and($unbookableTagTeams->contains($unemployedTagTeam))->toBeTrue()
-        ->and($unbookableTagTeams->contains($unbookableTagTeam))->toBeTrue()
-        ->and($unbookableTagTeams->contains($undersizedTagTeam))->toBeTrue();
+    expect($undersizedTagTeams)
+        ->toHaveCount(2)
+        ->and($undersizedTagTeams->contains($unbookableTagTeam))->toBeTrue()
+        ->and($undersizedTagTeams->contains($undersizedTagTeam))->toBeTrue();
 });
 
 test('released tag teams can be retrieved', function () {

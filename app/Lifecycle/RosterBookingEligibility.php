@@ -13,7 +13,18 @@ final class RosterBookingEligibility
     public static function allows(Wrestler|Referee|TagTeam $rosterMember): bool
     {
         if ($rosterMember instanceof TagTeam) {
-            return $rosterMember->currentWrestlers->every(
+            if (
+                $rosterMember->hasNoCurrentOrFutureEmployment()
+                || $rosterMember->isSuspended()
+                || $rosterMember->isRetired()
+                || $rosterMember->hasFutureEmployment()
+            ) {
+                return false;
+            }
+
+            $currentWrestlers = $rosterMember->currentWrestlers;
+
+            return $currentWrestlers->count() >= 2 && $currentWrestlers->every(
                 fn (Wrestler $wrestler): bool => self::allows($wrestler),
             );
         }

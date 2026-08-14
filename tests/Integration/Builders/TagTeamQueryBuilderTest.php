@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Builders\TagTeamBuilder;
+use App\Builders\Roster\TagTeamBuilder;
 use App\Models\TagTeams\TagTeam;
 
 /**
@@ -10,9 +10,9 @@ use App\Models\TagTeams\TagTeam;
  *
  * UNIT TEST SCOPE:
  * - Builder class structure and scope functionality
- * - Employment status filtering scopes (bookable, futureEmployed, unemployed, released)
+ * - Employment status filtering scopes (available, futureEmployed, unemployed, released)
  * - Status-based filtering scopes (suspended, retired)
- * - Complex business logic scopes (unbookable with multiple entities)
+ * - Current wrestler count scopes
  * - Query scope accuracy and entity isolation
  *
  * These tests verify that the TagTeamQueryBuilder correctly implements
@@ -31,20 +31,24 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
         $this->releasedTagTeam = TagTeam::factory()->released()->create();
         $this->unemployedTagTeam = TagTeam::factory()->unemployed()->create();
         $this->unbookableTagTeam = TagTeam::factory()->unbookable()->create();
+        $this->undersizedTagTeam = TagTeam::factory()->employed()->create();
+        $this->undersizedTagTeam->currentWrestlers()->updateExistingPivot(
+            $this->undersizedTagTeam->currentWrestlers()->firstOrFail(),
+            ['left_at' => now()],
+        );
     });
 
     describe('employment status scopes', function () {
-        test('bookable tag teams can be retrieved', function () {
-            // Use the existing bookable tag team from beforeEach
+        test('available tag teams with minimum wrestlers can be retrieved', function () {
             $tagTeam = $this->bookableTagTeam;
 
             // Act
-            $bookableTagTeams = TagTeam::bookable()->get();
+            $availableTagTeams = TagTeam::available()->withMinimumWrestlers()->get();
 
             // Assert
-            expect($bookableTagTeams)
+            expect($availableTagTeams)
                 ->toHaveCount(1)
-                ->and($bookableTagTeams->contains($tagTeam))->toBeTrue();
+                ->and($availableTagTeams->contains($tagTeam))->toBeTrue();
         });
 
         test('future employed tag teams can be retrieved', function () {
@@ -101,18 +105,16 @@ describe('TagTeamQueryBuilder Unit Tests', function () {
         });
     });
 
-    describe('complex business logic scopes', function () {
-        test('unbookable tag teams can be retrieved', function () {
+    describe('current wrestler count scopes', function () {
+        test('tag teams below the minimum wrestler count can be retrieved', function () {
             // Act
-            $unbookableTagTeams = TagTeam::unbookable()->get();
+            $undersizedTagTeams = TagTeam::belowMinimumWrestlers()->get();
 
-            // Assert - Unbookable includes any entity that cannot be booked
-            // (suspended, retired, released, unemployed, and unbookable)
-            expect($unbookableTagTeams->pluck('id'))->toContain($this->suspendedTagTeam->id);
-            expect($unbookableTagTeams->pluck('id'))->toContain($this->retiredTagTeam->id);
-            expect($unbookableTagTeams->pluck('id'))->toContain($this->releasedTagTeam->id);
-            expect($unbookableTagTeams->pluck('id'))->toContain($this->unemployedTagTeam->id);
-            expect($unbookableTagTeams->pluck('id'))->toContain($this->unbookableTagTeam->id);
+            // Assert
+            expect($undersizedTagTeams->pluck('id'))
+                ->toContain($this->unbookableTagTeam->id)
+                ->toContain($this->undersizedTagTeam->id)
+                ->not->toContain($this->bookableTagTeam->id);
         });
     });
 });
