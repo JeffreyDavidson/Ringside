@@ -201,7 +201,7 @@ describe('StableWrestler Pivot Model', function () {
             expect($pivotRecord->left_at)->toBeNull();
 
             // Test pivot relationships
-            expect($pivotRecord->wrestler->id)->toBe($this->wrestler->id);
+            expect($pivotRecord->wrestler?->id)->toBe($this->wrestler->id);
             expect($pivotRecord->stable->id)->toBe($this->stable->id);
         });
 

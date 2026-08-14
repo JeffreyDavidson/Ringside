@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Stables;
 
-use App\Builders\Roster\MembershipPeriodBuilder;
+use App\Builders\Roster\StableMembershipBuilder;
 use App\Models\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -22,18 +22,20 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  *
  * @property-read Stable $stable
- * @property-read TagTeam $tagTeam
+ * @property-read TagTeam|null $tagTeam
  *
- * @method static MembershipPeriodBuilder<static> current()
- * @method static MembershipPeriodBuilder<static> ended()
- * @method static MembershipPeriodBuilder<static> newModelQuery()
- * @method static MembershipPeriodBuilder<static> newQuery()
- * @method static MembershipPeriodBuilder<static> query()
+ * @method static StableMembershipBuilder<static> current()
+ * @method static StableMembershipBuilder<static> ended()
+ * @method static StableMembershipBuilder<static> forStableId(int $stableId)
+ * @method static StableMembershipBuilder<static> mostRecentlyJoinedFirst()
+ * @method static StableMembershipBuilder<static> newModelQuery()
+ * @method static StableMembershipBuilder<static> newQuery()
+ * @method static StableMembershipBuilder<static> query()
  *
  * @mixin \Eloquent
  */
 #[Fillable('stable_id', 'tag_team_id', 'joined_at', 'left_at')]
-#[UseEloquentBuilder(MembershipPeriodBuilder::class)]
+#[UseEloquentBuilder(StableMembershipBuilder::class)]
 class StableTagTeam extends Pivot
 {
     /** @var string */

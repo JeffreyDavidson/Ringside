@@ -199,7 +199,7 @@ describe('StableTagTeam Pivot Model', function () {
             expect($pivotRecord->left_at)->toBeNull();
 
             // Test pivot relationships
-            expect($pivotRecord->tagTeam->id)->toBe($this->tagTeam->id);
+            expect($pivotRecord->tagTeam?->id)->toBe($this->tagTeam->id);
             expect($pivotRecord->stable->id)->toBe($this->stable->id);
         });
 
