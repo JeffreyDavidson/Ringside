@@ -20,8 +20,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 ## Shared Concerns
 
-- `HasEmploymentScopes` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` queries for individual roster members and tag teams.
-- `HasRetirementScopes` provides the shared `retired()` query for individual roster members and tag teams whose tables filter retirement directly.
+- `FiltersByEmploymentStatus` provides relationship-backed `employed()`, `unemployed()`, `released()`, and `futureEmployed()` filters for individual roster members and tag teams.
+- `FiltersByRetirementStatus` provides the shared `retired()` filter for individual roster members and tag teams.
 - `HasNameSearch` provides first-name and last-name matching for models that store those columns.
 
 `EventMatchBuilder` owns reusable match-history queries for matches on past events and matches involving a specific wrestler or tag team.
