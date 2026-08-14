@@ -30,7 +30,7 @@ class PreviousManagers extends BasePreviousManagersTable
         return TagTeamManager::query()
             ->where('tag_team_id', $this->tagTeamId)
             ->ended()
-            ->orderByDesc('hired_at');
+            ->mostRecentlyHiredFirst();
     }
 
     public function configure(): void
