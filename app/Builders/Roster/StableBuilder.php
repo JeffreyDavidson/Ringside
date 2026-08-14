@@ -9,6 +9,7 @@ use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Stables\Stable;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -62,10 +63,6 @@ use Illuminate\Support\Facades\DB;
  *     ->established()
  *     ->belowMinimumMembers()
  *     ->get();
- *
- * // Storyline booking
- * $storylineReady = Stable::query()->availableForStorylines()->get();
- * $reunionCandidates = Stable::query()->availableForReunion()->get();
  *
  * // Complex queries
  * $futureStables = Stable::query()
@@ -150,15 +147,11 @@ class StableBuilder extends Builder
      */
     public function withMinimumMembers(): static
     {
-        /** @var static */
-        $result = $this->whereRaw('
-            (SELECT
-                COALESCE((SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id AND left_at IS NULL), 0) +
-                COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0)
-            ) >= ?
-        ', [StableMembershipData::MINIMUM_MEMBER_COUNT]);
-
-        return $result;
+        return $this->where(
+            $this->currentMemberCountExpression(),
+            '>=',
+            StableMembershipData::MINIMUM_MEMBER_COUNT,
+        );
     }
 
     /**
@@ -172,15 +165,11 @@ class StableBuilder extends Builder
      */
     public function belowMinimumMembers(): static
     {
-        /** @var static */
-        $result = $this->whereRaw('
-            (SELECT
-                COALESCE((SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id AND left_at IS NULL), 0) +
-                COALESCE((SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL), 0)
-            ) < ?
-        ', [StableMembershipData::MINIMUM_MEMBER_COUNT]);
-
-        return $result;
+        return $this->where(
+            $this->currentMemberCountExpression(),
+            '<',
+            StableMembershipData::MINIMUM_MEMBER_COUNT,
+        );
     }
 
     /**
@@ -197,16 +186,13 @@ class StableBuilder extends Builder
      * // Get all available stables for booking
      * $availableStables = Stable::query()->available()->get();
      *
-     * // Find available stables with managers
-     * $managedStables = Stable::query()
-     *     ->available()
-     *     ->whereHas('currentManagers')
-     *     ->get();
      * ```
      */
     public function available(): static
     {
-        return $this->availableForStorylines();
+        return $this->established()
+            ->withMinimumMembers()
+            ->whereNotRetired();
     }
 
     /**
@@ -233,124 +219,17 @@ class StableBuilder extends Builder
     public function unavailable(): static
     {
         $this->where(function (Builder $query) {
-            $query->whereDoesntHave('activityPeriods') // Unestablished
+            $query->whereDoesntHave('activityPeriods')
                 ->orWhere(function (Builder $subQuery) {
                     $subQuery->whereHas('activityPeriods')
-                        ->whereDoesntHave('currentActivityPeriod'); // Disbanded
+                        ->whereDoesntHave('currentActivityPeriod');
                 })
-                ->orWhereHas('currentRetirement'); // Retired
-        });
-
-        // Note: This doesn't include the "below minimum members" check to keep the query simple.
-        // For complete unavailability checking including member count, use specific methods
-        // like belowMinimumMembers() in combination with other conditions.
-
-        return $this;
-    }
-
-    /**
-     * Scope a query to include stables available for storylines.
-     *
-     * Filters stables that are currently established, have minimum members,
-     * and are not retired, making them available for booking in storylines.
-     * This is the primary implementation that the available() method delegates to.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function availableForStorylines(): static
-    {
-        return $this->established()
-            ->withMinimumMembers()
-            ->whereNotRetired();
-    }
-
-    /**
-     * Scope a query to include stables available for reunion.
-     *
-     * Filters stables that have been disbanded but are not retired,
-     * making them candidates for reunion storylines.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function availableForReunion(): static
-    {
-        return $this->disbanded()
-            ->whereNotRetired();
-    }
-
-    /**
-     * Scope a query to include stables with available members.
-     *
-     * Filters stables where all current members (wrestlers, tag teams, managers)
-     * are available for competition. This ensures the stable has a complete
-     * roster ready for storylines and matches.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get stables with all members available
-     * $stablesWithAvailableMembers = Stable::query()
-     *     ->withAvailableMembers()
-     *     ->get();
-     *
-     * // Find established stables ready for storylines
-     * $storylineReady = Stable::query()
-     *     ->established()
-     *     ->withAvailableMembers()
-     *     ->get();
-     * ```
-     */
-    public function withAvailableMembers(): static
-    {
-        $this->whereHas('currentWrestlers', function (Builder $query) {
-            $query->whereEmployed()
-                ->whereNotInjured()
-                ->whereNotSuspended()
-                ->whereNotRetired();
-        })
-            ->whereHas('currentTagTeams', function (Builder $query) {
-                $query->whereEmployed()
-                    ->whereNotSuspended()
-                    ->whereNotRetired();
-            })
-            ->whereHas('currentManagers', function (Builder $query) {
-                $query->whereEmployed()
-                    ->whereNotInjured()
-                    ->whereNotSuspended()
-                    ->whereNotRetired();
-            });
-
-        return $this;
-    }
-
-    /**
-     * Scope a query to include actively managed stables.
-     *
-     * Filters stables that have at least one current manager who is available.
-     * Managed stables typically have more storyline opportunities and structure.
-     *
-     * @return static The builder instance for method chaining
-     *
-     * @example
-     * ```php
-     * // Get all actively managed stables
-     * $managedStables = Stable::query()->activelyManaged()->get();
-     *
-     * // Find established stables with active management
-     * $wellManagedStables = Stable::query()
-     *     ->established()
-     *     ->activelyManaged()
-     *     ->get();
-     * ```
-     */
-    public function activelyManaged(): static
-    {
-        $this->whereHas('currentManagers', function (Builder $query) {
-            $query->whereEmployed()
-                ->whereNotInjured()
-                ->whereNotSuspended()
-                ->whereNotRetired();
+                ->orWhereHas('currentRetirement')
+                ->orWhere(
+                    $this->currentMemberCountExpression(),
+                    '<',
+                    StableMembershipData::MINIMUM_MEMBER_COUNT,
+                );
         });
 
         return $this;
@@ -378,57 +257,20 @@ class StableBuilder extends Builder
      */
     public function withMemberCount(int $min, ?int $max = null): static
     {
-        $memberCountExpression = DB::raw('(
-            (SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id) +
-            (SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id)
-        )');
-
-        $this->where($memberCountExpression, '>=', $min);
+        $this->where($this->currentMemberCountExpression(), '>=', $min);
 
         if ($max !== null) {
-            $this->where($memberCountExpression, '<=', $max);
+            $this->where($this->currentMemberCountExpression(), '<=', $max);
         }
 
         return $this;
     }
 
-    /**
-     * Alias for established() scope method.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function active(): static
+    private function currentMemberCountExpression(): Expression
     {
-        return $this->established();
-    }
-
-    /**
-     * Alias for disbanded() scope method.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function inactive(): static
-    {
-        return $this->disbanded();
-    }
-
-    /**
-     * Alias for unestablished() scope method.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function unactivated(): static
-    {
-        return $this->unestablished();
-    }
-
-    /**
-     * Alias for withFutureEstablishment() scope method.
-     *
-     * @return static The builder instance for method chaining
-     */
-    public function withFutureActivation(): static
-    {
-        return $this->withFutureEstablishment();
+        return DB::raw('(
+            (SELECT COUNT(*) FROM stables_wrestlers WHERE stable_id = stables.id AND left_at IS NULL) +
+            (SELECT COUNT(*) * 2 FROM stables_tag_teams WHERE stable_id = stables.id AND left_at IS NULL)
+        )');
     }
 }
