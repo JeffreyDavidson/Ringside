@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 
@@ -48,4 +49,37 @@ it('retrieves matches for a competitor and eager loads competitors', function ()
         ->and($tagTeamMatches)
         ->toHaveCount(1)
         ->and($tagTeamMatches->contains($tagTeamMatch))->toBeTrue();
+});
+
+it('retrieves matches officiated by a referee and eager loads every assigned referee', function () {
+    $referee = Referee::factory()->create();
+    $otherReferee = Referee::factory()->create();
+    $officiatedMatch = EventMatch::factory()->create();
+    $otherMatch = EventMatch::factory()->create();
+    $officiatedMatch->referees()->attach([$referee->id, $otherReferee->id]);
+    $otherMatch->referees()->attach($otherReferee);
+
+    $matches = EventMatch::query()->forReferee($referee)->get();
+
+    expect($matches)->toHaveCount(1)
+        ->and($matches->firstOrFail()->is($officiatedMatch))->toBeTrue()
+        ->and($matches->firstOrFail()->relationLoaded('referees'))->toBeTrue()
+        ->and($matches->firstOrFail()->referees)->toHaveCount(2);
+});
+
+it('orders matches by their event date with the latest event first', function () {
+    $oldestEvent = Event::factory()->past()->create(['date' => now()->subDays(3)]);
+    $latestEvent = Event::factory()->past()->create(['date' => now()->subDay()]);
+    $middleEvent = Event::factory()->past()->create(['date' => now()->subDays(2)]);
+    $oldestMatch = EventMatch::factory()->forEvent($oldestEvent)->create();
+    $latestMatch = EventMatch::factory()->forEvent($latestEvent)->create();
+    $middleMatch = EventMatch::factory()->forEvent($middleEvent)->create();
+
+    $matches = EventMatch::query()->latestEventFirst()->get();
+
+    expect($matches->modelKeys())->toBe([
+        $latestMatch->id,
+        $middleMatch->id,
+        $oldestMatch->id,
+    ]);
 });

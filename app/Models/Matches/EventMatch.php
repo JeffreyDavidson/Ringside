@@ -57,6 +57,8 @@ use Illuminate\Support\Carbon;
  * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
  * @method static EventMatchBuilder<static>|EventMatch forPastEvents()
  * @method static EventMatchBuilder<static>|EventMatch forCompetitor(Wrestler|TagTeam $competitor)
+ * @method static EventMatchBuilder<static>|EventMatch forReferee(Referee $referee)
+ * @method static EventMatchBuilder<static>|EventMatch latestEventFirst()
  * @method static EventMatchBuilder<static>|EventMatch newModelQuery()
  * @method static EventMatchBuilder<static>|EventMatch newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|EventMatch onlyTrashed()
