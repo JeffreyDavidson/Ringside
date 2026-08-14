@@ -31,5 +31,5 @@ class UserBuilder extends Builder
 {
     use HasNameSearch;
 
-    // Users don't extend SingleRosterMemberBuilder, so we include HasNameSearch directly
+    // Users don't extend IndividualBuilder, so they include HasNameSearch directly.
 }

@@ -102,7 +102,7 @@ WHERE (
 ## Applied To
 
 Currently used by:
-- `SingleRosterMemberBuilder` (Managers, Referees, Wrestlers)
+- `IndividualBuilder` (Managers, Referees, Wrestlers)
 - `UserBuilder`
 - Table components: Users, Managers (eliminates duplicated search logic)
 

@@ -16,7 +16,7 @@ use App\Models\Referees\Referee;
  *
  * @template TModel of Referee
  *
- * @extends SingleRosterMemberBuilder<TModel>
+ * @extends IndividualBuilder<TModel>
  *
  * @example
  * ```php
@@ -35,7 +35,7 @@ use App\Models\Referees\Referee;
  *     ->get();
  * ```
  */
-class RefereeBuilder extends SingleRosterMemberBuilder
+class RefereeBuilder extends IndividualBuilder
 {
     // Referees inherit all availability, employment, injury, retirement, and suspension scopes from base class
 

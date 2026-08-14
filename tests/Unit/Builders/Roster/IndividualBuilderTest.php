@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Roster\SingleRosterMemberBuilder;
+use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Models\Wrestlers\Wrestler;
 
 /**
- * Unit tests for SingleRosterMemberBuilder abstract base class.
+ * Unit tests for IndividualBuilder abstract base class.
  *
  * UNIT TEST SCOPE:
  * - Abstract base class functionality through concrete WrestlerBuilder implementation
@@ -18,16 +18,16 @@ use App\Models\Wrestlers\Wrestler;
  * - Employment status management for individual entities
  * - Abstract class architecture and contract implementation
  *
- * These tests verify that the SingleRosterMemberBuilder provides consistent
+ * These tests verify that the IndividualBuilder provides consistent
  * shared functionality for all individual roster member builders (Wrestler, Manager, Referee).
  * Uses WrestlerBuilder as the concrete implementation for testing abstract functionality.
  *
- * @see SingleRosterMemberBuilder
+ * @see IndividualBuilder
  */
-describe('SingleRosterMemberBuilder Unit Tests', function () {
+describe('IndividualBuilder Unit Tests', function () {
     beforeEach(function () {
         // Create wrestlers in all possible states for comprehensive scope testing
-        // Using Wrestler model since WrestlerBuilder extends SingleRosterMemberBuilder
+        // Using Wrestler model since WrestlerBuilder extends IndividualBuilder
         $this->futureEmployedWrestler = Wrestler::factory()->withFutureEmployment()->create();
         $this->suspendedWrestler = Wrestler::factory()->suspended()->create();
         $this->retiredWrestler = Wrestler::factory()->retired()->create();
@@ -41,19 +41,19 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
     });
 
     describe('abstract class architecture', function () {
-        test('wrestler builder extends single roster member builder', function () {
+        test('wrestler builder extends individual builder', function () {
             // Arrange
             $builder = Wrestler::query();
 
             // Assert
             expect($builder)->toBeInstanceOf(WrestlerBuilder::class);
-            expect($builder)->toBeInstanceOf(SingleRosterMemberBuilder::class);
+            expect($builder)->toBeInstanceOf(IndividualBuilder::class);
         });
 
         test('uses required traits', function () {
             // Act & Assert
-            expect(class_uses(SingleRosterMemberBuilder::class))->toContain(HasAvailabilityScopes::class);
-            expect(class_uses(SingleRosterMemberBuilder::class))->toContain(HasRetirementScopes::class);
+            expect(class_uses(IndividualBuilder::class))->toContain(HasAvailabilityScopes::class);
+            expect(class_uses(IndividualBuilder::class))->toContain(HasRetirementScopes::class);
         });
     });
 
@@ -164,7 +164,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
 
             // Assert
             expect($builder)->toBeInstanceOf(WrestlerBuilder::class);
-            expect($builder)->toBeInstanceOf(SingleRosterMemberBuilder::class);
+            expect($builder)->toBeInstanceOf(IndividualBuilder::class);
         });
 
         test('chained scopes maintain builder type', function () {
@@ -175,7 +175,7 @@ describe('SingleRosterMemberBuilder Unit Tests', function () {
 
             // Assert
             expect($builder)->toBeInstanceOf(WrestlerBuilder::class);
-            expect($builder)->toBeInstanceOf(SingleRosterMemberBuilder::class);
+            expect($builder)->toBeInstanceOf(IndividualBuilder::class);
         });
     });
 

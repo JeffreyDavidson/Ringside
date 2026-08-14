@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Builders\Concerns\HasAvailabilityScopes;
 use App\Builders\Concerns\HasRetirementScopes;
-use App\Builders\Roster\SingleRosterMemberBuilder;
+use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Builders\Titles\TitleBuilder;
@@ -33,8 +33,8 @@ describe('Builder Concerns Unit Tests', function () {
     describe('HasAvailabilityScopes trait functionality', function () {
         test('trait is used by builders or base classes', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
-            // SingleRosterMemberBuilder uses the trait, and other builders inherit from it
-            expect(class_uses(SingleRosterMemberBuilder::class))->toContain(HasAvailabilityScopes::class);
+            // IndividualBuilder uses the trait, and other builders inherit from it
+            expect(class_uses(IndividualBuilder::class))->toContain(HasAvailabilityScopes::class);
             expect(class_uses(TagTeamBuilder::class))->toContain(HasAvailabilityScopes::class);
 
             // Verify that methods are available on concrete builders
@@ -184,7 +184,7 @@ describe('Builder Concerns Unit Tests', function () {
     describe('HasRetirementScopes trait functionality', function () {
         test('trait is used by builders or base classes', function () {
             // Act & Assert - Verify trait usage (directly or through inheritance)
-            expect(class_uses(SingleRosterMemberBuilder::class))->toContain(HasRetirementScopes::class);
+            expect(class_uses(IndividualBuilder::class))->toContain(HasRetirementScopes::class);
             expect(class_uses(TagTeamBuilder::class))->toContain(HasRetirementScopes::class);
             expect(class_uses(TitleBuilder::class))->toContain(HasRetirementScopes::class);
 
