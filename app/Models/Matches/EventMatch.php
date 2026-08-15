@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Matches;
 
 use App\Builders\Matches\EventMatchBuilder;
+use App\Builders\Matches\MatchSideBuilder;
 use App\Collections\MatchCompetitorsCollection;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
@@ -173,7 +174,10 @@ class EventMatch extends Model implements SoftDeletable
     /** @return HasMany<MatchSide, $this> */
     public function sides(): HasMany
     {
-        return $this->hasMany(MatchSide::class, 'match_id')->orderBy('position');
+        $relation = $this->hasMany(MatchSide::class, 'match_id');
+        MatchSideBuilder::constrainToPositionOrder($relation->getQuery());
+
+        return $relation;
     }
 
     /** @return BelongsTo<MatchSide, $this> */
