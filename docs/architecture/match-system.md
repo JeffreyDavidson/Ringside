@@ -46,6 +46,8 @@ Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by El
 
 `MatchStipulation` is an optional match configuration selected from active definitions when a match is created or edited. The match retains that relationship as historical configuration even if the definition is later made inactive. Stipulation capabilities and match presentation must be implemented by the match domain when they are enforced; the model does not infer behavior from hard-coded slug lists.
 
+`AddMatchForEventAction` receives side-based `EventMatchData`, locks the owning event, allocates the next card position without reusing soft-deleted match numbers, and persists the match, officials, championship stakes, sides, and competitors in one transaction. Assignment Actions retain eligibility and scheduling-conflict enforcement for their respective relationships.
+
 ## Winner/Loser System
 
 ### Multiple Winners and Losers
