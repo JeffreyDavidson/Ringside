@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Livewire\Matches\Tables;
 
 use App\Actions\Matches\DeleteAction;
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<EventMatch> */
@@ -25,13 +25,13 @@ class Main extends BaseTable
     protected string $resourceName = 'matches';
 
     /**
-     * @return Builder<EventMatch>
+     * @return EventMatchBuilder<EventMatch>
      */
-    public function builder(): Builder
+    public function builder(): EventMatchBuilder
     {
         return EventMatch::query()
-            ->with(['event', 'competitors', 'result.winner'])
-            ->orderBy('events_matches.created_at', 'desc');
+            ->latestEventFirst()
+            ->with(['event', 'competitors', 'result.winner']);
     }
 
     public function configure(): void
