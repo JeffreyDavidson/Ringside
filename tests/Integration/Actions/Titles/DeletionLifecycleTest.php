@@ -7,11 +7,26 @@ use App\Actions\Titles\RestoreAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Spatie\PestPluginTestTime\testTime;
 
 beforeEach(function () {
     testTime()->freeze();
+});
+
+test('deleting a title ends its current championship reign', function () {
+    $title = Title::factory()->create();
+    $championship = TitleChampionship::factory()
+        ->for($title)
+        ->current()
+        ->create();
+    $deletedAt = now()->subDay()->startOfSecond();
+
+    resolve(DeleteAction::class)->handle($title, $deletedAt);
+
+    expect($championship->refresh()->lost_at)->toEqual($deletedAt)
+        ->and($title->refresh()->trashed())->toBeTrue();
 });
 
 test('it audits title deletion and restoration', function () {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Lifecycle\ChampionshipReignManager;
 use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamManager;
 use App\Models\TagTeams\TagTeamWrestler;
@@ -11,6 +12,8 @@ use Illuminate\Support\Carbon;
 
 class EndCurrentRelationshipsAction
 {
+    public function __construct(private readonly ChampionshipReignManager $championshipReigns) {}
+
     public function handle(TagTeam $tagTeam, Carbon $effectiveDate): void
     {
         TagTeamWrestler::query()
@@ -22,5 +25,7 @@ class EndCurrentRelationshipsAction
             ->where('tag_team_id', $tagTeam->id)
             ->current()
             ->update(['fired_at' => $effectiveDate]);
+
+        $this->championshipReigns->endCurrentReignsForChampion($tagTeam, $effectiveDate);
     }
 }
