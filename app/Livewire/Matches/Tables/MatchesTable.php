@@ -11,8 +11,11 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Referees\Referee;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
+use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use LogicException;
 
@@ -40,7 +43,7 @@ class MatchesTable extends DataTableComponent
         }
 
         return EventMatch::query()
-            ->with(['event', 'titles', 'competitors.competitor', 'winningSide.competitors.competitor'])
+            ->with(['event', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
             ->where('event_id', $this->eventId);
     }
 
@@ -64,15 +67,16 @@ class MatchesTable extends DataTableComponent
             Column::make(__('matches.match_type'), 'match_type')
                 ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
-            ArrayColumn::make(__('matches.competitors'))
-                ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(function (int $index, MatchCompetitor $value): string {
-                    $competitor = $value->competitor;
-                    $type = str($competitor->getMorphClass())->kebab()->plural();
+            Column::make(__('matches.competitors'))
+                ->label(fn (EventMatch $row): string => $row->competitors
+                    ->competitorsBySidePosition()
+                    ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor): string {
+                        $type = str($competitor->getMorphClass())->kebab()->plural();
 
-                    return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
-                })
-                ->separator(' vs '),
+                        return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
+                    })->join(' & '))
+                    ->join(' vs '))
+                ->html(),
             ArrayColumn::make(__('matches.referees'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->referees))
                 ->outputFormat(function (int $index, Referee $value): string {

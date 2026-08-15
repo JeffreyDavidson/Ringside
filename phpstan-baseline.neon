@@ -127,12 +127,6 @@ parameters:
 			path: app/Livewire/Matches/Forms/CreateEditForm.php
 
 		-
-			message: '#^Property App\\Livewire\\Matches\\Forms\\CreateEditForm\:\:\$competitors \(array\<int\>\) does not accept array\<int\<0, max\>, array\<string, array\>\>\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: app/Livewire/Matches/Modals/FormModal.php
-
-		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1

@@ -24,15 +24,17 @@ class CorrectNumberOfSides implements DataAwareRule, ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! isset($this->data['match_type'])) {
-            return; // No match type to validate against
+        if (! is_array($value)) {
+            return;
         }
 
-        $matchType = $this->data['match_type'] instanceof MatchType
-            ? $this->data['match_type']
-            : MatchType::tryFrom($this->data['match_type']);
+        $matchTypeValue = $this->data['matchType'] ?? $this->data['match_type'] ?? null;
+        $matchType = $matchTypeValue instanceof MatchType
+            ? $matchTypeValue
+            : (is_string($matchTypeValue) ? MatchType::tryFrom($matchTypeValue) : null);
+        $requiredSides = $matchType?->numberOfSides();
 
-        if ($matchType && $matchType->numberOfSides() !== count((array) $value)) {
+        if ($requiredSides !== null && $requiredSides !== count($value)) {
             $fail('This match does not have the required number of competitor sides.');
         }
     }

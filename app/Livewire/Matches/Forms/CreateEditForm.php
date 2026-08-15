@@ -9,9 +9,13 @@ use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
+use App\Rules\Matches\CompetitorsNotDuplicated;
+use App\Rules\Matches\CorrectNumberOfSides;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Enum;
@@ -41,7 +45,7 @@ use Illuminate\Validation\Rules\Enum;
  *
  * @property string $preview Match promotional preview content
  * @property MatchType $matchType Match type enum
- * @property array<int> $competitors Array of competitor IDs (wrestlers/tag teams)
+ * @property array<int, array{wrestlers?: array<int>, tag_teams?: array<int>}> $competitors Competitors grouped by side
  * @property array<int> $referees Array of referee IDs for match officials
  * @property array<int> $titles Array of title IDs at stake in the match
  */
@@ -95,7 +99,7 @@ class CreateEditForm extends BaseForm
      * Each side contains wrestlers and potentially tag teams for that side.
      * Structure: [0 => ['wrestlers' => [1, 2]], 1 => ['wrestlers' => [3, 4]]]
      *
-     * @var array<int, array{wrestlers: array<int>}> Competitors grouped by side
+     * @var array<int, array{wrestlers?: array<int>, tag_teams?: array<int>}> Competitors grouped by side
      */
     public array $competitors = [];
 
@@ -160,10 +164,27 @@ class CreateEditForm extends BaseForm
         // Load match type from enum property
         $this->matchType = $this->formModel->match_type;
 
-        // Load competitor IDs from relationships
         $this->referees = $this->formModel->referees->pluck('id')->toArray();
         $this->titles = $this->formModel->titles->pluck('id')->toArray();
-        $this->competitors = $this->formModel->competitors->pluck('wrestler_id')->toArray(); // Assuming wrestler_id is the foreign key
+        $this->competitors = $this->formModel->sides()
+            ->with('competitors.competitor')
+            ->get()
+            ->map(function (MatchSide $side): array {
+                return [
+                    'wrestlers' => $side->competitors
+                        ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof Wrestler)
+                        ->pluck('competitor_id')
+                        ->values()
+                        ->all(),
+                    'tag_teams' => $side->competitors
+                        ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof TagTeam)
+                        ->pluck('competitor_id')
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**
@@ -204,29 +225,25 @@ class CreateEditForm extends BaseForm
         $this->formModel->sides()->delete();
 
         // Create new competitor records using the side-based structure
-        foreach ($this->competitors as $sideNumber => $sideCompetitors) {
-            $side = $this->formModel->sides()->create(['position' => (int) $sideNumber]);
+        foreach ($this->competitors as $sideIndex => $sideCompetitors) {
+            $side = $this->formModel->sides()->create(['position' => $sideIndex + 1]);
 
             // Handle wrestlers for this side
-            if (isset($sideCompetitors['wrestlers'])) {
-                foreach ($sideCompetitors['wrestlers'] as $wrestlerId) {
-                    $this->formModel->competitors()->create([
-                        'competitor_type' => (new Wrestler())->getMorphClass(),
-                        'competitor_id' => $wrestlerId,
-                        'match_side_id' => $side->id,
-                    ]);
-                }
+            foreach ($sideCompetitors['wrestlers'] ?? [] as $wrestlerId) {
+                $this->formModel->competitors()->create([
+                    'competitor_type' => (new Wrestler())->getMorphClass(),
+                    'competitor_id' => $wrestlerId,
+                    'match_side_id' => $side->id,
+                ]);
             }
 
             // Handle tag teams for this side (when implemented)
-            if (isset($sideCompetitors['tag_teams'])) {
-                foreach ($sideCompetitors['tag_teams'] as $tagTeamId) {
-                    $this->formModel->competitors()->create([
-                        'competitor_type' => (new TagTeam())->getMorphClass(),
-                        'competitor_id' => $tagTeamId,
-                        'match_side_id' => $side->id,
-                    ]);
-                }
+            foreach ($sideCompetitors['tag_teams'] ?? [] as $tagTeamId) {
+                $this->formModel->competitors()->create([
+                    'competitor_type' => (new TagTeam())->getMorphClass(),
+                    'competitor_id' => $tagTeamId,
+                    'match_side_id' => $side->id,
+                ]);
             }
         }
     }
@@ -319,6 +336,11 @@ class CreateEditForm extends BaseForm
 
         // Add dynamic competitor validation based on match type
         $competitorRules = $this->getCompetitorValidationRules();
+        $competitorRules['competitors'] = [
+            ...$competitorRules['competitors'],
+            new CorrectNumberOfSides(),
+            new CompetitorsNotDuplicated(),
+        ];
 
         return array_merge($baseRules, $competitorRules);
     }

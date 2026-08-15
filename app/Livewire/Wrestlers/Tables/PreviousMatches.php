@@ -32,7 +32,7 @@ class PreviousMatches extends BasePreviousMatchesTable
 
         return EventMatch::query()
             ->forPastEvents()
-            ->with(['titles', 'competitors.competitor', 'winningSide.competitors.competitor'])
+            ->with(['titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
             ->forCompetitor($wrestler)
             ->latestEventFirst();
     }
