@@ -50,13 +50,11 @@ class AddTagTeamsToMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $tagTeams, int $sideNumber): void
     {
-        // Pre-filter tag teams to ensure only eligible teams are processed
-        $eligibleTagTeams = $tagTeams->filter(
-            fn (TagTeam $tagTeam) => $this->isTagTeamEligibleForMatch($tagTeam, $eventMatch)
-        )->unique('id')->values();
+        $requestedTagTeams = $tagTeams->unique('id')->values();
 
-        // Validate we have tag teams to add after filtering
-        if ($eligibleTagTeams->isEmpty()) {
+        if ($requestedTagTeams->isEmpty() || $requestedTagTeams->contains(
+            fn (TagTeam $tagTeam): bool => ! RosterBookingEligibility::allows($tagTeam)
+        )) {
             throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
 
@@ -65,12 +63,11 @@ class AddTagTeamsToMatchAction
             throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
-        DB::transaction(function () use ($eventMatch, $eligibleTagTeams, $sideNumber): void {
-            $this->conflictService->ensureTagTeamsCanBeAssigned($eventMatch, $eligibleTagTeams);
+        DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
+            $this->conflictService->ensureTagTeamsCanBeAssigned($eventMatch, $requestedTagTeams);
             $side = $eventMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
-            // Add each eligible tag team to the specified side
-            $eligibleTagTeams->each(function (TagTeam $tagTeam) use ($eventMatch, $side) {
+            $requestedTagTeams->each(function (TagTeam $tagTeam) use ($eventMatch, $side): void {
                 $eventMatch->competitors()->create([
                     'competitor_id' => $tagTeam->id,
                     'competitor_type' => $tagTeam->getMorphClass(),
@@ -78,27 +75,5 @@ class AddTagTeamsToMatchAction
                 ]);
             });
         });
-    }
-
-    /**
-     * Check if a tag team is eligible to compete in the match.
-     *
-     * @param  TagTeam  $tagTeam  The tag team to validate
-     * @param  EventMatch  $eventMatch  The match they would compete in
-     * @return bool True if the tag team can compete
-     */
-    private function isTagTeamEligibleForMatch(TagTeam $tagTeam, EventMatch $eventMatch): bool
-    {
-        // Basic availability checks - tag team must be active and available
-        if (! RosterBookingEligibility::allows($tagTeam)) {
-            return false;
-        }
-
-        // Check for conflicts with existing match assignments
-        // Note: More complex conflict checking would be implemented here
-        // such as checking for double-booking on the same event date
-        // Could validate against $eventMatch->event->date for scheduling conflicts
-
-        return true;
     }
 }

@@ -47,45 +47,20 @@ class AddTitlesToMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $titles): void
     {
-        // Pre-filter titles to ensure only eligible championships are processed
-        $eligibleTitles = $titles->filter(
-            fn (Title $title) => $this->isTitleEligibleForMatch($title, $eventMatch)
-        )->unique('id')->values();
+        $requestedTitles = $titles->unique('id')->values();
 
-        // Validate we have titles to add after filtering
-        if ($eligibleTitles->isEmpty()) {
+        if ($requestedTitles->isEmpty() || $requestedTitles->contains(
+            fn (Title $title): bool => ! $title->isCurrentlyActive()
+        )) {
             throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
-        DB::transaction(function () use ($eventMatch, $eligibleTitles): void {
-            $this->conflictService->ensureTitlesCanBeAssigned($eventMatch, $eligibleTitles);
+        DB::transaction(function () use ($eventMatch, $requestedTitles): void {
+            $this->conflictService->ensureTitlesCanBeAssigned($eventMatch, $requestedTitles);
 
-            // Add each eligible title as championship stakes
-            $eligibleTitles->each(function (Title $title) use ($eventMatch) {
+            $requestedTitles->each(function (Title $title) use ($eventMatch): void {
                 $eventMatch->titles()->attach($title->id);
             });
         });
-    }
-
-    /**
-     * Check if a title is eligible to be at stake in the match.
-     *
-     * @param  Title  $title  The title to validate
-     * @param  EventMatch  $eventMatch  The match where it would be at stake
-     * @return bool True if the title can be defended/competed for
-     */
-    private function isTitleEligibleForMatch(Title $title, EventMatch $eventMatch): bool
-    {
-        // Basic availability checks - title must be active and available
-        if (! $title->isCurrentlyActive()) {
-            return false;
-        }
-
-        // Check for conflicts with existing title defenses
-        // Note: More complex validation would be implemented here
-        // such as ensuring the current champion is participating in the match
-        // Could validate against $eventMatch->event->date for scheduling conflicts
-
-        return true;
     }
 }

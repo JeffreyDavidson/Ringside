@@ -48,13 +48,11 @@ class AddWrestlersToMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $wrestlers, int $sideNumber): void
     {
-        // Pre-filter wrestlers to ensure only eligible competitors are processed
-        $eligibleWrestlers = $wrestlers->filter(
-            fn (Wrestler $wrestler) => $this->isWrestlerEligibleForMatch($wrestler, $eventMatch)
-        )->unique('id')->values();
+        $requestedWrestlers = $wrestlers->unique('id')->values();
 
-        // Validate we have wrestlers to add after filtering
-        if ($eligibleWrestlers->isEmpty()) {
+        if ($requestedWrestlers->isEmpty() || $requestedWrestlers->contains(
+            fn (Wrestler $wrestler): bool => ! RosterBookingEligibility::allows($wrestler)
+        )) {
             throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }
 
@@ -63,12 +61,11 @@ class AddWrestlersToMatchAction
             throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
-        DB::transaction(function () use ($eventMatch, $eligibleWrestlers, $sideNumber): void {
-            $this->conflictService->ensureWrestlersCanBeAssigned($eventMatch, $eligibleWrestlers);
+        DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
+            $this->conflictService->ensureWrestlersCanBeAssigned($eventMatch, $requestedWrestlers);
             $side = $eventMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
-            // Add each eligible wrestler to the specified side
-            $eligibleWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $side) {
+            $requestedWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $side): void {
                 $eventMatch->competitors()->create([
                     'competitor_id' => $wrestler->id,
                     'competitor_type' => $wrestler->getMorphClass(),
@@ -76,27 +73,5 @@ class AddWrestlersToMatchAction
                 ]);
             });
         });
-    }
-
-    /**
-     * Check if a wrestler is eligible to compete in the match.
-     *
-     * @param  Wrestler  $wrestler  The wrestler to validate
-     * @param  EventMatch  $eventMatch  The match they would compete in
-     * @return bool True if the wrestler can compete
-     */
-    private function isWrestlerEligibleForMatch(Wrestler $wrestler, EventMatch $eventMatch): bool
-    {
-        // Basic availability checks - wrestler must be active and available
-        if (! RosterBookingEligibility::allows($wrestler)) {
-            return false;
-        }
-
-        // Check for conflicts with existing match assignments
-        // Note: More complex conflict checking would be implemented here
-        // such as checking for double-booking on the same event date
-        // Could validate against $eventMatch->event->date for scheduling conflicts
-
-        return true;
     }
 }

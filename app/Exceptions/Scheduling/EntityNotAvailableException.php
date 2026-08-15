@@ -10,6 +10,6 @@ final class EntityNotAvailableException extends BaseBusinessException
 {
     public static function forMatchAssignment(string $entityType): static
     {
-        return new self("No eligible {$entityType} were provided for match assignment.");
+        return new self("Selected {$entityType} must all be eligible for match assignment.");
     }
 }
