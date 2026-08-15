@@ -13,6 +13,7 @@ use App\Models\Stables\StableTagTeam;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
+/** @extends DataTableComponent<StableTagTeam> */
 class PreviousTagTeams extends DataTableComponent
 {
     use ShowTableTrait;

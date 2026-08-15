@@ -31,6 +31,7 @@ use App\Models\TagTeams\TagTeam;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<TagTeam> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

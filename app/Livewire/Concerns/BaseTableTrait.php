@@ -116,7 +116,7 @@ trait BaseTableTrait
                 ];
             })
             ->setTdAttributes(function (Column $column, $row, $columnIndex, $rowIndex): array {
-                if ($this->columns->count() - 1 === $columnIndex) {
+                if (count($this->getColumns()) - 1 === $columnIndex) {
                     return [
                         'default' => false,
                         'default-styling' => false,

@@ -13,6 +13,7 @@ use App\Models\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
+/** @extends DataTableComponent<StableWrestler> */
 class PreviousWrestlers extends DataTableComponent
 {
     use ShowTableTrait;

@@ -20,6 +20,7 @@ use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Event> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

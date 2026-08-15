@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Venue> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

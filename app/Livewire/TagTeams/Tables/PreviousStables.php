@@ -9,6 +9,7 @@ use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
+/** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
 {
     protected string $databaseTableName = 'stables';

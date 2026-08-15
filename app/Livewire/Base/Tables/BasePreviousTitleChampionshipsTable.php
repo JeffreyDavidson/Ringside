@@ -13,6 +13,9 @@ use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @extends DataTableComponent<TitleChampionship>
+ */
 abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 {
     use ShowTableTrait;

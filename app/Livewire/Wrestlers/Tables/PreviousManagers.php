@@ -9,6 +9,7 @@ use App\Models\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
+/** @extends BasePreviousManagersTable<WrestlerManager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
     /**

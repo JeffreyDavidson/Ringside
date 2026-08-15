@@ -34,6 +34,7 @@ use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Managers\Manager;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Manager> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

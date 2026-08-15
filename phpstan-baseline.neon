@@ -67,18 +67,6 @@ parameters:
 			path: app/Livewire/Base/Tables/BasePreviousMatchesTable.php
 
 		-
-			message: '#^Access to an undefined property App\\Livewire\\Base\\Tables\\BaseTable\:\:\$columns\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Base/Tables/BaseTable.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Events\\EventBuilder\<App\\Models\\Events\\Event\>\) of method App\\Livewire\\Events\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Events/Tables/Main.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
 			identifier: property.notFound
 			count: 2
@@ -139,30 +127,6 @@ parameters:
 			path: app/Livewire/Managers/Components/Actions.php
 
 		-
-			message: '#^Return type \(App\\Builders\\Roster\\ManagerBuilder\<App\\Models\\Managers\\Manager\>\) of method App\\Livewire\\Managers\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Managers/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\Managers\\Tables\\PreviousStables\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Managers/Tables/PreviousStables.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamManager\>\) of method App\\Livewire\\Managers\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Managers/Tables/PreviousTagTeams.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Wrestlers\\WrestlerManager\>\) of method App\\Livewire\\Managers\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Managers/Tables/PreviousWrestlers.php
-
-		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
 			count: 1
@@ -181,8 +145,8 @@ parameters:
 			path: app/Livewire/Matches/Modals/FormModal.php
 
 		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Matches\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
+			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Matches\\MatchResult\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Livewire/Matches/Tables/Main.php
 
@@ -190,55 +154,7 @@ parameters:
 			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Matches\\MatchResult\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
-			path: app/Livewire/Matches/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Matches\\Tables\\MatchesTable\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
 			path: app/Livewire/Matches/Tables/MatchesTable.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Matches\\MatchResult\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Matches/Tables/MatchesTable.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Roster\\RefereeBuilder\<App\\Models\\Referees\\Referee\>\) of method App\\Livewire\\Referees\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Referees/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Referees\\Tables\\PreviousMatches\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Referees/Tables/PreviousMatches.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Roster\\StableBuilder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\Stables\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Stables/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Managers\\Manager\>\) of method App\\Livewire\\Stables\\Tables\\PreviousManagers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Stables/Tables/PreviousManagers.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\StableTagTeam\>\) of method App\\Livewire\\Stables\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Stables/Tables/PreviousTagTeams.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\StableWrestler\>\) of method App\\Livewire\\Stables\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Stables/Tables/PreviousWrestlers.php
 
 		-
 			message: '#^Instanceof between Illuminate\\View\\View and Illuminate\\Contracts\\View\\View will always evaluate to true\.$#'
@@ -317,111 +233,8 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Livewire/TagTeams/Components/Actions.php
-
 		-
 			message: '#^Method App\\Livewire\\TagTeams\\Components\\Actions\:\:executeActionWithContext\(\) has parameter \$actionParams with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Livewire/TagTeams/Components/Actions.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Roster\\TagTeamBuilder\<App\\Models\\TagTeams\\TagTeam\>\) of method App\\Livewire\\TagTeams\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/TagTeams/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamManager\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousManagers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/TagTeams/Tables/PreviousManagers.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousMatches\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/TagTeams/Tables/PreviousMatches.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousStables\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/TagTeams/Tables/PreviousStables.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Titles\\TitleChampionship\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousTitleChampionships\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/TagTeams/Tables/PreviousTitleChampionships.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamWrestler\>\) of method App\\Livewire\\TagTeams\\Tables\\PreviousWrestlers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/TagTeams/Tables/PreviousWrestlers.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Titles\\TitleBuilder\<App\\Models\\Titles\\Title\>\) of method App\\Livewire\\Titles\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Titles/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Titles\\TitleChampionship\>\) of method App\\Livewire\\Titles\\Tables\\PreviousTitleChampionships\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Titles/Tables/PreviousTitleChampionships.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Users\\UserBuilder\<App\\Models\\Users\\User\>\) of method App\\Livewire\\Users\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Users/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Events\\Venue\>\) of method App\\Livewire\\Venues\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Venues/Tables/Main.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Events\\EventBuilder\<App\\Models\\Events\\Event\>\) of method App\\Livewire\\Venues\\Tables\\PreviousEvents\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Venues/Tables/PreviousEvents.php
-
-		-
-			message: '#^Return type \(App\\Builders\\Roster\\WrestlerBuilder\<App\\Models\\Wrestlers\\Wrestler\>\) of method App\\Livewire\\Wrestlers\\Tables\\Main\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Wrestlers/Tables/Main.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Wrestlers\\WrestlerManager\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousManagers\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Wrestlers/Tables/PreviousManagers.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Matches\\EventMatch\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousMatches\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Wrestlers/Tables/PreviousMatches.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Stables\\Stable\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousStables\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Wrestlers/Tables/PreviousStables.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\TagTeams\\TagTeamWrestler\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousTagTeams\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Wrestlers/Tables/PreviousTagTeams.php
-
-		-
-			message: '#^Return type \(Illuminate\\Database\\Eloquent\\Builder\<App\\Models\\Titles\\TitleChampionship\>\) of method App\\Livewire\\Wrestlers\\Tables\\PreviousTitleChampionships\:\:builder\(\) should be compatible with return type \(Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\) of method App\\Livewire\\Table\\DataTableComponent\:\:builder\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: app/Livewire/Wrestlers/Tables/PreviousTitleChampionships.php

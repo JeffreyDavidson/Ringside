@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * @template TModel of Model
+ */
 abstract class DataTableComponent extends Component
 {
     use WithPagination;
@@ -45,7 +48,7 @@ abstract class DataTableComponent extends Component
     /**
      * Return the query builder for the table data.
      *
-     * @return Builder<Model>
+     * @return Builder<TModel>
      */
     abstract public function builder(): Builder;
 
@@ -129,7 +132,7 @@ abstract class DataTableComponent extends Component
     }
 
     /**
-     * @return LengthAwarePaginator<int, Model>
+     * @return LengthAwarePaginator<int, TModel>
      */
     protected function getRows(): LengthAwarePaginator
     {
@@ -147,7 +150,7 @@ abstract class DataTableComponent extends Component
     }
 
     /**
-     * @param  Builder<Model>  $query
+     * @param  Builder<TModel>  $query
      */
     protected function applySearch(Builder $query): void
     {
@@ -172,7 +175,7 @@ abstract class DataTableComponent extends Component
     }
 
     /**
-     * @param  Builder<Model>  $query
+     * @param  Builder<TModel>  $query
      */
     protected function applyFilters(Builder $query): void
     {
@@ -183,7 +186,7 @@ abstract class DataTableComponent extends Component
     }
 
     /**
-     * @param  Builder<Model>  $query
+     * @param  Builder<TModel>  $query
      */
     protected function applySorting(Builder $query): void
     {

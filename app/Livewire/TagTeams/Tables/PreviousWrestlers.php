@@ -13,6 +13,7 @@ use App\Models\TagTeams\TagTeamWrestler;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
+/** @extends DataTableComponent<TagTeamWrestler> */
 class PreviousWrestlers extends DataTableComponent
 {
     use ShowTableTrait;

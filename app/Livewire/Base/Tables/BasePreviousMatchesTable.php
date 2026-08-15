@@ -15,6 +15,9 @@ use App\Models\Matches\MatchCompetitor;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 
+/**
+ * @extends DataTableComponent<EventMatch>
+ */
 abstract class BasePreviousMatchesTable extends DataTableComponent
 {
     use ShowTableTrait;

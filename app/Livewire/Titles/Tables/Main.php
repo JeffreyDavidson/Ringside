@@ -51,6 +51,7 @@ use Illuminate\Support\Facades\Gate;
  * // - Tag Team Titles (Inactive, First Activated: 2021-03-10)
  * ```
  */
+/** @extends BaseTable<Title> */
 class Main extends BaseTable
 {
     /**

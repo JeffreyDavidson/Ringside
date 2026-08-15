@@ -18,6 +18,7 @@ use App\Models\Wrestlers\Wrestler;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<Wrestler> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = true;

@@ -13,6 +13,7 @@ use App\Models\Matches\MatchCompetitor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
+/** @extends BaseTable<EventMatch> */
 class Main extends BaseTable
 {
     protected bool $showActionColumn = false;

@@ -11,6 +11,9 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\TagTeams\TagTeamWrestler;
 
+/**
+ * @extends DataTableComponent<TagTeamWrestler>
+ */
 abstract class BasePreviousTagTeamsTable extends DataTableComponent
 {
     use ShowTableTrait;
