@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Builders\Lifecycle\LifecycleTransitionBuilder;
 use App\Models\Lifecycle\LifecycleTransition;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -14,8 +15,9 @@ trait HasLifecycleTransitions
     /** @return MorphMany<LifecycleTransition, $this> */
     public function lifecycleTransitions(): MorphMany
     {
-        return $this->morphMany(LifecycleTransition::class, 'subject')
-            ->orderBy('effective_at')
-            ->orderBy('id');
+        $relation = $this->morphMany(LifecycleTransition::class, 'subject');
+        LifecycleTransitionBuilder::constrainChronologically($relation->getQuery());
+
+        return $relation;
     }
 }
