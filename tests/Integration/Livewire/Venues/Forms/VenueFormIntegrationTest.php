@@ -7,7 +7,7 @@ use App\Models\Events\Venue;
 use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Exists;
+use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Unique;
 use JMac\Testing\Double;
 use Livewire\Component;
@@ -75,19 +75,18 @@ describe('VenueForm Integration Tests', function () {
             expect($rules['city'])->toContain('max:255');
         });
 
-        test('state validation enforces database referential integrity', function () {
+        test('state validation accepts supported United States values', function () {
             $rules = $this->form->rulesForTesting();
 
             expect($rules['state'])->toContain('required');
             expect($rules['state'])->toContain('string');
 
-            // Should validate against states table
             $stateRules = $rules['state'];
 
-            $hasExistsRule = collect($stateRules)->contains(function ($rule) {
-                return $rule instanceof Exists;
+            $hasEnumRule = collect($stateRules)->contains(function ($rule) {
+                return $rule instanceof Enum;
             });
-            expect($hasExistsRule)->toBeTrue();
+            expect($hasEnumRule)->toBeTrue();
         });
 
         test('zipcode validation enforces US postal format', function () {
@@ -152,17 +151,16 @@ describe('VenueForm Integration Tests', function () {
             expect($rules['zipcode'])->toContain('digits:5');
         });
 
-        test('validates state against existing state records', function () {
+        test('validates state against the supported state enum', function () {
             $rules = $this->form->rulesForTesting();
 
-            // Should validate that state exists in states table
             $stateRules = $rules['state'];
 
-            $existsRule = collect($stateRules)->first(function ($rule) {
-                return $rule instanceof Exists;
+            $enumRule = collect($stateRules)->first(function ($rule) {
+                return $rule instanceof Enum;
             });
 
-            expect($existsRule)->not()->toBeNull();
+            expect($enumRule)->not()->toBeNull();
         });
     });
 

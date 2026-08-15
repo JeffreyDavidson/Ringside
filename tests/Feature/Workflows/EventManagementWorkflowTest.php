@@ -8,8 +8,6 @@ use App\Livewire\Venues\Modals\FormModal as VenueFormModal;
 use App\Livewire\Venues\Tables\Main as VenuesTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 use function Pest\Laravel\actingAs;
 
@@ -18,24 +16,6 @@ use function Pest\Laravel\actingAs;
  * Tests realistic scenarios for creating venues, scheduling events, and managing event details.
  */
 describe('Venue Creation and Setup Workflow', function () {
-    beforeEach(function () {
-        // Create states table if it doesn't exist
-        if (! Schema::hasTable('states')) {
-            Schema::create('states', function ($table) {
-                $table->id();
-                $table->string('name')->unique();
-                $table->timestamps();
-            });
-        }
-
-        // Insert required state data
-        DB::table('states')->insertOrIgnore([
-            ['name' => 'NY', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'CA', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'IL', 'created_at' => now(), 'updated_at' => now()],
-        ]);
-    });
-
     test('administrator can create venue through complete UI workflow', function () {
         // Given: An authenticated administrator
         $admin = administrator();
@@ -58,7 +38,7 @@ describe('Venue Creation and Setup Workflow', function () {
             'name' => 'Madison Square Garden',
             'street_address' => '4 Pennsylvania Plaza',
             'city' => 'New York',
-            'state' => 'NY',
+            'state' => 'New York',
             'zipcode' => '10001',
         ];
 
@@ -78,7 +58,7 @@ describe('Venue Creation and Setup Workflow', function () {
 
         $venue = Venue::where('name', 'Madison Square Garden')->firstOrFail();
         expect($venue->city)->toBe('New York');
-        expect($venue->state)->toBe('NY');
+        expect($venue->state)->toBe('New York');
         expect($venue->street_address)->toBe('4 Pennsylvania Plaza');
         expect($venue->zipcode)->toBe('10001');
 
@@ -108,7 +88,7 @@ describe('Venue Creation and Setup Workflow', function () {
         expect($component->get('form.zipcode'))->not->toBeEmpty();
 
         // And: Ensure state and zipcode are valid for test
-        $component->set('form.state', 'CA');
+        $component->set('form.state', 'California');
         $component->set('form.zipcode', '90210');
 
         // And: Capture the venue name before submission (form gets reset after)
@@ -131,7 +111,7 @@ describe('Event Creation and Scheduling Workflow', function () {
         $venue = Venue::factory()->create([
             'name' => 'Allstate Arena',
             'city' => 'Rosemont',
-            'state' => 'IL',
+            'state' => 'Illinois',
         ]);
 
         // When: Navigating to events index
