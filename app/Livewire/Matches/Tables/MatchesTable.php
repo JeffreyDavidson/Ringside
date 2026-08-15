@@ -114,6 +114,9 @@ class MatchesTable extends DataTableComponent
                         return $row->match_finish->label();
                     }
                 )->html(),
+            Column::make(__('core.actions'))
+                ->view('components.matches.table-result-action')
+                ->html(),
         ];
     }
 }
