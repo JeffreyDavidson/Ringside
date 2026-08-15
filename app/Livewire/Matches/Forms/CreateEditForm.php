@@ -166,7 +166,7 @@ class CreateEditForm extends BaseForm
 
         $this->referees = $this->formModel->referees->pluck('id')->toArray();
         $this->titles = $this->formModel->titles->pluck('id')->toArray();
-        $this->competitors = $this->formModel->sides()
+        $competitorsBySide = $this->formModel->sides()
             ->with('competitors.competitor')
             ->get()
             ->map(function (MatchSide $side): array {
@@ -185,6 +185,13 @@ class CreateEditForm extends BaseForm
             })
             ->values()
             ->all();
+
+        $this->competitors = $this->matchType->usesIndividualCompetitorSides()
+            ? [[
+                'wrestlers' => collect($competitorsBySide)->pluck('wrestlers')->flatten()->values()->all(),
+                'tag_teams' => [],
+            ]]
+            : $competitorsBySide;
     }
 
     /**
@@ -223,6 +230,20 @@ class CreateEditForm extends BaseForm
         // Delete existing competitors
         $this->formModel->competitors()->delete();
         $this->formModel->sides()->delete();
+
+        if ($this->matchType->usesIndividualCompetitorSides()) {
+            foreach ($this->competitors[0]['wrestlers'] ?? [] as $sideIndex => $wrestlerId) {
+                $side = $this->formModel->sides()->create(['position' => $sideIndex + 1]);
+
+                $this->formModel->competitors()->create([
+                    'competitor_type' => (new Wrestler())->getMorphClass(),
+                    'competitor_id' => $wrestlerId,
+                    'match_side_id' => $side->id,
+                ]);
+            }
+
+            return;
+        }
 
         // Create new competitor records using the side-based structure
         foreach ($this->competitors as $sideIndex => $sideCompetitors) {
@@ -431,12 +452,18 @@ class CreateEditForm extends BaseForm
             ];
         }
 
-        // Battle Royal / Rumble: Multiple sides, 1 wrestler each
-        if (in_array($matchType, [MatchType::BattleRoyal, MatchType::RoyalRumble], true)) {
+        if ($matchType->usesIndividualCompetitorSides()) {
+            $maximumCompetitors = $matchType->getMaximumCompetitors();
+            $wrestlerRules = ['required', 'array', 'min:'.$matchType->getMinimumCompetitors()];
+
+            if ($maximumCompetitors !== null) {
+                $wrestlerRules[] = 'max:'.$maximumCompetitors;
+            }
+
             return [
-                'competitors' => ['required', 'array', 'min:6'], // Minimum 6 for battle royal
-                'competitors.*.wrestlers' => ['required', 'array', 'size:1'],
-                'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+                'competitors' => ['required', 'array', 'size:1'],
+                'competitors.0.wrestlers' => $wrestlerRules,
+                'competitors.0.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
             ];
         }
 

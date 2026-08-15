@@ -13,6 +13,7 @@ The match system handles complex wrestling match scenarios with flexible competi
 
 #### Wrestler-Only Match Types
 - **Singles**: Only wrestler vs wrestler
+- **Battle Royal**: Individual wrestlers, with at least three entrants and no configured maximum
 - **Royal Rumble**: Only individual wrestlers
 - **Rationale**: These match types require individual competitor mechanics
 
@@ -22,7 +23,6 @@ The match system handles complex wrestling match scenarios with flexible competi
 - **Fatal 4-Way**: Can be wrestlers, tag teams, or mixed
 - **6/8/10 Man Tag Team**: Can be wrestlers, tag teams, or mixed
 - **Handicap Matches**: Can be wrestlers, tag teams, or mixed
-- **Battle Royal**: Can be wrestlers, tag teams, or mixed
 - **Tornado Tag Team**: Can be wrestlers, tag teams, or mixed
 - **Gauntlet**: Can be wrestlers, tag teams, or mixed
 - **Rationale**: These match types support flexible competitor configurations

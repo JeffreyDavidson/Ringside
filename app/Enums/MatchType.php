@@ -69,9 +69,14 @@ enum MatchType: string
         return match ($this) {
             self::TagTeam, self::TornadoTagTeam, self::SixManTagTeam,
             self::EightManTagTeam, self::TenManTagTeam => ['wrestler', 'tag_team'],
-            self::TripleThreat, self::Fatal4Way, self::BattleRoyal, self::RoyalRumble => ['wrestler', 'tag_team'],
+            self::TripleThreat, self::Fatal4Way => ['wrestler', 'tag_team'],
             default => ['wrestler'], // Singles and other types default to wrestler-only
         };
+    }
+
+    public function usesIndividualCompetitorSides(): bool
+    {
+        return in_array($this, [self::BattleRoyal, self::RoyalRumble], true);
     }
 
     /**
@@ -103,16 +108,23 @@ enum MatchType: string
      */
     public function getMinimumCompetitors(): int
     {
-        return $this->numberOfSides() ?? 2;
+        return match ($this) {
+            self::BattleRoyal => 3,
+            self::RoyalRumble => 10,
+            default => $this->numberOfSides() ?? 2,
+        };
     }
 
     /**
      * Get the maximum number of competitors allowed for this match type.
      */
-    public function getMaximumCompetitors(): int
+    public function getMaximumCompetitors(): ?int
     {
-        // For now, assume same as minimum unless specified otherwise
-        return $this->getMinimumCompetitors();
+        return match ($this) {
+            self::BattleRoyal => null,
+            self::RoyalRumble => 30,
+            default => $this->getMinimumCompetitors(),
+        };
     }
 
     /**

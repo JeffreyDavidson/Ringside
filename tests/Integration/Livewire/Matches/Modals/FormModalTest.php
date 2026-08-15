@@ -196,6 +196,38 @@ describe('FormModal Create Operations', function () {
 
         $component->assertHasErrors(['form.referees.0']);
     });
+
+    it('persists each battle royal entrant on an individual side', function () {
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::BattleRoyal)
+            ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('matchCreated');
+
+        $match = EventMatch::query()->whereBelongsTo($this->event)->sole();
+
+        expect($match->sides()->pluck('position')->all())->toBe([1, 2, 3])
+            ->and($match->competitors)->toHaveCount(3)
+            ->and($match->competitors->pluck('match_side_id')->unique())->toHaveCount(3);
+    });
+
+    it('requires the configured minimum number of individual entrants', function (MatchType $matchType, int $entrantCount) {
+        $wrestlers = Wrestler::factory()->count($entrantCount)->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', $matchType)
+            ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
+            ->call('save')
+            ->assertHasErrors(['form.competitors.0.wrestlers' => 'min']);
+    })->with([
+        'battle royal' => [MatchType::BattleRoyal, 2],
+        'royal rumble' => [MatchType::RoyalRumble, 9],
+    ]);
 });
 
 describe('FormModal Edit Operations', function () {
@@ -267,6 +299,26 @@ describe('FormModal Edit Operations', function () {
             ->assertSet('form.competitors', [
                 ['wrestlers' => [$wrestler->id], 'tag_teams' => []],
                 ['wrestlers' => [], 'tag_teams' => [$tagTeam->id]],
+            ]);
+    });
+
+    it('loads individual entrant sides into one selection bucket', function () {
+        $match = EventMatch::factory()
+            ->for($this->event)
+            ->battleRoyal(3)
+            ->create();
+        $wrestlerIds = $match->competitors()
+            ->with('side')
+            ->get()
+            ->sortBy('side.position')
+            ->pluck('competitor_id')
+            ->values()
+            ->all();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal', $match->id)
+            ->assertSet('form.competitors', [
+                ['wrestlers' => $wrestlerIds, 'tag_teams' => []],
             ]);
     });
 
