@@ -77,7 +77,6 @@ class TitleChampionship extends Model
         return [
             'won_at' => 'datetime',
             'lost_at' => 'datetime',
-            'last_held_reign' => 'datetime',
         ];
     }
 

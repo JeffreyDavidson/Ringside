@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Wrestlers\Wrestler;
+use App\ValueObjects\Weight;
 use Database\Seeders\WrestlersTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 
@@ -55,7 +56,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
                 expect($wrestler->hometown)->not->toBeEmpty();
                 expect($wrestler->height->feet)->toBeInt();
                 expect($wrestler->height->inches)->toBeInt();
-                expect($wrestler->weight)->toBeInt();
+                expect($wrestler->weight)->toBeInstanceOf(Weight::class);
             }
         });
 
@@ -67,7 +68,7 @@ describe('WrestlersTableSeeder Integration Tests', function () {
             foreach ($wrestlers as $wrestler) {
                 expect($wrestler->height->feet)->toBeBetween(4, 8);
                 expect($wrestler->height->inches)->toBeBetween(0, 11);
-                expect($wrestler->weight)->toBeBetween(100, 500);
+                expect($wrestler->weight->toPounds())->toBeBetween(100, 500);
             }
         });
 

@@ -8,6 +8,8 @@ use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Unit tests for User model structure and configuration.
@@ -49,6 +51,8 @@ describe('User Model Unit Tests', function () {
 
             expect($casts['role'])->toBe(Role::class);
             expect($casts['status'])->toBe(UserStatus::class);
+            expect($casts['email_verified_at'])->toBe('datetime');
+            expect($casts['password'])->toBe('hashed');
         });
 
         test('has custom eloquent builder', function () {
@@ -92,6 +96,16 @@ describe('User Model Unit Tests', function () {
 
             expect($modelConstants)->toBeEmpty();
         });
+    });
+
+    test('casts verification timestamps and hashes passwords', function () {
+        $user = User::factory()->create([
+            'email_verified_at' => '2026-08-15 12:00:00',
+            'password' => 'plain-text-password',
+        ]);
+
+        expect($user->email_verified_at)->toBeInstanceOf(Carbon::class)
+            ->and(Hash::check('plain-text-password', $user->password))->toBeTrue();
     });
 
 });
