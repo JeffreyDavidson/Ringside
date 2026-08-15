@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
 use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Model;
@@ -12,41 +11,7 @@ use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\Rules\Unique;
 use JMac\Testing\Double;
 use Livewire\Component;
-
-final class VenueFormTestProxy extends CreateEditForm
-{
-    /**
-     * @return array<string, array<int, mixed>>
-     */
-    public function rulesForTesting(): array
-    {
-        return $this->rules();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function modelDataForTesting(): array
-    {
-        return $this->getModelData();
-    }
-
-    /**
-     * @return class-string<Venue>
-     */
-    public function modelClassForTesting(): string
-    {
-        return $this->getModelClass();
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function validationAttributesForTesting(): array
-    {
-        return $this->validationAttributes();
-    }
-}
+use Tests\Integration\Livewire\Venues\Forms\Support\VenueFormTestProxy;
 
 /**
  * Integration tests for VenueForm component validation and behavior.
