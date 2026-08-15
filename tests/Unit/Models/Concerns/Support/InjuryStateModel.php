@@ -39,13 +39,12 @@ final class InjuryStateModel extends Model implements Injurable
         return new MorphOne($this->injuryBuilder($exists), new self(), 'injurable_type', 'injurable_id', 'id');
     }
 
-    private function injuryBuilder(bool $exists): InjuryStateBuilder
+    /** @return LifecycleStateBuilder<Injury> */
+    private function injuryBuilder(bool $exists): LifecycleStateBuilder
     {
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
-        $builder = new InjuryStateBuilder($query);
-        $builder->setModel(new Injury());
 
-        return $builder;
+        return new LifecycleStateBuilder($query, new Injury());
     }
 }

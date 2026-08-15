@@ -39,13 +39,12 @@ final class SuspensionStateModel extends Model implements Suspendable
         return new MorphOne($this->suspensionBuilder($exists), new self(), 'suspendable_type', 'suspendable_id', 'id');
     }
 
-    private function suspensionBuilder(bool $exists): SuspensionStateBuilder
+    /** @return LifecycleStateBuilder<Suspension> */
+    private function suspensionBuilder(bool $exists): LifecycleStateBuilder
     {
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
-        $builder = new SuspensionStateBuilder($query);
-        $builder->setModel(new Suspension());
 
-        return $builder;
+        return new LifecycleStateBuilder($query, new Suspension());
     }
 }
