@@ -13,11 +13,13 @@ use App\Livewire\Concerns\Data\PresentsTitlesList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchStipulation;
 use App\Models\Referees\Referee;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 use Log;
 
 /**
@@ -98,6 +100,19 @@ class FormModal extends BaseFormModal
     protected function getModalPath(): string
     {
         return 'livewire.matches.modals.form-modal';
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    #[Computed(cache: true, key: 'active-match-stipulations-list', seconds: 180)]
+    public function getMatchStipulations(): array
+    {
+        return MatchStipulation::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
     /**
