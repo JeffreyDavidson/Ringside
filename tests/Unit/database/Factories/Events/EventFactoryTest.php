@@ -60,6 +60,16 @@ describe('EventFactory Unit Tests', function () {
     });
 
     describe('factory state methods', function () {
+        test('with venue creates and associates a venue', function () {
+            // Act
+            $event = Event::factory()->withVenue()->create();
+            $venue = $event->venue()->firstOrFail();
+
+            // Assert
+            expect($venue)->toBeInstanceOf(Venue::class)
+                ->and($event->venue_id)->toBe($venue->id);
+        });
+
         test('scheduled state works correctly', function () {
             // Arrange
             $venue = Venue::factory()->create();

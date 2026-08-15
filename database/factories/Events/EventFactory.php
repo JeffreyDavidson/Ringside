@@ -100,6 +100,6 @@ class EventFactory extends Factory
      */
     public function withVenue(): static
     {
-        return $this->state(['venue_id' => Venue::inRandomOrder()->first()]);
+        return $this->for(Venue::factory(), 'venue');
     }
 }
