@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Stables\StablesController;
+use App\Livewire\Stables\Tables\PreviousManagers;
 use App\Livewire\Stables\Tables\PreviousTagTeams;
 use App\Livewire\Stables\Tables\PreviousWrestlers;
 use App\Models\Stables\Stable;
@@ -31,7 +32,8 @@ describe('Stables Controller', function () {
         $response->assertViewIs('stables.show')
             ->assertViewHas('stable', $this->stable)
             ->assertSeeLivewire(PreviousWrestlers::class)
-            ->assertSeeLivewire(PreviousTagTeams::class);
+            ->assertSeeLivewire(PreviousTagTeams::class)
+            ->assertSeeLivewire(PreviousManagers::class);
     });
 
     /**

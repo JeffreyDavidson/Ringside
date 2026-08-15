@@ -7,6 +7,7 @@ namespace App\Livewire\Managers\Tables;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Livewire\Table\Column;
 use App\Models\Stables\Stable;
+use App\Queries\Roster\StableManagerHistoryQuery;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 
@@ -33,8 +34,7 @@ class PreviousStables extends BasePreviousStablesTable
             throw new LogicException('A manager was not provided.');
         }
 
-        // Simplified query - just return all stables for now to fix the test
-        return Stable::query();
+        return StableManagerHistoryQuery::previousStablesForManagerId($this->managerId);
     }
 
     public function columns(): array

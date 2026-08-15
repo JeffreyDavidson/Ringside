@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Managers\ManagersController;
+use App\Livewire\Managers\Tables\PreviousStables;
 use App\Livewire\Managers\Tables\PreviousTagTeams;
 use App\Livewire\Managers\Tables\PreviousWrestlers;
 use App\Models\Managers\Manager;
@@ -30,7 +31,8 @@ describe('Managers Controller', function () {
             ->assertViewIs('managers.show')
             ->assertViewHas('manager', $this->manager)
             ->assertSeeLivewire(PreviousWrestlers::class)
-            ->assertSeeLivewire(PreviousTagTeams::class);
+            ->assertSeeLivewire(PreviousTagTeams::class)
+            ->assertSeeLivewire(PreviousStables::class);
     });
 
     /**
