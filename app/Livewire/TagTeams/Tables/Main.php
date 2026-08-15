@@ -46,7 +46,8 @@ class Main extends BaseTable
     public function builder(): TagTeamBuilder
     {
         return TagTeam::query()
-            ->with('currentEmployment')
+            ->withEmploymentStatusState()
+            ->with('firstEmployment')
             ->oldest('name');
     }
 

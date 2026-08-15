@@ -52,6 +52,7 @@ class Main extends BaseTable
     public function builder(): RefereeBuilder
     {
         return Referee::query()
+            ->withEmploymentStatusState()
             ->with('firstEmployment')
             ->oldest('last_name');
     }

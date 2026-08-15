@@ -101,7 +101,8 @@ class Main extends BaseTable
     public function builder(): TitleBuilder
     {
         return Title::query()
-            ->with(['currentActivityPeriod', 'currentChampionship.champion'])
+            ->withActivityStatusState()
+            ->with(['firstActivityPeriod', 'currentChampionship.champion'])
             ->oldest('name');
     }
 

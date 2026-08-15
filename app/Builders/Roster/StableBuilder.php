@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
+use App\Builders\Concerns\ProjectsActivityStatus;
 use App\Models\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class StableBuilder extends Builder
 {
+    use ProjectsActivityStatus;
+
     public function previousForTagTeamId(int $tagTeamId): static
     {
         $this->join('stables_tag_teams', 'stables.id', '=', 'stables_tag_teams.stable_id')

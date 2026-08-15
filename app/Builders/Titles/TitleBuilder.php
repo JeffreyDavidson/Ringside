@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Builders\Titles;
 
+use App\Builders\Concerns\FiltersByRetirementStatus;
+use App\Builders\Concerns\ProjectsActivityStatus;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -14,25 +16,32 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class TitleBuilder extends Builder
 {
+    use FiltersByRetirementStatus;
+    use ProjectsActivityStatus;
+
     public function undebuted(): static
     {
-        return $this->whereDoesntHave('activityPeriods');
+        return $this->whereDoesntHave('activityPeriods')
+            ->whereDoesntHave('currentRetirement');
     }
 
     public function active(): static
     {
-        return $this->whereHas('currentActivityPeriod');
+        return $this->whereHas('currentActivityPeriod')
+            ->whereDoesntHave('currentRetirement');
     }
 
     public function inactive(): static
     {
         return $this->whereHas('previousActivityPeriods')
             ->whereDoesntHave('currentActivityPeriod')
-            ->whereDoesntHave('futureActivityPeriod');
+            ->whereDoesntHave('futureActivityPeriod')
+            ->whereDoesntHave('currentRetirement');
     }
 
     public function withPendingDebut(): static
     {
-        return $this->whereHas('futureActivityPeriod');
+        return $this->whereHas('futureActivityPeriod')
+            ->whereDoesntHave('currentRetirement');
     }
 }

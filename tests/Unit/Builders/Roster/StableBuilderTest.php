@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Stables\Stable;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\DB;
 
 test('established stables can be retrieved', function () {
     $activeStable = Stable::factory()->active()->create();
@@ -60,6 +61,22 @@ test('unestablished stables can be retrieved', function () {
     expect($unactivatedStables)
         ->toHaveCount(1)
         ->and($unactivatedStables->contains($unactivatedStable))->toBeTrue();
+});
+
+test('projected activity status does not query per stable', function () {
+    Stable::factory()->active()->create();
+    Stable::factory()->retired()->create();
+
+    $stables = Stable::query()
+        ->withActivityStatusState()
+        ->get();
+
+    DB::enableQueryLog();
+    DB::flushQueryLog();
+
+    $stables->each(fn (Stable $stable) => $stable->status);
+
+    expect(DB::getQueryLog())->toBeEmpty();
 });
 
 test('previous stables can be retrieved for a wrestler', function () {
