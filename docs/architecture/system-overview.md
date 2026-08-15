@@ -124,9 +124,9 @@ EventMatch ←────────────── Title (many-to-many)
   ↓
 MatchCompetitor ←──── Wrestler/TagTeam (polymorphic)
   ↓
-MatchResult
-  ↓
-MatchWinner/MatchLoser ←──── MatchCompetitor (foreign key)
+EventMatch (match_finish, winning_side_id)
+    ↓
+MatchSide ←──── MatchCompetitor
 ```
 
 ## Key Features
@@ -198,8 +198,8 @@ $match = MatchFactory::new()
     ->generateFullMatch($config)
     ->create();
 
-// 3. Access results
-$winner = $match->result->winners->first();
+// 3. Access the winning side
+$winningSide = $match->winningSide;
 $champion = $match->titles->first()->currentChampion();
 ```
 

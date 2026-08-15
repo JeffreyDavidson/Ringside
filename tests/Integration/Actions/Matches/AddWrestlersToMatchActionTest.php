@@ -8,6 +8,7 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchSide;
 use App\Models\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -15,6 +16,11 @@ use function Spatie\PestPluginTestTime\testTime;
 beforeEach(function () {
     testTime()->freeze();
 });
+
+function wrestlerMatchSide(EventMatch $match, int $position): MatchSide
+{
+    return MatchSide::factory()->for($match, 'match')->create(compact('position'));
+}
 
 test('it adds a single wrestler to a match', function () {
     $match = EventMatch::factory()->create();
@@ -29,8 +35,8 @@ test('it adds a single wrestler to a match', function () {
     $this->assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => $sideNumber,
+        'competitor_type' => $wrestler->getMorphClass(),
+        'match_side_id' => $match->sides()->where('position', $sideNumber)->firstOrFail()->id,
     ]);
 
     // Match should have the wrestler as competitor
@@ -52,15 +58,15 @@ test('it adds multiple wrestlers to the same side', function () {
     $this->assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler1->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => $sideNumber,
+        'competitor_type' => $wrestler1->getMorphClass(),
+        'match_side_id' => $match->sides()->where('position', $sideNumber)->firstOrFail()->id,
     ]);
 
     $this->assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler2->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => $sideNumber,
+        'competitor_type' => $wrestler2->getMorphClass(),
+        'match_side_id' => $match->sides()->where('position', $sideNumber)->firstOrFail()->id,
     ]);
 
     // Match should have both wrestlers
@@ -82,15 +88,15 @@ test('it adds wrestlers to different sides', function () {
     $this->assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler1->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => 1,
+        'competitor_type' => $wrestler1->getMorphClass(),
+        'match_side_id' => $match->sides()->where('position', 1)->firstOrFail()->id,
     ]);
 
     $this->assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $wrestler2->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => 2,
+        'competitor_type' => $wrestler2->getMorphClass(),
+        'match_side_id' => $match->sides()->where('position', 2)->firstOrFail()->id,
     ]);
 
     expect($match->refresh()->competitors()->count())->toBe(2);
@@ -110,14 +116,14 @@ test('it filters out ineligible wrestlers', function () {
     $this->assertDatabaseHas('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $eligibleWrestler->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => $sideNumber,
+        'competitor_type' => $eligibleWrestler->getMorphClass(),
+        'match_side_id' => $match->sides()->where('position', $sideNumber)->firstOrFail()->id,
     ]);
 
     $this->assertDatabaseMissing('events_matches_competitors', [
         'match_id' => $match->id,
         'competitor_id' => $ineligibleWrestler->id,
-        'competitor_type' => Wrestler::class,
+        'competitor_type' => $ineligibleWrestler->getMorphClass(),
     ]);
 
     expect($match->refresh()->competitors()->count())->toBe(1);
@@ -167,11 +173,12 @@ test('it rejects a wrestler booked on another event at the same time', function 
     $existingMatch = EventMatch::factory()->forEvent($existingEvent)->create();
     $targetMatch = EventMatch::factory()->forEvent($targetEvent)->create();
     $wrestler = Wrestler::factory()->bookable()->create();
+    $existingSide = wrestlerMatchSide($existingMatch, 1);
 
     $existingMatch->competitors()->create([
+        'match_side_id' => $existingSide->id,
         'competitor_id' => $wrestler->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => 1,
+        'competitor_type' => $wrestler->getMorphClass(),
     ]);
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($targetMatch, collect([$wrestler]), 1))
@@ -186,11 +193,12 @@ test('it allows a wrestler booked at a different event time', function () {
     $existingMatch = EventMatch::factory()->forEvent($existingEvent)->create();
     $targetMatch = EventMatch::factory()->forEvent($targetEvent)->create();
     $wrestler = Wrestler::factory()->bookable()->create();
+    $existingSide = wrestlerMatchSide($existingMatch, 1);
 
     $existingMatch->competitors()->create([
+        'match_side_id' => $existingSide->id,
         'competitor_id' => $wrestler->id,
-        'competitor_type' => Wrestler::class,
-        'side_number' => 1,
+        'competitor_type' => $wrestler->getMorphClass(),
     ]);
 
     resolve(AddWrestlersToMatchAction::class)->handle($targetMatch, collect([$wrestler]), 1);

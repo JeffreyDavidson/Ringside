@@ -4,10 +4,24 @@ declare(strict_types=1);
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
+
+function attachBuilderTestCompetitor(EventMatch $match, Wrestler|TagTeam $competitor): void
+{
+    $side = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+
+    MatchCompetitor::factory()->create([
+        'match_id' => $match->id,
+        'match_side_id' => $side->id,
+        'competitor_type' => $competitor->getMorphClass(),
+        'competitor_id' => $competitor->id,
+    ]);
+}
 
 it('retrieves matches for selected events', function () {
     $selectedEvent = Event::factory()->create();
@@ -44,13 +58,13 @@ it('retrieves matches for a competitor and eager loads competitors', function ()
     $otherWrestler = Wrestler::factory()->create();
     $tagTeam = TagTeam::factory()->create();
     $wrestlerMatch = EventMatch::factory()->forEvent($event)->create();
-    $wrestlerMatch->wrestlers()->attach($wrestler, ['side_number' => 1]);
+    attachBuilderTestCompetitor($wrestlerMatch, $wrestler);
 
     $tagTeamMatch = EventMatch::factory()->forEvent($event)->create();
-    $tagTeamMatch->tagTeams()->attach($tagTeam, ['side_number' => 1]);
+    attachBuilderTestCompetitor($tagTeamMatch, $tagTeam);
 
     $otherMatch = EventMatch::factory()->forEvent($event)->create();
-    $otherMatch->wrestlers()->attach($otherWrestler, ['side_number' => 1]);
+    attachBuilderTestCompetitor($otherMatch, $otherWrestler);
 
     $wrestlerMatches = EventMatch::query()->forCompetitor($wrestler)->get();
     $tagTeamMatches = EventMatch::query()->forCompetitor($tagTeam)->get();

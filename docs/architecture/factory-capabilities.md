@@ -226,9 +226,9 @@ When titles are specified:
 
 The factory creates comprehensive winner/loser records:
 
-- **MatchResult**: Stores primary winner for backward compatibility
-- **MatchWinner**: Individual winner records (supports multiple winners)
-- **MatchLoser**: Individual loser records
+- **EventMatch**: Stores the generated finish and winning side
+- **MatchSide**: Groups generated competitors by their ordered side
+- **MatchCompetitor**: Associates each wrestler or tag team with a side
 - **Foreign Key Relationships**: Winners/losers link to MatchCompetitor records
 
 ### Competitor Side Assignment
@@ -289,10 +289,10 @@ $match = MatchFactory::new()->generateFullMatch([
     'match_type' => 'singles',
     'competitors' => [$wrestler1, $wrestler2],
     'winner_strategy' => 'first',  // $wrestler1 always wins
-    'decision_type' => 'pinfall'
+    'decision_type' => 'pinfall',
 ])->create();
 
-expect($match->result->winner)->toBe($wrestler1);
+expect($match->winningSide->competitors->sole()->competitor->is($wrestler1))->toBeTrue();
 ```
 
 ### Statistical Testing

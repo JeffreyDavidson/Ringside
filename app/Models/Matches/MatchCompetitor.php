@@ -25,11 +25,12 @@ use Illuminate\Support\Carbon;
  * @property int $match_id
  * @property string $competitor_type
  * @property int $competitor_id
- * @property int $side_number Numeric identifier for the side/team this competitor belongs to. Used to group competitors by side.
+ * @property int $match_side_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  *
  * @property-read Wrestler|TagTeam $competitor
+ * @property-read MatchSide $side
  *
  * @method static MatchCompetitorsCollection<int, static> all($columns = ['*'])
  * @method static MatchCompetitorsCollection<int, static> get($columns = ['*'])
@@ -43,7 +44,7 @@ use Illuminate\Support\Carbon;
  * @mixin \Eloquent
  */
 #[CollectedBy(MatchCompetitorsCollection::class)]
-#[Fillable('match_id', 'competitor_id', 'competitor_type', 'side_number')]
+#[Fillable('match_id', 'match_side_id', 'competitor_id', 'competitor_type')]
 #[UseEloquentBuilder(MatchCompetitorBuilder::class)]
 #[UseFactory(MatchCompetitorFactory::class)]
 class MatchCompetitor extends MorphPivot
@@ -51,12 +52,20 @@ class MatchCompetitor extends MorphPivot
     /** @use HasFactory<MatchCompetitorFactory> */
     use HasFactory;
 
+    public $incrementing = true;
+
     /**
      * @return BelongsTo<EventMatch, $this>
      */
     public function eventMatch(): BelongsTo
     {
         return $this->belongsTo(EventMatch::class, 'match_id');
+    }
+
+    /** @return BelongsTo<MatchSide, $this> */
+    public function side(): BelongsTo
+    {
+        return $this->belongsTo(MatchSide::class, 'match_side_id');
     }
 
     /**

@@ -6,6 +6,7 @@ namespace Tests\Unit\Database\Factories\Matches;
 
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchCompetitorFactory;
@@ -39,13 +40,12 @@ describe('MatchCompetitorFactory Unit Tests', function () {
             expect($competitor->competitor_type)->toBeIn(['wrestler', 'tag_team']);
         });
 
-        test('creates realistic competitor side assignments', function () {
+        test('creates a match side assignment', function () {
             // Arrange & Act
             $competitor = MatchCompetitor::factory()->make();
 
             // Assert
-            expect($competitor->side_number)->toBeInt();
-            expect($competitor->side_number)->toBeBetween(1, 2);
+            expect($competitor->match_side_id)->toBeInt();
         });
     });
 
@@ -87,13 +87,21 @@ describe('MatchCompetitorFactory Unit Tests', function () {
         });
 
         test('side assignment state works correctly', function () {
-            // Arrange & Act
-            $competitor1 = MatchCompetitor::factory()->make(['side_number' => 1]);
-            $competitor2 = MatchCompetitor::factory()->make(['side_number' => 2]);
+            $match = EventMatch::factory()->create();
+            $side1 = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+            $side2 = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
 
-            // Assert
-            expect($competitor1->side_number)->toBe(1);
-            expect($competitor2->side_number)->toBe(2);
+            $competitor1 = MatchCompetitor::factory()->make([
+                'match_id' => $match->id,
+                'match_side_id' => $side1->id,
+            ]);
+            $competitor2 = MatchCompetitor::factory()->make([
+                'match_id' => $match->id,
+                'match_side_id' => $side2->id,
+            ]);
+
+            expect($competitor1->match_side_id)->toBe($side1->id);
+            expect($competitor2->match_side_id)->toBe($side2->id);
         });
     });
 
@@ -112,18 +120,21 @@ describe('MatchCompetitorFactory Unit Tests', function () {
         test('accepts custom competitor configuration', function () {
             // Arrange
             $wrestler = Wrestler::factory()->create();
+            $match = EventMatch::factory()->create();
+            $side = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
 
             // Act
             $competitor = MatchCompetitor::factory()->make([
+                'match_id' => $match->id,
+                'match_side_id' => $side->id,
                 'competitor_id' => $wrestler->id,
                 'competitor_type' => 'wrestler',
-                'side_number' => 1,
             ]);
 
             // Assert
             expect($competitor->competitor_id)->toBe($wrestler->id);
             expect($competitor->competitor_type)->toBe('wrestler');
-            expect($competitor->side_number)->toBe(1);
+            expect($competitor->match_side_id)->toBe($side->id);
         });
     });
 
@@ -144,7 +155,7 @@ describe('MatchCompetitorFactory Unit Tests', function () {
             // Assert
             foreach ($competitors as $competitor) {
                 expect($competitor->competitor_type)->toBeIn(['wrestler', 'tag_team']);
-                expect($competitor->side_number)->toBeBetween(1, 2);
+                expect($competitor->match_side_id)->toBeInt();
             }
         });
 

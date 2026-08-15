@@ -65,13 +65,14 @@ class AddWrestlersToMatchAction
 
         DB::transaction(function () use ($eventMatch, $eligibleWrestlers, $sideNumber): void {
             $this->conflictService->ensureWrestlersCanBeAssigned($eventMatch, $eligibleWrestlers);
+            $side = $eventMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
             // Add each eligible wrestler to the specified side
-            $eligibleWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $sideNumber) {
+            $eligibleWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $side) {
                 $eventMatch->competitors()->create([
                     'competitor_id' => $wrestler->id,
-                    'competitor_type' => Wrestler::class,
-                    'side_number' => $sideNumber,
+                    'competitor_type' => $wrestler->getMorphClass(),
+                    'match_side_id' => $side->id,
                 ]);
             });
         });

@@ -98,7 +98,7 @@ class RingsideMakeTest extends Command
         // Ask for model name
         $modelName = text(
             label: 'Which model would you like to test?',
-            placeholder: 'e.g., Product, User, MatchResult',
+            placeholder: 'e.g., Product, User, EventMatch',
             required: true,
             validate: fn (string $value) => match (true) {
                 empty(mb_trim($value)) => 'Model name is required.',

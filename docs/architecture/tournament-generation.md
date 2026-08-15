@@ -198,11 +198,10 @@ public function scheduleMatches(Tournament $tournament, Event $event): void
 ```php
 public function advanceWinners(TournamentRound $round): void
 {
-    $completedMatches = $round->matches()->whereNotNull('result_id')->get();
+    $completedMatches = $round->matches()->whereNotNull('match_finish')->get();
     
     foreach ($completedMatches as $match) {
-        $winner = $match->result->winners->first();
-        $this->advanceCompetitor($winner, $round->tournament, $round->round_number + 1);
+        $this->advanceSide($match->winningSide, $round->tournament, $round->round_number + 1);
     }
     
     // Check if round is complete
@@ -211,16 +210,14 @@ public function advanceWinners(TournamentRound $round): void
     }
 }
 
-private function advanceCompetitor(MatchWinner $winner, Tournament $tournament, int $nextRound): void
+private function advanceSide(MatchSide $winningSide, Tournament $tournament, int $nextRound): void
 {
-    $competitor = $winner->competitor->competitor;
-    
     // Find next round bracket position
-    $nextRoundPosition = $this->calculateNextPosition($tournament, $winner, $nextRound);
+    $nextRoundPosition = $this->calculateNextPosition($tournament, $winningSide, $nextRound);
     
     // Update tournament bracket
     $bracketData = $tournament->bracket_data;
-    $bracketData['rounds'][$nextRound]['matches'][$nextRoundPosition]['competitors'][] = $competitor;
+    $bracketData['rounds'][$nextRound]['matches'][$nextRoundPosition]['side'] = $winningSide;
     
     $tournament->update(['bracket_data' => $bracketData]);
 }
