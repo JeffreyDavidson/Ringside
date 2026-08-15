@@ -61,12 +61,6 @@ parameters:
 			path: app/Livewire/Base/BaseModal.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Matches\\MatchResult\:\:\$decision\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Base/Tables/BasePreviousMatchesTable.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
 			identifier: property.notFound
 			count: 2
@@ -143,18 +137,6 @@ parameters:
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: app/Livewire/Matches/Modals/FormModal.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Matches\\MatchResult\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Matches/Tables/Main.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\Matches\\MatchResult\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Matches/Tables/MatchesTable.php
 
 		-
 			message: '#^Instanceof between Illuminate\\View\\View and Illuminate\\Contracts\\View\\View will always evaluate to true\.$#'

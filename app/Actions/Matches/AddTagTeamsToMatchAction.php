@@ -67,13 +67,14 @@ class AddTagTeamsToMatchAction
 
         DB::transaction(function () use ($eventMatch, $eligibleTagTeams, $sideNumber): void {
             $this->conflictService->ensureTagTeamsCanBeAssigned($eventMatch, $eligibleTagTeams);
+            $side = $eventMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
             // Add each eligible tag team to the specified side
-            $eligibleTagTeams->each(function (TagTeam $tagTeam) use ($eventMatch, $sideNumber) {
+            $eligibleTagTeams->each(function (TagTeam $tagTeam) use ($eventMatch, $side) {
                 $eventMatch->competitors()->create([
                     'competitor_id' => $tagTeam->id,
-                    'competitor_type' => TagTeam::class,
-                    'side_number' => $sideNumber,
+                    'competitor_type' => $tagTeam->getMorphClass(),
+                    'match_side_id' => $side->id,
                 ]);
             });
         });

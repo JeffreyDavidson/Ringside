@@ -31,7 +31,7 @@ class Main extends BaseTable
     {
         return EventMatch::query()
             ->latestEventFirst()
-            ->with(['event', 'competitors', 'result.winner']);
+            ->with(['event', 'competitors.competitor', 'winningSide.competitors.competitor']);
     }
 
     public function configure(): void
@@ -62,13 +62,19 @@ class Main extends BaseTable
                 ->label(fn (EventMatch $row) => $row->competitors->map(fn (MatchCompetitor $competitor) => $competitor->competitor->name)->join(' vs ')),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
-                    $winner = $row->result?->winner;
-
-                    if ($winner) {
-                        return $winner->name.' by '.$row->result?->match_decision->label();
+                    if ($row->match_finish === null) {
+                        return 'N/A';
                     }
 
-                    return 'N/A';
+                    if ($row->winningSide) {
+                        $winners = $row->winningSide->competitors
+                            ->map(fn (MatchCompetitor $competitor): string => $competitor->competitor->name)
+                            ->join(' & ');
+
+                        return $winners.' by '.$row->match_finish->label();
+                    }
+
+                    return $row->match_finish->label();
                 }),
         ];
     }

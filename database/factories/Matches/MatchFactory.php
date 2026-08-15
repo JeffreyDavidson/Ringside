@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Factories\Matches;
 
-use App\Enums\MatchDecision;
+use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use App\Models\Matches\MatchLoser;
-use App\Models\Matches\MatchResult;
-use App\Models\Matches\MatchWinner;
+use App\Models\Matches\MatchSide;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -157,12 +155,16 @@ class MatchFactory extends Factory
     public function withCompetitors(array $competitors): static
     {
         return $this->afterCreating(function (EventMatch $eventMatch) use ($competitors) {
-            foreach ($competitors as $sideNumber => $competitor) {
+            foreach (array_values($competitors) as $index => $competitor) {
+                $side = MatchSide::factory()->for($eventMatch, 'match')->create([
+                    'position' => $index + 1,
+                ]);
+
                 MatchCompetitor::factory()->create([
                     'match_id' => $eventMatch->id,
-                    'competitor_type' => get_class($competitor),
+                    'match_side_id' => $side->id,
+                    'competitor_type' => $competitor->getMorphClass(),
                     'competitor_id' => $competitor->id,
-                    'side_number' => $sideNumber,
                 ]);
             }
         });
@@ -273,7 +275,7 @@ class MatchFactory extends Factory
     private function generateCompetitors(MatchType $matchType, ?Model $existingChampion, int $competitorCount): array
     {
         $competitors = [];
-        $sideNumber = 0;
+        $sideNumber = 1;
 
         // Add existing champion first if provided
         if ($existingChampion) {
@@ -308,12 +310,12 @@ class MatchFactory extends Factory
     /**
      * Create competitor data array.
      */
-    private function createCompetitorData(Model $competitor, int $sideNumber): array
+    private function createCompetitorData(Model $competitor, int $position): array
     {
         return [
-            'competitor_type' => get_class($competitor),
+            'competitor_type' => $competitor->getMorphClass(),
             'competitor_id' => $competitor->id,
-            'side_number' => $sideNumber,
+            'position' => $position,
         ];
     }
 
@@ -322,16 +324,16 @@ class MatchFactory extends Factory
      */
     private function createCompetitorRecords(EventMatch $eventMatch, array $competitors): void
     {
-        $competitorData = array_map(function ($competitor) use ($eventMatch) {
-            return [
+        foreach ($competitors as $competitor) {
+            $side = $eventMatch->sides()->firstOrCreate(['position' => $competitor['position']]);
+
+            MatchCompetitor::factory()->create([
                 'match_id' => $eventMatch->id,
+                'match_side_id' => $side->id,
                 'competitor_type' => $competitor['competitor_type'],
                 'competitor_id' => $competitor['competitor_id'],
-                'side_number' => $competitor['side_number'],
-            ];
-        }, $competitors);
-
-        MatchCompetitor::factory()->createMany($competitorData);
+            ]);
+        }
     }
 
     /**
@@ -345,22 +347,14 @@ class MatchFactory extends Factory
             return;
         }
 
-        $this->createMatchResult($eventMatch, $competitors);
-    }
+        $winningSide = $competitors->random()->side;
 
-    /**
-     * Create a match result record with winner.
-     */
-    private function createMatchResult(EventMatch $eventMatch, $competitors): MatchResult
-    {
-        // Pick a random winner from the competitors
-        $winner = $competitors->random();
-
-        return MatchResult::factory()->create([
-            'match_id' => $eventMatch->id,
-            'match_decision' => fake()->randomElement(MatchDecision::cases()),
-            'winner_type' => $winner->competitor_type,
-            'winner_id' => $winner->competitor_id,
+        $eventMatch->update([
+            'match_finish' => fake()->randomElement(array_filter(
+                MatchFinish::cases(),
+                fn (MatchFinish $finish): bool => $finish->requiresWinningSide(),
+            )),
+            'winning_side_id' => $winningSide->id,
         ]);
     }
 
@@ -407,7 +401,7 @@ class MatchFactory extends Factory
         }
 
         // Add result with winner/loser strategy
-        $this->createFullMatchResult($eventMatch, $config);
+        $this->createFullMatchOutcome($eventMatch, $config);
     }
 
     /**
@@ -551,7 +545,7 @@ class MatchFactory extends Factory
     /**
      * Create match result with winner/loser strategy.
      */
-    private function createFullMatchResult(EventMatch $eventMatch, array $config): void
+    private function createFullMatchOutcome(EventMatch $eventMatch, array $config): void
     {
         $competitors = $eventMatch->competitors;
 
@@ -559,101 +553,45 @@ class MatchFactory extends Factory
             return;
         }
 
-        // Get or create match decision
-        $decision = $this->resolveMatchDecision($config['decision_type'] ?? 'pinfall');
+        $finish = $this->resolveMatchFinish($config['decision_type'] ?? 'pinfall');
 
-        // Handle no-outcome scenarios
-        if ($decision->hasNoOutcome()) {
-            MatchResult::factory()->create([
-                'match_id' => $eventMatch->id,
-                'match_decision' => $decision,
-                'winner_type' => null,
-                'winner_id' => null,
+        if (! $finish->requiresWinningSide()) {
+            $eventMatch->update([
+                'match_finish' => $finish,
+                'winning_side_id' => null,
             ]);
 
             return;
         }
 
-        // Resolve winners and losers based on strategy
         $winnerStrategy = $config['winner_strategy'] ?? 'random';
-        [$winners, $losers] = $this->resolveWinnersAndLosers($competitors, $winnerStrategy);
+        $winningCompetitor = $this->resolveWinningCompetitor($competitors, $winnerStrategy);
 
-        // Create the match result with first winner (for backward compatibility)
-        $primaryWinner = $winners->first();
-        $matchResult = MatchResult::factory()->create([
-            'match_id' => $eventMatch->id,
-            'match_decision' => $decision,
-            'winner_type' => $primaryWinner->competitor_type,
-            'winner_id' => $primaryWinner->competitor_id,
+        $eventMatch->update([
+            'match_finish' => $finish,
+            'winning_side_id' => $winningCompetitor->match_side_id,
         ]);
-
-        // Create winner records
-        foreach ($winners as $winner) {
-            MatchWinner::factory()->create([
-                'match_result_id' => $matchResult->id,
-                'match_competitor_id' => $winner->id,
-            ]);
-        }
-
-        // Create loser records
-        foreach ($losers as $loser) {
-            MatchLoser::factory()->create([
-                'match_result_id' => $matchResult->id,
-                'match_competitor_id' => $loser->id,
-            ]);
-        }
     }
 
-    /**
-     * Resolve match decision from type.
-     */
-    private function resolveMatchDecision(string $decisionType): MatchDecision
+    private function resolveMatchFinish(string $finishType): MatchFinish
     {
-        // Try to find matching enum case
-        foreach (MatchDecision::cases() as $case) {
-            if ($case->value === $decisionType) {
+        foreach (MatchFinish::cases() as $case) {
+            if ($case->value === $finishType) {
                 return $case;
             }
         }
 
-        // Default to pinfall if no match found
-        return MatchDecision::Pinfall;
+        return MatchFinish::Pinfall;
     }
 
-    /**
-     * Resolve winners and losers based on strategy.
-     *
-     * @return array{0: Collection, 1: Collection}
-     */
-    private function resolveWinnersAndLosers($competitors, string $strategy): array
+    /** @param Collection<int, MatchCompetitor> $competitors */
+    private function resolveWinningCompetitor(Collection $competitors, string $strategy): MatchCompetitor
     {
-        $competitorsCollection = collect($competitors);
-
         return match ($strategy) {
-            'first' => [
-                collect([$competitorsCollection->first()]),
-                $competitorsCollection->skip(1),
-            ],
-            'last' => [
-                collect([$competitorsCollection->last()]),
-                $competitorsCollection->take($competitorsCollection->count() - 1),
-            ],
-            'multiple' => [
-                $winners = $competitorsCollection->random(fake()->numberBetween(1, $competitorsCollection->count() - 1)),
-                $competitorsCollection->diff($winners),
-            ],
-            'all_but_one' => [
-                $competitorsCollection->take($competitorsCollection->count() - 1),
-                collect([$competitorsCollection->last()]),
-            ],
-            'single', 'random' => [
-                $winner = collect([$competitorsCollection->random()]),
-                $competitorsCollection->diff($winner),
-            ],
-            default => [
-                $winner = collect([$competitorsCollection->random()]),
-                $competitorsCollection->diff($winner),
-            ],
+            'first' => $competitors->firstOrFail(),
+            'last' => $competitors->last(),
+            'single', 'random' => $competitors->random(),
+            default => throw new InvalidArgumentException("Unknown winning side strategy: {$strategy}"),
         };
     }
 

@@ -40,7 +40,7 @@ class MatchesTable extends DataTableComponent
         }
 
         return EventMatch::query()
-            ->with(['event', 'titles', 'competitors', 'result.winner'])
+            ->with(['event', 'titles', 'competitors.competitor', 'winningSide.competitors.competitor'])
             ->where('event_id', $this->eventId);
     }
 
@@ -90,15 +90,24 @@ class MatchesTable extends DataTableComponent
             Column::make(__('matches.result'))
                 ->label(
                     function (EventMatch $row, Column $column): string {
-                        $winner = $row->result?->winner;
-
-                        if ($winner) {
-                            $type = str($winner->getMorphClass())->kebab()->plural();
-
-                            return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a> by '.$row->result?->match_decision->label();
+                        if ($row->match_finish === null) {
+                            return 'N/A';
                         }
 
-                        return 'N/A';
+                        if ($row->winningSide) {
+                            $winners = $row->winningSide->competitors
+                                ->map(function (MatchCompetitor $competitor): string {
+                                    $winner = $competitor->competitor;
+                                    $type = str($winner->getMorphClass())->kebab()->plural();
+
+                                    return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a>';
+                                })
+                                ->join(' & ');
+
+                            return $winners.' by '.$row->match_finish->label();
+                        }
+
+                        return $row->match_finish->label();
                     }
                 )->html(),
         ];

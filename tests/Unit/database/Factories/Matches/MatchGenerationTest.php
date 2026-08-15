@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Database\Factories\Matches;
 
-use App\Enums\MatchDecision;
+use App\Enums\MatchFinish;
 use App\Enums\Titles\TitleType;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -14,6 +14,7 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchFactory;
+use InvalidArgumentException;
 
 /**
  * Unit tests for Match comprehensive generation capabilities.
@@ -42,11 +43,11 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             // Assert
             expect($match->match_type->value)->toBe('singles');
             expect($match->competitors)->toHaveCount(2);
-            expect($match->result)->not->toBeNull();
+            expect($match->match_finish)->toBeInstanceOf(MatchFinish::class);
 
             $competitors = $match->competitors;
             foreach ($competitors as $competitor) {
-                expect($competitor->competitor_type)->toBe(Wrestler::class);
+                expect($competitor->competitor_type)->toBe((new Wrestler())->getMorphClass());
             }
         });
 
@@ -60,9 +61,9 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             // Assert
             expect($match->match_type->value)->toBe('tag-team');
             expect($match->competitors)->toHaveCount(4);
-            expect($match->result)->not->toBeNull();
+            expect($match->match_finish)->toBeInstanceOf(MatchFinish::class);
 
-            $allowedTypes = [Wrestler::class, TagTeam::class];
+            $allowedTypes = [(new Wrestler())->getMorphClass(), (new TagTeam())->getMorphClass()];
             foreach ($match->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -78,7 +79,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             // Assert
             expect($match->match_type->value)->toBe('battle-royal');
             expect($match->competitors)->toHaveCount(15);
-            expect($match->result)->not->toBeNull();
+            expect($match->match_finish)->toBeInstanceOf(MatchFinish::class);
         });
     });
 
@@ -99,7 +100,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
 
             // All competitors should be wrestlers for singles title
             foreach ($match->competitors as $competitor) {
-                expect($competitor->competitor_type)->toBe(Wrestler::class);
+                expect($competitor->competitor_type)->toBe((new Wrestler())->getMorphClass());
             }
         });
 
@@ -145,7 +146,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
 
             // Champion should be included as competitor
             $championIncluded = $match->competitors
-                ->where('competitor_type', Wrestler::class)
+                ->where('competitor_type', (new Wrestler())->getMorphClass())
                 ->where('competitor_id', $champion->id)
                 ->isNotEmpty();
             expect($championIncluded)->toBeTrue();
@@ -185,10 +186,10 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             expect($match->competitors)->toHaveCount(4);
 
             $wrestlerCount = $match->competitors
-                ->where('competitor_type', Wrestler::class)
+                ->where('competitor_type', (new Wrestler())->getMorphClass())
                 ->count();
             $tagTeamCount = $match->competitors
-                ->where('competitor_type', TagTeam::class)
+                ->where('competitor_type', (new TagTeam())->getMorphClass())
                 ->count();
 
             expect($wrestlerCount)->toBe(2);
@@ -213,8 +214,8 @@ describe('Match Comprehensive Generation Unit Tests', function () {
         });
     });
 
-    describe('winner and loser assignment strategies', function () {
-        test('generates match with first competitor as winner', function () {
+    describe('winning side assignment strategies', function () {
+        test('generates match with first competitor side as winner', function () {
             // Arrange & Act
             $match = EventMatch::factory()->generateFullMatch([
                 'match_type' => 'singles',
@@ -222,18 +223,11 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             ])->create();
 
             // Assert
-            expect($match->result)->not->toBeNull();
-            expect($match->result->winners)->toHaveCount(1);
-            expect($match->result->losers)->toHaveCount(1);
-
             $firstCompetitor = $match->competitors->firstOrFail();
-            $winner = $match->result->winners->firstOrFail();
-
-            expect($winner->competitor->competitor_type)->toBe($firstCompetitor->competitor_type);
-            expect($winner->competitor->competitor_id)->toBe($firstCompetitor->competitor_id);
+            expect($match->winning_side_id)->toBe($firstCompetitor->match_side_id);
         });
 
-        test('generates match with last competitor as winner', function () {
+        test('generates match with last competitor side as winner', function () {
             // Arrange & Act
             $match = EventMatch::factory()->generateFullMatch([
                 'match_type' => 'triple',
@@ -241,71 +235,46 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             ])->create();
 
             // Assert
-            expect($match->result->winners)->toHaveCount(1);
-            expect($match->result->losers)->toHaveCount(2);
-
             $lastCompetitor = $match->competitors->reverse()->firstOrFail();
-            $winner = $match->result->winners->firstOrFail();
-
-            expect($winner->competitor->competitor_type)->toBe($lastCompetitor->competitor_type);
-            expect($winner->competitor->competitor_id)->toBe($lastCompetitor->competitor_id);
+            expect($match->winning_side_id)->toBe($lastCompetitor->match_side_id);
         });
 
-        test('generates match with multiple winners', function () {
-            // Arrange & Act
-            $match = EventMatch::factory()->generateFullMatch([
+        test('rejects a multiple competitor winner strategy because winners are sides', function () {
+            expect(fn () => EventMatch::factory()->generateFullMatch([
                 'match_type' => 'fatal4way',
                 'winner_strategy' => 'multiple',
-            ])->create();
-
-            // Assert
-            expect($match->result->winners->count())->toBeGreaterThan(0);
-            expect($match->result->winners->count())->toBeLessThan(4);
-
-            $totalCompetitors = $match->result->winners->count() + $match->result->losers->count();
-            expect($totalCompetitors)->toBe(4);
+            ])->create())->toThrow(InvalidArgumentException::class);
         });
 
-        test('generates match with all but one as winners', function () {
-            // Arrange & Act
-            $match = EventMatch::factory()->generateFullMatch([
+        test('rejects an all but one winner strategy because winners are sides', function () {
+            expect(fn () => EventMatch::factory()->generateFullMatch([
                 'match_type' => 'fatal4way',
                 'winner_strategy' => 'all_but_one',
-            ])->create();
-
-            // Assert
-            expect($match->result->winners)->toHaveCount(3);
-            expect($match->result->losers)->toHaveCount(1);
+            ])->create())->toThrow(InvalidArgumentException::class);
         });
     });
 
     describe('no-outcome match scenarios', function () {
-        test('generates time limit draw with no winners or losers', function () {
-            // Act - MatchDecision is now an enum, using 'time-limit-draw' decision type
+        test('generates time limit draw with no winning side', function () {
             $match = EventMatch::factory()->generateFullMatch([
                 'match_type' => 'singles',
                 'decision_type' => 'time-limit-draw',
             ])->create();
 
             // Assert
-            expect($match->result)->not->toBeNull();
-            expect($match->result->match_decision->value)->toBe('time-limit-draw');
-            expect($match->result->winners)->toHaveCount(0);
-            expect($match->result->losers)->toHaveCount(0);
+            expect($match->match_finish)->toBe(MatchFinish::TimeLimitDraw)
+                ->and($match->winning_side_id)->toBeNull();
         });
 
-        test('generates no decision match with no winners or losers', function () {
-            // Act - MatchDecision is now an enum, using 'no-decision' decision type
+        test('generates no decision match with no winning side', function () {
             $match = EventMatch::factory()->generateFullMatch([
                 'match_type' => 'singles',
                 'decision_type' => 'no-decision',
             ])->create();
 
             // Assert
-            expect($match->result)->not->toBeNull();
-            expect($match->result->match_decision->value)->toBe('no-decision');
-            expect($match->result->winners)->toHaveCount(0);
-            expect($match->result->losers)->toHaveCount(0);
+            expect($match->match_finish)->toBe(MatchFinish::NoDecision)
+                ->and($match->winning_side_id)->toBeNull();
         });
     });
 
@@ -379,11 +348,8 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             expect($match->titles->pluck('id'))->toContain($title->id);
             expect($match->competitors)->toHaveCount(2);
             expect($match->referees->pluck('id'))->toContain($referee->id);
-            expect($match->result)->not->toBeNull();
-
-            // Challenger should win (last competitor strategy)
-            $winner = $match->result->winners->firstOrFail();
-            expect($winner->competitor->competitor_id)->toBe($challenger->id);
+            expect($match->winningSide)->not->toBeNull()
+                ->and($match->winningSide?->competitors->sole()->competitor_id)->toBe($challenger->id);
         });
 
         test('generates multi-title unification match', function () {
@@ -441,7 +407,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             // Assert
             expect($match->match_type->value)->toBe('singles');
             foreach ($match->competitors as $competitor) {
-                expect($competitor->competitor_type)->toBe(Wrestler::class);
+                expect($competitor->competitor_type)->toBe((new Wrestler())->getMorphClass());
             }
         });
 
@@ -455,7 +421,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             // Assert
             expect($match->match_type->value)->toBe('royal-rumble');
             foreach ($match->competitors as $competitor) {
-                expect($competitor->competitor_type)->toBe(Wrestler::class);
+                expect($competitor->competitor_type)->toBe((new Wrestler())->getMorphClass());
             }
         });
 
@@ -469,7 +435,7 @@ describe('Match Comprehensive Generation Unit Tests', function () {
             // Assert
             expect($match->match_type->value)->toBe('tag-team');
 
-            $allowedTypes = [Wrestler::class, TagTeam::class];
+            $allowedTypes = [(new Wrestler())->getMorphClass(), (new TagTeam())->getMorphClass()];
             foreach ($match->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }

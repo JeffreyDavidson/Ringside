@@ -61,10 +61,10 @@ Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by El
 - **Rationale**: Wrestling matches have complex outcome scenarios
 
 ### Match Result Architecture
-- **MatchResult**: Central result record linking to match decision
-- **MatchWinner**: Polymorphic pivot for all match winners
-- **MatchLoser**: Polymorphic pivot for all match losers
-- **MatchDecision**: Determines if winners/losers should be recorded
+- **EventMatch**: Stores the current match finish and optional winning side
+- **MatchSide**: Groups competitors who compete together
+- **MatchCompetitor**: Polymorphic competitor entry belonging to a match side
+- **MatchFinish**: Determines whether a winning side must be recorded
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

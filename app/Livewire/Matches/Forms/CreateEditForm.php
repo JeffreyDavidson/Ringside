@@ -201,16 +201,19 @@ class CreateEditForm extends BaseForm
 
         // Delete existing competitors
         $this->formModel->competitors()->delete();
+        $this->formModel->sides()->delete();
 
         // Create new competitor records using the side-based structure
         foreach ($this->competitors as $sideNumber => $sideCompetitors) {
+            $side = $this->formModel->sides()->create(['position' => (int) $sideNumber]);
+
             // Handle wrestlers for this side
             if (isset($sideCompetitors['wrestlers'])) {
                 foreach ($sideCompetitors['wrestlers'] as $wrestlerId) {
                     $this->formModel->competitors()->create([
-                        'competitor_type' => Wrestler::class,
+                        'competitor_type' => (new Wrestler())->getMorphClass(),
                         'competitor_id' => $wrestlerId,
-                        'side_number' => $sideNumber,
+                        'match_side_id' => $side->id,
                     ]);
                 }
             }
@@ -219,9 +222,9 @@ class CreateEditForm extends BaseForm
             if (isset($sideCompetitors['tag_teams'])) {
                 foreach ($sideCompetitors['tag_teams'] as $tagTeamId) {
                     $this->formModel->competitors()->create([
-                        'competitor_type' => TagTeam::class,
+                        'competitor_type' => (new TagTeam())->getMorphClass(),
                         'competitor_id' => $tagTeamId,
-                        'side_number' => $sideNumber,
+                        'match_side_id' => $side->id,
                     ]);
                 }
             }

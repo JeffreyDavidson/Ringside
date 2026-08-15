@@ -362,11 +362,11 @@ function createWrestlerWithEmploymentHistory(): Wrestler
 /**
  * Seed basic lookup data for testing.
  *
- * Note: MatchType and MatchDecision are now PHP enums and don't require seeding.
+ * Note: MatchType and MatchFinish are PHP enums and do not require seeding.
  */
 function seedBasicLookupData(): void
 {
-    // MatchType and MatchDecision are now PHP enums, no seeding needed
+    // MatchType and MatchFinish are PHP enums, so no lookup data is required.
 }
 
 /**

@@ -40,7 +40,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function sortBySideNumber(): static
     {
-        return $this->sortBy('side_number')->values();
+        return $this->sortBy(fn (MatchCompetitor $competitor): int => $competitor->side->position)->values();
     }
 
     /**
@@ -55,7 +55,10 @@ class MatchCompetitorsCollection extends Collection
      */
     public function sides(): array
     {
-        return $this->pluck('side_number')->unique()->values()->all();
+        return $this->map(fn (MatchCompetitor $competitor): int => $competitor->side->position)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     /**
@@ -71,7 +74,7 @@ class MatchCompetitorsCollection extends Collection
     public function countPerSide(): BaseCollection
     {
         // @phpstan-ignore-next-line return.type
-        return $this->groupBy('side_number')
+        return $this->groupBy(fn (MatchCompetitor $competitor): int => $competitor->side->position)
             ->map(fn (MatchCompetitorsCollection $group) => $group->count())
             ->mapWithKeys(function (int $count, mixed $side): array {
                 return [(int) $side => $count];
@@ -103,7 +106,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function countCompetitorsForSide(int $side): int
     {
-        return $this->where('side_number', $side)->count();
+        return $this->filterBySide($side)->count();
     }
 
     /**
@@ -153,7 +156,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function groupBySide(): BaseCollection
     {
-        return $this->groupBy('side_number');
+        return $this->groupBy(fn (MatchCompetitor $competitor): int => $competitor->side->position);
     }
 
     /**
@@ -216,7 +219,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function filterBySide(int $side): static
     {
-        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->side_number === $side);
+        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->side->position === $side);
     }
 
     /**
@@ -279,7 +282,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function pluckCompetitorsBySide(): BaseCollection
     {
-        return $this->groupBy('side_number')
+        return $this->groupBy(fn (MatchCompetitor $competitor): int => $competitor->side->position)
             ->map(function (MatchCompetitorsCollection $competitorsOnSide) {
                 return collect($competitorsOnSide)
                     ->map(fn (MatchCompetitor $competitor) => $competitor->competitor)
@@ -300,7 +303,7 @@ class MatchCompetitorsCollection extends Collection
      */
     public function getCompetitorsForSide(int $side): BaseCollection
     {
-        return $this->where('side_number', $side)
+        return $this->filterBySide($side)
             ->map(fn (MatchCompetitor $competitor) => $competitor->competitor)
             ->values();
     }

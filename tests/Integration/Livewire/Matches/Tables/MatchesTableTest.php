@@ -6,6 +6,8 @@ use App\Enums\MatchType;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -24,6 +26,18 @@ beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
 });
+
+function attachTableCompetitor(EventMatch $match, Wrestler|TagTeam $competitor, int $position): void
+{
+    $side = MatchSide::factory()->for($match, 'match')->create(compact('position'));
+
+    MatchCompetitor::factory()->create([
+        'match_id' => $match->id,
+        'match_side_id' => $side->id,
+        'competitor_type' => $competitor->getMorphClass(),
+        'competitor_id' => $competitor->id,
+    ]);
+}
 
 describe('MatchesTable Rendering', function () {
     it('can render matches table', function () {
@@ -50,8 +64,8 @@ describe('MatchesTable Rendering', function () {
         $wrestler1 = Wrestler::factory()->create(['name' => 'John Cena']);
         $wrestler2 = Wrestler::factory()->create(['name' => 'The Rock']);
 
-        $match->wrestlers()->attach($wrestler1, ['side_number' => 1]);
-        $match->wrestlers()->attach($wrestler2, ['side_number' => 2]);
+        attachTableCompetitor($match, $wrestler1, 1);
+        attachTableCompetitor($match, $wrestler2, 2);
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('John Cena')
@@ -125,8 +139,8 @@ describe('MatchesTable Search and Filtering', function () {
         $wrestler1 = Wrestler::factory()->create(['name' => 'Stone Cold']);
         $wrestler2 = Wrestler::factory()->create(['name' => 'The Rock']);
 
-        $match1->wrestlers()->attach($wrestler1, ['side_number' => 1]);
-        $match2->wrestlers()->attach($wrestler2, ['side_number' => 1]);
+        attachTableCompetitor($match1, $wrestler1, 1);
+        attachTableCompetitor($match2, $wrestler2, 1);
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Stone Cold')
@@ -143,9 +157,9 @@ describe('MatchesTable Complex Relationships', function () {
         $wrestler2 = Wrestler::factory()->create(['name' => 'Wrestler Two']);
         $tagTeam = TagTeam::factory()->create(['name' => 'Tag Team']);
 
-        $match->wrestlers()->attach($wrestler1, ['side_number' => 1]);
-        $match->wrestlers()->attach($wrestler2, ['side_number' => 2]);
-        $match->tagTeams()->attach($tagTeam, ['side_number' => 3]);
+        attachTableCompetitor($match, $wrestler1, 1);
+        attachTableCompetitor($match, $wrestler2, 2);
+        attachTableCompetitor($match, $tagTeam, 3);
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Wrestler One')
@@ -196,7 +210,7 @@ describe('MatchesTable Complex Relationships', function () {
         $match = EventMatch::factory()->for($event)->create();
 
         $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
-        $match->wrestlers()->attach($wrestler, ['side_number' => 1]);
+        attachTableCompetitor($match, $wrestler, 1);
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Test Wrestler')
@@ -220,7 +234,7 @@ describe('MatchesTable Performance', function () {
 
         // Attach relationships to matches
         foreach ($matches as $index => $match) {
-            $match->wrestlers()->attach($wrestlers[$index % 10], ['side_number' => 1]);
+            attachTableCompetitor($match, $wrestlers->random(), 1);
             $match->referees()->attach($referees[$index % 5]);
         }
 
@@ -236,7 +250,7 @@ describe('MatchesTable Performance', function () {
         $referee = Referee::factory()->create(['first_name' => 'Test', 'last_name' => 'Referee']);
         $title = Title::factory()->create(['name' => 'Test Title']);
 
-        $match->wrestlers()->attach($wrestler, ['side_number' => 1]);
+        attachTableCompetitor($match, $wrestler, 1);
         $match->referees()->attach($referee);
         $match->titles()->attach($title);
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Models\Matches\EventMatch;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,6 +35,8 @@ describe('EventMatch Model Unit Tests', function () {
                 'match_type',
                 'match_stipulation_id',
                 'preview',
+                'match_finish',
+                'winning_side_id',
             ]);
         });
 
@@ -44,6 +47,7 @@ describe('EventMatch Model Unit Tests', function () {
             expect($casts)->toBeArray();
             expect($casts['id'])->toBe('int');
             expect($casts['match_type'])->toBe(MatchType::class);
+            expect($casts['match_finish'])->toBe(MatchFinish::class);
         });
 
         test('has custom eloquent builder', function () {

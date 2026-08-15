@@ -24,7 +24,7 @@ class MatchCompetitorBuilder extends Builder
      */
     public function forCompetitorIds(string $competitorType, Collection $competitorIds): static
     {
-        $this->where('competitor_type', $competitorType)
+        $this->where('competitor_type', (new $competitorType())->getMorphClass())
             ->whereIn('competitor_id', $competitorIds);
 
         return $this;
