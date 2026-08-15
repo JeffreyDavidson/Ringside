@@ -23,9 +23,9 @@ final class TitleChampionshipQuery
     public static function previousChampionship(Title $title): ?TitleChampionship
     {
         return TitleChampionship::query()
-            ->whereBelongsTo($title)
+            ->forTitleId($title->id)
             ->previous()
-            ->latest('lost_at')
+            ->mostRecentlyLostFirst()
             ->first();
     }
 
@@ -36,7 +36,10 @@ final class TitleChampionshipQuery
 
     public static function firstChampionship(Title $title): ?TitleChampionship
     {
-        return $title->championships()->oldest('won_at')->first();
+        return TitleChampionship::query()
+            ->forTitleId($title->id)
+            ->earliestWonFirst()
+            ->first();
     }
 
     public static function firstChampion(Title $title): ?Model
