@@ -40,6 +40,8 @@ Builders are grouped by technical layer first and wrestling entity second. A con
 
 `MatchCompetitorBuilder` owns persisted competitor-record filters by competitor model type, competitor identifiers, and event identifiers. Scheduling policy and conflict exceptions remain in `MatchAssignmentConflictService`.
 
+`MatchSideBuilder` owns canonical match-side ordering by persisted position. `EventMatch::sides()` applies the same ordering so side collections remain deterministic regardless of insertion order.
+
 ## Boundaries
 
 Builders express database queries over relationships and stored lifecycle periods. They may:

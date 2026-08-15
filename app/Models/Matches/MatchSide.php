@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Builders\Matches\MatchSideBuilder;
 use Database\Factories\Matches\MatchSideFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,6 +34,7 @@ use Illuminate\Support\Carbon;
 #[Table('events_matches_sides')]
 #[Fillable('match_id', 'position')]
 #[UseFactory(MatchSideFactory::class)]
+#[UseEloquentBuilder(MatchSideBuilder::class)]
 class MatchSide extends Model
 {
     /** @use HasFactory<MatchSideFactory> */
