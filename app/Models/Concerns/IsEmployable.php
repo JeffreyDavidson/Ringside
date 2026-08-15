@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
 use Illuminate\Database\Eloquent\Model;
@@ -32,9 +33,8 @@ trait IsEmployable
     public function currentEmployment(): MorphOne
     {
         /** @var MorphOne<Employment, TModel> $relation */
-        $relation = $this->morphOne(Employment::class, 'employable')
-            ->whereNull('ended_at')
-            ->where('started_at', '<=', now());
+        $relation = $this->morphOne(Employment::class, 'employable');
+        LifecyclePeriodBuilder::constrainToCurrent($relation->getQuery());
 
         return $relation;
     }
@@ -43,9 +43,8 @@ trait IsEmployable
     public function futureEmployment(): MorphOne
     {
         /** @var MorphOne<Employment, TModel> $relation */
-        $relation = $this->morphOne(Employment::class, 'employable')
-            ->whereNull('ended_at')
-            ->where('started_at', '>', now());
+        $relation = $this->morphOne(Employment::class, 'employable');
+        LifecyclePeriodBuilder::constrainToScheduled($relation->getQuery());
 
         return $relation;
     }
@@ -54,8 +53,8 @@ trait IsEmployable
     public function previousEmployments(): MorphMany
     {
         /** @var MorphMany<Employment, TModel> $relation */
-        $relation = $this->morphMany(Employment::class, 'employable')
-            ->whereNotNull('ended_at');
+        $relation = $this->morphMany(Employment::class, 'employable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
 
         return $relation;
     }
@@ -64,9 +63,9 @@ trait IsEmployable
     public function previousEmployment(): MorphOne
     {
         /** @var MorphOne<Employment, TModel> $relation */
-        $relation = $this->morphOne(Employment::class, 'employable')
-            ->whereNotNull('ended_at')
-            ->ofMany('ended_at', 'max');
+        $relation = $this->morphOne(Employment::class, 'employable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
+        $relation->ofMany('ended_at', 'max');
 
         return $relation;
     }

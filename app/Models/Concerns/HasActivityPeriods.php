@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Lifecycle\ActivityPeriod;
 use Illuminate\Database\Eloquent\Model;
@@ -36,9 +37,8 @@ trait HasActivityPeriods
     public function currentActivityPeriod(): MorphOne
     {
         /** @var MorphOne<ActivityPeriod, TModel> $relation */
-        $relation = $this->morphOne(ActivityPeriod::class, 'activeable')
-            ->whereNull('ended_at')
-            ->where('started_at', '<=', now());
+        $relation = $this->morphOne(ActivityPeriod::class, 'activeable');
+        LifecyclePeriodBuilder::constrainToCurrent($relation->getQuery());
 
         return $relation;
     }
@@ -51,9 +51,8 @@ trait HasActivityPeriods
     public function futureActivityPeriod(): MorphOne
     {
         /** @var MorphOne<ActivityPeriod, TModel> $relation */
-        $relation = $this->morphOne(ActivityPeriod::class, 'activeable')
-            ->whereNull('ended_at')
-            ->where('started_at', '>', now());
+        $relation = $this->morphOne(ActivityPeriod::class, 'activeable');
+        LifecyclePeriodBuilder::constrainToScheduled($relation->getQuery());
 
         return $relation;
     }
@@ -66,8 +65,8 @@ trait HasActivityPeriods
     public function previousActivityPeriods(): MorphMany
     {
         /** @var MorphMany<ActivityPeriod, TModel> $relation */
-        $relation = $this->morphMany(ActivityPeriod::class, 'activeable')
-            ->whereNotNull('ended_at');
+        $relation = $this->morphMany(ActivityPeriod::class, 'activeable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
 
         return $relation;
     }
@@ -80,9 +79,9 @@ trait HasActivityPeriods
     public function previousActivityPeriod(): MorphOne
     {
         /** @var MorphOne<ActivityPeriod, TModel> $relation */
-        $relation = $this->morphOne(ActivityPeriod::class, 'activeable')
-            ->whereNotNull('ended_at')
-            ->latest('ended_at');
+        $relation = $this->morphOne(ActivityPeriod::class, 'activeable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
+        $relation->latest('ended_at');
 
         return $relation;
     }

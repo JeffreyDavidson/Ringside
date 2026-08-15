@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Suspendable;
 use App\Models\Lifecycle\Suspension;
 use Illuminate\Database\Eloquent\Model;
@@ -32,8 +33,8 @@ trait IsSuspendable
     public function currentSuspension(): MorphOne
     {
         /** @var MorphOne<Suspension, TModel> $relation */
-        $relation = $this->morphOne(Suspension::class, 'suspendable')
-            ->whereNull('ended_at');
+        $relation = $this->morphOne(Suspension::class, 'suspendable');
+        LifecyclePeriodBuilder::constrainToOpen($relation->getQuery());
 
         return $relation;
     }
@@ -42,8 +43,8 @@ trait IsSuspendable
     public function previousSuspensions(): MorphMany
     {
         /** @var MorphMany<Suspension, TModel> $relation */
-        $relation = $this->morphMany(Suspension::class, 'suspendable')
-            ->whereNotNull('ended_at');
+        $relation = $this->morphMany(Suspension::class, 'suspendable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
 
         return $relation;
     }
@@ -52,9 +53,9 @@ trait IsSuspendable
     public function previousSuspension(): MorphOne
     {
         /** @var MorphOne<Suspension, TModel> $relation */
-        $relation = $this->morphOne(Suspension::class, 'suspendable')
-            ->whereNotNull('ended_at')
-            ->ofMany('ended_at', 'max');
+        $relation = $this->morphOne(Suspension::class, 'suspendable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
+        $relation->ofMany('ended_at', 'max');
 
         return $relation;
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Injurable;
 use App\Models\Lifecycle\Injury;
 use Illuminate\Database\Eloquent\Model;
@@ -32,8 +33,8 @@ trait IsInjurable
     public function currentInjury(): MorphOne
     {
         /** @var MorphOne<Injury, TModel> $relation */
-        $relation = $this->morphOne(Injury::class, 'injurable')
-            ->whereNull('ended_at');
+        $relation = $this->morphOne(Injury::class, 'injurable');
+        LifecyclePeriodBuilder::constrainToOpen($relation->getQuery());
 
         return $relation;
     }
@@ -42,8 +43,8 @@ trait IsInjurable
     public function previousInjuries(): MorphMany
     {
         /** @var MorphMany<Injury, TModel> $relation */
-        $relation = $this->morphMany(Injury::class, 'injurable')
-            ->whereNotNull('ended_at');
+        $relation = $this->morphMany(Injury::class, 'injurable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
 
         return $relation;
     }
@@ -52,9 +53,9 @@ trait IsInjurable
     public function previousInjury(): MorphOne
     {
         /** @var MorphOne<Injury, TModel> $relation */
-        $relation = $this->morphOne(Injury::class, 'injurable')
-            ->whereNotNull('ended_at')
-            ->ofMany('ended_at', 'max');
+        $relation = $this->morphOne(Injury::class, 'injurable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
+        $relation->ofMany('ended_at', 'max');
 
         return $relation;
     }

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Lifecycle;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use Database\Factories\Lifecycle\ActivityPeriodFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +25,7 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable('started_at', 'ended_at')]
 #[UseFactory(ActivityPeriodFactory::class)]
+#[UseEloquentBuilder(LifecyclePeriodBuilder::class)]
 class ActivityPeriod extends Model
 {
     /** @use HasFactory<ActivityPeriodFactory> */
