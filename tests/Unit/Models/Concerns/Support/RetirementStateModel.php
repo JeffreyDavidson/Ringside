@@ -39,13 +39,12 @@ final class RetirementStateModel extends Model implements Retirable
         return new MorphOne($this->retirementBuilder($exists), new self(), 'retirable_type', 'retirable_id', 'id');
     }
 
-    private function retirementBuilder(bool $exists): RetirementStateBuilder
+    /** @return LifecycleStateBuilder<Retirement> */
+    private function retirementBuilder(bool $exists): LifecycleStateBuilder
     {
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
-        $builder = new RetirementStateBuilder($query);
-        $builder->setModel(new Retirement());
 
-        return $builder;
+        return new LifecycleStateBuilder($query, new Retirement());
     }
 }

@@ -49,13 +49,12 @@ final class EmploymentStateModel extends Model implements Employable
         return new MorphOne($this->employmentBuilder($exists), new self(), 'employable_type', 'employable_id', 'id');
     }
 
-    private function employmentBuilder(bool $exists): EmploymentStateBuilder
+    /** @return LifecycleStateBuilder<Employment> */
+    private function employmentBuilder(bool $exists): LifecycleStateBuilder
     {
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
-        $builder = new EmploymentStateBuilder($query);
-        $builder->setModel(new Employment());
 
-        return $builder;
+        return new LifecycleStateBuilder($query, new Employment());
     }
 }
