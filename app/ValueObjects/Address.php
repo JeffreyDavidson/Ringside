@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
+use App\Enums\Shared\UnitedStatesState;
 use InvalidArgumentException;
 
 readonly class Address
@@ -11,10 +12,10 @@ readonly class Address
     public function __construct(
         public string $streetAddress,
         public string $city,
-        public string $state,
+        public UnitedStatesState $state,
         public string $zipcode,
     ) {
-        if (mb_trim($this->streetAddress) === '' || mb_trim($this->city) === '' || mb_trim($this->state) === '') {
+        if (mb_trim($this->streetAddress) === '' || mb_trim($this->city) === '') {
             throw new InvalidArgumentException('Address fields cannot be empty.');
         }
 
@@ -25,7 +26,7 @@ readonly class Address
 
     public function formatted(): string
     {
-        return "{$this->streetAddress}, {$this->city}, {$this->state} {$this->zipcode}";
+        return "{$this->streetAddress}, {$this->city}, {$this->state->value} {$this->zipcode}";
     }
 
     /** @return array{street_address: string, city: string, state: string, zipcode: string} */
@@ -34,7 +35,7 @@ readonly class Address
         return [
             'street_address' => $this->streetAddress,
             'city' => $this->city,
-            'state' => $this->state,
+            'state' => $this->state->value,
             'zipcode' => $this->zipcode,
         ];
     }

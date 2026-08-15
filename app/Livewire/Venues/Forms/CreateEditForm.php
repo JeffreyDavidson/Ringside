@@ -130,7 +130,7 @@ class CreateEditForm extends BaseForm
             'address' => new Address(
                 streetAddress: $this->street_address,
                 city: $this->city,
-                state: $this->state,
+                state: UnitedStatesState::from($this->state),
                 zipcode: (string) $this->zipcode,
             ),
         ];

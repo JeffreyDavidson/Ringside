@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Database\Factories;
 
+use App\Enums\Shared\UnitedStatesState;
 use App\Models\Events\Venue;
 use Database\Factories\Events\VenueFactory;
 
@@ -58,7 +59,7 @@ describe('VenueFactory Unit Tests', function () {
             expect($venue->city)->toBeString();
             expect(mb_strlen($venue->city))->toBeGreaterThan(2);
             expect($venue->state)->toBeString();
-            expect(mb_strlen($venue->state))->toBe(2);
+            expect(UnitedStatesState::tryFrom($venue->state))->not->toBeNull();
             expect($venue->zipcode)->toBeString();
             expect(mb_strlen($venue->zipcode))->toBe(5);
         });
@@ -70,13 +71,13 @@ describe('VenueFactory Unit Tests', function () {
             $venue = Venue::factory()->make([
                 'name' => 'Custom Arena',
                 'city' => 'Custom City',
-                'state' => 'CC',
+                'state' => UnitedStatesState::Colorado->value,
             ]);
 
             // Assert
             expect($venue->name)->toBe('Custom Arena');
             expect($venue->city)->toBe('Custom City');
-            expect($venue->state)->toBe('CC');
+            expect($venue->state)->toBe(UnitedStatesState::Colorado->value);
         });
 
         test('maintains required attributes when overriding', function () {
@@ -112,7 +113,7 @@ describe('VenueFactory Unit Tests', function () {
             foreach ($venues as $venue) {
                 expect($venue->name)->toBeString();
                 expect($venue->zipcode)->toMatch('/^\d{5}$/');
-                expect($venue->state)->toMatch('/^[A-Z]{2}$/');
+                expect(UnitedStatesState::tryFrom($venue->state))->not->toBeNull();
             }
         });
     });

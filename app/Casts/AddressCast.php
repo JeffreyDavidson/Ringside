@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Casts;
 
+use App\Enums\Shared\UnitedStatesState;
 use App\ValueObjects\Address;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,7 @@ class AddressCast implements CastsAttributes
         return new Address(
             streetAddress: (string) $attributes['street_address'],
             city: (string) $attributes['city'],
-            state: (string) $attributes['state'],
+            state: UnitedStatesState::from((string) $attributes['state']),
             zipcode: (string) $attributes['zipcode'],
         );
     }
