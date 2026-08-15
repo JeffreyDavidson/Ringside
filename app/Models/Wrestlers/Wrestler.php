@@ -102,8 +102,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TitleChampionship> $titleChampionships
  * @property-read Collection<int, TitleChampionship> $currentChampionships
  * @property-read Collection<int, TitleChampionship> $previousTitleChampionships
- *
- * @method string getNameLabel()
  */
 #[Fillable('name', 'height', 'weight', 'hometown', 'signature_move')]
 #[Appends('status')]
