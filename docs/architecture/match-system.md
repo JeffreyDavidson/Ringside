@@ -46,6 +46,8 @@ Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by El
 
 `MatchStipulation` is a persistence record containing its configured name, slug, description, active flag, and match relationship. Stipulation capabilities and match presentation must be implemented by the match domain when they are enforced; the model does not infer behavior from hard-coded slug lists.
 
+`AddMatchForEventAction` receives side-based `EventMatchData`, locks the owning event, allocates the next card position without reusing soft-deleted match numbers, and persists the match, officials, championship stakes, sides, and competitors in one transaction. Assignment Actions retain eligibility and scheduling-conflict enforcement for their respective relationships.
+
 ## Winner/Loser System
 
 ### Multiple Winners and Losers
