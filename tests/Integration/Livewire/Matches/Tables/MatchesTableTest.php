@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
@@ -55,6 +56,20 @@ describe('MatchesTable Rendering', function () {
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Singles');
+    });
+
+    it('offers result recording and correction from the table', function () {
+        $event = Event::factory()->create();
+        $unresultedMatch = EventMatch::factory()->for($event)->create();
+        $resultedMatch = EventMatch::factory()->for($event)->create([
+            'match_finish' => MatchFinish::TimeLimitDraw,
+        ]);
+
+        livewire(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSee('Record Result')
+            ->assertSee('Correct Result')
+            ->assertSeeHtml("matchId: {$unresultedMatch->id}")
+            ->assertSeeHtml("matchId: {$resultedMatch->id}");
     });
 
     it('displays match competitors', function () {
