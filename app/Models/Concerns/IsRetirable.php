@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Retirable;
 use App\Models\Lifecycle\Retirement;
 use Illuminate\Database\Eloquent\Model;
@@ -32,8 +33,8 @@ trait IsRetirable
     public function currentRetirement(): MorphOne
     {
         /** @var MorphOne<Retirement, TModel> $relation */
-        $relation = $this->morphOne(Retirement::class, 'retirable')
-            ->whereNull('ended_at');
+        $relation = $this->morphOne(Retirement::class, 'retirable');
+        LifecyclePeriodBuilder::constrainToOpen($relation->getQuery());
 
         return $relation;
     }
@@ -42,8 +43,8 @@ trait IsRetirable
     public function previousRetirements(): MorphMany
     {
         /** @var MorphMany<Retirement, TModel> $relation */
-        $relation = $this->morphMany(Retirement::class, 'retirable')
-            ->whereNotNull('ended_at');
+        $relation = $this->morphMany(Retirement::class, 'retirable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
 
         return $relation;
     }
@@ -52,9 +53,9 @@ trait IsRetirable
     public function previousRetirement(): MorphOne
     {
         /** @var MorphOne<Retirement, TModel> $relation */
-        $relation = $this->morphOne(Retirement::class, 'retirable')
-            ->whereNotNull('ended_at')
-            ->ofMany('ended_at', 'max');
+        $relation = $this->morphOne(Retirement::class, 'retirable');
+        LifecyclePeriodBuilder::constrainToEnded($relation->getQuery());
+        $relation->ofMany('ended_at', 'max');
 
         return $relation;
     }
