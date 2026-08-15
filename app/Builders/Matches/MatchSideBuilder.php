@@ -13,13 +13,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class MatchSideBuilder extends Builder
 {
-    public function inPositionOrder(): static
-    {
-        self::constrainToPositionOrder($this);
-
-        return $this;
-    }
-
     /**
      * @template TModel of Model
      *

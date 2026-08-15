@@ -8,8 +8,10 @@ use App\Builders\Lifecycle\LifecycleTransitionBuilder;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Users\User;
+use App\Observers\Lifecycle\LifecycleTransitionObserver;
 use Database\Factories\Lifecycle\LifecycleTransitionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +19,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
-use LogicException;
 
 /**
  * @property int $id
@@ -35,6 +36,7 @@ use LogicException;
  * @property-read User|null $user
  */
 #[Fillable('subject_type', 'subject_id', 'dimension', 'transition', 'effective_at', 'user_id', 'context')]
+#[ObservedBy(LifecycleTransitionObserver::class)]
 #[UseFactory(LifecycleTransitionFactory::class)]
 #[UseEloquentBuilder(LifecycleTransitionBuilder::class)]
 class LifecycleTransition extends Model
@@ -63,16 +65,5 @@ class LifecycleTransition extends Model
             'effective_at' => 'datetime',
             'context' => 'array',
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::updating(function (): never {
-            throw new LogicException('Lifecycle transition records are immutable.');
-        });
-
-        static::deleting(function (): never {
-            throw new LogicException('Lifecycle transition records are immutable.');
-        });
     }
 }

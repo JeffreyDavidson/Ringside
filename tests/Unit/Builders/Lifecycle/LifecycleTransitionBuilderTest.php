@@ -10,7 +10,7 @@ test('lifecycle transitions use the shared builder', function () {
     expect(LifecycleTransition::query())->toBeInstanceOf(LifecycleTransitionBuilder::class);
 });
 
-test('lifecycle transitions can be ordered chronologically with deterministic ties', function () {
+test('lifecycle transition relationships are ordered chronologically with deterministic ties', function () {
     $title = Title::factory()->create();
     $sharedEffectiveDate = now()->subDay();
 
@@ -24,11 +24,7 @@ test('lifecycle transitions can be ordered chronologically with deterministic ti
         ->for($title, 'subject')
         ->create(['effective_at' => $sharedEffectiveDate]);
 
-    expect(LifecycleTransition::query()->chronological()->pluck('id')->all())->toBe([
-        $firstTiedTransition->id,
-        $secondTiedTransition->id,
-        $latestTransition->id,
-    ])->and($title->lifecycleTransitions()->pluck('id')->all())->toBe([
+    expect($title->lifecycleTransitions()->pluck('id')->all())->toBe([
         $firstTiedTransition->id,
         $secondTiedTransition->id,
         $latestTransition->id,

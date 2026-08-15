@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $title_id
- * @property int $event_match_id
  * @property int $champion_id
  * @property string $champion_type
  * @property int|null $won_match_id
@@ -77,7 +76,6 @@ class TitleChampionship extends Model
         return [
             'won_at' => 'datetime',
             'lost_at' => 'datetime',
-            'last_held_reign' => 'datetime',
         ];
     }
 

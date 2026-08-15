@@ -51,10 +51,6 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TitleChampionship> $championships
  *
  * @property TitleType $type
- * @property string|null $current_champion_type
- * @property int|null $current_champion_id
- * @property string|null $previous_champion_type
- * @property int|null $previous_champion_id
  *
  * @property-read Collection<int, ActivityPeriod> $activityPeriods
  * @property-read ActivityPeriod|null $currentActivityPeriod

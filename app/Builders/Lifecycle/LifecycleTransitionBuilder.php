@@ -13,13 +13,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LifecycleTransitionBuilder extends Builder
 {
-    public function chronological(): static
-    {
-        self::constrainChronologically($this);
-
-        return $this;
-    }
-
     /**
      * @template TModel of Model
      *

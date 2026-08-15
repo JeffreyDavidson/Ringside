@@ -154,7 +154,7 @@ class EventMatch extends Model implements SoftDeletable
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', 'events_matches_competitors', 'match_id')
+        return $this->morphedByMany(Wrestler::class, 'competitor', (new MatchCompetitor())->getTable(), 'match_id')
             ->using(MatchCompetitor::class)
             ->withPivot('match_side_id');
     }
@@ -166,7 +166,7 @@ class EventMatch extends Model implements SoftDeletable
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', 'events_matches_competitors', 'match_id')
+        return $this->morphedByMany(TagTeam::class, 'competitor', (new MatchCompetitor())->getTable(), 'match_id')
             ->using(MatchCompetitor::class)
             ->withPivot('match_side_id');
     }

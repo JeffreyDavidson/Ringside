@@ -29,8 +29,6 @@ class TitleFactory extends Factory
         return [
             'name' => str(fake()->unique()->words(2, true))->title()->append($titleType->value === 'singles' ? ' Title' : ' Titles'),
             'type' => $titleType,
-            'current_champion_id' => null,
-            'previous_champion_id' => null,
         ];
     }
 

@@ -190,7 +190,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
      */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class, 'tag_teams_wrestlers', 'wrestler_id', 'tag_team_id')
+        return $this->belongsToMany(TagTeam::class, (new TagTeamWrestler())->getTable(), 'wrestler_id', 'tag_team_id')
             ->withPivot(['joined_at', 'left_at'])
             ->using(TagTeamWrestler::class)
             ->withTimestamps();
@@ -216,7 +216,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
             'id',
             'id',
             'tag_team_id',
-        )->whereNull('tag_teams_wrestlers.left_at');
+        )->whereNull((new TagTeamWrestler())->qualifyColumn('left_at'));
     }
 
     /**
@@ -232,8 +232,8 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
             'id',
             'tag_team_id',
         )
-            ->whereNotNull('tag_teams_wrestlers.left_at')
-            ->latest('tag_teams_wrestlers.left_at');
+            ->whereNotNull((new TagTeamWrestler())->qualifyColumn('left_at'))
+            ->latest((new TagTeamWrestler())->qualifyColumn('left_at'));
     }
 
     /**

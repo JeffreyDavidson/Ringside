@@ -121,7 +121,7 @@ class Manager extends Model implements Employable, Injurable, Retirable, SoftDel
     /** @return BelongsToMany<Wrestler, $this, WrestlerManager> */
     public function wrestlers(): BelongsToMany
     {
-        return $this->belongsToMany(Wrestler::class, 'wrestlers_managers')
+        return $this->belongsToMany(Wrestler::class, (new WrestlerManager())->getTable())
             ->using(WrestlerManager::class)
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps();
@@ -142,7 +142,7 @@ class Manager extends Model implements Employable, Injurable, Retirable, SoftDel
     /** @return BelongsToMany<TagTeam, $this, TagTeamManager> */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class, 'tag_teams_managers')
+        return $this->belongsToMany(TagTeam::class, (new TagTeamManager())->getTable())
             ->using(TagTeamManager::class)
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps();
