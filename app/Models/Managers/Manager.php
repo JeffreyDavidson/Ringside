@@ -35,7 +35,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Tests\Unit\Models\Managers\ManagerTest;
 
 /**
  * @implements Employable<static>
@@ -97,8 +96,6 @@ use Tests\Unit\Models\Managers\ManagerTest;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Manager withoutTrashed()
  *
  * @mixin \Eloquent
- *
- * @see ManagerTest
  */
 #[Fillable('first_name', 'last_name')]
 #[Appends('status')]

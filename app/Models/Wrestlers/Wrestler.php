@@ -9,9 +9,7 @@ use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
-use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Concerns\HasMatchParticipations;
-use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
@@ -56,7 +54,7 @@ use Illuminate\Support\Carbon;
  * @implements CanBeAStableMember<StableWrestler, $this>
  * @implements Employable<static>
  * @implements Injurable<static>
- * @implements Manageable<WrestlerManager, static>
+ * @implements Manageable<WrestlerManager, $this>
  * @implements Retirable<static>
  * @implements Suspendable<static>
  *
@@ -119,13 +117,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     /** @use HasFactory<WrestlerFactory> */
     use HasFactory;
 
-    /** @use HasManagerAssignments<WrestlerManager, static> */
-    use HasManagerAssignments;
-
     use HasMatchParticipations;
-
-    /** @use HasStableMemberships<StableWrestler, $this> */
-    use HasStableMemberships;
 
     /** @use IsEmployable<static> */
     use IsEmployable;
@@ -141,29 +133,58 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
 
     use SoftDeletes;
 
-    protected function managerAssignmentTable(): string
+    /** @return BelongsToMany<Manager, $this, WrestlerManager> */
+    public function managers(): BelongsToMany
     {
-        return (new WrestlerManager())->getTable();
+        return $this->belongsToMany(Manager::class, (new WrestlerManager())->getTable())
+            ->using(WrestlerManager::class)
+            ->withPivot(['hired_at', 'fired_at'])
+            ->withTimestamps();
     }
 
-    protected function managerAssignmentPivotModel(): string
+    /** @return BelongsToMany<Manager, $this, WrestlerManager> */
+    public function currentManagers(): BelongsToMany
     {
-        return WrestlerManager::class;
+        return $this->managers()->wherePivotNull('fired_at');
     }
 
-    protected function stableMembershipTable(): string
+    /** @return BelongsToMany<Manager, $this, WrestlerManager> */
+    public function previousManagers(): BelongsToMany
     {
-        return (new StableWrestler())->getTable();
+        return $this->managers()->wherePivotNotNull('fired_at');
     }
 
-    protected function stableMembershipForeignKey(): string
+    /** @return BelongsToMany<Stable, $this, StableWrestler> */
+    public function stables(): BelongsToMany
     {
-        return 'wrestler_id';
+        return $this->belongsToMany(
+            Stable::class,
+            (new StableWrestler())->getTable(),
+            'wrestler_id',
+            'stable_id',
+        )
+            ->using(StableWrestler::class)
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
     }
 
-    protected function stableMembershipPivotModel(): string
+    /** @return HasOneThrough<Stable, StableWrestler, $this> */
+    public function currentStable(): HasOneThrough
     {
-        return StableWrestler::class;
+        return $this->hasOneThrough(
+            Stable::class,
+            StableWrestler::class,
+            'wrestler_id',
+            'id',
+            'id',
+            'stable_id',
+        )->whereNull((new StableWrestler())->qualifyColumn('left_at'));
+    }
+
+    /** @return BelongsToMany<Stable, $this, StableWrestler> */
+    public function previousStables(): BelongsToMany
+    {
+        return $this->stables()->wherePivotNotNull('left_at');
     }
 
     /**

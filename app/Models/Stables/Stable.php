@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
-use Tests\Unit\Models\Stables\StableTest;
 
 /**
  * @implements HasActivityPeriodsContract<static>
@@ -77,8 +76,6 @@ use Tests\Unit\Models\Stables\StableTest;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stable withoutTrashed()
  *
  * @mixin \Eloquent
- *
- * @see StableTest
  */
 #[Fillable('name')]
 #[Appends('status')]
