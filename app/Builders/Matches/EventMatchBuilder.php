@@ -10,6 +10,7 @@ use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
@@ -32,11 +33,22 @@ class EventMatchBuilder extends Builder
 
     public function forPastEvents(): static
     {
-        $this->withWhereHas('event', function (Builder|Relation $query): void {
-            $query->where('date', '<', now());
-        });
+        self::constrainToPastEvents($this);
+        $this->with('event');
 
         return $this;
+    }
+
+    /**
+     * @template TRelatedModel of Model
+     *
+     * @param  Builder<TRelatedModel>  $query
+     */
+    public static function constrainToPastEvents(Builder $query): void
+    {
+        $query->whereHas('event', function (Builder|Relation $query): void {
+            $query->where('date', '<', now());
+        });
     }
 
     public function forCompetitor(Wrestler|TagTeam $competitor): static
