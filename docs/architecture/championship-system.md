@@ -24,6 +24,14 @@ Models expose their explicit persisted naming fields: `name` for wrestlers and t
 
 `Title::status` is computed from activity-period relationships and is not a stored or cast database attribute. Only the persisted title `type` value is enum-cast.
 
+## Match Outcomes
+
+`ApplyMatchTitleOutcomesAction` is the championship-lineage boundary composed by `RecordResultAction`. It locks every attached title and its reigns before applying a result, so winner metadata and championship changes commit or roll back together.
+
+A champion defense leaves the current reign open. A compatible challenger winning by a title-changing finish closes the current reign with the match and event date, then creates the challenger's reign with the same match and date. A vacant title creates only the new reign. Winner-take-all matches apply that transition independently to every attached title inside the same transaction.
+
+Correcting a result soft deletes a reign incorrectly created by that match and reopens the preceding reign before applying the corrected outcome. Corrections are rejected after a later reign has been recorded because rewriting that earlier result would invalidate dependent lineage.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Match System](match-system.md)

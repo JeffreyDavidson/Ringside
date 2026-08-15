@@ -7,23 +7,42 @@ use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
+use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
+use App\Models\Wrestlers\Wrestler;
 
-function sideWithCompetitor(EventMatch $match, int $position, ?int $entryOrder = null): MatchSide
-{
+function sideWithCompetitor(
+    EventMatch $match,
+    int $position,
+    ?int $entryOrder = null,
+    Wrestler|TagTeam|null $competitor = null,
+): MatchSide {
     $side = MatchSide::factory()->create([
         'match_id' => $match->id,
         'position' => $position,
     ]);
 
-    $competitor = MatchCompetitor::factory()->create([
+    $matchCompetitorAttributes = [
         'match_id' => $match->id,
         'match_side_id' => $side->id,
-    ]);
-    $competitor->forceFill(['entry_order' => $entryOrder])->save();
+    ];
+
+    if ($competitor !== null) {
+        $matchCompetitorAttributes += [
+            'competitor_type' => $competitor->getMorphClass(),
+            'competitor_id' => $competitor->id,
+        ];
+    }
+
+    $matchCompetitor = MatchCompetitor::factory()->create($matchCompetitorAttributes);
+    $matchCompetitor->forceFill(['entry_order' => $entryOrder])->save();
 
     return $side;
 }
@@ -322,4 +341,236 @@ it('rejects an elimination credited after the eliminator exited', function () {
             new MatchEliminationData($competitors[1], 2, $competitors[0]),
         ]),
     ))->toThrow(InvalidMatchOutcomeException::class);
+});
+
+it('transfers a singles title to the winning challenger', function () {
+    $eventDate = now()->subDay()->startOfSecond();
+    $event = Event::factory()->create(['date' => $eventDate]);
+    $match = EventMatch::factory()->for($event)->create();
+    $champion = Wrestler::factory()->create();
+    $challenger = Wrestler::factory()->create();
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $reign = TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($champion)
+        ->wonOn($eventDate->copy()->subMonth()->toDateTimeString())
+        ->create();
+    sideWithCompetitor($match, 1, competitor: $champion);
+    $winningSide = sideWithCompetitor($match, 2, competitor: $challenger);
+    $match->titles()->attach($title);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $winningSide),
+    );
+
+    $newReign = $title->championships()->current()->sole();
+
+    expect($reign->refresh()->lost_match_id)->toBe($match->id)
+        ->and($reign->lost_at?->equalTo($eventDate))->toBeTrue()
+        ->and($newReign->champion->is($challenger))->toBeTrue()
+        ->and($newReign->won_match_id)->toBe($match->id)
+        ->and($newReign->won_at->equalTo($eventDate))->toBeTrue();
+});
+
+it('retains a title when its champion wins', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $champion = Wrestler::factory()->create();
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $reign = TitleChampionship::factory()->for($title)->forWrestler($champion)->create();
+    $winningSide = sideWithCompetitor($match, 1, competitor: $champion);
+    sideWithCompetitor($match, 2, competitor: Wrestler::factory()->create());
+    $match->titles()->attach($title);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Submission, $winningSide),
+    );
+
+    expect($reign->refresh()->lost_at)->toBeNull()
+        ->and($title->championships()->count())->toBe(1);
+});
+
+it('does not transfer a title on a disqualification', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $champion = Wrestler::factory()->create();
+    $challenger = Wrestler::factory()->create();
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $reign = TitleChampionship::factory()->for($title)->forWrestler($champion)->create();
+    sideWithCompetitor($match, 1, competitor: $champion);
+    $winningSide = sideWithCompetitor($match, 2, competitor: $challenger);
+    $match->titles()->attach($title);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Disqualification, $winningSide),
+    );
+
+    expect($reign->refresh()->lost_at)->toBeNull()
+        ->and($title->championships()->count())->toBe(1);
+});
+
+it('crowns the winner of a vacant title match', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $winner = Wrestler::factory()->create();
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $winningSide = sideWithCompetitor($match, 1, competitor: $winner);
+    sideWithCompetitor($match, 2, competitor: Wrestler::factory()->create());
+    $match->titles()->attach($title);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Knockout, $winningSide),
+    );
+
+    $reign = $title->championships()->current()->sole();
+
+    expect($reign->champion->is($winner))->toBeTrue()
+        ->and($reign->won_match_id)->toBe($match->id);
+});
+
+it('transfers every title in a winner-take-all match', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $winner = Wrestler::factory()->create();
+    $firstTitle = Title::factory()->create(['type' => TitleType::Singles]);
+    $secondTitle = Title::factory()->create(['type' => TitleType::Singles]);
+    $firstReign = TitleChampionship::factory()
+        ->for($firstTitle)
+        ->forWrestler(Wrestler::factory()->create())
+        ->create();
+    $secondReign = TitleChampionship::factory()
+        ->for($secondTitle)
+        ->forWrestler(Wrestler::factory()->create())
+        ->create();
+    $winningSide = sideWithCompetitor($match, 1, competitor: $winner);
+    sideWithCompetitor($match, 2, competitor: $firstReign->champion);
+    sideWithCompetitor($match, 3, competitor: $secondReign->champion);
+    $match->titles()->attach([$firstTitle->id, $secondTitle->id]);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Stipulation, $winningSide),
+    );
+
+    expect($firstTitle->championships()->current()->sole()->champion->is($winner))->toBeTrue()
+        ->and($secondTitle->championships()->current()->sole()->champion->is($winner))->toBeTrue();
+});
+
+it('transfers a tag team title to a winning tag team', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $champion = TagTeam::factory()->create();
+    $challenger = TagTeam::factory()->create();
+    $title = Title::factory()->create(['type' => TitleType::TagTeam]);
+    TitleChampionship::factory()->for($title)->forTagTeam($champion)->create();
+    sideWithCompetitor($match, 1, competitor: $champion);
+    $winningSide = sideWithCompetitor($match, 2, competitor: $challenger);
+    $match->titles()->attach($title);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $winningSide),
+    );
+
+    expect($title->championships()->current()->sole()->champion->is($challenger))->toBeTrue();
+});
+
+it('rejects a winner incompatible with the title type', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $title = Title::factory()->create(['type' => TitleType::TagTeam]);
+    $winningSide = sideWithCompetitor($match, 1, competitor: Wrestler::factory()->create());
+    $match->titles()->attach($title);
+
+    expect(fn () => resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $winningSide),
+    ))->toThrow(InvalidMatchOutcomeException::class);
+
+    expect($match->refresh()->match_finish)->toBeNull()
+        ->and($title->championships()->count())->toBe(0);
+});
+
+it('rejects a title change at an undated event', function () {
+    $event = Event::factory()->unscheduled()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $winningSide = sideWithCompetitor($match, 1, competitor: Wrestler::factory()->create());
+    $match->titles()->attach($title);
+
+    expect(fn () => resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $winningSide),
+    ))->toThrow(InvalidMatchOutcomeException::class);
+
+    expect($match->refresh()->match_finish)->toBeNull()
+        ->and($title->championships()->count())->toBe(0);
+});
+
+it('restores title lineage when a result is corrected to a draw', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $champion = Wrestler::factory()->create();
+    $challenger = Wrestler::factory()->create();
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    $originalReign = TitleChampionship::factory()->for($title)->forWrestler($champion)->create();
+    sideWithCompetitor($match, 1, competitor: $champion);
+    $winningSide = sideWithCompetitor($match, 2, competitor: $challenger);
+    $match->titles()->attach($title);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $winningSide),
+    );
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::TimeLimitDraw, null),
+    );
+
+    expect($originalReign->refresh()->lost_at)->toBeNull()
+        ->and($originalReign->lost_match_id)->toBeNull()
+        ->and($title->championships()->current()->sole()->is($originalReign))->toBeTrue()
+        ->and(TitleChampionship::onlyTrashed()->where('won_match_id', $match->id)->exists())->toBeTrue();
+});
+
+it('rejects correcting a title result after later lineage exists', function () {
+    $event = Event::factory()->past()->create();
+    $match = EventMatch::factory()->for($event)->create();
+    $champion = Wrestler::factory()->create();
+    $challenger = Wrestler::factory()->create();
+    $laterChampion = Wrestler::factory()->create();
+    $title = Title::factory()->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->create();
+    sideWithCompetitor($match, 1, competitor: $champion);
+    $winningSide = sideWithCompetitor($match, 2, competitor: $challenger);
+    $match->titles()->attach($title);
+
+    resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::Pinfall, $winningSide),
+    );
+
+    $laterMatch = EventMatch::factory()->for(Event::factory()->past())->create();
+    $challengerReign = $title->championships()->current()->sole();
+    $challengerReign->update([
+        'lost_match_id' => $laterMatch->id,
+        'lost_at' => $laterMatch->event->date,
+    ]);
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($laterChampion)
+        ->wonAtEventMatch($laterMatch)
+        ->create();
+
+    expect(fn () => resolve(RecordResultAction::class)->handle(
+        $match,
+        matchResult(MatchFinish::TimeLimitDraw, null),
+    ))->toThrow(InvalidMatchOutcomeException::class);
+
+    expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
+        ->and($title->championships()->current()->sole()->champion->is($laterChampion))->toBeTrue();
 });

@@ -14,7 +14,10 @@ use Illuminate\Support\Facades\DB;
 
 class RecordResultAction
 {
-    public function __construct(private MatchOutcomeRequirements $requirements) {}
+    public function __construct(
+        private MatchOutcomeRequirements $requirements,
+        private ApplyMatchTitleOutcomesAction $applyTitleOutcomes,
+    ) {}
 
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
     {
@@ -34,6 +37,7 @@ class RecordResultAction
             );
 
             $this->requirements->ensureSatisfied($lockedMatch, $lockedResult, $lockedCompetitors);
+            $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult);
 
             $lockedMatch->update([
                 'match_finish' => $result->finish,

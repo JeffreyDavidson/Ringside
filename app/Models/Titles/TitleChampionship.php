@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
@@ -29,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $lost_match_id
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
+ * @property Carbon|null $deleted_at
  *
  * @property-read EventMatch|null $wonEventMatch
  * @property-read EventMatch|null $lostEventMatch
@@ -48,6 +50,9 @@ use Illuminate\Support\Carbon;
  * @method static TitleChampionshipBuilder<static>|TitleChampionship newQuery()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship previous()
  * @method static TitleChampionshipBuilder<static>|TitleChampionship query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|TitleChampionship withoutTrashed()
  *
  * @mixin \Eloquent
  */
@@ -59,6 +64,8 @@ class TitleChampionship extends Model
 {
     /** @use HasFactory<TitleChampionshipFactory> */
     use HasFactory;
+
+    use SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
