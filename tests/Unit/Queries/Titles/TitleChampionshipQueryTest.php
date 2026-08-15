@@ -7,6 +7,7 @@ use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function () {
     $this->title = Title::factory()->create();
@@ -41,6 +42,20 @@ test('returns current and previous championship records and champions', function
         ->and(TitleChampionshipQuery::currentChampion($this->title)?->is($this->currentChampion))->toBeTrue()
         ->and(TitleChampionshipQuery::previousChampionship($this->title)?->is($this->previousChampionship))->toBeTrue()
         ->and(TitleChampionshipQuery::previousChampion($this->title)?->is($this->previousChampion))->toBeTrue();
+});
+
+test('uses the eager-loaded current championship', function () {
+    $title = Title::query()
+        ->with('currentChampionship.champion')
+        ->findOrFail($this->title->id);
+
+    DB::enableQueryLog();
+    DB::flushQueryLog();
+
+    $champion = TitleChampionshipQuery::currentChampion($title);
+
+    expect($champion?->is($this->currentChampion))->toBeTrue()
+        ->and(DB::getQueryLog())->toBeEmpty();
 });
 
 test('returns first and longest championship records and champions', function () {
