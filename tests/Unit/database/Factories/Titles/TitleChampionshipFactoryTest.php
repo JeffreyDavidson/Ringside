@@ -36,7 +36,7 @@ describe('TitleChampionshipFactory Unit Tests', function () {
 
             // Assert
             expect($championship->title_id)->toBeInt();
-            expect($championship->champion_type)->toBeIn(['wrestler', 'tagTeam']);
+            expect($championship->champion_type)->toBeIn(['wrestler', 'tag_team']);
             expect($championship->champion_id)->toBeInt();
             expect($championship->won_match_id)->toBeNull(); // Default has no match
             expect($championship->lost_match_id)->toBeNull(); // Current championship
@@ -84,7 +84,7 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             ]);
 
             // Assert
-            expect($championship->champion_type)->toBe('tagTeam');
+            expect($championship->champion_type)->toBe('tag_team');
             expect($championship->champion_id)->toBe($tagTeam->id);
             expect($championship->title_id)->toBe($title->id);
         });

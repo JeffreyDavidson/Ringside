@@ -31,6 +31,8 @@ single-consumer relationship traits or speculative override helpers.
 
 ## Related Model Resolution
 
+- Eloquent polymorphic relationships use an enforced morph map. Persist the stable lowercase aliases `event`, `manager`, `match`, `referee`, `stable`, `tag_team`, `title`, `venue`, and `wrestler`; never persist PHP class names or ad hoc aliases.
+- Obtain a model's persisted alias through `getMorphClass()`. `LifecycleOwnerType` uses the same backed values for lifecycle transition subjects.
 - Employment history uses the shared `App\Models\Lifecycle\Employment` model and an `employable` polymorphic owner.
 - Wrestlers, managers, referees, and tag teams expose the same typed employment relationships through `IsEmployable`.
 - Employment state uses one predicate per distinct meaning: `isEmployed()`, `hasFutureEmployment()`, `hasNoCurrentOrFutureEmployment()`, `isReleased()`, and `hasEmploymentHistory()`. Do not add aliases for those states.

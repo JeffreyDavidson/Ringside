@@ -46,16 +46,6 @@ enum LifecycleOwnerType: string
 
     public function morphAlias(): string
     {
-        return match ($this) {
-            self::Event => (new Event())->getMorphClass(),
-            self::Manager => (new Manager())->getMorphClass(),
-            self::Match => (new EventMatch())->getMorphClass(),
-            self::Referee => (new Referee())->getMorphClass(),
-            self::Stable => (new Stable())->getMorphClass(),
-            self::TagTeam => (new TagTeam())->getMorphClass(),
-            self::Title => (new Title())->getMorphClass(),
-            self::Venue => (new Venue())->getMorphClass(),
-            self::Wrestler => (new Wrestler())->getMorphClass(),
-        };
+        return $this->value;
     }
 }
