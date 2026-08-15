@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Events;
 
+use App\Enums\Shared\UnitedStatesState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -25,7 +26,7 @@ class VenueFactory extends Factory
             'name' => Str::of($name)->append(' Arena')->value(),
             'street_address' => fake()->buildingNumber().' '.fake()->streetName(),
             'city' => fake()->city(),
-            'state' => fake()->stateAbbr(),
+            'state' => fake()->randomElement(UnitedStatesState::cases())->value,
             'zipcode' => str(fake()->postcode())->substr(0, 5)->value(),
         ];
     }
