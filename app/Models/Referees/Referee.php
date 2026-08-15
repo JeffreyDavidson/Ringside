@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Referees;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasComputedEmploymentStatus;
@@ -26,7 +27,6 @@ use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -115,14 +115,20 @@ class Referee extends Model implements Employable, Injurable, Retirable, SoftDel
     /** @return BelongsToMany<EventMatch, $this> */
     public function matches(): BelongsToMany
     {
-        return $this->belongsToMany(EventMatch::class, 'events_matches_referees');
+        return $this->belongsToMany(
+            EventMatch::class,
+            'events_matches_referees',
+            'referee_id',
+            'match_id',
+        );
     }
 
     /** @return BelongsToMany<EventMatch, $this> */
     public function previousMatches(): BelongsToMany
     {
-        return $this->matches()->whereHas('event', function (Builder $eventQuery): void {
-            $eventQuery->where('date', '<', now());
-        });
+        $relation = $this->matches();
+        EventMatchBuilder::constrainToPastEvents($relation->getQuery());
+
+        return $relation;
     }
 }

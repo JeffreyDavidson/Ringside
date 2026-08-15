@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Concerns;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -20,7 +21,13 @@ trait HasMatchParticipations
      */
     public function matches(): MorphToMany
     {
-        return $this->morphToMany(EventMatch::class, 'competitor', 'event_match_competitors')
+        return $this->morphToMany(
+            EventMatch::class,
+            'competitor',
+            'events_matches_competitors',
+            'competitor_id',
+            'match_id',
+        )
             ->using(MatchCompetitor::class);
     }
 
@@ -31,8 +38,9 @@ trait HasMatchParticipations
      */
     public function previousMatches(): MorphToMany
     {
-        return $this->matches()->whereHas('event', function ($query) {
-            $query->where('date', '<', now());
-        });
+        $relation = $this->matches();
+        EventMatchBuilder::constrainToPastEvents($relation->getQuery());
+
+        return $relation;
     }
 }
