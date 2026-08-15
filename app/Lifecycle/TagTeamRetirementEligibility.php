@@ -71,9 +71,9 @@ final class TagTeamRetirementEligibility
             throw CannotBeUnretiredException::noAvailablePartners($tagTeam);
         }
 
-        $minimumPartners = TagTeam::NUMBER_OF_WRESTLERS_ON_TEAM;
+        $minimumPartners = TagTeamMembershipRequirements::MINIMUM_CURRENT_WRESTLERS;
 
-        if ($currentPartners->count() < $minimumPartners) {
+        if (! TagTeamMembershipRequirements::hasMinimumCurrentWrestlers($currentPartners)) {
             throw CannotBeUnretiredException::insufficientPartners(
                 $tagTeam,
                 $currentPartners->count(),
