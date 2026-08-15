@@ -33,7 +33,8 @@ class Main extends BaseTable
     public function builder(): WrestlerBuilder
     {
         return Wrestler::query()
-            ->with('currentEmployment');
+            ->withEmploymentStatusState()
+            ->with('firstEmployment');
     }
 
     public function configure(): void

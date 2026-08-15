@@ -42,7 +42,8 @@ class Main extends BaseTable
     public function builder(): StableBuilder
     {
         return Stable::query()
-            ->with('currentActivityPeriod')
+            ->withActivityStatusState()
+            ->with('firstActivityPeriod')
             ->oldest('name');
     }
 

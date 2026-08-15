@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Models\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Unit tests for IndividualBuilder abstract base class.
@@ -105,6 +106,19 @@ describe('IndividualBuilder Unit Tests', function () {
                 ->toHaveCount(1)
                 ->and($retiredWrestlers->contains($this->retiredWrestler))->toBeTrue();
         });
+    });
+
+    test('projected employment status does not query per wrestler', function () {
+        $wrestlers = Wrestler::query()
+            ->withEmploymentStatusState()
+            ->get();
+
+        DB::enableQueryLog();
+        DB::flushQueryLog();
+
+        $wrestlers->each(fn (Wrestler $wrestler) => $wrestler->status);
+
+        expect(DB::getQueryLog())->toBeEmpty();
     });
 
     describe('query builder inheritance verification', function () {

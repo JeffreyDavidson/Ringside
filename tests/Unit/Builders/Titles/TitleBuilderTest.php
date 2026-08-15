@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Titles\Title;
+use Illuminate\Support\Facades\DB;
 
 test('active titles can be retrieved', function () {
     $activeTitle = Title::factory()->active()->create();
@@ -39,8 +40,36 @@ test('inactive titles can be retrieved', function () {
     $inactiveTitles = Title::query()->inactive()->get();
 
     expect($inactiveTitles)
-        ->toHaveCount(2)
+        ->toHaveCount(1)
         ->and($inactiveTitles->contains($inactiveTitle))->toBeTrue()
-        ->and($inactiveTitles->contains($retiredTitle))->toBeTrue()
+        ->and($inactiveTitles->contains($retiredTitle))->toBeFalse()
         ->and($inactiveTitles->contains($futureActivatedTitle))->toBeFalse();
+});
+
+test('retired titles can be retrieved separately', function () {
+    $activeTitle = Title::factory()->active()->create();
+    $retiredTitle = Title::factory()->retired()->create();
+
+    $retiredTitles = Title::query()->retired()->get();
+
+    expect($retiredTitles)
+        ->toHaveCount(1)
+        ->and($retiredTitles->contains($retiredTitle))->toBeTrue()
+        ->and($retiredTitles->contains($activeTitle))->toBeFalse();
+});
+
+test('projected activity status does not query per title', function () {
+    Title::factory()->active()->create();
+    Title::factory()->retired()->create();
+
+    $titles = Title::query()
+        ->withActivityStatusState()
+        ->get();
+
+    DB::enableQueryLog();
+    DB::flushQueryLog();
+
+    $titles->each(fn (Title $title) => $title->status);
+
+    expect(DB::getQueryLog())->toBeEmpty();
 });

@@ -81,6 +81,7 @@ describe('TitlesTable Component', function () {
                 ->assertSee('Inactive Title')
                 ->assertSee('Undebuted Title')
                 ->assertSee('Retired Title')
+                ->assertSee('Retired')
                 // Status indicators should be present (exact text may vary)
                 ->assertSeeHtml('class'); // Status classes should be rendered
         });

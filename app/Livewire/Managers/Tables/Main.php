@@ -51,6 +51,7 @@ class Main extends BaseTable
     public function builder(): ManagerBuilder
     {
         return Manager::query()
+            ->withEmploymentStatusState()
             ->with('firstEmployment')
             ->oldest('last_name');
     }

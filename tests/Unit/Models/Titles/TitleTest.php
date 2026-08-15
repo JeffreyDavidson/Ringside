@@ -55,6 +55,12 @@ describe('Title Model Unit Tests', function () {
             $title = new Title();
             expect($title->status)->toBe(TitleStatus::Undebuted);
         });
+
+        test('reports retired titles separately from inactive titles', function () {
+            $title = Title::factory()->retired()->create();
+
+            expect($title->status)->toBe(TitleStatus::Retired);
+        });
     });
 
     describe('trait integration', function () {
