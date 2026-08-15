@@ -3,6 +3,15 @@
         <x-form.inputs.select label="Match Type" wire:model.live="form.matchType" :options="$this->getMatchTypes" />
     </x-form-modal.modal-input>
 
+    <x-form-modal.modal-input>
+        <x-form.inputs.select
+            label="Match Stipulation"
+            wire:model="form.matchStipulationId"
+            :options="$this->getMatchStipulations"
+            placeholder="Standard match"
+        />
+    </x-form-modal.modal-input>
+
     {{-- Dynamic Competitor Selection Based on Match Type --}}
     @if ($form->matchType)
         <div class="space-y-4">

@@ -9,6 +9,7 @@ use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Matches\MatchStipulation;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -101,6 +102,67 @@ describe('FormModal Rendering', function () {
 
         // Match types are now enums, so they should all be listed
         $component->assertSee('Singles');
+    });
+});
+
+describe('FormModal Match Stipulation Integration', function () {
+    it('presents only active stipulations', function () {
+        $activeStipulation = MatchStipulation::factory()->active()->create(['name' => 'Steel Cage']);
+        $inactiveStipulation = MatchStipulation::factory()->inactive()->create(['name' => 'Retired Rules']);
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->assertSee($activeStipulation->name)
+            ->assertDontSee($inactiveStipulation->name);
+    });
+
+    it('persists an active stipulation when creating a match', function () {
+        $stipulation = MatchStipulation::factory()->active()->create();
+        $firstWrestler = Wrestler::factory()->bookable()->create();
+        $secondWrestler = Wrestler::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.matchStipulationId', $stipulation->id)
+            ->set('form.competitors', [
+                ['wrestlers' => [$firstWrestler->id]],
+                ['wrestlers' => [$secondWrestler->id]],
+            ])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $match = EventMatch::query()->whereBelongsTo($this->event)->sole();
+
+        expect($match->matchStipulation()->sole()->is($stipulation))->toBeTrue();
+    });
+
+    it('rejects inactive stipulations', function () {
+        $stipulation = MatchStipulation::factory()->inactive()->create();
+        $firstWrestler = Wrestler::factory()->bookable()->create();
+        $secondWrestler = Wrestler::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.matchStipulationId', $stipulation->id)
+            ->set('form.competitors', [
+                ['wrestlers' => [$firstWrestler->id]],
+                ['wrestlers' => [$secondWrestler->id]],
+            ])
+            ->call('save')
+            ->assertHasErrors(['form.matchStipulationId']);
+    });
+
+    it('loads the existing stipulation when editing a match', function () {
+        $stipulation = MatchStipulation::factory()->active()->create();
+        $match = EventMatch::factory()->for($this->event)->create([
+            'match_stipulation_id' => $stipulation->id,
+        ]);
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal', $match->id)
+            ->assertSet('form.matchStipulationId', $stipulation->id);
     });
 });
 

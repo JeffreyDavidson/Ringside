@@ -11,6 +11,7 @@ use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Matches\MatchStipulation;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
@@ -18,6 +19,7 @@ use App\Rules\Matches\CompetitorsNotDuplicated;
 use App\Rules\Matches\CorrectNumberOfSides;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 /**
@@ -93,6 +95,8 @@ class CreateEditForm extends BaseForm
      */
     public ?MatchType $matchType = null;
 
+    public ?int $matchStipulationId = null;
+
     /**
      * Array of competitors organized by sides in the match.
      *
@@ -163,6 +167,7 @@ class CreateEditForm extends BaseForm
 
         // Load match type from enum property
         $this->matchType = $this->formModel->match_type;
+        $this->matchStipulationId = $this->formModel->match_stipulation_id;
 
         $this->referees = $this->formModel->referees->pluck('id')->toArray();
         $this->titles = $this->formModel->titles->pluck('id')->toArray();
@@ -289,6 +294,7 @@ class CreateEditForm extends BaseForm
             'match_number' => $this->getNextMatchNumber(),
             'preview' => $this->preview,
             'match_type' => $this->matchType,
+            'match_stipulation_id' => $this->matchStipulationId,
         ];
         // Note: relationships (competitors, referees, titles) are handled
         // separately through the relationship synchronization system
@@ -343,6 +349,11 @@ class CreateEditForm extends BaseForm
         $baseRules = [
             // eventId removed - it's context from route model binding, not user input
             'matchType' => ['required', new Enum(MatchType::class)],
+            'matchStipulationId' => [
+                'nullable',
+                'integer',
+                Rule::exists(MatchStipulation::class, 'id')->where('is_active', true),
+            ],
             'preview' => ['sometimes', 'string'],
             'referees' => ['sometimes', 'array'],
             'referees.*' => ['integer', 'exists:referees,id'],
@@ -495,6 +506,7 @@ class CreateEditForm extends BaseForm
         return [
             'preview' => 'match preview',
             'matchType' => 'match type',
+            'matchStipulationId' => 'match stipulation',
             'competitors' => 'competitors',
             'referees' => 'referees',
             'titles' => 'championship titles',

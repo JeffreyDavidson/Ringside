@@ -88,7 +88,6 @@ Notable missing 1:1 areas by production path:
 
 Representative missing/high-value paths:
 
-- `app/Actions/Matches/AddMatchForEventAction.php`
 - `app/Actions/Matches/AddRefereesToMatchAction.php`
 - `app/Actions/Matches/AddTagTeamsToMatchAction.php`
 - Most `app/Actions/Stables/*` beyond lifecycle/retire/split coverage
@@ -150,7 +149,7 @@ Strengths:
 
 Gaps:
 
-- Matches coverage lacks full parity: `AddCompetitorsToMatchAction`, `AddTitlesToMatchAction`, and `AddWrestlersToMatchAction` are covered, but `AddMatchForEventAction`, `AddRefereesToMatchAction`, and `AddTagTeamsToMatchAction` are not mirrored.
+- Matches coverage lacks full parity: match creation, competitor assignment, title assignment, and wrestler assignment are covered, but `AddRefereesToMatchAction` and `AddTagTeamsToMatchAction` are not mirrored.
 - Events, Venues, Titles, and Stables action coverage is incomplete compared with production action surface.
 - Service classes are untested despite encoding membership/lifecycle/validation behavior.
 - There is no clear integration suite for contracts, booking constraints across bookable competitors/officials, or computed status interactions spanning promotions/events/matches/titles.
@@ -317,7 +316,6 @@ High-value Ringside candidates:
 
 4. **INF-56-P0-D: Close critical domain action parity gaps**
    - Add mirrored integration tests for match/event/title/stable/venue actions that currently lack 1:1 coverage, especially:
-     - `Actions\Matches\AddMatchForEventAction`
      - `Actions\Matches\AddRefereesToMatchAction`
      - `Actions\Matches\AddTagTeamsToMatchAction`
      - missing `Actions\Titles\*` lifecycle actions
