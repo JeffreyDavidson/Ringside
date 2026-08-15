@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
@@ -26,7 +25,7 @@ require_once __DIR__.'/Helpers/LivewireHelpers.php';
 |
 */
 
-pest()->extend(TestCase::class)->use(DatabaseMigrations::class)->in('Browser');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Browser');
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Integration', 'Unit');
 
