@@ -60,7 +60,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 ->emptyValue('N/A'),
             Column::make(__('event-matches.competitors'))
                 ->label(fn (EventMatch $row): string => $row->competitors
-                    ->competitorsBySidePosition()
+                    ->competitorModelsBySidePosition()
                     ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor): string {
                         $type = str($competitor->getMorphClass())->kebab()->plural();
 
