@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Lifecycle;
 
+use App\Builders\Lifecycle\LifecycleTransitionBuilder;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Users\User;
 use Database\Factories\Lifecycle\LifecycleTransitionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +36,7 @@ use LogicException;
  */
 #[Fillable('subject_type', 'subject_id', 'dimension', 'transition', 'effective_at', 'user_id', 'context')]
 #[UseFactory(LifecycleTransitionFactory::class)]
+#[UseEloquentBuilder(LifecycleTransitionBuilder::class)]
 class LifecycleTransition extends Model
 {
     /** @use HasFactory<LifecycleTransitionFactory> */
