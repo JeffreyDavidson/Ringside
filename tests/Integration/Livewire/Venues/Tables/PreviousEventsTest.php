@@ -55,6 +55,11 @@ describe('PreviousEventsTable Integration Tests', function () {
             'date' => now()->addDays(10),
         ]);
 
+        $this->unscheduledEvent = Event::factory()->unscheduled()->create([
+            'name' => 'Unscheduled Wrestling Show',
+            'venue_id' => $this->venue->id,
+        ]);
+
         // Create event for other venue (should not appear in results)
         $this->otherVenueEvent = Event::factory()->create([
             'name' => 'Other Venue Event',
@@ -101,12 +106,9 @@ describe('PreviousEventsTable Integration Tests', function () {
 
             expect($builder)->toBeInstanceOf(EventBuilder::class);
 
-            // Check SQL includes venue filtering and ordering
             $sql = $builder->toSql();
             expect($sql)->toContain('where "venue_id" = ?');
-            expect($sql)->toContain('order by "date" desc');
 
-            // Check bindings include venue ID
             expect($builder->getBindings())->toContain($this->venue->id);
         });
 
@@ -114,10 +116,12 @@ describe('PreviousEventsTable Integration Tests', function () {
             $table = new PreviousEvents();
             $table->venueId = $this->venue->id;
 
-            $builder = $table->builder();
-            $sql = $builder->toSql();
-
-            expect($sql)->toContain('order by "date" desc');
+            expect($table->builder()->pluck('id')->all())->toBe([
+                $this->futureEvent->id,
+                $this->recentEvent->id,
+                $this->oldEvent->id,
+                $this->unscheduledEvent->id,
+            ]);
         });
 
         test('builder efficiently filters by venue ID with single query', function () {
@@ -144,10 +148,12 @@ describe('PreviousEventsTable Integration Tests', function () {
             // Verify events are in correct order (newest first)
             $table = new PreviousEvents();
             $table->venueId = $this->venue->id;
-            $events = $table->builder()->get();
-
-            expect($events->firstOrFail()->name)->toBe('Upcoming Wrestling Show');
-            expect($events->reverse()->firstOrFail()->name)->toBe('Classic Wrestling Event');
+            expect($table->builder()->pluck('id')->all())->toBe([
+                $this->futureEvent->id,
+                $this->recentEvent->id,
+                $this->oldEvent->id,
+                $this->unscheduledEvent->id,
+            ]);
         });
 
         test('includes both past and future events in chronological order', function () {
@@ -294,7 +300,7 @@ describe('PreviousEventsTable Integration Tests', function () {
             $table->venueId = $this->venue->id;
             $events = $table->builder()->get();
 
-            expect($events->count())->toBe(3); // Should show 3 events for this venue
+            expect($events->count())->toBe(4);
             expect($events->pluck('venue_id')->unique()->firstOrFail())->toBe($this->venue->id);
         });
     });
