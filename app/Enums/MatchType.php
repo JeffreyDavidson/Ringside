@@ -79,6 +79,11 @@ enum MatchType: string
         return in_array($this, [self::BattleRoyal, self::RoyalRumble], true);
     }
 
+    public function recordsIndividualEliminations(): bool
+    {
+        return in_array($this, [self::BattleRoyal, self::RoyalRumble], true);
+    }
+
     /**
      * Check if this match type allows wrestler competitors.
      */

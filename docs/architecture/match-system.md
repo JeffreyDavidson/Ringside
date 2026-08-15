@@ -76,6 +76,8 @@ Assignment Actions treat each requested collection as an atomic command. They re
 
 Royal Rumble competitors record a unique `entry_order` within the match. Battle Royal competitors may leave entry order unset because they begin simultaneously. Eliminated competitors record a unique `elimination_order`; the winner remains without one. `eliminated_by_match_competitor_id` optionally identifies the competitor responsible for the elimination and remains nullable for joint, external, or indeterminate eliminations.
 
+`RecordResultAction` records the finish, winning side, and elimination history as one atomic outcome. A decisive Battle Royal or Royal Rumble result accounts for every losing competitor exactly once, never eliminates a winner, and preserves chronological elimination order. No-outcome finishes may retain a valid partial elimination history. Recording a corrected result replaces the previous outcome metadata in the same transaction.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Core Capabilities](core-capabilities.md)

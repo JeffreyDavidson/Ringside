@@ -32,24 +32,4 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
     {
         return new self('A match cannot be reconfigured after its result has been recorded.');
     }
-
-    public static function missingWinningSide(): static
-    {
-        return new self('This match finish requires a winning side.');
-    }
-
-    public static function unexpectedWinningSide(): static
-    {
-        return new self('This match finish cannot have a winning side.');
-    }
-
-    public static function winningSideFromAnotherMatch(): static
-    {
-        return new self('The winning side must belong to the match being resulted.');
-    }
-
-    public static function winningSideWithoutCompetitors(): static
-    {
-        return new self('The winning side must contain at least one competitor.');
-    }
 }
