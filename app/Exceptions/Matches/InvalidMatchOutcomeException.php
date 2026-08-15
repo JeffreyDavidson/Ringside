@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Exceptions\Matches;
 
+use App\Enums\Titles\TitleType;
 use App\Exceptions\BaseBusinessException;
 
 final class InvalidMatchOutcomeException extends BaseBusinessException
@@ -76,5 +77,20 @@ final class InvalidMatchOutcomeException extends BaseBusinessException
     public static function invalidEntryOrder(): self
     {
         return new self('Royal Rumble entry order must be unique, positive, and consecutive.');
+    }
+
+    public static function invalidTitleWinner(TitleType $titleType): self
+    {
+        return new self("The winning side must contain exactly one {$titleType->value} championship competitor.");
+    }
+
+    public static function undatedTitleMatch(): self
+    {
+        return new self('A title change cannot be recorded for an event without a date.');
+    }
+
+    public static function titleLineageHasAdvanced(): self
+    {
+        return new self('This result cannot be corrected because a later title reign depends on it.');
     }
 }

@@ -6,6 +6,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | app/{Actions,Collections,Lifecycle,Models,Rules}/** | .ai/rules/actions-collections-lifecycle-models-rules.md |
 | app/{Actions,Lifecycle,Models}/** | .ai/rules/actions-lifecycle-models.md |
+| app/Actions/Matches/** | .ai/rules/actions-matches.md |
 | app/Actions/** | .ai/rules/actions.md |
 | app/** | .ai/rules/app.md |
 | tests/Browser/** | .ai/rules/browser.md |

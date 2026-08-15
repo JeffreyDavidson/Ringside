@@ -39,6 +39,21 @@ enum MatchFinish: string
         };
     }
 
+    public function allowsTitleChange(): bool
+    {
+        return match ($this) {
+            self::Pinfall,
+            self::Submission,
+            self::Knockout,
+            self::Stipulation,
+            self::Forfeit => true,
+            self::Disqualification,
+            self::Countout,
+            self::TimeLimitDraw,
+            self::NoDecision => false,
+        };
+    }
+
     /** @return array<string, string> */
     public static function options(): array
     {
