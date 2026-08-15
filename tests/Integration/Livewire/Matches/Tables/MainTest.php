@@ -108,6 +108,26 @@ describe('Matches Main Table Component Integration', function () {
     });
 
     describe('query optimization and performance', function () {
+        test('orders matches by event chronology instead of creation chronology', function () {
+            EventMatch::query()->forceDelete();
+
+            $latestEvent = Event::factory()->create(['date' => now()->addDay()]);
+            $earliestEvent = Event::factory()->create(['date' => now()->subDay()]);
+            $latestEventMatch = EventMatch::factory()->forEvent($latestEvent)->create([
+                'created_at' => now()->subDay(),
+            ]);
+            $earliestEventMatch = EventMatch::factory()->forEvent($earliestEvent)->create([
+                'created_at' => now(),
+            ]);
+
+            $table = new Main();
+
+            expect($table->builder()->pluck('id')->all())->toBe([
+                $latestEventMatch->id,
+                $earliestEventMatch->id,
+            ]);
+        });
+
         test('component loads efficiently with many matches', function () {
             EventMatch::factory()->count(10)->create([
                 'event_id' => $this->event->id,

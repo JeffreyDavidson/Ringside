@@ -92,7 +92,9 @@ class EventMatchBuilder extends Builder
                     $event->qualifyColumn('id'),
                     $this->getModel()->qualifyColumn('event_id'),
                 )
-        );
+        )
+            ->orderByDesc($this->qualifyColumn('event_id'))
+            ->orderBy($this->qualifyColumn('match_number'));
 
         return $this;
     }
