@@ -102,8 +102,7 @@ describe('TagTeam Model Unit Tests', function () {
                 return $constant && $constant->getDeclaringClass()->getName() === TagTeam::class;
             }, ARRAY_FILTER_USE_BOTH);
 
-            expect($modelConstants)->toHaveKey('NUMBER_OF_WRESTLERS_ON_TEAM');
-            expect($modelConstants['NUMBER_OF_WRESTLERS_ON_TEAM'])->toBe(2);
+            expect($modelConstants)->not->toHaveKey('NUMBER_OF_WRESTLERS_ON_TEAM');
         });
     });
 

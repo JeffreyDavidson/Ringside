@@ -206,9 +206,4 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     {
         return $this->stables()->wherePivotNotNull('left_at');
     }
-
-    /**
-     * The number of the wrestlers allowed on a tag team.
-     */
-    public const int NUMBER_OF_WRESTLERS_ON_TEAM = 2;
 }

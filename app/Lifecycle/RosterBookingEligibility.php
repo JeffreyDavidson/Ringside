@@ -24,9 +24,10 @@ final class RosterBookingEligibility
 
             $currentWrestlers = $rosterMember->currentWrestlers;
 
-            return $currentWrestlers->count() >= 2 && $currentWrestlers->every(
-                fn (Wrestler $wrestler): bool => self::allows($wrestler),
-            );
+            return TagTeamMembershipRequirements::hasMinimumCurrentWrestlers($currentWrestlers)
+                && $currentWrestlers->every(
+                    fn (Wrestler $wrestler): bool => self::allows($wrestler),
+                );
         }
 
         return ! (
