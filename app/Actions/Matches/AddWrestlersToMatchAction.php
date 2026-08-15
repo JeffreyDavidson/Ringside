@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Enums\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\RosterBookingEligibility;
@@ -66,11 +67,15 @@ class AddWrestlersToMatchAction
             $side = $eventMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
             $requestedWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $side): void {
-                $eventMatch->competitors()->create([
+                $competitor = $eventMatch->competitors()->create([
                     'competitor_id' => $wrestler->id,
                     'competitor_type' => $wrestler->getMorphClass(),
                     'match_side_id' => $side->id,
                 ]);
+
+                if ($eventMatch->match_type === MatchType::RoyalRumble) {
+                    $competitor->forceFill(['entry_order' => $side->position])->save();
+                }
             });
         });
     }

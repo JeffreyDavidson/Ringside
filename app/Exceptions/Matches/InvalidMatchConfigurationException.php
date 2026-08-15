@@ -28,6 +28,11 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
         return new self('A match must have at least one referee assigned.');
     }
 
+    public static function resultAlreadyRecorded(): static
+    {
+        return new self('A match cannot be reconfigured after its result has been recorded.');
+    }
+
     public static function missingWinningSide(): static
     {
         return new self('This match finish requires a winning side.');

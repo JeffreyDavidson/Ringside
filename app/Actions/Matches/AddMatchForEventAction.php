@@ -36,6 +36,7 @@ class AddMatchForEventAction
                 'event_id' => $lockedEvent->id,
                 'match_number' => ($lastMatchNumber ?? 0) + 1,
                 'match_type' => $eventMatchData->matchType,
+                'match_stipulation_id' => $eventMatchData->matchStipulation?->id,
                 'preview' => $eventMatchData->preview,
             ]);
 

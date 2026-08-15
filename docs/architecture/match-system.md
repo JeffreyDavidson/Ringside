@@ -50,6 +50,8 @@ Assignment Actions treat each requested collection as an atomic command. They re
 
 `AddMatchForEventAction` receives side-based `EventMatchData`, locks the owning event, allocates the next card position without reusing soft-deleted match numbers, and persists the match, officials, championship stakes, sides, and competitors in one transaction. Assignment Actions retain eligibility and scheduling-conflict enforcement for their respective relationships.
 
+`UpdateMatchAction` receives the same typed data, locks the match, and replaces its configuration and assignments in one transaction. Any unavailable replacement rolls the entire edit back to the previous configuration. Once a result has been recorded, the match configuration is immutable so its sides and competitors continue to describe that result.
+
 ## Winner/Loser System
 
 ### Multiple Winners and Losers

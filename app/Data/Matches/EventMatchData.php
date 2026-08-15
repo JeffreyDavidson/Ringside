@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Data\Matches;
 
 use App\Enums\MatchType;
+use App\Models\Matches\MatchStipulation;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -26,6 +27,7 @@ readonly class EventMatchData
         public EloquentCollection $referees,
         public EloquentCollection $titles,
         public Collection $sides,
-        public ?string $preview
+        public ?string $preview,
+        public ?MatchStipulation $matchStipulation = null,
     ) {}
 }
