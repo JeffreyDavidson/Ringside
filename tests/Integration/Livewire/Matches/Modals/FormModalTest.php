@@ -118,35 +118,37 @@ describe('FormModal Match Stipulation Integration', function () {
 
     it('persists an active stipulation when creating a match', function () {
         $stipulation = MatchStipulation::factory()->active()->create();
-        $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+        $firstWrestler = Wrestler::factory()->bookable()->create();
+        $secondWrestler = Wrestler::factory()->bookable()->create();
 
         livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Singles)
             ->set('form.matchStipulationId', $stipulation->id)
             ->set('form.competitors', [
-                ['wrestlers' => [$wrestlers[0]->id]],
-                ['wrestlers' => [$wrestlers[1]->id]],
+                ['wrestlers' => [$firstWrestler->id]],
+                ['wrestlers' => [$secondWrestler->id]],
             ])
             ->call('save')
             ->assertHasNoErrors();
 
         $match = EventMatch::query()->whereBelongsTo($this->event)->sole();
 
-        expect($match->matchStipulation->is($stipulation))->toBeTrue();
+        expect($match->matchStipulation()->sole()->is($stipulation))->toBeTrue();
     });
 
     it('rejects inactive stipulations', function () {
         $stipulation = MatchStipulation::factory()->inactive()->create();
-        $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+        $firstWrestler = Wrestler::factory()->bookable()->create();
+        $secondWrestler = Wrestler::factory()->bookable()->create();
 
         livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Singles)
             ->set('form.matchStipulationId', $stipulation->id)
             ->set('form.competitors', [
-                ['wrestlers' => [$wrestlers[0]->id]],
-                ['wrestlers' => [$wrestlers[1]->id]],
+                ['wrestlers' => [$firstWrestler->id]],
+                ['wrestlers' => [$secondWrestler->id]],
             ])
             ->call('save')
             ->assertHasErrors(['form.matchStipulationId']);
