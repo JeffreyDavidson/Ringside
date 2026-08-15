@@ -8,6 +8,7 @@ use App\Actions\Titles\UnretireAction;
 use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -22,6 +23,19 @@ test('it closes current title activity when scheduling retirement', function () 
     expect($title->currentActivityPeriod()->doesntExist())->toBeTrue()
         ->and($title->activityPeriods()->latest('id')->firstOrFail()->ended_at)->toEqual(now()->startOfSecond())
         ->and($title->currentRetirement()->firstOrFail()->started_at)->toEqual($retirementDate);
+});
+
+test('retirement ends the current championship reign', function () {
+    $title = Title::factory()->active()->create();
+    $championship = TitleChampionship::factory()
+        ->for($title)
+        ->current()
+        ->create();
+    $retirementDate = now()->subDay()->startOfSecond();
+
+    resolve(RetireAction::class)->handle($title, $retirementDate);
+
+    expect($championship->refresh()->lost_at)->toEqual($retirementDate);
 });
 
 test('retirement closes activity opened from a stale inactive snapshot', function () {

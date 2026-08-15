@@ -5,12 +5,15 @@ declare(strict_types=1);
 use App\Actions\TagTeams\EndCurrentRelationshipsAction;
 use App\Models\Managers\Manager;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Models\Wrestlers\Wrestler;
 
 test('it ends only the tag teams current relationships', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $wrestler = Wrestler::factory()->employed()->create();
     $manager = Manager::factory()->employed()->create();
+    $title = Title::factory()->tagTeam()->create();
     $effectiveDate = now();
     $formerMembershipEndedAt = now()->subWeek();
     $currentMembershipStartedAt = now()->subDay();
@@ -21,6 +24,11 @@ test('it ends only the tag teams current relationships', function () {
     ]);
     $tagTeam->wrestlers()->attach($wrestler, ['joined_at' => $currentMembershipStartedAt]);
     $tagTeam->managers()->attach($manager, ['hired_at' => $currentMembershipStartedAt]);
+    $championship = TitleChampionship::factory()
+        ->for($title)
+        ->forTagTeam($tagTeam)
+        ->current()
+        ->create();
 
     resolve(EndCurrentRelationshipsAction::class)
         ->handle($tagTeam, $effectiveDate);
@@ -28,7 +36,8 @@ test('it ends only the tag teams current relationships', function () {
     $tagTeam->refresh();
 
     expect($tagTeam->currentWrestlers)->toBeEmpty()
-        ->and($tagTeam->currentManagers)->toBeEmpty();
+        ->and($tagTeam->currentManagers)->toBeEmpty()
+        ->and($championship->refresh()->lost_at?->toDateTimeString())->toBe($effectiveDate->toDateTimeString());
 
     $this->assertDatabaseHas('tag_teams_wrestlers', [
         'tag_team_id' => $tagTeam->id,
