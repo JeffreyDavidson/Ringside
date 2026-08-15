@@ -34,7 +34,22 @@ test('it rejects match assignment when no tag team is available', function () {
     $tagTeams = TagTeam::factory()->retired()->count(2)->create();
 
     expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, $tagTeams, 1))
-        ->toThrow(EntityNotAvailableException::class, 'No eligible tag teams were provided for match assignment.');
+        ->toThrow(EntityNotAvailableException::class, 'Selected tag teams must all be eligible for match assignment.');
+});
+
+test('it rejects the entire assignment when any tag team is unavailable', function () {
+    $match = EventMatch::factory()->create();
+    $availableTagTeam = TagTeam::factory()->bookable()->create();
+    $unavailableTagTeam = TagTeam::factory()->retired()->create();
+
+    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle(
+        $match,
+        collect([$availableTagTeam, $unavailableTagTeam]),
+        1,
+    ))->toThrow(EntityNotAvailableException::class);
+
+    expect($match->competitors()->count())->toBe(0)
+        ->and($match->sides()->count())->toBe(0);
 });
 
 test('it rejects a tag team already booked on the event card', function () {

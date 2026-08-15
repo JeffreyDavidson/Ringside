@@ -102,7 +102,7 @@ test('it adds wrestlers to different sides', function () {
     expect($match->refresh()->competitors()->count())->toBe(2);
 });
 
-test('it filters out ineligible wrestlers', function () {
+test('it rejects the entire assignment when any wrestler is ineligible', function () {
     $match = EventMatch::factory()->create();
     $eligibleWrestler = Wrestler::factory()->employed()->create();
     $ineligibleWrestler = Wrestler::factory()->retired()->create(); // Not bookable
@@ -110,23 +110,11 @@ test('it filters out ineligible wrestlers', function () {
     $wrestlers = collect([$eligibleWrestler, $ineligibleWrestler]);
     $sideNumber = 1;
 
-    resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber);
+    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber))
+        ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.');
 
-    // Should only add the eligible wrestler
-    $this->assertDatabaseHas('events_matches_competitors', [
-        'match_id' => $match->id,
-        'competitor_id' => $eligibleWrestler->id,
-        'competitor_type' => $eligibleWrestler->getMorphClass(),
-        'match_side_id' => $match->sides()->where('position', $sideNumber)->firstOrFail()->id,
-    ]);
-
-    $this->assertDatabaseMissing('events_matches_competitors', [
-        'match_id' => $match->id,
-        'competitor_id' => $ineligibleWrestler->id,
-        'competitor_type' => $ineligibleWrestler->getMorphClass(),
-    ]);
-
-    expect($match->refresh()->competitors()->count())->toBe(1);
+    expect($match->competitors()->count())->toBe(0)
+        ->and($match->sides()->count())->toBe(0);
 });
 
 test('it throws exception when no eligible wrestlers provided', function () {
@@ -137,7 +125,7 @@ test('it throws exception when no eligible wrestlers provided', function () {
     $sideNumber = 1;
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber))
-        ->toThrow(EntityNotAvailableException::class, 'No eligible wrestlers were provided for match assignment.');
+        ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.');
 });
 
 test('it throws exception when side number is invalid', function () {

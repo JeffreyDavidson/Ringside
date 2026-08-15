@@ -14,7 +14,20 @@ test('it rejects match assignment when no referee is available', function () {
     $referees = Referee::factory()->retired()->count(2)->create();
 
     expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($match, $referees))
-        ->toThrow(EntityNotAvailableException::class, 'No eligible referees were provided for match assignment.');
+        ->toThrow(EntityNotAvailableException::class, 'Selected referees must all be eligible for match assignment.');
+});
+
+test('it rejects the entire assignment when any referee is unavailable', function () {
+    $match = EventMatch::factory()->create();
+    $availableReferee = Referee::factory()->bookable()->create();
+    $unavailableReferee = Referee::factory()->retired()->create();
+
+    expect(fn () => resolve(AddRefereesToMatchAction::class)->handle(
+        $match,
+        collect([$availableReferee, $unavailableReferee]),
+    ))->toThrow(EntityNotAvailableException::class);
+
+    expect($match->referees()->count())->toBe(0);
 });
 
 test('it allows a referee to officiate multiple matches on one event card', function () {

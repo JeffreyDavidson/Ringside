@@ -59,28 +59,17 @@ test('it adds multiple titles to a match', function () {
     expect($match->refresh()->titles->pluck('id'))->toContain($title1->id, $title2->id);
 });
 
-test('it filters out inactive titles', function () {
+test('it rejects the entire assignment when any title is inactive', function () {
     $match = EventMatch::factory()->create();
     $activeTitle = Title::factory()->active()->create();
     $inactiveTitle = Title::factory()->inactive()->create();
 
     $titles = collect([$activeTitle, $inactiveTitle]);
 
-    resolve(AddTitlesToMatchAction::class)->handle($match, $titles);
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
+        ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.');
 
-    // Should only add the active title
-    $this->assertDatabaseHas('events_matches_titles', [
-        'match_id' => $match->id,
-        'title_id' => $activeTitle->id,
-    ]);
-
-    $this->assertDatabaseMissing('events_matches_titles', [
-        'match_id' => $match->id,
-        'title_id' => $inactiveTitle->id,
-    ]);
-
-    expect($match->refresh()->titles)->toHaveCount(1);
-    expect($match->refresh()->titles->firstOrFail()->id)->toBe($activeTitle->id);
+    expect($match->titles()->count())->toBe(0);
 });
 
 test('it throws exception when no eligible titles provided', function () {
@@ -90,7 +79,7 @@ test('it throws exception when no eligible titles provided', function () {
     $titles = collect([$inactiveTitle]);
 
     expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
-        ->toThrow(EntityNotAvailableException::class, 'No eligible titles were provided for match assignment.');
+        ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.');
 });
 
 test('it handles empty collection', function () {
@@ -98,7 +87,7 @@ test('it handles empty collection', function () {
     $titles = Title::query()->whereKey([])->get();
 
     expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
-        ->toThrow(EntityNotAvailableException::class, 'No eligible titles were provided for match assignment.');
+        ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.');
 });
 
 test('it creates championship match correctly', function () {
