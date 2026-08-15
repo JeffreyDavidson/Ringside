@@ -215,6 +215,27 @@ describe('FormModal Create Operations', function () {
             ->and($match->competitors->pluck('match_side_id')->unique())->toHaveCount(3);
     });
 
+    it('records royal rumble selection order as entrant order', function () {
+        $wrestlers = Wrestler::factory()->count(10)->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::RoyalRumble)
+            ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $entryOrder = EventMatch::query()
+            ->whereBelongsTo($this->event)
+            ->sole()
+            ->competitors()
+            ->orderBy('entry_order')
+            ->pluck('entry_order')
+            ->all();
+
+        expect($entryOrder)->toBe(range(1, 10));
+    });
+
     it('requires the configured minimum number of individual entrants', function (MatchType $matchType, int $entrantCount) {
         $wrestlers = Wrestler::factory()->count($entrantCount)->bookable()->create();
 

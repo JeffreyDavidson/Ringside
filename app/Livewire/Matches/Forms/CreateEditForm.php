@@ -235,11 +235,15 @@ class CreateEditForm extends BaseForm
             foreach ($this->competitors[0]['wrestlers'] ?? [] as $sideIndex => $wrestlerId) {
                 $side = $this->formModel->sides()->create(['position' => $sideIndex + 1]);
 
-                $this->formModel->competitors()->create([
+                $competitor = $this->formModel->competitors()->create([
                     'competitor_type' => (new Wrestler())->getMorphClass(),
                     'competitor_id' => $wrestlerId,
                     'match_side_id' => $side->id,
                 ]);
+
+                if ($this->matchType === MatchType::RoyalRumble) {
+                    $competitor->forceFill(['entry_order' => $sideIndex + 1])->save();
+                }
             }
 
             return;

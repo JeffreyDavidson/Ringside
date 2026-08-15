@@ -66,6 +66,10 @@ Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by El
 - **MatchCompetitor**: Polymorphic competitor entry belonging to a match side
 - **MatchFinish**: Determines whether a winning side must be recorded
 
+### Entrant and Elimination Metadata
+
+Royal Rumble competitors record a unique `entry_order` within the match. Battle Royal competitors may leave entry order unset because they begin simultaneously. Eliminated competitors record a unique `elimination_order`; the winner remains without one. `eliminated_by_match_competitor_id` optionally identifies the competitor responsible for the elimination and remains nullable for joint, external, or indeterminate eliminations.
+
 ## Related Documentation
 - [Business Rules](business-rules.md)
 - [Core Capabilities](core-capabilities.md)
