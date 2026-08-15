@@ -8,6 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -104,6 +105,9 @@ abstract class DataTableComponent extends Component
             $this->sortDirection = 'asc';
         }
     }
+
+    #[On('refreshDatatable')]
+    public function refreshDatatable(): void {}
 
     public function render(): View
     {

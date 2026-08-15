@@ -5,5 +5,5 @@ paths:
 
 # Browser
 
-## Reset browser databases with migrations
-Use DatabaseMigrations for browser tests; keep database reset configuration centralized in tests/Pest.php.
+## Refresh browser databases without rollbacks
+Use RefreshDatabase for browser tests and keep reset configuration centralized in tests/Pest.php. Browser tests must not use DatabaseMigrations because this project uses forward-only migrations without rollback support.

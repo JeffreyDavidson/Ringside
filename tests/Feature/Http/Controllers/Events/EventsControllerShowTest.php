@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Events\EventsController;
 use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -28,6 +29,18 @@ describe('Events Controller', function () {
             ->assertViewIs('events.show')
             ->assertViewHas('event', $this->event)
             ->assertSeeLivewire(MatchesTable::class);
+    });
+
+    /**
+     * @see EventsController::show()
+     */
+    test('show loads an event with matches', function () {
+        EventMatch::factory()->for($this->event)->create();
+
+        actingAs(administrator())
+            ->get(action([EventsController::class, 'show'], $this->event))
+            ->assertOk()
+            ->assertViewHas('event', fn (Event $event): bool => $event->relationLoaded('matches'));
     });
 
     /**

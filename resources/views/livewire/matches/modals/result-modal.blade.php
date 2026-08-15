@@ -79,7 +79,12 @@
     <x-slot:footer>
         <div class="flex flex-1 justify-end gap-2">
             <x-buttons.light wire:click="$dispatch('closeModal')">Cancel</x-buttons.light>
-            <x-buttons.primary wire:click="save" wire:loading.attr="disabled" wire:target="save">
+            <x-buttons.primary
+                data-test="save-result"
+                wire:click="save"
+                wire:loading.attr="disabled"
+                wire:target="save"
+            >
                 Save Result
             </x-buttons.primary>
         </div>
