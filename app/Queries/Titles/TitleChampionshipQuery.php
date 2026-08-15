@@ -12,6 +12,10 @@ final class TitleChampionshipQuery
 {
     public static function currentChampionship(Title $title): ?TitleChampionship
     {
+        if ($title->relationLoaded('currentChampionship')) {
+            return $title->currentChampionship;
+        }
+
         return $title->currentChampionship()->first();
     }
 
