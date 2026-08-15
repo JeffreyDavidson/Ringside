@@ -8,9 +8,7 @@ use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
-use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Concerns\HasMatchParticipations;
-use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
@@ -39,6 +37,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -46,7 +45,7 @@ use Illuminate\Support\Carbon;
  * @implements CanBeChampion<$this>
  * @implements CanBeAStableMember<StableTagTeam, $this>
  * @implements Employable<static>
- * @implements Manageable<TagTeamManager, static>
+ * @implements Manageable<TagTeamManager, $this>
  * @implements Retirable<static>
  * @implements Suspendable<static>
  *
@@ -120,13 +119,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @use HasFactory<TagTeamFactory> */
     use HasFactory;
 
-    /** @use HasManagerAssignments<TagTeamManager, static> */
-    use HasManagerAssignments;
-
     use HasMatchParticipations;
-
-    /** @use HasStableMemberships<StableTagTeam, $this> */
-    use HasStableMemberships;
 
     /** @use IsEmployable<static> */
     use IsEmployable;
@@ -139,14 +132,25 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
 
     use SoftDeletes;
 
-    protected function managerAssignmentTable(): string
+    /** @return BelongsToMany<Manager, $this, TagTeamManager> */
+    public function managers(): BelongsToMany
     {
-        return (new TagTeamManager())->getTable();
+        return $this->belongsToMany(Manager::class, (new TagTeamManager())->getTable())
+            ->using(TagTeamManager::class)
+            ->withPivot(['hired_at', 'fired_at'])
+            ->withTimestamps();
     }
 
-    protected function managerAssignmentPivotModel(): string
+    /** @return BelongsToMany<Manager, $this, TagTeamManager> */
+    public function currentManagers(): BelongsToMany
     {
-        return TagTeamManager::class;
+        return $this->managers()->wherePivotNull('fired_at');
+    }
+
+    /** @return BelongsToMany<Manager, $this, TagTeamManager> */
+    public function previousManagers(): BelongsToMany
+    {
+        return $this->managers()->wherePivotNotNull('fired_at');
     }
 
     /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
@@ -170,19 +174,37 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
         return $this->wrestlers()->wherePivotNotNull('left_at');
     }
 
-    protected function stableMembershipTable(): string
+    /** @return BelongsToMany<Stable, $this, StableTagTeam> */
+    public function stables(): BelongsToMany
     {
-        return (new StableTagTeam())->getTable();
+        return $this->belongsToMany(
+            Stable::class,
+            (new StableTagTeam())->getTable(),
+            'tag_team_id',
+            'stable_id',
+        )
+            ->using(StableTagTeam::class)
+            ->withPivot(['joined_at', 'left_at'])
+            ->withTimestamps();
     }
 
-    protected function stableMembershipForeignKey(): string
+    /** @return HasOneThrough<Stable, StableTagTeam, $this> */
+    public function currentStable(): HasOneThrough
     {
-        return 'tag_team_id';
+        return $this->hasOneThrough(
+            Stable::class,
+            StableTagTeam::class,
+            'tag_team_id',
+            'id',
+            'id',
+            'stable_id',
+        )->whereNull((new StableTagTeam())->qualifyColumn('left_at'));
     }
 
-    protected function stableMembershipPivotModel(): string
+    /** @return BelongsToMany<Stable, $this, StableTagTeam> */
+    public function previousStables(): BelongsToMany
     {
-        return StableTagTeam::class;
+        return $this->stables()->wherePivotNotNull('left_at');
     }
 
     /**

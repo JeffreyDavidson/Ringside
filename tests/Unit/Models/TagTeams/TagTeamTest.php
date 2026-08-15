@@ -5,9 +5,7 @@ declare(strict_types=1);
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
-use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Concerns\HasMatchParticipations;
-use App\Models\Concerns\HasStableMemberships;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
@@ -71,8 +69,6 @@ describe('TagTeam Model Unit Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(TagTeam::class))->toContain(HasManagerAssignments::class);
-            expect(class_uses(TagTeam::class))->toContain(HasStableMemberships::class);
             expect(class_uses(TagTeam::class))->toContain(HasChampionshipReigns::class);
             expect(class_uses(TagTeam::class))->toContain(HasFactory::class);
             expect(class_uses(TagTeam::class))->toContain(HasMatchParticipations::class);

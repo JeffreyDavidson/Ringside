@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Contracts;
 
-use App\Models\Concerns\HasManagerAssignments;
 use App\Models\Managers\Manager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 /**
  * @template TPivotModel of Pivot The pivot model for the manager relationship
  * @template TModel of Model The model that can be managed
- *
- * @see HasManagerAssignments For the trait implementation
  */
 interface Manageable
 {
