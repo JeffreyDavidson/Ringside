@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Forms;
 
+use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
 use App\ValueObjects\Address;
@@ -22,7 +23,7 @@ use Illuminate\Validation\Rule;
  * Key Responsibilities:
  * - Venue identification and naming with uniqueness enforcement
  * - Complete address management with comprehensive validation
- * - State verification against valid state records in database
+ * - State verification against the supported United States values
  * - ZIP code format validation for postal accuracy
  * - Location data integrity for event management systems
  *
@@ -33,7 +34,7 @@ use Illuminate\Validation\Rule;
  * @property string $name Venue's official name for events and promotion
  * @property string $street_address Complete street address for location
  * @property string $city City where venue is located
- * @property string $state State name (validated against State model)
+ * @property string $state State name
  * @property int|string $zipcode 5-digit ZIP code for postal addressing
  */
 class CreateEditForm extends BaseForm
@@ -81,11 +82,11 @@ class CreateEditForm extends BaseForm
     /**
      * State where the venue is located.
      *
-     * Validated against existing State model records to ensure data accuracy
+     * Validated against supported United States values to ensure data accuracy
      * and prevent entry errors. Used for regional event planning, tax compliance,
      * regulatory requirements, and state-specific operational procedures.
      *
-     * @var string State name (must exist in states table)
+     * @var string State name
      */
     public string $state = '';
 
@@ -163,7 +164,7 @@ class CreateEditForm extends BaseForm
             'name' => ['required', 'string', 'max:255', Rule::unique('venues', 'name')->ignore($this->modelId)],
             'street_address' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
-            'state' => ['required', 'string', Rule::exists('states', 'name')],
+            'state' => ['required', 'string', Rule::enum(UnitedStatesState::class)],
             'zipcode' => ['required', 'digits:5'],
         ];
     }

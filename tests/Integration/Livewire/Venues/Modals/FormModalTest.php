@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
-use App\Models\Shared\State;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Database\Eloquent\Model;
@@ -17,25 +16,7 @@ beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
 
-    // Create states table for testing - Sushi models need manual table creation in tests
-    // to work with Laravel's validation rules like Rule::exists()
-    Schema::dropIfExists('states');
-    Schema::create('states', function ($table) {
-        $table->id();
-        $table->string('name');
-        $table->string('code');
-        $table->timestamps();
-    });
-
-    // Populate with all states from the Sushi model data
-    collect((new State())->rows)->each(function ($stateData) {
-        DB::table('states')->insert(array_merge($stateData, [
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]));
-    });
-
-    $this->state = DB::table('states')->where('name', 'California')->firstOrFail();
+    $this->state = 'California';
 });
 
 describe('Form Modal Initialization', function () {
@@ -221,7 +202,7 @@ describe('Form Modal Creation', function () {
         $modal->assertHasErrors(['form.name' => 'unique']);
     });
 
-    it('validates state exists in database', function () {
+    it('validates the state is supported', function () {
         $modal = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Arena')
@@ -231,7 +212,7 @@ describe('Form Modal Creation', function () {
             ->set('form.zipcode', '12345')
             ->call('save');
 
-        $modal->assertHasErrors(['form.state' => 'exists']);
+        $modal->assertHasErrors(['form.state']);
     });
 
     it('validates zipcode format', function () {
