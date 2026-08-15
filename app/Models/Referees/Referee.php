@@ -72,19 +72,15 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, EventMatch> $matches
  * @property-read Collection<int, EventMatch> $previousMatches
  *
- * @method static RefereeBuilder<static>|Referee available()
  * @method static RefereeBuilder<static>|Referee employed()
  * @method static \Database\Factories\Referees\RefereeFactory factory($count = null, $state = [])
  * @method static RefereeBuilder<static>|Referee futureEmployed()
- * @method static RefereeBuilder<static>|Referee injured()
  * @method static RefereeBuilder<static>|Referee newModelQuery()
  * @method static RefereeBuilder<static>|Referee newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee onlyTrashed()
  * @method static RefereeBuilder<static>|Referee query()
  * @method static RefereeBuilder<static>|Referee released()
  * @method static RefereeBuilder<static>|Referee retired()
- * @method static RefereeBuilder<static>|Referee suspended()
- * @method static RefereeBuilder<static>|Referee unavailable()
  * @method static RefereeBuilder<static>|Referee unemployed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Referee withoutTrashed()
@@ -129,7 +125,4 @@ class Referee extends Model implements Employable, Injurable, Retirable, SoftDel
             $eventQuery->where('date', '<', now());
         });
     }
-
-    // full_name is handled by virtual column in database
-
 }

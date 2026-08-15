@@ -78,19 +78,15 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TagTeam> $currentTagTeams
  * @property-read Collection<int, TagTeam> $previousTagTeams
  *
- * @method static ManagerBuilder<static>|Manager available()
  * @method static ManagerBuilder<static>|Manager employed()
  * @method static \Database\Factories\Managers\ManagerFactory factory($count = null, $state = [])
  * @method static ManagerBuilder<static>|Manager futureEmployed()
- * @method static ManagerBuilder<static>|Manager injured()
  * @method static ManagerBuilder<static>|Manager newModelQuery()
  * @method static ManagerBuilder<static>|Manager newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Manager onlyTrashed()
  * @method static ManagerBuilder<static>|Manager query()
  * @method static ManagerBuilder<static>|Manager released()
  * @method static ManagerBuilder<static>|Manager retired()
- * @method static ManagerBuilder<static>|Manager suspended()
- * @method static ManagerBuilder<static>|Manager unavailable()
  * @method static ManagerBuilder<static>|Manager unemployed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Manager withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Manager withoutTrashed()
