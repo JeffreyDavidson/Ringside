@@ -234,7 +234,7 @@ test('it preserves wrestler identity and metadata', function () {
     expect($wrestler->id)->toBe($originalId);
     expect($wrestler->name)->toBe($originalName);
     expect($wrestler->hometown)->toBe($originalHometown);
-    expect($wrestler->weight)->toBe($originalWeight);
+    expect($wrestler->weight->toPounds())->toBe($originalWeight);
 });
 
 test('it handles wrestler with no relationships', function () {

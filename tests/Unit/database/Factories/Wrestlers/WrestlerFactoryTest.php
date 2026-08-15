@@ -31,7 +31,7 @@ describe('wrestler factory states', function () {
 
         expect((string) $wrestler->name)->toBeString();
         expect($wrestler->height)->toBeInstanceOf(Height::class);
-        expect($wrestler->weight)->toBeGreaterThan(0);
+        expect($wrestler->weight->toPounds())->toBeGreaterThan(0);
         expect($wrestler->hometown)->toBeString();
         expect($wrestler->status)->toBeInstanceOf(EmploymentStatus::class);
     });
