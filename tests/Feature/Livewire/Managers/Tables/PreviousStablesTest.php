@@ -1,0 +1,74 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Livewire\Managers\Tables\PreviousStables;
+use App\Models\Managers\Manager;
+use App\Models\Stables\Stable;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Users\User;
+use App\Models\Wrestlers\Wrestler;
+
+beforeEach(function () {
+    $this->actingAs(User::factory()->administrator()->create());
+});
+
+it('requires a manager', function () {
+    expect(fn () => (new PreviousStables())->builder())
+        ->toThrow(LogicException::class, 'A manager was not provided.');
+});
+
+it('shows distinct previous stables associated through managed roster members', function () {
+    $manager = Manager::factory()->create();
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+    $previousWrestlerStable = Stable::factory()->create();
+    $previousTagTeamStable = Stable::factory()->create();
+    $nonOverlappingStable = Stable::factory()->create();
+    $currentStable = Stable::factory()->create();
+
+    $wrestler->managers()->attach($manager, [
+        'hired_at' => now()->subYears(3),
+        'fired_at' => now()->subYears(2),
+    ]);
+    $previousWrestlerStable->wrestlers()->attach($wrestler, [
+        'joined_at' => now()->subYears(3)->addMonth(),
+        'left_at' => now()->subYears(2)->addMonth(),
+    ]);
+    $nonOverlappingStable->wrestlers()->attach($wrestler, [
+        'joined_at' => now()->subYear(),
+        'left_at' => now()->subMonths(6),
+    ]);
+
+    $tagTeam->managers()->attach($manager, [
+        'hired_at' => now()->subYears(2),
+        'fired_at' => now()->subYear(),
+    ]);
+    $previousTagTeamStable->tagTeams()->attach($tagTeam, [
+        'joined_at' => now()->subYears(2)->addMonth(),
+        'left_at' => now()->subYear()->addMonth(),
+    ]);
+    $currentStable->tagTeams()->attach($tagTeam, [
+        'joined_at' => now()->subMonths(6),
+    ]);
+    $tagTeam->managers()->attach($manager, [
+        'hired_at' => now()->subMonths(5),
+    ]);
+
+    $stables = testLivewire(PreviousStables::class, ['managerId' => $manager->id])
+        ->instance()
+        ->builder()
+        ->get();
+
+    expect($stables->modelKeys())->toEqualCanonicalizing([
+        $previousWrestlerStable->id,
+        $previousTagTeamStable->id,
+    ]);
+});
+
+it('renders for an administrator', function () {
+    $manager = Manager::factory()->create();
+
+    testLivewire(PreviousStables::class, ['managerId' => $manager->id])
+        ->assertSuccessful();
+});
