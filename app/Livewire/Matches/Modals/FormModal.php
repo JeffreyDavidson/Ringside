@@ -370,7 +370,7 @@ class FormModal extends BaseFormModal
     {
         $matchType = $this->getSelectedMatchType();
 
-        return $matchType ? $matchType->getMinimumCompetitors() : 2;
+        return $matchType?->numberOfSides() ?? 1;
     }
 
     /**
@@ -388,14 +388,10 @@ class FormModal extends BaseFormModal
      */
     private function initializeCompetitorStructure(MatchType $matchType): void
     {
-        $numberOfSides = $matchType->getMinimumCompetitors();
+        $numberOfSides = $matchType->numberOfSides() ?? 1;
         $competitors = [];
 
-        $matchTypeName = mb_strtolower($matchType->name);
-
-        // Initialize competitor structure based on match type specifics
-        if (str_contains($matchTypeName, 'battle') || str_contains($matchTypeName, 'rumble') || str_contains($matchTypeName, 'royal')) {
-            // Battle Royal: Single array for multiple wrestlers
+        if ($matchType->usesIndividualCompetitorSides()) {
             $competitors[0] = [
                 'wrestlers' => [],
                 'tag_teams' => [],

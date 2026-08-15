@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchType;
 use App\Rules\Matches\CorrectNumberOfSides;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -22,6 +23,39 @@ use Illuminate\Contracts\Validation\ValidationRule;
  * @see CorrectNumberOfSides
  */
 describe('CorrectNumberOfSides Validation Rule Unit Tests', function () {
+    test('accepts the required number of sides for a fixed match type', function () {
+        $failed = false;
+        $rule = (new CorrectNumberOfSides())->setData(['matchType' => MatchType::Singles]);
+
+        $rule->validate('competitors', [[], []], validationFailureCallback(function () use (&$failed): void {
+            $failed = true;
+        }));
+
+        expect($failed)->toBeFalse();
+    });
+
+    test('rejects the wrong number of sides for a fixed match type', function () {
+        $failureMessage = null;
+        $rule = (new CorrectNumberOfSides())->setData(['matchType' => MatchType::TripleThreat]);
+
+        $rule->validate('competitors', [[], []], validationFailureCallback(function (string $message) use (&$failureMessage): void {
+            $failureMessage = $message;
+        }));
+
+        expect($failureMessage)->toBe('This match does not have the required number of competitor sides.');
+    });
+
+    test('allows variable side counts for open match types', function () {
+        $failed = false;
+        $rule = (new CorrectNumberOfSides())->setData(['matchType' => MatchType::BattleRoyal]);
+
+        $rule->validate('competitors', [[], [], [], [], [], []], validationFailureCallback(function () use (&$failed): void {
+            $failed = true;
+        }));
+
+        expect($failed)->toBeFalse();
+    });
+
     describe('DataAwareRule implementation', function () {
         test('implements DataAwareRule interface correctly', function () {
             // Arrange

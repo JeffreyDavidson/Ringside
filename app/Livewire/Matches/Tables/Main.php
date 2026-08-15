@@ -11,6 +11,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<EventMatch> */
@@ -31,7 +32,7 @@ class Main extends BaseTable
     {
         return EventMatch::query()
             ->latestEventFirst()
-            ->with(['event', 'competitors.competitor', 'winningSide.competitors.competitor']);
+            ->with(['event', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor']);
     }
 
     public function configure(): void
@@ -59,7 +60,10 @@ class Main extends BaseTable
                 ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
             Column::make(__('event-matches.competitors'))
-                ->label(fn (EventMatch $row) => $row->competitors->map(fn (MatchCompetitor $competitor) => $competitor->competitor->name)->join(' vs ')),
+                ->label(fn (EventMatch $row): string => $row->competitors
+                    ->competitorsBySidePosition()
+                    ->map(fn (Collection $side): string => $side->pluck('name')->join(' & '))
+                    ->join(' vs ')),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
                     if ($row->match_finish === null) {

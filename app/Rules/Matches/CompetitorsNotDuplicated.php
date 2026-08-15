@@ -19,16 +19,14 @@ class CompetitorsNotDuplicated implements ValidationRule
 
         $wrestlers = [];
         $tagTeams = [];
-        $matchCompetitors = (array) $value;
 
-        foreach ($matchCompetitors as $competitors) {
-            if (Arr::has($competitors, 'wrestlers')) {
-                $wrestlers[] = $competitors['wrestlers'];
+        foreach ($value as $side) {
+            if (! is_array($side)) {
+                continue;
             }
 
-            if (Arr::has($competitors, 'tagteams')) {
-                $tagTeams[] = $competitors['tagteams'];
-            }
+            $wrestlers[] = Arr::wrap(Arr::get($side, 'wrestlers', []));
+            $tagTeams[] = Arr::wrap(Arr::get($side, 'tag_teams', []));
         }
 
         $wrestlers = Arr::flatten($wrestlers);

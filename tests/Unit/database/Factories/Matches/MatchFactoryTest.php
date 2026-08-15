@@ -328,7 +328,12 @@ describe('MatchFactory', function () {
         test('match type has correct competitor limits', function () {
             expect(MatchType::Singles->getMinimumCompetitors())->toBe(2);
             expect(MatchType::TripleThreat->getMinimumCompetitors())->toBe(3);
-            expect(MatchType::BattleRoyal->getMinimumCompetitors())->toBe(2);
+            expect(MatchType::BattleRoyal->getMinimumCompetitors())->toBe(3);
+            expect(MatchType::BattleRoyal->getMaximumCompetitors())->toBeNull();
+            expect(MatchType::RoyalRumble->getMinimumCompetitors())->toBe(10);
+            expect(MatchType::RoyalRumble->getMaximumCompetitors())->toBe(30);
+            expect(MatchType::BattleRoyal->allowsTagTeams())->toBeFalse();
+            expect(MatchType::RoyalRumble->allowsTagTeams())->toBeFalse();
         });
     });
 });

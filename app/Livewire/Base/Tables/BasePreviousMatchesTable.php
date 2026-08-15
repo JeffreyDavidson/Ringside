@@ -13,7 +13,10 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Referees\Referee;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
+use App\Models\Wrestlers\Wrestler;
+use Illuminate\Support\Collection;
 
 /**
  * @extends DataTableComponent<EventMatch>
@@ -55,15 +58,16 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 })
                 ->separator(', ')
                 ->emptyValue('N/A'),
-            ArrayColumn::make(__('event-matches.competitors'))
-                ->data(fn (mixed $value, EventMatch $row) => ($row->competitors))
-                ->outputFormat(function (int $index, MatchCompetitor $value): string {
-                    $competitor = $value->competitor;
-                    $type = str($competitor->getMorphClass())->kebab()->plural();
+            Column::make(__('event-matches.competitors'))
+                ->label(fn (EventMatch $row): string => $row->competitors
+                    ->competitorsBySidePosition()
+                    ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor): string {
+                        $type = str($competitor->getMorphClass())->kebab()->plural();
 
-                    return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
-                })
-                ->separator('<br />'),
+                        return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
+                    })->join(' & '))
+                    ->join(' vs '))
+                ->html(),
             ArrayColumn::make(__('event-matches.titles'))
                 ->data(fn (mixed $value, EventMatch $row) => ($row->titles))
                 ->outputFormat(fn (int $index, Title $value): string => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')

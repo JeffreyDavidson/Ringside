@@ -22,7 +22,7 @@ use Illuminate\Support\Collection as BaseCollection;
  * @example
  * ```php
  * $competitors = new MatchCompetitorsCollection($matchCompetitors);
- * $sides = $competitors->sides();
+ * $sidePositions = $competitors->sidePositions();
  * $wrestlersOnly = $competitors->onlyWrestlers();
  * ```
  */
@@ -35,10 +35,10 @@ class MatchCompetitorsCollection extends Collection
      *
      * @example
      * ```php
-     * $sortedCompetitors = $competitors->sortBySideNumber();
+     * $sortedCompetitors = $competitors->sortBySidePosition();
      * ```
      */
-    public function sortBySideNumber(): static
+    public function sortBySidePosition(): static
     {
         return $this->sortBy(fn (MatchCompetitor $competitor): int => $competitor->side->position)->values();
     }
@@ -50,10 +50,10 @@ class MatchCompetitorsCollection extends Collection
      *
      * @example
      * ```php
-     * $sides = $competitors->sides(); // [1, 2]
+     * $sidePositions = $competitors->sidePositions(); // [1, 2]
      * ```
      */
-    public function sides(): array
+    public function sidePositions(): array
     {
         return $this->map(fn (MatchCompetitor $competitor): int => $competitor->side->position)
             ->unique()
@@ -68,10 +68,10 @@ class MatchCompetitorsCollection extends Collection
      *
      * @example
      * ```php
-     * $counts = $competitors->countPerSide(); // [1 => 2, 2 => 1]
+     * $counts = $competitors->countBySidePosition(); // [1 => 2, 2 => 1]
      * ```
      */
-    public function countPerSide(): BaseCollection
+    public function countBySidePosition(): BaseCollection
     {
         // @phpstan-ignore-next-line return.type
         return $this->groupBy(fn (MatchCompetitor $competitor): int => $competitor->side->position)
@@ -82,48 +82,36 @@ class MatchCompetitorsCollection extends Collection
     }
 
     /**
-     * Get all distinct side numbers present in the collection.
-     *
-     * Alias for sides() method for backward compatibility.
-     *
-     * @return array<int> Array of unique side numbers
-     */
-    public function getSides(): array
-    {
-        return $this->sides();
-    }
-
-    /**
      * Count how many competitors exist for a given side.
      *
-     * @param  int  $side  The side number to count
+     * @param  int  $position  The side position to count
      * @return int Number of competitors on the specified side
      *
      * @example
      * ```php
-     * $count = $competitors->countCompetitorsForSide(1); // 2
+     * $count = $competitors->competitorCountForSidePosition(1); // 2
      * ```
      */
-    public function countCompetitorsForSide(int $side): int
+    public function competitorCountForSidePosition(int $position): int
     {
-        return $this->filterBySide($side)->count();
+        return $this->forSidePosition($position)->count();
     }
 
     /**
      * Determine if any competitor on the given side is a tag team.
      *
-     * @param  int  $side  The side number to check
+     * @param  int  $position  The side position to check
      * @return bool True if any competitor on the side is a tag team
      *
      * @example
      * ```php
-     * $hasTagTeams = $competitors->hasTagTeamsOnSide(1);
+     * $hasTagTeams = $competitors->hasTagTeamsOnSidePosition(1);
      * ```
      */
-    public function hasTagTeamsOnSide(int $side): bool
+    public function hasTagTeamsOnSidePosition(int $position): bool
     {
-        return $this->getCompetitorsForSide($side)
-            ->contains(fn (Wrestler|TagTeam $competitor) => $competitor instanceof TagTeam);
+        return $this->competitorsForSidePosition($position)
+            ->contains(fn (Wrestler|TagTeam $competitor): bool => $competitor instanceof TagTeam);
     }
 
     /**
@@ -150,11 +138,11 @@ class MatchCompetitorsCollection extends Collection
      *
      * @example
      * ```php
-     * $grouped = $competitors->groupBySide();
+     * $grouped = $competitors->groupBySidePosition();
      * // [1 => Collection[...], 2 => Collection[...]]
      * ```
      */
-    public function groupBySide(): BaseCollection
+    public function groupBySidePosition(): BaseCollection
     {
         return $this->groupBy(fn (MatchCompetitor $competitor): int => $competitor->side->position);
     }
@@ -209,17 +197,17 @@ class MatchCompetitorsCollection extends Collection
     /**
      * Get all competitors belonging to a specific side.
      *
-     * @param  int  $side  The side number to filter by
+     * @param  int  $position  The side position to filter by
      * @return static Collection of competitors on the specified side
      *
      * @example
      * ```php
-     * $sideOneCompetitors = $competitors->filterBySide(1);
+     * $sideOneCompetitors = $competitors->forSidePosition(1);
      * ```
      */
-    public function filterBySide(int $side): static
+    public function forSidePosition(int $position): static
     {
-        return $this->filter(fn (MatchCompetitor $competitor) => $competitor->side->position === $side);
+        return $this->filter(fn (MatchCompetitor $competitor): bool => $competitor->side->position === $position);
     }
 
     /**
@@ -276,11 +264,11 @@ class MatchCompetitorsCollection extends Collection
      *
      * @example
      * ```php
-     * $competitorsBySide = $competitors->pluckCompetitorsBySide();
+     * $competitorsBySide = $competitors->competitorsBySidePosition();
      * // [1 => Collection[Wrestler, TagTeam], 2 => Collection[Wrestler]]
      * ```
      */
-    public function pluckCompetitorsBySide(): BaseCollection
+    public function competitorsBySidePosition(): BaseCollection
     {
         return $this->groupBy(fn (MatchCompetitor $competitor): int => $competitor->side->position)
             ->map(function (MatchCompetitorsCollection $competitorsOnSide) {
@@ -293,18 +281,18 @@ class MatchCompetitorsCollection extends Collection
     /**
      * Get all Bookable competitors for a given side number.
      *
-     * @param  int  $side  The side number to get competitors for
+     * @param  int  $position  The side position to get competitors for
      * @return BaseCollection<int, Wrestler|TagTeam> Collection of competitor models
      *
      * @example
      * ```php
-     * $sideCompetitors = $competitors->getCompetitorsForSide(1);
+     * $sideCompetitors = $competitors->competitorsForSidePosition(1);
      * ```
      */
-    public function getCompetitorsForSide(int $side): BaseCollection
+    public function competitorsForSidePosition(int $position): BaseCollection
     {
-        return $this->filterBySide($side)
-            ->map(fn (MatchCompetitor $competitor) => $competitor->competitor)
+        return $this->forSidePosition($position)
+            ->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor)
             ->values();
     }
 }

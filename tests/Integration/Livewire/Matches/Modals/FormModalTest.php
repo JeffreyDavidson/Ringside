@@ -7,6 +7,8 @@ use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -127,6 +129,9 @@ describe('FormModal Create Operations', function () {
             'match_type' => MatchType::Singles->value,
             'preview' => 'Epic wrestling match preview',
         ]);
+
+        $match = EventMatch::query()->whereBelongsTo($this->event)->sole();
+        expect($match->sides()->pluck('position')->all())->toBe([1, 2]);
     });
 
     it('validates required fields when creating', function () {
@@ -191,6 +196,59 @@ describe('FormModal Create Operations', function () {
 
         $component->assertHasErrors(['form.referees.0']);
     });
+
+    it('persists each battle royal entrant on an individual side', function () {
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::BattleRoyal)
+            ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('matchCreated');
+
+        $match = EventMatch::query()->whereBelongsTo($this->event)->sole();
+
+        expect($match->sides()->pluck('position')->all())->toBe([1, 2, 3])
+            ->and($match->competitors)->toHaveCount(3)
+            ->and($match->competitors->pluck('match_side_id')->unique())->toHaveCount(3);
+    });
+
+    it('records royal rumble selection order as entrant order', function () {
+        $wrestlers = Wrestler::factory()->count(10)->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::RoyalRumble)
+            ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $entryOrder = EventMatch::query()
+            ->whereBelongsTo($this->event)
+            ->sole()
+            ->competitors()
+            ->orderBy('entry_order')
+            ->pluck('entry_order')
+            ->all();
+
+        expect($entryOrder)->toBe(range(1, 10));
+    });
+
+    it('requires the configured minimum number of individual entrants', function (MatchType $matchType, int $entrantCount) {
+        $wrestlers = Wrestler::factory()->count($entrantCount)->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', $matchType)
+            ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
+            ->call('save')
+            ->assertHasErrors(['form.competitors.0.wrestlers' => 'min']);
+    })->with([
+        'battle royal' => [MatchType::BattleRoyal, 2],
+        'royal rumble' => [MatchType::RoyalRumble, 9],
+    ]);
 });
 
 describe('FormModal Edit Operations', function () {
@@ -233,6 +291,70 @@ describe('FormModal Edit Operations', function () {
         $component->assertSet('form.eventId', $this->event->id);
         $component->assertSet('form.matchType', MatchType::Singles);
         $component->assertSet('form.preview', 'Original preview');
+    });
+
+    it('loads existing competitors grouped by their ordered sides', function () {
+        $match = EventMatch::factory()
+            ->for($this->event)
+            ->state(['match_type' => MatchType::TagTeam])
+            ->create();
+        $wrestler = Wrestler::factory()->bookable()->create();
+        $tagTeam = TagTeam::factory()->bookable()->create();
+        $firstSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+        $secondSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
+        MatchCompetitor::factory()->create([
+            'match_id' => $match->id,
+            'match_side_id' => $firstSide->id,
+            'competitor_type' => $wrestler->getMorphClass(),
+            'competitor_id' => $wrestler->id,
+        ]);
+        MatchCompetitor::factory()->create([
+            'match_id' => $match->id,
+            'match_side_id' => $secondSide->id,
+            'competitor_type' => $tagTeam->getMorphClass(),
+            'competitor_id' => $tagTeam->id,
+        ]);
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal', $match->id)
+            ->assertSet('form.competitors', [
+                ['wrestlers' => [$wrestler->id], 'tag_teams' => []],
+                ['wrestlers' => [], 'tag_teams' => [$tagTeam->id]],
+            ]);
+    });
+
+    it('loads individual entrant sides into one selection bucket', function () {
+        $match = EventMatch::factory()
+            ->for($this->event)
+            ->battleRoyal(3)
+            ->create();
+        $wrestlerIds = $match->competitors()
+            ->with('side')
+            ->get()
+            ->sortBy('side.position')
+            ->pluck('competitor_id')
+            ->values()
+            ->all();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal', $match->id)
+            ->assertSet('form.competitors', [
+                ['wrestlers' => $wrestlerIds, 'tag_teams' => []],
+            ]);
+    });
+
+    it('rejects a competitor selected on multiple sides', function () {
+        $wrestler = Wrestler::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.competitors', [
+                ['wrestlers' => [$wrestler->id]],
+                ['wrestlers' => [$wrestler->id]],
+            ])
+            ->call('save')
+            ->assertHasErrors(['form.competitors']);
     });
 });
 

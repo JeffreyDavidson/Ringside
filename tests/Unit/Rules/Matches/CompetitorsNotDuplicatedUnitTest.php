@@ -93,8 +93,8 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
             $competitors = [
-                ['tagteams' => [1, 2]],
-                ['tagteams' => [3, 4]],
+                ['tag_teams' => [1, 2]],
+                ['tag_teams' => [3, 4]],
             ];
 
             $failCalled = false;
@@ -113,8 +113,8 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
             $competitors = [
-                ['tagteams' => [1, 2]],
-                ['tagteams' => [2, 3]], // Tag team 2 appears twice
+                ['tag_teams' => [1, 2]],
+                ['tag_teams' => [2, 3]], // Tag team 2 appears twice
             ];
 
             $failCalled = false;
@@ -138,8 +138,8 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
             $competitors = [
-                ['wrestlers' => [1, 2], 'tagteams' => [1]],
-                ['wrestlers' => [3], 'tagteams' => [2, 3]],
+                ['wrestlers' => [1, 2], 'tag_teams' => [1]],
+                ['wrestlers' => [3], 'tag_teams' => [2, 3]],
             ];
 
             $failCalled = false;
@@ -158,8 +158,8 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
             $competitors = [
-                ['wrestlers' => [1], 'tagteams' => [1]],
-                ['wrestlers' => [2], 'tagteams' => [2]],
+                ['wrestlers' => [1], 'tag_teams' => [1]],
+                ['wrestlers' => [2], 'tag_teams' => [2]],
             ];
             // Wrestler 1 and tag team 1 can coexist (different types)
 
@@ -219,8 +219,8 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
             $competitors = [
-                ['tagteams' => [1, 2]],
-                ['tagteams' => [3, 4]],
+                ['tag_teams' => [1, 2]],
+                ['tag_teams' => [3, 4]],
                 // No wrestlers key
             ];
 
@@ -240,8 +240,8 @@ describe('CompetitorsNotDuplicated Validation Rule Unit Tests', function () {
             // Arrange
             $rule = new CompetitorsNotDuplicated();
             $competitors = [
-                ['wrestlers' => [], 'tagteams' => []],
-                ['wrestlers' => [], 'tagteams' => []],
+                ['wrestlers' => [], 'tag_teams' => []],
+                ['wrestlers' => [], 'tag_teams' => []],
             ];
 
             $failCalled = false;

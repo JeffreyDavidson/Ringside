@@ -13,6 +13,7 @@ The match system handles complex wrestling match scenarios with flexible competi
 
 #### Wrestler-Only Match Types
 - **Singles**: Only wrestler vs wrestler
+- **Battle Royal**: Individual wrestlers, with at least three entrants and no configured maximum
 - **Royal Rumble**: Only individual wrestlers
 - **Rationale**: These match types require individual competitor mechanics
 
@@ -22,7 +23,6 @@ The match system handles complex wrestling match scenarios with flexible competi
 - **Fatal 4-Way**: Can be wrestlers, tag teams, or mixed
 - **6/8/10 Man Tag Team**: Can be wrestlers, tag teams, or mixed
 - **Handicap Matches**: Can be wrestlers, tag teams, or mixed
-- **Battle Royal**: Can be wrestlers, tag teams, or mixed
 - **Tornado Tag Team**: Can be wrestlers, tag teams, or mixed
 - **Gauntlet**: Can be wrestlers, tag teams, or mixed
 - **Rationale**: These match types support flexible competitor configurations
@@ -65,6 +65,10 @@ Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by El
 - **MatchSide**: Groups competitors who compete together
 - **MatchCompetitor**: Polymorphic competitor entry belonging to a match side
 - **MatchFinish**: Determines whether a winning side must be recorded
+
+### Entrant and Elimination Metadata
+
+Royal Rumble competitors record a unique `entry_order` within the match. Battle Royal competitors may leave entry order unset because they begin simultaneously. Eliminated competitors record a unique `elimination_order`; the winner remains without one. `eliminated_by_match_competitor_id` optionally identifies the competitor responsible for the elimination and remains nullable for joint, external, or indeterminate eliminations.
 
 ## Related Documentation
 - [Business Rules](business-rules.md)

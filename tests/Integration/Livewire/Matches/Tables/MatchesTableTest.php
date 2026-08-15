@@ -7,7 +7,6 @@ use App\Livewire\Matches\Tables\MatchesTable;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use App\Models\Matches\MatchSide;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -29,7 +28,7 @@ beforeEach(function () {
 
 function attachTableCompetitor(EventMatch $match, Wrestler|TagTeam $competitor, int $position): void
 {
-    $side = MatchSide::factory()->for($match, 'match')->create(compact('position'));
+    $side = $match->sides()->firstOrCreate(compact('position'));
 
     MatchCompetitor::factory()->create([
         'match_id' => $match->id,
