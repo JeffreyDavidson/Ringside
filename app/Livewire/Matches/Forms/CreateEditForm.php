@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Forms;
 
+use App\Actions\Matches\AddMatchForEventAction;
+use App\Actions\Matches\UpdateMatchAction;
+use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Matches\MatchStipulation;
+use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
 use App\Models\Wrestlers\Wrestler;
@@ -136,13 +141,21 @@ class CreateEditForm extends BaseForm
      */
     public function store(): bool
     {
-        $result = parent::store();
+        $this->validate();
 
-        if ($result) {
-            $this->syncRelationships();
+        $data = $this->toData();
+
+        if ($this->isCreating()) {
+            $event = Event::query()->findOrFail($this->eventId);
+            $this->formModel = resolve(AddMatchForEventAction::class)->handle($event, $data);
+        } else {
+            $match = EventMatch::query()->findOrFail($this->modelId);
+            $this->formModel = resolve(UpdateMatchAction::class)->handle($match, $data);
         }
 
-        return $result;
+        $this->modelId = $this->formModel->getKey();
+
+        return true;
     }
 
     /**
@@ -200,85 +213,6 @@ class CreateEditForm extends BaseForm
     }
 
     /**
-     * Synchronize all event match relationships.
-     *
-     * Updates the relationships for referees, titles, and competitors
-     * to match the current form state. Handles both many-to-many
-     * and one-to-many relationships appropriately.
-     */
-    private function syncRelationships(): void
-    {
-        if (! $this->formModel instanceof EventMatch) {
-            return;
-        }
-
-        // Sync many-to-many relationships (assuming referees and titles are BelongsToMany)
-        $this->formModel->referees()->sync($this->referees);
-        $this->formModel->titles()->sync($this->titles);
-
-        // Handle competitors - assuming it's a HasMany relationship
-        $this->syncCompetitors();
-    }
-
-    /**
-     * Sync competitors for HasMany relationship.
-     *
-     * Removes existing competitors and creates new ones based on
-     * the current form state.
-     */
-    private function syncCompetitors(): void
-    {
-        if (! $this->formModel instanceof EventMatch) {
-            return;
-        }
-
-        // Delete existing competitors
-        $this->formModel->competitors()->delete();
-        $this->formModel->sides()->delete();
-
-        if ($this->matchType->usesIndividualCompetitorSides()) {
-            foreach ($this->competitors[0]['wrestlers'] ?? [] as $sideIndex => $wrestlerId) {
-                $side = $this->formModel->sides()->create(['position' => $sideIndex + 1]);
-
-                $competitor = $this->formModel->competitors()->create([
-                    'competitor_type' => (new Wrestler())->getMorphClass(),
-                    'competitor_id' => $wrestlerId,
-                    'match_side_id' => $side->id,
-                ]);
-
-                if ($this->matchType === MatchType::RoyalRumble) {
-                    $competitor->forceFill(['entry_order' => $sideIndex + 1])->save();
-                }
-            }
-
-            return;
-        }
-
-        // Create new competitor records using the side-based structure
-        foreach ($this->competitors as $sideIndex => $sideCompetitors) {
-            $side = $this->formModel->sides()->create(['position' => $sideIndex + 1]);
-
-            // Handle wrestlers for this side
-            foreach ($sideCompetitors['wrestlers'] ?? [] as $wrestlerId) {
-                $this->formModel->competitors()->create([
-                    'competitor_type' => (new Wrestler())->getMorphClass(),
-                    'competitor_id' => $wrestlerId,
-                    'match_side_id' => $side->id,
-                ]);
-            }
-
-            // Handle tag teams for this side (when implemented)
-            foreach ($sideCompetitors['tag_teams'] ?? [] as $tagTeamId) {
-                $this->formModel->competitors()->create([
-                    'competitor_type' => (new TagTeam())->getMorphClass(),
-                    'competitor_id' => $tagTeamId,
-                    'match_side_id' => $side->id,
-                ]);
-            }
-        }
-    }
-
-    /**
      * Prepare event match data for model storage.
      *
      * Transforms form fields into model-compatible data structure.
@@ -291,28 +225,43 @@ class CreateEditForm extends BaseForm
     {
         return [
             'event_id' => $this->eventId,
-            'match_number' => $this->getNextMatchNumber(),
             'preview' => $this->preview,
             'match_type' => $this->matchType,
             'match_stipulation_id' => $this->matchStipulationId,
         ];
-        // Note: relationships (competitors, referees, titles) are handled
-        // separately through the relationship synchronization system
     }
 
-    /**
-     * Get the next match number for the event.
-     *
-     * Calculates the next sequential match number based on existing matches
-     * for the specified event. Match numbers start from 1.
-     *
-     * @return int Next match number (1-based)
-     */
-    private function getNextMatchNumber(): int
+    private function toData(): EventMatchData
     {
-        $maxMatchNumber = EventMatch::where('event_id', $this->eventId)->max('match_number');
+        $matchType = $this->matchType;
+        $sides = $matchType->usesIndividualCompetitorSides()
+            ? collect($this->competitors[0]['wrestlers'] ?? [])
+                ->values()
+                ->mapWithKeys(fn (int $wrestlerId, int $index): array => [
+                    $index + 1 => [
+                        'wrestlers' => Wrestler::query()->whereKey($wrestlerId)->get()->all(),
+                        'tag_teams' => [],
+                    ],
+                ])
+            : collect($this->competitors)
+                ->values()
+                ->mapWithKeys(fn (array $side, int $index): array => [
+                    $index + 1 => [
+                        'wrestlers' => Wrestler::query()->whereKey($side['wrestlers'] ?? [])->get()->all(),
+                        'tag_teams' => TagTeam::query()->whereKey($side['tag_teams'] ?? [])->get()->all(),
+                    ],
+                ]);
 
-        return ($maxMatchNumber ?? 0) + 1;
+        return new EventMatchData(
+            matchType: $matchType,
+            referees: Referee::query()->whereKey($this->referees)->get(),
+            titles: Title::query()->whereKey($this->titles)->get(),
+            sides: $sides,
+            preview: $this->preview,
+            matchStipulation: $this->matchStipulationId === null
+                ? null
+                : MatchStipulation::query()->findOrFail($this->matchStipulationId),
+        );
     }
 
     /**
@@ -355,7 +304,7 @@ class CreateEditForm extends BaseForm
                 Rule::exists(MatchStipulation::class, 'id')->where('is_active', true),
             ],
             'preview' => ['sometimes', 'string'],
-            'referees' => ['sometimes', 'array'],
+            'referees' => ['required', 'array', 'min:1'],
             'referees.*' => ['integer', 'exists:referees,id'],
             'titles' => ['sometimes', 'array'],
             'titles.*' => [

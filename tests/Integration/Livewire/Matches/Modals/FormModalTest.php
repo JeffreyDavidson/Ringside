@@ -120,11 +120,13 @@ describe('FormModal Match Stipulation Integration', function () {
         $stipulation = MatchStipulation::factory()->active()->create();
         $firstWrestler = Wrestler::factory()->bookable()->create();
         $secondWrestler = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Singles)
             ->set('form.matchStipulationId', $stipulation->id)
+            ->set('form.referees', [$referee->id])
             ->set('form.competitors', [
                 ['wrestlers' => [$firstWrestler->id]],
                 ['wrestlers' => [$secondWrestler->id]],
@@ -261,10 +263,12 @@ describe('FormModal Create Operations', function () {
 
     it('persists each battle royal entrant on an individual side', function () {
         $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::BattleRoyal)
+            ->set('form.referees', [$referee->id])
             ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
             ->call('save')
             ->assertHasNoErrors()
@@ -279,10 +283,12 @@ describe('FormModal Create Operations', function () {
 
     it('records royal rumble selection order as entrant order', function () {
         $wrestlers = Wrestler::factory()->count(10)->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::RoyalRumble)
+            ->set('form.referees', [$referee->id])
             ->set('form.competitors.0.wrestlers', $wrestlers->modelKeys())
             ->call('save')
             ->assertHasNoErrors();
@@ -320,10 +326,12 @@ describe('FormModal Edit Operations', function () {
         $wrestler2 = Wrestler::factory()->bookable()->create();
         $wrestler3 = Wrestler::factory()->bookable()->create();
         $wrestler4 = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal', $match->id)
             ->set('form.matchType', MatchType::TagTeam)
+            ->set('form.referees', [$referee->id])
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id, $wrestler2->id]],
                 1 => ['wrestlers' => [$wrestler3->id, $wrestler4->id]],
@@ -425,10 +433,12 @@ describe('FormModal Title Championship Integration', function () {
         $title = Title::factory()->active()->create();
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Singles)
+            ->set('form.referees', [$referee->id])
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
                 1 => ['wrestlers' => [$wrestler2->id]],
@@ -475,10 +485,12 @@ describe('FormModal Tag Team Integration', function () {
     it('can create tag team match', function () {
         $tagTeam1 = TagTeam::factory()->bookable()->create();
         $tagTeam2 = TagTeam::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::TagTeam)
+            ->set('form.referees', [$referee->id])
             ->set('form.competitors', [
                 0 => ['tag_teams' => [$tagTeam1->id]],
                 1 => ['tag_teams' => [$tagTeam2->id]],
@@ -517,10 +529,12 @@ describe('FormModal State Management', function () {
     it('closes modal after successful save', function () {
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
 
         $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal')
             ->set('form.matchType', MatchType::Singles)
+            ->set('form.referees', [$referee->id])
             ->set('form.competitors', [
                 0 => ['wrestlers' => [$wrestler1->id]],
                 1 => ['wrestlers' => [$wrestler2->id]],
