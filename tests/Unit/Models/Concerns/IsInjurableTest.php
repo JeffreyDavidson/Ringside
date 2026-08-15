@@ -7,56 +7,10 @@ namespace Tests\Unit\Models\Concerns;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Contracts\Injurable;
 use App\Models\Lifecycle\Injury;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use JMac\Testing\Double;
-
-/** @extends EloquentBuilder<Injury> */
-final class FakeInjuryBuilder extends EloquentBuilder {}
-
-/** @implements Injurable<self> */
-final class InjuryStateModel extends Model implements Injurable
-{
-    /** @use IsInjurable<self> */
-    use IsInjurable;
-
-    public bool $currentInjuryExists = false;
-
-    /** @return MorphOne<Injury, self> */
-    public function currentInjury(): MorphOne
-    {
-        return $this->injuryHasOne($this->currentInjuryExists);
-    }
-
-    /** @return MorphMany<Injury, self> */
-    public function injuries(): MorphMany
-    {
-        $builder = $this->injuryBuilder(false);
-
-        return new MorphMany($builder, new self(), 'injurable_type', 'injurable_id', 'id');
-    }
-
-    /** @return MorphOne<Injury, self> */
-    private function injuryHasOne(bool $exists): MorphOne
-    {
-        $builder = $this->injuryBuilder($exists);
-
-        return new MorphOne($builder, new self(), 'injurable_type', 'injurable_id', 'id');
-    }
-
-    private function injuryBuilder(bool $exists): FakeInjuryBuilder
-    {
-        $query = Double::for(QueryBuilder::class);
-        $query->expects('exists')->returns($exists);
-        $builder = new FakeInjuryBuilder($query);
-        $builder->setModel(new Injury());
-
-        return $builder;
-    }
-}
+use Tests\Unit\Models\Concerns\Support\InjuryStateModel;
 
 describe('IsInjurable', function () {
     test('provides polymorphic injury relationships', function () {
