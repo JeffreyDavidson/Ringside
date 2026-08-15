@@ -44,7 +44,7 @@ Assignment actions lock the affected event rows and enforce these rules inside t
 
 Roster booking eligibility is evaluated by `RosterBookingEligibility`, not by Eloquent models or builders. The policy combines persisted employment, injury, suspension, future-employment, and tag-team membership state. A tag team must satisfy its own lifecycle state, have at least two current wrestlers, and have every current wrestler individually eligible. Models expose those relationships and state predicates; validation rules, assignment Actions, and collections invoke the policy when deciding whether a participant may be booked.
 
-`MatchStipulation` is a persistence record containing its configured name, slug, description, active flag, and match relationship. Stipulation capabilities and match presentation must be implemented by the match domain when they are enforced; the model does not infer behavior from hard-coded slug lists.
+`MatchStipulation` is an optional match configuration selected from active definitions when a match is created or edited. The match retains that relationship as historical configuration even if the definition is later made inactive. Stipulation capabilities and match presentation must be implemented by the match domain when they are enforced; the model does not infer behavior from hard-coded slug lists.
 
 ## Winner/Loser System
 
