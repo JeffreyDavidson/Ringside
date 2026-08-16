@@ -176,10 +176,13 @@ class FormModal extends BaseFormModal
      */
     protected function generateRefereeAssignments(): array
     {
-        // Most matches have 1 referee, some special matches might have 2
         $refereeCount = fake()->randomFloat(null, 0, 1) < 0.9 ? 1 : 2;
 
-        return Referee::factory()->count($refereeCount)->create()->pluck('id')->toArray();
+        return Referee::query()
+            ->inRandomOrder()
+            ->limit($refereeCount)
+            ->pluck('id')
+            ->all();
     }
 
     /**
@@ -192,13 +195,15 @@ class FormModal extends BaseFormModal
      */
     protected function generateTitleAssignments(): array
     {
-        // 30% chance of being a championship match
         if (fake()->randomFloat(null, 0, 1) < 0.3) {
-            /** @phpstan-ignore-next-line */
-            return [Title::inRandomOrder()->first()?->id ?? Title::factory()->create()->id];
+            return Title::query()
+                ->inRandomOrder()
+                ->limit(1)
+                ->pluck('id')
+                ->all();
         }
 
-        return []; // Non-title match
+        return [];
     }
 
     /**
@@ -211,10 +216,13 @@ class FormModal extends BaseFormModal
      */
     protected function generateWrestlerAssignments(): array
     {
-        // For now, generate 2-4 wrestlers (singles to tag team)
         $wrestlerCount = fake()->numberBetween(2, 4);
 
-        return Wrestler::factory()->count($wrestlerCount)->create()->pluck('id')->toArray();
+        return Wrestler::query()
+            ->inRandomOrder()
+            ->limit($wrestlerCount)
+            ->pluck('id')
+            ->all();
     }
 
     /**

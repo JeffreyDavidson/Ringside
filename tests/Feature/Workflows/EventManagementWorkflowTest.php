@@ -162,6 +162,7 @@ describe('Event Creation and Scheduling Workflow', function () {
     test('event creation with dummy data workflow', function () {
         // Given: An authenticated administrator
         $admin = administrator();
+        Venue::factory()->create();
 
         // When: Opening create modal and using dummy data
         actingAs($admin);

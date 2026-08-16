@@ -602,6 +602,16 @@ describe('TagTeams FormModal Tests', function () {
 
             expect($wrestlerA)->not->toBe($wrestlerB);
         });
+
+        test('dummy data does not persist additional wrestlers', function () {
+            Wrestler::factory()->count(5)->create();
+
+            testLivewire(FormModal::class)
+                ->call('openModal')
+                ->call('fillDummyFields');
+
+            expect(Wrestler::query()->count())->toBe(5);
+        });
     });
 
     describe('integration with employment system', function () {

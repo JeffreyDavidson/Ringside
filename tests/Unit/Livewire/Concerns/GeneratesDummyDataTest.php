@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Concerns\GeneratesDummyData;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Integration\Livewire\Concerns\GeneratesDummyDataTest;
 
 /**
@@ -237,6 +238,28 @@ describe('GeneratesDummyData Unit Tests', function () {
     });
 
     describe('field population', function () {
+        test('rejects dummy data requests outside local and testing environments', function () {
+            $form = new class
+            {
+                use GeneratesDummyData;
+
+                public string $name = '';
+
+                protected function getDummyDataFields(): array
+                {
+                    return ['name' => 'Test Name'];
+                }
+            };
+
+            app()->detectEnvironment(fn () => 'production');
+
+            try {
+                expect(fn () => $form->fillDummyFields())->toThrow(NotFoundHttpException::class);
+            } finally {
+                app()->detectEnvironment(fn () => 'testing');
+            }
+        });
+
         test('populates fields directly on a form', function () {
             $form = new class
             {
