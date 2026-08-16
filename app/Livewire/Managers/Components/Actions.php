@@ -13,24 +13,15 @@ use App\Actions\Managers\RestoreAction;
 use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
-use App\Livewire\Concerns\ExecutesActionsWithContext;
+use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Managers\Manager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
-/**
- * Manager Actions Component
- *
- * Handles all business actions that can be performed on a manager including
- * employment management, health status changes, and career lifecycle operations.
- * This component is designed to be reusable across different contexts (tables,
- * detail pages, cards, etc.) while maintaining consistent authorization and
- * error handling patterns.
- */
 class Actions extends Component
 {
-    use ExecutesActionsWithContext;
+    use ExecutesRosterActions;
 
     public Manager $manager;
 
@@ -39,182 +30,58 @@ class Actions extends Component
         $this->manager = $manager;
     }
 
-    /**
-     * Employ a manager.
-     */
     public function employ(): void
     {
         Gate::authorize('employ', $this->manager);
-
-        $this->executeActionWithContext(
-            'employed',
-            EmployAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_employed' => $this->manager->isEmployed(),
-                'manager_is_suspended' => $this->manager->isSuspended(),
-                'manager_is_retired' => $this->manager->isRetired(),
-                'manager_is_injured' => $this->manager->isInjured(),
-            ]
-        );
+        $this->executeRosterAction('employed', 'manager', fn () => resolve(EmployAction::class)->handle($this->manager));
     }
 
-    /**
-     * Release a manager.
-     */
     public function release(): void
     {
         Gate::authorize('release', $this->manager);
-
-        $this->executeActionWithContext(
-            'released',
-            ReleaseAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_employed' => $this->manager->isEmployed(),
-                'manager_is_suspended' => $this->manager->isSuspended(),
-            ]
-        );
+        $this->executeRosterAction('released', 'manager', fn () => resolve(ReleaseAction::class)->handle($this->manager));
     }
 
-    /**
-     * Retire a manager.
-     */
     public function retire(): void
     {
         Gate::authorize('retire', $this->manager);
-
-        $this->executeActionWithContext(
-            'retired',
-            RetireAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_employed' => $this->manager->isEmployed(),
-                'manager_is_suspended' => $this->manager->isSuspended(),
-            ]
-        );
+        $this->executeRosterAction('retired', 'manager', fn () => resolve(RetireAction::class)->handle($this->manager));
     }
 
-    /**
-     * Unretire a manager.
-     */
     public function unretire(): void
     {
         Gate::authorize('unretire', $this->manager);
-
-        $this->executeActionWithContext(
-            'unretired',
-            UnretireAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_retired' => $this->manager->isRetired(),
-            ]
-        );
+        $this->executeRosterAction('unretired', 'manager', fn () => resolve(UnretireAction::class)->handle($this->manager));
     }
 
-    /**
-     * Suspend a manager.
-     */
     public function suspend(): void
     {
         Gate::authorize('suspend', $this->manager);
-
-        $this->executeActionWithContext(
-            'suspended',
-            SuspendAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_employed' => $this->manager->isEmployed(),
-                'manager_is_injured' => $this->manager->isInjured(),
-            ]
-        );
+        $this->executeRosterAction('suspended', 'manager', fn () => resolve(SuspendAction::class)->handle($this->manager));
     }
 
-    /**
-     * Reinstate a manager.
-     */
     public function reinstate(): void
     {
         Gate::authorize('reinstate', $this->manager);
-
-        $this->executeActionWithContext(
-            'reinstated',
-            ReinstateAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_suspended' => $this->manager->isSuspended(),
-                'manager_is_injured' => $this->manager->isInjured(),
-            ]
-        );
+        $this->executeRosterAction('reinstated', 'manager', fn () => resolve(ReinstateAction::class)->handle($this->manager));
     }
 
-    /**
-     * Injure a manager.
-     */
     public function injure(): void
     {
         Gate::authorize('injure', $this->manager);
-
-        $this->executeActionWithContext(
-            'injured',
-            InjureAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_employed' => $this->manager->isEmployed(),
-                'manager_is_suspended' => $this->manager->isSuspended(),
-            ]
-        );
+        $this->executeRosterAction('injured', 'manager', fn () => resolve(InjureAction::class)->handle($this->manager));
     }
 
-    /**
-     * Heal a manager from injury.
-     */
     public function healFromInjury(): void
     {
         Gate::authorize('clearFromInjury', $this->manager);
-
-        $this->executeActionWithContext(
-            'healed',
-            HealAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_current_status' => $this->manager->status,
-                'manager_is_injured' => $this->manager->isInjured(),
-            ]
-        );
+        $this->executeRosterAction('healed', 'manager', fn () => resolve(HealAction::class)->handle($this->manager));
     }
 
-    /**
-     * Restore a deleted manager.
-     */
     public function restore(): void
     {
         Gate::authorize('restore', $this->manager);
-
-        $this->executeActionWithContext(
-            'restored',
-            RestoreAction::class,
-            $this->manager,
-            'manager',
-            fn () => [
-                'manager_is_deleted' => ! is_null($this->manager->deleted_at),
-            ]
-        );
+        $this->executeRosterAction('restored', 'manager', fn () => resolve(RestoreAction::class)->handle($this->manager));
     }
 
     public function render(): View
