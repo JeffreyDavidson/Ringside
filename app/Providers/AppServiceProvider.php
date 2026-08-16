@@ -61,12 +61,12 @@ class AppServiceProvider extends ServiceProvider
             return str_replace(':values', $values, $message);
         });
 
-        Relation::morphMap([
+        Relation::enforceMorphMap([
             'wrestler' => Wrestler::class,
             'manager' => Manager::class,
             'match' => EventMatch::class,
             'title' => Title::class,
-            'tagTeam' => TagTeam::class,
+            'tag_team' => TagTeam::class,
             'referee' => Referee::class,
             'stable' => Stable::class,
             'event' => Event::class,

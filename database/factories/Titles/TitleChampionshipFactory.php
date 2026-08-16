@@ -26,11 +26,11 @@ class TitleChampionshipFactory extends Factory
      */
     public function definition(): array
     {
-        $type = fake()->randomElement(['wrestler', 'tagTeam']);
+        $type = fake()->randomElement(['wrestler', 'tag_team']);
 
         $champion = match ($type) {
             'wrestler' => Wrestler::factory()->create(),
-            'tagTeam' => TagTeam::factory()->create(),
+            'tag_team' => TagTeam::factory()->create(),
             default => throw new InvalidArgumentException("Unknown champion type: {$type}"),
         };
 
@@ -69,7 +69,7 @@ class TitleChampionshipFactory extends Factory
 
         return $this->state(function () use ($tagTeam) {
             return [
-                'champion_type' => 'tagTeam',
+                'champion_type' => 'tag_team',
                 'champion_id' => $tagTeam->id,
             ];
         });

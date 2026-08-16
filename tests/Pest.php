@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase;
 use Illuminate\Support\Carbon;
@@ -28,6 +29,15 @@ require_once __DIR__.'/Helpers/LivewireHelpers.php';
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Browser');
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Integration', 'Unit');
+
+pest()
+    ->beforeEach(function () {
+        Relation::requireMorphMap(false);
+    })
+    ->afterEach(function () {
+        Relation::requireMorphMap();
+    })
+    ->in('Unit/Models/Concerns');
 
 pest()
     ->extend(TestCase::class)

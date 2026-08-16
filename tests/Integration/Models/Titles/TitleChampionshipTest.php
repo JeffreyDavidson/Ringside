@@ -98,7 +98,7 @@ describe('TitleChampionship Model', function () {
             expect($wrestlerChampionship->champion)->toBeInstanceOf(Wrestler::class);
             expect($tagTeamChampionship->champion)->toBeInstanceOf(TagTeam::class);
             expect($wrestlerChampionship->champion_type)->toBe('wrestler');
-            expect($tagTeamChampionship->champion_type)->toBe('tagTeam');
+            expect($tagTeamChampionship->champion_type)->toBe('tag_team');
             expect($wrestlerChampionship->champion()->firstOrFail()->getKey())->toBe($this->wrestler->id);
             expect($tagTeamChampionship->champion()->firstOrFail()->getKey())->toBe($this->tagTeam->id);
         });
@@ -271,7 +271,7 @@ describe('TitleChampionship Model', function () {
             // Filter current championships
             $currentChampionships = TitleChampionship::whereNull('lost_at')->get();
             expect($currentChampionships)->toHaveCount(1);
-            expect($currentChampionships->firstOrFail()->champion_type)->toBe('tagTeam');
+            expect($currentChampionships->firstOrFail()->champion_type)->toBe('tag_team');
 
             // Filter by champion type
             $wrestlerChampionships = TitleChampionship::where('champion_type', 'wrestler')->get();

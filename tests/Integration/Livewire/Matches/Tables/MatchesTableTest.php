@@ -178,7 +178,9 @@ describe('MatchesTable Complex Relationships', function () {
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertSee('Wrestler One')
             ->assertSee('Wrestler Two')
-            ->assertSee('Tag Team');
+            ->assertSee('Tag Team')
+            ->assertSeeHtml(route('wrestlers.show', $wrestler1))
+            ->assertSeeHtml(route('tag-teams.show', $tagTeam));
     });
 
     it('displays championship matches correctly', function () {
