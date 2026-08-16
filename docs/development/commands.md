@@ -37,27 +37,27 @@ This document provides a comprehensive reference for all development and testing
 ## Test Generation
 
 ### Ringside Test Generator
-- `php artisan ringside:make:test --unit --model="ModelName"` - Generate standardized model unit tests
+- `php artisan ringside:make:test --model="ModelName"` - Generate standardized model unit tests
 
 ### Command Examples
 
 ```bash
 # Generate test for Wrestler model (auto-detected in Wrestlers/ directory)
-php artisan ringside:make:test --unit --model="Wrestler"
-# Creates: tests/Unit/Models/WrestlerTest.php
+php artisan ringside:make:test --model="Wrestler"
+# Creates: tests/Unit/Models/Roster/Wrestlers/WrestlerTest.php
 
 # Generate test for User model with directory specification
 php artisan make:model-test User --directory=Users
-# Creates: tests/Unit/Models/UserTest.php
+# Creates: tests/Unit/Models/Users/UserTest.php
 # Resolves: App\Models\Users\User
 
 # Generate test for nested model
-php artisan ringside:make:test --unit --model="TitleChampionship"  
-# Creates: tests/Unit/Models/TitleChampionshipTest.php
+php artisan ringside:make:test --model="TitleChampionship"
+# Creates: tests/Unit/Models/Titles/TitleChampionshipTest.php
 
 # Generate test with full namespace
-php artisan ringside:make:test --unit --model="App\Models\Events\Venue"
-# Creates: tests/Unit/Models/VenueTest.php
+php artisan ringside:make:test --model="App\Models\Events\Venue"
+# Creates: tests/Unit/Models/Events/VenueTest.php
 ```
 
 ### Enhanced Command Integration
@@ -72,14 +72,14 @@ php artisan make:model-test Product
 php artisan make:model-test User --directory=Users
 
 # Option 3: Full Ringside command
-php artisan ringside:make:test --unit --model="Product"
+php artisan ringside:make:test --model="Product"
 
 # Option 4: Full command with directory
-php artisan ringside:make:test --unit --model="User" --directory="Users"
+php artisan ringside:make:test --model="User" --directory="Users"
 
 # Option 5: Interactive mode
 php artisan ringside:make:test
-# Prompts for test type, model selection, and optional directory
+# Prompts for the model and optional directory
 
 # Option 6: Enhanced Laravel integration
 php artisan make:test ProductTest --unit
