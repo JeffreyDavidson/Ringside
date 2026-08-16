@@ -17,8 +17,8 @@ use ReflectionMethod;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
-#[Signature('ringside:make:test {name? : The name of the test (optional)} {--unit : Create a unit test} {--feature : Create a feature test} {--model= : Generate a model test for the specified model} {--directory= : Specify model directory (e.g., Users for Users/User)} {--action= : Generate an action test for the specified action} {--repository= : Generate a repository test for the specified repository}')]
-#[Description('Generate standardized Ringside tests (models, actions, repositories)')]
+#[Signature('ringside:make:test {--model= : Generate a model test for the specified model} {--directory= : Specify model directory (e.g., Users for Users/User)}')]
+#[Description('Generate a standardized Ringside model test')]
 class RingsideMakeTest extends Command
 {
     /**
@@ -28,66 +28,16 @@ class RingsideMakeTest extends Command
     {
         $filesystem = new Filesystem();
 
-        // Determine test type and entity with interactive prompts
         if ($this->option('model')) {
             $directory = $this->option('directory');
 
             return $this->generateModelTest($this->option('model'), $filesystem, $directory);
         }
 
-        if ($this->option('action')) {
-            $this->error('Action test generation not yet implemented.');
-
-            return 1;
-        }
-
-        if ($this->option('repository')) {
-            $this->error('Repository test generation not yet implemented.');
-
-            return 1;
-        }
-
-        // No specific test type provided - show interactive prompts
-        return $this->handleInteractiveMode($filesystem);
-    }
-
-    /**
-     * Handle interactive mode when no specific options are provided.
-     */
-    protected function handleInteractiveMode(Filesystem $filesystem): int
-    {
         $this->info('🚀 Ringside Test Generator');
         $this->line('');
 
-        // Ask for test type
-        $testType = select(
-            label: 'What type of test would you like to generate?',
-            options: [
-                'model' => 'Model test (data layer validation)',
-                'action' => 'Action test (coming soon)',
-                'repository' => 'Repository test (coming soon)',
-            ],
-            default: 'model'
-        );
-
-        if ($testType === 'action') {
-            $this->error('Action test generation not yet implemented.');
-
-            return 1;
-        }
-
-        if ($testType === 'repository') {
-            $this->error('Repository test generation not yet implemented.');
-
-            return 1;
-        }
-
-        // Handle model test type
-        if ($testType === 'model') {
-            return $this->handleInteractiveModelTest($filesystem);
-        }
-
-        return 1;
+        return $this->handleInteractiveModelTest($filesystem);
     }
 
     /**
@@ -174,13 +124,6 @@ class RingsideMakeTest extends Command
      */
     protected function generateModelTest(string $modelName, Filesystem $filesystem, ?string $directory = null): int
     {
-        // Validate unit flag is present
-        if (! $this->option('unit')) {
-            $this->error('Model tests currently only support --unit flag');
-
-            return 1;
-        }
-
         // Resolve model class and namespace
         $modelClass = $this->resolveModelClass($modelName, $directory);
 
@@ -192,7 +135,8 @@ class RingsideMakeTest extends Command
 
         // Generate test file path
         $testClassName = Str::studly($modelName).'Test';
-        $testFilePath = base_path("tests/Unit/Models/{$testClassName}.php");
+        $relativeTestPath = $this->modelTestPath($modelClass, $testClassName);
+        $testFilePath = base_path($relativeTestPath);
 
         // Check if test already exists
         if ($filesystem->exists($testFilePath)) {
@@ -228,9 +172,22 @@ class RingsideMakeTest extends Command
         $this->line('1. Review generated fillable properties array');
         $this->line('2. Verify casts configuration');
         $this->line('3. Update traits list if needed');
-        $this->line("4. Run: php artisan test tests/Unit/Models/{$testClassName}.php");
+        $this->line("4. Run: php artisan test {$relativeTestPath}");
 
         return 0;
+    }
+
+    protected function modelTestPath(string $modelClass, string $testClassName): string
+    {
+        $relativeModelClass = Str::after($modelClass, 'App\\Models\\');
+        $relativeModelDirectory = str_contains($relativeModelClass, '\\')
+            ? Str::beforeLast($relativeModelClass, '\\')
+            : '';
+        $relativeTestDirectory = $relativeModelDirectory === ''
+            ? 'tests/Unit/Models'
+            : 'tests/Unit/Models/'.str_replace('\\', '/', $relativeModelDirectory);
+
+        return "{$relativeTestDirectory}/{$testClassName}.php";
     }
 
     /**

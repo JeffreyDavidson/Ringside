@@ -49,7 +49,6 @@ class EnhancedTestMakeCommand extends TestMakeCommand
                     $this->info('* Generating standardized model test with Ringside...');
 
                     $result = $this->call('ringside:make:test', [
-                        '--unit' => $this->option('unit'),
                         '--model' => $modelName,
                     ]);
 

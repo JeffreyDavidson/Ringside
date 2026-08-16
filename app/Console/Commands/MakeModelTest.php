@@ -23,7 +23,6 @@ class MakeModelTest extends Command
 
         // Delegate to the full Ringside command
         $args = [
-            '--unit' => true,
             '--model' => $modelName,
         ];
 
