@@ -71,9 +71,11 @@ class MatchesTable extends DataTableComponent
                 ->label(fn (EventMatch $row): string => $row->competitors
                     ->competitorsBySidePosition()
                     ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor): string {
-                        $type = str($competitor->getMorphClass())->kebab()->plural();
+                        $routeName = $competitor instanceof Wrestler
+                            ? 'wrestlers.show'
+                            : 'tag-teams.show';
 
-                        return '<a href="'.route($type.'.show', $competitor->id).'">'.$competitor->name.'</a>';
+                        return '<a href="'.route($routeName, $competitor).'">'.$competitor->name.'</a>';
                     })->join(' & '))
                     ->join(' vs '))
                 ->html(),
