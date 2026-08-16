@@ -15,141 +15,143 @@
     {{-- Dynamic Competitor Selection Based on Match Type --}}
     @if ($form->matchType)
         <div class="space-y-4">
-            @if (str_contains($this->matchTypeName, 'singles'))
-                {{-- Singles Match: 2 sides, 1 wrestler each --}}
-                <x-form-modal.modal-input>
-                    <div class="grid grid-cols-2 gap-4">
-                        <x-form.inputs.select
-                            label="Competitor 1"
-                            wire:model="form.competitors.0.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                        <x-form.inputs.select
-                            label="Competitor 2"
-                            wire:model="form.competitors.1.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                    </div>
-                </x-form-modal.modal-input>
-
-            @elseif (str_contains($this->matchTypeName, 'tag') || str_contains($this->matchTypeName, 'team'))
-                {{-- Tag Team Match: 2 sides, wrestlers or tag teams --}}
-                <x-form-modal.modal-input>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium">Team A</label>
+            @switch ($this->competitorSelectionLayout)
+                @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::Singles)
+                    {{-- Singles Match: 2 sides, 1 wrestler each --}}
+                    <x-form-modal.modal-input>
+                        <div class="grid grid-cols-2 gap-4">
                             <x-form.inputs.select
-                                label="Wrestlers"
-                                wire:model="form.competitors.0.wrestlers"
+                                label="Competitor 1"
+                                wire:model="form.competitors.0.wrestlers.0"
                                 :options="$this->getWrestlers"
-                                multiple
                             />
+                            <x-form.inputs.select
+                                label="Competitor 2"
+                                wire:model="form.competitors.1.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                        </div>
+                    </x-form-modal.modal-input>
+                    @break
+                @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::TagTeam)
+                    {{-- Tag Team Match: 2 sides, wrestlers or tag teams --}}
+                    <x-form-modal.modal-input>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Team A</label>
+                                <x-form.inputs.select
+                                    label="Wrestlers"
+                                    wire:model="form.competitors.0.wrestlers"
+                                    :options="$this->getWrestlers"
+                                    multiple
+                                />
+                                <x-form.inputs.select
+                                    label="Tag Teams"
+                                    wire:model="form.competitors.0.tag_teams"
+                                    :options="$this->getTagTeams"
+                                />
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium">Team B</label>
+                                <x-form.inputs.select
+                                    label="Wrestlers"
+                                    wire:model="form.competitors.1.wrestlers"
+                                    :options="$this->getWrestlers"
+                                    multiple
+                                />
+                                <x-form.inputs.select
+                                    label="Tag Teams"
+                                    wire:model="form.competitors.1.tag_teams"
+                                    :options="$this->getTagTeams"
+                                />
+                            </div>
+                        </div>
+                    </x-form-modal.modal-input>
+                    @break
+                @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::TripleThreat)
+                    {{-- Triple Threat: 3 sides, 1 wrestler each --}}
+                    <x-form-modal.modal-input>
+                        <div class="grid grid-cols-3 gap-4">
+                            <x-form.inputs.select
+                                label="Competitor 1"
+                                wire:model="form.competitors.0.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                            <x-form.inputs.select
+                                label="Competitor 2"
+                                wire:model="form.competitors.1.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                            <x-form.inputs.select
+                                label="Competitor 3"
+                                wire:model="form.competitors.2.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                        </div>
+                    </x-form-modal.modal-input>
+                    @break
+                @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::FatalFourWay)
+                    {{-- Fatal Four Way: 4 sides, 1 wrestler each --}}
+                    <x-form-modal.modal-input>
+                        <div class="grid grid-cols-2 gap-4">
+                            <x-form.inputs.select
+                                label="Competitor 1"
+                                wire:model="form.competitors.0.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                            <x-form.inputs.select
+                                label="Competitor 2"
+                                wire:model="form.competitors.1.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                            <x-form.inputs.select
+                                label="Competitor 3"
+                                wire:model="form.competitors.2.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                            <x-form.inputs.select
+                                label="Competitor 4"
+                                wire:model="form.competitors.3.wrestlers.0"
+                                :options="$this->getWrestlers"
+                            />
+                        </div>
+                    </x-form-modal.modal-input>
+                    @break
+                @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::BattleRoyal)
+                    {{-- Battle Royal: Multiple individual wrestlers --}}
+                    <x-form-modal.modal-input>
+                        <x-form.inputs.select
+                            label="Competitors (Select Multiple)"
+                            wire:model="form.competitors.0.wrestlers"
+                            :options="$this->getWrestlers"
+                            multiple
+                        />
+                        <p class="mt-1 text-sm text-gray-600">Select all wrestlers participating in this match</p>
+                    </x-form-modal.modal-input>
+                    @break
+                @default
+                    {{-- Default/Unknown Match Type: Generic competitor selection --}}
+                    <x-form-modal.modal-input>
+                        <x-form.inputs.select
+                            label="Wrestlers"
+                            wire:model="form.competitors.0.wrestlers"
+                            :options="$this->getWrestlers"
+                            multiple
+                        />
+                    </x-form-modal.modal-input>
+
+                    @if ($this->matchTypeAllowsTagTeams)
+                        <x-form-modal.modal-input>
                             <x-form.inputs.select
                                 label="Tag Teams"
                                 wire:model="form.competitors.0.tag_teams"
                                 :options="$this->getTagTeams"
-                            />
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium">Team B</label>
-                            <x-form.inputs.select
-                                label="Wrestlers"
-                                wire:model="form.competitors.1.wrestlers"
-                                :options="$this->getWrestlers"
                                 multiple
                             />
-                            <x-form.inputs.select
-                                label="Tag Teams"
-                                wire:model="form.competitors.1.tag_teams"
-                                :options="$this->getTagTeams"
-                            />
-                        </div>
-                    </div>
-                </x-form-modal.modal-input>
+                        </x-form-modal.modal-input>
+                    @endif
 
-            @elseif (str_contains($this->matchTypeName, 'triple') || str_contains($this->matchTypeName, 'three'))
-                {{-- Triple Threat: 3 sides, 1 wrestler each --}}
-                <x-form-modal.modal-input>
-                    <div class="grid grid-cols-3 gap-4">
-                        <x-form.inputs.select
-                            label="Competitor 1"
-                            wire:model="form.competitors.0.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                        <x-form.inputs.select
-                            label="Competitor 2"
-                            wire:model="form.competitors.1.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                        <x-form.inputs.select
-                            label="Competitor 3"
-                            wire:model="form.competitors.2.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                    </div>
-                </x-form-modal.modal-input>
-
-            @elseif (str_contains($this->matchTypeName, 'fatal') || str_contains($this->matchTypeName, 'four'))
-                {{-- Fatal Four Way: 4 sides, 1 wrestler each --}}
-                <x-form-modal.modal-input>
-                    <div class="grid grid-cols-2 gap-4">
-                        <x-form.inputs.select
-                            label="Competitor 1"
-                            wire:model="form.competitors.0.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                        <x-form.inputs.select
-                            label="Competitor 2"
-                            wire:model="form.competitors.1.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                        <x-form.inputs.select
-                            label="Competitor 3"
-                            wire:model="form.competitors.2.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                        <x-form.inputs.select
-                            label="Competitor 4"
-                            wire:model="form.competitors.3.wrestlers.0"
-                            :options="$this->getWrestlers"
-                        />
-                    </div>
-                </x-form-modal.modal-input>
-
-            @elseif (str_contains($this->matchTypeName, 'battle') || str_contains($this->matchTypeName, 'rumble') || str_contains($this->matchTypeName, 'royal'))
-                {{-- Battle Royal: Multiple individual wrestlers --}}
-                <x-form-modal.modal-input>
-                    <x-form.inputs.select
-                        label="Competitors (Select Multiple)"
-                        wire:model="form.competitors.0.wrestlers"
-                        :options="$this->getWrestlers"
-                        multiple
-                    />
-                    <p class="mt-1 text-sm text-gray-600">Select all wrestlers participating in this match</p>
-                </x-form-modal.modal-input>
-
-            @else
-                {{-- Default/Unknown Match Type: Generic competitor selection --}}
-                <x-form-modal.modal-input>
-                    <x-form.inputs.select
-                        label="Wrestlers"
-                        wire:model="form.competitors.0.wrestlers"
-                        :options="$this->getWrestlers"
-                        multiple
-                    />
-                </x-form-modal.modal-input>
-
-                @if ($this->matchTypeAllowsTagTeams)
-                    <x-form-modal.modal-input>
-                        <x-form.inputs.select
-                            label="Tag Teams"
-                            wire:model="form.competitors.0.tag_teams"
-                            :options="$this->getTagTeams"
-                            multiple
-                        />
-                    </x-form-modal.modal-input>
-                @endif
-            @endif
+            @endswitch
         </div>
     @else
         {{-- No match type selected - show helper text --}}
