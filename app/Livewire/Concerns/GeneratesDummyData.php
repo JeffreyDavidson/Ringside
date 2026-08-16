@@ -63,6 +63,8 @@ trait GeneratesDummyData
      */
     public function fillDummyFields(): void
     {
+        abort_unless(app()->environment(['local', 'testing']), 404);
+
         $fields = $this->getDummyDataFields();
 
         foreach ($fields as $field => $generator) {
