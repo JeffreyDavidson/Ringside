@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Enums\BusinessRuleReason;
+use App\Enums\Roster\RosterEntityType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
@@ -25,24 +27,24 @@ test('it maps roster failures from stable reasons instead of message text', func
     $exception = CannotBeReinstatedException::injured($wrestler, 'wording may change');
 
     expect($exception->reason())->toBe(BusinessRuleReason::Injured)
-        ->and(ErrorMessageMappingService::mapWrestlerException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::Wrestler))
         ->toBe('wrestlers.errors.cannot_reinstate_injured')
-        ->and(ErrorMessageMappingService::mapManagerException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::Manager))
         ->toBe('managers.errors.cannot_reinstate_injured')
-        ->and(ErrorMessageMappingService::mapRefereeException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::Referee))
         ->toBe('referees.errors.cannot_reinstate_injured');
 });
 
 test('it maps common lifecycle reasons for each roster presentation', function () {
     $wrestler = new Wrestler(['name' => 'Test Wrestler']);
 
-    expect(ErrorMessageMappingService::mapWrestlerException(CannotBeEmployedException::employed($wrestler)))
+    expect(ErrorMessageMappingService::map(CannotBeEmployedException::employed($wrestler), RosterEntityType::Wrestler))
         ->toBe('wrestlers.errors.already_employed')
-        ->and(ErrorMessageMappingService::mapManagerException(CannotBeSuspendedException::unemployed($wrestler)))
+        ->and(ErrorMessageMappingService::map(CannotBeSuspendedException::unemployed($wrestler), RosterEntityType::Manager))
         ->toBe('managers.errors.not_employed_suspend')
-        ->and(ErrorMessageMappingService::mapRefereeException(CannotBeInjuredException::unemployed($wrestler)))
+        ->and(ErrorMessageMappingService::map(CannotBeInjuredException::unemployed($wrestler), RosterEntityType::Referee))
         ->toBe('referees.errors.cannot_injure_unemployed')
-        ->and(ErrorMessageMappingService::mapWrestlerException(CannotBeClearedFromInjuryException::notInjured($wrestler)))
+        ->and(ErrorMessageMappingService::map(CannotBeClearedFromInjuryException::notInjured($wrestler), RosterEntityType::Wrestler))
         ->toBe('wrestlers.errors.not_injured');
 });
 
@@ -51,7 +53,7 @@ test('it maps restoration failures from the not-deleted reason', function () {
     $exception = CannotBeRestoredException::notDeleted($wrestler);
 
     expect($exception->reason())->toBe(BusinessRuleReason::NotDeleted)
-        ->and(ErrorMessageMappingService::mapWrestlerException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::Wrestler))
         ->toBe('wrestlers.errors.not_deleted');
 });
 
@@ -60,11 +62,11 @@ test('it maps available roster reinstatement failures to suspension guidance', f
     $exception = CannotBeReinstatedException::available($wrestler);
 
     expect($exception->reason())->toBe(BusinessRuleReason::NotSuspended)
-        ->and(ErrorMessageMappingService::mapWrestlerException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::Wrestler))
         ->toBe('wrestlers.errors.not_suspended')
-        ->and(ErrorMessageMappingService::mapManagerException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::Manager))
         ->toBe('managers.errors.not_suspended')
-        ->and(ErrorMessageMappingService::mapRefereeException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::Referee))
         ->toBe('referees.errors.not_suspended');
 });
 
@@ -73,36 +75,37 @@ test('it maps tag team reinstatement failures from a stable reason', function ()
     $exception = TagTeamCannotBeReinstatedException::notSuspended($tagTeam);
 
     expect($exception->reason())->toBe(BusinessRuleReason::NotSuspended)
-        ->and(ErrorMessageMappingService::mapTagTeamException($exception))
+        ->and(ErrorMessageMappingService::map($exception, RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.not_suspended');
 });
 
 test('it maps tag team lifecycle failures from stable reasons', function () {
     $tagTeam = new TagTeam(['name' => 'Test Team']);
 
-    expect(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeEmployedException::alreadyEmployed($tagTeam)))
+    expect(ErrorMessageMappingService::map(TagTeamCannotBeEmployedException::alreadyEmployed($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.already_employed')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeEmployedException::retired($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeEmployedException::retired($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.cannot_employ_retired')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeReleasedException::notEmployed($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeReleasedException::notEmployed($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.not_employed')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeRetiredException::notEmployed($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeRetiredException::notEmployed($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.cannot_retire_unemployed')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeRetiredException::alreadyRetired($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeRetiredException::alreadyRetired($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.already_retired')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeUnretiredException::notRetired($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeUnretiredException::notRetired($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.not_retired')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeSuspendedException::notEmployed($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeSuspendedException::notEmployed($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.not_employed_suspend')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeSuspendedException::alreadySuspended($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeSuspendedException::alreadySuspended($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.already_suspended')
-        ->and(ErrorMessageMappingService::mapTagTeamException(TagTeamCannotBeRestoredException::notDeleted($tagTeam)))
+        ->and(ErrorMessageMappingService::map(TagTeamCannotBeRestoredException::notDeleted($tagTeam), RosterEntityType::TagTeam))
         ->toBe('tag-teams.errors.not_deleted');
 });
 
-test('it uses a general message for unknown exceptions', function () {
-    $exception = new RuntimeException('Unknown failure.');
+test('it uses a general message for an unmapped business exception', function () {
+    $wrestler = new Wrestler(['name' => 'Test Wrestler']);
+    $exception = CannotBeDeletedException::alreadyDeleted($wrestler);
 
-    expect(ErrorMessageMappingService::mapWrestlerException($exception))
+    expect(ErrorMessageMappingService::map($exception, RosterEntityType::Wrestler))
         ->toBe('wrestlers.errors.general_error');
 });
