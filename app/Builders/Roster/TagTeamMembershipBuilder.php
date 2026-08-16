@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
-use App\Models\TagTeams\TagTeamWrestler;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 

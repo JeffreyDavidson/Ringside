@@ -8,7 +8,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\TagTeamRetirementEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

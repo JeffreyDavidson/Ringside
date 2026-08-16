@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Stables\StableStatus;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Database\Seeders\StablesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 

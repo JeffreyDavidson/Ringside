@@ -5,14 +5,14 @@ declare(strict_types=1);
 use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 
 test('it resolves supported lifecycle owner models', function (LifecycleOwnerType $ownerType, Model $owner) {

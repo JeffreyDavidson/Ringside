@@ -7,9 +7,9 @@ namespace App\Lifecycle;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 final class IndividualSuspensionEligibility
 {

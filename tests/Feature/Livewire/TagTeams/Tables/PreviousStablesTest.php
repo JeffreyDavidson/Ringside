@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Livewire\TagTeams\Tables\PreviousStables;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Users\User;
 
 beforeEach(function () {

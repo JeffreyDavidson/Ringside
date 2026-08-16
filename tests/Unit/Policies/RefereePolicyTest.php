@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\InjureAction;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Policies\ManagerPolicy;
 use App\Policies\RefereePolicy;
 use App\Policies\WrestlerPolicy;

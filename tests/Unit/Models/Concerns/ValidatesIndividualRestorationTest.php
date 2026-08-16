@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
 use App\Lifecycle\IndividualDeletionEligibility;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 describe('individual restoration validation', function () {
     test('unsaved individuals cannot be restored', function (string $individualType) {

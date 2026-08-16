@@ -6,10 +6,10 @@ namespace Tests\Unit\Database\Factories;
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
 use Illuminate\Support\Carbon;
 

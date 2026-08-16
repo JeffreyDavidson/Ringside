@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use Database\Seeders\RefereesTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 

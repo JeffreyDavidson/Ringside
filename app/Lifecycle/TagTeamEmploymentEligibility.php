@@ -6,7 +6,7 @@ namespace App\Lifecycle;
 
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 final class TagTeamEmploymentEligibility
 {

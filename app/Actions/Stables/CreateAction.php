@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Facades\DB;
 

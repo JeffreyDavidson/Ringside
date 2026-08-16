@@ -7,14 +7,14 @@ namespace App\Providers;
 use App\Console\Commands\EnhancedTestMakeCommand;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use App\Models\Managers\Manager;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -38,10 +38,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->registerLegacyRosterModelAliases();
+
         // Replace Laravel's default make:test command with our enhanced version
         $this->app->singleton('command.test.make', function (Application $app) {
             return new EnhancedTestMakeCommand($app['files']);
         });
+    }
+
+    private function registerLegacyRosterModelAliases(): void
+    {
+        $aliases = [
+            'App\\Models\\Managers\\Manager' => Manager::class,
+            'App\\Models\\Referees\\Referee' => Referee::class,
+            'App\\Models\\Stables\\Stable' => Stable::class,
+            'App\\Models\\TagTeams\\TagTeam' => TagTeam::class,
+            'App\\Models\\Wrestlers\\Wrestler' => Wrestler::class,
+        ];
+
+        foreach ($aliases as $legacyClass => $rosterClass) {
+            if (! class_exists($legacyClass, false)) {
+                class_alias($rosterClass, $legacyClass);
+            }
+        }
     }
 
     /**

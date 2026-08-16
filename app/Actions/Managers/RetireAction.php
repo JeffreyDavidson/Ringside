@@ -11,7 +11,7 @@ use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

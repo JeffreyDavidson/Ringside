@@ -8,7 +8,7 @@ use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 
 test('lifecycle period models use the shared builder', function (string $modelClass) {

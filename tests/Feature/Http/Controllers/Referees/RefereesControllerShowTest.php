@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Referees\RefereesController;
 use App\Livewire\Referees\Tables\PreviousMatches;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

@@ -8,7 +8,7 @@ use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\IndividualEmploymentEligibility;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
 
 /**

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Referees\Modals\FormModal;
 use App\Livewire\Referees\RefereeForm;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 /**
  * Integration tests for Referees FormModal component functionality.

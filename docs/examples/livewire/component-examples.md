@@ -127,7 +127,7 @@ Example with image uploads and complex validation:
 namespace App\Livewire\Wrestlers\Forms;
 
 use App\Livewire\Forms\BaseForm;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Traits\ManagesEmployment;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\WithFileUploads;
@@ -312,7 +312,7 @@ namespace App\Livewire\Wrestlers\Modals;
 
 use App\Livewire\Modals\BaseFormModal;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 class FormModal extends BaseFormModal
 {
@@ -521,7 +521,7 @@ Table with image display and complex status management:
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Tables\BaseTable;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
 class Main extends BaseTable
@@ -780,7 +780,7 @@ Actions with employment status management:
 
 namespace App\Livewire\Wrestlers\Components;
 
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Component;
 
 class Actions extends Component

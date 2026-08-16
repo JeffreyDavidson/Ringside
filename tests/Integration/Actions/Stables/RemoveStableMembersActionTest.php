@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Actions\Stables\RemoveStableMembersAction;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
-use App\Models\Stables\Stable;
-use App\Models\Stables\StableWrestler;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
 test('it rejects a future membership removal date', function () {

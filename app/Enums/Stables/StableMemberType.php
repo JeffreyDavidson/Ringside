@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Enums\Stables;
 
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 

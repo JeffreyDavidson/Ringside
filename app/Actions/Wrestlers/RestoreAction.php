@@ -6,7 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\IndividualDeletionEligibility;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

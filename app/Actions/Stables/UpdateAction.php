@@ -6,7 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Facades\DB;
 

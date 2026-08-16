@@ -6,7 +6,7 @@ namespace App\Livewire\Wrestlers\Forms;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesEmployment;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Model;

@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\IndividualRetirementEligibility;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 describe('individual retirement eligibility', function () {
     test('keeps the retirement predicate aligned with its guard', function (string $factoryState, bool $canBeRetired) {

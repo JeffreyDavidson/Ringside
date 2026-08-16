@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\ManagerBuilder;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 
 /**
  * Unit tests for ManagerQueryBuilder query scopes and methods.

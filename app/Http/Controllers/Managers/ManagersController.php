@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Managers;
 
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Contracts\View\View;
 
 class ManagersController

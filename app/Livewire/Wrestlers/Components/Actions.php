@@ -14,7 +14,7 @@ use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Livewire\Concerns\ExecutesRosterActions;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;

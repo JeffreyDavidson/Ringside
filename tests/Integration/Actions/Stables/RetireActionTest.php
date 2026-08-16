@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Actions\Stables\RetireAction;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Lifecycle\StableRetirementEligibility;
-use App\Models\Stables\Stable;
-use App\Models\Stables\StableTagTeam;
-use App\Models\Stables\StableWrestler;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableTagTeam;
+use App\Models\Roster\Stables\StableWrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 

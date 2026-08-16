@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

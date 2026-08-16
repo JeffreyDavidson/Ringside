@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\ReleaseAction;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 

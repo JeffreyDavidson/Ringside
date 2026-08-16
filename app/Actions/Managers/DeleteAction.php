@@ -7,7 +7,7 @@ namespace App\Actions\Managers;
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\IndividualDeletionEligibility;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

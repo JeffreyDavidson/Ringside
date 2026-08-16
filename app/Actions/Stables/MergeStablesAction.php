@@ -7,7 +7,7 @@ namespace App\Actions\Stables;
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Data\Stables\StableMembershipData;
 use App\Lifecycle\StableRestructuringEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

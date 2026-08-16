@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 
 test('it starts an activity period for an inactive stable', function () {

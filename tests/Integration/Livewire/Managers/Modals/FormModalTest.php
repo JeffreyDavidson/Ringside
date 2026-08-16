@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Managers\Modals\FormModal;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 
 /**
  * Integration tests for Managers FormModal component functionality.

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Data\Stables;
 
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 
 /**

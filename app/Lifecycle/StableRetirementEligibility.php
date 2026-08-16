@@ -7,7 +7,7 @@ namespace App\Lifecycle;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 
 final class StableRetirementEligibility

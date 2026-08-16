@@ -8,7 +8,7 @@ use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 
 final class StableActivityEligibility
 {

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\TagTeamBuilder;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 /**
  * Unit tests for TagTeamQueryBuilder query scopes and methods.

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Referees\Tables\Main;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Models\Users\User;
 use Livewire\Livewire;
 

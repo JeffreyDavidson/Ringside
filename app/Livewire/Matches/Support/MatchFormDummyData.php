@@ -6,9 +6,9 @@ namespace App\Livewire\Matches\Support;
 
 use App\Enums\MatchType;
 use App\Lifecycle\RosterBookingEligibility;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 
 final class MatchFormDummyData
 {

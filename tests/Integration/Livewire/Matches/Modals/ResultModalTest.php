@@ -8,8 +8,8 @@ use App\Livewire\Matches\Modals\ResultModal;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 
 use function Pest\Livewire\livewire;
 

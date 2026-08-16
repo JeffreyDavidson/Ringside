@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Lifecycle\TagTeamDeletionEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 test('deletion predicate stays aligned with its guard', function (string $factoryState, bool $canDelete) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();

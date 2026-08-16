@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Data\Wrestlers\WrestlerData;
-use App\Models\Managers\Manager;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
 use Illuminate\Database\Eloquent\Collection;
 

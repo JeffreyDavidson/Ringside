@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\EndCurrentRelationshipsAction;
-use App\Models\Managers\Manager;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 
 test('it ends the wrestlers current professional relationships', function () {
     $wrestler = Wrestler::factory()->create();

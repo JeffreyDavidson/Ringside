@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Database\Factories\Lifecycle;
 
 use App\Models\Lifecycle\ActivityPeriod;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 use Database\Factories\Concerns\HasLifecyclePeriodStates;
 use Illuminate\Database\Eloquent\Factories\Factory;

@@ -7,7 +7,7 @@ namespace App\Livewire\Managers\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Managers\Forms\CreateEditForm;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\View\View;
 
 /**

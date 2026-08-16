@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Data\Referees\RefereeData;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Lifecycle\DeletionPeriodCloser;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\DB;
 
 use function Spatie\PestPluginTestTime\testTime;

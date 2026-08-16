@@ -6,9 +6,9 @@ namespace App\Builders\Matches;
 
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;

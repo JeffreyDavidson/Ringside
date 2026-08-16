@@ -9,9 +9,9 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 
 test('it rejects a match without competitors', function () {
     $event = Event::factory()->create();

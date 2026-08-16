@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Data\TagTeams\TagTeamMembershipData;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
 test('calculates the combined wrestler weight in pounds', function () {

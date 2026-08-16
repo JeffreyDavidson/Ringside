@@ -6,7 +6,7 @@ namespace App\Livewire\Referees\Forms;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesEmployment;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;

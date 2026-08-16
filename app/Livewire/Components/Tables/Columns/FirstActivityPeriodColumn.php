@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Components\Tables\Columns;
 
 use App\Livewire\Table\Column;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 
 class FirstActivityPeriodColumn extends Column

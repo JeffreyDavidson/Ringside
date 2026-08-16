@@ -7,17 +7,17 @@ use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Lifecycle\ActivityPeriodFactory;
 use Database\Factories\Lifecycle\EmploymentFactory;
 use Database\Factories\Lifecycle\InjuryFactory;
 use Database\Factories\Lifecycle\RetirementFactory;
 use Database\Factories\Lifecycle\SuspensionFactory;
-use Database\Factories\Managers\ManagerFactory;
-use Database\Factories\Referees\RefereeFactory;
-use Database\Factories\Wrestlers\WrestlerFactory;
+use Database\Factories\Roster\Managers\ManagerFactory;
+use Database\Factories\Roster\Referees\RefereeFactory;
+use Database\Factories\Roster\Wrestlers\WrestlerFactory;
 
 test('lifecycle period factories create valid date ranges', function (
     ActivityPeriodFactory|EmploymentFactory|InjuryFactory|RetirementFactory|SuspensionFactory $factory,

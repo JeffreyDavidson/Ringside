@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Livewire\Wrestlers\Modals\FormModal;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();

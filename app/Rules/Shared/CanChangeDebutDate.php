@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Shared;
 
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;

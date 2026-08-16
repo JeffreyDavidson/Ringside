@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\ReinstateAction;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;
 

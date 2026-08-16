@@ -6,8 +6,8 @@ namespace App\Models\Titles;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;

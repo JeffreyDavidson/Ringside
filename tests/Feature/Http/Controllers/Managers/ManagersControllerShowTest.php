@@ -6,7 +6,7 @@ use App\Http\Controllers\Managers\ManagersController;
 use App\Livewire\Managers\Tables\PreviousStables;
 use App\Livewire\Managers\Tables\PreviousTagTeams;
 use App\Livewire\Managers\Tables\PreviousWrestlers;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

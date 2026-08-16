@@ -6,7 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\IndividualDeletionEligibility;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction

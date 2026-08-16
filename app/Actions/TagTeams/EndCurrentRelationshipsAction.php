@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Lifecycle\ChampionshipReignManager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamManager;
-use App\Models\TagTeams\TagTeamWrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamManager;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Illuminate\Support\Carbon;
 
 class EndCurrentRelationshipsAction

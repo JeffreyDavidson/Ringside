@@ -7,10 +7,10 @@ use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
 use App\Lifecycle\RosterBookingEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**

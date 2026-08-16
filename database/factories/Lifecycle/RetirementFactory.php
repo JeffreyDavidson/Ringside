@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Database\Factories\Lifecycle;
 
 use App\Models\Lifecycle\Retirement;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 use Database\Factories\Concerns\HasLifecyclePeriodStates;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;
 use App\Lifecycle\TagTeamEmploymentEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 test('employment predicate stays aligned with its guard', function (string $factoryState, bool $canEmploy) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();

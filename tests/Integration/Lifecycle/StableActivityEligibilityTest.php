@@ -7,7 +7,7 @@ use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Lifecycle\StableActivityEligibility;
 use App\Models\Lifecycle\ActivityPeriod;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 
 test('establishment predicate stays aligned with its guard', function (string $factoryState, bool $canEstablish) {
     $stableFactory = Stable::factory();

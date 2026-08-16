@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamWrestler;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('tag team memberships can be filtered by tag team and wrestler', function () {
     $tagTeam = TagTeam::factory()->create();

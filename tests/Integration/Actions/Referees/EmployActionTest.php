@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Referees\EmployAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 

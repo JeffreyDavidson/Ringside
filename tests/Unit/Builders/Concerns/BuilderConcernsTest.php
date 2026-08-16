@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('wrestlers may be filtered by employment status', function (): void {
     $employed = Wrestler::factory()->employed()->create();

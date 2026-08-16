@@ -8,7 +8,7 @@ use App\Livewire\TagTeams\Tables\PreviousMatches;
 use App\Livewire\TagTeams\Tables\PreviousStables;
 use App\Livewire\TagTeams\Tables\PreviousTitleChampionships;
 use App\Livewire\TagTeams\Tables\PreviousWrestlers;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;

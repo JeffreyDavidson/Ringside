@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Data\Managers\ManagerData;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 

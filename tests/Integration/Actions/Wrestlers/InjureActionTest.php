@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\InjureAction;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 

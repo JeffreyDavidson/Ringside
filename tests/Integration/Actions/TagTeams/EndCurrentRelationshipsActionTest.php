@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\EndCurrentRelationshipsAction;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 
 test('it ends only the tag teams current relationships', function () {
     $tagTeam = TagTeam::factory()->employed()->create();

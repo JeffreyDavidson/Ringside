@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\DB;
 
 /**

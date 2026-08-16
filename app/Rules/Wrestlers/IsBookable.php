@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Wrestlers;
 
 use App\Lifecycle\RosterBookingEligibility;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

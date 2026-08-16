@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\ReinstateAction;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
 

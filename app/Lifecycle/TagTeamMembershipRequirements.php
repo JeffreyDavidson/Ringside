@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
 final class TagTeamMembershipRequirements

@@ -5,10 +5,10 @@ declare(strict_types=1);
 use App\Enums\Stables\StableStatus;
 use App\Livewire\Stables\Tables\Main;
 use App\Livewire\Stables\Tables\StablesTable;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;

@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\RestoreAction;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamManager;
-use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerManager;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamManager;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 
 use function Spatie\PestPluginTestTime\testTime;
 

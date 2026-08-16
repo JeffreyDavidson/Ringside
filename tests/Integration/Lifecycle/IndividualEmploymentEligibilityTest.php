@@ -5,9 +5,9 @@ declare(strict_types=1);
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
 use App\Lifecycle\IndividualEmploymentEligibility;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 describe('individual employment eligibility', function () {
     test('keeps the employment predicate aligned with its guard', function (string $factoryState, bool $canBeEmployed) {

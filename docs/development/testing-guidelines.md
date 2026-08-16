@@ -79,9 +79,9 @@ app/Rules/Events/ → tests/Unit/Rules/Events/
 
 ### Integration Test Structure  
 ```
-app/Models/Wrestlers/WrestlerManager.php → tests/Integration/Models/Wrestlers/WrestlerManagerTest.php
-app/Models/TagTeams/TagTeamWrestler.php → tests/Integration/Models/TagTeams/TagTeamWrestlerTest.php
-app/Models/Stables/StableMember.php → tests/Integration/Models/Stables/StableMemberTest.php
+app/Models/Roster/Wrestlers/WrestlerManager.php → tests/Integration/Models/Roster/Wrestlers/WrestlerManagerTest.php
+app/Models/Roster/TagTeams/TagTeamWrestler.php → tests/Integration/Models/Roster/TagTeams/TagTeamWrestlerTest.php
+app/Models/Roster/Stables/StableWrestler.php → tests/Integration/Models/Roster/Stables/StableWrestlerTest.php
 app/Models/Titles/TitleChampionship.php → tests/Integration/Models/Titles/TitleChampionshipTest.php
 ```
 

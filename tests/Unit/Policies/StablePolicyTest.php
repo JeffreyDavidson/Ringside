@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Users\User;
 use App\Policies\StablePolicy;
 use Illuminate\Support\Facades\Gate;

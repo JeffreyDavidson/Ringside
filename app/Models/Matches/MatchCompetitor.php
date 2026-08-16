@@ -6,8 +6,8 @@ namespace App\Models\Matches;
 
 use App\Builders\Matches\MatchCompetitorBuilder;
 use App\Collections\MatchCompetitorsCollection;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchCompetitorFactory;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;

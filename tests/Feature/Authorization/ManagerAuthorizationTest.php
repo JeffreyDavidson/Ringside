@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Managers\Tables\Main;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Models\Users\User;
 use Livewire\Livewire;
 

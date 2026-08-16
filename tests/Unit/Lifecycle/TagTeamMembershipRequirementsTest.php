@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Lifecycle\TagTeamMembershipRequirements;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
 test('a tag team requires at least two current wrestlers', function (int $wrestlerCount, bool $satisfiesRequirement): void {

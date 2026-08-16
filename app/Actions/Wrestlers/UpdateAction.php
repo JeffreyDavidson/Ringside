@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Data\Wrestlers\WrestlerData;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 

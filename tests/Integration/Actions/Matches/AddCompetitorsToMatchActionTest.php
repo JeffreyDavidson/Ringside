@@ -7,8 +7,8 @@ use App\Actions\Matches\AddTagTeamsToMatchAction;
 use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
 
 test('it adds wrestler competitors to a match', function () {

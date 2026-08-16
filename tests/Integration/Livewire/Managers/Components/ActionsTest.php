@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
 use App\Livewire\Managers\Components\Actions;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Models\Users\User;
 use JMac\Testing\Double;
 use Livewire\Livewire;

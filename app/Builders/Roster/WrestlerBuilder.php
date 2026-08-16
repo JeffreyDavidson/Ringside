@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 /**
  * @template TModel of Wrestler

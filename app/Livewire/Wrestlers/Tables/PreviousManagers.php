@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
-use App\Models\Wrestlers\WrestlerManager;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

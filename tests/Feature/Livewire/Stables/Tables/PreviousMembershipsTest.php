@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use App\Livewire\Stables\Tables\PreviousTagTeams;
 use App\Livewire\Stables\Tables\PreviousWrestlers;
-use App\Models\Stables\Stable;
-use App\Models\Stables\StableTagTeam;
-use App\Models\Stables\StableWrestler;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableTagTeam;
+use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;

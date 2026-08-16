@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
 use App\Lifecycle\TagTeamSuspensionEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 test('suspension predicate stays aligned with its guard', function (string $factoryState, bool $canSuspend) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();

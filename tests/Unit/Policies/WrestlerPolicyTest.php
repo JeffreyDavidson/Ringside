@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use App\Policies\WrestlerPolicy;
 use Illuminate\Support\Facades\Gate;
 

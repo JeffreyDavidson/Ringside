@@ -7,9 +7,9 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\RetireAction as RetireManagerAction;
 use App\Actions\Wrestlers\RetireAction as RetireWrestlerAction;
 use App\Lifecycle\IndividualRetirementEligibility;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 class RetireCurrentMembersAction

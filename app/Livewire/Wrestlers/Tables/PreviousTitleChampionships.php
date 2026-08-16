@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

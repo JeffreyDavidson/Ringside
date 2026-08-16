@@ -7,7 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Lifecycle\TagTeamSuspensionEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

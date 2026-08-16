@@ -22,7 +22,7 @@ Ringside follows strict coding standards to ensure consistent, maintainable, and
 
 declare(strict_types=1);
 
-namespace App\Models\Wrestlers;
+namespace App\Models\Roster\Wrestlers;
 
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
@@ -53,12 +53,12 @@ class Wrestler extends Model
 
 ```php
 // ✅ CORRECT - Import classes
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\CannotBeEmployedException;
 
 // ❌ INCORRECT - Using FQCN
-$wrestler = new \App\Models\Wrestlers\Wrestler();
+$wrestler = new \App\Models\Roster\Wrestlers\Wrestler();
 ```
 
 ## Type Declarations

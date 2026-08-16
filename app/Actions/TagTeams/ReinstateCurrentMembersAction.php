@@ -6,9 +6,9 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\ReinstateAction as ReinstateManagerAction;
 use App\Actions\Wrestlers\ReinstateAction as ReinstateWrestlerAction;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 class ReinstateCurrentMembersAction

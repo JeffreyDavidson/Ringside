@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\InjureAction;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Policies\ManagerPolicy;
 use App\Policies\WrestlerPolicy;
 use Illuminate\Support\Facades\Gate;

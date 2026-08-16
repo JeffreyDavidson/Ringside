@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Referees\UnretireAction;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Models\Lifecycle\Employment;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 

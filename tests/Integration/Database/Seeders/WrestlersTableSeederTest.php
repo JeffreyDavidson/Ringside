@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\ValueObjects\Weight;
 use Database\Seeders\WrestlersTableSeeder;
 use Illuminate\Support\Facades\Artisan;

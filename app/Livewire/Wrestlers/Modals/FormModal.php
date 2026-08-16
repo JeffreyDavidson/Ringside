@@ -7,7 +7,7 @@ namespace App\Livewire\Wrestlers\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 

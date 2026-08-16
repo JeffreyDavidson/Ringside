@@ -14,7 +14,7 @@ use App\Actions\Managers\RetireAction;
 use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
 use App\Livewire\Concerns\ExecutesRosterActions;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;

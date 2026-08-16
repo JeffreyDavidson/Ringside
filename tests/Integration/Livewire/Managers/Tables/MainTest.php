@@ -8,10 +8,10 @@ use App\Livewire\Managers\Tables\Main;
 use App\Livewire\Managers\Tables\ManagersTable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
-use App\Models\Managers\Manager;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;

@@ -6,7 +6,7 @@ namespace App\Exceptions\Roster\TagTeams;
 
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 final class CannotBeSuspendedException extends BaseBusinessException
 {

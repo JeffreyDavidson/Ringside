@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Shared\ActivationStatus;
 use App\Enums\Stables\StableStatus;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;

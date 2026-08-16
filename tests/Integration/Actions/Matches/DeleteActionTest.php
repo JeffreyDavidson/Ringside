@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Matches\DeleteAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 test('it soft deletes a match while preserving its historical records', function () {
     $eventMatch = EventMatch::factory()->complete()->withReferees()->create();

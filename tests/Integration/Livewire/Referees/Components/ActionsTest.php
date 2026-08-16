@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\EmployAction;
 use App\Livewire\Referees\Components\Actions;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Models\Users\User;
 use JMac\Testing\Double;
 use Livewire\Livewire;

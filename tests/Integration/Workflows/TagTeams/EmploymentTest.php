@@ -8,8 +8,8 @@ use App\Data\TagTeams\TagTeamMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Lifecycle\TagTeamEmploymentEligibility;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\TagTeamMembershipService;
 use Illuminate\Support\Carbon;
 

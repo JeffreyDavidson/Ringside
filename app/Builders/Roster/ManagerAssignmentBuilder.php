@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
-use App\Models\TagTeams\TagTeamManager;
-use App\Models\Wrestlers\WrestlerManager;
+use App\Models\Roster\TagTeams\TagTeamManager;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
