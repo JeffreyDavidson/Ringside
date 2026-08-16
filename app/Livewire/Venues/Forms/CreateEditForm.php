@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Venues\Forms;
 
+use App\Data\Events\VenueData;
 use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
@@ -134,6 +135,22 @@ class CreateEditForm extends BaseForm
                 zipcode: (string) $this->zipcode,
             ),
         ];
+    }
+
+    public function toData(): VenueData
+    {
+        return new VenueData(
+            name: $this->name,
+            street_address: $this->street_address,
+            city: $this->city,
+            state: $this->state,
+            zipcode: (string) $this->zipcode,
+        );
+    }
+
+    public function venue(): Venue
+    {
+        return Venue::query()->findOrFail($this->modelId);
     }
 
     /**
