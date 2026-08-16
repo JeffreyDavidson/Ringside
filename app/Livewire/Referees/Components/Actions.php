@@ -13,6 +13,7 @@ use App\Actions\Referees\RestoreAction;
 use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
+use App\Enums\Roster\RosterEntityType;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Contracts\View\View;
@@ -33,55 +34,55 @@ class Actions extends Component
     public function employ(): void
     {
         Gate::authorize('employ', $this->referee);
-        $this->executeRosterAction('employed', 'referee', fn () => resolve(EmployAction::class)->handle($this->referee));
+        $this->executeRosterAction('employed', RosterEntityType::Referee, fn () => resolve(EmployAction::class)->handle($this->referee));
     }
 
     public function release(): void
     {
         Gate::authorize('release', $this->referee);
-        $this->executeRosterAction('released', 'referee', fn () => resolve(ReleaseAction::class)->handle($this->referee));
+        $this->executeRosterAction('released', RosterEntityType::Referee, fn () => resolve(ReleaseAction::class)->handle($this->referee));
     }
 
     public function retire(): void
     {
         Gate::authorize('retire', $this->referee);
-        $this->executeRosterAction('retired', 'referee', fn () => resolve(RetireAction::class)->handle($this->referee));
+        $this->executeRosterAction('retired', RosterEntityType::Referee, fn () => resolve(RetireAction::class)->handle($this->referee));
     }
 
     public function unretire(): void
     {
         Gate::authorize('unretire', $this->referee);
-        $this->executeRosterAction('unretired', 'referee', fn () => resolve(UnretireAction::class)->handle($this->referee));
+        $this->executeRosterAction('unretired', RosterEntityType::Referee, fn () => resolve(UnretireAction::class)->handle($this->referee));
     }
 
     public function suspend(): void
     {
         Gate::authorize('suspend', $this->referee);
-        $this->executeRosterAction('suspended', 'referee', fn () => resolve(SuspendAction::class)->handle($this->referee));
+        $this->executeRosterAction('suspended', RosterEntityType::Referee, fn () => resolve(SuspendAction::class)->handle($this->referee));
     }
 
     public function reinstate(): void
     {
         Gate::authorize('reinstate', $this->referee);
-        $this->executeRosterAction('reinstated', 'referee', fn () => resolve(ReinstateAction::class)->handle($this->referee));
+        $this->executeRosterAction('reinstated', RosterEntityType::Referee, fn () => resolve(ReinstateAction::class)->handle($this->referee));
     }
 
     public function injure(): void
     {
         Gate::authorize('injure', $this->referee);
-        $this->executeRosterAction('injured', 'referee', fn () => resolve(InjureAction::class)->handle($this->referee));
+        $this->executeRosterAction('injured', RosterEntityType::Referee, fn () => resolve(InjureAction::class)->handle($this->referee));
     }
 
     public function healFromInjury(): void
     {
         Gate::authorize('clearFromInjury', $this->referee);
-        $this->executeRosterAction('healed', 'referee', fn () => resolve(HealAction::class)->handle($this->referee));
+        $this->executeRosterAction('healed', RosterEntityType::Referee, fn () => resolve(HealAction::class)->handle($this->referee));
     }
 
     public function restore(): void
     {
         Gate::authorize('restore', $this->referee);
-        $this->executeRosterAction('restored', 'referee', fn () => resolve(RestoreAction::class)->handle($this->referee));
+        $this->executeRosterAction('restored', RosterEntityType::Referee, fn () => resolve(RestoreAction::class)->handle($this->referee));
     }
 
     public function render(): View
