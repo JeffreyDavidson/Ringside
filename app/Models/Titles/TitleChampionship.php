@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  * @property string $champion_type
  * @property int|null $won_match_id
  * @property int|null $lost_match_id
+ * @property int|null $previous_championship_id
  * @property Carbon $won_at
  * @property Carbon|null $lost_at
  * @property Carbon|null $deleted_at
@@ -34,6 +35,7 @@ use Illuminate\Support\Carbon;
  * @property-read EventMatch|null $wonEventMatch
  * @property-read EventMatch|null $lostEventMatch
  * @property-read Title|null $title
+ * @property-read TitleChampionship|null $previousChampionship
  * @property-read Wrestler|TagTeam $champion
  *
  * @property Carbon|null $created_at
@@ -117,5 +119,11 @@ class TitleChampionship extends Model
     public function lostEventMatch(): BelongsTo
     {
         return $this->belongsTo(EventMatch::class, 'lost_match_id');
+    }
+
+    /** @return BelongsTo<TitleChampionship, $this> */
+    public function previousChampionship(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'previous_championship_id');
     }
 }
