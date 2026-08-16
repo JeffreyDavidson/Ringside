@@ -7,12 +7,14 @@ namespace App\Livewire\Titles\Tables;
 use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\DeleteAction;
 use App\Actions\Titles\PullAction;
+use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Builders\Titles\TitleBuilder;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Exceptions\Titles\CannotBePulledException;
+use App\Exceptions\Titles\CannotBeReinstatedException;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
@@ -21,7 +23,6 @@ use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
@@ -300,21 +301,32 @@ class Main extends BaseTable
         return back();
     }
 
+    public function reinstate(Title $title): RedirectResponse
+    {
+        Gate::authorize('reinstate', $title);
+
+        try {
+            resolve(ReinstateAction::class)->handle($title);
+        } catch (CannotBeReinstatedException $exception) {
+            return redirect()->back()->with('error', $exception->getMessage());
+        }
+
+        return back();
+    }
+
     public function handleTitleAction(string $action, int $titleId): void
     {
-        $title = Title::findOrFail($titleId);
-
-        // Delegate to the Actions component
-        $actionsComponent = new Actions();
-        $actionsComponent->title = $title;
+        $title = $action === 'restore'
+            ? Title::onlyTrashed()->findOrFail($titleId)
+            : Title::findOrFail($titleId);
 
         match ($action) {
-            'debut' => $actionsComponent->debut(),
-            'pull' => $actionsComponent->deactivate(),
-            'reinstate' => $actionsComponent->reinstate(),
-            'retire' => $actionsComponent->retire(),
-            'unretire' => $actionsComponent->unretire(),
-            'restore' => $actionsComponent->restore(),
+            'debut' => $this->debut($title),
+            'pull' => $this->putOnHold($title),
+            'reinstate' => $this->reinstate($title),
+            'retire' => $this->retire($title),
+            'unretire' => $this->unretire($title),
+            'restore' => $this->restore($titleId),
             default => null,
         };
     }

@@ -27,7 +27,6 @@ use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Managers\Components\Actions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -269,22 +268,20 @@ class Main extends BaseTable
 
     public function handleManagerAction(string $action, int $managerId): void
     {
-        $manager = Manager::findOrFail($managerId);
-
-        // Delegate to the Actions component
-        $actionsComponent = new Actions();
-        $actionsComponent->manager = $manager;
+        $manager = $action === 'restore'
+            ? Manager::onlyTrashed()->findOrFail($managerId)
+            : Manager::findOrFail($managerId);
 
         match ($action) {
-            'employ' => $actionsComponent->employ(),
-            'release' => $actionsComponent->release(),
-            'retire' => $actionsComponent->retire(),
-            'unretire' => $actionsComponent->unretire(),
-            'suspend' => $actionsComponent->suspend(),
-            'reinstate' => $actionsComponent->reinstate(),
-            'injure' => $actionsComponent->injure(),
-            'heal' => $actionsComponent->healFromInjury(),
-            'restore' => $actionsComponent->restore(),
+            'employ' => $this->employ($manager),
+            'release' => $this->release($manager),
+            'retire' => $this->retire($manager),
+            'unretire' => $this->unretire($manager),
+            'suspend' => $this->suspend($manager),
+            'reinstate' => $this->reinstate($manager),
+            'injure' => $this->injure($manager),
+            'heal' => $this->clearFromInjury($manager),
+            'restore' => $this->restore($managerId),
             default => null,
         };
     }
