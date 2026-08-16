@@ -5,22 +5,33 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Actions\Wrestlers\DeleteAction;
+use App\Actions\Wrestlers\EmployAction;
+use App\Actions\Wrestlers\HealAction;
+use App\Actions\Wrestlers\InjureAction;
+use App\Actions\Wrestlers\ReinstateAction;
+use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RestoreAction;
+use App\Actions\Wrestlers\RetireAction;
+use App\Actions\Wrestlers\SuspendAction;
+use App\Actions\Wrestlers\UnretireAction;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Wrestler> */
 class Main extends BaseTable
 {
+    use ExecutesRosterActions;
+
     protected bool $showActionColumn = true;
 
     protected string $databaseTableName = 'wrestlers';
@@ -131,23 +142,29 @@ class Main extends BaseTable
 
     public function handleWrestlerAction(string $action, int $wrestlerId): void
     {
-        $wrestler = Wrestler::findOrFail($wrestlerId);
-
-        // Delegate to the Actions component
-        $actionsComponent = new Actions();
-        $actionsComponent->wrestler = $wrestler;
+        $wrestler = $action === 'restore'
+            ? Wrestler::onlyTrashed()->findOrFail($wrestlerId)
+            : Wrestler::findOrFail($wrestlerId);
 
         match ($action) {
-            'employ' => $actionsComponent->employ(),
-            'release' => $actionsComponent->release(),
-            'retire' => $actionsComponent->retire(),
-            'unretire' => $actionsComponent->unretire(),
-            'suspend' => $actionsComponent->suspend(),
-            'reinstate' => $actionsComponent->reinstate(),
-            'injure' => $actionsComponent->injure(),
-            'heal' => $actionsComponent->healFromInjury(),
-            'restore' => $actionsComponent->restore(),
+            'employ' => $this->executeWrestlerAction('employ', 'employed', $wrestler, fn () => resolve(EmployAction::class)->handle($wrestler)),
+            'release' => $this->executeWrestlerAction('release', 'released', $wrestler, fn () => resolve(ReleaseAction::class)->handle($wrestler)),
+            'retire' => $this->executeWrestlerAction('retire', 'retired', $wrestler, fn () => resolve(RetireAction::class)->handle($wrestler)),
+            'unretire' => $this->executeWrestlerAction('unretire', 'unretired', $wrestler, fn () => resolve(UnretireAction::class)->handle($wrestler)),
+            'suspend' => $this->executeWrestlerAction('suspend', 'suspended', $wrestler, fn () => resolve(SuspendAction::class)->handle($wrestler)),
+            'reinstate' => $this->executeWrestlerAction('reinstate', 'reinstated', $wrestler, fn () => resolve(ReinstateAction::class)->handle($wrestler)),
+            'injure' => $this->executeWrestlerAction('injure', 'injured', $wrestler, fn () => resolve(InjureAction::class)->handle($wrestler)),
+            'heal' => $this->executeWrestlerAction('clearFromInjury', 'healed', $wrestler, fn () => resolve(HealAction::class)->handle($wrestler)),
+            'restore' => $this->restore($wrestlerId),
             default => null,
         };
+    }
+
+    /** @param Closure(): void $action */
+    private function executeWrestlerAction(string $ability, string $successAction, Wrestler $wrestler, Closure $action): void
+    {
+        Gate::authorize($ability, $wrestler);
+
+        $this->executeRosterAction($successAction, 'wrestler', $action);
     }
 }

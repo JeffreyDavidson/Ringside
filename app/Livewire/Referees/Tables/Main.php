@@ -27,7 +27,6 @@ use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
-use App\Livewire\Referees\Components\Actions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -270,22 +269,20 @@ class Main extends BaseTable
 
     public function handleRefereeAction(string $action, int $refereeId): void
     {
-        $referee = Referee::findOrFail($refereeId);
-
-        // Delegate to the Actions component
-        $actionsComponent = new Actions();
-        $actionsComponent->referee = $referee;
+        $referee = $action === 'restore'
+            ? Referee::onlyTrashed()->findOrFail($refereeId)
+            : Referee::findOrFail($refereeId);
 
         match ($action) {
-            'employ' => $actionsComponent->employ(),
-            'release' => $actionsComponent->release(),
-            'retire' => $actionsComponent->retire(),
-            'unretire' => $actionsComponent->unretire(),
-            'suspend' => $actionsComponent->suspend(),
-            'reinstate' => $actionsComponent->reinstate(),
-            'injure' => $actionsComponent->injure(),
-            'heal' => $actionsComponent->healFromInjury(),
-            'restore' => $actionsComponent->restore(),
+            'employ' => $this->employ($referee),
+            'release' => $this->release($referee),
+            'retire' => $this->retire($referee),
+            'unretire' => $this->unretire($referee),
+            'suspend' => $this->suspend($referee),
+            'reinstate' => $this->reinstate($referee),
+            'injure' => $this->injure($referee),
+            'heal' => $this->clearFromInjury($referee),
+            'restore' => $this->restore($refereeId),
             default => null,
         };
     }
