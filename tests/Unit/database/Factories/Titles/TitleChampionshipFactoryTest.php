@@ -88,6 +88,15 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             expect($championship->title_id)->toBe($title->id);
         });
 
+        test('configuring a champion relationship does not persist the champion', function (string $state, string $modelClass) {
+            TitleChampionship::factory()->{$state}();
+
+            expect($modelClass::query()->count())->toBe(0);
+        })->with([
+            ['forWrestler', Wrestler::class],
+            ['forTagTeam', TagTeam::class],
+        ]);
+
         test('past championship state works correctly', function () {
             // Arrange
             $wonDate = now()->subMonths(6);
@@ -148,6 +157,16 @@ describe('TitleChampionshipFactory Unit Tests', function () {
                 ->and($championship->lost_match_id)->toBe($lostEventMatch->id)
                 ->and($championship->won_at)->toEqual($wonEventMatch->event->date)
                 ->and($championship->lost_at)->toEqual($lostEventMatch->event->date);
+        });
+
+        test('current state clears an existing loss date and match', function () {
+            $championship = TitleChampionship::factory()
+                ->lostAtEventMatch()
+                ->current()
+                ->make();
+
+            expect($championship->lost_match_id)->toBeNull()
+                ->and($championship->lost_at)->toBeNull();
         });
     });
 

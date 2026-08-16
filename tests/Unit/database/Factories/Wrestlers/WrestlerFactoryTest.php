@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Database\Factories;
 
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
 use App\ValueObjects\Height;
 use Database\Factories\Wrestlers\WrestlerFactory;
@@ -101,5 +102,11 @@ describe('wrestler factory states', function () {
         $wrestler = Wrestler::factory()->onCurrentTagTeam()->create();
 
         expect($wrestler->currentTagTeam)->not->toBeNull();
+    });
+
+    test('configuring a current tag team does not persist the team', function () {
+        Wrestler::factory()->onCurrentTagTeam();
+
+        expect(TagTeam::query()->count())->toBe(0);
     });
 });
