@@ -15,6 +15,7 @@ use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Builders\Roster\WrestlerBuilder;
+use App\Enums\Roster\RosterEntityType;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
@@ -165,6 +166,6 @@ class Main extends BaseTable
     {
         Gate::authorize($ability, $wrestler);
 
-        $this->executeRosterAction($successAction, 'wrestler', $action);
+        $this->executeRosterAction($successAction, RosterEntityType::Wrestler, $action);
     }
 }
