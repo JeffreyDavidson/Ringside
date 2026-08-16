@@ -121,8 +121,9 @@ class WrestlerFactory extends Factory
      */
     public function onCurrentTagTeam(?TagTeam $tagTeam = null): static
     {
-        $tagTeam ??= TagTeam::factory()->create();
-
-        return $this->hasAttached($tagTeam, ['joined_at' => now()->toDateTimeString()]);
+        return $this->hasAttached(
+            $tagTeam ?? TagTeam::factory(),
+            ['joined_at' => now()->toDateTimeString()],
+        );
     }
 }

@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Tests\Unit\Database\Factories\TagTeams;
 
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Lifecycle\Employment;
+use App\Models\Lifecycle\Retirement;
+use App\Models\Lifecycle\Suspension;
 use App\Models\TagTeams\TagTeam;
+use App\Models\Wrestlers\Wrestler;
 use Database\Factories\TagTeams\TagTeamFactory;
+use Illuminate\Support\Carbon;
 
 /**
  * Unit tests for TagTeamFactory data generation and state management.
@@ -46,6 +51,22 @@ describe('TagTeamFactory Unit Tests', function () {
     });
 
     describe('factory state methods', function () {
+        test('configuring relationship states does not persist related models', function (string $state) {
+            TagTeam::factory()->{$state}();
+
+            expect(Wrestler::query()->count())->toBe(0)
+                ->and(Employment::query()->count())->toBe(0)
+                ->and(Suspension::query()->count())->toBe(0)
+                ->and(Retirement::query()->count())->toBe(0);
+        })->with([
+            'employed',
+            'withFutureEmployment',
+            'suspended',
+            'retired',
+            'unemployed',
+            'released',
+        ]);
+
         test('employed state works correctly', function () {
             // Arrange & Act
             $tagTeam = TagTeam::factory()->employed()->create();
@@ -68,6 +89,14 @@ describe('TagTeamFactory Unit Tests', function () {
 
             // Assert
             expect($tagTeam->isRetired())->toBeTrue();
+        });
+
+        test('future employment aligns wrestler membership with the employment date', function () {
+            $tagTeam = TagTeam::factory()->withFutureEmployment()->create();
+
+            expect($tagTeam->currentWrestlers)->toHaveCount(2)
+                ->and($tagTeam->currentWrestlers->pluck('pivot.joined_at')->unique()->values()->all())
+                ->toEqual([Carbon::tomorrow()->toDateTimeString()]);
         });
     });
 

@@ -46,14 +46,11 @@ class TitleChampionshipFactory extends Factory
      */
     public function forWrestler(?Wrestler $wrestler = null): static
     {
-        $wrestler = $wrestler ?? Wrestler::factory()->create();
+        if ($wrestler === null) {
+            return $this->for(Wrestler::factory(), 'champion');
+        }
 
-        return $this->state(function () use ($wrestler) {
-            return [
-                'champion_type' => $wrestler->getMorphClass(),
-                'champion_id' => $wrestler->id,
-            ];
-        });
+        return $this->for($wrestler, 'champion');
     }
 
     /**
@@ -61,14 +58,11 @@ class TitleChampionshipFactory extends Factory
      */
     public function forTagTeam(?TagTeam $tagTeam = null): static
     {
-        $tagTeam = $tagTeam ?? TagTeam::factory()->create();
+        if ($tagTeam === null) {
+            return $this->for(TagTeam::factory(), 'champion');
+        }
 
-        return $this->state(function () use ($tagTeam) {
-            return [
-                'champion_type' => $tagTeam->getMorphClass(),
-                'champion_id' => $tagTeam->id,
-            ];
-        });
+        return $this->for($tagTeam, 'champion');
     }
 
     /**
@@ -135,6 +129,7 @@ class TitleChampionshipFactory extends Factory
     public function current(): static
     {
         return $this->state([
+            'lost_match_id' => null,
             'lost_at' => null,
         ]);
     }
