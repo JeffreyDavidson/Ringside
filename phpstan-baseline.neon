@@ -27,7 +27,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Base\\BaseFormModal\<TForm of App\\Livewire\\Base\\BaseForm, TModel of Illuminate\\Database\\Eloquent\\Model\>\:\:\$form\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: app/Livewire/Base/BaseFormModal.php
 
 		-

@@ -57,6 +57,11 @@ class FormModal extends BaseFormModal
         return 'livewire.matches.modals.form-modal';
     }
 
+    protected function storeForm(): bool
+    {
+        return $this->form->store();
+    }
+
     /** @return array<int, string> */
     #[Computed(cache: true, key: 'active-match-stipulations-list', seconds: 180)]
     public function getMatchStipulations(): array

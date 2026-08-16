@@ -31,3 +31,17 @@ test('Livewire components do not instantiate other Livewire components', functio
 
     expect($componentConstructions)->toBeEmpty();
 });
+
+test('Livewire components do not write directly through Eloquent models', function () {
+    $directWrites = [];
+
+    foreach (Finder::create()->files()->in(app_path('Livewire'))->name('*.php') as $file) {
+        if (! preg_match('/(?:->|::)\s*(?:create|update)\s*\(/', $file->getContents())) {
+            continue;
+        }
+
+        $directWrites[] = $file->getRelativePathname();
+    }
+
+    expect($directWrites)->toBeEmpty();
+});
