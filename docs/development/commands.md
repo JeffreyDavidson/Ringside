@@ -36,54 +36,10 @@ This document provides a comprehensive reference for all development and testing
 
 ## Test Generation
 
-### Ringside Test Generator
-- `php artisan ringside:make:test --model="ModelName"` - Generate standardized model unit tests
-
-### Command Examples
+Use Laravel's native Pest test generator. Test names mirror the applicable `app/` path.
 
 ```bash
-# Generate test for Wrestler model (auto-detected in Wrestlers/ directory)
-php artisan ringside:make:test --model="Wrestler"
-# Creates: tests/Unit/Models/Roster/Wrestlers/WrestlerTest.php
-
-# Generate test for User model with directory specification
-php artisan make:model-test User --directory=Users
-# Creates: tests/Unit/Models/Users/UserTest.php
-# Resolves: App\Models\Users\User
-
-# Generate test for nested model
-php artisan ringside:make:test --model="TitleChampionship"
-# Creates: tests/Unit/Models/Titles/TitleChampionshipTest.php
-
-# Generate test with full namespace
-php artisan ringside:make:test --model="App\Models\Events\Venue"
-# Creates: tests/Unit/Models/Events/VenueTest.php
-```
-
-### Enhanced Command Integration
-
-**Multiple Discovery Paths**: The Ringside test generator provides several ways to access standardized test generation:
-
-```bash
-# Option 1: Direct alias command (Laravel-style)
-php artisan make:model-test Product
-
-# Option 2: Directory-specific model resolution
-php artisan make:model-test User --directory=Users
-
-# Option 3: Full Ringside command
-php artisan ringside:make:test --model="Product"
-
-# Option 4: Full command with directory
-php artisan ringside:make:test --model="User" --directory="Users"
-
-# Option 5: Interactive mode
-php artisan ringside:make:test
-# Prompts for the model and optional directory
-
-# Option 6: Enhanced Laravel integration
-php artisan make:test ProductTest --unit
-# Detects model-like names and offers Ringside alternative
+php artisan make:test --pest --unit Models/Roster/Wrestlers/WrestlerTest
 ```
 
 ## Quality Assurance Protocol
