@@ -9,12 +9,15 @@ use App\Models\Managers\Manager;
 use App\Models\Referees\Referee;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Wrestlers\Wrestler;
+use Database\Factories\Concerns\HasLifecyclePeriodStates;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /** @extends Factory<Suspension> */
 class SuspensionFactory extends Factory
 {
+    use HasLifecyclePeriodStates;
+
     /** @return array<string, mixed> */
     public function definition(): array
     {
@@ -34,23 +37,5 @@ class SuspensionFactory extends Factory
         ]);
 
         return $this->for($suspendableFactory, 'suspendable');
-    }
-
-    public function current(): static
-    {
-        return $this->state(fn (): array => [
-            'started_at' => Carbon::yesterday(),
-            'ended_at' => null,
-        ]);
-    }
-
-    public function started(Carbon $startedAt): static
-    {
-        return $this->state(fn (): array => ['started_at' => $startedAt]);
-    }
-
-    public function ended(Carbon $endedAt): static
-    {
-        return $this->state(fn (): array => ['ended_at' => $endedAt]);
     }
 }
