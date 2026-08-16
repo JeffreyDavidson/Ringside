@@ -7,12 +7,15 @@ namespace Database\Factories\Lifecycle;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Stables\Stable;
 use App\Models\Titles\Title;
+use Database\Factories\Concerns\HasLifecyclePeriodStates;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /** @extends Factory<ActivityPeriod> */
 class ActivityPeriodFactory extends Factory
 {
+    use HasLifecyclePeriodStates;
+
     /** @return array<string, mixed> */
     public function definition(): array
     {
@@ -28,15 +31,5 @@ class ActivityPeriodFactory extends Factory
             Stable::factory(),
             Title::factory(),
         ]), 'activeable');
-    }
-
-    public function started(Carbon $startedAt): static
-    {
-        return $this->state(fn (): array => ['started_at' => $startedAt]);
-    }
-
-    public function ended(Carbon $endedAt): static
-    {
-        return $this->state(fn (): array => ['ended_at' => $endedAt]);
     }
 }
