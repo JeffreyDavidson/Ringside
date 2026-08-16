@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Database\Factories;
 
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\Title;
@@ -61,10 +62,8 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             $title = Title::factory()->create();
 
             // Act
-            $championship = TitleChampionship::factory()->make([
+            $championship = TitleChampionship::factory()->forWrestler($wrestler)->make([
                 'title_id' => $title->id,
-                'champion_type' => 'wrestler',
-                'champion_id' => $wrestler->id,
             ]);
 
             // Assert
@@ -107,6 +106,48 @@ describe('TitleChampionshipFactory Unit Tests', function () {
             expect(requiredDate($championship->lost_at)->format('Y-m-d H:i:s'))->toBe($lostDate->format('Y-m-d H:i:s'));
             expect($championship->lost_match_id)->toBe($lostMatch->id);
             expect(requiredDate($championship->lost_at)->isAfter($championship->won_at))->toBeTrue();
+        });
+
+        test('won at event match creates a scheduled match when one is not supplied', function () {
+            // Act
+            $championship = TitleChampionship::factory()->wonAtEventMatch()->create();
+
+            // Assert
+            expect($championship->wonEventMatch)->toBeInstanceOf(EventMatch::class)
+                ->and($championship->won_at)->toEqual($championship->wonEventMatch?->event->date);
+        });
+
+        test('lost at event match creates a complete championship timeline', function () {
+            // Act
+            $championship = TitleChampionship::factory()->lostAtEventMatch()->create();
+
+            // Assert
+            expect($championship->wonEventMatch)->toBeInstanceOf(EventMatch::class)
+                ->and($championship->lostEventMatch)->toBeInstanceOf(EventMatch::class)
+                ->and($championship->won_at)->toEqual($championship->wonEventMatch?->event->date)
+                ->and($championship->lost_at)->toEqual($championship->lostEventMatch?->event->date)
+                ->and(requiredDate($championship->lost_at)->isAfter($championship->won_at))->toBeTrue();
+        });
+
+        test('lost at event match retains supplied winning and losing matches', function () {
+            // Arrange
+            $wonEventMatch = EventMatch::factory()
+                ->for(Event::factory()->state(['date' => now()->subMonth()]))
+                ->create();
+            $lostEventMatch = EventMatch::factory()
+                ->for(Event::factory()->past())
+                ->create();
+
+            // Act
+            $championship = TitleChampionship::factory()
+                ->lostAtEventMatch($lostEventMatch, $wonEventMatch)
+                ->create();
+
+            // Assert
+            expect($championship->won_match_id)->toBe($wonEventMatch->id)
+                ->and($championship->lost_match_id)->toBe($lostEventMatch->id)
+                ->and($championship->won_at)->toEqual($wonEventMatch->event->date)
+                ->and($championship->lost_at)->toEqual($lostEventMatch->event->date);
         });
     });
 
