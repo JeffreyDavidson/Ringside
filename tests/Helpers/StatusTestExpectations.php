@@ -8,11 +8,11 @@ use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamWrestler;
-use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerManager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 

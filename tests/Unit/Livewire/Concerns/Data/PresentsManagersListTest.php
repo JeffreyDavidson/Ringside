@@ -91,7 +91,7 @@ describe('PresentsManagersList Unit Tests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = reflectionSource($reflection);
 
-            expect($source)->toContain('use App\\Models\\Managers\\Manager;');
+            expect($source)->toContain('use App\\Models\\Roster\\Managers\\Manager;');
         });
 
         test('imports Computed attribute', function () {

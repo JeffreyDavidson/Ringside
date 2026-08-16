@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Actions\TagTeams\SuspendCurrentMembersAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;
 

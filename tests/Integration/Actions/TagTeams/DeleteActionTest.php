@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Actions\TagTeams\DeleteAction;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Lifecycle\TagTeamDeletionEligibility;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('it soft deletes a tag team', function () {
     $tagTeam = TagTeam::factory()->create();

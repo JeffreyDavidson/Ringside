@@ -11,9 +11,9 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 
 test('it atomically replaces a match configuration', function () {
     $match = EventMatch::factory()->create([

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\RefereeBuilder;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 /**
  * Unit tests for RefereeQueryBuilder query scopes and methods.

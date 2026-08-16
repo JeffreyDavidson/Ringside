@@ -6,9 +6,9 @@ namespace App\Exceptions\Roster\Individuals;
 
 use App\Enums\BusinessRuleReason;
 use App\Exceptions\BaseBusinessException;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 final class CannotBeInjuredException extends BaseBusinessException
 {

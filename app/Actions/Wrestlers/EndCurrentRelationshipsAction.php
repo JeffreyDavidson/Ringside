@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Lifecycle\ChampionshipReignManager;
-use App\Models\Stables\StableWrestler;
-use App\Models\TagTeams\TagTeamWrestler;
-use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerManager;
+use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Support\Carbon;
 
 class EndCurrentRelationshipsAction

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Livewire\Wrestlers\Tables\Main;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Pest\Laravel\actingAs;
 

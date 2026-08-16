@@ -11,8 +11,8 @@ use App\Livewire\TagTeams\Tables\TagTeamsTable;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;

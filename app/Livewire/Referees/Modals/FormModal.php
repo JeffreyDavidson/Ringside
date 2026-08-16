@@ -7,7 +7,7 @@ namespace App\Livewire\Referees\Modals;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Referees\Forms\CreateEditForm;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\View\View;
 
 /**

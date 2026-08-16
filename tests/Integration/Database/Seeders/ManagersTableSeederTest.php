@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Database\Seeders\ManagersTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 

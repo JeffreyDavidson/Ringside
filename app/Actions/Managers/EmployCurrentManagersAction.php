@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Models\Contracts\Manageable;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
 
 class EmployCurrentManagersAction

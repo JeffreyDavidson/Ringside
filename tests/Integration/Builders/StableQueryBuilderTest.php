@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\StableBuilder;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 
 /**
  * Unit tests for StableQueryBuilder query scopes and methods.

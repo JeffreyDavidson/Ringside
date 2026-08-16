@@ -7,7 +7,7 @@ namespace App\Livewire\Stables\Tables;
 use App\Builders\Roster\ManagerBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Livewire\Table\Column;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Queries\Roster\StableManagerHistoryQuery;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;

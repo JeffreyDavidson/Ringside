@@ -14,7 +14,7 @@ use App\Actions\Referees\RetireAction;
 use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Livewire\Concerns\ExecutesRosterActions;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;

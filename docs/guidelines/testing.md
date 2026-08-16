@@ -18,7 +18,7 @@ Comprehensive testing standards ensure reliable, maintainable test suites.
 
 ```php
 // ✅ CORRECT - Proper test structure with required groups
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Actions\Wrestlers\EmployAction;
 
 test('can employ wrestler with valid data', function () {

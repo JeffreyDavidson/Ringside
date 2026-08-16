@@ -12,10 +12,10 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 
 /**

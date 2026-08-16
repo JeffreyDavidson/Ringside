@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\WrestlerBuilder;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 /**
  * Integration tests for WrestlerQueryBuilder query scopes and methods.

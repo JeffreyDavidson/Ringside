@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Wrestlers\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Queries\Roster;
 
-use App\Models\Managers\Manager;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 

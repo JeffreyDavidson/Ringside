@@ -16,8 +16,8 @@ use App\Exceptions\Roster\TagTeams\CannotBeRestoredException as TagTeamCannotBeR
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\ErrorMessageMappingService;
 
 test('it maps roster failures from stable reasons instead of message text', function () {

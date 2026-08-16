@@ -6,7 +6,7 @@ namespace App\Lifecycle;
 
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
 final class TagTeamDeletionEligibility

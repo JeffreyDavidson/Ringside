@@ -12,7 +12,7 @@ use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Stables\Forms\CreateEditForm;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 

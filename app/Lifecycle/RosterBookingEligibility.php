@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 final class RosterBookingEligibility
 {

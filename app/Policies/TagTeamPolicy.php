@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Users\User;
 use Tests\Unit\Policies\TagTeamPolicyTest;
 

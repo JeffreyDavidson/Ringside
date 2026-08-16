@@ -7,7 +7,7 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 test('it rejects match assignment when no referee is available', function () {
     $match = EventMatch::factory()->create();

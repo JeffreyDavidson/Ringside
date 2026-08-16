@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Users\User;
 use Tests\Unit\Policies\StablePolicyTest;
 

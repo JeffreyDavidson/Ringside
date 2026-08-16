@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {

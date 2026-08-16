@@ -6,9 +6,9 @@ namespace App\Lifecycle;
 
 use App\Exceptions\Roster\Individuals\CannotBeDeletedException;
 use App\Exceptions\Roster\Individuals\CannotBeRestoredException;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 final class IndividualDeletionEligibility
 {

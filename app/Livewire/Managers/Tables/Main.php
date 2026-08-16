@@ -31,7 +31,7 @@ use App\Livewire\Managers\Components\Actions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Manager> */

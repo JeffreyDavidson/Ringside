@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousStables;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {

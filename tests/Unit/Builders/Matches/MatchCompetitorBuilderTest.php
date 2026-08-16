@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 it('filters competitor records by model type and identifiers', function () {
     $wrestler = Wrestler::factory()->create();

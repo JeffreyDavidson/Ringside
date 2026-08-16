@@ -8,10 +8,10 @@ use App\Livewire\Stables\Modals\FormModal as StableFormModal;
 use App\Livewire\Stables\Tables\Main as StablesTable;
 use App\Livewire\TagTeams\Modals\FormModal as TagTeamFormModal;
 use App\Livewire\TagTeams\Tables\Main as TagTeamsTable;
-use App\Models\Managers\Manager;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Pest\Laravel\actingAs;
 

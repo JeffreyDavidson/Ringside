@@ -6,7 +6,7 @@ namespace App\Lifecycle;
 
 use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 final class TagTeamSuspensionEligibility
 {

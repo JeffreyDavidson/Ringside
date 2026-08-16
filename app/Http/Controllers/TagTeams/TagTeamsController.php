@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\TagTeams;
 
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Contracts\View\View;
 
 class TagTeamsController

@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\EndCurrentRelationshipsAction;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('it ends only the managers current relationships', function () {
     $manager = Manager::factory()->employed()->create();

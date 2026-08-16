@@ -6,7 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\TagTeamDeletionEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

@@ -7,7 +7,7 @@ namespace App\Actions\Referees;
 use App\Lifecycle\DeletionPeriodCloser;
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\IndividualDeletionEligibility;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

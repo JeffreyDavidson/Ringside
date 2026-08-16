@@ -12,7 +12,7 @@ use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Lifecycle\StableActivityEligibility;
 use App\Models\Lifecycle\ActivityPeriod;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 

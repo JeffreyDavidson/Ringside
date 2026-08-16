@@ -10,7 +10,7 @@ use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

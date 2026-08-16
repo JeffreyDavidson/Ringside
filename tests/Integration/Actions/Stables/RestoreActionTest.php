@@ -6,7 +6,7 @@ use App\Actions\Stables\RestoreAction;
 use App\Enums\Stables\StableStatus;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Lifecycle\StableDeletionEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 
 test('it restores a stable without former members', function () {
     $stable = Stable::factory()->create();

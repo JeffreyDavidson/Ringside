@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousManagers;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
-use App\Models\Wrestlers\WrestlerManager;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();

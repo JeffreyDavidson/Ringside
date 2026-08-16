@@ -13,7 +13,7 @@ use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\StableRetirementEligibility;
 use App\Lifecycle\TagTeamRetirementEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

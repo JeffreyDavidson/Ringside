@@ -9,7 +9,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\StableRetirementEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 

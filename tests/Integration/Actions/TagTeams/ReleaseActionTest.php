@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\ReleaseAction;
 use App\Lifecycle\TagTeamEmploymentEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 use function Spatie\PestPluginTestTime\testTime;
 

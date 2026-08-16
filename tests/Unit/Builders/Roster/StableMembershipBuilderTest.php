@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\StableMembershipBuilder;
-use App\Models\Stables\Stable;
-use App\Models\Stables\StableTagTeam;
-use App\Models\Stables\StableWrestler;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\Stables\StableTagTeam;
+use App\Models\Roster\Stables\StableWrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('stable membership models use the stable membership builder', function () {
     expect(StableWrestler::query())->toBeInstanceOf(StableMembershipBuilder::class)

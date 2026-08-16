@@ -11,8 +11,8 @@ use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 

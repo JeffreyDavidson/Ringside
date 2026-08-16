@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions\Roster\Stables;
 
 use App\Exceptions\BaseBusinessException;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 
 final class CannotBeEstablishedException extends BaseBusinessException
 {

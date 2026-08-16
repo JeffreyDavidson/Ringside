@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data\Wrestlers;
 
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\ValueObjects\Height;
 use App\ValueObjects\Weight;
 use Illuminate\Database\Eloquent\Collection;

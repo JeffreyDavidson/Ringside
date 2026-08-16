@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 it('groups competitor models by ordered side position', function () {
     $match = EventMatch::factory()->create();

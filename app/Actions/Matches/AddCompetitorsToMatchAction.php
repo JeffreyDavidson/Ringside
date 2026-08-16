@@ -6,8 +6,8 @@ namespace App\Actions\Matches;
 
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

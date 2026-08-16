@@ -15,7 +15,7 @@ use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\RosterBookingEligibility;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
 /**

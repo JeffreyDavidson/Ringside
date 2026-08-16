@@ -7,7 +7,7 @@ namespace App\Actions\Matches;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

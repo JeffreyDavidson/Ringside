@@ -7,11 +7,11 @@ use App\Builders\Roster\RefereeBuilder;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Builders\Titles\TitleBuilder;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 
 test('models resolve their concrete typed builders', function () {
     expect(Wrestler::query())->toBeInstanceOf(WrestlerBuilder::class)

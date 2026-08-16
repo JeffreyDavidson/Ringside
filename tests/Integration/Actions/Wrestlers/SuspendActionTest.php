@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\SuspendAction;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 

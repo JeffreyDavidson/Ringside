@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Models\Lifecycle\Employment;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Model;
 
 test('it creates employment for an explicit employable owner', function (Closure $createEmployable) {

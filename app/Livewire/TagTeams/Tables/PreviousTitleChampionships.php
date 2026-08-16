@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;

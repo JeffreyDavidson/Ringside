@@ -10,7 +10,7 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Lifecycle\StableActivityEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

@@ -8,7 +8,7 @@ use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\TagTeams\TagTeamManager;
+use App\Models\Roster\TagTeams\TagTeamManager;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

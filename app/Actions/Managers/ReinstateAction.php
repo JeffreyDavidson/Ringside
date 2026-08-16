@@ -8,7 +8,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

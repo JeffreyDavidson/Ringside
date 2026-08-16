@@ -6,9 +6,9 @@ namespace App\Livewire\TagTeams\Forms;
 
 use App\Data\TagTeams\TagTeamData;
 use App\Livewire\Base\BaseForm;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\Rules\Wrestlers\CanJoinTagTeam;
 use Illuminate\Database\Eloquent\Model;

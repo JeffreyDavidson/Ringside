@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;

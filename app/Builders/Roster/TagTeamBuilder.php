@@ -6,7 +6,7 @@ namespace App\Builders\Roster;
 
 use App\Builders\Concerns\FiltersByEmploymentStatus;
 use App\Builders\Concerns\FiltersByRetirementStatus;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
 /**

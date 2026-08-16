@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Database\Seeders\TagTeamsTableSeeder;
 use Illuminate\Support\Facades\Artisan;
 

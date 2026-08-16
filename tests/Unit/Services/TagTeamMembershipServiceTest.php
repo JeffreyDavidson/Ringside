@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Data\TagTeams\TagTeamMembershipData;
-use App\Models\Managers\Manager;
-use App\Models\TagTeams\TagTeam;
-use App\Models\TagTeams\TagTeamWrestler;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\TagTeamMembershipService;
 use Illuminate\Database\Eloquent\Collection;
 

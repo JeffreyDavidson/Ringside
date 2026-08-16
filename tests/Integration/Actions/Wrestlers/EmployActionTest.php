@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
-use App\Models\Managers\Manager;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 

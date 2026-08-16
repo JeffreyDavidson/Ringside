@@ -6,7 +6,7 @@ namespace App\Lifecycle;
 
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Services\StableMembershipService;
 
 final class StableDeletionEligibility

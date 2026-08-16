@@ -8,7 +8,7 @@ use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\Wrestlers\WrestlerManager;
+use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

@@ -6,8 +6,8 @@ use App\Actions\Matches\AddCompetitorsToMatchAction;
 use App\Actions\Matches\AddTagTeamsToMatchAction;
 use App\Actions\Matches\AddWrestlersToMatchAction;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
 use JMac\Testing\Matching\Argument;
 

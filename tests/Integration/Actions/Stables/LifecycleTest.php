@@ -16,9 +16,9 @@ use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Lifecycle\StableRetirementEligibility;
 use App\Models\Lifecycle\Retirement;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 

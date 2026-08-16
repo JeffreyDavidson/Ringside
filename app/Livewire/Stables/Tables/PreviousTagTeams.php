@@ -9,7 +9,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\Stables\StableTagTeam;
+use App\Models\Roster\Stables\StableTagTeam;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

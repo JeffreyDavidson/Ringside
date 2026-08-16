@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Actions\Wrestlers\EmployAction;
 
 /**
@@ -57,9 +57,9 @@ describe('Wrestler Model Unit Tests', function () {
 
 declare(strict_types=1);
 
-namespace Database\Factories\Wrestlers;
+namespace Database\Factories\Roster\Wrestlers;
 
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

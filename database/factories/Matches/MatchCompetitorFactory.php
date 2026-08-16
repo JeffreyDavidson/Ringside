@@ -6,7 +6,7 @@ namespace Database\Factories\Matches;
 
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

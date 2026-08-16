@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions\Roster\TagTeams;
 
 use App\Exceptions\BaseBusinessException;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 final class CannotBeDeletedException extends BaseBusinessException
 {

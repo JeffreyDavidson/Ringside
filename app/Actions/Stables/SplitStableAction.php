@@ -8,7 +8,7 @@ use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Lifecycle\StableRestructuringEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Builders\Roster;
 
 use App\Builders\Concerns\HasNameSearch;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 
 /**
  * @template TModel of Manager

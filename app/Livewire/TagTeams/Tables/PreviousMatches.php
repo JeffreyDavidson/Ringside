@@ -6,7 +6,7 @@ namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

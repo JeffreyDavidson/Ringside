@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\SuspendAction;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 

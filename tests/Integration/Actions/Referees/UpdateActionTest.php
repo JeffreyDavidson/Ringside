@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Referees\UpdateAction;
 use App\Data\Referees\RefereeData;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Referees\Referee;
 
 use function Spatie\PestPluginTestTime\testTime;
 

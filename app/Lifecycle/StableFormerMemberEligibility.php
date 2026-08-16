@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 

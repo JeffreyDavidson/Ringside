@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Lifecycle\ActivityPeriod;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\QueryException;
 
 test('a stable may have multiple closed activity periods', function () {

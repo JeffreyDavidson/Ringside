@@ -9,7 +9,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\TagTeamEmploymentEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

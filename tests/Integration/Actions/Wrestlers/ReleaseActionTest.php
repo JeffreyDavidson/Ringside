@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\ReleaseAction;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 

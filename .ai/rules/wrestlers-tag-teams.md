@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'app/Models/{Wrestlers,TagTeams}/**'
+  - 'app/Models/Roster/{Wrestlers,TagTeams}/**'
 ---
 
 # Wrestlers Tag Teams

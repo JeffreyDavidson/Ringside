@@ -6,10 +6,10 @@ use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\SuspensionPeriodManager;
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
 

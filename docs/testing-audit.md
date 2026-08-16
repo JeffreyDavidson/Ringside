@@ -106,7 +106,7 @@ Representative missing/high-value paths:
 
 Strengths:
 
-- Many core models have mirrored tests, e.g. `app/Models/Wrestlers/Wrestler.php` → `tests/Unit/Models/Wrestlers/WrestlerTest.php`.
+- Many core models have mirrored tests, e.g. `app/Models/Roster/Wrestlers/Wrestler.php` → `tests/Unit/Models/Roster/Wrestlers/WrestlerTest.php`.
 - Many action classes have mirrored integration tests, especially roster employment/status actions.
 - Controllers mostly have mirrored feature tests under `tests/Feature/Http/Controllers/...`.
 - Arch tests are correctly treated as a grouped exception at `tests/ArchitectureTest.php`.

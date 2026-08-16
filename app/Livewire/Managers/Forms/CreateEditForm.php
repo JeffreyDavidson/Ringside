@@ -6,7 +6,7 @@ namespace App\Livewire\Managers\Forms;
 
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\ManagesEmployment;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;

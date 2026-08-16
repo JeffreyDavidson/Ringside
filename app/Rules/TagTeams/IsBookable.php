@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\TagTeams;
 
 use App\Lifecycle\RosterBookingEligibility;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

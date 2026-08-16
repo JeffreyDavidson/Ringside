@@ -6,7 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\StableDeletionEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\TagTeams\Tables;
 
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
-use App\Models\TagTeams\TagTeamManager;
+use App\Models\Roster\TagTeams\TagTeamManager;
 use Illuminate\Database\Eloquent\Builder;
 use LogicException;
 

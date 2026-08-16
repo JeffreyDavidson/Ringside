@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stables\DeleteAction;
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
 use App\Lifecycle\StableDeletionEligibility;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 
 test('it deletes an inactive stable without current members', function () {
     $stable = Stable::factory()->inactive()->create();

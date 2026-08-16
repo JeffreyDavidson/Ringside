@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Data\TagTeams\TagTeamData;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Services\TagTeamMembershipService;
 use Illuminate\Support\Facades\DB;
 

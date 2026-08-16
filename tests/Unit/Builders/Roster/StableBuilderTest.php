@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\DB;
 
 test('established stables can be retrieved', function () {

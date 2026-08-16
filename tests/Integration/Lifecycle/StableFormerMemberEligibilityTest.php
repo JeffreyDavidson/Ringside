@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Lifecycle\StableFormerMemberEligibility;
-use App\Models\Stables\Stable;
-use App\Models\TagTeams\TagTeam;
-use App\Models\Wrestlers\Wrestler;
+use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('retired employed former members are unavailable', function () {
     $stable = Stable::factory()->retired()->create();

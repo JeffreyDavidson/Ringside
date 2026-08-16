@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Models\Managers\Manager;
-use App\Models\Referees\Referee;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use App\Models\Wrestlers\Wrestler;
 
 describe('name search', function () {
     it('searches users by a case-insensitive first or last name match', function () {

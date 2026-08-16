@@ -6,7 +6,7 @@ use App\Actions\Stables\UpdateAction;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 
 test('it rejects an activity end date before the start date', function () {
     $stable = Stable::factory()->inactive()->create(['name' => 'Original Name']);

@@ -8,7 +8,7 @@ use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchSide;
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
 
 function tagTeamMatchSide(EventMatch $match, int $position): MatchSide
 {

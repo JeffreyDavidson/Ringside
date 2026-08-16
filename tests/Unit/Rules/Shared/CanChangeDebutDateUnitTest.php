@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Lifecycle\ActivityPeriod;
-use App\Models\Stables\Stable;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
 

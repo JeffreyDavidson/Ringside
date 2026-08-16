@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Rules\Titles;
 
-use App\Models\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Wrestlers\Wrestler;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;

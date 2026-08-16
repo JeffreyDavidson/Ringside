@@ -6,7 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\IndividualDeletionEligibility;
-use App\Models\Managers\Manager;
+use App\Models\Roster\Managers\Manager;
 use App\Services\ManagerAssignmentService;
 use Illuminate\Support\Facades\DB;
 
