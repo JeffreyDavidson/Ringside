@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,7 +29,7 @@ use Illuminate\Support\Carbon;
  * @property string $last_name
  * @property string $full_name
  * @property string $email
- * @property string|null $email_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string $password
  * @property UserStatus $status
  * @property string|null $avatar_path
@@ -79,18 +78,8 @@ class User extends Authenticatable
             'role' => Role::class,
             'status' => UserStatus::class,
             'phone_number' => PhoneNumberCast::class,
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
         ];
-    }
-
-    /**
-     * Get the user's password.
-     *
-     * @return Attribute<mixed, mixed>
-     */
-    public function password(): Attribute
-    {
-        return new Attribute(
-            set: fn (string $value) => bcrypt($value),
-        );
     }
 }

@@ -6,6 +6,7 @@ namespace App\Models\Wrestlers;
 
 use App\Builders\Roster\WrestlerBuilder;
 use App\Casts\HeightCast;
+use App\Casts\WeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
@@ -34,6 +35,7 @@ use App\Models\TagTeams\TagTeam;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Titles\TitleChampionship;
 use App\ValueObjects\Height;
+use App\ValueObjects\Weight;
 use Database\Factories\Wrestlers\WrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -61,7 +63,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $name
  * @property Height $height
- * @property int $weight
+ * @property Weight $weight
  * @property string $hometown
  * @property string|null $signature_move
  * @property EmploymentStatus $status
@@ -245,6 +247,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     {
         return [
             'height' => HeightCast::class,
+            'weight' => WeightCast::class,
         ];
     }
 }

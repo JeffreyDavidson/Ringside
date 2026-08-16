@@ -61,7 +61,7 @@ class Main extends BaseTable
                 ->searchable(),
             Column::make(__('event-matches.competitors'))
                 ->label(fn (EventMatch $row): string => $row->competitors
-                    ->competitorsBySidePosition()
+                    ->competitorModelsBySidePosition()
                     ->map(fn (Collection $side): string => $side->pluck('name')->join(' & '))
                     ->join(' vs ')),
             Column::make(__('event-matches.result'))

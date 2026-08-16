@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
 use App\ValueObjects\Address;
@@ -115,7 +116,7 @@ describe('VenueForm Integration Tests', function () {
             expect($data)->toHaveKeys(['name', 'address']);
             expect($data['name'])->toBe('Madison Square Garden')
                 ->and($data['address'])->toEqual(
-                    new Address('4 Pennsylvania Plaza', 'New York', 'New York', '10001'),
+                    new Address('4 Pennsylvania Plaza', 'New York', UnitedStatesState::NewYork, '10001'),
                 );
         });
     });

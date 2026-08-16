@@ -42,8 +42,8 @@ describe('TitleChampionship Model Unit Tests', function () {
             $casts = $titleChampionship->getCasts();
 
             expect($casts['won_at'])->toBe('datetime');
-            expect($casts['lost_at'])->toBe('datetime')
-                ->and($casts)->not->toHaveKey('last_held_reign');
+            expect($casts['lost_at'])->toBe('datetime');
+            expect($casts)->not->toHaveKey('last_held_reign');
         });
 
         test('title championship has correct default values', function () {

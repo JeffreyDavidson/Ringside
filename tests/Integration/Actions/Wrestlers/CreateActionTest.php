@@ -32,7 +32,7 @@ test('it creates a wrestler with basic information', function () {
     expect($result->height->feet)->toBe(6);
     expect($result->height->inches)->toBe(1);
     expect($result->hometown)->toBe('West Newbury, Massachusetts');
-    expect($result->weight)->toBe(251);
+    expect($result->weight->toPounds())->toBe(251);
     expect($result->signature_move)->toBe('Attitude Adjustment');
 
     $this->assertDatabaseHas('wrestlers', [
@@ -99,7 +99,7 @@ test('it creates wrestler with all optional fields', function () {
     expect($result->height->feet)->toBe(6);
     expect($result->height->inches)->toBe(2);
     expect($result->hometown)->toBe('Austin, Texas');
-    expect($result->weight)->toBe(252);
+    expect($result->weight->toPounds())->toBe(252);
     expect($result->signature_move)->toBe('Stone Cold Stunner');
 
     // Verify database state

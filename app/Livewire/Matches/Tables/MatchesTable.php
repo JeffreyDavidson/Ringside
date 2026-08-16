@@ -69,7 +69,7 @@ class MatchesTable extends DataTableComponent
                 ->searchable(),
             Column::make(__('matches.competitors'))
                 ->label(fn (EventMatch $row): string => $row->competitors
-                    ->competitorsBySidePosition()
+                    ->competitorModelsBySidePosition()
                     ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor): string {
                         $type = str($competitor->getMorphClass())->kebab()->plural();
 

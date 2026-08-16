@@ -37,7 +37,7 @@ test('it updates wrestler basic information', function () {
     expect($result)->toBeInstanceOf(Wrestler::class);
     expect($result->name)->toBe('Updated Name');
     expect($result->height->toInches())->toBe(75);
-    expect($result->weight)->toBe(250);
+    expect($result->weight->toPounds())->toBe(250);
     expect($result->hometown)->toBe('Updated Town');
     expect($result->signature_move)->toBe('Updated Move');
 
@@ -258,7 +258,7 @@ test('it returns updated wrestler instance', function () {
     expect($result->id)->toBe($wrestler->id);
     expect($result->name)->toBe('Return Test');
     expect($result->height->toInches())->toBe(76);
-    expect($result->weight)->toBe(240);
+    expect($result->weight->toPounds())->toBe(240);
 });
 
 test('it handles height conversion correctly', function () {

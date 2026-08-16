@@ -37,7 +37,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Integration Test Arena',
                 street_address: '123 Test Street',
                 city: 'Test City',
-                state: 'TS',
+                state: 'Texas',
                 zipcode: '12345'
             );
 
@@ -47,7 +47,7 @@ describe('Venue Action Integration Tests', function () {
             expect($venue->name)->toBe('Integration Test Arena');
             expect($venue->street_address)->toBe('123 Test Street');
             expect($venue->city)->toBe('Test City');
-            expect($venue->state)->toBe('TS');
+            expect($venue->state)->toBe('Texas');
             expect($venue->zipcode)->toBe('12345');
             expect($venue->exists)->toBeTrue();
         });
@@ -57,7 +57,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Database Test Arena',
                 street_address: '456 Database Lane',
                 city: 'Database City',
-                state: 'DB',
+                state: 'Delaware',
                 zipcode: '54321'
             );
 
@@ -67,7 +67,7 @@ describe('Venue Action Integration Tests', function () {
             expect($retrievedVenue->name)->toBe('Database Test Arena');
             expect($retrievedVenue->street_address)->toBe('456 Database Lane');
             expect($retrievedVenue->city)->toBe('Database City');
-            expect($retrievedVenue->state)->toBe('DB');
+            expect($retrievedVenue->state)->toBe('Delaware');
             expect($retrievedVenue->zipcode)->toBe('54321');
         });
 
@@ -76,7 +76,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'O\'Malley\'s Arena & Entertainment Center',
                 street_address: '789 O\'Connor St.',
                 city: 'St. Louis',
-                state: 'MO',
+                state: 'Missouri',
                 zipcode: '63101'
             );
 
@@ -85,7 +85,7 @@ describe('Venue Action Integration Tests', function () {
             expect($venue->name)->toBe('O\'Malley\'s Arena & Entertainment Center');
             expect($venue->street_address)->toBe('789 O\'Connor St.');
             expect($venue->city)->toBe('St. Louis');
-            expect($venue->state)->toBe('MO');
+            expect($venue->state)->toBe('Missouri');
             expect($venue->zipcode)->toBe('63101');
         });
 
@@ -94,7 +94,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Minimal Arena',
                 street_address: '100 Basic St',
                 city: 'Basic City',
-                state: 'BC',
+                state: 'California',
                 zipcode: '10000'
             );
 
@@ -103,7 +103,7 @@ describe('Venue Action Integration Tests', function () {
             expect($venue->name)->toBe('Minimal Arena');
             expect($venue->street_address)->toBe('100 Basic St');
             expect($venue->city)->toBe('Basic City');
-            expect($venue->state)->toBe('BC');
+            expect($venue->state)->toBe('California');
             expect($venue->zipcode)->toBe('10000');
         });
     });
@@ -140,7 +140,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Database Updated',
                 street_address: $venue->street_address,
                 city: $venue->city,
-                state: 'DU',
+                state: 'Utah',
                 zipcode: $venue->zipcode
             );
 
@@ -148,7 +148,7 @@ describe('Venue Action Integration Tests', function () {
 
             $retrievedVenue = Venue::findOrFail($venue->id);
             expect($retrievedVenue->name)->toBe('Database Updated');
-            expect($retrievedVenue->state)->toBe('DU');
+            expect($retrievedVenue->state)->toBe('Utah');
         });
 
         test('update action handles address changes', function () {
@@ -163,7 +163,7 @@ describe('Venue Action Integration Tests', function () {
                 name: $venue->name,
                 street_address: '456 New Avenue',
                 city: 'New City',
-                state: 'NS',
+                state: 'Nevada',
                 zipcode: '54321'
             );
 
@@ -171,7 +171,7 @@ describe('Venue Action Integration Tests', function () {
 
             expect($updatedVenue->street_address)->toBe('456 New Avenue');
             expect($updatedVenue->city)->toBe('New City');
-            expect($updatedVenue->state)->toBe('NS');
+            expect($updatedVenue->state)->toBe('Nevada');
             expect($updatedVenue->zipcode)->toBe('54321');
         });
 
@@ -297,7 +297,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Event Association Arena',
                 street_address: '123 Event St',
                 city: 'Event City',
-                state: 'EC',
+                state: 'Colorado',
                 zipcode: '12345'
             );
 
@@ -344,7 +344,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Validation Test Arena',
                 street_address: '123 Validation St',
                 city: 'Validation City',
-                state: 'VC',
+                state: 'Virginia',
                 zipcode: '12345'
             );
 
@@ -364,7 +364,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Updated Validation Arena',
                 street_address: '456 Updated St',
                 city: 'Updated City',
-                state: 'UC',
+                state: 'Connecticut',
                 zipcode: '54321'
             );
 
@@ -373,7 +373,7 @@ describe('Venue Action Integration Tests', function () {
             expect($updatedVenue->name)->toBe('Updated Validation Arena');
             expect($updatedVenue->street_address)->toBe('456 Updated St');
             expect($updatedVenue->city)->toBe('Updated City');
-            expect($updatedVenue->state)->toBe('UC');
+            expect($updatedVenue->state)->toBe('Connecticut');
             expect($updatedVenue->zipcode)->toBe('54321');
         });
     });
@@ -384,7 +384,7 @@ describe('Venue Action Integration Tests', function () {
                 name: 'Timestamp Test Arena',
                 street_address: '123 Time St',
                 city: 'Time City',
-                state: 'TC',
+                state: 'Tennessee',
                 zipcode: '12345'
             );
 

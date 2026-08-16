@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\UnitedStatesState;
 use App\Models\Events\Venue;
 use App\ValueObjects\Address;
 
@@ -14,13 +15,13 @@ test('it casts venue address columns to an address', function () {
     ]);
 
     expect($venue->address)->toEqual(
-        new Address('4 Pennsylvania Plaza', 'New York', 'New York', '10001'),
+        new Address('4 Pennsylvania Plaza', 'New York', UnitedStatesState::NewYork, '10001'),
     );
 });
 
 test('it stores an address across the existing venue columns', function () {
     $venue = Venue::factory()->create([
-        'address' => new Address('4 Pennsylvania Plaza', 'New York', 'New York', '10001'),
+        'address' => new Address('4 Pennsylvania Plaza', 'New York', UnitedStatesState::NewYork, '10001'),
     ]);
 
     expect($venue->getRawOriginal('street_address'))->toBe('4 Pennsylvania Plaza')

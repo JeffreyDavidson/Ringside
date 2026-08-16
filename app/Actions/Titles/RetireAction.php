@@ -7,6 +7,7 @@ namespace App\Actions\Titles;
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Titles\CannotBeRetiredException;
+use App\Lifecycle\ChampionshipReignManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
@@ -17,6 +18,7 @@ class RetireAction
 {
     public function __construct(
         private readonly EndActivityPeriodAction $endActivityPeriod,
+        private readonly ChampionshipReignManager $championshipReigns,
         private readonly RetirementPeriodManager $retirementPeriods,
         private readonly TitleLifecycleEligibility $eligibility,
     ) {}
@@ -52,11 +54,7 @@ class RetireAction
                 $this->endActivityPeriod->handle($lockedTitle, $operationalDate);
             }
 
-            // End current championship if title has an active champion
-            $currentChampionship = $lockedTitle->currentChampionship;
-            if ($currentChampionship) {
-                $currentChampionship->update(['lost_at' => $retirementDate]);
-            }
+            $this->championshipReigns->endCurrentReign($lockedTitle, $retirementDate);
 
             $this->retirementPeriods->start($lockedTitle, $retirementDate, LifecycleTransitionType::Retired);
         });

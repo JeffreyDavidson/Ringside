@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Lifecycle\ChampionshipReignManager;
 use App\Models\Stables\StableWrestler;
 use App\Models\TagTeams\TagTeamWrestler;
 use App\Models\Wrestlers\Wrestler;
@@ -12,6 +13,8 @@ use Illuminate\Support\Carbon;
 
 class EndCurrentRelationshipsAction
 {
+    public function __construct(private readonly ChampionshipReignManager $championshipReigns) {}
+
     public function handle(Wrestler $wrestler, Carbon $effectiveDate): void
     {
         TagTeamWrestler::query()
@@ -29,8 +32,6 @@ class EndCurrentRelationshipsAction
             ->current()
             ->update(['fired_at' => $effectiveDate]);
 
-        $wrestler->currentChampionships()->update([
-            'lost_at' => $effectiveDate,
-        ]);
+        $this->championshipReigns->endCurrentReignsForChampion($wrestler, $effectiveDate);
     }
 }

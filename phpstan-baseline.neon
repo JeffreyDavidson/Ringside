@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Matches\\MatchCompetitor\>\:\:map\(\) expects callable\(App\\Models\\Matches\\MatchCompetitor, int\)\: Illuminate\\Support\\Collection\<int, App\\Models\\TagTeams\\TagTeam\|App\\Models\\Wrestlers\\Wrestler\>, Closure\(App\\Collections\\MatchCompetitorsCollection\)\: Illuminate\\Support\\Collection\<int, App\\Models\\TagTeams\\TagTeam\|App\\Models\\Wrestlers\\Wrestler\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Collections/MatchCompetitorsCollection.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Matches\\MatchCompetitor\>\:\:map\(\) expects callable\(App\\Models\\Matches\\MatchCompetitor, int\)\: int\<0, max\>, Closure\(App\\Collections\\MatchCompetitorsCollection\)\: int\<0, max\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Collections/MatchCompetitorsCollection.php
-
-		-
 			message: '#^Parameter \#3 \$managers of static method App\\Data\\TagTeams\\TagTeamMembershipData\:\:fromWrestlers\(\) expects Illuminate\\Database\\Eloquent\\Collection\|null, Illuminate\\Support\\Collection\<int, App\\Models\\Managers\\Manager\>\|null given\.$#'
 			identifier: argument.type
 			count: 1

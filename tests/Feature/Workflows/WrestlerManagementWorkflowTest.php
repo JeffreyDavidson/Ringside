@@ -58,7 +58,7 @@ describe('Wrestler Creation Journey', function () {
         $wrestler = Wrestler::where('name', 'John Cena')->firstOrFail();
         expect($wrestler->hometown)->toBe('West Newbury, MA');
         expect($wrestler->height->toInches())->toBe(73); // 6'1" = 73 inches
-        expect($wrestler->weight)->toBe(251);
+        expect($wrestler->weight->toPounds())->toBe(251);
         expect($wrestler->signature_move)->toBe('Attitude Adjustment');
 
         // And: Should appear in the wrestlers table
