@@ -151,7 +151,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
     public function wrestlers(): BelongsToMany
     {
-        return $this->belongsToMany(Wrestler::class, 'tag_teams_wrestlers', 'tag_team_id', 'wrestler_id')
+        return $this->belongsToMany(Wrestler::class, (new TagTeamWrestler())->getTable(), 'tag_team_id', 'wrestler_id')
             ->using(TagTeamWrestler::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();

@@ -6,6 +6,8 @@ namespace App\Builders\Roster;
 
 use App\Builders\Concerns\ProjectsActivityStatus;
 use App\Models\Stables\Stable;
+use App\Models\Stables\StableTagTeam;
+use App\Models\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -19,30 +21,34 @@ class StableBuilder extends Builder
 
     public function previousForTagTeamId(int $tagTeamId): static
     {
-        $this->join('stables_tag_teams', 'stables.id', '=', 'stables_tag_teams.stable_id')
-            ->where('stables_tag_teams.tag_team_id', $tagTeamId)
-            ->whereNotNull('stables_tag_teams.left_at')
+        $membership = new StableTagTeam();
+
+        $this->join($membership->getTable(), 'stables.id', '=', $membership->qualifyColumn('stable_id'))
+            ->where($membership->qualifyColumn('tag_team_id'), $tagTeamId)
+            ->whereNotNull($membership->qualifyColumn('left_at'))
             ->select(
                 'stables.*',
-                'stables_tag_teams.joined_at as joined_at',
-                'stables_tag_teams.left_at as left_at',
+                $membership->qualifyColumn('joined_at').' as joined_at',
+                $membership->qualifyColumn('left_at').' as left_at',
             )
-            ->orderByDesc('stables_tag_teams.joined_at');
+            ->orderByDesc($membership->qualifyColumn('joined_at'));
 
         return $this;
     }
 
     public function previousForWrestlerId(int $wrestlerId): static
     {
-        $this->join('stables_wrestlers', 'stables.id', '=', 'stables_wrestlers.stable_id')
-            ->where('stables_wrestlers.wrestler_id', $wrestlerId)
-            ->whereNotNull('stables_wrestlers.left_at')
+        $membership = new StableWrestler();
+
+        $this->join($membership->getTable(), 'stables.id', '=', $membership->qualifyColumn('stable_id'))
+            ->where($membership->qualifyColumn('wrestler_id'), $wrestlerId)
+            ->whereNotNull($membership->qualifyColumn('left_at'))
             ->select(
                 'stables.*',
-                'stables_wrestlers.joined_at as joined_at',
-                'stables_wrestlers.left_at as left_at',
+                $membership->qualifyColumn('joined_at').' as joined_at',
+                $membership->qualifyColumn('left_at').' as left_at',
             )
-            ->orderByDesc('stables_wrestlers.joined_at');
+            ->orderByDesc($membership->qualifyColumn('joined_at'));
 
         return $this;
     }

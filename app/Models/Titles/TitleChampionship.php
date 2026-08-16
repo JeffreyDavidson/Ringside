@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $title_id
- * @property int $event_match_id
  * @property int $champion_id
  * @property string $champion_type
  * @property int|null $won_match_id
