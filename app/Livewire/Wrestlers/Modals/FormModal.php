@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Modals;
 
+use App\Actions\Wrestlers\CreateAction;
+use App\Actions\Wrestlers\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
@@ -19,6 +21,16 @@ class FormModal extends BaseFormModal
     use GeneratesDummyData;
 
     public CreateEditForm $form;
+
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    {
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
+    }
 
     protected function getFormClass(): string
     {
@@ -46,6 +58,21 @@ class FormModal extends BaseFormModal
             'signature_move' => fn () => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
             'employment_date' => fn () => $this->generateOptionalEmploymentDate(),
         ];
+    }
+
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if ($this->form->isEditing()) {
+            $this->updateAction->handle($this->form->wrestler(), $this->form->toData());
+
+            return true;
+        }
+
+        $this->createAction->handle($this->form->toData());
+
+        return true;
     }
 
     public function render(): View

@@ -38,7 +38,7 @@ use Illuminate\Validation\Rule;
  * @extends BaseForm<CreateEditForm, Stable>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesActivityPeriods For activation period tracking
+ * @see StableData For typed Action input
  * @see CanChangeDebutDate For custom activation validation
  *
  * @property string $name Stable's official name for storylines and promotion
@@ -114,7 +114,7 @@ class CreateEditForm extends BaseForm
      * - Supports stable reformation and reactivation scenarios
      *
      *
-     * @see ManagesActivityPeriods For activation period management
+     * @see StableData::$start_date For activity period input
      */
     public function loadExtraData(): void
     {

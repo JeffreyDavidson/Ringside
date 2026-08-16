@@ -24,7 +24,7 @@ Base classes provide common functionality while allowing customization through a
 Components use traits for shared functionality:
 - `GeneratesDummyData` - Test data generation
 - `HasStandardValidationAttributes` - Validation messaging
-- `ManagesEmployment` - Employment status handling
+- Typed form data is passed to domain Actions for employment and activity-period persistence.
 
 ## Component Hierarchy
 

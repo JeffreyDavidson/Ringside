@@ -128,13 +128,12 @@ namespace App\Livewire\Wrestlers\Forms;
 
 use App\Livewire\Forms\BaseForm;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Traits\ManagesEmployment;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\WithFileUploads;
 
 class CreateEditForm extends BaseForm
 {
-    use WithFileUploads, ManagesEmployment;
+    use WithFileUploads;
     
     public string $name = '';
     public string $slug = '';
@@ -145,7 +144,7 @@ class CreateEditForm extends BaseForm
     public $photo;
     public bool $active = true;
     
-    // Employment fields from trait
+    // Employment fields are converted to typed Action data by the form.
     public ?string $employed_from = null;
     public ?string $employed_until = null;
     

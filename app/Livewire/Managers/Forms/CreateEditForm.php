@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Forms;
 
+use App\Data\Managers\ManagerData;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesEmployment;
 use App\Models\Roster\Managers\Manager;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @extends BaseForm<CreateEditForm, Manager>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesEmployment For employment tracking capabilities
+ * @see ManagerData For typed Action input
  * @see CanChangeEmploymentDate For custom validation rules
  *
  * @property string $first_name Manager's first name for identification
@@ -39,8 +39,6 @@ use Illuminate\Support\Carbon;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesEmployment;
-
     /**
      * The model instance being edited, or null for new manager creation.
      *
@@ -75,8 +73,7 @@ class CreateEditForm extends BaseForm
     /**
      * Employment start date for manager contract tracking.
      *
-     * Managed through ManagesEmployment trait for consistent employment
-     * tracking across all personnel types. Critical for storyline planning,
+     * Passed through ManagerData to the create or update Action. Critical for storyline planning,
      * payroll management, benefits administration, and availability
      * scheduling for wrestling programming and events.
      *
@@ -98,7 +95,7 @@ class CreateEditForm extends BaseForm
      * - Converts Carbon dates to string format for form display
      *
      *
-     * @see ManagesEmployment::$employment_date For employment date handling
+     * @see ManagerData::$employment_date For employment date handling
      */
     public function loadExtraData(): void
     {
@@ -129,6 +126,20 @@ class CreateEditForm extends BaseForm
         ];
         // Note: employment data is managed separately through
         // the employment relationship system
+    }
+
+    public function toData(): ManagerData
+    {
+        return new ManagerData(
+            first_name: $this->first_name,
+            last_name: $this->last_name,
+            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+        );
+    }
+
+    public function manager(): Manager
+    {
+        return Manager::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -169,34 +180,6 @@ class CreateEditForm extends BaseForm
      * Extends the base store functionality to handle employment creation
      * for managers when employment dates are provided.
      */
-    public function store(): bool
-    {
-        $this->validate();
-
-        $wasCreating = $this->isCreating();
-        $result = $this->storeModel();
-
-        if ($result && $wasCreating) {
-            $this->handlePostCreationTasks();
-        }
-
-        return $result;
-    }
-
-    /**
-     * Handle post-creation tasks after manager creation.
-     *
-     * Creates employment record for new managers with employment dates.
-     * Called automatically by the store process after successful creation.
-     */
-    protected function handlePostCreationTasks(): void
-    {
-        // Create employment record for managers with employment dates
-        if ($this->employment_date) {
-            $this->handleEmploymentCreation();
-        }
-    }
-
     /**
      * Get manager-specific validation attributes.
      *

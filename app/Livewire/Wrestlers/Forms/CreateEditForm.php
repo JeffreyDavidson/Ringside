@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Forms;
 
+use App\Data\Wrestlers\WrestlerData;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesEmployment;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
@@ -31,7 +31,7 @@ use Illuminate\Validation\Rule;
  * @extends BaseForm<CreateEditForm, Wrestler>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesEmployment For employment tracking capabilities
+ * @see WrestlerData For typed Action input
  * @see Height For height value object operations
  * @see CanChangeEmploymentDate For custom validation rules
  *
@@ -45,8 +45,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesEmployment;
-
     /**
      * The model instance being edited, or null for new wrestler creation.
      *
@@ -117,8 +115,7 @@ class CreateEditForm extends BaseForm
     /**
      * Employment start date for contract and career tracking.
      *
-     * Managed through ManagesEmployment trait for consistent employment
-     * tracking across all personnel types. Supports Carbon objects or
+     * Passed through WrestlerData to the create or update Action. Supports Carbon objects or
      * string dates for flexible input handling.
      *
      * @var Carbon|string|null Employment start date
@@ -141,7 +138,7 @@ class CreateEditForm extends BaseForm
      * - Uses Height value object for accurate calculations
      *
      *
-     * @see ManagesEmployment::$employment_date For employment date handling
+     * @see WrestlerData::$employment_date For employment date handling
      * @see Height::toInches() For height conversion calculations
      */
     public function loadExtraData(): void
@@ -188,6 +185,23 @@ class CreateEditForm extends BaseForm
             'weight' => $this->weight,
             'signature_move' => $this->signature_move,
         ];
+    }
+
+    public function toData(): WrestlerData
+    {
+        return new WrestlerData(
+            name: $this->name,
+            height: new Height($this->height_feet, $this->height_inches),
+            weight: $this->weight,
+            hometown: $this->hometown,
+            signature_move: $this->signature_move ?: null,
+            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+        );
+    }
+
+    public function wrestler(): Wrestler
+    {
+        return Wrestler::query()->findOrFail($this->modelId);
     }
 
     /**
