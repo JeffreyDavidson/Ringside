@@ -484,14 +484,14 @@ test('handles database exceptions gracefully', function () {
 });
 ```
 
-## Testing with Traits
+## Testing Typed Form Data
 
 ### Employment Management
-Test forms that use employment-related traits:
+Test employment inputs before they are passed to domain Actions:
 
 ```php
-test('validates employment date with ManagesEmployment trait', function () {
-    $form = new CreateEditForm(); // Assumes form uses ManagesEmployment
+test('validates an employment date', function () {
+    $form = new CreateEditForm();
     $form->employment_date = '2024-01-01';
     
     $form->validate();

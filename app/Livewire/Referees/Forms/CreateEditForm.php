@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Forms;
 
+use App\Data\Referees\RefereeData;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesEmployment;
 use App\Models\Roster\Referees\Referee;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +30,7 @@ use Illuminate\Support\Carbon;
  * @extends BaseForm<CreateEditForm, Referee>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesEmployment For employment tracking capabilities
+ * @see RefereeData For typed Action input
  * @see CanChangeEmploymentDate For custom validation rules
  *
  * @property string $first_name Referee's first name for identification
@@ -39,8 +39,6 @@ use Illuminate\Support\Carbon;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesEmployment;
-
     /**
      * The model instance being edited, or null for new referee creation.
      *
@@ -75,8 +73,7 @@ class CreateEditForm extends BaseForm
     /**
      * Employment start date for referee contract tracking.
      *
-     * Managed through ManagesEmployment trait for consistent employment
-     * tracking across all personnel types. Essential for payroll, benefits,
+     * Passed through RefereeData to the create or update Action. Essential for payroll, benefits,
      * scheduling availability, and operational planning for wrestling events
      * requiring qualified officiating staff.
      *
@@ -97,7 +94,7 @@ class CreateEditForm extends BaseForm
      * - Converts Carbon dates to string format for form display
      *
      *
-     * @see ManagesEmployment::$employment_date For employment date handling
+     * @see RefereeData::$employment_date For employment date handling
      */
     public function loadExtraData(): void
     {
@@ -128,6 +125,20 @@ class CreateEditForm extends BaseForm
         ];
         // Note: employment data is managed separately through
         // the employment relationship system
+    }
+
+    public function toData(): RefereeData
+    {
+        return new RefereeData(
+            first_name: $this->first_name,
+            last_name: $this->last_name,
+            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+        );
+    }
+
+    public function referee(): Referee
+    {
+        return Referee::query()->findOrFail($this->modelId);
     }
 
     /**
@@ -185,31 +196,4 @@ class CreateEditForm extends BaseForm
      * Extends the base store functionality to handle employment creation
      * for referees when employment dates are provided.
      */
-    public function store(): bool
-    {
-        $this->validate();
-
-        $wasCreating = $this->isCreating();
-        $result = $this->storeModel();
-
-        if ($result && $wasCreating) {
-            $this->handlePostCreationTasks();
-        }
-
-        return $result;
-    }
-
-    /**
-     * Handle post-creation tasks after referee creation.
-     *
-     * Creates employment record for new referees with employment dates.
-     * Called automatically by the store process after successful creation.
-     */
-    protected function handlePostCreationTasks(): void
-    {
-        // Create employment record for referees with employment dates
-        if ($this->employment_date) {
-            $this->handleEmploymentCreation();
-        }
-    }
 }

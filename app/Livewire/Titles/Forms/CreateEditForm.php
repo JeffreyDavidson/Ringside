@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Titles\Forms;
 
+use App\Data\Titles\TitleData;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\ManagesActivityPeriods;
 use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
 use Illuminate\Database\Eloquent\Model;
@@ -31,7 +31,7 @@ use Illuminate\Validation\Rule;
  * @extends BaseForm<CreateEditForm, Title>
  *
  * @see BaseForm For base form functionality and patterns
- * @see ManagesActivityPeriods For activation period tracking
+ * @see TitleData For typed Action input
  * @see CanChangeDebutDate For custom activation validation
  *
  * @property string $name Championship title name (must end with Title/Titles)
@@ -40,8 +40,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    use ManagesActivityPeriods;
-
     /**
      * The model instance being edited, or null for new title creation.
      *
@@ -76,8 +74,7 @@ class CreateEditForm extends BaseForm
      * Title activation start date for championship history tracking.
      *
      * Tracks when a championship title becomes active and available for
-     * competition. Managed through ManagesActivityPeriods trait for
-     * consistent activation tracking across the title system.
+     * competition. Passed through TitleData to the create or update Action.
      *
      * @var string|null Title activation start date (string to prevent auto-casting)
      */
@@ -96,7 +93,7 @@ class CreateEditForm extends BaseForm
      * - Converts Carbon dates to string format for form display
      *
      *
-     * @see ManagesActivityPeriods For activation period management
+     * @see TitleData::$debut_date For activity period input
      */
     public function loadExtraData(): void
     {
@@ -112,34 +109,6 @@ class CreateEditForm extends BaseForm
     /**
      * Store the title data with activity period handling.
      */
-    public function store(): bool
-    {
-        $this->validate();
-
-        $wasCreating = $this->isCreating();
-        $result = $this->storeModel();
-
-        if ($result && $wasCreating) {
-            $this->handlePostCreationTasks();
-        }
-
-        return $result;
-    }
-
-    /**
-     * Handle additional tasks after title creation.
-     *
-     * Creates activation record for new titles with start dates.
-     * Called automatically by the store pattern trait.
-     */
-    protected function handlePostCreationTasks(): void
-    {
-        // Create activation record for new titles with start dates
-        if ($this->start_date) {
-            $this->handleActivityPeriodCreation();
-        }
-    }
-
     /**
      * Prepare title data for model storage.
      *
@@ -158,6 +127,20 @@ class CreateEditForm extends BaseForm
         ];
         // Note: start_date is NOT included here because activation dates
         // are managed separately through the title's activation relationship system
+    }
+
+    public function toData(): TitleData
+    {
+        return new TitleData(
+            name: $this->name,
+            type: TitleType::from((string) $this->type),
+            debut_date: $this->start_date ? Carbon::parse($this->start_date) : null,
+        );
+    }
+
+    public function title(): Title
+    {
+        return Title::query()->findOrFail($this->modelId);
     }
 
     /**

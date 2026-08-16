@@ -308,29 +308,34 @@ class CreateEditForm extends BaseForm
 }
 ```
 
-## Trait Integration
+## Action Integration
 
-### Employment Management
+Forms validate input and produce typed data. The owning modal resolves persistence Actions so employment and other lifecycle records are written inside the domain transaction.
+
 ```php
 class CreateEditForm extends BaseForm
 {
-    use ManagesEmployment;
-    
-    public ?Carbon $employment_date = null;
-    
-    protected function rules(): array
+    public function toData(): ManagerData
     {
-        return [
-            'employment_date' => $this->employmentDateRules(),
-        ];
+        return new ManagerData(
+            first_name: $this->first_name,
+            last_name: $this->last_name,
+            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+        );
     }
-    
-    protected function getModelData(): array
+}
+
+class FormModal extends BaseFormModal
+{
+    protected function storeForm(): bool
     {
-        return [
-            'name' => $this->name,
-            'employment_date' => $this->employment_date,
-        ];
+        $this->form->validate();
+
+        $this->form->isCreating()
+            ? $this->createAction->handle($this->form->toData())
+            : $this->updateAction->handle($this->form->manager(), $this->form->toData());
+
+        return true;
     }
 }
 ```

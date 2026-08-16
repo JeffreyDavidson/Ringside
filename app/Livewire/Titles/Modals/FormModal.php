@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Titles\Modals;
 
+use App\Actions\Titles\CreateAction;
+use App\Actions\Titles\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Titles\Forms\CreateEditForm;
@@ -20,6 +22,16 @@ class FormModal extends BaseFormModal
     use GeneratesDummyData;
 
     public CreateEditForm $form;
+
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    {
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
+    }
 
     protected function getFormClass(): string
     {
@@ -65,6 +77,21 @@ class FormModal extends BaseFormModal
         }
 
         parent::openModal($modelId);
+    }
+
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if ($this->form->isEditing()) {
+            $this->updateAction->handle($this->form->title(), $this->form->toData());
+
+            return true;
+        }
+
+        $this->createAction->handle($this->form->toData());
+
+        return true;
     }
 
     public function render(): View

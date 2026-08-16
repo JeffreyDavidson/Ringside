@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Modals;
 
+use App\Actions\Referees\CreateAction;
+use App\Actions\Referees\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Referees\Forms\CreateEditForm;
@@ -25,6 +27,16 @@ class FormModal extends BaseFormModal
     public ?array $originalModelData = null;
 
     public CreateEditForm $form;
+
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    {
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
+    }
 
     protected function getFormClass(): string
     {
@@ -48,6 +60,21 @@ class FormModal extends BaseFormModal
             'last_name' => fn () => fake()->lastName(),
             'employment_date' => fn () => $this->generateOptionalEmploymentDate(),
         ];
+    }
+
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if ($this->form->isEditing()) {
+            $this->updateAction->handle($this->form->referee(), $this->form->toData());
+
+            return true;
+        }
+
+        $this->createAction->handle($this->form->toData());
+
+        return true;
     }
 
     public function mount(mixed $modelId = null): void
