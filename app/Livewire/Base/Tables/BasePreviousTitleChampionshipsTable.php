@@ -35,7 +35,6 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
     }
 
     /**
-     * Undocumented function
      *
      * @return array<int, Column>
      */

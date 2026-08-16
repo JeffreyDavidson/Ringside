@@ -21,15 +21,6 @@ class DateHelper
      * @param  Carbon|null  $date  The optional date to use
      * @return Carbon The resolved date (provided date or current timestamp)
      *
-     * @example
-     * ```php
-     * // Instead of: $deletionDate = $deletionDate ?? now();
-     * $deletionDate = DateHelper::resolveDate($deletionDate);
-     *
-     * // Both calls are equivalent:
-     * DateHelper::resolveDate(null)                    // Returns now()
-     * DateHelper::resolveDate(Carbon::parse('2024-01-01'))  // Returns 2024-01-01
-     * ```
      */
     public static function resolveDate(?Carbon $date): Carbon
     {

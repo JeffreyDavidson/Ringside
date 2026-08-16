@@ -20,19 +20,6 @@ use LogicException;
  * The table displays tag teams ordered by when the wrestler joined them,
  * showing only completed memberships (where left_at is not null).
  *
- * @example
- * ```php
- * // In a Blade template
- * <livewire:wrestlers.tables.previous-tag-teams-table :wrestler-id="$wrestler->id" />
- *
- * // In a Livewire component
- * public function render()
- * {
- *     return view('livewire.wrestler.show', [
- *         'wrestler' => $this->wrestler,
- *     ]);
- * }
- * ```
  */
 class PreviousTagTeams extends BasePreviousTagTeamsTable
 {
@@ -65,13 +52,6 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * @throws LogicException If wrestlerId is not set
      * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
      *
-     * @example
-     * ```php
-     * // The query finds pivot records like:
-     * // - TagTeamWrestler(wrestler_id: 1, tag_team_id: 5, joined_at: '1997-01-01', left_at: '1999-03-01')
-     * // - TagTeamWrestler(wrestler_id: 1, tag_team_id: 8, joined_at: '1999-04-01', left_at: '2000-01-01')
-     * // But excludes current memberships where left_at is null
-     * ```
      */
     public function builder(): Builder
     {
@@ -93,12 +73,6 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * the table to access both the pivot data and related tag team information.
      *
      *
-     * @example
-     * ```php
-     * // Ensures the query selects:
-     * // SELECT *, tag_team_id FROM tag_teams_wrestlers WHERE...
-     * // This allows access to both pivot and tag team data in the table
-     * ```
      */
     public function configure(): void
     {

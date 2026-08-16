@@ -15,14 +15,6 @@ namespace App\Enums\Shared;
  * entity types. This enum provides the common statuses used by multiple
  * entity types to ensure consistency in status management.
  *
- * @example
- * ```php
- * // Used by Stables
- * $stable->status = ActivationStatus::Active;
- *
- * // Used by Titles
- * $title->status = ActivationStatus::Inactive;
- * ```
  */
 enum ActivationStatus: string
 {

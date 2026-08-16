@@ -57,7 +57,6 @@ class MatchesTable extends DataTableComponent
     }
 
     /**
-     * Undocumented function
      *
      * @return array<int, Column>
      */

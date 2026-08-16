@@ -61,7 +61,6 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
      *
      * @return array<int, Column>
      */
@@ -80,7 +79,6 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
      *
      * @return array<int, Filter>
      */

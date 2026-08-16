@@ -21,29 +21,6 @@ use LogicException;
  *
  * @since 1.0.0
  *
- * @example
- * ```php
- * class CreateEditForm extends BaseForm
- * {
- *     use GeneratesDummyData;
- *
- *     public string $preview = '';
- *     public int $matchTypeId = 0;
- *
- *     protected function getDummyDataFields(): array
- *     {
- *         return [
- *             'preview' => fn() => fake()->paragraph() . ' Epic match!',
- *             'matchTypeId' => fn() => fake()->numberBetween(1, 10),
- *         ];
- *     }
- *
- *     public function fillWithDummyData(): void
- *     {
- *         $this->fillDummyFields();
- *     }
- * }
- * ```
  */
 trait GeneratesDummyData
 {
@@ -55,11 +32,6 @@ trait GeneratesDummyData
      * both callable generators and static values.
      *
      *
-     * @example
-     * ```php
-     * // Call this method to populate all defined dummy fields
-     * $this->fillDummyFields();
-     * ```
      */
     public function fillDummyFields(): void
     {
@@ -108,18 +80,6 @@ trait GeneratesDummyData
      *
      * @return array<string, callable|mixed> Array mapping field names to generators
      *
-     * @example
-     * ```php
-     * protected function getDummyDataFields(): array
-     * {
-     *     return [
-     *         'name' => fn() => $this->generateWrestlingName(),
-     *         'signature_move' => fn() => $this->generateSignatureMove(),
-     *         'weight' => fn() => fake()->numberBetween(150, 300),
-     *         'active' => true, // Static value
-     *     ];
-     * }
-     * ```
      */
     abstract protected function getDummyDataFields(): array;
 
@@ -132,12 +92,6 @@ trait GeneratesDummyData
      *
      * @return string A realistic wrestling name
      *
-     * @example
-     * Possible outputs:
-     * - "John Smith"
-     * - "Thunder Johnson"
-     * - "The Destroyer"
-     * - "Mike 'Steel' Rodriguez"
      */
     protected function generateWrestlingName(): string
     {
@@ -162,12 +116,6 @@ trait GeneratesDummyData
      *
      * @return string A realistic signature move name
      *
-     * @example
-     * Possible outputs:
-     * - "Stone Cold Stunner"
-     * - "Tombstone Slam"
-     * - "Submission"
-     * - "People's Elbow"
      */
     protected function generateSignatureMove(): string
     {
@@ -199,12 +147,6 @@ trait GeneratesDummyData
      *
      * @return string A realistic venue name
      *
-     * @example
-     * Possible outputs:
-     * - "Madison Square Garden"
-     * - "American Airlines Center"
-     * - "Chicago Stadium"
-     * - "Wells Fargo Arena"
      */
     protected function generateVenueName(): string
     {
@@ -232,12 +174,6 @@ trait GeneratesDummyData
      *
      * @return string A realistic championship title name
      *
-     * @example
-     * Possible outputs:
-     * - "Intercontinental Championship Title"
-     * - "Women's Tag Team Titles"
-     * - "World Heavyweight Title"
-     * - "United States Championship"
      */
     protected function generateChampionshipTitle(): string
     {
@@ -261,17 +197,6 @@ trait GeneratesDummyData
      *
      * @return array<string, mixed> Address components with proper typing
      *
-     * @example
-     * ```php
-     * $address = $this->generateUSAddress();
-     * // Returns:
-     * // [
-     * //     'street_address' => '123 Main Street',
-     * //     'city' => 'Chicago',
-     * //     'state' => 'IL',
-     * //     'zipcode' => 60601
-     * // ]
-     * ```
      */
     protected function generateUSAddress(): array
     {
@@ -302,17 +227,6 @@ trait GeneratesDummyData
      * @param  string  $maxPeriod  Maximum future period (e.g., '+3 months', '+1 year')
      * @return string|null Date string in Y-m-d format, or null
      *
-     * @example
-     * ```php
-     * // 80% chance of a date within 3 months
-     * $startDate = $this->generateFutureDate(0.8, '+3 months');
-     *
-     * // Always generate a date within 1 year
-     * $contractDate = $this->generateFutureDate(1.0, '+1 year');
-     *
-     * // 30% chance of a date within 6 months
-     * $optionalDate = $this->generateFutureDate(0.3, '+6 months');
-     * ```
      */
     protected function generateFutureDate(float $probability = 0.8, string $maxPeriod = '+3 months'): ?string
     {
@@ -337,12 +251,6 @@ trait GeneratesDummyData
      * @param  string  $maxPeriod  Maximum future period (default: '+3 month')
      * @return string|null The formatted date string or null
      *
-     * @example
-     * ```php
-     * // Common usage in FormModal getDummyDataFields()
-     * 'start_date' => fn () => $this->generateOptionalStartDate(),
-     * 'employment_date' => fn () => $this->generateOptionalEmploymentDate(0.7),
-     * ```
      */
     protected function generateOptionalStartDate(
         string $format = 'Y-m-d H:i:s',

@@ -14,13 +14,6 @@ use InvalidArgumentException;
  * Height is stored as feet and inches since this is the standard format
  * used in professional wrestling.
  *
- * @example
- * ```php
- * // Create a height for a 6'2" wrestler
- * $height = new Height(6, 2);
- * echo $height; // "6'2""
- * echo $height->toInches(); // 74
- * ```
  */
 readonly class Height
 {
@@ -63,12 +56,6 @@ readonly class Height
      *
      * @return string The formatted height (e.g., "6'2"")
      *
-     * @example
-     * ```php
-     * $height = new Height(6, 2);
-     * echo $height->__toString(); // "6'2""
-     * echo (string) $height;      // "6'2""
-     * ```
      */
     public function __toString(): string
     {
@@ -83,11 +70,6 @@ readonly class Height
      *
      * @return int The total height in inches
      *
-     * @example
-     * ```php
-     * $height = new Height(6, 2);
-     * echo $height->toInches(); // 74 (6*12 + 2)
-     * ```
      */
     public function toInches(): int
     {

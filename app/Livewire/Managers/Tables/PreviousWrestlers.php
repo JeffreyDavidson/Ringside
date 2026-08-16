@@ -46,7 +46,6 @@ class PreviousWrestlers extends DataTableComponent
     }
 
     /**
-     * Undocumented function
      *
      * @return array<int, Column>
      */

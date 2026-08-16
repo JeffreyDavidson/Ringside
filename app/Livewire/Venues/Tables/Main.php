@@ -39,7 +39,6 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
      *
      * @return array<int, Column>
      */
