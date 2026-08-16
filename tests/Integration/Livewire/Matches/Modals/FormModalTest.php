@@ -103,6 +103,40 @@ describe('FormModal Rendering', function () {
         // Match types are now enums, so they should all be listed
         $component->assertSee('Singles');
     });
+
+    it('fills the form with valid match data', function () {
+        $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+        $unavailableWrestler = Wrestler::factory()->create();
+        $unavailableReferee = Referee::factory()->create();
+
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->call('fillDummyFields')
+            ->assertSet('form.matchType', MatchType::Singles)
+            ->assertSet('form.competitors', function (array $competitors) use ($wrestlers): bool {
+                $competitorIds = collect($competitors)
+                    ->pluck('wrestlers')
+                    ->flatten()
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                return $competitorIds === $wrestlers->modelKeys();
+            })
+            ->assertSet('form.referees', [$referee->id])
+            ->assertSet('form.competitors', function (array $competitors) use ($unavailableWrestler): bool {
+                return ! collect($competitors)
+                    ->pluck('wrestlers')
+                    ->flatten()
+                    ->contains($unavailableWrestler->id);
+            })
+            ->assertSet('form.referees', fn (array $refereeIds): bool => ! in_array(
+                $unavailableReferee->id,
+                $refereeIds,
+                true,
+            ));
+    });
 });
 
 describe('FormModal Match Stipulation Integration', function () {

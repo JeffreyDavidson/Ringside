@@ -9,7 +9,6 @@ use App\Actions\Matches\UpdateMatchAction;
 use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
 use App\Livewire\Base\BaseForm;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
@@ -49,17 +48,9 @@ use Illuminate\Validation\Rules\Enum;
  * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see EventMatch For the underlying event match model
- *
- * @property string $preview Match promotional preview content
- * @property MatchType $matchType Match type enum
- * @property array<int, array{wrestlers?: array<int>, tag_teams?: array<int>}> $competitors Competitors grouped by side
- * @property array<int> $referees Array of referee IDs for match officials
- * @property array<int> $titles Array of title IDs at stake in the match
  */
 class CreateEditForm extends BaseForm
 {
-    use GeneratesDummyData;
-
     /**
      * The model instance being edited, or null for new event match creation.
      *
@@ -131,6 +122,18 @@ class CreateEditForm extends BaseForm
      * @var array<int> Title database IDs
      */
     public array $titles = [];
+
+    public function resetCompetitorsFor(MatchType $matchType): void
+    {
+        $sideCount = $matchType->usesIndividualCompetitorSides()
+            ? 1
+            : ($matchType->numberOfSides() ?? 1);
+
+        $this->competitors = array_fill(0, $sideCount, [
+            'wrestlers' => [],
+            'tag_teams' => [],
+        ]);
+    }
 
     /**
      * Store a new event match.
@@ -459,26 +462,6 @@ class CreateEditForm extends BaseForm
             'competitors' => 'competitors',
             'referees' => 'referees',
             'titles' => 'championship titles',
-        ];
-    }
-
-    /**
-     * Get dummy data field definitions for event match forms.
-     *
-     * Provides realistic fake data generators for development and testing
-     * purposes, allowing quick population of match forms with wrestling-
-     * appropriate dummy data.
-     *
-     * @return array<string, callable|mixed> Array mapping field names to generators
-     */
-    protected function getDummyDataFields(): array
-    {
-        return [
-            'preview' => fn () => fake()->paragraph(2).' This epic showdown promises to deliver non-stop action!',
-            'matchType' => fn () => fake()->randomElement(MatchType::cases()),
-            'competitors' => fn () => fake()->randomElements(range(1, 50), fake()->numberBetween(2, 6)), // 2-6 wrestlers
-            'referees' => fn () => [fake()->numberBetween(1, 20)], // Single referee
-            'titles' => fn () => fake()->boolean(0.3) ? fake()->randomElements(range(1, 15), fake()->numberBetween(1, 2)) : [], // 30% chance of title match
         ];
     }
 }

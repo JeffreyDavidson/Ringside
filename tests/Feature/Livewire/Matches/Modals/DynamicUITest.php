@@ -6,6 +6,7 @@ use App\Enums\MatchType;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Users\User;
+use Livewire\Attributes\Locked;
 
 use function Pest\Livewire\livewire;
 
@@ -16,6 +17,12 @@ beforeEach(function () {
 });
 
 describe('Dynamic Match Type UI', function () {
+    it('locks the event context against client-side changes', function () {
+        $eventId = new ReflectionProperty(FormModal::class, 'eventId');
+
+        expect($eventId->getAttributes(Locked::class))->toHaveCount(1);
+    });
+
     it('shows helper text when no match type is selected', function () {
         $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal');

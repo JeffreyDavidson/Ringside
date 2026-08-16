@@ -11,37 +11,17 @@ use App\Livewire\Concerns\Data\PresentsRefereesList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsTitlesList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
+use App\Livewire\Matches\Enums\CompetitorSelectionLayout;
 use App\Livewire\Matches\Forms\CreateEditForm;
+use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
-use App\Models\Referees\Referee;
-use App\Models\Titles\Title;
-use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
-use Log;
+use Livewire\Attributes\Locked;
 
-/**
- * Livewire modal component for wrestling match management within events.
- *
- * Manages the creation and editing of individual wrestling matches that occur
- * during events. Handles complex relationships between wrestlers, referees,
- * titles, match types, and promotional content. Supports dynamic view rendering
- * based on match type requirements.
- *
- * Key Features:
- * - Modal-based event match form interface
- * - Match type and competitor assignment
- * - Referee and title assignment
- * - Dynamic view rendering based on match type
- * - Wrestling match data generation for testing
- *
- * @extends BaseFormModal<CreateEditForm, EventMatch>
- *
- * @see BaseFormModal For modal functionality and patterns
- * @see EventMatch For the underlying match model structure
- */
+/** @extends BaseFormModal<CreateEditForm, EventMatch> */
 class FormModal extends BaseFormModal
 {
     use PresentsMatchTypesList;
@@ -50,61 +30,34 @@ class FormModal extends BaseFormModal
     use PresentsTitlesList;
     use PresentsWrestlersList;
 
-    /**
-     * Event identifier for match association.
-     *
-     * Required context for all matches since they cannot exist without an event.
-     * Comes from route model binding in the parent component.
-     *
-     * @var int Event database ID
-     */
-    public int $eventId;
+    #[Locked]
+    public int $eventId = 0;
 
-    /**
-     * String name to render view for each match type.
-     *
-     * Determines which Blade template to use for rendering match-specific
-     * form fields based on the selected match type (singles, tag team, etc.).
-     *
-     * @var string View template identifier for dynamic rendering
-     */
-    public string $subViewToUse;
-
-    /**
-     * Get the form class that handles event match data validation and processing.
-     *
-     * @return class-string<CreateEditForm> The fully qualified class name of CreateEditForm
-     */
     public CreateEditForm $form;
+
+    private MatchFormDummyData $dummyData;
+
+    public function boot(MatchFormDummyData $dummyData): void
+    {
+        $this->dummyData = $dummyData;
+    }
 
     protected function getFormClass(): string
     {
         return CreateEditForm::class;
     }
 
-    /**
-     * Get the model class that represents event match entities.
-     *
-     * @return class-string<EventMatch> The fully qualified class name of EventMatch model
-     */
     protected function getModelClass(): string
     {
         return EventMatch::class;
     }
 
-    /**
-     * Get the Blade view path for rendering the event match form modal.
-     *
-     * @return string The view path relative to resources/views
-     */
     protected function getModalPath(): string
     {
         return 'livewire.matches.modals.form-modal';
     }
 
-    /**
-     * @return array<int, string>
-     */
+    /** @return array<int, string> */
     #[Computed(cache: true, key: 'active-match-stipulations-list', seconds: 180)]
     public function getMatchStipulations(): array
     {
@@ -115,189 +68,27 @@ class FormModal extends BaseFormModal
             ->all();
     }
 
-    /**
-     * Generate dummy data fields for event match testing and development.
-     *
-     * Returns field generators for event match data including match types,
-     * competitor assignments, referee assignments, title stakes, and promotional content.
-     *
-     * @return array<string, callable(): mixed> Array mapping field names to generators
-     */
+    /** @return array<string, mixed> */
     protected function getDummyDataFields(): array
     {
-        return [
-            'matchType' => fn () => $this->getRandomMatchType(),
-            'referees' => fn () => $this->generateRefereeAssignments(),
-            'titles' => fn () => $this->generateTitleAssignments(),
-            'wrestlers' => fn () => $this->generateWrestlerAssignments(),
-            'preview' => fn () => $this->generateMatchPreview(),
-        ];
+        return $this->dummyData->generate();
     }
 
-    /**
-     * Generate random event match data for testing and development.
-     *
-     * Populates the form with realistic wrestling match data including
-     * match types, competitor assignments, referee assignments, title
-     * stakes, and promotional content.
-     */
-    public function generateRandomData(): void
-    {
-        $this->form->fill([
-            'matchType' => $this->getRandomMatchType(),
-            'referees' => $this->generateRefereeAssignments(),
-            'titles' => $this->generateTitleAssignments(),
-            'wrestlers' => $this->generateWrestlerAssignments(),
-            'preview' => $this->generateMatchPreview(),
-        ]);
-    }
-
-    /**
-     * Get a random match type for testing.
-     *
-     * Returns a random MatchType enum case for various wrestling match styles
-     * including singles, tag team, ladder matches, cage matches, etc.
-     *
-     * @return MatchType A random match type enum
-     */
-    protected function getRandomMatchType(): MatchType
-    {
-        return fake()->randomElement(MatchType::cases());
-    }
-
-    /**
-     * Generate referee assignments for the match.
-     *
-     * Creates referee assignments appropriate for different match types.
-     * Most matches have one referee, but special matches may require
-     * additional officials.
-     *
-     * @return array<int> Array of referee IDs
-     */
-    protected function generateRefereeAssignments(): array
-    {
-        $refereeCount = fake()->randomFloat(null, 0, 1) < 0.9 ? 1 : 2;
-
-        return Referee::query()
-            ->inRandomOrder()
-            ->limit($refereeCount)
-            ->pluck('id')
-            ->all();
-    }
-
-    /**
-     * Generate title assignments for championship matches.
-     *
-     * Creates title stakes for matches, with some matches being for
-     * championships and others being non-title matches.
-     *
-     * @return array<int> Array of title IDs (empty for non-title matches)
-     */
-    protected function generateTitleAssignments(): array
-    {
-        if (fake()->randomFloat(null, 0, 1) < 0.3) {
-            return Title::query()
-                ->inRandomOrder()
-                ->limit(1)
-                ->pluck('id')
-                ->all();
-        }
-
-        return [];
-    }
-
-    /**
-     * Generate wrestler assignments for the match.
-     *
-     * Creates wrestler assignments appropriate for different match types.
-     * Singles matches get 2 wrestlers, tag team matches get 4, etc.
-     *
-     * @return array<int> Array of wrestler IDs
-     */
-    protected function generateWrestlerAssignments(): array
-    {
-        $wrestlerCount = fake()->numberBetween(2, 4);
-
-        return Wrestler::query()
-            ->inRandomOrder()
-            ->limit($wrestlerCount)
-            ->pluck('id')
-            ->all();
-    }
-
-    /**
-     * Generate promotional preview content for wrestling matches.
-     *
-     * Creates realistic promotional text that would be used to advertise
-     * wrestling matches, including storyline elements, competitor highlights,
-     * and match stipulations.
-     *
-     * @return string Generated match preview text
-     */
-    protected function generateMatchPreview(): string
-    {
-        $matchIntros = [
-            'In what promises to be an explosive encounter',
-            'Two wrestling titans collide when',
-            'The stage is set for an epic showdown as',
-            'Tensions reach a boiling point in this highly anticipated match featuring',
-            'Get ready for non-stop action when',
-            'The rivalry intensifies as',
-        ];
-
-        $matchElements = [
-            'championship gold hangs in the balance',
-            'personal vendettas will be settled',
-            'only one competitor can emerge victorious',
-            'careers and reputations are on the line',
-            'months of buildup culminate in this decisive battle',
-            'the wrestling world will witness something special',
-        ];
-
-        $callsToAction = [
-            "Don't miss this incredible matchup!",
-            "You won't want to blink during this one!",
-            'This match could steal the entire show!',
-            'Witness wrestling at its absolute finest!',
-            'The action starts when the bell rings!',
-            'This is what wrestling is all about!',
-        ];
-
-        return fake()->randomElement($matchIntros).' '.
-               fake()->randomElement($matchElements).'. '.
-               fake()->randomElement($callsToAction);
-    }
-
-    /**
-     * Component mount lifecycle - properly initialize eventId before form creation.
-     *
-     * @param  mixed  $modelId  Optional model ID for editing (Livewire standard)
-     */
     public function mount(mixed $modelId = null): void
     {
         parent::mount($modelId);
 
-        // Set eventId on form - this should always happen since eventId is required context
-        if ($this->eventId > 0 && $this->form) {
+        if ($this->eventId > 0) {
             $this->form->eventId = $this->eventId;
-        } elseif ($this->form) {
-            // Log warning if eventId is not properly set (development aid)
-            Log::warning('Matches FormModal: eventId not properly initialized', [
-                'eventId' => $this->eventId,
-                'component' => static::class,
-            ]);
         }
     }
 
     public function openModal(mixed $modelId = null): void
     {
-        // Check authorization before opening modal
-        if ($modelId !== null) {
-            // Editing existing match - check update permission
-            Gate::authorize('update', EventMatch::class);
-        } else {
-            // Creating new match - check create permission
+        if ($modelId === null) {
             Gate::authorize('create', EventMatch::class);
+        } else {
+            Gate::authorize('update', EventMatch::query()->findOrFail($modelId));
         }
 
         parent::openModal($modelId);
@@ -305,131 +96,44 @@ class FormModal extends BaseFormModal
 
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
-            return 'Edit Match';
-        }
-
-        return 'Create Match';
+        return isset($this->model) ? 'Edit Match' : 'Create Match';
     }
 
     public function submitForm(): bool
     {
-        // Store whether we're creating or updating before the form submission
         $isCreating = $this->form->isCreating();
+        $wasStored = parent::submitForm();
 
-        $result = parent::submitForm();
-
-        if ($result) {
-            // Dispatch the appropriate event based on whether we created or updated
-            if ($isCreating) {
-                $this->dispatch('matchCreated');
-            } else {
-                $this->dispatch('matchUpdated');
-            }
-
-            // Reset the form after successful submission
-            $this->form->reset();
+        if (! $wasStored) {
+            return false;
         }
 
-        return $result;
+        $this->dispatch($isCreating ? 'matchCreated' : 'matchUpdated');
+        $this->form->reset();
+
+        return true;
     }
 
-    /**
-     * Handle match type selection changes for dynamic UI updates.
-     *
-     * When the match type changes, we need to:
-     * 1. Clear incompatible competitor data
-     * 2. Initialize the correct competitor structure
-     * 3. Reset validation state
-     */
     public function updatedFormMatchType(mixed $value): void
     {
-        if (! $value) {
-            return;
-        }
+        $matchType = $value instanceof MatchType ? $value : MatchType::tryFrom((string) $value);
 
-        // Clear existing competitor data when match type changes
-        $this->form->competitors = [];
-
-        // Initialize competitor structure based on match type
-        $matchType = $value instanceof MatchType ? $value : MatchType::tryFrom($value);
-        if ($matchType) {
-            $this->initializeCompetitorStructure($matchType);
+        if ($matchType !== null) {
+            $this->form->resetCompetitorsFor($matchType);
         }
     }
 
-    /**
-     * Get the currently selected match type enum.
-     */
-    public function getSelectedMatchType(): ?MatchType
-    {
-        return $this->form->matchType;
-    }
-
-    /**
-     * Check if the current match type allows wrestlers.
-     */
-    public function getMatchTypeAllowsWrestlersProperty(): bool
-    {
-        $matchType = $this->getSelectedMatchType();
-
-        return $matchType ? $matchType->allowsWrestlers() : true;
-    }
-
-    /**
-     * Check if the current match type allows tag teams.
-     */
     public function getMatchTypeAllowsTagTeamsProperty(): bool
     {
-        $matchType = $this->getSelectedMatchType();
-
-        return $matchType ? $matchType->allowsTagTeams() : false;
+        return $this->form->matchType?->allowsTagTeams() ?? false;
     }
 
-    /**
-     * Get the number of sides required for the current match type.
-     */
-    public function getNumberOfSidesProperty(): int
+    #[Computed]
+    public function competitorSelectionLayout(): ?CompetitorSelectionLayout
     {
-        $matchType = $this->getSelectedMatchType();
-
-        return $matchType?->numberOfSides() ?? 1;
-    }
-
-    /**
-     * Get the match type name for template logic.
-     */
-    public function getMatchTypeNameProperty(): string
-    {
-        $matchType = $this->getSelectedMatchType();
-
-        return $matchType ? mb_strtolower($matchType->name) : '';
-    }
-
-    /**
-     * Initialize the competitor structure based on match type.
-     */
-    private function initializeCompetitorStructure(MatchType $matchType): void
-    {
-        $numberOfSides = $matchType->numberOfSides() ?? 1;
-        $competitors = [];
-
-        if ($matchType->usesIndividualCompetitorSides()) {
-            $competitors[0] = [
-                'wrestlers' => [],
-                'tag_teams' => [],
-            ];
-        } else {
-            // Other matches: Initialize empty competitor structure for each side
-            for ($i = 0; $i < $numberOfSides; $i++) {
-                $competitors[$i] = [
-                    'wrestlers' => [],
-                    'tag_teams' => [],
-                ];
-            }
-        }
-
-        $this->form->competitors = $competitors;
+        return $this->form->matchType === null
+            ? null
+            : CompetitorSelectionLayout::forMatchType($this->form->matchType);
     }
 
     public function render(): View

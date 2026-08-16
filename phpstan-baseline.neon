@@ -91,18 +91,6 @@ parameters:
 			path: app/Livewire/Managers/Components/Actions.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/Livewire/Matches/Forms/CreateEditForm.php
-
-		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/Livewire/Matches/Modals/FormModal.php
-
-		-
 			message: '#^Instanceof between Illuminate\\View\\View and Illuminate\\Contracts\\View\\View will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
