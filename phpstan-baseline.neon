@@ -27,20 +27,8 @@ parameters:
 		-
 			message: '#^Access to an undefined property App\\Livewire\\Base\\BaseFormModal\<TForm of App\\Livewire\\Base\\BaseForm, TModel of Illuminate\\Database\\Eloquent\\Model\>\:\:\$form\.$#'
 			identifier: property.notFound
-			count: 4
+			count: 3
 			path: app/Livewire/Base/BaseFormModal.php
-
-		-
-			message: '#^PHPDoc tag @var for property App\\Livewire\\Base\\BaseModal\:\:\$modelForm with type \(TModelForm of App\\Livewire\\Base\\BaseForm\)\|null is not subtype of native type App\\Livewire\\Base\\BaseForm\.$#'
-			identifier: property.phpDocType
-			count: 1
-			path: app/Livewire/Base/BaseModal.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between TModelForm of App\\Livewire\\Base\\BaseForm and null will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Livewire/Base/BaseModal.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'

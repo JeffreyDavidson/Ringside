@@ -56,7 +56,6 @@ class FormModal extends BaseFormModal
 
         // Set the title field to use full_name instead of name
         $this->modelTitleField = 'full_name';
-        $this->titleField = 'full_name';
     }
 
     public function openModal(mixed $modelId = null): void

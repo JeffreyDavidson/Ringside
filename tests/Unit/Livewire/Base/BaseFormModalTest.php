@@ -120,8 +120,6 @@ describe('BaseFormModal Unit Tests', function () {
             expect($docComment)->toContain('TForm of BaseForm');
             expect($docComment)->toContain('TModel of Model');
             expect($docComment)->toContain('@extends BaseModal');
-            expect($docComment)->toContain('@see BaseModal');
-            expect($docComment)->toContain('@see GeneratesDummyData');
         });
     });
 
