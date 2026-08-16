@@ -117,3 +117,10 @@ test('domain resource routes are named and authorized at the route', function ()
 
     expect($routeCount)->toBeGreaterThan(0);
 });
+
+test('application does not expose an API route surface', function () {
+    $apiRoutes = collect(Route::getRoutes()->getRoutes())
+        ->filter(fn (IlluminateRoute $route): bool => str_starts_with($route->uri(), 'api/'));
+
+    expect($apiRoutes)->toBeEmpty();
+});
