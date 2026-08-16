@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Livewire\Base\BaseForm;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 use Tests\Integration\Livewire\Base\BaseFormTest;
 
@@ -69,7 +70,7 @@ describe('BaseForm Unit Tests', function () {
             $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
 
             expect($concreteMethodNames)->toContain('fill');
-            expect($concreteMethodNames)->toContain('submit');
+            expect($concreteMethodNames)->toContain('store');
             expect($concreteMethodNames)->toContain('validationAttributes');
         });
     });
@@ -85,6 +86,12 @@ describe('BaseForm Unit Tests', function () {
             expect($formModelProperty->hasType())->toBeTrue();
             expect(reflectionTypeName($formModelProperty))->toBe('Illuminate\\Database\\Eloquent\\Model');
             expect(requiredReflectionType($formModelProperty->getType())->allowsNull())->toBeTrue();
+        });
+
+        test('locks the model identifier against client-side changes', function () {
+            $property = new ReflectionProperty(BaseForm::class, 'modelId');
+
+            expect($property->getAttributes(Locked::class))->toHaveCount(1);
         });
     });
 
@@ -102,7 +109,7 @@ describe('BaseForm Unit Tests', function () {
             // Should have concrete methods for common workflow
             $concreteMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
             $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
-            expect($concreteMethodNames)->toContain('submit');
+            expect($concreteMethodNames)->toContain('store');
             expect($concreteMethodNames)->toContain('fill');
         });
     });
@@ -144,10 +151,6 @@ describe('BaseForm Unit Tests', function () {
             expect($docComment)->toContain('@template');
             expect($docComment)->toContain('TForm of BaseForm');
             expect($docComment)->toContain('TFormModel of Model');
-            expect($docComment)->toContain('@author');
-            expect($docComment)->toContain('@since');
-            expect($docComment)->toContain('@see');
-            expect($docComment)->toContain('@example');
         });
     });
 

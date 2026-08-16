@@ -23,7 +23,6 @@ class FormModal extends BaseFormModal
 
         // Override title field to use full_name for managers
         $this->modelTitleField = 'full_name';
-        $this->titleField = 'full_name';
     }
 
     public CreateEditForm $form;

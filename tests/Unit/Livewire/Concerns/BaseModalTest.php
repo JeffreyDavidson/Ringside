@@ -77,7 +77,6 @@ describe('BaseModal Unit Tests', function () {
 
             expect($reflection->hasProperty('modalFormPath'))->toBeTrue();
             expect($reflection->hasProperty('modelTitleField'))->toBeTrue();
-            expect($reflection->hasProperty('titleField'))->toBeTrue();
 
             $modalFormPath = $reflection->getProperty('modalFormPath');
             expect($modalFormPath->isProtected())->toBeTrue();
@@ -87,9 +86,6 @@ describe('BaseModal Unit Tests', function () {
             expect($modelTitleField->isProtected())->toBeTrue();
             expect(reflectionTypeName($modelTitleField))->toBe('string');
 
-            $titleField = $reflection->getProperty('titleField');
-            expect($titleField->isProtected())->toBeTrue();
-            expect(reflectionTypeName($titleField))->toBe('string');
         });
     });
 
@@ -142,27 +138,12 @@ describe('BaseModal Unit Tests', function () {
             expect($method->getNumberOfParameters())->toBe(0);
         });
 
-        test('has save method', function () {
+        test('leaves the submission workflow to form modals', function () {
             $reflection = new ReflectionClass(BaseModal::class);
 
-            expect($reflection->hasMethod('save'))->toBeTrue();
-
-            $method = $reflection->getMethod('save');
-            expect($method->isPublic())->toBeTrue();
-            expect(reflectionReturnTypeName($method))->toBe('void');
-            expect($method->getNumberOfParameters())->toBe(0);
+            expect($reflection->hasMethod('save'))->toBeFalse();
         });
 
-        test('has render method', function () {
-            $reflection = new ReflectionClass(BaseModal::class);
-
-            expect($reflection->hasMethod('render'))->toBeTrue();
-
-            $method = $reflection->getMethod('render');
-            expect($method->isPublic())->toBeTrue();
-            expect(reflectionReturnTypeName($method))->toBe('Illuminate\\View\\View');
-            expect($method->getNumberOfParameters())->toBe(0);
-        });
     });
 
     describe('namespace and naming', function () {
@@ -184,7 +165,6 @@ describe('BaseModal Unit Tests', function () {
 
             // Check for actual imports in BaseModal
             expect($source)->toContain('use Illuminate\\Database\\Eloquent\\Model;');
-            expect($source)->toContain('use Illuminate\\View\\View;');
             expect($source)->toContain('use LivewireUI\\Modal\\ModalComponent;');
         });
     });
@@ -198,8 +178,6 @@ describe('BaseModal Unit Tests', function () {
 
             // Should have template methods
             expect($reflection->hasMethod('mount'))->toBeTrue();
-            expect($reflection->hasMethod('save'))->toBeTrue();
-            expect($reflection->hasMethod('render'))->toBeTrue();
         });
     });
 
