@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousTitleChampionships;
+use App\Models\TagTeams\TagTeam;
+use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Models\Users\User;
 use App\Models\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
@@ -63,6 +66,27 @@ describe('PreviousTitleChampionshipsTable Query Building', function () {
 });
 
 describe('PreviousTitleChampionshipsTable Rendering', function () {
+    it('links to the champion who held the title before the wrestler', function () {
+        $title = Title::factory()->create();
+        $previousChampion = TagTeam::factory()->create(['name' => 'Previous Champions']);
+        TitleChampionship::factory()
+            ->for($title)
+            ->forTagTeam($previousChampion)
+            ->wonOn('2020-01-01')
+            ->lostOn('2020-06-01')
+            ->create();
+        TitleChampionship::factory()
+            ->for($title)
+            ->forWrestler($this->wrestler)
+            ->wonOn('2020-06-01')
+            ->lostOn('2021-01-01')
+            ->create();
+
+        testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id])
+            ->assertSee('Previous Champions')
+            ->assertSeeHtml(route('tag-teams.show', $previousChampion));
+    });
+
     it('can render with wrestler id set', function () {
         $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 

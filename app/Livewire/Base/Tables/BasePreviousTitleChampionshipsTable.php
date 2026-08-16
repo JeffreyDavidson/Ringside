@@ -9,9 +9,10 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
+use App\Models\Wrestlers\Wrestler;
 use App\Queries\Titles\TitleChampionshipQuery;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends DataTableComponent<TitleChampionship>
@@ -45,11 +46,8 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
                 ->title(fn (TitleChampionship $row) => $row->title->name)
                 ->location(fn (TitleChampionship $row) => route('titles.show', $row->title)),
             LinkColumn::make(__('championships.previous_champion'))
-                ->title(fn (TitleChampionship $row) => 'N/A') // TODO: Implement previous champion lookup
-                ->location(function (Model $row) {
-                    // TODO: Implement previous champion navigation
-                    return null;
-                }),
+                ->title(fn (TitleChampionship $row) => $row->previousChampionship?->champion->name ?? 'N/A')
+                ->location(fn (TitleChampionship $row) => $this->championLocation($row)),
             DateColumn::make(__('championships.dates_held'), 'won_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('championships.dates_held'), 'lost_at')
@@ -57,5 +55,20 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
             Column::make(__('championships.days_held'))
                 ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
         ];
+    }
+
+    private function championLocation(TitleChampionship $championship): ?string
+    {
+        return match (true) {
+            $championship->previousChampionship?->champion instanceof Wrestler => route(
+                'wrestlers.show',
+                $championship->previousChampionship->champion,
+            ),
+            $championship->previousChampionship?->champion instanceof TagTeam => route(
+                'tag-teams.show',
+                $championship->previousChampionship->champion,
+            ),
+            default => null,
+        };
     }
 }

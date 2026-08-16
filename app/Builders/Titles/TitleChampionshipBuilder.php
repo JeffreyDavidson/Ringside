@@ -55,4 +55,19 @@ class TitleChampionshipBuilder extends Builder
 
         return $this;
     }
+
+    public function withPreviousChampionshipId(): static
+    {
+        $this->addSelect([
+            'previous_championship_id' => TitleChampionship::query()
+                ->from('titles_championships as previous_championships')
+                ->select('previous_championships.id')
+                ->whereColumn('previous_championships.title_id', 'titles_championships.title_id')
+                ->whereColumn('previous_championships.won_at', '<', 'titles_championships.won_at')
+                ->orderByDesc('previous_championships.won_at')
+                ->limit(1),
+        ]);
+
+        return $this;
+    }
 }
