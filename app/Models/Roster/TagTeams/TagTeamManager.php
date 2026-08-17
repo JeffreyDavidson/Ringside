@@ -7,6 +7,7 @@ namespace App\Models\Roster\TagTeams;
 use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -36,10 +37,9 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable('tag_team_id', 'manager_id', 'hired_at', 'fired_at')]
 #[UseEloquentBuilder(ManagerAssignmentBuilder::class)]
+#[Table(name: 'tag_teams_managers')]
 class TagTeamManager extends Pivot
 {
-    protected $table = 'tag_teams_managers';
-
     /**
      * Get the attributes that should be cast.
      *

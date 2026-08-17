@@ -129,7 +129,7 @@ abstract class DataTableComponent extends Component
         $columns = $this->columns();
 
         if (method_exists($this, 'appendColumns')) {
-            $columns = array_merge($columns, $this->appendColumns());
+            return array_merge($columns, $this->appendColumns());
         }
 
         return $columns;
@@ -167,7 +167,7 @@ abstract class DataTableComponent extends Component
         }
 
         $searchTerm = $this->search;
-        $searchableColumns = collect($this->getColumns())->filter(fn (Column $col) => $col->isSearchable());
+        $searchableColumns = collect($this->getColumns())->filter(fn (Column $col): bool => $col->isSearchable());
 
         if ($searchableColumns->isEmpty()) {
             return;

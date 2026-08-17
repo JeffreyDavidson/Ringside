@@ -56,7 +56,7 @@ class Main extends BaseTable
         return [
             LinkColumn::make(__('event-matches.event'))
                 ->title(fn (EventMatch $row) => $row->event->name)
-                ->location(fn (EventMatch $row) => route('events.show', $row->event)),
+                ->location(fn (EventMatch $row): string => route('events.show', $row->event)),
             Column::make(__('event-matches.match_number'), 'match_number')
                 ->searchable(),
             Column::make(__('event-matches.match_type'), 'match_type')

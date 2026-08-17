@@ -96,10 +96,10 @@ trait GeneratesDummyData
     protected function generateWrestlingName(): string
     {
         $patterns = [
-            fn () => fake()->firstName().' '.fake()->lastName(),
-            fn () => fake()->word().' '.fake()->lastName(),
-            fn () => 'The '.fake()->word(),
-            fn () => fake()->firstName().' "'.fake()->word().'" '.fake()->lastName(),
+            fn (): string => fake()->firstName().' '.fake()->lastName(),
+            fn (): string => fake()->word().' '.fake()->lastName(),
+            fn (): string => 'The '.fake()->word(),
+            fn (): string => fake()->firstName().' "'.fake()->word().'" '.fake()->lastName(),
         ];
 
         $pattern = $this->randomGenerator($patterns);

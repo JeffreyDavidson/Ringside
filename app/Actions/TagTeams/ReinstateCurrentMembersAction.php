@@ -22,7 +22,7 @@ class ReinstateCurrentMembersAction
     {
         $wrestlers = $tagTeam->currentWrestlers()
             ->get()
-            ->filter(fn (Wrestler $wrestler) => $wrestler->isSuspended());
+            ->filter(fn (Wrestler $wrestler): bool => $wrestler->isSuspended());
 
         foreach ($wrestlers as $wrestler) {
             $this->reinstateWrestler->handle($wrestler, $reinstatementDate);
@@ -30,7 +30,7 @@ class ReinstateCurrentMembersAction
 
         $managers = $tagTeam->currentManagers()
             ->get()
-            ->filter(fn (Manager $manager) => $manager->isSuspended());
+            ->filter(fn (Manager $manager): bool => $manager->isSuspended());
 
         foreach ($managers as $manager) {
             $this->reinstateManager->handle($manager, $reinstatementDate);

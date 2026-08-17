@@ -21,7 +21,7 @@ trait HasNameSearch
     {
         $trimmedTerm = mb_trim($searchTerm);
 
-        return $this->where(function ($query) use ($trimmedTerm) {
+        return $this->where(function ($query) use ($trimmedTerm): void {
             $query->whereLike('first_name', $trimmedTerm)
                 ->orWhereLike('last_name', $trimmedTerm)
                 ->orWhereLike('first_name', $trimmedTerm.' %')

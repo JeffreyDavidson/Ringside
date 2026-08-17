@@ -41,13 +41,13 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('tag-teams.name'))
-                ->title(fn (TagTeamWrestler $row) => $this->tagTeamName($row))
-                ->location(fn (TagTeamWrestler $row) => $row->tagTeam === null
+                ->title(fn (TagTeamWrestler $row): string => $this->tagTeamName($row))
+                ->location(fn (TagTeamWrestler $row): ?string => $row->tagTeam === null
                     ? null
                     : route('tag-teams.show', $row->tagTeam)),
             LinkColumn::make(__('tag-teams.partner'))
-                ->title(fn (TagTeamWrestler $row) => $this->getPartnerName($row))
-                ->location(fn (TagTeamWrestler $row) => $this->getPartnerRoute($row)),
+                ->title(fn (TagTeamWrestler $row): string => $this->getPartnerName($row))
+                ->location(fn (TagTeamWrestler $row): string => $this->getPartnerRoute($row)),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('stables.date_left'), 'left_at')

@@ -50,7 +50,7 @@ class FormModal extends BaseFormModal
         return [
             'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
             'signature_move' => fn () => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
-            'employment_date' => fn () => $this->generateOptionalEmploymentDate(),
+            'employment_date' => fn (): ?string => $this->generateOptionalEmploymentDate(),
             'wrestlerA' => fn () => $wrestlerIds->first(),
             'wrestlerB' => fn () => $wrestlerIds->get(1),
         ];

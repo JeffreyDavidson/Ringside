@@ -87,7 +87,7 @@ class Main extends BaseTable
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function (TagTeamBuilder $builder, string $value) {
+                ->filter(function (TagTeamBuilder $builder, string $value): void {
                     /** @var TagTeamBuilder<TagTeam> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
