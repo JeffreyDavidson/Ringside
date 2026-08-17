@@ -6,6 +6,7 @@ namespace App\Livewire\Table\Filters;
 
 use App\Livewire\Table\Filter;
 
+/** @phpstan-consistent-constructor */
 class SelectFilter extends Filter
 {
     /** @var array<string, string> */

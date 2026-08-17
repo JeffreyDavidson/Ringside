@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
+/** @phpstan-consistent-constructor */
 class Column
 {
     protected string $field;
@@ -126,9 +127,7 @@ class Column
     public function resolveValue(mixed $row): string
     {
         if ($this->viewPath) {
-            $view = view($this->viewPath, ['row' => $row]);
-
-            return $view instanceof View ? $view->render() : (string) $view;
+            return view($this->viewPath, ['row' => $row])->render();
         }
 
         if ($this->labelCallback) {

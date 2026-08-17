@@ -23,27 +23,3 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Middleware/AddWrestlingContext.php
-
-		-
-			message: '#^Instanceof between Illuminate\\View\\View and Illuminate\\Contracts\\View\\View will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: app/Livewire/Table/Column.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: app/Livewire/Table/Column.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: app/Livewire/Table/Filters/DateRangeFilter.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 1
-			path: app/Livewire/Table/Filters/SelectFilter.php

@@ -7,6 +7,7 @@ namespace App\Livewire\Table\Filters;
 use App\Livewire\Table\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
+/** @phpstan-consistent-constructor */
 class DateRangeFilter extends Filter
 {
     /** @var array<string, mixed> */
