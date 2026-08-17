@@ -83,7 +83,10 @@ class FormModal extends BaseFormModal
         return MatchStipulation::query()
             ->where('is_active', true)
             ->orderBy('name')
-            ->pluck('name', 'id')
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (MatchStipulation $stipulation): array => [
+                $stipulation->id => $stipulation->name,
+            ])
             ->all();
     }
 
@@ -93,7 +96,7 @@ class FormModal extends BaseFormModal
         return $this->dummyData->generate();
     }
 
-    public function openModal(mixed $modelId = null): void
+    public function openModal(int|string|null $modelId = null): void
     {
         if ($modelId === null) {
             Gate::authorize('create', EventMatch::class);
@@ -126,7 +129,11 @@ class FormModal extends BaseFormModal
 
     public function updatedFormMatchType(mixed $value): void
     {
-        $matchType = $value instanceof MatchType ? $value : MatchType::tryFrom((string) $value);
+        $matchType = match (true) {
+            $value instanceof MatchType => $value,
+            is_string($value) => MatchType::tryFrom($value),
+            default => null,
+        };
 
         if ($matchType !== null) {
             $this->form->resetCompetitorsFor($matchType);

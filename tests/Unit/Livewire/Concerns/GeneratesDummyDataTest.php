@@ -169,7 +169,10 @@ describe('GeneratesDummyData Unit Tests', function () {
 
             expect($publicMethods)->toHaveCount(1); // fillDummyFields
             expect(count($protectedMethods))->toBeGreaterThan(5); // generators + abstract
-            expect($privateMethods)->toHaveCount(1); // populateField
+            expect(array_values(array_map(
+                fn (ReflectionMethod $method): string => $method->getName(),
+                $privateMethods
+            )))->toEqualCanonicalizing(['populateField', 'randomString', 'randomGenerator']);
         });
 
         test('has no properties', function () {

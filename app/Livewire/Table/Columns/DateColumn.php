@@ -6,6 +6,8 @@ namespace App\Livewire\Table\Columns;
 
 use App\Livewire\Table\Column;
 use Carbon\Carbon;
+use DateTimeInterface;
+use LogicException;
 
 class DateColumn extends Column
 {
@@ -44,9 +46,15 @@ class DateColumn extends Column
             return $this->emptyValue;
         }
 
-        $date = $value instanceof Carbon
-            ? $value
-            : Carbon::createFromFormat($this->inputFormat, (string) $value);
+        if ($value instanceof DateTimeInterface) {
+            return Carbon::instance($value)->format($this->outputFormat);
+        }
+
+        if (! is_string($value)) {
+            throw new LogicException('Date column values must be date objects or formatted strings.');
+        }
+
+        $date = Carbon::createFromFormat($this->inputFormat, $value);
 
         return $date ? $date->format($this->outputFormat) : $this->emptyValue;
     }

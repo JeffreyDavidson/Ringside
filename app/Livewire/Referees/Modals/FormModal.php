@@ -19,7 +19,7 @@ class FormModal extends BaseFormModal
     /**
      * Store original model data for resetting purposes
      *
-     * @var array<string, mixed>|null
+     * @var array{first_name: string, last_name: string, employment_date: string}|null
      */
     public ?array $originalModelData = null;
 
@@ -64,7 +64,7 @@ class FormModal extends BaseFormModal
         return true;
     }
 
-    public function mount(mixed $modelId = null): void
+    public function mount(int|string|null $modelId = null): void
     {
         parent::mount($modelId);
 
@@ -72,7 +72,7 @@ class FormModal extends BaseFormModal
         $this->modelTitleField = 'full_name';
     }
 
-    public function openModal(mixed $modelId = null): void
+    public function openModal(int|string|null $modelId = null): void
     {
         parent::openModal($modelId);
 

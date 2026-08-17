@@ -199,7 +199,9 @@ abstract class DataTableComponent extends Component
     protected function applySorting(Builder $query): void
     {
         if ($this->sortField !== '') {
-            $query->orderBy($this->sortField, $this->sortDirection);
+            $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+            $query->orderBy($this->sortField, $direction);
         }
     }
 

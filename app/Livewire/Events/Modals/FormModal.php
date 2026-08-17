@@ -58,7 +58,7 @@ class FormModal extends BaseFormModal
         return 'Create Event';
     }
 
-    public function openModal(mixed $modelId = null): void
+    public function openModal(int|string|null $modelId = null): void
     {
         // Check authorization before opening modal
         if ($modelId !== null) {

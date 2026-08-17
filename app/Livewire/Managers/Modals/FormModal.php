@@ -16,7 +16,7 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    public function mount(mixed $modelId = null): void
+    public function mount(int|string|null $modelId = null): void
     {
         parent::mount($modelId);
 

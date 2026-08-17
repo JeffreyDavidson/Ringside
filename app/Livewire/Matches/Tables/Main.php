@@ -11,8 +11,11 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use LogicException;
 
 /** @extends BaseTable<EventMatch> */
 class Main extends BaseTable
@@ -62,7 +65,9 @@ class Main extends BaseTable
             Column::make(__('event-matches.competitors'))
                 ->label(fn (EventMatch $row): string => $row->competitors
                     ->competitorModelsBySidePosition()
-                    ->map(fn (Collection $side): string => $side->pluck('name')->join(' & '))
+                    ->map(fn (Collection $side): string => $side
+                        ->map(fn (mixed $competitor): string => $this->competitorName($competitor))
+                        ->join(' & '))
                     ->join(' vs ')),
             Column::make(__('event-matches.result'))
                 ->label(function (EventMatch $row): string {
@@ -90,5 +95,13 @@ class Main extends BaseTable
         resolve(DeleteAction::class)->handle($eventMatch);
 
         session()->flash('status', 'Match successfully deleted.');
+    }
+
+    private function competitorName(mixed $competitor): string
+    {
+        return match (true) {
+            $competitor instanceof Wrestler, $competitor instanceof TagTeam => $competitor->name,
+            default => throw new LogicException('Match competitors must be Wrestlers or Tag Teams.'),
+        };
     }
 }

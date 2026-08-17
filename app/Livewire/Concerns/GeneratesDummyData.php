@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns;
 
+use Closure;
 use DateTime;
 use LogicException;
 
@@ -37,7 +38,11 @@ trait GeneratesDummyData
         $fields = $this->getDummyDataFields();
 
         foreach ($fields as $field => $generator) {
-            $value = is_callable($generator) ? $generator() : $generator;
+            $value = $generator;
+
+            if (is_callable($generator)) {
+                $value = $generator();
+            }
 
             // Try to populate fields using available patterns
             $this->populateField($field, $value);
@@ -97,7 +102,7 @@ trait GeneratesDummyData
             fn () => fake()->firstName().' "'.fake()->word().'" '.fake()->lastName(),
         ];
 
-        $pattern = fake()->randomElement($patterns);
+        $pattern = $this->randomGenerator($patterns);
 
         return ucwords($pattern());
     }
@@ -126,10 +131,10 @@ trait GeneratesDummyData
         $useModifier = fake()->boolean(60);
 
         if ($useModifier) {
-            return fake()->randomElement($modifiers).' '.fake()->randomElement($moveTypes);
+            return $this->randomString($modifiers).' '.$this->randomString($moveTypes);
         }
 
-        return fake()->randomElement($moveTypes);
+        return $this->randomString($moveTypes);
     }
 
     /**
@@ -152,10 +157,10 @@ trait GeneratesDummyData
         $usePrefix = fake()->boolean(70);
 
         if ($usePrefix) {
-            return fake()->randomElement($prefixes).' '.fake()->randomElement($suffixes);
+            return $this->randomString($prefixes).' '.$this->randomString($suffixes);
         }
 
-        return fake()->city().' '.fake()->randomElement($suffixes);
+        return fake()->city().' '.$this->randomString($suffixes);
     }
 
     /**
@@ -178,7 +183,7 @@ trait GeneratesDummyData
             'Women\'s', 'Tag Team', 'World Heavyweight', 'Universal', 'Raw Women\'s',
         ];
 
-        return fake()->randomElement($categories).' '.fake()->randomElement($titleTypes);
+        return $this->randomString($categories).' '.$this->randomString($titleTypes);
     }
 
     /**
@@ -202,7 +207,7 @@ trait GeneratesDummyData
         return [
             'street_address' => fake()->streetAddress(),
             'city' => fake()->city(),
-            'state' => fake()->randomElement($stateAbbreviations),
+            'state' => $this->randomString($stateAbbreviations),
             'zipcode' => (int) fake()->numerify('#####'),
         ];
     }
@@ -261,5 +266,34 @@ trait GeneratesDummyData
     protected function generateOptionalEmploymentDate(float $probability = 0.8): ?string
     {
         return $this->generateOptionalStartDate('Y-m-d', $probability);
+    }
+
+    /**
+     * @param  non-empty-list<string>  $values
+     */
+    private function randomString(array $values): string
+    {
+        $value = fake()->randomElement($values);
+
+        if (! is_string($value)) {
+            throw new LogicException('Expected the random value to be a string.');
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param  non-empty-list<Closure(): string>  $generators
+     * @return Closure(): string
+     */
+    private function randomGenerator(array $generators): Closure
+    {
+        $generator = fake()->randomElement($generators);
+
+        if (! $generator instanceof Closure) {
+            throw new LogicException('Expected the random value to be a generator.');
+        }
+
+        return $generator;
     }
 }

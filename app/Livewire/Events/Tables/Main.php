@@ -79,8 +79,9 @@ class Main extends BaseTable
     {
         $venues = Venue::query()
             ->alphabetical()
-            ->pluck('name', 'id')
-            ->toArray();
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (Venue $venue): array => [$venue->id => $venue->name])
+            ->all();
 
         $statusOptions = ['' => __('core.all')];
 
