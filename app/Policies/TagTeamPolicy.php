@@ -6,15 +6,12 @@ namespace App\Policies;
 
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Users\User;
-use Tests\Unit\Policies\TagTeamPolicyTest;
 
 /**
  * Simplified TagTeamPolicy using before hook pattern.
  *
  * All repetitive administrator checks are handled by the before hook.
  * Business validation is handled in Actions using custom exceptions.
- *
- * @see TagTeamPolicyTest
  */
 class TagTeamPolicy
 {

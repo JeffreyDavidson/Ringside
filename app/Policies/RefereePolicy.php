@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Users\User;
-use Tests\Unit\Policies\RefereePolicyTest;
 
 /**
  * Simplified RefereePolicy using before hook pattern.
  *
  * All repetitive administrator checks are handled by the before hook.
  * Business validation is handled in Actions using custom exceptions.
- *
- * @see RefereePolicyTest
  */
 class RefereePolicy
 {

@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+arch()->preset()->php();
+arch()->preset()->security();
+
+arch('application code uses strict types')
+    ->expect('App')
+    ->toUseStrictTypes();
+
+arch('application code does not depend on tests')
+    ->expect('App')
+    ->not->toUse('Tests');
+
+arch('application code does not use debug helpers')
+    ->expect(['dd', 'dump', 'ray', 'var_dump'])
+    ->each->not->toBeUsed();
+
+arch('environment values are read through configuration')
+    ->expect('env')
+    ->not->toBeUsed();
+
+arch('enums are native enums')
+    ->expect('App\\Enums')
+    ->toBeEnums();
+
+arch('controllers use the controller suffix')
+    ->expect('App\\Http\\Controllers')
+    ->toHaveSuffix('Controller');
+
+arch('actions use the action suffix')
+    ->expect('App\\Actions')
+    ->toHaveSuffix('Action');
+
+arch('services use the service suffix')
+    ->expect('App\\Services')
+    ->toHaveSuffix('Service');

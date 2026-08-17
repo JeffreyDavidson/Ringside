@@ -557,4 +557,27 @@ describe('FormModal State Management', function () {
     });
 });
 
-// TODO: Add authorization tests when authorization is implemented for Stables FormModal
+describe('FormModal Authorization', function () {
+    it('forbids creating a stable without permission', function () {
+        $this->actingAs(User::factory()->create());
+
+        livewire(FormModal::class)
+            ->set('form.name', 'Unauthorized Stable')
+            ->call('save')
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('stables', ['name' => 'Unauthorized Stable']);
+    });
+
+    it('forbids updating a stable without permission', function () {
+        $stable = Stable::factory()->create(['name' => 'Original Stable']);
+        $this->actingAs(User::factory()->create());
+
+        livewire(FormModal::class, ['modelId' => $stable->id])
+            ->set('form.name', 'Unauthorized Rename')
+            ->call('save')
+            ->assertForbidden();
+
+        expect($stable->refresh()->name)->toBe('Original Stable');
+    });
+});

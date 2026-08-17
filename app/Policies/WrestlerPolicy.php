@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\Users\User;
-use Tests\Unit\Policies\WrestlerPolicyTest;
 
 /**
  * Simplified WrestlerPolicy with business logic moved to Actions.
@@ -13,8 +12,6 @@ use Tests\Unit\Policies\WrestlerPolicyTest;
  * This policy only handles authorization (who can do what), not validation
  * (whether the action is valid). Business rules and entity state validation
  * are handled in the corresponding Actions using custom exceptions.
- *
- * @see WrestlerPolicyTest
  */
 class WrestlerPolicy
 {

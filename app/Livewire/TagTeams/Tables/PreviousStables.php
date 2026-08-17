@@ -31,12 +31,7 @@ class PreviousStables extends BasePreviousStablesTable
 
     public function configure(): void
     {
-        $this->setPrimaryKey('id')
-            ->setColumnSelectDisabled()
-            ->setSearchPlaceholder('Search '.$this->resourceName)
-            ->setPaginationEnabled()
-            ->setPerPageAccepted([5, 10, 25, 50, 100])
-            ->setLoadingPlaceholderContent('Loading')
-            ->setLoadingPlaceholderEnabled();
+        $this->setSearchPlaceholder('Search '.$this->resourceName)
+            ->setPerPageAccepted([5, 10, 25, 50, 100]);
     }
 }
