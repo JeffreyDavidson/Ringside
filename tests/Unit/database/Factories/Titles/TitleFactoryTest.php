@@ -31,20 +31,30 @@ describe('TitleFactory Unit Tests', function () {
             $title = Title::factory()->make();
 
             // Assert
-            expect((string) $title->name)->toBeString();
-            expect((string) $title->name)->toContain('Title');
+            expect($title->name)->toBeString();
+            expect($title->name)->toEndWith($title->type === TitleType::Singles ? 'Title' : 'Titles');
             expect($title->status)->toBeInstanceOf(TitleStatus::class);
             expect($title->type)->toBeInstanceOf(TitleType::class);
         });
 
-        test('generates realistic title names', function () {
+        test('generates realistic singles title names', function () {
             // Arrange & Act
-            $title = Title::factory()->make();
+            $title = Title::factory()->singles()->make();
 
             // Assert
-            expect((string) $title->name)->toBeString();
-            expect(mb_strlen((string) $title->name))->toBeGreaterThan(5);
-            expect((string) $title->name)->toContain('Title');
+            expect($title->name)->toBeString();
+            expect(mb_strlen($title->name))->toBeGreaterThan(5);
+            expect($title->name)->toEndWith('Title');
+        });
+
+        test('generates realistic tag team title names', function () {
+            // Arrange & Act
+            $title = Title::factory()->tagTeam()->make();
+
+            // Assert
+            expect($title->name)->toBeString();
+            expect(mb_strlen($title->name))->toBeGreaterThan(6);
+            expect($title->name)->toEndWith('Titles');
         });
     });
 
