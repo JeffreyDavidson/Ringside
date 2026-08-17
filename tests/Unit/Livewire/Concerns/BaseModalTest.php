@@ -53,14 +53,14 @@ describe('BaseModal Unit Tests', function () {
             expect($property->isProtected())->toBeTrue();
         });
 
-        test('has modelType property', function () {
+        test('has model class configuration', function () {
             $reflection = new ReflectionClass(BaseModal::class);
 
-            expect($reflection->hasProperty('modelType'))->toBeTrue();
+            expect($reflection->hasProperty('modelClass'))->toBeTrue();
 
-            $property = $reflection->getProperty('modelType');
+            $property = $reflection->getProperty('modelClass');
             expect($property->isProtected())->toBeTrue();
-            expect(reflectionTypeName($property))->toBe('Illuminate\\Database\\Eloquent\\Model');
+            expect(reflectionTypeName($property))->toBe('string');
         });
 
         test('has model title configuration', function () {
