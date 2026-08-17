@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Exceptions\Titles\CannotBePulledException;
 use App\Exceptions\Titles\CannotBeReinstatedException;
@@ -13,18 +15,29 @@ use App\Models\Titles\Title;
 
 class TitleLifecycleEligibility
 {
-    public function canDebut(Title $title): bool
+    public function allows(Title $title, TitleLifecycleTransition $transition): bool
     {
         try {
-            $this->ensureCanDebut($title);
+            $this->ensureAllowed($title, $transition);
 
             return true;
-        } catch (CannotBeDebutedException) {
+        } catch (BaseBusinessException) {
             return false;
         }
     }
 
-    public function ensureCanDebut(Title $title): void
+    public function ensureAllowed(Title $title, TitleLifecycleTransition $transition): void
+    {
+        match ($transition) {
+            TitleLifecycleTransition::Debut => $this->ensureCanDebut($title),
+            TitleLifecycleTransition::Pull => $this->ensureCanPull($title),
+            TitleLifecycleTransition::Reinstate => $this->ensureCanReinstate($title),
+            TitleLifecycleTransition::Retire => $this->ensureCanRetire($title),
+            TitleLifecycleTransition::Unretire => $this->ensureCanUnretire($title),
+        };
+    }
+
+    private function ensureCanDebut(Title $title): void
     {
         if ($title->hasActivityPeriods()) {
             throw CannotBeDebutedException::alreadyDebuted($title);
@@ -35,18 +48,7 @@ class TitleLifecycleEligibility
         }
     }
 
-    public function canReinstate(Title $title): bool
-    {
-        try {
-            $this->ensureCanReinstate($title);
-
-            return true;
-        } catch (CannotBeReinstatedException) {
-            return false;
-        }
-    }
-
-    public function ensureCanReinstate(Title $title): void
+    private function ensureCanReinstate(Title $title): void
     {
         if (! $title->hasActivityPeriods()) {
             throw CannotBeReinstatedException::neverActivated($title);
@@ -61,18 +63,7 @@ class TitleLifecycleEligibility
         }
     }
 
-    public function canPull(Title $title): bool
-    {
-        try {
-            $this->ensureCanPull($title);
-
-            return true;
-        } catch (CannotBePulledException) {
-            return false;
-        }
-    }
-
-    public function ensureCanPull(Title $title): void
+    private function ensureCanPull(Title $title): void
     {
         if (! $title->isCurrentlyActive()) {
             throw CannotBePulledException::notActive($title);
@@ -83,18 +74,7 @@ class TitleLifecycleEligibility
         }
     }
 
-    public function canRetire(Title $title): bool
-    {
-        try {
-            $this->ensureCanRetire($title);
-
-            return true;
-        } catch (CannotBeRetiredException) {
-            return false;
-        }
-    }
-
-    public function ensureCanRetire(Title $title): void
+    private function ensureCanRetire(Title $title): void
     {
         if ($title->isRetired()) {
             throw CannotBeRetiredException::alreadyRetired($title);
@@ -109,18 +89,7 @@ class TitleLifecycleEligibility
         }
     }
 
-    public function canUnretire(Title $title): bool
-    {
-        try {
-            $this->ensureCanUnretire($title);
-
-            return true;
-        } catch (CannotBeUnretiredException) {
-            return false;
-        }
-    }
-
-    public function ensureCanUnretire(Title $title): void
+    private function ensureCanUnretire(Title $title): void
     {
         if ($title->trashed()) {
             throw CannotBeUnretiredException::deleted($title);

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Lifecycle\TitleLifecycleEligibility;
@@ -12,16 +13,16 @@ describe('title lifecycle eligibility', function () {
         $eligibility = new TitleLifecycleEligibility();
         $title = Title::factory()->{$factoryState}()->create();
 
-        expect($eligibility->canRetire($title))->toBe($canBeRetired);
+        expect($eligibility->allows($title, TitleLifecycleTransition::Retire))->toBe($canBeRetired);
 
         if ($canBeRetired) {
-            expect(fn () => $eligibility->ensureCanRetire($title))
+            expect(fn () => $eligibility->ensureAllowed($title, TitleLifecycleTransition::Retire))
                 ->not->toThrow(CannotBeRetiredException::class);
 
             return;
         }
 
-        expect(fn () => $eligibility->ensureCanRetire($title))
+        expect(fn () => $eligibility->ensureAllowed($title, TitleLifecycleTransition::Retire))
             ->toThrow(CannotBeRetiredException::class);
     })->with([
         'active' => ['active', true],
@@ -37,8 +38,8 @@ describe('title lifecycle eligibility', function () {
         $title = Title::factory()->retired()->create();
         $title->delete();
 
-        expect($eligibility->canUnretire($title))->toBeFalse()
-            ->and(fn () => $eligibility->ensureCanUnretire($title))
+        expect($eligibility->allows($title, TitleLifecycleTransition::Unretire))->toBeFalse()
+            ->and(fn () => $eligibility->ensureAllowed($title, TitleLifecycleTransition::Unretire))
             ->toThrow(
                 CannotBeUnretiredException::class,
                 CannotBeUnretiredException::deleted($title)->getMessage(),
@@ -49,16 +50,16 @@ describe('title lifecycle eligibility', function () {
         $eligibility = new TitleLifecycleEligibility();
         $title = Title::factory()->{$factoryState}()->create();
 
-        expect($eligibility->canUnretire($title))->toBe($canBeUnretired);
+        expect($eligibility->allows($title, TitleLifecycleTransition::Unretire))->toBe($canBeUnretired);
 
         if ($canBeUnretired) {
-            expect(fn () => $eligibility->ensureCanUnretire($title))
+            expect(fn () => $eligibility->ensureAllowed($title, TitleLifecycleTransition::Unretire))
                 ->not->toThrow(CannotBeUnretiredException::class);
 
             return;
         }
 
-        expect(fn () => $eligibility->ensureCanUnretire($title))
+        expect(fn () => $eligibility->ensureAllowed($title, TitleLifecycleTransition::Unretire))
             ->toThrow(
                 CannotBeUnretiredException::class,
                 CannotBeUnretiredException::notRetired($title)->getMessage(),

@@ -6,6 +6,7 @@ namespace App\Actions\Titles;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Lifecycle\ChampionshipReignManager;
 use App\Lifecycle\RetirementPeriodManager;
@@ -49,7 +50,7 @@ class RetireAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->eligibility->ensureCanRetire($lockedTitle);
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Retire);
 
             if ($lockedTitle->hasActivityPeriods() && $lockedTitle->isCurrentlyActive()) {
                 $this->endActivityPeriod->handle($lockedTitle, $operationalDate);

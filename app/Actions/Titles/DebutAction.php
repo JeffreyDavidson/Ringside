@@ -8,6 +8,7 @@ use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
@@ -47,7 +48,7 @@ class DebutAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->eligibility->ensureCanDebut($lockedTitle);
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Debut);
 
             $this->startActivityPeriod->handle($lockedTitle, $debutDate, rescheduleFuturePeriod: true);
             $this->recordLifecycleTransition->handle(
