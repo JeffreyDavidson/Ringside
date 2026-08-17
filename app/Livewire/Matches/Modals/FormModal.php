@@ -54,11 +54,6 @@ class FormModal extends BaseFormModal
         $this->updateMatchAction = $updateMatchAction;
     }
 
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
-    }
-
     protected function getModelClass(): string
     {
         return EventMatch::class;

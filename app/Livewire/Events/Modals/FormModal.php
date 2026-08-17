@@ -34,11 +34,6 @@ class FormModal extends BaseFormModal
         $this->updateAction = $updateAction;
     }
 
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
-    }
-
     protected function getModelClass(): string
     {
         return Event::class;

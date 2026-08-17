@@ -17,8 +17,6 @@ abstract class BaseFormModal extends BaseModal
 {
     use GeneratesDummyData;
 
-    abstract protected function getFormClass(): string;
-
     abstract protected function getModelClass(): string;
 
     abstract protected function getModalPath(): string;
@@ -67,11 +65,6 @@ abstract class BaseFormModal extends BaseModal
 
         $modelClass = $this->getModelClass();
         $this->modelType = new $modelClass();
-
-        if (! isset($this->form)) {
-            $formClass = $this->getFormClass();
-            $this->form = new $formClass($this, 'form');
-        }
 
         $this->modelForm = $this->form;
 

@@ -9,7 +9,6 @@ use App\Actions\TagTeams\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\TagTeams\Forms\CreateEditForm;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -21,7 +20,6 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
     use PresentsManagersList;
     use PresentsWrestlersList;
 
@@ -35,11 +33,6 @@ class FormModal extends BaseFormModal
     {
         $this->createAction = $createAction;
         $this->updateAction = $updateAction;
-    }
-
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string

@@ -25,13 +25,10 @@ beforeEach(function () {
 });
 
 describe('FormModal Configuration', function () {
-    it('returns correct form class', function () {
-        $modal = new FormModal();
-        $reflection = new ReflectionClass($modal);
-        $method = $reflection->getMethod('getFormClass');
-        $method->setAccessible(true);
+    it('initializes the match form', function () {
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
-        expect($method->invoke($modal))->toBe(CreateEditForm::class);
+        expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
     });
 
     it('returns correct model class', function () {

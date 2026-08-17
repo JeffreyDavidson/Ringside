@@ -7,7 +7,6 @@ namespace App\Livewire\Titles\Modals;
 use App\Actions\Titles\CreateAction;
 use App\Actions\Titles\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\Gate;
@@ -19,8 +18,6 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
-
     public CreateEditForm $form;
 
     private CreateAction $createAction;
@@ -31,11 +28,6 @@ class FormModal extends BaseFormModal
     {
         $this->createAction = $createAction;
         $this->updateAction = $updateAction;
-    }
-
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string

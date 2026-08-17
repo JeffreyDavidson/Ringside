@@ -7,7 +7,6 @@ namespace App\Livewire\Referees\Modals;
 use App\Actions\Referees\CreateAction;
 use App\Actions\Referees\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Referees\Forms\CreateEditForm;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\View\View;
@@ -17,8 +16,6 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
-
     /**
      * Store original model data for resetting purposes
      *
@@ -36,11 +33,6 @@ class FormModal extends BaseFormModal
     {
         $this->createAction = $createAction;
         $this->updateAction = $updateAction;
-    }
-
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string
