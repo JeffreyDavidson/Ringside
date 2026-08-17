@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Forms;
 
-use App\Actions\Matches\AddMatchForEventAction;
-use App\Actions\Matches\UpdateMatchAction;
 use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
-use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
@@ -55,19 +52,6 @@ class CreateEditForm extends BaseForm
      * @var EventMatch|null Current event match model or null for creation
      */
     protected ?Model $formModel = null;
-
-    /**
-     * Event identifier for match association.
-     *
-     * Links the match to a specific wrestling event where it will take place.
-     * This is always required since matches cannot exist without an event.
-     * Provided by route model binding, not user input.
-     *
-     * Default value of 0 indicates uninitialized - will be set during component mount.
-     *
-     * @var int Event database ID
-     */
-    public int $eventId = 0;
 
     /**
      * Match promotional preview content for marketing purposes.
@@ -134,32 +118,6 @@ class CreateEditForm extends BaseForm
     }
 
     /**
-     * Store a new event match.
-     *
-     * Creates a new match with all relationships properly synced.
-     *
-     * @return bool True if the match was successfully created
-     */
-    public function store(): bool
-    {
-        $this->validate();
-
-        $data = $this->toData();
-
-        if ($this->isCreating()) {
-            $event = Event::query()->findOrFail($this->eventId);
-            $this->formModel = resolve(AddMatchForEventAction::class)->handle($event, $data);
-        } else {
-            $match = EventMatch::query()->findOrFail($this->modelId);
-            $this->formModel = resolve(UpdateMatchAction::class)->handle($match, $data);
-        }
-
-        $this->modelId = $this->formModel->getKey();
-
-        return true;
-    }
-
-    /**
      * Load additional data when editing existing event match records.
      *
      * Handles complex relationship data loading for edit operations,
@@ -220,7 +178,7 @@ class CreateEditForm extends BaseForm
      * Excludes relationship data which is handled separately through
      * the relationship synchronization system.
      */
-    private function toData(): EventMatchData
+    public function toData(): EventMatchData
     {
         $matchType = $this->matchType;
         $sides = $matchType->usesIndividualCompetitorSides()
@@ -280,7 +238,6 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         $baseRules = [
-            // eventId removed - it's context from route model binding, not user input
             'matchType' => ['required', new Enum(MatchType::class)],
             'matchStipulationId' => [
                 'nullable',

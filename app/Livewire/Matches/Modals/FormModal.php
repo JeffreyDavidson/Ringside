@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Modals;
 
+use App\Actions\Matches\AddMatchForEventAction;
+use App\Actions\Matches\UpdateMatchAction;
 use App\Enums\MatchType;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
@@ -14,6 +16,7 @@ use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Matches\Enums\CompetitorSelectionLayout;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Support\MatchFormDummyData;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
 use Illuminate\Support\Facades\Gate;
@@ -37,9 +40,18 @@ class FormModal extends BaseFormModal
 
     private MatchFormDummyData $dummyData;
 
-    public function boot(MatchFormDummyData $dummyData): void
-    {
+    private AddMatchForEventAction $addMatchForEventAction;
+
+    private UpdateMatchAction $updateMatchAction;
+
+    public function boot(
+        MatchFormDummyData $dummyData,
+        AddMatchForEventAction $addMatchForEventAction,
+        UpdateMatchAction $updateMatchAction,
+    ): void {
         $this->dummyData = $dummyData;
+        $this->addMatchForEventAction = $addMatchForEventAction;
+        $this->updateMatchAction = $updateMatchAction;
     }
 
     protected function getFormClass(): string
@@ -59,7 +71,21 @@ class FormModal extends BaseFormModal
 
     protected function storeForm(): bool
     {
-        return $this->form->store();
+        $this->form->validate();
+
+        if ($this->form->isEditing()) {
+            $match = EventMatch::query()->findOrFail($this->form->modelId);
+            Gate::authorize('update', $match);
+            $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
+        } else {
+            Gate::authorize('create', EventMatch::class);
+            $event = Event::query()->findOrFail($this->eventId);
+            $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
+        }
+
+        $this->form->setModel($storedMatch);
+
+        return true;
     }
 
     /** @return array<int, string> */
@@ -77,15 +103,6 @@ class FormModal extends BaseFormModal
     protected function getDummyDataFields(): array
     {
         return $this->dummyData->generate();
-    }
-
-    public function mount(mixed $modelId = null): void
-    {
-        parent::mount($modelId);
-
-        if ($this->eventId > 0) {
-            $this->form->eventId = $this->eventId;
-        }
     }
 
     public function openModal(mixed $modelId = null): void

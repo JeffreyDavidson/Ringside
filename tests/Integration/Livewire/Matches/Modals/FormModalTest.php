@@ -392,7 +392,7 @@ describe('FormModal Edit Operations', function () {
         $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal', $match->id);
 
-        $component->assertSet('form.eventId', $this->event->id);
+        $component->assertSet('eventId', $this->event->id);
         $component->assertSet('form.matchType', MatchType::Singles);
         $component->assertSet('form.preview', 'Original preview');
     });
@@ -554,8 +554,7 @@ describe('FormModal State Management', function () {
             ->call('openModal', $match->id)
             ->call('openModal');
 
-        // eventId should remain set since it comes from route context, not form data
-        $component->assertSet('form.eventId', $this->event->id);
+        $component->assertSet('eventId', $this->event->id);
         $component->assertSet('form.matchType', null);
         $component->assertSet('form.competitors', []);
     });

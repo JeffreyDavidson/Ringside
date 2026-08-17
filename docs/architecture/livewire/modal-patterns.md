@@ -142,13 +142,6 @@ Domain modals may extend the shared lifecycle for behavior such as:
 Keep those additions UI-focused. Reusable queries belong on Builders, and business
 state transitions belong in Actions or lifecycle collaborators.
 
-## Matches exception
-
-The Matches modal currently delegates `storeForm()` to the Matches form, whose
-`store()` method assembles the complex competitor data and calls match Actions.
-This is transitional. The target boundary is the same as other domains: the form
-builds typed data and the modal calls the Actions.
-
 ## Testing
 
 - Assert authorization at modal entry and submission boundaries.
