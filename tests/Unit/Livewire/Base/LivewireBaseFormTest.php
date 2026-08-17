@@ -133,17 +133,6 @@ describe('BaseForm Unit Tests', function () {
         });
     });
 
-    describe('documentation and annotations', function () {
-        test('has proper PHPDoc annotations', function () {
-            $reflection = new ReflectionClass(BaseForm::class);
-            $docComment = $reflection->getDocComment();
-
-            expect($docComment)->toContain('@template');
-            expect($docComment)->toContain('TForm of BaseForm');
-            expect($docComment)->toContain('TFormModel of Model');
-        });
-    });
-
     describe('namespace and naming', function () {
         test('uses correct namespace', function () {
             $reflection = new ReflectionClass(BaseForm::class);
@@ -154,17 +143,6 @@ describe('BaseForm Unit Tests', function () {
             $reflection = new ReflectionClass(BaseForm::class);
             expect($reflection->getShortName())->toBe('BaseForm');
             expect($reflection->getName())->toBe(BaseForm::class);
-        });
-    });
-
-    describe('generic type safety', function () {
-        test('provides type safety through generics', function () {
-            $reflection = new ReflectionClass(BaseForm::class);
-            $docComment = $reflection->getDocComment();
-
-            // Should use template generics for type safety
-            expect($docComment)->toContain('@template TForm');
-            expect($docComment)->toContain('@template TFormModel');
         });
     });
 

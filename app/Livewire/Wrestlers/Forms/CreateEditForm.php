@@ -9,7 +9,6 @@ use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +27,7 @@ use Illuminate\Validation\Rule;
  * - Wrestling persona data (signature moves, career information)
  * - Custom validation rules for wrestling industry requirements
  *
- * @extends BaseForm<CreateEditForm, Wrestler>
+ * @extends BaseForm<Wrestler>
  *
  * @see BaseForm For base form functionality and patterns
  * @see WrestlerData For typed Action input
@@ -45,13 +44,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new wrestler creation.
-     *
-     * @var Wrestler|null Current wrestler model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Wrestler's ring name or legal name for identification.
      *

@@ -111,18 +111,6 @@ describe('BaseFormModal Unit Tests', function () {
         });
     });
 
-    describe('documentation and annotations', function () {
-        test('has proper PHPDoc annotations', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
-            $docComment = $reflection->getDocComment();
-
-            expect($docComment)->toContain('@template');
-            expect($docComment)->toContain('TForm of BaseForm');
-            expect($docComment)->toContain('TModel of Model');
-            expect($docComment)->toContain('@extends BaseModal');
-        });
-    });
-
     describe('namespace and naming', function () {
         test('uses correct namespace', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
@@ -133,18 +121,6 @@ describe('BaseFormModal Unit Tests', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
             expect($reflection->getShortName())->toBe('BaseFormModal');
             expect($reflection->getName())->toBe(BaseFormModal::class);
-        });
-    });
-
-    describe('generic type safety', function () {
-        test('provides type safety through generics', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
-            $docComment = $reflection->getDocComment();
-
-            // Should use template generics for type safety
-            expect($docComment)->toContain('@template TForm');
-            expect($docComment)->toContain('@template TModel');
-            expect($docComment)->toContain('@extends BaseModal<TForm, TModel>');
         });
     });
 

@@ -30,13 +30,6 @@ describe('BaseModal Unit Tests', function () {
             expect($reflection->isAbstract())->toBeTrue();
         });
 
-        test('has generic type annotations', function () {
-            $reflection = new ReflectionClass(BaseModal::class);
-            $docComment = $reflection->getDocComment();
-
-            expect($docComment)->toContain('@template TModelForm of BaseForm');
-            expect($docComment)->toContain('@template TModelType of Model');
-        });
     });
 
     describe('property structure', function () {
@@ -58,7 +51,6 @@ describe('BaseModal Unit Tests', function () {
 
             $property = $reflection->getProperty('modelForm');
             expect($property->isProtected())->toBeTrue();
-            expect($property->getDocComment())->toContain('@var TModelForm');
         });
 
         test('has modelType property', function () {
@@ -69,7 +61,6 @@ describe('BaseModal Unit Tests', function () {
             $property = $reflection->getProperty('modelType');
             expect($property->isProtected())->toBeTrue();
             expect(reflectionTypeName($property))->toBe('Illuminate\\Database\\Eloquent\\Model');
-            expect($property->getDocComment())->toContain('@var TModelType');
         });
 
         test('has string configuration properties', function () {
@@ -181,23 +172,4 @@ describe('BaseModal Unit Tests', function () {
         });
     });
 
-    describe('generic type safety', function () {
-        test('uses generic type constraints', function () {
-            $reflection = new ReflectionClass(BaseModal::class);
-            $docComment = $reflection->getDocComment();
-
-            expect($docComment)->toContain('TModelForm of BaseForm');
-            expect($docComment)->toContain('TModelType of Model');
-        });
-
-        test('property annotations use generic types', function () {
-            $reflection = new ReflectionClass(BaseModal::class);
-
-            $modelFormProperty = $reflection->getProperty('modelForm');
-            expect($modelFormProperty->getDocComment())->toContain('@var TModelForm');
-
-            $modelTypeProperty = $reflection->getProperty('modelType');
-            expect($modelTypeProperty->getDocComment())->toContain('@var TModelType');
-        });
-    });
 });

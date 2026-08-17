@@ -8,7 +8,6 @@ use App\Data\Users\UserData;
 use App\Enums\Users\Role;
 use App\Livewire\Base\BaseForm;
 use App\Models\Users\User;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
 /**
@@ -26,7 +25,7 @@ use Illuminate\Validation\Rule;
  * - User identification and contact information
  * - Role-based access control preparation
  *
- * @extends BaseForm<CreateEditForm, User>
+ * @extends BaseForm<User>
  *
  * @see BaseForm For base form functionality and patterns
  *

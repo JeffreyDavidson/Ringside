@@ -9,7 +9,6 @@ use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
 use App\Models\Events\Venue;
 use App\ValueObjects\Address;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
 /**
@@ -28,7 +27,7 @@ use Illuminate\Validation\Rule;
  * - ZIP code format validation for postal accuracy
  * - Location data integrity for event management systems
  *
- * @extends BaseForm<CreateEditForm, Venue>
+ * @extends BaseForm<Venue>
  *
  * @see BaseForm For base form functionality and patterns
  *
@@ -40,13 +39,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new venue creation.
-     *
-     * @var Venue|null Current venue model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Venue's official name for events and promotional materials.
      *

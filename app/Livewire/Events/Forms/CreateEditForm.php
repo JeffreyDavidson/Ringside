@@ -10,7 +10,6 @@ use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Rules\Events\DateCanBeChanged;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -30,7 +29,7 @@ use Illuminate\Validation\Rule;
  * - Event uniqueness validation across the system
  * - Cached venue list presentation for efficient form rendering
  *
- * @extends BaseForm<CreateEditForm, Event>
+ * @extends BaseForm<Event>
  *
  * @see BaseForm For base form functionality
  * @see PresentsVenuesList For venue selection functionality

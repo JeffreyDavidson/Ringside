@@ -14,7 +14,6 @@ use App\Rules\Shared\CanChangeDebutDate;
 use App\Rules\Stables\CanJoinStable;
 use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -35,7 +34,7 @@ use Illuminate\Validation\Rule;
  * - Integration with stable activation relationship system
  * - Wrestling storyline and faction management support
  *
- * @extends BaseForm<CreateEditForm, Stable>
+ * @extends BaseForm<Stable>
  *
  * @see BaseForm For base form functionality and patterns
  * @see StableData For typed Action input
@@ -46,13 +45,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new stable creation.
-     *
-     * @var Stable|null Current stable model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Stable's official name for storylines and promotional materials.
      *
