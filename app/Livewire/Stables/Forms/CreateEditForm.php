@@ -16,6 +16,7 @@ use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use LogicException;
 
 /**
  * Livewire form component for managing stable creation and editing.
@@ -194,7 +195,7 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 'exists:wrestlers,id',
-                new CanJoinStable(Wrestler::class, $this->modelId, $stableStartDate),
+                new CanJoinStable(Wrestler::class, $this->stableId(), $stableStartDate),
                 new IsNotInjured(),
                 new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
             ],
@@ -203,7 +204,7 @@ class CreateEditForm extends BaseForm
                 'bail',
                 'integer',
                 'exists:tag_teams,id',
-                new CanJoinStable(TagTeam::class, $this->modelId, $stableStartDate),
+                new CanJoinStable(TagTeam::class, $this->stableId(), $stableStartDate),
             ],
         ];
 
@@ -222,6 +223,19 @@ class CreateEditForm extends BaseForm
         }
 
         return Carbon::parse($this->started_at);
+    }
+
+    private function stableId(): ?int
+    {
+        if ($this->modelId === null || is_int($this->modelId)) {
+            return $this->modelId;
+        }
+
+        if (ctype_digit($this->modelId)) {
+            return (int) $this->modelId;
+        }
+
+        throw new LogicException('Stable forms require integer model keys.');
     }
 
     /**

@@ -15,9 +15,9 @@ trait PresentsRefereesList
     #[Computed(cache: false)]
     public function getReferees(): array
     {
-        return Referee::select('id', 'full_name')
-            ->get()
-            ->pluck('full_name', 'id')
-            ->toArray();
+        return Referee::query()
+            ->get(['id', 'full_name'])
+            ->mapWithKeys(fn (Referee $referee): array => [$referee->id => $referee->full_name])
+            ->all();
     }
 }

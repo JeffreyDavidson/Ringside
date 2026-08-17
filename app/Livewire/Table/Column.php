@@ -7,6 +7,9 @@ namespace App\Livewire\Table;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use LogicException;
+use Stringable;
 
 /** @phpstan-consistent-constructor */
 class Column
@@ -25,6 +28,7 @@ class Column
 
     protected ?Closure $labelCallback = null;
 
+    /** @var view-string|null */
     protected ?string $viewPath = null;
 
     public function __construct(
@@ -82,6 +86,7 @@ class Column
         return $this;
     }
 
+    /** @param view-string $viewPath */
     public function view(string $viewPath): static
     {
         $this->viewPath = $viewPath;
@@ -133,9 +138,26 @@ class Column
         if ($this->labelCallback) {
             $result = ($this->labelCallback)($row, $this);
 
-            return $result instanceof View ? $result->render() : (string) $result;
+            return $result instanceof View ? $result->render() : $this->resolveStringValue($result);
         }
 
-        return (string) data_get($row, $this->field, '');
+        return $this->resolveStringValue(data_get($row, $this->field, ''));
+    }
+
+    private function resolveStringValue(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        if (is_string($value)) {
+            return Str::of($value)->toString();
+        }
+
+        if (is_int($value) || is_float($value) || is_bool($value) || $value instanceof Stringable) {
+            return Str::of((string) $value)->toString();
+        }
+
+        throw new LogicException('Table column values must be stringable.');
     }
 }

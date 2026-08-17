@@ -134,13 +134,13 @@ class CreateEditForm extends BaseForm
 
         // Load current wrestler assignments
         $currentWrestlers = $this->formModel->currentWrestlers;
-        if ($currentWrestlers->isNotEmpty()) {
-            $this->wrestlerA = $currentWrestlers->first()->getKey();
-            $this->wrestlerB = $currentWrestlers->skip(1)->first()->getKey();
-        }
+        $this->wrestlerA = $currentWrestlers->first()?->id;
+        $this->wrestlerB = $currentWrestlers->skip(1)->first()?->id;
 
         // Load current manager assignments
-        $this->managers = $this->formModel->currentManagers->pluck('id')->toArray();
+        $this->managers = $this->formModel->currentManagers
+            ->map(fn (Manager $manager): int => $manager->id)
+            ->all();
     }
 
     public function toData(): TagTeamData

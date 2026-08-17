@@ -9,7 +9,7 @@ use App\Livewire\Table\Filter;
 /** @phpstan-consistent-constructor */
 class SelectFilter extends Filter
 {
-    /** @var array<string, string> */
+    /** @var array<int|string, string> */
     protected array $options = [];
 
     public static function make(string $name, ?string $key = null): static
@@ -18,7 +18,7 @@ class SelectFilter extends Filter
     }
 
     /**
-     * @param  array<string, string>  $options
+     * @param  array<int|string, string>  $options
      */
     public function options(array $options): static
     {
@@ -28,7 +28,7 @@ class SelectFilter extends Filter
     }
 
     /**
-     * @return array<string, string>
+     * @return array<int|string, string>
      */
     public function getOptions(): array
     {

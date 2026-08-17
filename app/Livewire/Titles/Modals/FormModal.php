@@ -38,7 +38,7 @@ class FormModal extends BaseFormModal
     protected function getDummyDataFields(): array
     {
         return [
-            'name' => fn () => Str::of(fake()->words(2, true))->title()->append(' Title')->value(),
+            'name' => fn () => Str::of(fake()->word().' '.fake()->word())->title()->append(' Title')->value(),
             'type' => fn () => fake()->randomElement(['singles', 'tag-team']),
             'start_date' => fn () => $this->generateOptionalStartDate('Y-m-d', 0.6, '-1 year', 'now'),
         ];
@@ -53,7 +53,7 @@ class FormModal extends BaseFormModal
         return 'Create Title';
     }
 
-    public function openModal(mixed $modelId = null): void
+    public function openModal(int|string|null $modelId = null): void
     {
         // Authorization check - only administrators can access title management
         if ($modelId) {

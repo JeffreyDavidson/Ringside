@@ -15,6 +15,9 @@ trait PresentsTitlesList
     #[Computed(cache: true, key: 'titles-list', seconds: 180)]
     public function getTitles(): array
     {
-        return Title::select('id', 'name')->pluck('name', 'id')->toArray();
+        return Title::query()
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (Title $title): array => [$title->id => $title->name])
+            ->all();
     }
 }

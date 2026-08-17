@@ -6,6 +6,7 @@ namespace App\Livewire\Matches\Forms;
 
 use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
+use App\Enums\Titles\TitleStatus;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\HasStandardValidationAttributes;
 use App\Models\Matches\EventMatch;
@@ -21,6 +22,7 @@ use App\Rules\Matches\CorrectNumberOfSides;
 use Closure;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use LogicException;
 
 /**
  * Livewire form component for managing event match creation and editing.
@@ -133,8 +135,12 @@ class CreateEditForm extends BaseForm
         $this->matchType = $this->formModel->match_type;
         $this->matchStipulationId = $this->formModel->match_stipulation_id;
 
-        $this->referees = $this->formModel->referees->pluck('id')->toArray();
-        $this->titles = $this->formModel->titles->pluck('id')->toArray();
+        $this->referees = $this->formModel->referees
+            ->map(fn (Referee $referee): int => $referee->id)
+            ->all();
+        $this->titles = $this->formModel->titles
+            ->map(fn (Title $title): int => $title->id)
+            ->all();
         $competitorsBySide = $this->formModel->sides()
             ->with('competitors.competitor')
             ->get()
@@ -142,12 +148,12 @@ class CreateEditForm extends BaseForm
                 return [
                     'wrestlers' => $side->competitors
                         ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof Wrestler)
-                        ->pluck('competitor_id')
+                        ->map(fn (MatchCompetitor $competitor): int => $competitor->competitor_id)
                         ->values()
                         ->all(),
                     'tag_teams' => $side->competitors
                         ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof TagTeam)
-                        ->pluck('competitor_id')
+                        ->map(fn (MatchCompetitor $competitor): int => $competitor->competitor_id)
                         ->values()
                         ->all(),
                 ];
@@ -155,9 +161,12 @@ class CreateEditForm extends BaseForm
             ->values()
             ->all();
 
-        $this->competitors = $this->matchType->usesIndividualCompetitorSides()
+        $this->competitors = $this->requiredMatchType()->usesIndividualCompetitorSides()
             ? [[
-                'wrestlers' => collect($competitorsBySide)->pluck('wrestlers')->flatten()->values()->all(),
+                'wrestlers' => collect($competitorsBySide)
+                    ->flatMap(fn (array $side): array => $side['wrestlers'])
+                    ->values()
+                    ->all(),
                 'tag_teams' => [],
             ]]
             : $competitorsBySide;
@@ -172,7 +181,7 @@ class CreateEditForm extends BaseForm
      */
     public function toData(): EventMatchData
     {
-        $matchType = $this->matchType;
+        $matchType = $this->requiredMatchType();
         $sides = $matchType->usesIndividualCompetitorSides()
             ? collect($this->competitors[0]['wrestlers'] ?? [])
                 ->values()
@@ -244,8 +253,13 @@ class CreateEditForm extends BaseForm
                 'integer',
                 'exists:titles,id',
                 function (string $attribute, mixed $value, Closure $fail) {
-                    $title = Title::find($value);
-                    if ($title && $title->status->value !== 'active') {
+                    if (! is_int($value)) {
+                        return;
+                    }
+
+                    $title = Title::query()->find($value);
+
+                    if ($title !== null && $title->status !== TitleStatus::Active) {
                         $fail('The selected title must be active.');
                     }
                 },
@@ -282,6 +296,12 @@ class CreateEditForm extends BaseForm
         }
 
         return $this->getValidationForMatchType($this->matchType);
+    }
+
+    private function requiredMatchType(): MatchType
+    {
+        return $this->matchType
+            ?? throw new LogicException('A match type is required before building match data.');
     }
 
     /**

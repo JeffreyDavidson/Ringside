@@ -41,8 +41,10 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('titles.name'))
-                ->title(fn (TitleChampionship $row) => $row->title->name)
-                ->location(fn (TitleChampionship $row) => route('titles.show', $row->title)),
+                ->title(fn (TitleChampionship $row) => $this->titleName($row))
+                ->location(fn (TitleChampionship $row) => $row->title === null
+                    ? null
+                    : route('titles.show', $row->title)),
             LinkColumn::make(__('championships.previous_champion'))
                 ->title(fn (TitleChampionship $row) => $row->previousChampionship?->champion->name ?? 'N/A')
                 ->location(fn (TitleChampionship $row) => $this->championLocation($row)),
@@ -68,5 +70,12 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
             ),
             default => null,
         };
+    }
+
+    private function titleName(TitleChampionship $championship): string
+    {
+        $title = $championship->title;
+
+        return $title->name ?? 'N/A';
     }
 }

@@ -25,7 +25,7 @@ abstract class BaseFormModal extends BaseModal
 
     public bool $isModalOpen = false;
 
-    public function openModal(mixed $modelId = null): void
+    public function openModal(int|string|null $modelId = null): void
     {
         $this->mount($modelId);
         $this->isModalOpen = true;
@@ -76,7 +76,7 @@ abstract class BaseFormModal extends BaseModal
         Gate::authorize('update', $modelClass::query()->findOrFail($this->form->modelId));
     }
 
-    public function mount(mixed $modelId = null): void
+    public function mount(int|string|null $modelId = null): void
     {
         $this->modelClass = $this->getModelClass();
 

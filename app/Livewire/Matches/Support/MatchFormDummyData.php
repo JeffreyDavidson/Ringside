@@ -29,7 +29,8 @@ final class MatchFormDummyData
             ->filter(fn (Wrestler $wrestler): bool => RosterBookingEligibility::allows($wrestler))
             ->shuffle()
             ->take(2)
-            ->modelKeys();
+            ->map(fn (Wrestler $wrestler): int => $wrestler->id)
+            ->all();
 
         $refereeIds = Referee::query()
             ->employed()
@@ -37,7 +38,8 @@ final class MatchFormDummyData
             ->filter(fn (Referee $referee): bool => RosterBookingEligibility::allows($referee))
             ->shuffle()
             ->take(1)
-            ->modelKeys();
+            ->map(fn (Referee $referee): int => $referee->id)
+            ->all();
 
         return [
             'matchType' => MatchType::Singles,
@@ -47,7 +49,9 @@ final class MatchFormDummyData
             ],
             'referees' => $refereeIds,
             'titles' => fake()->boolean(30)
-                ? Title::query()->active()->inRandomOrder()->limit(1)->pluck('id')->all()
+                ? Title::query()->active()->inRandomOrder()->limit(1)->get(['id'])
+                    ->map(fn (Title $title): int => $title->id)
+                    ->all()
                 : [],
             'preview' => fake()->paragraph(2),
         ];
