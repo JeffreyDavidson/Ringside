@@ -37,7 +37,6 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
     }
 
     /**
-     *
      * @return array<int, Column>
      */
     public function columns(): array

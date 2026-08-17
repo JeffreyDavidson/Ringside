@@ -13,7 +13,6 @@ use InvalidArgumentException;
  * for wrestlers, providing validation, formatting, and conversion methods.
  * Height is stored as feet and inches since this is the standard format
  * used in professional wrestling.
- *
  */
 readonly class Height
 {
@@ -55,7 +54,6 @@ readonly class Height
      * Returns the height in the standard wrestling format: feet'inches"
      *
      * @return string The formatted height (e.g., "6'2"")
-     *
      */
     public function __toString(): string
     {
@@ -69,7 +67,6 @@ readonly class Height
      * useful for height comparisons and calculations.
      *
      * @return int The total height in inches
-     *
      */
     public function toInches(): int
     {

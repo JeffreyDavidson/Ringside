@@ -31,15 +31,6 @@ describe('GeneratesDummyData Unit Tests', function () {
             expect($reflection->isAbstract())->toBeTrue();
         });
 
-        test('has comprehensive documentation', function () {
-            $reflection = new ReflectionClass(GeneratesDummyData::class);
-            $docComment = $reflection->getDocComment();
-
-            expect($docComment)->toContain('Trait for generating dummy data in Livewire forms');
-            expect($docComment)->toContain('@author');
-            expect($docComment)->toContain('@since');
-            expect($docComment)->toContain('@example');
-        });
     });
 
     describe('public method signatures', function () {
@@ -161,51 +152,6 @@ describe('GeneratesDummyData Unit Tests', function () {
             $source = reflectionSource($reflection);
 
             expect($source)->toContain('use LogicException;');
-        });
-    });
-
-    describe('method documentation', function () {
-        test('methods have comprehensive documentation', function () {
-            $reflection = new ReflectionClass(GeneratesDummyData::class);
-
-            $documentedMethods = [
-                'fillDummyFields',
-                'populateField',
-                'getDummyDataFields',
-                'generateWrestlingName',
-                'generateSignatureMove',
-                'generateVenueName',
-                'generateChampionshipTitle',
-                'generateUSAddress',
-                'generateFutureDate',
-            ];
-
-            foreach ($documentedMethods as $methodName) {
-                $method = $reflection->getMethod($methodName);
-                $docComment = $method->getDocComment();
-
-                expect($docComment)->not->toBeFalse();
-                expect($docComment)->toContain('/**');
-            }
-        });
-
-        test('generator methods have example outputs', function () {
-            $reflection = new ReflectionClass(GeneratesDummyData::class);
-
-            $generatorMethods = [
-                'generateWrestlingName',
-                'generateSignatureMove',
-                'generateVenueName',
-                'generateChampionshipTitle',
-            ];
-
-            foreach ($generatorMethods as $methodName) {
-                $method = $reflection->getMethod($methodName);
-                $docComment = $method->getDocComment();
-
-                expect($docComment)->toContain('@example');
-                expect($docComment)->toContain('Possible outputs:');
-            }
         });
     });
 

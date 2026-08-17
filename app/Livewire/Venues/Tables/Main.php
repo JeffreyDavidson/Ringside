@@ -39,7 +39,6 @@ class Main extends BaseTable
     }
 
     /**
-     *
      * @return array<int, Column>
      */
     public function columns(): array

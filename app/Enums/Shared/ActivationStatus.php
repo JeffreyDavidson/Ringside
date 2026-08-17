@@ -14,7 +14,6 @@ namespace App\Enums\Shared;
  * Wrestling promotions need consistent status tracking across different
  * entity types. This enum provides the common statuses used by multiple
  * entity types to ensure consistency in status management.
- *
  */
 enum ActivationStatus: string
 {

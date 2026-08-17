@@ -35,7 +35,6 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
     abstract protected function getPartnerRoute(TagTeamWrestler $row): string;
 
     /**
-     *
      * @return array<int, Column>
      */
     public function columns(): array

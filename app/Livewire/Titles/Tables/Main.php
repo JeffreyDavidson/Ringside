@@ -40,7 +40,6 @@ use Illuminate\Support\Facades\Gate;
  * The table integrates with various title management actions including activation,
  * deactivation, retirement, restoration, and deletion through a comprehensive
  * action system with proper authorization and error handling.
- *
  */
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
@@ -79,7 +78,6 @@ class Main extends BaseTable
      * relationship provides access to activation status and dates.
      *
      * @return TitleBuilder<Title> Query builder for titles with eager loaded relationships
-     *
      */
     public function builder(): TitleBuilder
     {
@@ -108,7 +106,6 @@ class Main extends BaseTable
      * a title is currently active, inactive, or retired.
      *
      * @return array<int, Column> Array of column definitions for the table
-     *
      */
     public function columns(): array
     {
@@ -132,7 +129,6 @@ class Main extends BaseTable
      * titles activated within specific time periods.
      *
      * @return array<int, Filter> Array of filter definitions for the table
-     *
      */
     public function filters(): array
     {

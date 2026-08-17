@@ -20,7 +20,6 @@ class DateHelper
      *
      * @param  Carbon|null  $date  The optional date to use
      * @return Carbon The resolved date (provided date or current timestamp)
-     *
      */
     public static function resolveDate(?Carbon $date): Carbon
     {

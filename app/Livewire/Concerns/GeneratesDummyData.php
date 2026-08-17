@@ -20,7 +20,6 @@ use LogicException;
  * @author Ringside
  *
  * @since 1.0.0
- *
  */
 trait GeneratesDummyData
 {
@@ -30,8 +29,6 @@ trait GeneratesDummyData
      * This method automatically detects whether the form uses direct properties
      * or a form object pattern and populates fields accordingly. It supports
      * both callable generators and static values.
-     *
-     *
      */
     public function fillDummyFields(): void
     {
@@ -79,7 +76,6 @@ trait GeneratesDummyData
      * to define which fields should be populated and how they should be generated.
      *
      * @return array<string, callable|mixed> Array mapping field names to generators
-     *
      */
     abstract protected function getDummyDataFields(): array;
 
@@ -91,7 +87,6 @@ trait GeneratesDummyData
      * Perfect for wrestler, manager, or character name generation.
      *
      * @return string A realistic wrestling name
-     *
      */
     protected function generateWrestlingName(): string
     {
@@ -115,7 +110,6 @@ trait GeneratesDummyData
      * signature moves and finishers.
      *
      * @return string A realistic signature move name
-     *
      */
     protected function generateSignatureMove(): string
     {
@@ -146,7 +140,6 @@ trait GeneratesDummyData
      * appropriate venue suffixes.
      *
      * @return string A realistic venue name
-     *
      */
     protected function generateVenueName(): string
     {
@@ -173,7 +166,6 @@ trait GeneratesDummyData
      * nomenclature used in professional wrestling.
      *
      * @return string A realistic championship title name
-     *
      */
     protected function generateChampionshipTitle(): string
     {
@@ -196,7 +188,6 @@ trait GeneratesDummyData
      * including proper state abbreviations and valid ZIP code formats.
      *
      * @return array<string, mixed> Address components with proper typing
-     *
      */
     protected function generateUSAddress(): array
     {
@@ -226,7 +217,6 @@ trait GeneratesDummyData
      * @param  float  $probability  Probability of generating a date (0.0 to 1.0)
      * @param  string  $maxPeriod  Maximum future period (e.g., '+3 months', '+1 year')
      * @return string|null Date string in Y-m-d format, or null
-     *
      */
     protected function generateFutureDate(float $probability = 0.8, string $maxPeriod = '+3 months'): ?string
     {
@@ -250,7 +240,6 @@ trait GeneratesDummyData
      * @param  float  $probability  The probability of returning a date (default: 0.8)
      * @param  string  $maxPeriod  Maximum future period (default: '+3 month')
      * @return string|null The formatted date string or null
-     *
      */
     protected function generateOptionalStartDate(
         string $format = 'Y-m-d H:i:s',

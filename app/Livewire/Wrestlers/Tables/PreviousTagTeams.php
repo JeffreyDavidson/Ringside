@@ -19,7 +19,6 @@ use LogicException;
  *
  * The table displays tag teams ordered by when the wrestler joined them,
  * showing only completed memberships (where left_at is not null).
- *
  */
 class PreviousTagTeams extends BasePreviousTagTeamsTable
 {
@@ -51,7 +50,6 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      *
      * @throws LogicException If wrestlerId is not set
      * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
-     *
      */
     public function builder(): Builder
     {
@@ -71,8 +69,6 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * Adds the tag team ID from the pivot table to the select statement
      * to ensure proper data retrieval for the table display. This allows
      * the table to access both the pivot data and related tag team information.
-     *
-     *
      */
     public function configure(): void
     {

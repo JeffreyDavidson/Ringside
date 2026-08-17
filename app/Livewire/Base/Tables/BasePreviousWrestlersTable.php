@@ -26,7 +26,6 @@ abstract class BasePreviousWrestlersTable extends DataTableComponent
     public function configure(): void {}
 
     /**
-     *
      * @return array<int, Column>
      */
     public function columns(): array
