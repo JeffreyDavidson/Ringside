@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Casts\AddressCast;
 use App\Enums\Shared\UnitedStatesState;
 use App\Models\Events\Venue;
 use App\ValueObjects\Address;
@@ -28,4 +29,12 @@ test('it stores an address across the existing venue columns', function () {
         ->and($venue->getRawOriginal('city'))->toBe('New York')
         ->and($venue->getRawOriginal('state'))->toBe('New York')
         ->and($venue->getRawOriginal('zipcode'))->toBe('10001');
+});
+
+test('it rejects values that are not addresses', function () {
+    $cast = new AddressCast();
+    $venue = Venue::factory()->make();
+
+    expect(fn () => $cast->set($venue, 'address', null, []))
+        ->toThrow(InvalidArgumentException::class, 'The address attribute must be an Address value object.');
 });

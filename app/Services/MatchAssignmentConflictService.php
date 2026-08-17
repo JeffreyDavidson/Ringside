@@ -34,7 +34,10 @@ final class MatchAssignmentConflictService
 
         $wrestler = $wrestlers->firstWhere('id', $conflictingWrestlerId);
 
-        throw SchedulingConflictException::competitorAlreadyBooked('Wrestler', $wrestler->name);
+        throw SchedulingConflictException::competitorAlreadyBooked(
+            'Wrestler',
+            $wrestler === null ? "ID: {$conflictingWrestlerId}" : (string) $wrestler->name,
+        );
     }
 
     /**
@@ -54,7 +57,10 @@ final class MatchAssignmentConflictService
 
         $tagTeam = $tagTeams->firstWhere('id', $conflictingTagTeamId);
 
-        throw SchedulingConflictException::competitorAlreadyBooked('Tag team', $tagTeam->name);
+        throw SchedulingConflictException::competitorAlreadyBooked(
+            'Tag team',
+            $tagTeam === null ? "ID: {$conflictingTagTeamId}" : (string) $tagTeam->name,
+        );
     }
 
     /**
