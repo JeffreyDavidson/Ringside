@@ -24,7 +24,7 @@ class RetireCurrentMembersAction
     {
         $wrestlers = $tagTeam->currentWrestlers()
             ->get()
-            ->filter(fn (Wrestler $wrestler) => $this->eligibility->canRetire($wrestler));
+            ->filter(fn (Wrestler $wrestler): bool => $this->eligibility->canRetire($wrestler));
 
         foreach ($wrestlers as $wrestler) {
             $this->retireWrestler->handle($wrestler, $retirementDate);
@@ -32,7 +32,7 @@ class RetireCurrentMembersAction
 
         $managers = $tagTeam->currentManagers()
             ->get()
-            ->filter(fn (Manager $manager) => $this->eligibility->canRetire($manager));
+            ->filter(fn (Manager $manager): bool => $this->eligibility->canRetire($manager));
 
         foreach ($managers as $manager) {
             $this->retireManager->handle($manager, $retirementDate);

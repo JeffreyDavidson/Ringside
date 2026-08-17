@@ -67,10 +67,14 @@ describe('PresentsManagersList Unit Tests', function () {
     describe('computed attribute configuration', function () {
         test('Computed attribute has correct parameters', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = reflectionSource($reflection);
+            $method = $reflection->getMethod('getManagers');
+            $attributes = $method->getAttributes(Computed::class);
+            $computed = $attributes[0]->newInstance();
 
-            // Check for Computed attribute configuration
-            expect($source)->toContain('#[Computed(cache: true, key: \'managers-list\', seconds: 180)]');
+            expect($computed)
+                ->cache->toBeTrue()
+                ->key->toBe('managers-list')
+                ->seconds->toBe(180);
         });
     });
 

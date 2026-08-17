@@ -22,7 +22,7 @@ class SuspendCurrentMembersAction
     {
         $wrestlers = $tagTeam->currentWrestlers()
             ->get()
-            ->filter(fn (Wrestler $wrestler) => $wrestler->isEmployed() && ! $wrestler->isSuspended());
+            ->filter(fn (Wrestler $wrestler): bool => $wrestler->isEmployed() && ! $wrestler->isSuspended());
 
         foreach ($wrestlers as $wrestler) {
             $this->suspendWrestler->handle($wrestler, $suspensionDate);
@@ -30,7 +30,7 @@ class SuspendCurrentMembersAction
 
         $managers = $tagTeam->currentManagers()
             ->get()
-            ->filter(fn (Manager $manager) => $manager->isEmployed() && ! $manager->isSuspended());
+            ->filter(fn (Manager $manager): bool => $manager->isEmployed() && ! $manager->isSuspended());
 
         foreach ($managers as $manager) {
             $this->suspendManager->handle($manager, $suspensionDate);

@@ -40,7 +40,7 @@ class FormModal extends BaseFormModal
         return [
             'name' => fn () => Str::of(fake()->word().' '.fake()->word())->title()->append(' Title')->value(),
             'type' => fn () => fake()->randomElement(['singles', 'tag-team']),
-            'start_date' => fn () => $this->generateOptionalStartDate('Y-m-d', 0.6, '-1 year', 'now'),
+            'start_date' => fn (): ?string => $this->generateOptionalStartDate('Y-m-d', 0.6, '-1 year', 'now'),
         ];
     }
 

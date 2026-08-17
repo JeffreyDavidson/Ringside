@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns\Columns;
 
 use App\Livewire\Table\Column;
+use Illuminate\Contracts\View\Factory;
 
 /**
  * Provides action column functionality for Livewire table components.
@@ -20,7 +21,7 @@ trait HasActionColumn
     protected function getDefaultActionColumn(): Column
     {
         return Column::make(__('core.actions'))
-            ->label(fn ($row, Column $column) => view('components.tables.columns.action-column', [
+            ->label(fn ($row, Column $column): Factory|\Illuminate\Contracts\View\View => view('components.tables.columns.action-column', [
                 'path' => $this->routeBasePath,
                 'rowId' => $row->id,
             ]))

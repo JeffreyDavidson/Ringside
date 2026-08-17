@@ -209,7 +209,7 @@ class CreateEditForm extends BaseForm
         ];
 
         // Add validation that ended_at is after started_at if both are provided
-        if (! empty($this->started_at) && ! empty($this->ended_at)) {
+        if (! in_array($this->started_at, [null, '', '0'], true) && ! in_array($this->ended_at, [null, '', '0'], true)) {
             $rules['ended_at'][] = 'after:started_at';
         }
 

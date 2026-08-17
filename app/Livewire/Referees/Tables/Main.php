@@ -68,7 +68,7 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('referees.name'), 'full_name')
-                ->searchable(function (RefereeBuilder $builder, string $searchTerm) {
+                ->searchable(function (RefereeBuilder $builder, string $searchTerm): void {
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')
@@ -94,7 +94,7 @@ class Main extends BaseTable
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function (RefereeBuilder $builder, string $value) {
+                ->filter(function (RefereeBuilder $builder, string $value): void {
                     /** @var RefereeBuilder<Referee> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),
