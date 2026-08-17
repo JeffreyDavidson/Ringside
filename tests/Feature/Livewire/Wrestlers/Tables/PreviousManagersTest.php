@@ -33,14 +33,18 @@ describe('PreviousManagers Configuration', function () {
         expect($component->instance()->databaseTableName)->toBe('wrestlers_managers');
     });
 
-    it('adds correct additional selects', function () {
+    it('defines the manager history columns', function () {
         $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $component->instance()->configure();
+        $fields = collect($component->instance()->columns())
+            ->map->getField()
+            ->all();
 
-        // This would need to be tested differently depending on how additionalSelects is implemented
-        // For now, we'll just ensure configure() runs without error
-        expect(true)->toBeTrue();
+        expect($fields)->toBe([
+            'manager.full_name',
+            'hired_at',
+            'fired_at',
+        ]);
     });
 });
 
