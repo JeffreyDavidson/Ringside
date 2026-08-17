@@ -273,7 +273,13 @@ trait GeneratesDummyData
      */
     private function randomString(array $values): string
     {
-        return $values[array_rand($values)];
+        $value = fake()->randomElement($values);
+
+        if (! is_string($value)) {
+            throw new LogicException('Expected the random value to be a string.');
+        }
+
+        return $value;
     }
 
     /**
@@ -282,6 +288,12 @@ trait GeneratesDummyData
      */
     private function randomGenerator(array $generators): Closure
     {
-        return $generators[array_rand($generators)];
+        $generator = fake()->randomElement($generators);
+
+        if (! $generator instanceof Closure) {
+            throw new LogicException('Expected the random value to be a generator.');
+        }
+
+        return $generator;
     }
 }

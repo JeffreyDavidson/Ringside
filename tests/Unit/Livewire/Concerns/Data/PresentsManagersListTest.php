@@ -108,9 +108,10 @@ describe('PresentsManagersList Unit Tests', function () {
             $source = reflectionSource($reflection);
 
             // Check for expected query implementation
-            expect($source)->toContain('Manager::select(\'id\', \'full_name\')');
-            expect($source)->toContain('->pluck(\'full_name\', \'id\')');
-            expect($source)->toContain('->toArray()');
+            expect($source)->toContain('Manager::query()');
+            expect($source)->toContain("->get(['id', 'full_name'])");
+            expect($source)->toContain('->mapWithKeys(');
+            expect($source)->toContain('->all()');
         });
     });
 
@@ -204,15 +205,15 @@ describe('PresentsManagersList Unit Tests', function () {
             $source = reflectionSource($reflection);
 
             // Check for field selection optimization
-            expect($source)->toContain('select(\'id\', \'full_name\')');
+            expect($source)->toContain("get(['id', 'full_name'])");
         });
 
-        test('uses efficient pluck method', function () {
+        test('keys the list by manager id', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = reflectionSource($reflection);
 
-            // Check for pluck usage
-            expect($source)->toContain('pluck(\'full_name\', \'id\')');
+            expect($source)->toContain('mapWithKeys(');
+            expect($source)->toContain('[$manager->id => $manager->full_name]');
         });
     });
 
