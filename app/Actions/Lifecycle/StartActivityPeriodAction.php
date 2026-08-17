@@ -41,7 +41,12 @@ class StartActivityPeriodAction
             }
 
             if ($openActivityPeriod) {
-                throw new LogicException(class_basename($activeable)." {$activeable->getKey()} already has an open activity period.");
+                $activeableKey = $activeable->getKey();
+                $activeableIdentifier = is_int($activeableKey) || is_string($activeableKey)
+                    ? $activeableKey
+                    : 'unknown';
+
+                throw new LogicException(class_basename($activeable)." {$activeableIdentifier} already has an open activity period.");
             }
 
             return $lockedActiveable->activityPeriods()->create([

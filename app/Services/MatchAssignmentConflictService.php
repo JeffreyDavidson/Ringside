@@ -23,15 +23,19 @@ final class MatchAssignmentConflictService
     public function ensureWrestlersCanBeAssigned(EventMatch $eventMatch, Collection $wrestlers): void
     {
         $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
-        $conflictingWrestlerId = MatchCompetitor::query()
-            ->forCompetitorIds(Wrestler::class, $wrestlers->pluck('id'))
+        $conflictingCompetitor = MatchCompetitor::query()
+            ->forCompetitorIds(
+                Wrestler::class,
+                $wrestlers->map(fn (Wrestler $wrestler): int => $wrestler->id),
+            )
             ->forEventIds($conflictingEventIds)
-            ->value('competitor_id');
+            ->first(['competitor_id']);
 
-        if ($conflictingWrestlerId === null) {
+        if ($conflictingCompetitor === null) {
             return;
         }
 
+        $conflictingWrestlerId = $conflictingCompetitor->competitor_id;
         $wrestler = $wrestlers->firstWhere('id', $conflictingWrestlerId);
 
         throw SchedulingConflictException::competitorAlreadyBooked(
@@ -46,15 +50,19 @@ final class MatchAssignmentConflictService
     public function ensureTagTeamsCanBeAssigned(EventMatch $eventMatch, Collection $tagTeams): void
     {
         $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
-        $conflictingTagTeamId = MatchCompetitor::query()
-            ->forCompetitorIds(TagTeam::class, $tagTeams->pluck('id'))
+        $conflictingCompetitor = MatchCompetitor::query()
+            ->forCompetitorIds(
+                TagTeam::class,
+                $tagTeams->map(fn (TagTeam $tagTeam): int => $tagTeam->id),
+            )
             ->forEventIds($conflictingEventIds)
-            ->value('competitor_id');
+            ->first(['competitor_id']);
 
-        if ($conflictingTagTeamId === null) {
+        if ($conflictingCompetitor === null) {
             return;
         }
 
+        $conflictingTagTeamId = $conflictingCompetitor->competitor_id;
         $tagTeam = $tagTeams->firstWhere('id', $conflictingTagTeamId);
 
         throw SchedulingConflictException::competitorAlreadyBooked(
@@ -77,7 +85,7 @@ final class MatchAssignmentConflictService
 
         $conflictingReferee = EventMatch::query()
             ->forEventIds($conflictingEventIds)
-            ->withAnyRefereeIds($referees->pluck('id'))
+            ->withAnyRefereeIds($referees->map(fn (Referee $referee): int => $referee->id))
             ->with('referees:id,first_name,last_name,full_name')
             ->get()
             ->flatMap->referees
@@ -98,7 +106,7 @@ final class MatchAssignmentConflictService
         $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
         $conflictingTitleId = EventMatch::query()
             ->forEventIds($conflictingEventIds)
-            ->withAnyTitleIds($titles->pluck('id'))
+            ->withAnyTitleIds($titles->map(fn (Title $title): int => $title->id))
             ->with('titles:id,name')
             ->get()
             ->flatMap->titles
@@ -131,6 +139,7 @@ final class MatchAssignmentConflictService
             })
             ->orderBy('id')
             ->lockForUpdate()
-            ->pluck('id');
+            ->get(['id'])
+            ->map(fn (Event $conflictingEvent): int => $conflictingEvent->id);
     }
 }

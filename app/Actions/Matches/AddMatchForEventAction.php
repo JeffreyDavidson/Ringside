@@ -29,13 +29,14 @@ class AddMatchForEventAction
                 ->whereKey($event->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
-            $lastMatchNumber = $lockedEvent->matches()
+            $lastMatch = $lockedEvent->matches()
                 ->withTrashed()
-                ->max('match_number');
+                ->orderByDesc('match_number')
+                ->first(['match_number']);
 
             $createdMatch = EventMatch::query()->create([
                 'event_id' => $lockedEvent->id,
-                'match_number' => ($lastMatchNumber ?? 0) + 1,
+                'match_number' => ($lastMatch->match_number ?? 0) + 1,
                 'match_type' => $eventMatchData->matchType,
                 'match_stipulation_id' => $eventMatchData->matchStipulation?->id,
                 'preview' => $eventMatchData->preview,

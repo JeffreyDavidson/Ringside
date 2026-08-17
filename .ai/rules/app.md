@@ -19,3 +19,6 @@ Use now() and today() for the current timestamp or date. Use Carbon constructors
 
 ## Classify exception boundaries by failure source
 Use typed BaseBusinessException subclasses for domain-rule rejections. Use LogicException for impossible programmer or configuration states, including missing convention-derived model classes and invalid trait hosts. Reserve InvalidArgumentException for invalid values supplied by a caller; do not directly construct generic Exception.
+
+## Use Laravel before custom infrastructure
+Prefer Laravel's native framework abstractions and APIs before introducing custom helpers, normalization, infrastructure, or replacement patterns. Preserve Eloquent and framework types through typed models, relationships, builders, casts, validation, and collections; add custom code only when Laravel does not provide the required behavior.

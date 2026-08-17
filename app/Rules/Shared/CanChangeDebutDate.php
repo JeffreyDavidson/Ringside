@@ -7,6 +7,7 @@ namespace App\Rules\Shared;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Titles\Title;
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Carbon;
 
@@ -22,6 +23,12 @@ class CanChangeDebutDate implements ValidationRule
 
         $currentActivityPeriod = $this->model->currentActivityPeriod;
         if (! $currentActivityPeriod) {
+            return;
+        }
+
+        if (! $value instanceof DateTimeInterface && ! is_float($value) && ! is_int($value) && ! is_string($value)) {
+            $fail('The debut date must be a valid date.');
+
             return;
         }
 

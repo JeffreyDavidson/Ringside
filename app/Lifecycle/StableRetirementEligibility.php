@@ -8,6 +8,8 @@ use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 
 final class StableRetirementEligibility
@@ -92,9 +94,13 @@ final class StableRetirementEligibility
         $unavailableKeyMembers = $this->formerMemberEligibility->unavailableKeyMembersFor($stable);
 
         if ($unavailableKeyMembers->isNotEmpty()) {
+            $unavailableMemberNames = $unavailableKeyMembers
+                ->map(fn (Wrestler|TagTeam $member): string => $member->name)
+                ->implode(', ');
+
             throw CannotBeUnretiredException::keyMembersUnavailable(
                 $stable,
-                $unavailableKeyMembers->pluck('name')->join(', '),
+                $unavailableMemberNames,
             );
         }
     }

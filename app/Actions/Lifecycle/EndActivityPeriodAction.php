@@ -39,7 +39,12 @@ class EndActivityPeriodAction
                 ->first();
 
             if (! $currentActivityPeriod) {
-                throw new LogicException(class_basename($activeable)." {$activeable->getKey()} does not have a current activity period.");
+                $activeableKey = $activeable->getKey();
+                $activeableIdentifier = is_int($activeableKey) || is_string($activeableKey)
+                    ? $activeableKey
+                    : 'unknown';
+
+                throw new LogicException(class_basename($activeable)." {$activeableIdentifier} does not have a current activity period.");
             }
 
             if ($endedAt->lt($currentActivityPeriod->started_at)) {

@@ -86,9 +86,13 @@ final class TagTeamRetirementEligibility
         );
 
         if ($unavailablePartners->isNotEmpty()) {
+            $unavailablePartnerNames = $unavailablePartners
+                ->map(fn (Wrestler $wrestler): string => $wrestler->name)
+                ->implode(', ');
+
             throw CannotBeUnretiredException::keyPartnersUnavailable(
                 $tagTeam,
-                $unavailablePartners->pluck('name')->join(', '),
+                $unavailablePartnerNames,
             );
         }
     }

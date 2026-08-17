@@ -27,7 +27,7 @@ class TitleFactory extends Factory
         $titleType = fake()->randomElement(TitleType::cases());
 
         return [
-            'name' => str(fake()->unique()->words(2, true))->title()->append($titleType->value === 'singles' ? ' Title' : ' Titles'),
+            'name' => $this->generateTitleName($titleType),
             'type' => $titleType,
         ];
     }
@@ -82,12 +82,18 @@ class TitleFactory extends Factory
 
     public function singles(): static
     {
-        return $this->state(fn () => ['type' => TitleType::Singles]);
+        return $this->state(fn () => [
+            'name' => $this->generateTitleName(TitleType::Singles),
+            'type' => TitleType::Singles,
+        ]);
     }
 
     public function tagTeam(): static
     {
-        return $this->state(fn () => ['type' => TitleType::TagTeam]);
+        return $this->state(fn () => [
+            'name' => $this->generateTitleName(TitleType::TagTeam),
+            'type' => TitleType::TagTeam,
+        ]);
     }
 
     public function undebuted(): static
@@ -116,5 +122,13 @@ class TitleFactory extends Factory
 
         return $this
             ->has(ActivityPeriod::factory()->started($startDate), 'activityPeriods');
+    }
+
+    private function generateTitleName(TitleType $titleType): string
+    {
+        return str(fake()->unique()->words(2, true))
+            ->title()
+            ->append($titleType === TitleType::Singles ? ' Title' : ' Titles')
+            ->toString();
     }
 }
