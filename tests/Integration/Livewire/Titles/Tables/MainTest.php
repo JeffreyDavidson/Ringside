@@ -58,7 +58,7 @@ describe('TitlesTable Component', function () {
                 ->current()
                 ->create();
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee($activeTitle->name)
@@ -74,7 +74,7 @@ describe('TitlesTable Component', function () {
             $undebutedTitle = Title::factory()->create(['name' => 'Undebuted Title']);
             $retiredTitle = Title::factory()->retired()->create(['name' => 'Retired Title']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active Title')
@@ -93,7 +93,7 @@ describe('TitlesTable Component', function () {
             Title::factory()->create(['name' => 'Intercontinental Title']);
             Title::factory()->create(['name' => 'United States Championship']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Test search functionality
             $component
@@ -115,7 +115,7 @@ describe('TitlesTable Component', function () {
             $retiredTitle = Title::factory()->retired()->create(['name' => 'Retired Title']);
             $undebutedTitle = Title::factory()->create(['name' => 'Undebuted Title']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Test filtering by status (if component supports it)
             $component
@@ -128,7 +128,7 @@ describe('TitlesTable Component', function () {
             $singlesTitle = Title::factory()->singles()->create(['name' => 'Singles Championship']);
             $tagTeamTitle = Title::factory()->tagTeam()->create(['name' => 'Tag Team Championship']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Singles Championship')
@@ -141,7 +141,7 @@ describe('TitlesTable Component', function () {
             $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
             $retiredTitle = Title::factory()->retired()->create(['name' => 'Retired Title']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render without errors
             $component->assertOk();
@@ -175,7 +175,7 @@ describe('TitlesTable Component', function () {
                 ->current()
                 ->create();
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('World Championship')
@@ -187,7 +187,7 @@ describe('TitlesTable Component', function () {
 
             // No championship created - title should be vacant
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Vacant Championship')
@@ -212,7 +212,7 @@ describe('TitlesTable Component', function () {
                 ->current()
                 ->create();
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Historical Title')
@@ -238,13 +238,13 @@ describe('TitlesTable Component', function () {
                     ->create();
             }
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render efficiently
             $component->assertOk();
 
             // Should not have N+1 query issues (would require query monitoring in real implementation)
-            $titles = $component->instance()->builder()->get();
+            $titles = app(Main::class)->builder()->get();
             expect($titles)->not->toBeEmpty();
         });
 
@@ -258,7 +258,7 @@ describe('TitlesTable Component', function () {
                 ->current()
                 ->create();
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertOk()
@@ -271,7 +271,7 @@ describe('TitlesTable Component', function () {
         test('component updates when title data changes', function () {
             $title = Title::factory()->create(['name' => 'Original Name']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Original Name');
 
             // Update title name
@@ -287,7 +287,7 @@ describe('TitlesTable Component', function () {
             $title = Title::factory()->active()->create(['name' => 'Championship']);
             $wrestler = Wrestler::factory()->create(['name' => 'New Champion']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Vacant'); // Initially vacant
 
             // Create championship

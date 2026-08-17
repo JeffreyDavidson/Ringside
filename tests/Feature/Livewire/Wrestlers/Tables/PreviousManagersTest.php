@@ -8,6 +8,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use App\Models\Users\User;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->wrestler = Wrestler::factory()->create();
@@ -22,21 +24,21 @@ describe('PreviousManagers Configuration', function () {
     });
 
     it('can set wrestler id', function () {
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->wrestlerId)->toBe($this->wrestler->id);
+        $component->assertSet('wrestlerId', $this->wrestler->id);
     });
 
     it('has correct database table name', function () {
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->databaseTableName)->toBe('wrestlers_managers');
+        $component->assertSet('databaseTableName', 'wrestlers_managers');
     });
 
     it('defines the manager history columns', function () {
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $fields = collect($component->instance()->columns())
+        $fields = collect(app(PreviousManagers::class)->columns())
             ->map->getField()
             ->all();
 
@@ -50,9 +52,9 @@ describe('PreviousManagers Configuration', function () {
 
 describe('PreviousManagers Query Building', function () {
     it('builds query correctly with wrestler id', function () {
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $builder = $component->instance()->builder();
+        $builder = tap(app(PreviousManagers::class), fn (PreviousManagers $table) => $table->wrestlerId = $this->wrestler->id)->builder();
 
         expect($builder->getModel())->toBeInstanceOf(WrestlerManager::class);
         expect($builder->toSql())->toContain('and "wrestler_id" = ?');
@@ -78,9 +80,9 @@ describe('PreviousManagers Query Building', function () {
             'fired_at' => now()->subMonth(),
         ]);
 
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousManagers::class), fn (PreviousManagers $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
 
         expect($results)->toHaveCount(1);
         expect($results->firstOrFail()->wrestler_id)->toBe($this->wrestler->id);
@@ -104,9 +106,9 @@ describe('PreviousManagers Query Building', function () {
             'fired_at' => now()->subMonths(2),
         ]);
 
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousManagers::class), fn (PreviousManagers $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
 
         expect($results)->toHaveCount(1);
         expect($results->firstOrFail()->manager_id)->toBe($previousManager->id);
@@ -139,9 +141,9 @@ describe('PreviousManagers Query Building', function () {
             'fired_at' => now()->subMonths(7),
         ]);
 
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousManagers::class), fn (PreviousManagers $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
 
         expect($results)->toHaveCount(3);
         // Should be ordered by hired_at desc (most recent first)
@@ -160,13 +162,13 @@ describe('PreviousManagers Rendering', function () {
             'fired_at' => now()->subMonths(2),
         ]);
 
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
 
     it('can render with no previous manager relationships', function () {
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
@@ -196,9 +198,9 @@ describe('PreviousManagers Rendering', function () {
             'fired_at' => now()->subMonths(7),
         ]);
 
-        $component = testLivewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousManagers::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousManagers::class), fn (PreviousManagers $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
         expect($results)->toHaveCount(3);
 
         $component->assertSuccessful();

@@ -50,7 +50,7 @@ describe('UsersTable Component', function () {
                 'email' => 'unverified@example.com',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('John Admin')
@@ -68,7 +68,7 @@ describe('UsersTable Component', function () {
                 'first_name' => 'Basic',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Admin')
@@ -91,7 +91,7 @@ describe('UsersTable Component', function () {
                 'first_name' => 'Unverified',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active')
@@ -111,7 +111,7 @@ describe('UsersTable Component', function () {
                 'phone_number' => null,
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Phone User')
@@ -143,7 +143,7 @@ describe('UsersTable Component', function () {
             freshModel($jane);
             freshModel($bob);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Test search by first name
             $component
@@ -179,7 +179,7 @@ describe('UsersTable Component', function () {
                 'email' => 'different@domain.com',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->set('search', 'unique@')
@@ -196,7 +196,7 @@ describe('UsersTable Component', function () {
                 'email' => 'john.smith@company.com',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Search should work with partial matches
             $component
@@ -231,7 +231,7 @@ describe('UsersTable Component', function () {
                 'created_at' => now()->subHour(),
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Get the rendered content to check ordering
             $html = $component->html();
@@ -261,10 +261,10 @@ describe('UsersTable Component', function () {
                 'phone_number' => '1234567890',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Verify the component loads without N+1 issues
-            $users = $component->instance()->builder()->get();
+            $users = app(Main::class)->builder()->get();
             expect($users)->toBeInstanceOf(Collection::class);
             expect($users->count())->toBeGreaterThan(0);
         });
@@ -289,7 +289,7 @@ describe('UsersTable Component', function () {
             freshModel($john);
             freshModel($jane);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Set search and verify it persists
             $component
@@ -310,7 +310,7 @@ describe('UsersTable Component', function () {
                 'last_name' => 'Name',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
             $component->assertSee('Original Name');
 
             // Update user data
@@ -355,13 +355,13 @@ describe('UsersTable Component', function () {
             // Create multiple users with various attributes
             User::factory()->count(20)->create();
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Component should render efficiently
             $component->assertOk();
 
             // Should not have N+1 query issues (query counting would require additional setup)
-            $users = $component->instance()->builder()->get();
+            $users = app(Main::class)->builder()->get();
             expect($users)->not->toBeEmpty();
         });
 
@@ -372,7 +372,7 @@ describe('UsersTable Component', function () {
             $admin = User::factory()->administrator()->create(['first_name' => 'Super', 'last_name' => 'Admin']);
             $basic = User::factory()->create(['role' => Role::Basic, 'first_name' => 'Regular', 'last_name' => 'User']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Super Admin')
@@ -396,7 +396,7 @@ describe('UsersTable Component', function () {
                 'last_name' => 'User',
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertSee('Active User')
@@ -410,7 +410,7 @@ describe('UsersTable Component', function () {
             // Clear all users except the acting user
             User::where('id', '!=', $this->user->id)->delete();
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component->assertOk();
             // Should still show the acting user
@@ -425,7 +425,7 @@ describe('UsersTable Component', function () {
                 'avatar_path' => null,
             ]);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component
                 ->assertOk()
@@ -435,7 +435,7 @@ describe('UsersTable Component', function () {
         test('component handles invalid search input gracefully', function () {
             User::factory()->create(['first_name' => 'Valid', 'last_name' => 'User']);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             // Test with special characters
             $component

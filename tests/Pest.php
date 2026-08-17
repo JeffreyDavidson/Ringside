@@ -13,8 +13,6 @@ use Illuminate\Translation\Translator;
 
 use function Pest\Laravel\withoutVite;
 
-require_once __DIR__.'/Helpers/LivewireHelpers.php';
-
 pest()->tia()->baselined();
 
 /*

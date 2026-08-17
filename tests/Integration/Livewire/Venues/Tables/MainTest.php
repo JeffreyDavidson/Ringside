@@ -83,7 +83,7 @@ describe('VenuesTable Integration Tests', function () {
         test('renders successfully for administrators', function () {
             Livewire::actingAs($this->admin);
 
-            $component = testLivewire(Main::class);
+            $component = livewire(Main::class);
 
             $component->assertOk()
                 ->assertSee('Active Test Arena')

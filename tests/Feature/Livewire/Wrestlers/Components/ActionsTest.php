@@ -8,6 +8,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use JMac\Testing\Double;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->wrestler = Wrestler::factory()->create();
@@ -16,20 +18,20 @@ beforeEach(function () {
 
 describe('Actions Basic Functionality', function () {
     it('can be instantiated', function () {
-        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
+        $component = livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
         expect($component->instance())->toBeInstanceOf(Actions::class);
-        expect($component->instance()->wrestler->id)->toBe($this->wrestler->id);
+        $component->assertSet('wrestler.id', $this->wrestler->id);
     });
 
     it('can mount with wrestler', function () {
-        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
+        $component = livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
-        expect($component->instance()->wrestler->id)->toBe($this->wrestler->id);
+        $component->assertSet('wrestler.id', $this->wrestler->id);
     });
 
     it('can render successfully', function () {
-        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
+        $component = livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
         $component->assertSuccessful();
     });
@@ -39,7 +41,7 @@ describe('Actions Basic Functionality', function () {
         $employAction->expects('handle')
             ->throws(new LogicException('Unexpected employment failure.'));
         app()->instance(EmployAction::class, $employAction);
-        $component = testLivewire(Actions::class, ['wrestler' => $this->wrestler]);
+        $component = livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
         expect(fn () => $component->call('employ'))
             ->toThrow(LogicException::class, 'Unexpected employment failure.');

@@ -7,6 +7,8 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Livewire\livewire;
+
 /**
  * Integration tests for TagTeams FormModal component functionality.
  *
@@ -34,7 +36,7 @@ beforeEach(function () {
 describe('TagTeams FormModal Tests', function () {
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->assertSet('isModalOpen', false)
                 ->call('openModal')
                 ->assertSet('isModalOpen', true)
@@ -43,7 +45,7 @@ describe('TagTeams FormModal Tests', function () {
         });
 
         test('modal renders with correct form fields', function () {
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->assertPropertyWired('form.name')
                 ->assertPropertyWired('form.signature_move')
@@ -54,36 +56,37 @@ describe('TagTeams FormModal Tests', function () {
         });
 
         test('modal shows correct title for create mode', function () {
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal');
 
-            expect($component->instance()->getModalTitle())->toBe('Add TagTeam');
+            $component->assertSee('Add TagTeam');
         });
 
         test('modal shows correct title for edit mode', function () {
             $tagTeam = TagTeam::factory()->create(['name' => 'Test Tag Team']);
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id);
 
-            expect($component->instance()->getModalTitle())->toContain('Edit');
-            expect($component->instance()->getModalTitle())->toContain('Test Tag Team');
+            $component->assertSee('Edit Test Tag Team');
         });
 
         test('provides wrestlers list for form options', function () {
             $wrestlers = Wrestler::factory()->count(5)->create();
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal');
 
-            expect($component->instance()->getWrestlers())->toHaveCount(5);
-            expect(array_key_first($component->instance()->getWrestlers()))->toBe($wrestlers->firstOrFail()->id);
+            $wrestlerOptions = app(FormModal::class)->getWrestlers();
+
+            expect($wrestlerOptions)->toHaveCount(5);
+            expect(array_key_first($wrestlerOptions))->toBe($wrestlers->firstOrFail()->id);
         });
     });
 
     describe('form validation rules enforcement', function () {
         test('validates required fields', function () {
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', '')
                 ->set('form.wrestlerA', null)
@@ -97,7 +100,7 @@ describe('TagTeams FormModal Tests', function () {
         });
 
         test('validates field length constraints', function () {
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', str_repeat('A', 256))
                 ->set('form.signature_move', str_repeat('C', 256))
@@ -114,7 +117,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Existing Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -129,7 +132,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'New Team')
                 ->set('form.signature_move', 'Double Slam')
@@ -140,7 +143,7 @@ describe('TagTeams FormModal Tests', function () {
         });
 
         test('validates wrestlers exist in database', function () {
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Test Team')
                 ->set('form.wrestlerA', 9999) // Non-existent wrestler
@@ -155,7 +158,7 @@ describe('TagTeams FormModal Tests', function () {
         test('validates wrestlers are different', function () {
             $wrestler = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Test Team')
                 ->set('form.wrestlerA', $wrestler->id)
@@ -168,7 +171,7 @@ describe('TagTeams FormModal Tests', function () {
             $unavailableWrestler = Wrestler::factory()->onCurrentTagTeam()->create();
             $availableWrestler = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Test Team')
                 ->set('form.wrestlerA', $unavailableWrestler->id)
@@ -181,7 +184,7 @@ describe('TagTeams FormModal Tests', function () {
             $injuredWrestler = Wrestler::factory()->injured()->create();
             $availableWrestler = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Test Team')
                 ->set('form.wrestlerA', $injuredWrestler->id)
@@ -194,7 +197,7 @@ describe('TagTeams FormModal Tests', function () {
             $suspendedWrestler = Wrestler::factory()->suspended()->create();
             $availableWrestler = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Test Team')
                 ->set('form.wrestlerA', $suspendedWrestler->id)
@@ -207,7 +210,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -221,7 +224,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -239,7 +242,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerB = Wrestler::factory()->create(['name' => 'Wrestler B']);
             $manager = Manager::factory()->create();
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'New Tag Team')
                 ->set('form.signature_move', 'Team Finisher')
@@ -267,7 +270,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Simple Tag Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -285,7 +288,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Event Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -310,7 +313,7 @@ describe('TagTeams FormModal Tests', function () {
             $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
             $tagTeam->managers()->sync([$manager->id => ['hired_at' => now()]]);
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id);
 
             $component->assertSet('form.name', 'Edit Test Team')
@@ -335,7 +338,7 @@ describe('TagTeams FormModal Tests', function () {
 
             $tagTeam->wrestlers()->sync([$originalWrestlerA->id, $originalWrestlerB->id]);
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
                 ->set('form.name', 'Updated Team Name')
                 ->set('form.signature_move', 'New Team Finisher')
@@ -357,7 +360,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestler2 = Wrestler::factory()->create();
             $tagTeam = TagTeam::factory()->create(['name' => 'Unique Team Name']);
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
                 ->set('form.name', 'Unique Team Name') // Same name should be allowed
                 ->set('form.wrestlerA', $wrestler1->id)
@@ -371,7 +374,7 @@ describe('TagTeams FormModal Tests', function () {
                 ->hasEmployments(1, ['started_at' => '2023-06-15'])
                 ->create();
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id);
 
             $component->assertSet('form.employment_date', '2023-06-15');
@@ -383,7 +386,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Relationship Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -406,7 +409,7 @@ describe('TagTeams FormModal Tests', function () {
             $tagTeam = TagTeam::factory()->create(['name' => 'Update Test Team']);
             $tagTeam->wrestlers()->sync([$originalWrestlerA->id, $originalWrestlerB->id]);
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
                 ->set('form.wrestlerA', $newWrestlerA->id)
                 ->set('form.wrestlerB', $newWrestlerB->id)
@@ -429,7 +432,7 @@ describe('TagTeams FormModal Tests', function () {
                 'joined_at' => now()->subYear(),
             ]);
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
                 ->set('form.wrestlerA', $newWrestlerA->id)
                 ->set('form.wrestlerB', $newWrestlerB->id)
@@ -452,7 +455,7 @@ describe('TagTeams FormModal Tests', function () {
             $manager1 = Manager::factory()->create();
             $manager2 = Manager::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Manager Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -480,7 +483,7 @@ describe('TagTeams FormModal Tests', function () {
                 'hired_at' => now()->subYear(),
             ]);
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
                 ->set('form.managers', [$newManager->id])
                 ->call('submitForm')
@@ -505,7 +508,7 @@ describe('TagTeams FormModal Tests', function () {
             $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
             $tagTeam->managers()->sync([$originalManager->id => ['hired_at' => now()]]);
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
                 ->set('form.managers', [$newManager->id])
                 ->call('submitForm')
@@ -525,7 +528,7 @@ describe('TagTeams FormModal Tests', function () {
             $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
             $tagTeam->managers()->sync([$manager->id => ['hired_at' => now()]]);
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal', $tagTeam->id)
                 ->set('form.managers', []) // Remove all managers
                 ->call('submitForm')
@@ -539,7 +542,7 @@ describe('TagTeams FormModal Tests', function () {
 
     describe('form submission and error handling', function () {
         test('prevents submission with validation errors', function () {
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', '') // Invalid: required
                 ->call('submitForm');
@@ -553,7 +556,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Success Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -565,7 +568,7 @@ describe('TagTeams FormModal Tests', function () {
         test('maintains form state on validation errors', function () {
             $wrestlerA = Wrestler::factory()->create();
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', '') // Will cause error
                 ->set('form.signature_move', 'Valid Move')
@@ -583,7 +586,7 @@ describe('TagTeams FormModal Tests', function () {
             // Create wrestlers for dummy data to use
             Wrestler::factory()->count(5)->create();
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -597,7 +600,7 @@ describe('TagTeams FormModal Tests', function () {
             // Create enough wrestlers for dummy data
             Wrestler::factory()->count(5)->create();
 
-            $component = testLivewire(FormModal::class)
+            $component = livewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -610,7 +613,7 @@ describe('TagTeams FormModal Tests', function () {
         test('dummy data does not persist additional wrestlers', function () {
             Wrestler::factory()->count(5)->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->call('fillDummyFields');
 
@@ -623,7 +626,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'Employment Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)
@@ -641,7 +644,7 @@ describe('TagTeams FormModal Tests', function () {
             $wrestlerA = Wrestler::factory()->create();
             $wrestlerB = Wrestler::factory()->create();
 
-            testLivewire(FormModal::class)
+            livewire(FormModal::class)
                 ->call('openModal')
                 ->set('form.name', 'No Employment Test Team')
                 ->set('form.wrestlerA', $wrestlerA->id)

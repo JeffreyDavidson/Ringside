@@ -7,6 +7,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Collection;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->wrestler = Wrestler::factory()->create();
@@ -20,23 +22,23 @@ describe('PreviousTagTeamsTable Configuration', function () {
     });
 
     it('can set wrestler id', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->wrestlerId)->toBe($this->wrestler->id);
+        $component->assertSet('wrestlerId', $this->wrestler->id);
     });
 
     it('has correct database table name', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->databaseTableName)->toBe('tag_teams_wrestlers');
+        $component->assertSet('databaseTableName', 'tag_teams_wrestlers');
     });
 });
 
 describe('PreviousTagTeamsTable Query Building', function () {
     it('builds query correctly with wrestler id', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $builder = $component->instance()->builder();
+        $builder = tap(app(PreviousTagTeams::class), fn (PreviousTagTeams $table) => $table->wrestlerId = $this->wrestler->id)->builder();
 
         expect($builder->toSql())->toContain('where "wrestler_id" = ?');
         expect($builder->toSql())->toContain('and "left_at" is not null');
@@ -44,17 +46,17 @@ describe('PreviousTagTeamsTable Query Building', function () {
     });
 
     it('filters by wrestler id correctly', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousTagTeams::class), fn (PreviousTagTeams $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
 
         expect($results)->toBeInstanceOf(Collection::class);
     });
 
     it('only shows relationships that have ended', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $builder = $component->instance()->builder();
+        $builder = tap(app(PreviousTagTeams::class), fn (PreviousTagTeams $table) => $table->wrestlerId = $this->wrestler->id)->builder();
 
         expect($builder->toSql())->toContain('and "left_at" is not null');
     });
@@ -62,15 +64,15 @@ describe('PreviousTagTeamsTable Query Building', function () {
 
 describe('PreviousTagTeamsTable Rendering', function () {
     it('can render with wrestler id set', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
 
     it('can render with no tag team relationships', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousTagTeams::class), fn (PreviousTagTeams $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
         expect($results)->toHaveCount(0);
 
         $component->assertSuccessful();
@@ -79,7 +81,7 @@ describe('PreviousTagTeamsTable Rendering', function () {
 
 describe('PreviousTagTeamsTable Authorization', function () {
     it('allows access to administrators', function () {
-        $component = testLivewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });

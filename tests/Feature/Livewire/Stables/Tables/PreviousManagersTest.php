@@ -9,6 +9,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->actingAs(User::factory()->administrator()->create());
 });
@@ -63,8 +65,7 @@ it('shows distinct previous managers associated through stable roster members', 
         'hired_at' => now()->subMonths(2),
     ]);
 
-    $managers = testLivewire(PreviousManagers::class, ['stableId' => $stable->id])
-        ->instance()
+    $managers = tap(app(PreviousManagers::class), fn (PreviousManagers $table) => $table->stableId = $stable->id)
         ->builder()
         ->get();
 
@@ -73,7 +74,7 @@ it('shows distinct previous managers associated through stable roster members', 
         $previousTagTeamManager->id,
     ]);
 
-    testLivewire(PreviousManagers::class, ['stableId' => $stable->id])
+    livewire(PreviousManagers::class, ['stableId' => $stable->id])
         ->set('search', 'Historic')
         ->assertSee('Historic Manager')
         ->assertDontSee('Former Advisor');
@@ -82,6 +83,6 @@ it('shows distinct previous managers associated through stable roster members', 
 it('renders for an administrator', function () {
     $stable = Stable::factory()->create();
 
-    testLivewire(PreviousManagers::class, ['stableId' => $stable->id])
+    livewire(PreviousManagers::class, ['stableId' => $stable->id])
         ->assertSuccessful();
 });
