@@ -22,8 +22,6 @@ abstract class BaseModal extends ModalComponent
     /** @var TModelType */
     protected Model $modelType;
 
-    protected string $modalFormPath;
-
     protected string $modelTitleField = 'name';
 
     public function mount(int|string|null $modelId = null): void

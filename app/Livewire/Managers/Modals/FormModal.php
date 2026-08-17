@@ -41,11 +41,6 @@ class FormModal extends BaseFormModal
         return Manager::class;
     }
 
-    protected function getModalPath(): string
-    {
-        return 'livewire.managers.modals.form-modal';
-    }
-
     protected function getDummyDataFields(): array
     {
         return [
@@ -72,6 +67,6 @@ class FormModal extends BaseFormModal
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.managers.modals.form-modal');
+        return view('livewire.managers.modals.form-modal');
     }
 }

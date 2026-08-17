@@ -22,11 +22,7 @@ It does not validate input or persist a model.
 ```php
 abstract class BaseFormModal extends BaseModal
 {
-    abstract protected function getFormClass(): string;
-
     abstract protected function getModelClass(): string;
-
-    abstract protected function getModalPath(): string;
 
     abstract protected function storeForm(): bool;
 
@@ -50,9 +46,9 @@ abstract class BaseFormModal extends BaseModal
 }
 ```
 
-The three class metadata methods configure modal infrastructure. They are distinct
-from the removed form-level model metadata: the modal genuinely needs the concrete
-form class, model class, and Blade path to mount itself.
+The modal supplies only the concrete model class needed for edit-mode lookup.
+Livewire initializes the typed public form property, and each component's
+`render()` method owns its Blade view directly.
 
 ## Domain modal pattern
 
@@ -60,7 +56,7 @@ A standard domain modal:
 
 1. declares its typed form property;
 2. receives create and update Actions through Livewire's `boot()` injection;
-3. provides the form, model, and view classes;
+3. provides the model class used for edit-mode lookup;
 4. validates and authorizes at the interaction boundary;
 5. converts input with `toData()`; and
 6. delegates persistence to the appropriate Action.
