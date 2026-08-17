@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Modals;
 
+use App\Actions\Users\CreateAction;
+use App\Actions\Users\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
@@ -16,6 +18,16 @@ use Illuminate\View\View;
 class FormModal extends BaseFormModal
 {
     public CreateEditForm $form;
+
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    {
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
+    }
 
     protected function getFormClass(): string
     {
@@ -65,6 +77,21 @@ class FormModal extends BaseFormModal
         }
 
         return 'Create User';
+    }
+
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if ($this->form->isEditing()) {
+            $this->updateAction->handle($this->form->user(), $this->form->toData());
+
+            return true;
+        }
+
+        $this->createAction->handle($this->form->toData());
+
+        return true;
     }
 
     public function submitForm(): bool

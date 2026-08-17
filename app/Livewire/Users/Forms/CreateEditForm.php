@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Users\Forms;
 
+use App\Data\Users\UserData;
+use App\Enums\Users\Role;
 use App\Livewire\Base\BaseForm;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 /**
@@ -143,6 +144,22 @@ class CreateEditForm extends BaseForm
         }
 
         return $data;
+    }
+
+    public function toData(): UserData
+    {
+        return new UserData(
+            firstName: $this->first_name,
+            lastName: $this->last_name,
+            email: $this->email,
+            role: Role::from($this->role),
+            password: $this->password !== '' ? $this->password : null,
+        );
+    }
+
+    public function user(): User
+    {
+        return User::query()->findOrFail($this->modelId);
     }
 
     /**
