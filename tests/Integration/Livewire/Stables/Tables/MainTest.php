@@ -179,7 +179,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is disbanded
-            expect(freshModel($activeStable)->status === StableStatus::Inactive)->toBeTrue();
+            expect(freshModel($activeStable)->status)->toBe(StableStatus::Inactive);
         });
 
         test('retire action integration works correctly', function () {
@@ -313,7 +313,7 @@ describe('StablesTable Component', function () {
             $component->call('disband', $disbandedStable)
                 ->assertRedirect();
 
-            expect(freshModel($disbandedStable)->status === StableStatus::Inactive)->toBeTrue();
+            expect(freshModel($disbandedStable)->status)->toBe(StableStatus::Inactive);
         });
     });
 

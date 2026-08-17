@@ -51,7 +51,7 @@ describe('TagTeam Model Unit Tests', function () {
             $casts = $tagTeam->getCasts();
 
             // Status is computed attribute, no cast needed
-            expect(array_key_exists('status', $casts))->toBeFalse();
+            expect($casts)->not->toHaveKey('status');
         });
 
         test('has custom eloquent builder', function () {
