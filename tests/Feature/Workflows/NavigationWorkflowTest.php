@@ -217,9 +217,6 @@ describe('Content Discovery and Search Navigation Workflow', function () {
         actingAs($admin)
             ->get(route('venues.index'))
             ->assertOk();
-
-        // Then: All sections are accessible and searchable
-        expect(true)->toBeTrue(); // Test passes if no assertions fail
     });
 });
 
@@ -323,10 +320,6 @@ describe('Mobile and Responsive Navigation Workflow', function () {
                 ->get(route($route))
                 ->assertOk();
         }
-
-        // Then: All sections should be accessible regardless of viewport
-        // (Actual responsive testing would require browser testing tools)
-        expect(true)->toBeTrue();
     });
 });
 
@@ -385,8 +378,5 @@ describe('Performance and Loading Navigation Workflow', function () {
                 ->get(route($route))
                 ->assertOk();
         }
-
-        // Then: All sections should load successfully with populated data
-        expect(true)->toBeTrue();
     });
 });

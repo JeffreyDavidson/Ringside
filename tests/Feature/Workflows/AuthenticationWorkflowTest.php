@@ -191,8 +191,5 @@ describe('Session Management', function () {
         actingAs($admin)
             ->get(route('titles.index'))
             ->assertOk();
-
-        // Then: All requests succeed without re-authentication
-        expect(true)->toBeTrue(); // Test passes if no assertions fail
     });
 });
