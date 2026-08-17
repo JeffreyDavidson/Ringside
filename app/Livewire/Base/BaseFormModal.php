@@ -17,6 +17,7 @@ abstract class BaseFormModal extends BaseModal
 {
     use GeneratesDummyData;
 
+    /** @return class-string<TModel> */
     abstract protected function getModelClass(): string;
 
     public bool $isModalOpen = false;
@@ -59,8 +60,7 @@ abstract class BaseFormModal extends BaseModal
 
     public function mount(mixed $modelId = null): void
     {
-        $modelClass = $this->getModelClass();
-        $this->modelType = new $modelClass();
+        $this->modelClass = $this->getModelClass();
 
         $this->modelForm = $this->form;
 

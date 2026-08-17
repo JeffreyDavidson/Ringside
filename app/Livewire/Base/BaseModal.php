@@ -19,8 +19,8 @@ abstract class BaseModal extends ModalComponent
     /** @var TModelForm */
     protected BaseForm $modelForm;
 
-    /** @var TModelType */
-    protected Model $modelType;
+    /** @var class-string<TModelType> */
+    protected string $modelClass;
 
     protected string $modelTitleField = 'name';
 
@@ -34,7 +34,7 @@ abstract class BaseModal extends ModalComponent
         }
 
         $id = is_numeric($modelId) ? (int) $modelId : $modelId;
-        $this->model = $this->modelType::query()->findOrFail($id);
+        $this->model = $this->modelClass::query()->findOrFail($id);
         $this->modelForm->setModel($this->model);
     }
 
@@ -44,7 +44,7 @@ abstract class BaseModal extends ModalComponent
             return 'Edit '.$this->modelForm->generateModelEditName($this->modelTitleField);
         }
 
-        return 'Add '.(isset($this->modelType) ? class_basename($this->modelType) : 'Record');
+        return 'Add '.(isset($this->modelClass) ? class_basename($this->modelClass) : 'Record');
     }
 
     public function clear(): void
