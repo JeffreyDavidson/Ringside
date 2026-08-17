@@ -1,616 +1,172 @@
 # Livewire Form Patterns
 
-## Overview
+Ringside uses Livewire form objects as typed input boundaries. A form owns public
+input state, validation, edit-state hydration, and conversion to a domain data
+object. It does not directly create or update Eloquent records.
 
-This document details the comprehensive form patterns used in Ringside's Livewire architecture. Our form system provides a consistent, type-safe approach to handling data input, validation, and persistence across all domain entities.
+## Responsibility boundary
 
-## Form Architecture
+| Layer | Responsibility |
+| --- | --- |
+| Form | Input state, validation rules, validation labels, edit hydration, and `toData()` conversion |
+| Modal | Authorization, submission orchestration, Action resolution, and UI events |
+| Action | Business rules, transactions, persistence, and relationship changes |
+| Model | Eloquent state and relationships |
 
-### Core Components
+Public Livewire properties are untrusted input. Validate them before constructing
+data objects or calling Actions. Model identifiers remain locked against client-side
+changes and protected operations are authorized at the modal boundary.
 
-#### BaseForm
-The foundation class that provides:
-- **Model Management**: Automatic model binding and lifecycle
-- **Validation**: Integrated Laravel validation
-- **Data Transformation**: Input/output data mapping
-- **Type Safety**: Generic type parameters for model binding
+## BaseForm
+
+`App\Livewire\Base\BaseForm` provides only behavior shared by all create/edit forms:
+
+- stores a locked model identifier;
+- hydrates editable attributes through `setModel()`;
+- distinguishes create and edit state;
+- provides modal-title display values;
+- invokes the optional `loadExtraData()` hook; and
+- requires each form to define its validation rules.
+
+It deliberately has no `store()`, `getModelClass()`, or `getModelData()` method.
 
 ```php
-/**
- * @template TModel of Model
- */
 abstract class BaseForm extends Form
 {
     protected ?Model $formModel = null;
-    
-    abstract protected function getModelClass(): string;
-    abstract protected function getModelData(): array;
+
+    #[Locked]
+    public int|string|null $modelId = null;
+
+    public function setModel(?Model $formModel): void;
+
+    public function isCreating(): bool;
+
+    public function isEditing(): bool;
+
+    protected function loadExtraData(): void;
+
     abstract protected function rules(): array;
-    
-    public function loadExtraData(): void {}
-    public function setModel(?Model $model): void {}
-    public function store(): bool {}
 }
 ```
 
-#### CreateEditForm Pattern
-All domain forms follow the `CreateEditForm` pattern:
-- **Unified Interface**: Single form handles both create and edit operations
-- **Model Binding**: Automatic model detection and data population
-- **Validation**: Context-aware validation rules
-- **Data Mapping**: Consistent data transformation patterns
+## Domain forms
 
-### Implementation Pattern
+Each domain form extends `BaseForm` and normally contains:
+
+1. typed public properties matching the editable fields;
+2. `rules()` and, when useful, `validationAttributes()`;
+3. `loadExtraData()` for state stored outside the model's direct attributes;
+4. `toData()` to construct the Action's typed input; and
+5. a typed model lookup used by edit Actions when required.
 
 ```php
-/**
- * @extends BaseForm<Event>
- */
-class CreateEditForm extends BaseForm
+final class CreateEditForm extends BaseForm
 {
-    // Form properties - match model attributes
-    public string $name = '';
-    public Carbon|string|null $date = '';
-    public int $venue_id = 0;
-    public ?string $preview = '';
-    
-    // Model configuration
-    protected function getModelClass(): string
-    {
-        return Event::class;
-    }
-    
-    // Data transformation
-    protected function getModelData(): array
-    {
-        return [
-            'name' => $this->name,
-            'date' => $this->date,
-            'venue_id' => $this->venue_id,
-            'preview' => $this->preview,
-        ];
-    }
-    
-    // Validation rules
-    protected function rules(): array
-    {
-        return [
-            'name' => ['required', 'string', 'max:255', 
-                Rule::unique('events', 'name')->ignore($this->formModel)],
-            'date' => ['nullable', 'date', 
-                new DateCanBeChanged($this->formModel)],
-            'venue_id' => ['required_with:date', 'integer', 
-                Rule::exists('venues', 'id')],
-            'preview' => ['nullable', 'string'],
-        ];
-    }
-}
-```
+    public string $first_name = '';
 
-## Form Lifecycle
+    public string $last_name = '';
 
-### 1. Instantiation
-Form components are created by parent components:
-```php
-// In BaseFormModal
-$formClass = $this->getFormClass();
-$this->form = new $formClass($this, 'form');
-```
+    public ?string $employment_date = null;
 
-### 2. Model Binding
-When editing existing models:
-```php
-public function setModel(?Model $model): void
-{
-    $this->formModel = $model;
-    
-    if ($model) {
-        $this->fill($model->toArray());
-        $this->loadExtraData();
-    }
-}
-```
-
-### 3. Extra Data Loading
-Hook for additional data setup:
-```php
-public function loadExtraData(): void
-{
-    // Load related data, set computed properties, etc.
-    if ($this->formModel && isset($this->formModel->venue_id)) {
-        $this->venue_id = $this->formModel->venue_id;
-    }
-}
-```
-
-### 4. Validation
-Real-time validation on property updates:
-```php
-// Automatic validation on property changes
-public function updated($propertyName): void
-{
-    $this->validateOnly($propertyName);
-}
-```
-
-### 5. Submission
-Form persistence and event handling:
-```php
-public function store(): bool
-{
-    $this->validate();
-    
-    $modelData = $this->getModelData();
-    $modelClass = $this->getModelClass();
-    
-    if ($this->formModel) {
-        $this->formModel->update($modelData);
-        $this->dispatch('modelUpdated', $this->formModel->id);
-    } else {
-        $model = $modelClass::create($modelData);
-        $this->dispatch('modelCreated', $model->id);
-    }
-    
-    return true;
-}
-```
-
-## Validation Patterns
-
-### Context-Aware Validation
-Rules adapt based on create vs edit context:
-```php
-protected function rules(): array
-{
-    return [
-        'name' => [
-            'required',
-            'string',
-            'max:255',
-            Rule::unique('events', 'name')->ignore($this->formModel)
-        ],
-        'email' => [
-            'required',
-            'email',
-            Rule::unique('users', 'email')->ignore($this->formModel)
-        ],
-    ];
-}
-```
-
-### Custom Validation Rules
-Domain-specific validation logic:
-```php
-protected function rules(): array
-{
-    return [
-        'date' => [
-            'nullable',
-            'date',
-            new DateCanBeChanged($this->formModel)
-        ],
-        'employment_date' => [
-            'nullable',
-            'date',
-            new EmploymentDateRule($this->formModel)
-        ],
-    ];
-}
-```
-
-### Validation Attributes
-Custom field names for error messages:
-```php
-protected function getCustomValidationAttributes(): array
-{
-    return [
-        'date' => 'event date',
-        'venue_id' => 'venue',
-        'preview' => 'event preview',
-    ];
-}
-```
-
-## Data Handling Patterns
-
-### Input Transformation
-Transform form inputs for model storage:
-```php
-protected function getModelData(): array
-{
-    return [
-        'name' => $this->name,
-        'date' => $this->date,
-        'venue_id' => $this->venue_id,
-        'preview' => $this->preview,
-        // Transform complex data
-        'metadata' => json_encode($this->metadata),
-        'status' => $this->status ?? 'active',
-    ];
-}
-```
-
-### Output Transformation
-Transform model data for form display:
-```php
-public function loadExtraData(): void
-{
-    if ($this->formModel) {
-        // Transform complex data for display
-        $this->metadata = json_decode($this->formModel->metadata, true);
-        $this->venue_id = $this->formModel->venue_id;
-    }
-}
-```
-
-## Relationship Handling
-
-### Belongs To Relationships
-```php
-class CreateEditForm extends BaseForm
-{
-    public int $venue_id = 0;
-    
-    // Access related model
-    public function getVenueProperty(): ?Venue
-    {
-        return $this->venue_id ? Venue::find($this->venue_id) : null;
-    }
-    
-    // Validation includes relationship
-    protected function rules(): array
-    {
-        return [
-            'venue_id' => ['required', 'integer', Rule::exists('venues', 'id')],
-        ];
-    }
-}
-```
-
-### Has Many Relationships
-```php
-class CreateEditForm extends BaseForm
-{
-    public array $tags = [];
-    
-    public function loadExtraData(): void
-    {
-        if ($this->formModel) {
-            $this->tags = $this->formModel->tags->pluck('id')->toArray();
-        }
-    }
-    
-    protected function getModelData(): array
-    {
-        return [
-            'name' => $this->name,
-            // Handle relationships separately
-        ];
-    }
-    
-    public function store(): bool
-    {
-        $this->validate();
-        
-        $modelData = $this->getModelData();
-        $modelClass = $this->getModelClass();
-        
-        if ($this->formModel) {
-            $this->formModel->update($modelData);
-            $this->formModel->tags()->sync($this->tags);
-        } else {
-            $model = $modelClass::create($modelData);
-            $model->tags()->sync($this->tags);
-        }
-        
-        return true;
-    }
-}
-```
-
-## Action Integration
-
-Forms validate input and produce typed data. The owning modal resolves persistence Actions so employment and other lifecycle records are written inside the domain transaction.
-
-```php
-class CreateEditForm extends BaseForm
-{
     public function toData(): ManagerData
     {
         return new ManagerData(
             first_name: $this->first_name,
             last_name: $this->last_name,
-            employment_date: $this->employment_date ? Carbon::parse($this->employment_date) : null,
+            employment_date: $this->employment_date === null
+                ? null
+                : Carbon::parse($this->employment_date),
         );
     }
-}
 
-class FormModal extends BaseFormModal
-{
-    protected function storeForm(): bool
+    public function manager(): Manager
     {
-        $this->form->validate();
-
-        $this->form->isCreating()
-            ? $this->createAction->handle($this->form->toData())
-            : $this->updateAction->handle($this->form->manager(), $this->form->toData());
-
-        return true;
+        return Manager::query()->findOrFail($this->modelId);
     }
-}
-```
 
-### Data Presentation
-```php
-class CreateEditForm extends BaseForm
-{
-    use PresentsVenuesList;
-    
-    public int $venue_id = 0;
-    
-    // Trait provides getVenues() method
-    public function getVenuesProperty(): Collection
+    protected function rules(): array
     {
-        return $this->getVenues();
+        return [
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+        ];
     }
 }
 ```
 
-## Error Handling
+Do not expose generic model-class or model-data metadata merely to support a base
+persistence method. The modal already knows which model and Actions it coordinates.
 
-### Validation Errors
-```php
-public function store(): bool
-{
-    try {
-        $this->validate();
-        
-        $modelData = $this->getModelData();
-        // ... persistence logic
-        
-        return true;
-    } catch (ValidationException $e) {
-        // Validation errors automatically handled by Livewire
-        return false;
-    }
-}
-```
+## Validation
 
-### Business Logic Errors
-```php
-public function store(): bool
-{
-    try {
-        $this->validate();
-        
-        $modelData = $this->getModelData();
-        $modelClass = $this->getModelClass();
-        
-        // Business logic validation
-        if (!$this->canCreateModel($modelData)) {
-            $this->addError('general', 'Cannot create model due to business rules');
-            return false;
-        }
-        
-        $model = $modelClass::create($modelData);
-        
-        return true;
-    } catch (Exception $e) {
-        $this->addError('general', 'An error occurred while saving');
-        Log::error('Form submission error', ['error' => $e->getMessage()]);
-        return false;
-    }
-}
-```
+Form validation is the entry boundary for request-shaped eligibility rules. Use
+array rules and dedicated rule objects for reusable or domain-specific checks.
+Actions may assume their data object was constructed from validated input, while
+still enforcing transactional invariants that must hold for every caller.
 
-## Testing Patterns
-
-### Form Property Testing
-```php
-test('form properties are initialized correctly', function () {
-    $form = new CreateEditForm();
-    
-    expect($form->name)->toBe('');
-    expect($form->date)->toBe('');
-    expect($form->venue_id)->toBe(0);
-    expect($form->preview)->toBe('');
-});
-```
-
-### Validation Testing
-```php
-test('validates required fields', function () {
-    $form = new CreateEditForm();
-    
-    $form->name = '';
-    $form->validate();
-    
-    expect($form->getErrorBag()->has('name'))->toBeTrue();
-});
-```
-
-### Model Binding Testing
-```php
-test('loads model data correctly', function () {
-    $event = Event::factory()->create([
-        'name' => 'Test Event',
-        'date' => '2024-01-01',
-    ]);
-    
-    $form = new CreateEditForm();
-    $form->setModel($event);
-    
-    expect($form->name)->toBe('Test Event');
-    expect($form->date)->toBe('2024-01-01');
-});
-```
-
-## Performance Optimization
-
-### Lazy Loading
-```php
-class CreateEditForm extends BaseForm
-{
-    #[Lazy]
-    public function getVenuesProperty(): Collection
-    {
-        return Venue::active()->get();
-    }
-}
-```
-
-### Computed Properties
-```php
-class CreateEditForm extends BaseForm
-{
-    #[Computed]
-    public function availableVenues(): Collection
-    {
-        return Venue::active()
-            ->when($this->formModel, function ($query) {
-                return $query->orWhere('id', $this->formModel->venue_id);
-            })
-            ->get();
-    }
-}
-```
-
-### Database Optimization
-```php
-public function loadExtraData(): void
-{
-    if ($this->formModel) {
-        // Eager load relationships
-        $this->formModel->load(['venue', 'tags']);
-        
-        // Use specific queries instead of loading all data
-        $this->venue_id = $this->formModel->venue_id;
-    }
-}
-```
-
-## Advanced Patterns
-
-### Dynamic Form Fields
-```php
-class CreateEditForm extends BaseForm
-{
-    public array $dynamicFields = [];
-    
-    public function mount(): void
-    {
-        $this->dynamicFields = $this->getDynamicFields();
-    }
-    
-    protected function getDynamicFields(): array
-    {
-        // Return fields based on configuration
-        return config('forms.dynamic_fields', []);
-    }
-}
-```
-
-### Conditional Validation
 ```php
 protected function rules(): array
 {
-    $rules = [
-        'name' => ['required', 'string', 'max:255'],
+    return [
+        'employment_date' => [
+            'nullable',
+            'date',
+            new CanChangeEmploymentDate($this->formModel),
+        ],
     ];
-    
-    if ($this->type === 'special') {
-        $rules['special_field'] = ['required', 'string'];
-    }
-    
-    return $rules;
 }
 ```
 
-### Multi-Step Forms
+## Editing and extra data
+
+`BaseForm::setModel()` fills direct Eloquent attributes and then calls
+`loadExtraData()`. Override that hook only for values derived from casts or related
+records that cannot be filled from the model's attribute array.
+
 ```php
-class CreateEditForm extends BaseForm
+protected function loadExtraData(): void
 {
-    public int $currentStep = 1;
-    public array $steps = ['basic', 'details', 'review'];
-    
-    public function nextStep(): void
-    {
-        $this->validateCurrentStep();
-        $this->currentStep++;
+    if (! $this->formModel instanceof Manager) {
+        return;
     }
-    
-    protected function validateCurrentStep(): void
-    {
-        $stepRules = $this->getStepRules($this->currentStep);
-        $this->validate($stepRules);
-    }
+
+    $this->employment_date = $this->formModel
+        ->firstEmployment?->started_at?->toDateString();
 }
 ```
 
-## Common Pitfalls
+## Persistence
 
-### Model Hydration Issues
+The owning modal validates the form, converts it to typed data, and calls the
+appropriate create or update Action. This keeps transactions and business behavior
+out of UI state objects.
+
 ```php
-// ❌ WRONG - Model state may be lost
-public function store(): bool
+protected function storeForm(): bool
 {
-    $this->validate();
-    // Model might be null here due to hydration
-    $this->formModel->update($this->getModelData());
-}
+    $this->form->validate();
 
-// ✅ CORRECT - Always ensure model is set
-public function store(): bool
-{
-    $this->validate();
-    
-    if ($this->formModel) {
-        $this->formModel->update($this->getModelData());
-    } else {
-        $modelClass = $this->getModelClass();
-        $modelClass::create($this->getModelData());
+    if ($this->form->isEditing()) {
+        $this->updateAction->handle($this->form->manager(), $this->form->toData());
+
+        return true;
     }
+
+    $this->createAction->handle($this->form->toData());
+
+    return true;
 }
 ```
 
-### Validation Rule Context
-```php
-// ❌ WRONG - Ignores current model incorrectly
-'email' => Rule::unique('users', 'email')->ignore($this->id),
+The Matches form is a temporary exception: its `store()` method currently resolves
+the match Actions because match submission assembles a complex competitor payload.
+That orchestration should move to the Matches modal without moving match invariants
+out of the Actions.
 
-// ✅ CORRECT - Uses proper model context
-'email' => Rule::unique('users', 'email')->ignore($this->formModel),
-```
+## Testing
 
-## Best Practices
-
-### Form Design
-- Keep forms focused on single responsibility
-- Use meaningful property names
-- Implement proper type hints
-- Document complex validation rules
-
-### Data Handling
-- Transform data appropriately for storage
-- Handle null values gracefully
-- Validate relationships exist
-- Use transactions for complex operations
-
-### Error Handling
-- Provide clear error messages
-- Log errors for debugging
-- Handle edge cases gracefully
-- Test error scenarios
-
-### Performance
-- Use lazy loading for expensive operations
-- Implement computed properties for cached data
-- Optimize database queries
-- Avoid storing large objects in form state
-
-## Related Documentation
-
-- [Component Architecture](component-architecture.md) - Overall architecture patterns
-- [Modal Patterns](modal-patterns.md) - Modal integration patterns
-- [Testing Guide](../../guides/livewire/testing-guide.md) - Form testing strategies
-- [Migration Guide](../../guides/livewire/migration-guide.md) - Migration from legacy forms
+Test forms for validation, hydration, and data conversion. Test modals for Action
+coordination and user-facing events. Test persistence and domain invariants through
+the Action integration tests. Avoid reflection tests that freeze removed internal
+methods instead of proving behavior.

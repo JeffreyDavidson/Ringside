@@ -1,352 +1,143 @@
 # Livewire Component Architecture
 
-## Overview
+Ringside uses class-based Livewire components with external Blade views. Livewire
+is the UI boundary; domain behavior remains in Actions and focused domain services.
 
-This document provides a comprehensive guide to the Livewire component architecture in Ringside. Our architecture follows a standardized pattern that ensures consistency, maintainability, and scalability across all domain entities.
+## Layers
 
-## Architecture Principles
-
-### 1. Single Responsibility Principle
-Each component has a focused purpose:
-- **Forms** handle data input, validation, and persistence
-- **Modals** manage modal display and form integration
-- **Tables** display and manage data collections
-- **Actions** handle specific business operations
-
-### 2. Template Method Pattern
-Base classes provide common functionality while allowing customization through abstract methods:
-- `BaseForm` - Form lifecycle management
-- `BaseModal` - Modal state management
-- `BaseFormModal` - Combined form and modal functionality
-- `BaseTable` - Table display and filtering
-
-### 3. Composition over Inheritance
-Components use traits for shared functionality:
-- `GeneratesDummyData` - Test data generation
-- `HasStandardValidationAttributes` - Validation messaging
-- Typed form data is passed to domain Actions for employment and activity-period persistence.
-
-## Component Hierarchy
-
-```
-app/Livewire/
-├── Base/
-│   ├── BaseForm.php           # Form lifecycle management
-│   ├── BaseModal.php          # Modal state management
-│   └── BaseFormModal.php      # Combined form+modal functionality
-├── Concerns/
-│   ├── GeneratesDummyData.php # Test data generation
-│   └── Data/
-│       └── PresentsVenuesList.php # Domain-specific data presentation
-└── {Domain}/
-    ├── Forms/
-    │   └── CreateEditForm.php  # Domain-specific form implementation
-    ├── Modals/
-    │   └── FormModal.php       # Domain-specific modal implementation
-    ├── Tables/
-    │   └── {Domain}Table.php   # Domain-specific table implementation
-    └── Components/
-        └── Actions.php # Domain-specific actions
+```text
+Blade view
+    ↓ binds input and invokes component methods
+Livewire form + modal
+    ↓ validates, authorizes, and builds typed data
+Action
+    ↓ enforces business rules and coordinates persistence
+Eloquent models, Builders, and relationships
 ```
 
-## Base Classes
+### Forms
+
+Forms hold editable state, define validation, hydrate edit values, and construct
+typed data objects. They do not provide generic Eloquent persistence.
+
+### Modals
+
+Modals own the user interaction:
+
+- resolve or receive their create and update Actions;
+- authorize protected operations;
+- validate their form;
+- choose the create or update path;
+- call the Action with typed data; and
+- dispatch UI refresh and close events after success.
+
+### Actions
+
+Actions are the application boundary for mutations. They own business rules,
+transactions, model writes, and relationship changes. A Livewire component resolves
+Actions from Laravel's container and calls `handle()`.
+
+### Models and Builders
+
+Models remain the Eloquent data layer. Typed custom Builders own reusable query
+behavior. Livewire query components may query Eloquent directly and compose those
+Builder methods.
+
+## Directory convention
+
+```text
+app/Livewire/{Domain}/
+├── Components/
+├── Forms/
+│   └── CreateEditForm.php
+├── Modals/
+│   └── FormModal.php
+└── Tables/
+
+resources/views/livewire/{domain}/
+├── components/
+├── modals/
+└── tables/
+```
+
+Shared mechanics live under `app/Livewire/Base` or a focused concern. Domain rules
+do not move into a base component merely because several screens invoke them.
+
+## Shared base classes
 
 ### BaseForm
 
-The foundational form class that provides:
-- **Model Management**: Automatic model binding and persistence
-- **Validation**: Standardized validation patterns
-- **Lifecycle Hooks**: `loadExtraData()`, `getModelData()`, `rules()`
-- **Type Safety**: Generic type parameters for model binding
-
-```php
-/**
- * @template TModel of Model
- * @extends BaseForm<TModel>
- */
-abstract class BaseForm extends Form
-{
-    abstract protected function getModelClass(): string;
-    abstract protected function getModelData(): array;
-    abstract protected function rules(): array;
-    
-    public function loadExtraData(): void {}
-    public function setModel(?Model $model): void {}
-    public function store(): bool {}
-}
-```
+`BaseForm` centralizes model hydration, locked model identity, create/edit state,
+modal-title display values, and validation hooks. It does not know a concrete model
+class and does not persist records.
 
 ### BaseModal
 
-Core modal functionality providing:
-- **State Management**: Modal open/close state
-- **Model Binding**: Automatic model resolution
-- **Event Handling**: Modal lifecycle events
-- **View Resolution**: Dynamic view path handling
-
-```php
-/**
- * @template TForm of BaseForm
- * @template TModel of Model
- */
-abstract class BaseModal extends Component
-{
-    abstract protected function getFormClass(): string;
-    abstract protected function getModelClass(): string;
-    abstract protected function getModalPath(): string;
-    
-    public function openModal(mixed $modelId = null): void {}
-    public function closeModal(): void {}
-    public function mount(mixed $modelId = null): void {}
-}
-```
+`BaseModal` loads the model selected by a locked identifier, connects the model to
+the form, builds modal titles, and resets or restores form state.
 
 ### BaseFormModal
 
-Combines BaseModal with form-specific functionality:
-- **Form Integration**: Automatic form instantiation
-- **Dummy Data**: Test data generation capabilities
-- **Unified API**: Single interface for form modals
+`BaseFormModal` coordinates the shared submission lifecycle:
 
-```php
-/**
- * @template TForm of BaseForm
- * @template TModel of Model
- * @extends BaseModal<TForm, TModel>
- */
-abstract class BaseFormModal extends BaseModal
-{
-    use GeneratesDummyData;
-    
-    public BaseForm $form;
-    
-    public function save(): void {}
-    public function submitForm(): bool {}
-    protected function getDummyDataFields(): array {}
-}
+1. initialize the concrete model and form types;
+2. mount create or edit state;
+3. delegate domain submission to `storeForm()`;
+4. dispatch table refresh and form-submitted events; and
+5. close the modal after a successful submission.
+
+Each domain modal implements `storeForm()` because only the domain boundary knows
+which Actions and typed data belong to the operation.
+
+## Mutation flow
+
+```text
+User submits modal
+    ↓
+Modal validates form
+    ↓
+Modal authorizes operation
+    ↓
+Form constructs typed Data object
+    ↓
+Modal calls create/update Action
+    ↓
+Action performs transaction and persistence
+    ↓
+Modal dispatches UI events
 ```
 
-## Component Lifecycle
+Validation failures remain attached to Livewire form fields. Business exceptions
+are caught only at a user-interaction boundary and translated into an appropriate
+message. Programmer and infrastructure failures continue through Laravel's normal
+exception reporting.
 
-### Form Lifecycle
+## Authorization and input security
 
-1. **Instantiation**: Component created with optional model ID
-2. **Mount**: `mount($modelId)` called to initialize state
-3. **Model Binding**: If model ID provided, model loaded and bound
-4. **Extra Data Loading**: `loadExtraData()` called for additional setup
-5. **Validation**: Real-time validation on property updates
-6. **Submission**: `store()` method handles persistence
-7. **Success**: Events dispatched, component state updated
+- Treat every public property as untrusted request input.
+- Lock identifiers that must not change client-side.
+- Call `Gate::authorize()` immediately before protected Livewire operations.
+- Validate before constructing Action input.
+- Never rely on a hidden input or disabled field as authorization.
 
-### Modal Lifecycle
+## Read behavior
 
-1. **Component Creation**: Modal component instantiated
-2. **Open Modal**: `openModal($modelId)` called
-3. **Mount/Remount**: Component mounted with model context
-4. **Form Initialization**: Form component created and configured
-5. **Display**: Modal rendered with form content
-6. **Form Submission**: Form validation and persistence
-7. **Close**: Modal closed on success or user action
+Use computed properties for data that should be derived on each request instead of
+serializing constrained Eloquent collections into component state. Put reusable
+query constraints on typed Eloquent Builders.
 
-## Domain Implementation Pattern
+## Views
 
-### Directory Structure
-Each domain follows this standardized structure:
+Keep markup in external Blade files paired with class-based components. Use
+`wire:key` in rendered loops, loading states for visible async work, and named
+Livewire events that express the completed UI operation.
 
-```
-app/Livewire/{Domain}/
-├── Forms/
-│   └── CreateEditForm.php      # Handles create/edit operations
-├── Modals/
-│   └── FormModal.php           # Modal wrapper for forms
-├── Tables/
-│   ├── Main.php                # Main entity table
-│   └── Previous{Related}.php   # Relationship tables
-└── Components/
-    └── Actions.php             # Business action handlers
-```
+## Testing boundaries
 
-### Naming Conventions
+- Form tests cover validation, hydration, and typed-data conversion.
+- Modal tests cover authorization, Action delegation, and emitted events.
+- Action tests cover mutations, transactions, and business invariants.
+- Browser tests cover behavior that depends on client-side Livewire interaction.
 
-- **Forms**: `CreateEditForm` - Handles both create and edit operations
-- **Modals**: `FormModal` - Wraps CreateEditForm in modal interface
-- **Tables**: `Main` - Main entity display table, `Previous{Related}` - Relationship tables
-- **Components**: `Actions` - Business action handlers
-
-### Implementation Requirements
-
-Each domain component must:
-1. **Extend appropriate base class**
-2. **Implement required abstract methods**
-3. **Follow naming conventions**
-4. **Include comprehensive documentation**
-5. **Provide test coverage**
-
-## Generic Type Safety
-
-### Type Parameters
-
-Components use generic type parameters for type safety:
-
-```php
-/**
- * @template TModel of Model
- * @extends BaseForm<TModel>
- */
-class CreateEditForm extends BaseForm
-{
-    protected function getModelClass(): string
-    {
-        return Event::class; // @phpstan-ignore-line
-    }
-}
-```
-
-### Benefits
-
-- **IDE Support**: Better autocomplete and error detection
-- **Static Analysis**: PHPStan can verify type correctness
-- **Runtime Safety**: Type hints prevent incorrect usage
-- **Documentation**: Clear contracts for component usage
-
-### Typed Table Rows
-
-`DataTableComponent` is generic over the Eloquent model returned by its `builder()` method. Every concrete table declares that row model through an `@extends` annotation, and generic intermediate table bases forward their model template to `DataTableComponent`.
-
-This keeps search, filters, sorting, and pagination attached to the concrete Builder type instead of widening every table to `Builder<Model>`. Fixed-purpose table bases, such as previous-match and championship-history tables, bind their known row model directly.
-
-## Integration Patterns
-
-### Form-Modal Integration
-
-```php
-// FormModal provides the modal wrapper
-class FormModal extends BaseFormModal
-{
-    // Form class configuration
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
-    }
-    
-    // Model class configuration
-    protected function getModelClass(): string
-    {
-        return Event::class;
-    }
-    
-    // View path configuration
-    protected function getModalPath(): string
-    {
-        return 'livewire.events.modals.form-modal';
-    }
-}
-```
-
-### Component Communication
-
-Components communicate through:
-- **Events**: `$this->dispatch('event-name', $data)`
-- **Properties**: Reactive public properties
-- **Method Calls**: Direct method invocation
-- **URL Parameters**: Route model binding
-
-## Performance Considerations
-
-### Lazy Loading
-- Use `#[Lazy]` attribute for expensive computations
-- Implement `#[Computed]` for cached calculations
-- Defer non-critical operations
-
-### Memory Management
-- Avoid storing large objects in component state
-- Use database queries instead of in-memory collections
-- Implement proper cleanup in component destruction
-
-### Caching
-- Cache expensive calculations using `#[Computed]`
-- Implement query result caching where appropriate
-- Use Livewire's built-in caching mechanisms
-
-## Error Handling
-
-### Validation Errors
-- Use Laravel's validation system
-- Provide clear error messages
-- Implement field-specific validation rules
-
-### Exception Handling
-- Catch and handle exceptions gracefully
-- Provide user-friendly error messages
-- Log errors for debugging
-
-### Fallback Behavior
-- Implement fallback UI for error states
-- Provide retry mechanisms where appropriate
-- Maintain component state during errors
-
-## Testing Strategy
-
-### Unit Tests
-- Test individual component methods
-- Mock dependencies and external services
-- Verify business logic correctness
-
-### Integration Tests
-- Test component rendering
-- Verify form submission workflows
-- Test modal state management
-
-### Feature Tests
-- Test complete user workflows
-- Verify event dispatching
-- Test component interaction
-
-## Migration Path
-
-### From Legacy Components
-1. **Assess Current Component**: Understand existing functionality
-2. **Plan Migration**: Identify required changes
-3. **Implement Base Classes**: Extend appropriate base classes
-4. **Update Tests**: Ensure comprehensive test coverage
-5. **Deploy Gradually**: Use feature flags for safe deployment
-
-### Breaking Changes
-- Document all breaking changes
-- Provide migration guides
-- Offer backward compatibility where possible
-- Communicate changes clearly
-
-## Best Practices
-
-### Code Organization
-- Group related functionality together
-- Use descriptive method and property names
-- Follow PSR-12 coding standards
-- Include comprehensive PHPDoc comments
-
-### Component Design
-- Keep components focused and small
-- Avoid tight coupling between components
-- Use dependency injection for external services
-- Implement proper error boundaries
-
-### State Management
-- Minimize component state
-- Use reactive properties appropriately
-- Implement proper state validation
-- Handle state hydration correctly
-
-## Related Documentation
-
-- [Form Patterns](form-patterns.md) - Detailed form implementation patterns
-- [Modal Patterns](modal-patterns.md) - Modal component best practices
-- [Testing Guide](../../guides/livewire/testing-guide.md) - Comprehensive testing strategies
-- [Migration Guide](../../guides/livewire/migration-guide.md) - Migration from legacy patterns
-
-## References
-
-- [Laravel Livewire Documentation](https://laravel-livewire.com/docs)
-- [Laravel Validation](https://laravel.com/docs/validation)
-- [PHPStan Generic Types](https://phpstan.org/blog/generics-in-php-using-phpdocs)
-- [Template Method Pattern](https://refactoring.guru/design-patterns/template-method)
+Prefer behavioral assertions over reflection tests that require incidental private
+or protected methods.
