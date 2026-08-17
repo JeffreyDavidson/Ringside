@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Modals;
 
+use App\Actions\Events\CreateAction;
+use App\Actions\Events\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Events\Forms\CreateEditForm;
@@ -21,6 +23,16 @@ class FormModal extends BaseFormModal
     use PresentsVenuesList;
 
     public CreateEditForm $form;
+
+    private CreateAction $createAction;
+
+    private UpdateAction $updateAction;
+
+    public function boot(CreateAction $createAction, UpdateAction $updateAction): void
+    {
+        $this->createAction = $createAction;
+        $this->updateAction = $updateAction;
+    }
 
     protected function getFormClass(): string
     {
@@ -68,6 +80,21 @@ class FormModal extends BaseFormModal
         }
 
         parent::openModal($modelId);
+    }
+
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if ($this->form->isEditing()) {
+            $this->updateAction->handle($this->form->event(), $this->form->toData());
+
+            return true;
+        }
+
+        $this->createAction->handle($this->form->toData());
+
+        return true;
     }
 
     public function render(): View

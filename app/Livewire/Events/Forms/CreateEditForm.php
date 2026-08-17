@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Events\Forms;
 
+use App\Data\Events\EventData;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Rules\Events\DateCanBeChanged;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -140,6 +142,21 @@ class CreateEditForm extends BaseForm
             'venue_id' => $this->venue_id,
             'preview' => $this->preview,
         ];
+    }
+
+    public function toData(): EventData
+    {
+        return new EventData(
+            name: $this->name,
+            date: $this->date ? Carbon::parse($this->date) : null,
+            venue: $this->venue_id ? Venue::query()->findOrFail($this->venue_id) : null,
+            preview: $this->preview ?: null,
+        );
+    }
+
+    public function event(): Event
+    {
+        return Event::query()->findOrFail($this->modelId);
     }
 
     /**
