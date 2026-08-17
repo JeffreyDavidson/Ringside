@@ -9,12 +9,13 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 
+/** @extends DataTableComponent<User> */
 class TestDataTableComponent extends DataTableComponent
 {
     /** @return Builder<User> */
     public function builder(): Builder
     {
-        return User::query();
+        return (new User())->newQuery();
     }
 
     /** @return array<int, Column> */
