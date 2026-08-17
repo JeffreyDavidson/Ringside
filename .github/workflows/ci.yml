@@ -40,3 +40,41 @@ jobs:
 
             - name: Run application tests
               run: php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite "Feature","Integration","Unit" --no-coverage --parallel
+
+    browser-tests:
+        name: Browser Tests
+        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        timeout-minutes: 20
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 22
+                  cache: npm
+
+            - name: Install frontend dependencies
+              run: npm ci --ignore-scripts --no-audit --no-fund
+
+            - name: Install Chromium
+              run: npx playwright install chromium
+
+            - name: Build frontend assets
+              run: npm run build
+
+            - name: Prepare Laravel
+              run: |
+                  cp .env.testing .env
+                  php artisan key:generate
+                  php artisan config:cache
+
+            - name: Run browser tests
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser --parallel
