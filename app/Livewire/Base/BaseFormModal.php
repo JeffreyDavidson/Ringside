@@ -6,10 +6,13 @@ namespace App\Livewire\Base;
 
 use App\Livewire\Concerns\GeneratesDummyData;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * @template TForm of BaseForm
  * @template TModel of Model
+ *
+ * @property TForm $form
  *
  * @extends BaseModal<TForm, TModel>
  */
@@ -44,6 +47,8 @@ abstract class BaseFormModal extends BaseModal
             $this->form->setModel($this->model);
         }
 
+        $this->authorizeSubmission();
+
         if (! $this->storeForm()) {
             return false;
         }
@@ -57,6 +62,19 @@ abstract class BaseFormModal extends BaseModal
     }
 
     abstract protected function storeForm(): bool;
+
+    private function authorizeSubmission(): void
+    {
+        $modelClass = $this->getModelClass();
+
+        if ($this->form->isCreating()) {
+            Gate::authorize('create', $modelClass);
+
+            return;
+        }
+
+        Gate::authorize('update', $modelClass::query()->findOrFail($this->form->modelId));
+    }
 
     public function mount(mixed $modelId = null): void
     {

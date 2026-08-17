@@ -24,6 +24,10 @@ use App\Models\Roster\Managers\Manager;
  * @see FormModal
  * @see Form
  */
+beforeEach(function () {
+    $this->actingAs(administrator());
+});
+
 describe('Managers FormModal Tests', function () {
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
@@ -477,5 +481,38 @@ describe('Managers FormModal Tests', function () {
             // Based on Laravel validation, last_name is required, so this should have errors
             $component->assertHasErrors(['form.last_name']);
         });
+    });
+});
+
+describe('submission authorization', function () {
+    test('rejects an unauthorized create submission', function () {
+        $this->actingAs(basicUser());
+
+        testLivewire(FormModal::class)
+            ->set('form.first_name', 'Unauthorized')
+            ->set('form.last_name', 'Manager')
+            ->call('submitForm')
+            ->assertForbidden();
+
+        expect(Manager::query()
+            ->where('first_name', 'Unauthorized')
+            ->where('last_name', 'Manager')
+            ->exists())->toBeFalse();
+    });
+
+    test('rejects an unauthorized update submission', function () {
+        $manager = Manager::factory()->create([
+            'first_name' => 'Original',
+            'last_name' => 'Manager',
+        ]);
+        $this->actingAs(basicUser());
+
+        testLivewire(FormModal::class)
+            ->call('openModal', $manager->id)
+            ->set('form.first_name', 'Unauthorized')
+            ->call('submitForm')
+            ->assertForbidden();
+
+        expect($manager->refresh()->first_name)->toBe('Original');
     });
 });

@@ -65,10 +65,8 @@ class FormModal extends BaseFormModal
 
         if ($this->form->isEditing()) {
             $match = EventMatch::query()->findOrFail($this->form->modelId);
-            Gate::authorize('update', $match);
             $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
         } else {
-            Gate::authorize('create', EventMatch::class);
             $event = Event::query()->findOrFail($this->eventId);
             $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
         }

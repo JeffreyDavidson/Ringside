@@ -27,6 +27,10 @@ use App\Models\Roster\Wrestlers\Wrestler;
  * @see FormModal
  * @see Form
  */
+beforeEach(function () {
+    $this->actingAs(administrator());
+});
+
 describe('TagTeams FormModal Tests', function () {
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {
