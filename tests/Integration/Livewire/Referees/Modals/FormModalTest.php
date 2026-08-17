@@ -26,6 +26,10 @@ use App\Models\Roster\Referees\Referee;
  * @see FormModal
  * @see RefereeForm
  */
+beforeEach(function () {
+    $this->actingAs(administrator());
+});
+
 describe('Referees FormModal Tests', function () {
     describe('modal rendering and state management', function () {
         test('modal opens and closes correctly', function () {

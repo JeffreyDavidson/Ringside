@@ -25,12 +25,6 @@ parameters:
 			path: app/Http/Middleware/AddWrestlingContext.php
 
 		-
-			message: '#^Access to an undefined property App\\Livewire\\Base\\BaseFormModal\<TForm of App\\Livewire\\Base\\BaseForm, TModel of Illuminate\\Database\\Eloquent\\Model\>\:\:\$form\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Base/BaseFormModal.php
-
-		-
 			message: '#^Instanceof between Illuminate\\View\\View and Illuminate\\Contracts\\View\\View will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
