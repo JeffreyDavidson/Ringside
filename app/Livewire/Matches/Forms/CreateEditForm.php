@@ -19,7 +19,6 @@ use App\Models\Titles\Title;
 use App\Rules\Matches\CompetitorsNotDuplicated;
 use App\Rules\Matches\CorrectNumberOfSides;
 use Closure;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
@@ -38,7 +37,7 @@ use Illuminate\Validation\Rules\Enum;
  * - Championship title stakes and implications
  * - Match-specific validation and business rules
  *
- * @extends BaseForm<CreateEditForm, EventMatch>
+ * @extends BaseForm<EventMatch>
  *
  * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
@@ -46,13 +45,6 @@ use Illuminate\Validation\Rules\Enum;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new event match creation.
-     *
-     * @var EventMatch|null Current event match model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Match promotional preview content for marketing purposes.
      *

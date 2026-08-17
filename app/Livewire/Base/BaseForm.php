@@ -9,18 +9,17 @@ use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 /**
- * @template TForm of BaseForm
- * @template TFormModel of Model|null
+ * @template TModel of Model
  */
 abstract class BaseForm extends Form
 {
-    /** @var TFormModel */
+    /** @var TModel|null */
     protected ?Model $formModel = null;
 
     #[Locked]
     public int|string|null $modelId = null;
 
-    /** @param TFormModel $formModel */
+    /** @param TModel|null $formModel */
     public function setModel(?Model $formModel): void
     {
         $this->formModel = $formModel;

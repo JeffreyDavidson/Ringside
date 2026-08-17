@@ -11,7 +11,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\Rules\Wrestlers\CanJoinTagTeam;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -31,7 +30,7 @@ use Illuminate\Validation\Rule;
  * - Tag team partnership data (formation dates, career information)
  * - Custom validation rules for wrestling tag team requirements
  *
- * @extends BaseForm<CreateEditForm, TagTeam>
+ * @extends BaseForm<TagTeam>
  *
  * @see BaseForm For base form functionality and patterns
  * @see CanChangeEmploymentDate For custom validation rules
@@ -45,13 +44,6 @@ use Illuminate\Validation\Rule;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new tag team creation.
-     *
-     * @var TagTeam|null Current tag team model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Tag team's official name for identification and promotion.
      *

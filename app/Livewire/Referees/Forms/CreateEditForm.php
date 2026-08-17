@@ -8,7 +8,6 @@ use App\Data\Referees\RefereeData;
 use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Referees\Referee;
 use App\Rules\Shared\CanChangeEmploymentDate;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
@@ -27,7 +26,7 @@ use Illuminate\Support\Carbon;
  * - Integration with match assignment and scheduling systems
  * - Official personnel record management for wrestling operations
  *
- * @extends BaseForm<CreateEditForm, Referee>
+ * @extends BaseForm<Referee>
  *
  * @see BaseForm For base form functionality and patterns
  * @see RefereeData For typed Action input
@@ -39,13 +38,6 @@ use Illuminate\Support\Carbon;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new referee creation.
-     *
-     * @var Referee|null Current referee model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Referee's first name for personal identification.
      *

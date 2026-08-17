@@ -8,7 +8,6 @@ use App\Data\Managers\ManagerData;
 use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Managers\Manager;
 use App\Rules\Shared\CanChangeEmploymentDate;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
@@ -27,7 +26,7 @@ use Illuminate\Support\Carbon;
  * - Integration with wrestler representation and storyline systems
  * - Personnel record management for wrestling entertainment operations
  *
- * @extends BaseForm<CreateEditForm, Manager>
+ * @extends BaseForm<Manager>
  *
  * @see BaseForm For base form functionality and patterns
  * @see ManagerData For typed Action input
@@ -39,13 +38,6 @@ use Illuminate\Support\Carbon;
  */
 class CreateEditForm extends BaseForm
 {
-    /**
-     * The model instance being edited, or null for new manager creation.
-     *
-     * @var Manager|null Current manager model or null for creation
-     */
-    protected ?Model $formModel = null;
-
     /**
      * Manager's first name for personal identification.
      *
