@@ -8,6 +8,7 @@ use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBePulledException;
 use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
@@ -49,7 +50,7 @@ class PullAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->eligibility->ensureCanPull($lockedTitle);
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Pull);
             $this->endActivityPeriod->handle($lockedTitle, $pullDate);
             $this->recordLifecycleTransition->handle(
                 $lockedTitle,

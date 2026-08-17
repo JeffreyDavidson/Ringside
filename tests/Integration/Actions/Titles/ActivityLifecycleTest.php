@@ -6,6 +6,7 @@ use App\Actions\Titles\DebutAction;
 use App\Actions\Titles\PullAction;
 use App\Actions\Titles\ReinstateAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBePulledException;
 use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
@@ -48,16 +49,16 @@ test('pull eligibility stays aligned with its guard', function (string $factoryS
     $eligibility = new TitleLifecycleEligibility();
     $title = Title::factory()->{$factoryState}()->create();
 
-    expect($eligibility->canPull($title))->toBe($canPull);
+    expect($eligibility->allows($title, TitleLifecycleTransition::Pull))->toBe($canPull);
 
     if ($canPull) {
-        expect(fn () => $eligibility->ensureCanPull($title))
+        expect(fn () => $eligibility->ensureAllowed($title, TitleLifecycleTransition::Pull))
             ->not->toThrow(CannotBePulledException::class);
 
         return;
     }
 
-    expect(fn () => $eligibility->ensureCanPull($title))
+    expect(fn () => $eligibility->ensureAllowed($title, TitleLifecycleTransition::Pull))
         ->toThrow(CannotBePulledException::class);
 })->with([
     'active' => ['active', true],

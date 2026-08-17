@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\TitleLifecycleEligibility;
@@ -45,7 +46,7 @@ class UnretireAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->eligibility->ensureCanUnretire($lockedTitle);
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Unretire);
             $this->retirementPeriods->end($lockedTitle, $unretiredDate, LifecycleTransitionType::Unretired);
         });
     }
