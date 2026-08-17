@@ -40,7 +40,6 @@ describe('BaseForm Unit Tests', function () {
             $abstractMethodNames = array_map(fn ($method) => $method->getName(), $abstractMethods);
 
             expect($abstractMethodNames)->toContain('rules');
-            expect($abstractMethodNames)->toContain('getModelData');
         });
     });
 
@@ -54,11 +53,6 @@ describe('BaseForm Unit Tests', function () {
             expect($rules->isProtected())->toBeTrue();
             expect(reflectionReturnTypeName($rules))->toBe('array');
 
-            // getModelData method
-            $getModelData = $reflection->getMethod('getModelData');
-            expect($getModelData->isAbstract())->toBeTrue();
-            expect($getModelData->isProtected())->toBeTrue();
-            expect(reflectionReturnTypeName($getModelData))->toBe('array');
         });
     });
 
@@ -70,7 +64,6 @@ describe('BaseForm Unit Tests', function () {
             $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
 
             expect($concreteMethodNames)->toContain('fill');
-            expect($concreteMethodNames)->toContain('store');
             expect($concreteMethodNames)->toContain('validationAttributes');
         });
     });
@@ -109,7 +102,6 @@ describe('BaseForm Unit Tests', function () {
             // Should have concrete methods for common workflow
             $concreteMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
             $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
-            expect($concreteMethodNames)->toContain('store');
             expect($concreteMethodNames)->toContain('fill');
         });
     });
@@ -122,8 +114,6 @@ describe('BaseForm Unit Tests', function () {
             $rules = $reflection->getMethod('rules');
             expect($rules->isProtected())->toBeTrue();
 
-            $getModelData = $reflection->getMethod('getModelData');
-            expect($getModelData->isProtected())->toBeTrue();
         });
     });
 

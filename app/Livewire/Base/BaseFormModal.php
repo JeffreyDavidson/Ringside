@@ -59,10 +59,7 @@ abstract class BaseFormModal extends BaseModal
         return true;
     }
 
-    protected function storeForm(): bool
-    {
-        return $this->form->store();
-    }
+    abstract protected function storeForm(): bool;
 
     public function mount(mixed $modelId = null): void
     {
