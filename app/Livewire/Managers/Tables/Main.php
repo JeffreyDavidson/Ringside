@@ -67,7 +67,7 @@ class Main extends BaseTable
     {
         return [
             Column::make(__('managers.name'), 'full_name')
-                ->searchable(function (ManagerBuilder $builder, string $searchTerm) {
+                ->searchable(function (ManagerBuilder $builder, string $searchTerm): void {
                     $builder->whereNameMatches($searchTerm);
                 }),
             Column::make(__('core.status'), 'status')
@@ -93,7 +93,7 @@ class Main extends BaseTable
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function (ManagerBuilder $builder, string $value) {
+                ->filter(function (ManagerBuilder $builder, string $value): void {
                     /** @var ManagerBuilder<Manager> $builder */
                     match ($value) {
                         'employed' => $builder->employed(),

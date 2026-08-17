@@ -67,7 +67,7 @@ class Main extends BaseTable
                 ->emptyValue('No Date Set'),
             LinkColumn::make(__('events.venue'))
                 ->title(fn (Event $row) => $row->venue ? $row->venue->name : 'No Venue')
-                ->location(fn (Event $row) => $row->venue ? route('venues.show', $row->venue) : ''),
+                ->location(fn (Event $row): string => $row->venue ? route('venues.show', $row->venue) : ''),
 
         ];
     }

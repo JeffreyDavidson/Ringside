@@ -11,6 +11,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Matches\MatchCompetitorFactory;
 use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -54,6 +55,7 @@ use Illuminate\Support\Carbon;
 #[Fillable('match_id', 'match_side_id', 'competitor_id', 'competitor_type')]
 #[UseEloquentBuilder(MatchCompetitorBuilder::class)]
 #[UseFactory(MatchCompetitorFactory::class)]
+#[Table(name: 'events_matches_competitors')]
 class MatchCompetitor extends MorphPivot
 {
     /** @use HasFactory<MatchCompetitorFactory> */
@@ -86,13 +88,6 @@ class MatchCompetitor extends MorphPivot
     {
         return $this->hasMany(self::class, 'eliminated_by_match_competitor_id');
     }
-
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'events_matches_competitors';
 
     /**
      * @return array<string, string>

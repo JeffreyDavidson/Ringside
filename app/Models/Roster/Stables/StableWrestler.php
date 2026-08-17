@@ -7,6 +7,7 @@ namespace App\Models\Roster\Stables;
 use App\Builders\Roster\StableMembershipBuilder;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -36,11 +37,9 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable('stable_id', 'wrestler_id', 'joined_at', 'left_at')]
 #[UseEloquentBuilder(StableMembershipBuilder::class)]
+#[Table(name: 'stables_wrestlers')]
 class StableWrestler extends Pivot
 {
-    /** @var string */
-    protected $table = 'stables_wrestlers';
-
     /** @return array<string, string> */
     protected function casts(): array
     {

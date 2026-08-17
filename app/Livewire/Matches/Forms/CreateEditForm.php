@@ -252,7 +252,7 @@ class CreateEditForm extends BaseForm
             'titles.*' => [
                 'integer',
                 'exists:titles,id',
-                function (string $attribute, mixed $value, Closure $fail) {
+                function (string $attribute, mixed $value, Closure $fail): void {
                     if (! is_int($value)) {
                         return;
                     }

@@ -48,7 +48,7 @@ class PreviousTagTeams extends DataTableComponent
         return [
             LinkColumn::make(__('tag-teams.name'))
                 ->title(fn (StableTagTeam $row) => $row->tagTeam->name ?? 'Unknown')
-                ->location(fn (StableTagTeam $row) => $row->tagTeam ? route('tag-teams.show', $row->tagTeam) : '#'),
+                ->location(fn (StableTagTeam $row): string => $row->tagTeam ? route('tag-teams.show', $row->tagTeam) : '#'),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('stables.date_left'), 'left_at')

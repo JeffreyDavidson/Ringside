@@ -8,6 +8,7 @@ use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Roster\TagTeams\TagTeamWrestlerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -43,13 +44,11 @@ use Illuminate\Support\Carbon;
 #[Fillable('tag_team_id', 'wrestler_id', 'joined_at', 'left_at')]
 #[UseEloquentBuilder(TagTeamMembershipBuilder::class)]
 #[UseFactory(TagTeamWrestlerFactory::class)]
+#[Table(name: 'tag_teams_wrestlers')]
 class TagTeamWrestler extends Pivot
 {
     /** @use HasFactory<TagTeamWrestlerFactory> */
     use HasFactory;
-
-    /** @var string */
-    protected $table = 'tag_teams_wrestlers';
 
     /** @return array<string, string> */
     protected function casts(): array

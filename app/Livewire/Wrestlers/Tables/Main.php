@@ -88,7 +88,7 @@ class Main extends BaseTable
                     'unemployed' => 'Unemployed',
                     'retired' => 'Retired',
                 ])
-                ->filter(function (WrestlerBuilder $builder, string $value) {
+                ->filter(function (WrestlerBuilder $builder, string $value): void {
                     match ($value) {
                         'employed' => $builder->employed(),
                         'future_employment' => $builder->futureEmployed(),

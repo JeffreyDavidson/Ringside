@@ -45,7 +45,7 @@ class FormModal extends BaseFormModal
     {
         return [
             'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'start_date' => fn () => $this->generateOptionalStartDate(),
+            'start_date' => fn (): ?string => $this->generateOptionalStartDate(),
         ];
     }
 

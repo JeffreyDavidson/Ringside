@@ -7,6 +7,7 @@ namespace App\Models\Roster\Wrestlers;
 use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -36,10 +37,9 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable('wrestler_id', 'manager_id', 'hired_at', 'fired_at')]
 #[UseEloquentBuilder(ManagerAssignmentBuilder::class)]
+#[Table(name: 'wrestlers_managers')]
 class WrestlerManager extends Pivot
 {
-    protected $table = 'wrestlers_managers';
-
     /**
      * Get the attributes that should be cast.
      *

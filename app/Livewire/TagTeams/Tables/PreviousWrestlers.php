@@ -48,7 +48,7 @@ class PreviousWrestlers extends DataTableComponent
         return [
             LinkColumn::make(__('wrestlers.name'))
                 ->title(fn (TagTeamWrestler $row) => $row->wrestler->name ?? 'Unknown')
-                ->location(fn (TagTeamWrestler $row) => $row->wrestler ? route('wrestlers.show', $row->wrestler) : '#'),
+                ->location(fn (TagTeamWrestler $row): string => $row->wrestler ? route('wrestlers.show', $row->wrestler) : '#'),
             DateColumn::make(__('tag-teams.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('tag-teams.date_left'), 'left_at')
