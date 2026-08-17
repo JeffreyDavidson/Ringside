@@ -12,7 +12,13 @@ class IsNotInjured implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $wrestler = Wrestler::query()->findOrFail($value);
+        if (! is_int($value) && ! is_string($value)) {
+            $fail('The selected wrestler is invalid.');
+
+            return;
+        }
+
+        $wrestler = Wrestler::query()->whereKey($value)->firstOrFail();
 
         if ($wrestler->isInjured()) {
             $fail("{$wrestler->name} is injured and cannot join the stable.");

@@ -22,10 +22,10 @@ class RecordResultAction
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
     {
         return DB::transaction(function () use ($match, $result): EventMatch {
-            $lockedMatch = EventMatch::query()->lockForUpdate()->findOrFail($match->id);
+            $lockedMatch = EventMatch::query()->whereKey($match->id)->lockForUpdate()->firstOrFail();
             $lockedWinningSide = $result->winningSide === null
                 ? null
-                : MatchSide::query()->lockForUpdate()->findOrFail($result->winningSide->id);
+                : MatchSide::query()->whereKey($result->winningSide->id)->lockForUpdate()->firstOrFail();
             $lockedCompetitors = MatchCompetitor::query()
                 ->whereBelongsTo($lockedMatch, 'eventMatch')
                 ->lockForUpdate()

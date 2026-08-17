@@ -16,7 +16,7 @@ class DeleteAction
     public function handle(EventMatch $eventMatch, ?Carbon $deletedAt = null): void
     {
         DB::transaction(function () use ($eventMatch, $deletedAt): void {
-            $lockedMatch = EventMatch::query()->lockForUpdate()->findOrFail($eventMatch->getKey());
+            $lockedMatch = EventMatch::query()->whereKey($eventMatch->getKey())->lockForUpdate()->firstOrFail();
 
             $this->deletionState->delete($lockedMatch, $deletedAt ?? now());
         });

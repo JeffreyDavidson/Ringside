@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Events\Event;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Context;
@@ -93,7 +94,7 @@ class AddWrestlingContext
         // Add event context
         if ($event = $route->parameter('event')) {
             Context::add('event_id', $event->id ?? $event);
-            if (is_object($event) && isset($event->name)) {
+            if ($event instanceof Event) {
                 Context::add('event_name', $event->name);
                 Context::add('event_date', $event->date?->toDateString());
             }

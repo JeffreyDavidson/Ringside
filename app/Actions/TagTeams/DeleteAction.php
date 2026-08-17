@@ -57,7 +57,7 @@ class DeleteAction
         $deletionDate = DateHelper::resolveDate($deletionDate);
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
-            $lockedTagTeam = TagTeam::query()->withTrashed()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->withTrashed()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanDelete($lockedTagTeam);
 
             $this->endCurrentRelationships->handle($lockedTagTeam, $deletionDate);

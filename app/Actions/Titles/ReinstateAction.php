@@ -43,8 +43,9 @@ class ReinstateAction
 
         DB::transaction(function () use ($title, $reinstateDate, $notes): void {
             $lockedTitle = Title::query()
+                ->whereKey($title->getKey())
                 ->lockForUpdate()
-                ->findOrFail($title->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanReinstate($lockedTitle);
 

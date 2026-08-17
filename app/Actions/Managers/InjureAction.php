@@ -38,7 +38,7 @@ class InjureAction
         $injureDate = DateHelper::resolveDate($injureDate);
 
         DB::transaction(function () use ($manager, $injureDate): void {
-            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanInjure($lockedManager);
 
             $this->injuryPeriods->start($lockedManager, $injureDate, LifecycleTransitionType::Injured);

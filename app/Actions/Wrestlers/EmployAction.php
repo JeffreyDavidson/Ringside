@@ -41,7 +41,7 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($wrestler, $employmentDate): void {
-            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanEmploy($lockedWrestler);
 
             $this->employmentPeriods->start($lockedWrestler, $employmentDate, LifecycleTransitionType::Employed);

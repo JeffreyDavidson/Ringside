@@ -6,11 +6,11 @@ namespace App\Services;
 
 use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\Stables\Stable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class StableMembershipService
 {
@@ -63,7 +63,9 @@ class StableMembershipService
             return;
         }
 
-        $relationship->attach($members->modelKeys(), [
+        $relationship->attach($members->map(
+            fn (Model $member): int|string => $member->getKey(),
+        )->all(), [
             'joined_at' => $date,
             'left_at' => null,
         ]);

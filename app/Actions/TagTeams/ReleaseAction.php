@@ -43,7 +43,7 @@ class ReleaseAction
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($tagTeam, $releaseDate): void {
-            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRelease($lockedTagTeam);
 
             $this->employmentPeriods->end($lockedTagTeam, $releaseDate, LifecycleTransitionType::Released);

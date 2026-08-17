@@ -37,7 +37,7 @@ class EmployAction
         $startDate = DateHelper::resolveDate($startDate);
 
         DB::transaction(function () use ($manager, $startDate): void {
-            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanEmploy($lockedManager);
 
             $this->employmentPeriods->start($lockedManager, $startDate, LifecycleTransitionType::Employed);

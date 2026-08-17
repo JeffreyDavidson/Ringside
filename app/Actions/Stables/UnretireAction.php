@@ -53,8 +53,9 @@ class UnretireAction
         DB::transaction(function () use ($stable, $unretiredDate, $establishImmediately, $requireFormerMembers): void {
             $lockedStable = Stable::query()
                 ->withTrashed()
+                ->whereKey($stable->getKey())
                 ->lockForUpdate()
-                ->findOrFail($stable->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanUnretire($lockedStable, $requireFormerMembers);
             $this->retirementPeriods->end($lockedStable, $unretiredDate, LifecycleTransitionType::Unretired);

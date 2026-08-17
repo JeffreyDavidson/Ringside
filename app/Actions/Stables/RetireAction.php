@@ -59,8 +59,9 @@ class RetireAction
         DB::transaction(function () use ($stable, $retirementDate, $operationalDate): void {
             $lockedStable = Stable::query()
                 ->withTrashed()
+                ->whereKey($stable->getKey())
                 ->lockForUpdate()
-                ->findOrFail($stable->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanRetire($lockedStable);
 

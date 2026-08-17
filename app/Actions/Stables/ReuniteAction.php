@@ -45,8 +45,9 @@ class ReuniteAction
         DB::transaction(function () use ($stable, $reuniteDate): void {
             $lockedStable = Stable::query()
                 ->withTrashed()
+                ->whereKey($stable->getKey())
                 ->lockForUpdate()
-                ->findOrFail($stable->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanReunite($lockedStable);
             $this->startActivityPeriodAction->handle($lockedStable, $reuniteDate);

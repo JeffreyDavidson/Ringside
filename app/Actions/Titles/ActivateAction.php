@@ -34,8 +34,9 @@ class ActivateAction
 
         DB::transaction(function () use ($title, $activationDate): void {
             $lockedTitle = Title::query()
+                ->whereKey($title->getKey())
                 ->lockForUpdate()
-                ->findOrFail($title->getKey());
+                ->firstOrFail();
 
             // If the title is retired, first unretire it
             if ($lockedTitle->isRetired()) {

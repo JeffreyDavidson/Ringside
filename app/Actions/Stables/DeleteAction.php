@@ -29,8 +29,9 @@ class DeleteAction
         DB::transaction(function () use ($stable): void {
             $lockedStable = Stable::query()
                 ->withTrashed()
+                ->whereKey($stable->getKey())
                 ->lockForUpdate()
-                ->findOrFail($stable->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanDelete($lockedStable);
             $this->deletionState->delete($lockedStable, now());

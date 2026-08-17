@@ -42,7 +42,7 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
-            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanEmploy($lockedTagTeam);
 
             $this->employmentPeriods->start($lockedTagTeam, $employmentDate, LifecycleTransitionType::Employed);

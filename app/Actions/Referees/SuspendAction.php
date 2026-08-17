@@ -38,7 +38,7 @@ class SuspendAction
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         DB::transaction(function () use ($referee, $suspensionDate): void {
-            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanSuspend($lockedReferee);
 
             $this->suspensionPeriods->start($lockedReferee, $suspensionDate, LifecycleTransitionType::Suspended);

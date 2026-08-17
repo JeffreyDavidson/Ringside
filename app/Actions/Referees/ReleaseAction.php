@@ -42,7 +42,7 @@ class ReleaseAction
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($referee, $releaseDate): void {
-            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRelease($lockedReferee);
 
             if ($lockedReferee->isSuspended()) {

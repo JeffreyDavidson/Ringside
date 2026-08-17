@@ -41,8 +41,9 @@ class UnretireAction
         DB::transaction(function () use ($title, $unretiredDate): void {
             $lockedTitle = Title::query()
                 ->withTrashed()
+                ->whereKey($title->getKey())
                 ->lockForUpdate()
-                ->findOrFail($title->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanUnretire($lockedTitle);
             $this->retirementPeriods->end($lockedTitle, $unretiredDate, LifecycleTransitionType::Unretired);

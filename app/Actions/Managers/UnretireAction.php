@@ -41,7 +41,7 @@ class UnretireAction
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($manager, $unretiredDate, $employImmediately): void {
-            $lockedManager = Manager::query()->withTrashed()->lockForUpdate()->findOrFail($manager->getKey());
+            $lockedManager = Manager::query()->withTrashed()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanUnretire($lockedManager);
             $this->retirementPeriods->end($lockedManager, $unretiredDate, LifecycleTransitionType::Unretired);
 

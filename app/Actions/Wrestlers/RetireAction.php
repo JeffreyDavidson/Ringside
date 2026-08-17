@@ -47,7 +47,7 @@ class RetireAction
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($wrestler, $retirementDate): void {
-            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRetire($lockedWrestler);
 
             if ($lockedWrestler->isEmployed()) {

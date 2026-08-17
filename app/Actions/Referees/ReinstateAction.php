@@ -38,7 +38,7 @@ class ReinstateAction
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($referee, $reinstatementDate): void {
-            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanReinstate($lockedReferee);
 
             $this->suspensionPeriods->end($lockedReferee, $reinstatementDate, LifecycleTransitionType::Reinstated);

@@ -39,8 +39,9 @@ class SuspendAction
 
         DB::transaction(function () use ($wrestler, $suspensionDate): void {
             $lockedWrestler = Wrestler::query()
+                ->whereKey($wrestler->getKey())
                 ->lockForUpdate()
-                ->findOrFail($wrestler->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanSuspend($lockedWrestler);
 

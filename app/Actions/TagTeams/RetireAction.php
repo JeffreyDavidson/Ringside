@@ -47,7 +47,7 @@ class RetireAction
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($tagTeam, $retirementDate, $retireMembers): void {
-            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRetire($lockedTagTeam);
 
             if ($lockedTagTeam->isEmployed()) {
