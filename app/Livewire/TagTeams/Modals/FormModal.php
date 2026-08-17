@@ -40,11 +40,6 @@ class FormModal extends BaseFormModal
         return TagTeam::class;
     }
 
-    protected function getModalPath(): string
-    {
-        return 'livewire.tag-teams.modals.form-modal';
-    }
-
     protected function getDummyDataFields(): array
     {
         $wrestlerIds = Wrestler::query()
@@ -78,6 +73,6 @@ class FormModal extends BaseFormModal
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.tag-teams.modals.form-modal');
+        return view('livewire.tag-teams.modals.form-modal');
     }
 }

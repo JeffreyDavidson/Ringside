@@ -34,11 +34,6 @@ class FormModal extends BaseFormModal
         return Wrestler::class;
     }
 
-    protected function getModalPath(): string
-    {
-        return 'livewire.wrestlers.modals.form-modal';
-    }
-
     protected function getDummyDataFields(): array
     {
         return [
@@ -69,6 +64,6 @@ class FormModal extends BaseFormModal
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.wrestlers.modals.form-modal');
+        return view('livewire.wrestlers.modals.form-modal');
     }
 }

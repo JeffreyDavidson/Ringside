@@ -80,7 +80,7 @@ the form, builds modal titles, and resets or restores form state.
 
 `BaseFormModal` coordinates the shared submission lifecycle:
 
-1. initialize the concrete model and form types;
+1. initialize the concrete model type while Livewire initializes the typed form;
 2. mount create or edit state;
 3. delegate domain submission to `storeForm()`;
 4. dispatch table refresh and form-submitted events; and

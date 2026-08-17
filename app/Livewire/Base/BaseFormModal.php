@@ -19,8 +19,6 @@ abstract class BaseFormModal extends BaseModal
 
     abstract protected function getModelClass(): string;
 
-    abstract protected function getModalPath(): string;
-
     public bool $isModalOpen = false;
 
     public function openModal(mixed $modelId = null): void
@@ -61,8 +59,6 @@ abstract class BaseFormModal extends BaseModal
 
     public function mount(mixed $modelId = null): void
     {
-        $this->modalFormPath = $this->getModalPath();
-
         $modelClass = $this->getModelClass();
         $this->modelType = new $modelClass();
 

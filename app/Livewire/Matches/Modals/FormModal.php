@@ -59,11 +59,6 @@ class FormModal extends BaseFormModal
         return EventMatch::class;
     }
 
-    protected function getModalPath(): string
-    {
-        return 'livewire.matches.modals.form-modal';
-    }
-
     protected function storeForm(): bool
     {
         $this->form->validate();
@@ -155,6 +150,6 @@ class FormModal extends BaseFormModal
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.matches.modals.form-modal');
+        return view('livewire.matches.modals.form-modal');
     }
 }

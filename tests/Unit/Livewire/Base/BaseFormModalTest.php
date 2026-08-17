@@ -48,7 +48,6 @@ describe('BaseFormModal Unit Tests', function () {
             $abstractMethodNames = array_map(fn ($method) => $method->getName(), $abstractMethods);
 
             expect($abstractMethodNames)->toContain('getModelClass');
-            expect($abstractMethodNames)->toContain('getModalPath');
         });
     });
 
@@ -62,11 +61,6 @@ describe('BaseFormModal Unit Tests', function () {
             expect($getModelClass->isProtected())->toBeTrue();
             expect(reflectionReturnTypeName($getModelClass))->toBe('string');
 
-            // getModalPath method
-            $getModalPath = $reflection->getMethod('getModalPath');
-            expect($getModalPath->isAbstract())->toBeTrue();
-            expect($getModalPath->isProtected())->toBeTrue();
-            expect(reflectionReturnTypeName($getModalPath))->toBe('string');
         });
     });
 

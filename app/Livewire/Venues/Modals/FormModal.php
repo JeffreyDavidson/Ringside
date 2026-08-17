@@ -34,11 +34,6 @@ class FormModal extends BaseFormModal
         return Venue::class;
     }
 
-    protected function getModalPath(): string
-    {
-        return 'livewire.venues.modals.form-modal';
-    }
-
     protected function getDummyDataFields(): array
     {
         /**
@@ -68,7 +63,7 @@ class FormModal extends BaseFormModal
 
     public function render(): View
     {
-        return view($this->modalFormPath ?? 'livewire.venues.modals.form-modal');
+        return view('livewire.venues.modals.form-modal');
     }
 
     protected function storeForm(): bool

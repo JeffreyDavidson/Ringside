@@ -28,13 +28,10 @@ describe('FormModal Configuration', function () {
         expect($method->invoke($modal))->toBe(Wrestler::class);
     });
 
-    it('returns correct modal path', function () {
-        $modal = new FormModal();
-        $reflection = new ReflectionClass($modal);
-        $method = $reflection->getMethod('getModalPath');
-        $method->setAccessible(true);
+    it('renders the wrestler modal view', function () {
+        $component = testLivewire(FormModal::class);
 
-        expect($method->invoke($modal))->toBe('livewire.wrestlers.modals.form-modal');
+        expect($component->instance()->render()->name())->toBe('livewire.wrestlers.modals.form-modal');
     });
 });
 

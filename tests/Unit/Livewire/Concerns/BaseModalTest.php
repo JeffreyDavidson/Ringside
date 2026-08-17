@@ -63,15 +63,10 @@ describe('BaseModal Unit Tests', function () {
             expect(reflectionTypeName($property))->toBe('Illuminate\\Database\\Eloquent\\Model');
         });
 
-        test('has string configuration properties', function () {
+        test('has model title configuration', function () {
             $reflection = new ReflectionClass(BaseModal::class);
 
-            expect($reflection->hasProperty('modalFormPath'))->toBeTrue();
             expect($reflection->hasProperty('modelTitleField'))->toBeTrue();
-
-            $modalFormPath = $reflection->getProperty('modalFormPath');
-            expect($modalFormPath->isProtected())->toBeTrue();
-            expect(reflectionTypeName($modalFormPath))->toBe('string');
 
             $modelTitleField = $reflection->getProperty('modelTitleField');
             expect($modelTitleField->isProtected())->toBeTrue();
