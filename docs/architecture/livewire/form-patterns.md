@@ -159,11 +159,6 @@ protected function storeForm(): bool
 }
 ```
 
-The Matches form is a temporary exception: its `store()` method currently resolves
-the match Actions because match submission assembles a complex competitor payload.
-That orchestration should move to the Matches modal without moving match invariants
-out of the Actions.
-
 ## Testing
 
 Test forms for validation, hydration, and data conversion. Test modals for Action

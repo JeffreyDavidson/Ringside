@@ -84,6 +84,10 @@ arch('controllers do not use models directly')
     ->expect('App\\Http\\Controllers')
     ->not->toUse('App\\Models\\*');
 
+arch('match forms do not orchestrate actions')
+    ->expect('App\\Livewire\\Matches\\Forms')
+    ->not->toUse('App\\Actions\\*');
+
 arch('models are only used in repositories')
     ->expect('App\\Models')
     ->toOnlyBeUsedIn('App\\Repositories')
