@@ -8,6 +8,7 @@ use App\Enums\Shared\UnitedStatesState;
 use App\ValueObjects\Address;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
 
 /** @implements CastsAttributes<Address, Address> */
@@ -17,10 +18,10 @@ class AddressCast implements CastsAttributes
     public function get(Model $model, string $key, mixed $value, array $attributes): Address
     {
         return new Address(
-            streetAddress: (string) $attributes['street_address'],
-            city: (string) $attributes['city'],
-            state: UnitedStatesState::from((string) $attributes['state']),
-            zipcode: (string) $attributes['zipcode'],
+            streetAddress: Arr::string($attributes, 'street_address'),
+            city: Arr::string($attributes, 'city'),
+            state: UnitedStatesState::from(Arr::string($attributes, 'state')),
+            zipcode: Arr::string($attributes, 'zipcode'),
         );
     }
 

@@ -32,7 +32,15 @@ abstract class BaseBusinessException extends Exception
 
     protected static function formatModelContext(Model $model): string
     {
-        $name = $model->getAttribute('name') ?? "ID: {$model->getKey()}";
+        $name = $model->getAttribute('name');
+
+        if (! is_string($name)) {
+            $modelKey = $model->getKey();
+            $modelIdentifier = is_int($modelKey) || is_string($modelKey)
+                ? $modelKey
+                : 'unknown';
+            $name = "ID: {$modelIdentifier}";
+        }
 
         return class_basename($model)." '{$name}'";
     }

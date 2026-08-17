@@ -9,6 +9,7 @@ use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -64,7 +65,7 @@ class StableMembershipService
         }
 
         $relationship->attach($members->map(
-            fn (Model $member): int|string => $member->getKey(),
+            fn (Model $member): int => Arr::integer(['key' => $member->getKey()], 'key'),
         )->all(), [
             'joined_at' => $date,
             'left_at' => null,

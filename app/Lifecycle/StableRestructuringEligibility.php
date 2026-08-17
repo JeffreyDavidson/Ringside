@@ -105,13 +105,13 @@ final class StableRestructuringEligibility
                 || $wrestler->isSuspended()
                 || $wrestler->isInjured()
                 || $wrestler->isRetired(),
-        )->pluck('name')->all() ?? [];
+        )->map(fn (Wrestler $wrestler): string => $wrestler->name)->all() ?? [];
 
         $unavailableTagTeams = $members->tagTeams?->filter(
             fn (TagTeam $tagTeam): bool => ! $tagTeam->isEmployed()
                 || $tagTeam->isSuspended()
                 || $tagTeam->isRetired(),
-        )->pluck('name')->all() ?? [];
+        )->map(fn (TagTeam $tagTeam): string => $tagTeam->name)->all() ?? [];
 
         return [...$unavailableWrestlers, ...$unavailableTagTeams];
     }

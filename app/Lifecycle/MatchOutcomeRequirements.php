@@ -56,7 +56,9 @@ class MatchOutcomeRequirements
             return;
         }
 
-        $entryOrders = $competitors->pluck('entry_order')->all();
+        $entryOrders = $competitors
+            ->map(fn (MatchCompetitor $competitor): ?int => $competitor->entry_order)
+            ->all();
 
         if (! $this->isConsecutiveSequence($entryOrders, $competitors->count())) {
             throw InvalidMatchOutcomeException::invalidEntryOrder();

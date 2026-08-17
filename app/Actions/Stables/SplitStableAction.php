@@ -9,6 +9,8 @@ use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
 use App\Lifecycle\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -79,10 +81,15 @@ class SplitStableAction
         }
 
         $currentMembers = $this->membershipService->currentMembers($originalStable);
-        $nonMemberNames = [
-            ...$membersForNewStable->wrestlers?->diff($currentMembers->wrestlers ?? [])->pluck('name')->all() ?? [],
-            ...$membersForNewStable->tagTeams?->diff($currentMembers->tagTeams ?? [])->pluck('name')->all() ?? [],
-        ];
+        $nonMemberWrestlerNames = $membersForNewStable->wrestlers
+            ?->diff($currentMembers->wrestlers ?? [])
+            ->map(fn (Wrestler $wrestler): string => $wrestler->name)
+            ->all() ?? [];
+        $nonMemberTagTeamNames = $membersForNewStable->tagTeams
+            ?->diff($currentMembers->tagTeams ?? [])
+            ->map(fn (TagTeam $tagTeam): string => $tagTeam->name)
+            ->all() ?? [];
+        $nonMemberNames = [...$nonMemberWrestlerNames, ...$nonMemberTagTeamNames];
 
         if ($nonMemberNames !== []) {
             throw CannotBeSplitException::membersDoNotBelongToStable($nonMemberNames);

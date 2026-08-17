@@ -31,7 +31,13 @@ class NotRepresentedBySelectedTagTeam implements ValidationRule
         $wrestler = Wrestler::query()->whereKey($value)->firstOrFail();
         $currentTagTeam = $wrestler->currentTagTeam()->first();
 
-        if ($currentTagTeam && $this->tagTeamIds->contains($currentTagTeam->getKey())) {
+        if (! $currentTagTeam) {
+            return;
+        }
+
+        $currentTagTeamKey = $currentTagTeam->getKey();
+
+        if ((is_int($currentTagTeamKey) || is_string($currentTagTeamKey)) && $this->tagTeamIds->contains($currentTagTeamKey)) {
             $fail('This wrestler is already represented in the stable through their tag team.');
         }
     }

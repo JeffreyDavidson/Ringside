@@ -24,6 +24,27 @@ use Illuminate\Support\Carbon;
  * @see CanChangeEmploymentDate
  */
 describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
+    test('rejects an invalid employment date value', function () {
+        $model = new class extends Model
+        {
+            public function isEmployed(): bool
+            {
+                return true;
+            }
+        };
+        $message = null;
+
+        (new CanChangeEmploymentDate($model))->validate(
+            'started_at',
+            [],
+            validationFailureCallback(function (string $failure) use (&$message): void {
+                $message = $failure;
+            }),
+        );
+
+        expect($message)->toBe('The employment date must be a valid date.');
+    });
+
     describe('model validation with employment methods', function () {
         test('validation passes when model is not employed', function () {
             // Arrange

@@ -79,3 +79,20 @@ test('rejects changing the start date of an active model', function (string $mod
     'stable' => Stable::class,
     'title' => Title::class,
 ]);
+
+test('rejects an invalid debut date value for an active model', function () {
+    $stable = Stable::factory()
+        ->has(ActivityPeriod::factory()->started(now()->subWeek()), 'activityPeriods')
+        ->create();
+    $message = null;
+
+    (new CanChangeDebutDate($stable))->validate(
+        'debut_date',
+        [],
+        validationFailureCallback(function (string $failure) use (&$message): void {
+            $message = $failure;
+        }),
+    );
+
+    expect($message)->toBe('The debut date must be a valid date.');
+});

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Shared;
 
 use Closure;
+use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -24,6 +25,12 @@ class CanChangeEmploymentDate implements ValidationRule
             return;
         }
 
+        if (! $value instanceof DateTimeInterface && ! is_float($value) && ! is_int($value) && ! is_string($value)) {
+            $fail('The employment date must be a valid date.');
+
+            return;
+        }
+
         $targetDate = Carbon::parse($value);
 
         if ($model->isEmployed()) {
@@ -36,6 +43,8 @@ class CanChangeEmploymentDate implements ValidationRule
 
     private function getModelName(Model $model): string
     {
-        return $model->getAttribute('name') ?? class_basename($model);
+        $name = $model->getAttribute('name');
+
+        return is_string($name) ? $name : class_basename($model);
     }
 }

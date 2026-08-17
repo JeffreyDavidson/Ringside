@@ -8,7 +8,6 @@ use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -42,8 +41,7 @@ class AddCompetitorsToMatchAction
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
         // Validate competitor distribution before processing
-        $competitorArray = $competitors->toArray();
-        if (! $this->validateCompetitorDistribution($competitorArray)) {
+        if (! $this->validateCompetitorDistribution($competitors)) {
             throw InvalidMatchConfigurationException::insufficientSides(2);
         }
 
@@ -60,24 +58,28 @@ class AddCompetitorsToMatchAction
      *
      * @param  EventMatch  $eventMatch  The match to add competitors to
      * @param  int  $sideNumber  The side number (1, 2, 3, etc.)
-     * @param  array<string, array<int, Wrestler|TagTeam>>  $sideCompetitors  Competitors for this side
+     * @param  array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}  $sideCompetitors  Competitors for this side
      */
     private function addSideCompetitors(EventMatch $eventMatch, int $sideNumber, array $sideCompetitors): void
     {
         // Add wrestlers to this side
-        if (Arr::exists($sideCompetitors, 'wrestlers') && ! empty($sideCompetitors['wrestlers'])) {
+        $wrestlers = $sideCompetitors['wrestlers'] ?? [];
+
+        if ($wrestlers !== []) {
             $this->addWrestlersToMatchAction->handle(
                 $eventMatch,
-                collect((array) Arr::get($sideCompetitors, 'wrestlers')),
+                collect($wrestlers),
                 $sideNumber
             );
         }
 
         // Add tag teams to this side
-        if (Arr::exists($sideCompetitors, 'tag_teams') && ! empty($sideCompetitors['tag_teams'])) {
+        $tagTeams = $sideCompetitors['tag_teams'] ?? [];
+
+        if ($tagTeams !== []) {
             $this->addTagTeamsToMatchAction->handle(
                 $eventMatch,
-                collect((array) Arr::get($sideCompetitors, 'tag_teams')),
+                collect($tagTeams),
                 $sideNumber
             );
         }
@@ -86,10 +88,10 @@ class AddCompetitorsToMatchAction
     /**
      * Validate match competitors for proper side distribution.
      *
-     * @param  array<int, array<string, mixed>>  $competitors  Competitors organized by side
+     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors  Competitors organized by side
      * @return bool True if competitor distribution is valid for the match type
      */
-    private function validateCompetitorDistribution(array $competitors): bool
+    private function validateCompetitorDistribution(Collection $competitors): bool
     {
         // Ensure we have at least 2 sides with competitors
         $sidesWithCompetitors = 0;
