@@ -47,7 +47,6 @@ describe('BaseFormModal Unit Tests', function () {
             $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
             $abstractMethodNames = array_map(fn ($method) => $method->getName(), $abstractMethods);
 
-            expect($abstractMethodNames)->toContain('getFormClass');
             expect($abstractMethodNames)->toContain('getModelClass');
             expect($abstractMethodNames)->toContain('getModalPath');
         });
@@ -56,12 +55,6 @@ describe('BaseFormModal Unit Tests', function () {
     describe('method signatures', function () {
         test('abstract methods have correct signatures', function () {
             $reflection = new ReflectionClass(BaseFormModal::class);
-
-            // getFormClass method
-            $getFormClass = $reflection->getMethod('getFormClass');
-            expect($getFormClass->isAbstract())->toBeTrue();
-            expect($getFormClass->isProtected())->toBeTrue();
-            expect(reflectionReturnTypeName($getFormClass))->toBe('string');
 
             // getModelClass method
             $getModelClass = $reflection->getMethod('getModelClass');

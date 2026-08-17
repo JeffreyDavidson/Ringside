@@ -7,7 +7,6 @@ namespace App\Livewire\Wrestlers\Modals;
 use App\Actions\Wrestlers\CreateAction;
 use App\Actions\Wrestlers\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\GeneratesDummyData;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Str;
@@ -18,8 +17,6 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    use GeneratesDummyData;
-
     public CreateEditForm $form;
 
     private CreateAction $createAction;
@@ -30,11 +27,6 @@ class FormModal extends BaseFormModal
     {
         $this->createAction = $createAction;
         $this->updateAction = $updateAction;
-    }
-
-    protected function getFormClass(): string
-    {
-        return CreateEditForm::class;
     }
 
     protected function getModelClass(): string
