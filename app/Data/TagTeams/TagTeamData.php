@@ -6,8 +6,8 @@ namespace App\Data\TagTeams;
 
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Collection;
 
 readonly class TagTeamData
 {

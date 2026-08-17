@@ -29,6 +29,8 @@ readonly class TagTeamMembershipData
 
     /**
      * Create membership data from individual wrestler properties.
+     *
+     * @param  Collection<int, Manager>|null  $managers
      */
     public static function fromWrestlers(Wrestler $wrestlerA, Wrestler $wrestlerB, ?Collection $managers = null): self
     {
@@ -50,6 +52,8 @@ readonly class TagTeamMembershipData
 
     /**
      * Get the managers collection, defaulting to empty Eloquent collection.
+     *
+     * @return Collection<int, Manager>
      */
     public function getManagers(): Collection
     {

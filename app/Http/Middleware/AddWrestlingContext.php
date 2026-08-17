@@ -35,7 +35,7 @@ class AddWrestlingContext
         // Add user context if authenticated
         if ($user = $request->user()) {
             Context::add('user_id', $user->id);
-            Context::add('user_name', $user->name);
+            Context::add('user_name', $user->full_name);
             Context::add('user_email', $user->email);
             Context::addHidden('session_id', $request->session()->getId());
         }
