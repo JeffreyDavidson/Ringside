@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Console\Commands\EnhancedTestMakeCommand;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;
@@ -16,7 +15,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -40,10 +38,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->registerLegacyRosterModelAliases();
 
-        // Replace Laravel's default make:test command with our enhanced version
-        $this->app->singleton('command.test.make', function (Application $app) {
-            return new EnhancedTestMakeCommand($app['files']);
-        });
     }
 
     private function registerLegacyRosterModelAliases(): void
