@@ -7,6 +7,7 @@ namespace App\View\Filters;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class FirstActivationFilter extends DateRangeFilter
 {
@@ -30,7 +31,7 @@ class FirstActivationFilter extends DateRangeFilter
         ])
             ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate'])
             ->filter(function (Builder $query, array $dateRange): void {
-                $query->withWhereHas($this->filterRelationshipName, function (Builder $query) use ($dateRange): void {
+                $query->withWhereHas($this->filterRelationshipName, function (Builder|Relation $query) use ($dateRange): void {
                     /** @var array{'minDate': string, 'maxDate': string} $dateRange */
                     $query
                         ->where(function (Builder $query) use ($dateRange): void {

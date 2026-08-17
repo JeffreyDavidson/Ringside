@@ -34,7 +34,7 @@ class HealAction
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
         DB::transaction(function () use ($wrestler, $recoveryDate): void {
-            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanHeal($lockedWrestler);
 
             $this->injuryPeriods->end($lockedWrestler, $recoveryDate, LifecycleTransitionType::Healed);

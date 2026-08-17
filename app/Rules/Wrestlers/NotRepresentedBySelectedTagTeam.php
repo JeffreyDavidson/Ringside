@@ -22,7 +22,13 @@ class NotRepresentedBySelectedTagTeam implements ValidationRule
             return;
         }
 
-        $wrestler = Wrestler::query()->findOrFail($value);
+        if (! is_int($value) && ! is_string($value)) {
+            $fail('The selected wrestler is invalid.');
+
+            return;
+        }
+
+        $wrestler = Wrestler::query()->whereKey($value)->firstOrFail();
         $currentTagTeam = $wrestler->currentTagTeam()->first();
 
         if ($currentTagTeam && $this->tagTeamIds->contains($currentTagTeam->getKey())) {

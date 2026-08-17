@@ -23,8 +23,9 @@ class UpdateMatchAction
 
         return DB::transaction(function () use ($match, $data): EventMatch {
             $lockedMatch = EventMatch::query()
+                ->whereKey($match->id)
                 ->lockForUpdate()
-                ->findOrFail($match->id);
+                ->firstOrFail();
 
             if ($lockedMatch->match_finish !== null) {
                 throw InvalidMatchConfigurationException::resultAlreadyRecorded();

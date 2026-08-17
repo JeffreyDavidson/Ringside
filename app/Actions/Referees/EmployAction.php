@@ -37,7 +37,7 @@ class EmployAction
         $employmentDate = DateHelper::resolveDate($employmentDate);
 
         DB::transaction(function () use ($referee, $employmentDate): void {
-            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanEmploy($lockedReferee);
 
             $this->employmentPeriods->start($lockedReferee, $employmentDate, LifecycleTransitionType::Employed);

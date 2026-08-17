@@ -37,7 +37,7 @@ class ReinstateAction
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($wrestler, $reinstatementDate): void {
-            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanReinstate($lockedWrestler);
 
             $this->suspensionPeriods->end($lockedWrestler, $reinstatementDate, LifecycleTransitionType::Reinstated);

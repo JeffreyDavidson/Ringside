@@ -30,7 +30,7 @@ class RestoreAction
     public function handle(TagTeam $tagTeam): void
     {
         DB::transaction(function () use ($tagTeam): void {
-            $lockedTagTeam = TagTeam::query()->withTrashed()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->withTrashed()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRestore($lockedTagTeam);
 
             $this->deletionState->restore($lockedTagTeam, now());

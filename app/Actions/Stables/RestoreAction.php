@@ -30,8 +30,9 @@ class RestoreAction
         DB::transaction(function () use ($stable): void {
             $lockedStable = Stable::query()
                 ->withTrashed()
+                ->whereKey($stable->getKey())
                 ->lockForUpdate()
-                ->findOrFail($stable->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanRestore($lockedStable);
             $this->deletionState->restore($lockedStable, now());

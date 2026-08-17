@@ -14,7 +14,13 @@ class CanJoinTagTeam implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $wrestler = Wrestler::query()->find($value);
+        if (! is_int($value) && ! is_string($value)) {
+            $fail('The selected wrestler is invalid.');
+
+            return;
+        }
+
+        $wrestler = Wrestler::query()->whereKey($value)->first();
 
         if (! $wrestler) {
             $fail('The selected wrestler is invalid.');

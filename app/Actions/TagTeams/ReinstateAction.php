@@ -40,7 +40,7 @@ class ReinstateAction
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
-            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanReinstate($lockedTagTeam);
 
             $this->suspensionPeriods->end($lockedTagTeam, $reinstatementDate, LifecycleTransitionType::Reinstated);

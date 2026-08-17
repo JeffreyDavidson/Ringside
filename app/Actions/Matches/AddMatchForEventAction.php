@@ -26,8 +26,9 @@ class AddMatchForEventAction
 
         return DB::transaction(function () use ($event, $eventMatchData): EventMatch {
             $lockedEvent = Event::query()
+                ->whereKey($event->getKey())
                 ->lockForUpdate()
-                ->findOrFail($event->getKey());
+                ->firstOrFail();
             $lastMatchNumber = $lockedEvent->matches()
                 ->withTrashed()
                 ->max('match_number');

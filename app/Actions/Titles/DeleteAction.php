@@ -46,8 +46,9 @@ class DeleteAction
 
         DB::transaction(function () use ($title, $deletionDate): void {
             $lockedTitle = Title::query()
+                ->whereKey($title->getKey())
                 ->lockForUpdate()
-                ->findOrFail($title->getKey());
+                ->firstOrFail();
 
             // Handle title status cleanup based on current state
             if ($lockedTitle->isCurrentlyActive()) {

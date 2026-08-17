@@ -42,7 +42,7 @@ class UnretireAction
         $unretirementDate = DateHelper::resolveDate($unretirementDate);
 
         DB::transaction(function () use ($wrestler, $unretirementDate, $employImmediately): void {
-            $lockedWrestler = Wrestler::query()->withTrashed()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $lockedWrestler = Wrestler::query()->withTrashed()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanUnretire($lockedWrestler);
             $this->retirementPeriods->end($lockedWrestler, $unretirementDate, LifecycleTransitionType::Unretired);
 

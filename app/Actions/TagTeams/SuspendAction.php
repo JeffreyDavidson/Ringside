@@ -39,7 +39,7 @@ class SuspendAction
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         DB::transaction(function () use ($tagTeam, $suspensionDate): void {
-            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanSuspend($lockedTagTeam);
 
             $this->suspensionPeriods->start($lockedTagTeam, $suspensionDate, LifecycleTransitionType::Suspended);

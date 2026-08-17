@@ -49,8 +49,9 @@ class DisbandAction
         DB::transaction(function () use ($stable, $disbandDate): void {
             $lockedStable = Stable::query()
                 ->withTrashed()
+                ->whereKey($stable->getKey())
                 ->lockForUpdate()
-                ->findOrFail($stable->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanDisband($lockedStable);
             $this->endActivityPeriodAction->handle($lockedStable, $disbandDate);

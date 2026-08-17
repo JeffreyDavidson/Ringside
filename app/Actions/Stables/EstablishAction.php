@@ -54,8 +54,9 @@ class EstablishAction
             function () use ($stable, $activationDate, $endDate): ActivityPeriod {
                 $lockedStable = Stable::query()
                     ->withTrashed()
+                    ->whereKey($stable->getKey())
                     ->lockForUpdate()
-                    ->findOrFail($stable->getKey());
+                    ->firstOrFail();
 
                 $this->eligibility->ensureCanEstablish($lockedStable);
 

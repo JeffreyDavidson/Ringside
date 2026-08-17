@@ -45,8 +45,9 @@ class RetireAction
 
         DB::transaction(function () use ($title, $retirementDate, $operationalDate): void {
             $lockedTitle = Title::query()
+                ->whereKey($title->getKey())
                 ->lockForUpdate()
-                ->findOrFail($title->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanRetire($lockedTitle);
 

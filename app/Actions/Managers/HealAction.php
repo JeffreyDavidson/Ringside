@@ -39,7 +39,7 @@ class HealAction
         $recoveryDate = DateHelper::resolveDate($recoveryDate);
 
         DB::transaction(function () use ($manager, $recoveryDate): void {
-            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanHeal($lockedManager);
 
             $this->injuryPeriods->end($lockedManager, $recoveryDate, LifecycleTransitionType::Healed);

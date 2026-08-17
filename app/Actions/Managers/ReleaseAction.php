@@ -43,7 +43,7 @@ class ReleaseAction
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($manager, $releaseDate): void {
-            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRelease($lockedManager);
 
             $this->employmentPeriods->end($lockedManager, $releaseDate, LifecycleTransitionType::Released);

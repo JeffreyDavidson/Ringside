@@ -43,8 +43,9 @@ class DebutAction
 
         DB::transaction(function () use ($title, $debutDate, $notes): void {
             $lockedTitle = Title::query()
+                ->whereKey($title->getKey())
                 ->lockForUpdate()
-                ->findOrFail($title->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanDebut($lockedTitle);
 

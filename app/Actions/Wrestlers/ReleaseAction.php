@@ -44,7 +44,7 @@ class ReleaseAction
         $releaseDate = DateHelper::resolveDate($releaseDate);
 
         DB::transaction(function () use ($wrestler, $releaseDate): void {
-            $lockedWrestler = Wrestler::query()->lockForUpdate()->findOrFail($wrestler->getKey());
+            $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRelease($lockedWrestler);
 
             $this->employmentPeriods->end($lockedWrestler, $releaseDate, LifecycleTransitionType::Released);

@@ -46,7 +46,7 @@ class RetireAction
         $retirementDate = DateHelper::resolveDate($retirementDate);
 
         DB::transaction(function () use ($referee, $retirementDate): void {
-            $lockedReferee = Referee::query()->lockForUpdate()->findOrFail($referee->getKey());
+            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRetire($lockedReferee);
 
             if ($lockedReferee->isEmployed()) {

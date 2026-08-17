@@ -41,7 +41,7 @@ class UnretireAction
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
-            $lockedReferee = Referee::query()->withTrashed()->lockForUpdate()->findOrFail($referee->getKey());
+            $lockedReferee = Referee::query()->withTrashed()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanUnretire($lockedReferee);
             $this->retirementPeriods->end($lockedReferee, $unretiredDate, LifecycleTransitionType::Unretired);
             $this->employmentPeriods->start($lockedReferee, $unretiredDate, LifecycleTransitionType::Employed);

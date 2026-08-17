@@ -26,8 +26,9 @@ class ApplyMatchTitleOutcomesAction
         DB::transaction(function () use ($match, $result): void {
             $lockedMatch = EventMatch::query()
                 ->with('event')
+                ->whereKey($match->id)
                 ->lockForUpdate()
-                ->findOrFail($match->id);
+                ->firstOrFail();
             $titleIds = $lockedMatch->titles()->pluck((new Title())->qualifyColumn('id'));
 
             if ($titleIds->isEmpty()) {

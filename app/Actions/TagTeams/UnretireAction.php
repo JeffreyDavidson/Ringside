@@ -53,7 +53,7 @@ class UnretireAction
         $unretiredDate = DateHelper::resolveDate($unretiredDate);
 
         DB::transaction(function () use ($tagTeam, $unretiredDate, $unretireMembers, $employImmediately, $requireAvailablePartners): void {
-            $lockedTagTeam = TagTeam::query()->lockForUpdate()->findOrFail($tagTeam->getKey());
+            $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanUnretire($lockedTagTeam, $requireAvailablePartners);
 
             $this->retirementPeriods->end($lockedTagTeam, $unretiredDate, LifecycleTransitionType::Unretired);

@@ -45,8 +45,9 @@ class SplitStableAction
     ): Stable {
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
             $lockedStable = Stable::query()
+                ->whereKey($originalStable->getKey())
                 ->lockForUpdate()
-                ->findOrFail($originalStable->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanSplit($lockedStable);
 

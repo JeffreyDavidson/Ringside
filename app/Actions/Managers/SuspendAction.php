@@ -38,7 +38,7 @@ class SuspendAction
         $suspensionDate = DateHelper::resolveDate($suspensionDate);
 
         DB::transaction(function () use ($manager, $suspensionDate): void {
-            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanSuspend($lockedManager);
 
             $this->suspensionPeriods->start($lockedManager, $suspensionDate, LifecycleTransitionType::Suspended);

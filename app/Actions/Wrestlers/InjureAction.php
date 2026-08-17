@@ -39,8 +39,9 @@ class InjureAction
 
         DB::transaction(function () use ($wrestler, $injuryDate): void {
             $lockedWrestler = Wrestler::query()
+                ->whereKey($wrestler->getKey())
                 ->lockForUpdate()
-                ->findOrFail($wrestler->getKey());
+                ->firstOrFail();
 
             $this->eligibility->ensureCanInjure($lockedWrestler);
 

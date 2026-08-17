@@ -38,7 +38,7 @@ final class ReinstateAction
         $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
 
         DB::transaction(function () use ($manager, $reinstatementDate): void {
-            $lockedManager = Manager::query()->lockForUpdate()->findOrFail($manager->getKey());
+            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanReinstate($lockedManager);
 
             $this->suspensionPeriods->end($lockedManager, $reinstatementDate, LifecycleTransitionType::Reinstated);
