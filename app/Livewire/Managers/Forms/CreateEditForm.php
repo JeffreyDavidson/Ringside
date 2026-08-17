@@ -115,19 +115,7 @@ class CreateEditForm extends BaseForm
      * Includes personal identification data while excluding employment
      * information which is handled separately through the employment
      * relationship system for proper data separation and integrity.
-     *
-     * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
-    {
-        return [
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-        ];
-        // Note: employment data is managed separately through
-        // the employment relationship system
-    }
-
     public function toData(): ManagerData
     {
         return new ManagerData(
@@ -150,11 +138,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Manager> The Manager model class
      */
-    protected function getModelClass(): string
-    {
-        return Manager::class;
-    }
-
     /**
      * Define validation rules for manager form fields.
      *

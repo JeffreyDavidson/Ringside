@@ -219,19 +219,7 @@ class CreateEditForm extends BaseForm
      * Transforms form fields into model-compatible data structure.
      * Excludes relationship data which is handled separately through
      * the relationship synchronization system.
-     *
-     * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
-    {
-        return [
-            'event_id' => $this->eventId,
-            'preview' => $this->preview,
-            'match_type' => $this->matchType,
-            'match_stipulation_id' => $this->matchStipulationId,
-        ];
-    }
-
     private function toData(): EventMatchData
     {
         $matchType = $this->matchType;
@@ -273,11 +261,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<EventMatch> The EventMatch model class
      */
-    protected function getModelClass(): string
-    {
-        return EventMatch::class;
-    }
-
     /**
      * Define validation rules for event match form fields.
      *

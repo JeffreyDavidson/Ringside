@@ -182,15 +182,6 @@ class CreateEditForm extends BaseForm
      *
      * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
-    {
-        return [
-            'name' => $this->name,
-            'signature_move' => $this->signature_move ?: null,
-        ];
-        // Note: wrestler relationships and employment data handled separately
-    }
-
     /**
      * Get the model class for tag team form operations.
      *
@@ -199,11 +190,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<TagTeam> The TagTeam model class
      */
-    protected function getModelClass(): string
-    {
-        return TagTeam::class;
-    }
-
     /**
      * Define validation rules for tag team form fields.
      *

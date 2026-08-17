@@ -121,22 +121,7 @@ class CreateEditForm extends BaseForm
      * Transforms form fields into model-compatible data structure ready
      * for database persistence. All venue fields are passed through directly
      * as they represent simple scalar values without complex transformations.
-     *
-     * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
-    {
-        return [
-            'name' => $this->name,
-            'address' => new Address(
-                streetAddress: $this->street_address,
-                city: $this->city,
-                state: UnitedStatesState::from($this->state),
-                zipcode: (string) $this->zipcode,
-            ),
-        ];
-    }
-
     public function toData(): VenueData
     {
         return new VenueData(
@@ -161,11 +146,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Venue> The Venue model class
      */
-    protected function getModelClass(): string
-    {
-        return Venue::class;
-    }
-
     /**
      * Define validation rules for venue form fields.
      *

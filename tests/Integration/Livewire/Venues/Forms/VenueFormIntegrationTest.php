@@ -2,11 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseForm;
-use App\Models\Events\Venue;
-use App\ValueObjects\Address;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Unique;
@@ -22,7 +18,6 @@ use Tests\Integration\Livewire\Venues\Forms\Support\VenueFormTestProxy;
  * - Venue name uniqueness constraints
  * - State validation against database
  * - ZIP code format enforcement
- * - Data transformation and model mapping
  * - Complete address management functionality
  *
  * These tests verify that the VenueForm correctly implements
@@ -98,29 +93,6 @@ describe('VenueForm Integration Tests', function () {
         });
     });
 
-    describe('data transformation methods', function () {
-        test('getModelClass returns correct Venue class', function () {
-            expect($this->form->modelClassForTesting())->toBe(Venue::class);
-        });
-
-        test('getModelData transforms complete venue data correctly', function () {
-            $this->form->name = 'Madison Square Garden';
-            $this->form->street_address = '4 Pennsylvania Plaza';
-            $this->form->city = 'New York';
-            $this->form->state = 'New York';
-            $this->form->zipcode = '10001';
-
-            $data = $this->form->modelDataForTesting();
-
-            expect($data)->toBeArray();
-            expect($data)->toHaveKeys(['name', 'address']);
-            expect($data['name'])->toBe('Madison Square Garden')
-                ->and($data['address'])->toEqual(
-                    new Address('4 Pennsylvania Plaza', 'New York', UnitedStatesState::NewYork, '10001'),
-                );
-        });
-    });
-
     describe('validation attributes customization', function () {
         test('validationAttributes provides readable field names', function () {
             $attributes = $this->form->validationAttributesForTesting();
@@ -168,14 +140,6 @@ describe('VenueForm Integration Tests', function () {
     describe('form inheritance and structure', function () {
         test('extends BaseForm correctly', function () {
             expect($this->form)->toBeInstanceOf(BaseForm::class);
-        });
-
-        test('implements required abstract methods', function () {
-            $requiredMethods = ['getModelClass', 'getModelData', 'rules'];
-
-            foreach ($requiredMethods as $method) {
-                expect(method_exists($this->form, $method))->toBeTrue("Method {$method} should exist");
-            }
         });
 
         test('has public form properties for venue data', function () {

@@ -114,19 +114,7 @@ class CreateEditForm extends BaseForm
      * Includes personal identification data while excluding employment
      * information which is handled separately through the employment
      * relationship system for proper data separation.
-     *
-     * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
-    {
-        return [
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-        ];
-        // Note: employment data is managed separately through
-        // the employment relationship system
-    }
-
     public function toData(): RefereeData
     {
         return new RefereeData(
@@ -149,11 +137,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Referee> The Referee model class
      */
-    protected function getModelClass(): string
-    {
-        return Referee::class;
-    }
-
     /**
      * Define validation rules for referee form fields.
      *

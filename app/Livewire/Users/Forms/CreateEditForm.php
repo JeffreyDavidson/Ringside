@@ -124,28 +124,8 @@ class CreateEditForm extends BaseForm
      * - Password is only included when provided (allows updates without password change)
      * - Uses bcrypt hashing for maximum security
      *
-     * @return array<string, mixed> Model data ready for persistence
-     *
      * @see Hash::make() For secure password hashing
      */
-    protected function getModelData(): array
-    {
-        $data = [
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'email' => $this->email,
-            'role' => $this->role,
-        ];
-
-        // Only include password if provided (allows profile updates without password change)
-        if (! empty($this->password)) {
-            // Model handles password hashing via Attribute cast
-            $data['password'] = $this->password;
-        }
-
-        return $data;
-    }
-
     public function toData(): UserData
     {
         return new UserData(
@@ -170,11 +150,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<User> The User model class
      */
-    protected function getModelClass(): string
-    {
-        return User::class;
-    }
-
     /**
      * Define validation rules for user form fields.
      *
