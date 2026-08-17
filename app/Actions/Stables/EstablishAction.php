@@ -8,6 +8,7 @@ use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Lifecycle\StableActivityEligibility;
@@ -58,7 +59,7 @@ class EstablishAction
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                $this->eligibility->ensureCanEstablish($lockedStable);
+                $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Establish);
 
                 $activityPeriod = $this->startActivityPeriodAction->handle($lockedStable, $activationDate);
 

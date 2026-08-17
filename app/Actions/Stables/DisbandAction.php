@@ -8,6 +8,7 @@ use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Lifecycle\StableActivityEligibility;
 use App\Models\Roster\Stables\Stable;
@@ -53,7 +54,7 @@ class DisbandAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->eligibility->ensureCanDisband($lockedStable);
+            $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Disband);
             $this->endActivityPeriodAction->handle($lockedStable, $disbandDate);
 
             $currentMembers = $this->membershipService->currentMembers($lockedStable);

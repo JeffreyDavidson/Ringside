@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Lifecycle;
 
 use App\Data\Stables\StableMembershipData;
+use App\Enums\Stables\StableActivityTransition;
+use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
@@ -16,18 +18,27 @@ final class StableActivityEligibility
 {
     public function __construct(private readonly StableFormerMemberEligibility $formerMemberEligibility) {}
 
-    public function canEstablish(Stable $stable): bool
+    public function allows(Stable $stable, StableActivityTransition $transition): bool
     {
         try {
-            $this->ensureCanEstablish($stable);
+            $this->ensureAllowed($stable, $transition);
 
             return true;
-        } catch (CannotBeEstablishedException) {
+        } catch (BaseBusinessException) {
             return false;
         }
     }
 
-    public function ensureCanEstablish(Stable $stable): void
+    public function ensureAllowed(Stable $stable, StableActivityTransition $transition): void
+    {
+        match ($transition) {
+            StableActivityTransition::Establish => $this->ensureCanEstablish($stable),
+            StableActivityTransition::Disband => $this->ensureCanDisband($stable),
+            StableActivityTransition::Reunite => $this->ensureCanReunite($stable),
+        };
+    }
+
+    private function ensureCanEstablish(Stable $stable): void
     {
         if ($stable->trashed()) {
             throw CannotBeEstablishedException::deleted($stable);
@@ -42,18 +53,7 @@ final class StableActivityEligibility
         }
     }
 
-    public function canDisband(Stable $stable): bool
-    {
-        try {
-            $this->ensureCanDisband($stable);
-
-            return true;
-        } catch (CannotBeDisbandedException) {
-            return false;
-        }
-    }
-
-    public function ensureCanDisband(Stable $stable): void
+    private function ensureCanDisband(Stable $stable): void
     {
         if ($stable->trashed()) {
             throw CannotBeDisbandedException::deleted($stable);
@@ -76,18 +76,7 @@ final class StableActivityEligibility
         }
     }
 
-    public function canReunite(Stable $stable): bool
-    {
-        try {
-            $this->ensureCanReunite($stable);
-
-            return true;
-        } catch (CannotBeReunitedException) {
-            return false;
-        }
-    }
-
-    public function ensureCanReunite(Stable $stable): void
+    private function ensureCanReunite(Stable $stable): void
     {
         if ($stable->trashed()) {
             throw CannotBeReunitedException::deleted($stable);

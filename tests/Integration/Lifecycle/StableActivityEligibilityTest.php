@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
@@ -16,15 +17,15 @@ test('establishment predicate stays aligned with its guard', function (string $f
         : $stableFactory->{$factoryState}()->create();
     $eligibility = resolve(StableActivityEligibility::class);
 
-    expect($eligibility->canEstablish($stable))->toBe($canEstablish);
+    expect($eligibility->allows($stable, StableActivityTransition::Establish))->toBe($canEstablish);
 
     if ($canEstablish) {
-        expect(fn () => $eligibility->ensureCanEstablish($stable))->not->toThrow(CannotBeEstablishedException::class);
+        expect(fn () => $eligibility->ensureAllowed($stable, StableActivityTransition::Establish))->not->toThrow(CannotBeEstablishedException::class);
 
         return;
     }
 
-    expect(fn () => $eligibility->ensureCanEstablish($stable))->toThrow(CannotBeEstablishedException::class);
+    expect(fn () => $eligibility->ensureAllowed($stable, StableActivityTransition::Establish))->toThrow(CannotBeEstablishedException::class);
 })->with([
     'unformed' => ['default', true],
     'active' => ['active', false],
@@ -39,15 +40,15 @@ test('disbandment predicate stays aligned with its guard', function (string $fac
         : $stableFactory->{$factoryState}()->create();
     $eligibility = resolve(StableActivityEligibility::class);
 
-    expect($eligibility->canDisband($stable))->toBe($canDisband);
+    expect($eligibility->allows($stable, StableActivityTransition::Disband))->toBe($canDisband);
 
     if ($canDisband) {
-        expect(fn () => $eligibility->ensureCanDisband($stable))->not->toThrow(CannotBeDisbandedException::class);
+        expect(fn () => $eligibility->ensureAllowed($stable, StableActivityTransition::Disband))->not->toThrow(CannotBeDisbandedException::class);
 
         return;
     }
 
-    expect(fn () => $eligibility->ensureCanDisband($stable))->toThrow(CannotBeDisbandedException::class);
+    expect(fn () => $eligibility->ensureAllowed($stable, StableActivityTransition::Disband))->toThrow(CannotBeDisbandedException::class);
 })->with([
     'active' => ['active', true],
     'unformed' => ['default', false],
@@ -67,11 +68,11 @@ test('reunion predicate stays aligned with its guard', function () {
         ->create();
     $eligibility = resolve(StableActivityEligibility::class);
 
-    expect($eligibility->canReunite($eligibleStable))->toBeTrue()
-        ->and($eligibility->canReunite($stableWithoutFormerMembers))->toBeFalse()
-        ->and(fn () => $eligibility->ensureCanReunite($eligibleStable))
+    expect($eligibility->allows($eligibleStable, StableActivityTransition::Reunite))->toBeTrue()
+        ->and($eligibility->allows($stableWithoutFormerMembers, StableActivityTransition::Reunite))->toBeFalse()
+        ->and(fn () => $eligibility->ensureAllowed($eligibleStable, StableActivityTransition::Reunite))
         ->not->toThrow(CannotBeReunitedException::class)
-        ->and(fn () => $eligibility->ensureCanReunite($stableWithoutFormerMembers))
+        ->and(fn () => $eligibility->ensureAllowed($stableWithoutFormerMembers, StableActivityTransition::Reunite))
         ->toThrow(CannotBeReunitedException::class);
 });
 
@@ -85,7 +86,7 @@ test('activity transitions reject a deleted stable', function () {
     $activeStable->delete();
     $disbandedStable->delete();
 
-    expect($eligibility->canEstablish($unformedStable))->toBeFalse()
-        ->and($eligibility->canDisband($activeStable))->toBeFalse()
-        ->and($eligibility->canReunite($disbandedStable))->toBeFalse();
+    expect($eligibility->allows($unformedStable, StableActivityTransition::Establish))->toBeFalse()
+        ->and($eligibility->allows($activeStable, StableActivityTransition::Disband))->toBeFalse()
+        ->and($eligibility->allows($disbandedStable, StableActivityTransition::Reunite))->toBeFalse();
 });
