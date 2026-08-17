@@ -16,12 +16,6 @@ use InvalidArgumentException;
  * Defines the valid types of members that can belong to a stable and their
  * corresponding relationship names. Provides type-safe member type handling
  * and automatic model type detection.
- *
- * @example
- * ```php
- * $type = StableMemberType::fromModel($wrestler);
- * $relationshipName = $type->getRelationshipName(); // 'wrestlers'
- * ```
  */
 enum StableMemberType: string
 {

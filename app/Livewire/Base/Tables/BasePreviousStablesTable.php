@@ -26,8 +26,6 @@ abstract class BasePreviousStablesTable extends DataTableComponent
     public function configure(): void {}
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array

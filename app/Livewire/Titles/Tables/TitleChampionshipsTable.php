@@ -20,9 +20,6 @@ class TitleChampionshipsTable extends DataTableComponent
      */
     public ?Title $title = null;
 
-    /**
-     * Undocumented function.
-     */
     public function mount(?Title $title = null): void
     {
         $this->title = $title;
@@ -53,8 +50,6 @@ class TitleChampionshipsTable extends DataTableComponent
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array

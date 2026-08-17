@@ -40,17 +40,6 @@ use Illuminate\Support\Facades\Gate;
  * The table integrates with various title management actions including activation,
  * deactivation, retirement, restoration, and deletion through a comprehensive
  * action system with proper authorization and error handling.
- *
- * @example
- * ```php
- * // In a Blade template
- * <livewire:titles.tables.titles-table />
- *
- * // The table displays titles like:
- * // - WWE Championship Title (Active, First Activated: 2020-01-15)
- * // - Intercontinental Title (Retired, First Activated: 2019-06-01)
- * // - Tag Team Titles (Inactive, First Activated: 2021-03-10)
- * ```
  */
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
@@ -89,15 +78,6 @@ class Main extends BaseTable
      * relationship provides access to activation status and dates.
      *
      * @return TitleBuilder<Title> Query builder for titles with eager loaded relationships
-     *
-     * @example
-     * ```php
-     * // The query retrieves titles with their activity status:
-     * // SELECT titles.*, activity_periods.* FROM titles
-     * // LEFT JOIN activity_periods ON titles.id = activity_periods.title_id
-     * // WHERE activity_periods.ended_at IS NULL
-     * // ORDER BY titles.name ASC
-     * ```
      */
     public function builder(): TitleBuilder
     {
@@ -126,15 +106,6 @@ class Main extends BaseTable
      * a title is currently active, inactive, or retired.
      *
      * @return array<int, Column> Array of column definitions for the table
-     *
-     * @example
-     * ```php
-     * // Table displays columns:
-     * // | Name                    | Status   | First Activation |
-     * // | WWE Championship Title  | Active   | 2020-01-15      |
-     * // | Intercontinental Title  | Retired  | 2019-06-01      |
-     * // | Tag Team Titles         | Inactive | 2021-03-10      |
-     * ```
      */
     public function columns(): array
     {
@@ -158,13 +129,6 @@ class Main extends BaseTable
      * titles activated within specific time periods.
      *
      * @return array<int, Filter> Array of filter definitions for the table
-     *
-     * @example
-     * ```php
-     * // Available filters:
-     * // - Status: [All, Undebuted, Active, Inactive, Pending Debut]
-     * // - Activation Date: [Date range picker for first activation]
-     * ```
      */
     public function filters(): array
     {

@@ -61,8 +61,6 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Column>
      */
     public function columns(): array
@@ -80,8 +78,6 @@ class Main extends BaseTable
     }
 
     /**
-     * Undocumented function
-     *
      * @return array<int, Filter>
      */
     public function filters(): array

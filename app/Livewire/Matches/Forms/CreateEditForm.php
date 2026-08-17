@@ -43,8 +43,6 @@ use Illuminate\Validation\Rules\Enum;
  *
  * @extends BaseForm<CreateEditForm, EventMatch>
  *
- * @author Your Name
- *
  * @since 1.0.0
  * @see BaseForm For base form functionality and patterns
  * @see EventMatch For the underlying event match model
