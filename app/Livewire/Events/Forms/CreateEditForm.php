@@ -130,20 +130,8 @@ class CreateEditForm extends BaseForm
      * - Passes through date with proper Carbon/string handling
      * - Maintains other fields with appropriate data types
      *
-     * @return array<string, mixed> Model data ready for persistence
-     *
      * @see Event For model field requirements and relationships
      */
-    protected function getModelData(): array
-    {
-        return [
-            'name' => $this->name,
-            'date' => $this->date,
-            'venue_id' => $this->venue_id,
-            'preview' => $this->preview,
-        ];
-    }
-
     public function toData(): EventData
     {
         return new EventData(
@@ -167,11 +155,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Event> The Event model class
      */
-    protected function getModelClass(): string
-    {
-        return Event::class;
-    }
-
     /**
      * Define validation rules for event form fields.
      *

@@ -116,19 +116,7 @@ class CreateEditForm extends BaseForm
      * Only includes the title name as activation dates are managed
      * separately through the title's activation relationship system
      * to maintain proper separation of concerns.
-     *
-     * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
-    {
-        return [
-            'name' => $this->name,
-            'type' => $this->type,
-        ];
-        // Note: start_date is NOT included here because activation dates
-        // are managed separately through the title's activation relationship system
-    }
-
     public function toData(): TitleData
     {
         return new TitleData(
@@ -151,11 +139,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Title> The Title model class
      */
-    protected function getModelClass(): string
-    {
-        return Title::class;
-    }
-
     /**
      * Define validation rules for championship title fields.
      *

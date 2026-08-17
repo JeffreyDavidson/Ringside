@@ -169,24 +169,9 @@ class CreateEditForm extends BaseForm
      * - Converts Height to total inches for database storage
      * - Passes through other fields with appropriate typing
      *
-     * @return array<string, mixed> Model data ready for persistence
-     *
      * @see Height::__construct() For height object creation
      * @see Height::toInches() For database storage format
      */
-    protected function getModelData(): array
-    {
-        $height = new Height($this->height_feet, $this->height_inches);
-
-        return [
-            'name' => $this->name,
-            'hometown' => $this->hometown,
-            'height' => $height->toInches(),
-            'weight' => $this->weight,
-            'signature_move' => $this->signature_move,
-        ];
-    }
-
     public function toData(): WrestlerData
     {
         return new WrestlerData(
@@ -212,11 +197,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Wrestler> The Wrestler model class
      */
-    protected function getModelClass(): string
-    {
-        return Wrestler::class;
-    }
-
     /**
      * Define validation rules for wrestler form fields.
      *

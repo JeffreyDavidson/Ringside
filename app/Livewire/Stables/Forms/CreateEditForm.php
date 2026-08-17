@@ -158,15 +158,6 @@ class CreateEditForm extends BaseForm
      *
      * @return array<string, mixed> Model data ready for persistence
      */
-    protected function getModelData(): array
-    {
-        return [
-            'name' => $this->name,
-        ];
-        // Note: start_date is NOT included here because activation dates
-        // are managed separately through the stable's activation relationship system
-    }
-
     /**
      * Get the model class for stable form operations.
      *
@@ -175,11 +166,6 @@ class CreateEditForm extends BaseForm
      *
      * @return class-string<Stable> The Stable model class
      */
-    protected function getModelClass(): string
-    {
-        return Stable::class;
-    }
-
     /**
      * Define validation rules for stable form fields.
      *
