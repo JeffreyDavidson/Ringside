@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 final class SuspensionPeriodManager
 {
-    public function __construct(private RecordLifecycleTransitionAction $recordLifecycleTransition) {}
+    public function __construct(private LifecyclePeriodWriter $periodWriter) {}
 
     /**
      * @param  Model&Suspendable<*>  $suspendable
@@ -24,21 +22,13 @@ final class SuspensionPeriodManager
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
     ): void {
-        DB::transaction(function () use ($suspendable, $date, $transition): void {
-            $suspendable->suspensions()->create([
-                'started_at' => $date,
-                'ended_at' => null,
-            ]);
-
-            if ($transition !== null) {
-                $this->recordLifecycleTransition->handle(
-                    $suspendable,
-                    LifecycleDimension::Suspension,
-                    $transition,
-                    $date,
-                );
-            }
-        });
+        $this->periodWriter->start(
+            $suspendable,
+            $suspendable->suspensions(),
+            LifecycleDimension::Suspension,
+            $date,
+            $transition,
+        );
     }
 
     /**
@@ -49,19 +39,12 @@ final class SuspensionPeriodManager
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
     ): void {
-        DB::transaction(function () use ($suspendable, $date, $transition): void {
-            $suspendable->currentSuspension()->update([
-                'ended_at' => $date,
-            ]);
-
-            if ($transition !== null) {
-                $this->recordLifecycleTransition->handle(
-                    $suspendable,
-                    LifecycleDimension::Suspension,
-                    $transition,
-                    $date,
-                );
-            }
-        });
+        $this->periodWriter->end(
+            $suspendable,
+            $suspendable->currentSuspension(),
+            LifecycleDimension::Suspension,
+            $date,
+            $transition,
+        );
     }
 }
