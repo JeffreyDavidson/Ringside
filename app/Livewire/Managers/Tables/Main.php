@@ -114,52 +114,51 @@ class Main extends BaseTable
 
     public function clearFromInjury(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::ClearFromInjury->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::ClearFromInjury, $manager->id);
     }
 
     public function employ(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Employ->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::Employ, $manager->id);
     }
 
     public function injure(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Injure->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::Injure, $manager->id);
     }
 
     public function reinstate(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Reinstate->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::Reinstate, $manager->id);
     }
 
     public function release(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Release->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::Release, $manager->id);
     }
 
     public function restore(int $managerId): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Restore->value, $managerId);
+        $this->executeManagerAction(RosterLifecycleAction::Restore, $managerId);
     }
 
     public function retire(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Retire->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::Retire, $manager->id);
     }
 
     public function suspend(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Suspend->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::Suspend, $manager->id);
     }
 
     public function unretire(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Unretire->value, $manager->id);
+        $this->executeManagerAction(RosterLifecycleAction::Unretire, $manager->id);
     }
 
-    public function handleManagerAction(string $action, int $managerId): void
+    private function executeManagerAction(RosterLifecycleAction $lifecycleAction, int $managerId): void
     {
-        $lifecycleAction = RosterLifecycleAction::from($action);
         $manager = $lifecycleAction === RosterLifecycleAction::Restore
             ? Manager::onlyTrashed()->findOrFail($managerId)
             : Manager::findOrFail($managerId);

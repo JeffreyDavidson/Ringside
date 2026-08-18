@@ -108,52 +108,51 @@ class Main extends BaseTable
 
     public function clearFromInjury(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::ClearFromInjury->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::ClearFromInjury, $referee->id);
     }
 
     public function employ(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Employ->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::Employ, $referee->id);
     }
 
     public function injure(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Injure->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::Injure, $referee->id);
     }
 
     public function reinstate(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Reinstate->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::Reinstate, $referee->id);
     }
 
     public function release(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Release->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::Release, $referee->id);
     }
 
     public function restore(int $refereeId): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Restore->value, $refereeId);
+        $this->executeRefereeAction(RosterLifecycleAction::Restore, $refereeId);
     }
 
     public function retire(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Retire->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::Retire, $referee->id);
     }
 
     public function suspend(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Suspend->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::Suspend, $referee->id);
     }
 
     public function unretire(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Unretire->value, $referee->id);
+        $this->executeRefereeAction(RosterLifecycleAction::Unretire, $referee->id);
     }
 
-    public function handleRefereeAction(string $action, int $refereeId): void
+    private function executeRefereeAction(RosterLifecycleAction $lifecycleAction, int $refereeId): void
     {
-        $lifecycleAction = RosterLifecycleAction::from($action);
         $referee = $lifecycleAction === RosterLifecycleAction::Restore
             ? Referee::onlyTrashed()->findOrFail($refereeId)
             : Referee::query()->findOrFail($refereeId);
