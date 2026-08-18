@@ -17,6 +17,12 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    protected ?string $createdEventName = 'venueCreated';
+
+    protected ?string $updatedEventName = 'venueUpdated';
+
+    protected bool $resetFormAfterSubmission = true;
+
     public CreateEditForm $form;
 
     private CreateAction $createAction;
@@ -77,28 +83,6 @@ class FormModal extends BaseFormModal
         $this->createAction->handle($this->form->toData());
 
         return true;
-    }
-
-    public function submitForm(): bool
-    {
-        // Store whether we're creating or updating before the form submission
-        $isCreating = $this->form->isCreating();
-
-        $result = parent::submitForm();
-
-        if ($result) {
-            // Dispatch the appropriate event based on whether we created or updated
-            if ($isCreating) {
-                $this->dispatch('venueCreated');
-            } else {
-                $this->dispatch('venueUpdated');
-            }
-
-            // Reset the form after successful submission
-            $this->form->reset();
-        }
-
-        return $result;
     }
 
     public function closeModal(): void
