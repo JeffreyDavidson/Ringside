@@ -9,7 +9,6 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -225,6 +224,18 @@ describe('StablesTable Component', function () {
 
             // Verify stable is established
             expect(freshModel($unformedStable)->isCurrentlyActive())->toBeTrue();
+        });
+
+        test('lifecycle actions ignore an external referrer when redirecting', function () {
+            $unformedStable = Stable::factory()->unactivated()->create(['name' => 'Unformed Stable']);
+
+            actingAs($this->admin);
+
+            request()->headers->set('Referer', 'https://attacker.example');
+
+            livewire(Main::class)
+                ->call('establish', $unformedStable)
+                ->assertRedirect(route('stables.index'));
         });
 
         test('restore action integration works correctly', function () {
