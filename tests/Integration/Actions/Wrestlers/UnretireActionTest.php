@@ -177,7 +177,7 @@ test('it does not employ managers when wrestler is not employed immediately', fu
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     // Test with null date (should use now())

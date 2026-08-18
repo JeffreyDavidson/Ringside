@@ -138,7 +138,7 @@ test('it ends current employment period', function () {
     expect($tagTeam->employments()->whereNull('ended_at')->count())->toBe(0);
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $customReleaseDate = now()->subDays(2)->startOfDay();
 
@@ -146,7 +146,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $tagTeam->refresh();
 
-    // Verify DateHelper was used for date resolution
+    // Verify the provided date was persisted
     $this->assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'ended_at' => $customReleaseDate->toDateTimeString(),

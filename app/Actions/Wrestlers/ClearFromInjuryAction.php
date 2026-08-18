@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +30,7 @@ class ClearFromInjuryAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
-        $recoveryDate = DateHelper::resolveDate($recoveryDate);
+        $recoveryDate = $recoveryDate ?? now();
 
         DB::transaction(function () use ($wrestler, $recoveryDate): void {
             $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();

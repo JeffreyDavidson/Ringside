@@ -120,7 +120,7 @@ test('it ends current suspension period', function () {
     expect($tagTeam->suspensions()->whereNull('ended_at')->count())->toBe(0);
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
     $customReinstatementDate = now()->subDays(1)->startOfDay();
 
@@ -128,7 +128,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $tagTeam->refresh();
 
-    // Verify DateHelper was used for date resolution
+    // Verify the provided date was persisted
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),

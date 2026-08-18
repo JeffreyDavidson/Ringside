@@ -135,7 +135,7 @@ test('it creates new suspension period', function () {
     expect($currentSuspension->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $customSuspensionDate = now()->subDays(2)->startOfDay();
 
@@ -143,7 +143,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $tagTeam->refresh();
 
-    // Verify DateHelper was used for date resolution
+    // Verify the provided date was persisted
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $tagTeam->id,
         'suspendable_type' => $tagTeam->getMorphClass(),

@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Roster\Managers\Manager;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +33,7 @@ class EmployAction
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
-        $startDate = DateHelper::resolveDate($startDate);
+        $startDate = $startDate ?? now();
 
         DB::transaction(function () use ($manager, $startDate): void {
             $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();

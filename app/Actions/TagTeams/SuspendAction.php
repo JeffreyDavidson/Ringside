@@ -8,7 +8,6 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Lifecycle\TagTeamSuspensionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +35,7 @@ class SuspendAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void
     {
-        $suspensionDate = DateHelper::resolveDate($suspensionDate);
+        $suspensionDate = $suspensionDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $suspensionDate): void {
             $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();

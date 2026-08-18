@@ -132,7 +132,7 @@ test('it creates new employment period', function () {
     expect($currentEmployment->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
     $customEmploymentDate = now()->subDays(3)->startOfDay();
 
@@ -140,7 +140,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $tagTeam->refresh();
 
-    // Verify DateHelper was used for date resolution
+    // Verify the provided date was persisted
     $this->assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'started_at' => $customEmploymentDate->toDateTimeString(),

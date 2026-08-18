@@ -11,7 +11,6 @@ use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -41,7 +40,7 @@ class ReleaseAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = DateHelper::resolveDate($releaseDate);
+        $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($wrestler, $releaseDate): void {
             $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();

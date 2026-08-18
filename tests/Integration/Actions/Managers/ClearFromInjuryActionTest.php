@@ -119,7 +119,7 @@ test('it maintains employment status during injury clearance', function () {
     expect($employment->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $manager = Manager::factory()->injured()->create();
     $customRecoveryDate = now()->subDays(3)->startOfDay();
 
@@ -127,7 +127,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $manager->refresh();
 
-    // Verify DateHelper was used for date resolution
+    // Verify the provided date was persisted
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $manager->id,
         'injurable_type' => $manager->getMorphClass(),

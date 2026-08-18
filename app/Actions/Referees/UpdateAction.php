@@ -6,7 +6,6 @@ namespace App\Actions\Referees;
 
 use App\Data\Referees\RefereeData;
 use App\Models\Roster\Referees\Referee;
-use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -46,8 +45,7 @@ class UpdateAction
 
             // Handle employment using EmployAction for consistency
             if (! is_null($refereeData->employment_date) && ! $referee->isEmployed()) {
-                $employmentDate = DateHelper::resolveDate($refereeData->employment_date);
-                $this->employAction->handle($referee, $employmentDate);
+                $this->employAction->handle($referee, $refereeData->employment_date);
             }
 
             return $referee;

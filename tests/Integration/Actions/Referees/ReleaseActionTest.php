@@ -52,7 +52,7 @@ test('it releases referee with specific release date', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->employed()->create();
     $releaseDate = now()->subDays(6);
 
@@ -60,7 +60,7 @@ test('it handles DateHelper date resolution', function () {
 
     $referee->refresh();
 
-    // DateHelper should have processed the release date
+    // The provided release date should be persisted
     $this->assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'ended_at' => $releaseDate->toDateTimeString(),

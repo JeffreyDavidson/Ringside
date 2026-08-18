@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Referees\Referee;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +34,7 @@ class SuspendAction
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void
     {
-        $suspensionDate = DateHelper::resolveDate($suspensionDate);
+        $suspensionDate = $suspensionDate ?? now();
 
         DB::transaction(function () use ($referee, $suspensionDate): void {
             $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();

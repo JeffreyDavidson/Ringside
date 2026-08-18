@@ -214,7 +214,7 @@ test('it handles database transactions correctly', function () {
     expect($retirement->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $manager = Manager::factory()->employed()->create();
     $customRetirementDate = now()->subDays(3)->startOfDay();
 
@@ -222,7 +222,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $manager->refresh();
 
-    // Verify DateHelper was used for date resolution across all operations
+    // Verify the provided date was used across all operations
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $manager->id,
         'retirable_type' => $manager->getMorphClass(),
