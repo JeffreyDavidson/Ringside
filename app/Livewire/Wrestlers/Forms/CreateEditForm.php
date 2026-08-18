@@ -135,15 +135,12 @@ class CreateEditForm extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Early return if no model
         if (! $this->formModel) {
             return;
         }
 
-        // Load employment start date from relationship
         $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
 
-        // Convert Height value object to separate feet/inches fields
         $height = $this->formModel->height;
         $this->height_feet = (int) floor($height->toInches() / 12);
         $this->height_inches = $height->toInches() % 12;

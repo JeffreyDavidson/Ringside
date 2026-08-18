@@ -109,12 +109,10 @@ class CreateEditForm extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Map venue_id from model to venue_id form field
         if (isset($this->formModel->venue_id)) {
             $this->venue_id = $this->formModel->venue_id;
         }
 
-        // Venue list is cached automatically via PresentsVenuesList trait
     }
 
     /**
