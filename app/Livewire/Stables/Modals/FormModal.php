@@ -41,12 +41,10 @@ class FormModal extends BaseFormModal
         return Stable::class;
     }
 
-    protected function getDummyDataFields(): array
+    protected function populateDummyData(): void
     {
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'start_date' => fn (): ?string => $this->generateOptionalStartDate(),
-        ];
+        $this->form->name = Str::of(fake()->sentence(2))->title()->value();
+        $this->form->started_at = $this->generateOptionalStartDate();
     }
 
     public function getModalTitle(): string

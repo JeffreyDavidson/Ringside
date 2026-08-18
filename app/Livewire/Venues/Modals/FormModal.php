@@ -34,7 +34,7 @@ class FormModal extends BaseFormModal
         return Venue::class;
     }
 
-    protected function getDummyDataFields(): array
+    protected function populateDummyData(): void
     {
         /**
          * @var string $state
@@ -43,13 +43,11 @@ class FormModal extends BaseFormModal
          */
         $state = fake('en_US')->state();
 
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->append(' Arena')->value(),
-            'street_address' => fn () => fake()->streetAddress(),
-            'city' => fn () => fake()->city(),
-            'state' => fn () => $state,
-            'zipcode' => fn () => fake('en_US')->numerify('#####'),
-        ];
+        $this->form->name = Str::of(fake()->sentence(2))->title()->append(' Arena')->value();
+        $this->form->street_address = fake()->streetAddress();
+        $this->form->city = fake()->city();
+        $this->form->state = $state;
+        $this->form->zipcode = fake('en_US')->numerify('#####');
     }
 
     public function getModalTitle(): string

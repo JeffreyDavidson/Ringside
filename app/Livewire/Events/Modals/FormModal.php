@@ -38,14 +38,16 @@ class FormModal extends BaseFormModal
         return Event::class;
     }
 
-    protected function getDummyDataFields(): array
+    protected function populateDummyData(): void
     {
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'date' => fn (): string => fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s'),
-            'venue_id' => fn () => Venue::query()->inRandomOrder()->value('id'),
-            'preview' => fn () => Str::of(fake()->text())->value(),
-        ];
+        $this->form->name = Str::of(fake()->sentence(2))->title()->value();
+        $this->form->date = fake()->dateTimeBetween('now', '+3 month')->format('Y-m-d H:i:s');
+        $venue = Venue::query()->inRandomOrder()->first();
+
+        if ($venue !== null) {
+            $this->form->venue_id = $venue->id;
+        }
+        $this->form->preview = Str::of(fake()->text())->value();
     }
 
     public function getModalTitle(): string

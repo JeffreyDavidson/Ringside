@@ -34,17 +34,15 @@ class FormModal extends BaseFormModal
         return Wrestler::class;
     }
 
-    protected function getDummyDataFields(): array
+    protected function populateDummyData(): void
     {
-        return [
-            'name' => fn () => Str::of(fake()->sentence(2))->title()->value(),
-            'hometown' => fn (): string => fake()->city().', '.fake()->stateAbbr(), // @phpstan-ignore-line
-            'height_feet' => fn (): int => fake()->numberBetween(5, 7),
-            'height_inches' => fn (): int => fake()->numberBetween(0, 11),
-            'weight' => fn (): int => fake()->numberBetween(180, 350),
-            'signature_move' => fn () => Str::of(fake()->optional(0.8)->sentence(3))->title()->value(),
-            'employment_date' => fn (): ?string => $this->generateOptionalEmploymentDate(),
-        ];
+        $this->form->name = Str::of(fake()->sentence(2))->title()->value();
+        $this->form->hometown = fake()->city().', '.fake()->stateAbbr(); // @phpstan-ignore-line
+        $this->form->height_feet = fake()->numberBetween(5, 7);
+        $this->form->height_inches = fake()->numberBetween(0, 11);
+        $this->form->weight = fake()->numberBetween(180, 350);
+        $this->form->signature_move = Str::of(fake()->optional(0.8)->sentence(3))->title()->value();
+        $this->form->employment_date = $this->generateOptionalEmploymentDate();
     }
 
     protected function storeForm(): bool

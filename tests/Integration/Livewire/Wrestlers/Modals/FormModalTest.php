@@ -126,18 +126,6 @@ describe('FormModal Form Integration', function () {
 });
 
 describe('FormModal Dummy Data', function () {
-    it('has dummy data fields configured', function () {
-        $modal = new FormModal();
-        $reflection = new ReflectionClass($modal);
-        $method = $reflection->getMethod('getDummyDataFields');
-        $method->setAccessible(true);
-
-        $dummyFields = $method->invoke($modal);
-
-        expect($dummyFields)->toBeArray();
-        expect($dummyFields)->toHaveKeys(['name', 'hometown', 'height_feet', 'height_inches', 'weight', 'signature_move', 'employment_date']);
-    });
-
     it('can fill dummy data', function () {
         $component = livewire(FormModal::class);
         $component->call('fillDummyFields');

@@ -90,10 +90,9 @@ class FormModal extends BaseFormModal
             ->all();
     }
 
-    /** @return array<string, mixed> */
-    protected function getDummyDataFields(): array
+    protected function populateDummyData(): void
     {
-        return $this->dummyData->generate();
+        $this->dummyData->fill($this->form);
     }
 
     public function openModal(int|string|null $modelId = null): void

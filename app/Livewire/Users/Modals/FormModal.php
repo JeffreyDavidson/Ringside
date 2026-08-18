@@ -33,16 +33,14 @@ class FormModal extends BaseFormModal
         return User::class;
     }
 
-    protected function getDummyDataFields(): array
+    protected function populateDummyData(): void
     {
-        return [
-            'first_name' => fn () => fake()->firstName(),
-            'last_name' => fn () => fake()->lastName(),
-            'email' => fn () => fake()->unique()->safeEmail(),
-            'password' => fn (): string => 'password123',
-            'password_confirmation' => fn (): string => 'password123',
-            'role' => fn (): string => 'basic',
-        ];
+        $this->form->first_name = fake()->firstName();
+        $this->form->last_name = fake()->lastName();
+        $this->form->email = fake()->unique()->safeEmail();
+        $this->form->password = 'password123';
+        $this->form->password_confirmation = 'password123';
+        $this->form->role = 'basic';
     }
 
     public function getModalTitle(): string
