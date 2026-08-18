@@ -23,7 +23,7 @@ use function Spatie\PestPluginTestTime\testTime;
  *
  * Tests the complete business action workflow for managers including:
  * - Employment lifecycle (employ, release)
- * - Injury management (injure, heal)
+ * - Injury management (injure, clear from injury)
  * - Suspension workflow (suspend, reinstate)
  * - Retirement lifecycle (retire, unretire)
  * - Manager-specific business logic
@@ -135,7 +135,7 @@ describe('ManagersActions Integration Tests', function () {
         });
     });
 
-    describe('injury and healing actions', function () {
+    describe('injury and clearance actions', function () {
         test('injure action works for healthy employed manager', function () {
             actingAs($this->admin);
 
@@ -163,7 +163,7 @@ describe('ManagersActions Integration Tests', function () {
             expect(true)->toBeTrue();
         });
 
-        test('heal action works for injured manager', function () {
+        test('clear-from-injury action works for injured manager', function () {
             $injuredManager = Manager::factory()->injured()->create([
                 'first_name' => 'Injured',
                 'last_name' => 'Manager',
@@ -173,7 +173,7 @@ describe('ManagersActions Integration Tests', function () {
 
             $component = livewire(Actions::class, ['manager' => $injuredManager]);
 
-            $component->call('healFromInjury')
+            $component->call('clearFromInjury')
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
@@ -182,12 +182,12 @@ describe('ManagersActions Integration Tests', function () {
             expect(true)->toBeTrue();
         });
 
-        test('heal action fails for healthy manager', function () {
+        test('clear-from-injury action fails for healthy manager', function () {
             actingAs($this->admin);
 
             $component = livewire(Actions::class, ['manager' => $this->manager]);
 
-            $component->call('healFromInjury');
+            $component->call('clearFromInjury');
 
             // expect(session('error'))->toMatch('/cannot be cleared from injury/');
             expect(true)->toBeTrue();
@@ -352,8 +352,8 @@ describe('ManagersActions Integration Tests', function () {
             $component->call('injure');
             expect(freshModel($manager)->isInjured())->toBeTrue();
 
-            // Heal
-            $component->call('healFromInjury');
+            // Clear from injury
+            $component->call('clearFromInjury');
             expect(freshModel($manager)->isInjured())->toBeFalse();
 
             // Suspend (for misconduct, contract violations, etc.)
@@ -388,12 +388,12 @@ describe('ManagersActions Integration Tests', function () {
             expect($injuredManager->isEmployed())->toBeTrue();
             expect($injuredManager->isInjured())->toBeTrue();
 
-            // Cannot suspend injured manager without healing first
+            // Cannot suspend injured manager without injury clearance first
             $component->call('suspend');
             // expect(session('error'))->toMatch('/cannot be suspended/');
 
-            // Can heal first, then suspend
-            $component->call('healFromInjury');
+            // Can clear from injury first, then suspend
+            $component->call('clearFromInjury');
             expect(freshModel($injuredManager)->isInjured())->toBeFalse();
 
             $component->call('suspend');

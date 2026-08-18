@@ -141,12 +141,4 @@ class ManagerPolicy
     {
         return false; // Will be bypassed by before hook for administrators
     }
-
-    /**
-     * Only administrators can heal managers (alias for clearFromInjury, handled by before hook).
-     */
-    public function heal(User $user, Manager $manager): bool
-    {
-        return false; // Will be bypassed by before hook for administrators
-    }
 }

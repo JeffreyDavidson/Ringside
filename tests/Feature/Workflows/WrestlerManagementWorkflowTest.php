@@ -178,7 +178,7 @@ describe('Wrestler Employment Status Management Journey', function () {
         actingAs($admin);
 
         \Pest\Livewire\livewire(Main::class)
-            ->call('handleWrestlerAction', 'heal', $wrestler->id)
+            ->call('handleWrestlerAction', 'clear_from_injury', $wrestler->id)
             ->assertHasNoErrors();
 
         // Then: Wrestler should no longer be injured

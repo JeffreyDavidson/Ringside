@@ -44,7 +44,7 @@ final class ErrorMessageMappingService
             CannotBeReinstatedException::class,
             TagTeamCannotBeReinstatedException::class => self::reinstatementKey($reason),
             CannotBeInjuredException::class => self::injuryKey($reason, $entityType),
-            CannotBeClearedFromInjuryException::class => self::healingKey($reason),
+            CannotBeClearedFromInjuryException::class => self::injuryClearanceKey($reason),
             CannotBeRestoredException::class,
             TagTeamCannotBeRestoredException::class => self::restorationKey($reason),
             default => 'general_error',
@@ -131,11 +131,11 @@ final class ErrorMessageMappingService
         };
     }
 
-    private static function healingKey(BusinessRuleReason $reason): string
+    private static function injuryClearanceKey(BusinessRuleReason $reason): string
     {
         return $reason === BusinessRuleReason::NotInjured
             ? 'not_injured'
-            : 'cannot_heal';
+            : 'cannot_clear_from_injury';
     }
 
     private static function restorationKey(BusinessRuleReason $reason): string

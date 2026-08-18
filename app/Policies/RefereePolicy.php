@@ -141,12 +141,4 @@ class RefereePolicy
     {
         return false; // Will be bypassed by before hook for administrators
     }
-
-    /**
-     * Only administrators can heal referees (alias for clearFromInjury, handled by before hook).
-     */
-    public function heal(User $user, Referee $referee): bool
-    {
-        return false; // Will be bypassed by before hook for administrators
-    }
 }

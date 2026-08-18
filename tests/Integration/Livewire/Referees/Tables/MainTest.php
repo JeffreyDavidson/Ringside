@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\Referees\ClearFromInjuryAction;
 use App\Actions\Referees\EmployAction;
-use App\Actions\Referees\HealAction;
 use App\Actions\Referees\InjureAction;
 use App\Actions\Referees\ReleaseAction;
 use App\Actions\Referees\RetireAction;
@@ -363,13 +363,13 @@ describe('RefereesTable Component', function () {
             $component->assertSee('Injury Referee');
         });
 
-        test('component reflects healing status changes', function () {
+        test('component reflects injury clearance status changes', function () {
             $referee = Referee::factory()->injured()->create(['first_name' => 'Healing', 'last_name' => 'Referee']);
 
             $component = livewire(Main::class);
 
-            // Heal the referee
-            resolve(HealAction::class)->handle($referee, now());
+            // Clear the referee from injury
+            resolve(ClearFromInjuryAction::class)->handle($referee, now());
 
             // Refresh component
             $component->call('$refresh');

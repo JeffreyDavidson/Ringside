@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Components;
 
+use App\Actions\Wrestlers\ClearFromInjuryAction;
 use App\Actions\Wrestlers\EmployAction;
-use App\Actions\Wrestlers\HealAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReinstateAction;
 use App\Actions\Wrestlers\ReleaseAction;
@@ -73,10 +73,10 @@ class Actions extends Component
         $this->executeRosterAction('injured', RosterEntityType::Wrestler, fn () => resolve(InjureAction::class)->handle($this->wrestler));
     }
 
-    public function healFromInjury(): void
+    public function clearFromInjury(): void
     {
         Gate::authorize('clearFromInjury', $this->wrestler);
-        $this->executeRosterAction('healed', RosterEntityType::Wrestler, fn () => resolve(HealAction::class)->handle($this->wrestler));
+        $this->executeRosterAction('cleared_from_injury', RosterEntityType::Wrestler, fn () => resolve(ClearFromInjuryAction::class)->handle($this->wrestler));
     }
 
     public function restore(): void

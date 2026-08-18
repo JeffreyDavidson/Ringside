@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Wrestlers\HealAction;
+use App\Actions\Wrestlers\ClearFromInjuryAction;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -11,12 +11,12 @@ beforeEach(function () {
     testTime()->freeze();
 });
 
-test('it heals an injured wrestler', function () {
+test('it clears an injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     expect($wrestler->isInjured())->toBeTrue();
 
-    resolve(HealAction::class)->handle($wrestler);
+    resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -29,11 +29,11 @@ test('it heals an injured wrestler', function () {
     ]);
 });
 
-test('it heals wrestler with specific recovery date', function () {
+test('it clears wrestler from injury with specific recovery date', function () {
     $wrestler = Wrestler::factory()->injured()->create();
     $recoveryDate = now()->subDays(5);
 
-    resolve(HealAction::class)->handle($wrestler, $recoveryDate);
+    resolve(ClearFromInjuryAction::class)->handle($wrestler, $recoveryDate);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -46,13 +46,13 @@ test('it heals wrestler with specific recovery date', function () {
     ]);
 });
 
-test('it persists the healing lifecycle', function () {
+test('it persists the injury clearance lifecycle', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
     $currentInjury = $wrestler->currentInjury()->firstOrFail();
 
-    resolve(HealAction::class)->handle($wrestler);
+    resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
 
@@ -73,7 +73,7 @@ test('it handles DateHelper date resolution', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     // Test with null date (should use now())
-    resolve(HealAction::class)->handle($wrestler, null);
+    resolve(ClearFromInjuryAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -101,7 +101,7 @@ test('it handles multiple injury records correctly', function () {
 
     expect($wrestler->isInjured())->toBeTrue();
 
-    resolve(HealAction::class)->handle($wrestler);
+    resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isInjured())->toBeFalse();
@@ -123,22 +123,22 @@ test('it handles multiple injury records correctly', function () {
     ]);
 });
 
-test('it prevents healing non-injured wrestler', function () {
+test('it prevents clearing non-injured wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->isInjured())->toBeFalse();
 
-    expect(fn () => resolve(HealAction::class)->handle($wrestler))
+    expect(fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
-test('it prevents healing retired wrestler', function () {
+test('it prevents clearing retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     expect($wrestler->isRetired())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
 
-    expect(fn () => resolve(HealAction::class)->handle($wrestler))
+    expect(fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
 });
 
@@ -153,7 +153,7 @@ test('it works with employed injured wrestler', function () {
     expect($wrestler->isEmployed())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
-    resolve(HealAction::class)->handle($wrestler);
+    resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed

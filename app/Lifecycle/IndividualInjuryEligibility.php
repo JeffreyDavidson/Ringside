@@ -46,10 +46,10 @@ final class IndividualInjuryEligibility
         }
     }
 
-    public function canHeal(Wrestler|Manager|Referee $individual): bool
+    public function canBeClearedFromInjury(Wrestler|Manager|Referee $individual): bool
     {
         try {
-            $this->ensureCanHeal($individual);
+            $this->ensureCanBeClearedFromInjury($individual);
 
             return true;
         } catch (CannotBeClearedFromInjuryException) {
@@ -57,7 +57,7 @@ final class IndividualInjuryEligibility
         }
     }
 
-    public function ensureCanHeal(Wrestler|Manager|Referee $individual): void
+    public function ensureCanBeClearedFromInjury(Wrestler|Manager|Referee $individual): void
     {
         if (! $individual->isInjured()) {
             throw CannotBeClearedFromInjuryException::notInjured($individual);

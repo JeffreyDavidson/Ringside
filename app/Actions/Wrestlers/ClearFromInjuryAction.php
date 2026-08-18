@@ -13,7 +13,7 @@ use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class HealAction
+class ClearFromInjuryAction
 {
     public function __construct(
         private readonly InjuryPeriodManager $injuryPeriods,
@@ -21,7 +21,7 @@ class HealAction
     ) {}
 
     /**
-     * Heal a wrestler from injury.
+     * Clear a wrestler from injury.
      *
      * This handles the complete injury recovery workflow:
      * - Ends the injury period through the shared lifecycle component
@@ -35,11 +35,9 @@ class HealAction
 
         DB::transaction(function () use ($wrestler, $recoveryDate): void {
             $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanHeal($lockedWrestler);
+            $this->eligibility->ensureCanBeClearedFromInjury($lockedWrestler);
 
-            $this->injuryPeriods->end($lockedWrestler, $recoveryDate, LifecycleTransitionType::Healed);
+            $this->injuryPeriods->end($lockedWrestler, $recoveryDate, LifecycleTransitionType::ClearedFromInjury);
         });
-
-        // which checks if all current wrestlers are available for competition
     }
 }

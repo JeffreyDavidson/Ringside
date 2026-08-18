@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Managers\HealAction;
+use App\Actions\Managers\ClearFromInjuryAction;
 use App\Models\Roster\Managers\Manager;
 
 use function Spatie\PestPluginTestTime\testTime;
@@ -11,12 +11,12 @@ beforeEach(function () {
     testTime()->freeze();
 });
 
-test('it heals an injured manager', function () {
+test('it clears an injured manager', function () {
     $manager = Manager::factory()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
 
-    resolve(HealAction::class)->handle($manager);
+    resolve(ClearFromInjuryAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isInjured())->toBeFalse();
@@ -29,11 +29,11 @@ test('it heals an injured manager', function () {
     ]);
 });
 
-test('it heals manager with specific recovery date', function () {
+test('it clears manager from injury with specific recovery date', function () {
     $manager = Manager::factory()->injured()->create();
     $recoveryDate = now()->subDays(5);
 
-    resolve(HealAction::class)->handle($manager, $recoveryDate);
+    resolve(ClearFromInjuryAction::class)->handle($manager, $recoveryDate);
 
     $manager->refresh();
     expect($manager->isInjured())->toBeFalse();
@@ -46,13 +46,13 @@ test('it heals manager with specific recovery date', function () {
     ]);
 });
 
-test('it persists the healing lifecycle', function () {
+test('it persists the injury clearance lifecycle', function () {
     $manager = Manager::factory()->injured()->create();
 
     // Get current injury to verify it gets ended
     $currentInjury = $manager->currentInjury()->firstOrFail();
 
-    resolve(HealAction::class)->handle($manager);
+    resolve(ClearFromInjuryAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -68,12 +68,12 @@ test('it persists the healing lifecycle', function () {
     ]);
 });
 
-test('it prevents healing non-injured manager', function () {
+test('it prevents clearing non-injured manager', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->isInjured())->toBeFalse();
 
-    expect(fn () => resolve(HealAction::class)->handle($manager))
+    expect(fn () => resolve(ClearFromInjuryAction::class)->handle($manager))
         ->toThrow(Exception::class);
 });
 
@@ -81,7 +81,7 @@ test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->injured()->create();
     $originalInjuryId = $manager->currentInjury()->firstOrFail()->id;
 
-    resolve(HealAction::class)->handle($manager);
+    resolve(ClearFromInjuryAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -100,13 +100,13 @@ test('it handles database transactions correctly', function () {
     expect($manager->injuries()->count())->toBe(1);
 });
 
-test('it maintains employment status during healing', function () {
+test('it maintains employment status during injury clearance', function () {
     $manager = Manager::factory()->injured()->create();
 
     expect($manager->isEmployed())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();
 
-    resolve(HealAction::class)->handle($manager);
+    resolve(ClearFromInjuryAction::class)->handle($manager);
 
     $manager->refresh();
 
@@ -123,7 +123,7 @@ test('it uses DateHelper for consistent date handling', function () {
     $manager = Manager::factory()->injured()->create();
     $customRecoveryDate = now()->subDays(3)->startOfDay();
 
-    resolve(HealAction::class)->handle($manager, $customRecoveryDate);
+    resolve(ClearFromInjuryAction::class)->handle($manager, $customRecoveryDate);
 
     $manager->refresh();
 

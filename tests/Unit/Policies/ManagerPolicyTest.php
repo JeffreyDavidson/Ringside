@@ -63,7 +63,7 @@ describe('ManagerPolicy Unit Tests', function () {
             expect($this->policy->before($this->admin, 'retire'))->toBeTrue();
             expect($this->policy->before($this->admin, 'unretire'))->toBeTrue();
             expect($this->policy->before($this->admin, 'injure'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'heal'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'clearFromInjury'))->toBeTrue();
             expect($this->policy->before($this->admin, 'suspend'))->toBeTrue();
             expect($this->policy->before($this->admin, 'reinstate'))->toBeTrue();
 
@@ -72,7 +72,7 @@ describe('ManagerPolicy Unit Tests', function () {
             expect($this->policy->before($this->basicUser, 'retire'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'unretire'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'injure'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'heal'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'clearFromInjury'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'suspend'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'reinstate'))->toBeNull();
         });
@@ -140,14 +140,14 @@ describe('ManagerPolicy Unit Tests', function () {
             expect(Gate::forUser($this->basicUser)->denies('retire', $this->manager))->toBeTrue();
             expect(Gate::forUser($this->basicUser)->denies('unretire', $this->manager))->toBeTrue();
 
-            // Test manager health operations
+            // Test manager injury operations
             expect(Gate::forUser($this->admin)->allows('injure', $this->manager))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('heal', $this->manager))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('clearFromInjury', $this->manager))->toBeTrue();
             expect(Gate::forUser($this->admin)->allows('suspend', $this->manager))->toBeTrue();
             expect(Gate::forUser($this->admin)->allows('reinstate', $this->manager))->toBeTrue();
 
             expect(Gate::forUser($this->basicUser)->denies('injure', $this->manager))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('heal', $this->manager))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('clearFromInjury', $this->manager))->toBeTrue();
             expect(Gate::forUser($this->basicUser)->denies('suspend', $this->manager))->toBeTrue();
             expect(Gate::forUser($this->basicUser)->denies('reinstate', $this->manager))->toBeTrue();
         });
@@ -203,7 +203,7 @@ describe('ManagerPolicy Unit Tests', function () {
             // but should be allowed for administrators via before hook
             $managerOperations = [
                 'employ', 'release', 'retire', 'unretire',
-                'injure', 'heal', 'suspend', 'reinstate',
+                'injure', 'clearFromInjury', 'suspend', 'reinstate',
                 'assignToWrestler', 'assignToTagTeam', 'removeFromAssignment',
             ];
 
