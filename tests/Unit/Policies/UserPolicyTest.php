@@ -12,58 +12,58 @@ use function Pest\Laravel\actingAs;
 /**
  * Unit tests for UserPolicy authorization logic.
  *
- * Tests the before hook pattern used for administrator bypass
+ * Tests the global Gate hook used for administrator bypass
  * and validates that basic users are properly restricted.
  *
  * @see UserPolicy
  */
-describe('UserPolicy before hook', function () {
+describe('UserPolicy global Gate hook', function () {
     beforeEach(function () {
         $this->policy = new UserPolicy();
         $this->administrator = administrator();
         $this->basicUser = basicUser();
     });
 
-    test('before hook allows administrators for any ability', function () {
-        $result = $this->policy->before($this->administrator, 'viewAny');
+    test('global Gate hook allows administrators for any ability', function () {
+        $result = Gate::forUser($this->administrator)->raw('viewAny');
 
         expect($result)->toBeTrue();
     });
 
-    test('before hook returns null for basic users', function () {
-        $result = $this->policy->before($this->basicUser, 'viewAny');
+    test('global Gate hook returns null for basic users', function () {
+        $result = Gate::forUser($this->basicUser)->raw('viewAny');
 
         expect($result)->toBeNull();
     });
 
-    test('before hook allows administrators for all abilities', function () {
+    test('global Gate hook allows administrators for all abilities', function () {
         $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore'];
 
         foreach ($abilities as $ability) {
-            $result = $this->policy->before($this->administrator, $ability);
+            $result = Gate::forUser($this->administrator)->raw($ability);
             expect($result)->toBeTrue("Administrator should be allowed for {$ability}");
         }
     });
 
-    test('before hook returns null for basic users on all abilities', function () {
+    test('global Gate hook returns null for basic users on all abilities', function () {
         $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore'];
 
         foreach ($abilities as $ability) {
-            $result = $this->policy->before($this->basicUser, $ability);
+            $result = Gate::forUser($this->basicUser)->raw($ability);
             expect($result)->toBeNull("Basic user should get null for {$ability}");
         }
     });
 
-    test('before hook works for user-specific abilities', function () {
-        expect($this->policy->before($this->administrator, 'viewProfile'))->toBeTrue();
-        expect($this->policy->before($this->administrator, 'changePassword'))->toBeTrue();
-        expect($this->policy->before($this->administrator, 'manageRoles'))->toBeTrue();
-        expect($this->policy->before($this->administrator, 'deactivate'))->toBeTrue();
+    test('global Gate hook works for user-specific abilities', function () {
+        expect(Gate::forUser($this->administrator)->raw('viewProfile'))->toBeTrue();
+        expect(Gate::forUser($this->administrator)->raw('changePassword'))->toBeTrue();
+        expect(Gate::forUser($this->administrator)->raw('manageRoles'))->toBeTrue();
+        expect(Gate::forUser($this->administrator)->raw('deactivate'))->toBeTrue();
 
-        expect($this->policy->before($this->basicUser, 'viewProfile'))->toBeNull();
-        expect($this->policy->before($this->basicUser, 'changePassword'))->toBeNull();
-        expect($this->policy->before($this->basicUser, 'manageRoles'))->toBeNull();
-        expect($this->policy->before($this->basicUser, 'deactivate'))->toBeNull();
+        expect(Gate::forUser($this->basicUser)->raw('viewProfile'))->toBeNull();
+        expect(Gate::forUser($this->basicUser)->raw('changePassword'))->toBeNull();
+        expect(Gate::forUser($this->basicUser)->raw('manageRoles'))->toBeNull();
+        expect(Gate::forUser($this->basicUser)->raw('deactivate'))->toBeNull();
     });
 });
 
@@ -111,7 +111,7 @@ describe('UserPolicy individual methods', function () {
 });
 
 describe('UserPolicy integration with Gate facade', function () {
-    test('Gate allows administrators through before hook', function () {
+    test('Gate allows administrators through global Gate hook', function () {
         actingAs(administrator());
         $targetUser = basicUser();
 
@@ -123,7 +123,7 @@ describe('UserPolicy integration with Gate facade', function () {
         expect(Gate::allows('restore', $targetUser))->toBeTrue();
     });
 
-    test('Gate denies basic users after before hook returns null', function () {
+    test('Gate denies basic users after global Gate hook returns null', function () {
         actingAs(basicUser());
         $targetUser = administrator();
 
@@ -150,7 +150,7 @@ describe('UserPolicy integration with Gate facade', function () {
     });
 
     // NOTE: Gate integration testing moved to Feature tests for proper application context
-    // test('Gate supports user management operations through before hook', function () {
+    // test('Gate supports user management operations through global Gate hook', function () {
     //     actingAs(administrator());
     //
     //     // User management operations should be allowed for administrators
@@ -170,13 +170,8 @@ describe('UserPolicy integration with Gate facade', function () {
 });
 
 describe('UserPolicy method signatures', function () {
-    test('before method has correct signature', function () {
-        $reflection = new ReflectionMethod(UserPolicy::class, 'before');
-
-        expect($reflection->getParameters())->toHaveCount(2);
-        expect(reflectionTypeName($reflection->getParameters()[0]))->toBe(User::class);
-        expect(reflectionTypeName($reflection->getParameters()[1]))->toBe('string');
-        expect(reflectionReturnTypeName($reflection))->toBe('bool');
+    test('administrator bypass is not duplicated on the policy', function () {
+        expect(get_class_methods($this->policy))->not->toContain('before');
     });
 
     test('policy methods have correct signatures', function () {
@@ -202,19 +197,19 @@ describe('UserPolicy business context', function () {
         $this->policy = new UserPolicy();
     });
 
-    test('policy supports user management operations via before hook', function () {
+    test('policy supports user management operations via the global Gate hook', function () {
         // These operations aren't explicitly defined in the policy
-        // but should be allowed for administrators via before hook
+        // but should be allowed for administrators via the global Gate hook
         $userOperations = [
             'viewProfile', 'changePassword', 'manageRoles', 'deactivate',
             'activate', 'resetPassword', 'changeRole', 'viewAuditLog',
         ];
 
         foreach ($userOperations as $operation) {
-            expect($this->policy->before(administrator(), $operation))
+            expect(Gate::forUser(administrator())->raw($operation))
                 ->toBeTrue("Administrator should be able to {$operation} users");
 
-            expect($this->policy->before(basicUser(), $operation))
+            expect(Gate::forUser(basicUser())->raw($operation))
                 ->toBeNull("Basic user should continue to individual checks for {$operation}");
         }
     });
@@ -254,8 +249,8 @@ describe('UserPolicy business context', function () {
         expect($admin->role->isAdministrator())->toBeTrue();
         expect($basic->role->isAdministrator())->toBeFalse();
 
-        expect($this->policy->before($admin, 'any-operation'))->toBeTrue();
-        expect($this->policy->before($basic, 'any-operation'))->toBeNull();
+        expect(Gate::forUser($admin)->raw('any-operation'))->toBeTrue();
+        expect(Gate::forUser($basic)->raw('any-operation'))->toBeNull();
     });
 });
 
@@ -268,7 +263,6 @@ describe('UserPolicy edge cases and security', function () {
         $policy1 = new UserPolicy();
         $policy2 = new UserPolicy();
 
-        expect($policy1->before(administrator(), 'create'))->toBe($policy2->before(administrator(), 'create'));
         expect($policy1->viewAny(basicUser()))->toBe($policy2->viewAny(basicUser()));
     });
 
@@ -277,20 +271,20 @@ describe('UserPolicy edge cases and security', function () {
         expect($this->policy->viewAny(basicUser()))->toBeFalse();
         expect($this->policy->viewAny(basicUser()))->toBeFalse();
 
-        expect($this->policy->before(administrator(), 'create'))->toBeTrue();
-        expect($this->policy->before(administrator(), 'create'))->toBeTrue();
+        expect(Gate::forUser(administrator())->raw('create'))->toBeTrue();
+        expect(Gate::forUser(administrator())->raw('create'))->toBeTrue();
     });
 
     test('policy correctly identifies administrator privileges', function () {
         $admin = administrator();
         $basic = basicUser();
 
-        // Administrator should consistently pass the before hook
+        // Administrator should consistently pass the global Gate hook
         $abilities = ['create', 'read', 'update', 'delete', 'custom', 'manage', 'any'];
 
         foreach ($abilities as $ability) {
-            expect($this->policy->before($admin, $ability))->toBeTrue();
-            expect($this->policy->before($basic, $ability))->toBeNull();
+            expect(Gate::forUser($admin)->raw($ability))->toBeTrue();
+            expect(Gate::forUser($basic)->raw($ability))->toBeNull();
         }
     });
 });
