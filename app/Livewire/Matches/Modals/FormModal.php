@@ -21,7 +21,6 @@ use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -105,17 +104,6 @@ class FormModal extends BaseFormModal
     protected function populateDummyData(): void
     {
         $this->dummyData->fill($this->form);
-    }
-
-    public function openModal(int|string|null $modelId = null): void
-    {
-        if ($modelId === null) {
-            Gate::authorize('create', EventMatch::class);
-        } else {
-            Gate::authorize('update', EventMatch::query()->findOrFail($modelId));
-        }
-
-        parent::openModal($modelId);
     }
 
     public function getModalTitle(): string
