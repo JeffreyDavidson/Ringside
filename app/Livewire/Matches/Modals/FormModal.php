@@ -34,6 +34,12 @@ class FormModal extends BaseFormModal
     use PresentsTitlesList;
     use PresentsWrestlersList;
 
+    protected ?string $createdEventName = 'matchCreated';
+
+    protected ?string $updatedEventName = 'matchUpdated';
+
+    protected bool $resetFormAfterSubmission = true;
+
     #[Locked]
     public int $eventId = 0;
 
@@ -109,21 +115,6 @@ class FormModal extends BaseFormModal
     public function getModalTitle(): string
     {
         return isset($this->model) ? 'Edit Match' : 'Create Match';
-    }
-
-    public function submitForm(): bool
-    {
-        $isCreating = $this->form->isCreating();
-        $wasStored = parent::submitForm();
-
-        if (! $wasStored) {
-            return false;
-        }
-
-        $this->dispatch($isCreating ? 'matchCreated' : 'matchUpdated');
-        $this->form->reset();
-
-        return true;
     }
 
     public function updatedFormMatchType(mixed $value): void
