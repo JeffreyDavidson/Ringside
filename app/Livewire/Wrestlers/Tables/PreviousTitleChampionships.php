@@ -8,6 +8,7 @@ use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
@@ -15,6 +16,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     /**
      * Wrestler to use for component.
      */
+    #[Locked]
     public ?int $wrestlerId;
 
     public string $databaseTableName = 'titles_championships';

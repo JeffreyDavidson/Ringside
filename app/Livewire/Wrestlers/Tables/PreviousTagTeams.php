@@ -8,6 +8,7 @@ use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /**
@@ -30,6 +31,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      *
      * @var int|null The wrestler's ID, or null if not set
      */
+    #[Locked]
     public ?int $wrestlerId;
 
     /**

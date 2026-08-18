@@ -10,6 +10,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends DataTableComponent<WrestlerManager> */
@@ -17,6 +18,7 @@ class PreviousWrestlers extends DataTableComponent
 {
     use ShowTableTrait;
 
+    #[Locked]
     public ?int $managerId;
 
     protected string $databaseTableName = 'wrestlers_managers';

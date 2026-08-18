@@ -8,6 +8,7 @@ use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 class PreviousMatches extends BasePreviousMatchesTable
@@ -15,6 +16,7 @@ class PreviousMatches extends BasePreviousMatchesTable
     /**
      * Tag Team to use for component.
      */
+    #[Locked]
     public ?int $tagTeamId;
 
     protected string $databaseTableName = 'event_matches';

@@ -12,6 +12,7 @@ use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends DataTableComponent<TitleChampionship> */
@@ -26,6 +27,7 @@ class PreviousTitleChampionships extends DataTableComponent
     /**
      * Undocumented variable.
      */
+    #[Locked]
     public ?int $titleId;
 
     public function configure(): void

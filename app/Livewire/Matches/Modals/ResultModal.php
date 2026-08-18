@@ -17,10 +17,12 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use LivewireUI\Modal\ModalComponent;
 
 class ResultModal extends ModalComponent
 {
+    #[Locked]
     public int $matchId;
 
     public ?string $finish = null;

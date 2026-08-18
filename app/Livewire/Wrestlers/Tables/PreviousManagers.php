@@ -7,6 +7,7 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends BasePreviousManagersTable<WrestlerManager> */
@@ -15,6 +16,7 @@ class PreviousManagers extends BasePreviousManagersTable
     /**
      * Wrestler to use for component.
      */
+    #[Locked]
     public ?int $wrestlerId;
 
     public string $databaseTableName = 'wrestlers_managers';

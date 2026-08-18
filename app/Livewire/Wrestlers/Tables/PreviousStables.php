@@ -7,6 +7,7 @@ namespace App\Livewire\Wrestlers\Tables;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends BasePreviousStablesTable<Stable> */
@@ -15,6 +16,7 @@ class PreviousStables extends BasePreviousStablesTable
     /**
      * Wrestler to use for component.
      */
+    #[Locked]
     public ?int $wrestlerId;
 
     public string $databaseTableName = 'stables_wrestlers';

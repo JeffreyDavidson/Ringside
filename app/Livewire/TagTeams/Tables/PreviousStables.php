@@ -7,6 +7,7 @@ namespace App\Livewire\TagTeams\Tables;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends BasePreviousStablesTable<Stable> */
@@ -14,6 +15,7 @@ class PreviousStables extends BasePreviousStablesTable
 {
     protected string $databaseTableName = 'stables';
 
+    #[Locked]
     public ?int $tagTeamId;
 
     /**

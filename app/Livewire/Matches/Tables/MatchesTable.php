@@ -17,6 +17,7 @@ use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends DataTableComponent<EventMatch> */
@@ -31,6 +32,7 @@ class MatchesTable extends DataTableComponent
     /**
      * Event to use for component.
      */
+    #[Locked]
     public ?int $eventId = null;
 
     /**

@@ -8,6 +8,7 @@ use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
@@ -15,6 +16,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     /**
      * Tag Team to use for component.
      */
+    #[Locked]
     public ?int $tagTeamId;
 
     /**
