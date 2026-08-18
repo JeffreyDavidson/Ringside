@@ -18,7 +18,13 @@ class IsNotInjured implements ValidationRule
             return;
         }
 
-        $wrestler = Wrestler::query()->whereKey($value)->firstOrFail();
+        $wrestler = Wrestler::query()->whereKey($value)->first();
+
+        if (! $wrestler instanceof Wrestler) {
+            $fail('The selected wrestler is invalid.');
+
+            return;
+        }
 
         if ($wrestler->isInjured()) {
             $fail("{$wrestler->name} is injured and cannot join the stable.");
