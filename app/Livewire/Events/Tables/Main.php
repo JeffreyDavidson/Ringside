@@ -43,7 +43,7 @@ class Main extends BaseTable
 
     public function configure(): void
     {
-        Gate::authorize('viewList', Event::class);
+        Gate::authorize('viewAny', Event::class);
 
         $this->addAdditionalSelects([
             'events.venue_id',

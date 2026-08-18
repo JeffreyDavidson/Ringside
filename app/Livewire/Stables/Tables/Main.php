@@ -49,7 +49,7 @@ class Main extends BaseTable
 
     public function configure(): void
     {
-        Gate::authorize('viewList', Stable::class);
+        Gate::authorize('viewAny', Stable::class);
     }
 
     /**

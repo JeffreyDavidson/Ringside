@@ -33,7 +33,7 @@ describe('StablePolicy Unit Tests', function () {
 
     describe('before hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewList'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
             expect($this->policy->before($this->admin, 'view'))->toBeTrue();
             expect($this->policy->before($this->admin, 'create'))->toBeTrue();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
@@ -46,7 +46,7 @@ describe('StablePolicy Unit Tests', function () {
         });
 
         test('basic users do not bypass authorization checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewList'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
@@ -66,7 +66,7 @@ describe('StablePolicy Unit Tests', function () {
 
     describe('view authorization', function () {
         test('basic users cannot view stable list', function () {
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
         });
 
         test('basic users cannot view individual stables', function () {
@@ -153,7 +153,7 @@ describe('StablePolicy Unit Tests', function () {
     //
     //     test('gate authorize calls work with policy methods', function () {
     //         // This belongs in Feature tests - requires authentication context
-    //         expect(fn() => Gate::authorize('viewList', Stable::class))
+    //         expect(fn() => Gate::authorize('viewAny', Stable::class))
     //             ->toThrow(AuthorizationException::class);
     //
     //         expect(fn() => Gate::authorize('view', $this->stable))
@@ -163,7 +163,7 @@ describe('StablePolicy Unit Tests', function () {
     //     test('gate allows calls work with policy methods', function () {
     //         // This belongs in Feature tests - requires authentication context
     //         Gate::forUser($this->basicUser);
-    //         expect(Gate::allows('viewList', Stable::class))->toBeFalse();
+    //         expect(Gate::allows('viewAny', Stable::class))->toBeFalse();
     //         expect(Gate::allows('view', $this->stable))->toBeFalse();
     //         expect(Gate::allows('create', Stable::class))->toBeFalse();
     //         expect(Gate::allows('update', $this->stable))->toBeFalse();
@@ -171,7 +171,7 @@ describe('StablePolicy Unit Tests', function () {
     //
     //         // Test admin permissions (should be allowed via before hook)
     //         Gate::forUser($this->admin);
-    //         expect(Gate::allows('viewList', Stable::class))->toBeTrue();
+    //         expect(Gate::allows('viewAny', Stable::class))->toBeTrue();
     //         expect(Gate::allows('view', $this->stable))->toBeTrue();
     //         expect(Gate::allows('create', Stable::class))->toBeTrue();
     //         expect(Gate::allows('update', $this->stable))->toBeTrue();
@@ -214,7 +214,7 @@ describe('StablePolicy Unit Tests', function () {
         test('all required policy methods exist', function () {
             $requiredMethods = [
                 'before',
-                'viewList',
+                'viewAny',
                 'view',
                 'create',
                 'update',
@@ -253,7 +253,7 @@ describe('StablePolicy Unit Tests', function () {
     describe('authorization consistency', function () {
         test('all authorization methods return boolean for basic users', function () {
             $methods = [
-                ['viewList', []],
+                ['viewAny', []],
                 ['view', [$this->stable]],
                 ['create', []],
                 ['update', [$this->stable]],
@@ -274,7 +274,7 @@ describe('StablePolicy Unit Tests', function () {
         });
 
         test('before hook returns boolean true for admin or null for others', function () {
-            $abilities = ['viewList', 'view', 'create', 'update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire'];
+            $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire'];
 
             foreach ($abilities as $ability) {
                 expect($this->policy->before($this->admin, $ability))->toBeTrue();

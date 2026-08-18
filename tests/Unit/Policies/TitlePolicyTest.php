@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Gate;
  *
  * UNIT TEST SCOPE:
  * - Before hook behavior for administrator bypass
- * - Individual permission method testing (viewList, view, create, update, delete, restore)
+ * - Individual permission method testing (viewAny, view, create, update, delete, restore)
  * - Business-specific authorization methods (debut, pull, reinstate, retire, unretire, activate, deactivate)
  * - Policy method consistency and return value verification
  * - Laravel Gate integration testing
@@ -34,7 +34,7 @@ describe('TitlePolicy Unit Tests', function () {
 
     describe('before hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewList'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
             expect($this->policy->before($this->admin, 'view'))->toBeTrue();
             expect($this->policy->before($this->admin, 'create'))->toBeTrue();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
@@ -43,7 +43,7 @@ describe('TitlePolicy Unit Tests', function () {
         });
 
         test('basic users continue to individual method checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewList'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
@@ -72,12 +72,12 @@ describe('TitlePolicy Unit Tests', function () {
     });
 
     describe('basic CRUD permissions', function () {
-        test('viewList method denies basic users', function () {
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+        test('viewAny method denies basic users', function () {
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
         });
 
         test('view method denies basic users', function () {
-            expect($this->policy->view($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->title))->toBeFalse();
         });
 
         test('create method denies basic users', function () {
@@ -85,29 +85,29 @@ describe('TitlePolicy Unit Tests', function () {
         });
 
         test('update method denies basic users', function () {
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->title))->toBeFalse();
         });
 
         test('delete method denies basic users', function () {
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->title))->toBeFalse();
         });
 
         test('restore method denies basic users', function () {
-            expect($this->policy->restore($this->basicUser))->toBeFalse();
+            expect($this->policy->restore($this->basicUser, $this->title))->toBeFalse();
         });
     });
 
     describe('policy integration with Laravel Gate', function () {
         test('policy integrates correctly with Gate facade', function () {
             // Test administrator permissions through Gate
-            expect(Gate::forUser($this->admin)->allows('viewList', Title::class))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('viewAny', Title::class))->toBeTrue();
             expect(Gate::forUser($this->admin)->allows('create', Title::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('view', Title::class))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('view', $this->title))->toBeTrue();
 
             // Test basic user permissions through Gate
-            expect(Gate::forUser($this->basicUser)->denies('viewList', Title::class))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('viewAny', Title::class))->toBeTrue();
             expect(Gate::forUser($this->basicUser)->denies('create', Title::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('view', Title::class))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('view', $this->title))->toBeTrue();
         });
 
         test('policy works with specific title instances', function () {
@@ -139,12 +139,13 @@ describe('TitlePolicy Unit Tests', function () {
 
     describe('policy method consistency', function () {
         test('all policy methods follow consistent pattern', function () {
-            $methods = ['viewList', 'view', 'create', 'update', 'delete', 'restore'];
+            $methods = ['viewAny', 'view', 'create', 'update', 'delete', 'restore'];
 
             foreach ($methods as $method) {
-                // All methods should return false for basic users
-                expect($this->policy->{$method}($this->basicUser))
-                    ->toBeFalse("Method {$method} should deny basic users");
+                $subject = in_array($method, ['viewAny', 'create'], true) ? Title::class : $this->title;
+
+                expect(Gate::forUser($this->basicUser)->denies($method, $subject))
+                    ->toBeTrue("Method {$method} should deny basic users");
 
                 // All methods should be bypassed for administrators via before hook
                 expect($this->policy->before($this->admin, $method))
@@ -154,7 +155,7 @@ describe('TitlePolicy Unit Tests', function () {
 
         test('policy has all expected methods', function () {
             $expectedMethods = [
-                'before', 'viewList', 'view', 'create', 'update', 'delete', 'restore',
+                'before', 'viewAny', 'view', 'create', 'update', 'delete', 'restore',
             ];
 
             foreach ($expectedMethods as $method) {
@@ -232,13 +233,13 @@ describe('TitlePolicy Unit Tests', function () {
             $policy2 = new TitlePolicy();
 
             expect($policy1->before($this->admin, 'create'))->toBe($policy2->before($this->admin, 'create'));
-            expect($policy1->viewList($this->basicUser))->toBe($policy2->viewList($this->basicUser));
+            expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });
 
         test('policy is stateless', function () {
             // Multiple calls should return same results
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
 
             expect($this->policy->before($this->admin, 'create'))->toBeTrue();
             expect($this->policy->before($this->admin, 'create'))->toBeTrue();

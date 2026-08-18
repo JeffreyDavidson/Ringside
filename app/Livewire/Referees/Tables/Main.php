@@ -58,7 +58,7 @@ class Main extends BaseTable
 
     public function configure(): void
     {
-        Gate::authorize('viewList', Referee::class);
+        Gate::authorize('viewAny', Referee::class);
     }
 
     /**
@@ -220,7 +220,7 @@ class Main extends BaseTable
     {
         $referee = Referee::onlyTrashed()->findOrFail($refereeId);
 
-        Gate::authorize('restore', Referee::class);
+        Gate::authorize('restore', $referee);
 
         try {
             resolve(RestoreAction::class)->handle($referee);

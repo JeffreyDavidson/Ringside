@@ -26,6 +26,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Models,Providers,Actions,Lifecycle}/** | .ai/rules/models-providers-actions-lifecycle.md |
 | app/{Models,ValueObjects,Casts}/** | .ai/rules/models-value-objects-casts.md |
 | app/Models/** | .ai/rules/models.md |
+| app/Policies/** | .ai/rules/policies.md |
 | app/{Livewire,Http/Requests,Actions,Services}/** | .ai/rules/requests-actions-services.md |
 | app/Http/Requests/** | .ai/rules/requests.md |
 | routes/**, routes/web.php | .ai/rules/routes.md |

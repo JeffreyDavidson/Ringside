@@ -35,7 +35,7 @@ class Main extends BaseTable
 
     public function configure(): void
     {
-        Gate::authorize('viewList', Venue::class);
+        Gate::authorize('viewAny', Venue::class);
     }
 
     /**

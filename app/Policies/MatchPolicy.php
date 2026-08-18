@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\Matches\EventMatch;
 use App\Models\Users\User;
 
 /**
@@ -32,7 +33,7 @@ class MatchPolicy
     /**
      * Only administrators can view entity lists (handled by before hook).
      */
-    public function viewList(User $user): bool
+    public function viewAny(User $user): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -40,7 +41,7 @@ class MatchPolicy
     /**
      * Only administrators can view individual entities (handled by before hook).
      */
-    public function view(User $user): bool
+    public function view(User $user, EventMatch $eventMatch): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -56,7 +57,7 @@ class MatchPolicy
     /**
      * Only administrators can update entities (handled by before hook).
      */
-    public function update(User $user): bool
+    public function update(User $user, EventMatch $eventMatch): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -64,7 +65,7 @@ class MatchPolicy
     /**
      * Only administrators can delete entities (handled by before hook).
      */
-    public function delete(User $user): bool
+    public function delete(User $user, EventMatch $eventMatch): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -72,7 +73,7 @@ class MatchPolicy
     /**
      * Only administrators can restore entities (handled by before hook).
      */
-    public function restore(User $user): bool
+    public function restore(User $user, EventMatch $eventMatch): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

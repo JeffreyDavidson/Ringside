@@ -25,19 +25,19 @@ describe('UserPolicy before hook', function () {
     });
 
     test('before hook allows administrators for any ability', function () {
-        $result = $this->policy->before($this->administrator, 'viewList');
+        $result = $this->policy->before($this->administrator, 'viewAny');
 
         expect($result)->toBeTrue();
     });
 
     test('before hook returns null for basic users', function () {
-        $result = $this->policy->before($this->basicUser, 'viewList');
+        $result = $this->policy->before($this->basicUser, 'viewAny');
 
         expect($result)->toBeNull();
     });
 
     test('before hook allows administrators for all abilities', function () {
-        $abilities = ['viewList', 'view', 'create', 'update', 'delete', 'restore'];
+        $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore'];
 
         foreach ($abilities as $ability) {
             $result = $this->policy->before($this->administrator, $ability);
@@ -46,7 +46,7 @@ describe('UserPolicy before hook', function () {
     });
 
     test('before hook returns null for basic users on all abilities', function () {
-        $abilities = ['viewList', 'view', 'create', 'update', 'delete', 'restore'];
+        $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore'];
 
         foreach ($abilities as $ability) {
             $result = $this->policy->before($this->basicUser, $ability);
@@ -73,14 +73,14 @@ describe('UserPolicy individual methods', function () {
         $this->basicUser = basicUser();
     });
 
-    test('viewList method returns false for basic users', function () {
-        $result = $this->policy->viewList($this->basicUser);
+    test('viewAny method returns false for basic users', function () {
+        $result = $this->policy->viewAny($this->basicUser);
 
         expect($result)->toBeFalse();
     });
 
     test('view method returns false for basic users', function () {
-        $result = $this->policy->view($this->basicUser);
+        $result = $this->policy->view($this->basicUser, $this->basicUser);
 
         expect($result)->toBeFalse();
     });
@@ -92,19 +92,19 @@ describe('UserPolicy individual methods', function () {
     });
 
     test('update method returns false for basic users', function () {
-        $result = $this->policy->update($this->basicUser);
+        $result = $this->policy->update($this->basicUser, $this->basicUser);
 
         expect($result)->toBeFalse();
     });
 
     test('delete method returns false for basic users', function () {
-        $result = $this->policy->delete($this->basicUser);
+        $result = $this->policy->delete($this->basicUser, $this->basicUser);
 
         expect($result)->toBeFalse();
     });
 
     test('restore method returns false for basic users', function () {
-        $result = $this->policy->restore($this->basicUser);
+        $result = $this->policy->restore($this->basicUser, $this->basicUser);
 
         expect($result)->toBeFalse();
     });
@@ -113,24 +113,26 @@ describe('UserPolicy individual methods', function () {
 describe('UserPolicy integration with Gate facade', function () {
     test('Gate allows administrators through before hook', function () {
         actingAs(administrator());
+        $targetUser = basicUser();
 
-        expect(Gate::allows('viewList', User::class))->toBeTrue();
-        expect(Gate::allows('view', User::class))->toBeTrue();
+        expect(Gate::allows('viewAny', User::class))->toBeTrue();
+        expect(Gate::allows('view', $targetUser))->toBeTrue();
         expect(Gate::allows('create', User::class))->toBeTrue();
-        expect(Gate::allows('update', User::class))->toBeTrue();
-        expect(Gate::allows('delete', User::class))->toBeTrue();
-        expect(Gate::allows('restore', User::class))->toBeTrue();
+        expect(Gate::allows('update', $targetUser))->toBeTrue();
+        expect(Gate::allows('delete', $targetUser))->toBeTrue();
+        expect(Gate::allows('restore', $targetUser))->toBeTrue();
     });
 
     test('Gate denies basic users after before hook returns null', function () {
         actingAs(basicUser());
+        $targetUser = administrator();
 
-        expect(Gate::denies('viewList', User::class))->toBeTrue();
-        expect(Gate::denies('view', User::class))->toBeTrue();
+        expect(Gate::denies('viewAny', User::class))->toBeTrue();
+        expect(Gate::denies('view', $targetUser))->toBeTrue();
         expect(Gate::denies('create', User::class))->toBeTrue();
-        expect(Gate::denies('update', User::class))->toBeTrue();
-        expect(Gate::denies('delete', User::class))->toBeTrue();
-        expect(Gate::denies('restore', User::class))->toBeTrue();
+        expect(Gate::denies('update', $targetUser))->toBeTrue();
+        expect(Gate::denies('delete', $targetUser))->toBeTrue();
+        expect(Gate::denies('restore', $targetUser))->toBeTrue();
     });
 
     test('Gate works with specific user instances', function () {
@@ -178,13 +180,18 @@ describe('UserPolicy method signatures', function () {
     });
 
     test('policy methods have correct signatures', function () {
-        $methods = ['viewList', 'view', 'create', 'update', 'delete', 'restore'];
+        $methods = ['viewAny', 'view', 'create', 'update', 'delete', 'restore'];
 
         foreach ($methods as $method) {
             $reflection = new ReflectionMethod(UserPolicy::class, $method);
 
-            expect($reflection->getParameters())->toHaveCount(1);
+            $expectedParameterCount = in_array($method, ['viewAny', 'create'], true) ? 1 : 2;
+
+            expect($reflection->getParameters())->toHaveCount($expectedParameterCount);
             expect(reflectionTypeName($reflection->getParameters()[0]))->toBe(User::class);
+            if ($expectedParameterCount === 2) {
+                expect(reflectionTypeName($reflection->getParameters()[1]))->toBe(User::class);
+            }
             expect(reflectionReturnTypeName($reflection))->toBe('bool');
         }
     });
@@ -262,13 +269,13 @@ describe('UserPolicy edge cases and security', function () {
         $policy2 = new UserPolicy();
 
         expect($policy1->before(administrator(), 'create'))->toBe($policy2->before(administrator(), 'create'));
-        expect($policy1->viewList(basicUser()))->toBe($policy2->viewList(basicUser()));
+        expect($policy1->viewAny(basicUser()))->toBe($policy2->viewAny(basicUser()));
     });
 
     test('policy is stateless', function () {
         // Multiple calls should return same results
-        expect($this->policy->viewList(basicUser()))->toBeFalse();
-        expect($this->policy->viewList(basicUser()))->toBeFalse();
+        expect($this->policy->viewAny(basicUser()))->toBeFalse();
+        expect($this->policy->viewAny(basicUser()))->toBeFalse();
 
         expect($this->policy->before(administrator(), 'create'))->toBeTrue();
         expect($this->policy->before(administrator(), 'create'))->toBeTrue();
