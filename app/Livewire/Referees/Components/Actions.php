@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Components;
 
+use App\Actions\Referees\ClearFromInjuryAction;
 use App\Actions\Referees\EmployAction;
-use App\Actions\Referees\HealAction;
 use App\Actions\Referees\InjureAction;
 use App\Actions\Referees\ReinstateAction;
 use App\Actions\Referees\ReleaseAction;
@@ -73,10 +73,10 @@ class Actions extends Component
         $this->executeRosterAction('injured', RosterEntityType::Referee, fn () => resolve(InjureAction::class)->handle($this->referee));
     }
 
-    public function healFromInjury(): void
+    public function clearFromInjury(): void
     {
         Gate::authorize('clearFromInjury', $this->referee);
-        $this->executeRosterAction('healed', RosterEntityType::Referee, fn () => resolve(HealAction::class)->handle($this->referee));
+        $this->executeRosterAction('cleared_from_injury', RosterEntityType::Referee, fn () => resolve(ClearFromInjuryAction::class)->handle($this->referee));
     }
 
     public function restore(): void

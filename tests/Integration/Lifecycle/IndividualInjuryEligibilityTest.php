@@ -48,20 +48,20 @@ describe('individual injury eligibility', function () {
         Referee::class,
     ]);
 
-    test('keeps the healing predicate aligned with its guard', function (string $factoryState, bool $canBeHealed) {
+    test('keeps the injury clearance predicate aligned with its guard', function (string $factoryState, bool $canBeClearedFromInjury) {
         $eligibility = new IndividualInjuryEligibility();
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
-        expect($eligibility->canHeal($wrestler))->toBe($canBeHealed);
+        expect($eligibility->canBeClearedFromInjury($wrestler))->toBe($canBeClearedFromInjury);
 
-        if ($canBeHealed) {
-            expect(fn () => $eligibility->ensureCanHeal($wrestler))
+        if ($canBeClearedFromInjury) {
+            expect(fn () => $eligibility->ensureCanBeClearedFromInjury($wrestler))
                 ->not->toThrow(CannotBeClearedFromInjuryException::class);
 
             return;
         }
 
-        expect(fn () => $eligibility->ensureCanHeal($wrestler))
+        expect(fn () => $eligibility->ensureCanBeClearedFromInjury($wrestler))
             ->toThrow(CannotBeClearedFromInjuryException::class);
     })->with([
         'injured' => ['injured', true],

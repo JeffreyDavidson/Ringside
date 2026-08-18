@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Actions\Managers\ClearFromInjuryAction;
 use App\Actions\Managers\DeleteAction;
 use App\Actions\Managers\EmployAction;
-use App\Actions\Managers\HealAction;
 use App\Actions\Managers\InjureAction;
 use App\Actions\Managers\ReinstateAction;
 use App\Actions\Managers\ReleaseAction;
@@ -114,7 +114,7 @@ class Main extends BaseTable
 
     public function clearFromInjury(Manager $manager): void
     {
-        $this->handleManagerAction(RosterLifecycleAction::Heal->value, $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::ClearFromInjury->value, $manager->id);
     }
 
     public function employ(Manager $manager): void
@@ -172,7 +172,7 @@ class Main extends BaseTable
             RosterLifecycleAction::Suspend => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(SuspendAction::class)->handle($manager)),
             RosterLifecycleAction::Reinstate => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(ReinstateAction::class)->handle($manager)),
             RosterLifecycleAction::Injure => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(InjureAction::class)->handle($manager)),
-            RosterLifecycleAction::Heal => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(HealAction::class)->handle($manager)),
+            RosterLifecycleAction::ClearFromInjury => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(ClearFromInjuryAction::class)->handle($manager)),
             RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(RestoreAction::class)->handle($manager)),
         };
     }

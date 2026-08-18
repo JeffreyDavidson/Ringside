@@ -157,7 +157,7 @@ class Main extends BaseTable
             RosterLifecycleAction::Retire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(RetireAction::class)->handle($tagTeam)),
             RosterLifecycleAction::Unretire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(UnretireAction::class)->handle($tagTeam)),
             RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(RestoreAction::class)->handle($tagTeam)),
-            RosterLifecycleAction::Heal, RosterLifecycleAction::Injure => throw new InvalidArgumentException("{$lifecycleAction->value} is not a tag team lifecycle action."),
+            RosterLifecycleAction::ClearFromInjury, RosterLifecycleAction::Injure => throw new InvalidArgumentException("{$lifecycleAction->value} is not a tag team lifecycle action."),
         };
     }
 }

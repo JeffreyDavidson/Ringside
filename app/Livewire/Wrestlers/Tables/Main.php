@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Actions\Wrestlers\ClearFromInjuryAction;
 use App\Actions\Wrestlers\DeleteAction;
 use App\Actions\Wrestlers\EmployAction;
-use App\Actions\Wrestlers\HealAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReinstateAction;
 use App\Actions\Wrestlers\ReleaseAction;
@@ -156,7 +156,7 @@ class Main extends BaseTable
             RosterLifecycleAction::Suspend => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(SuspendAction::class)->handle($wrestler)),
             RosterLifecycleAction::Reinstate => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(ReinstateAction::class)->handle($wrestler)),
             RosterLifecycleAction::Injure => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(InjureAction::class)->handle($wrestler)),
-            RosterLifecycleAction::Heal => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(HealAction::class)->handle($wrestler)),
+            RosterLifecycleAction::ClearFromInjury => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler)),
             RosterLifecycleAction::Restore => $this->restore($wrestlerId),
         };
     }

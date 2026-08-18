@@ -8,7 +8,7 @@ test('it defines backed lifecycle action values', function (RosterLifecycleActio
     expect($action->value)->toBe($value);
 })->with([
     [RosterLifecycleAction::Employ, 'employ'],
-    [RosterLifecycleAction::Heal, 'heal'],
+    [RosterLifecycleAction::ClearFromInjury, 'clear_from_injury'],
     [RosterLifecycleAction::Injure, 'injure'],
     [RosterLifecycleAction::Reinstate, 'reinstate'],
     [RosterLifecycleAction::Release, 'release'],
@@ -27,7 +27,7 @@ test('it maps lifecycle actions to policy abilities and success messages', funct
         ->and($action->successAction())->toBe($successAction);
 })->with([
     [RosterLifecycleAction::Employ, 'employ', 'employed'],
-    [RosterLifecycleAction::Heal, 'clearFromInjury', 'healed'],
+    [RosterLifecycleAction::ClearFromInjury, 'clearFromInjury', 'cleared_from_injury'],
     [RosterLifecycleAction::Injure, 'injure', 'injured'],
     [RosterLifecycleAction::Reinstate, 'reinstate', 'reinstated'],
     [RosterLifecycleAction::Release, 'release', 'released'],

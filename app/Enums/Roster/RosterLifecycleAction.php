@@ -7,7 +7,7 @@ namespace App\Enums\Roster;
 enum RosterLifecycleAction: string
 {
     case Employ = 'employ';
-    case Heal = 'heal';
+    case ClearFromInjury = 'clear_from_injury';
     case Injure = 'injure';
     case Reinstate = 'reinstate';
     case Release = 'release';
@@ -19,7 +19,7 @@ enum RosterLifecycleAction: string
     public function ability(): string
     {
         return match ($this) {
-            self::Heal => 'clearFromInjury',
+            self::ClearFromInjury => 'clearFromInjury',
             default => $this->value,
         };
     }
@@ -28,7 +28,7 @@ enum RosterLifecycleAction: string
     {
         return match ($this) {
             self::Employ => 'employed',
-            self::Heal => 'healed',
+            self::ClearFromInjury => 'cleared_from_injury',
             self::Injure => 'injured',
             self::Reinstate => 'reinstated',
             self::Release => 'released',

@@ -23,7 +23,7 @@ use function Spatie\PestPluginTestTime\testTime;
  *
  * Tests the complete business action workflow for referees including:
  * - Employment lifecycle (employ, release)
- * - Injury management (injure, heal)
+ * - Injury management (injure, clear from injury)
  * - Suspension workflow (suspend, reinstate)
  * - Retirement lifecycle (retire, unretire)
  * - Referee-specific business logic (match assignment eligibility)
@@ -135,7 +135,7 @@ describe('RefereesActions Integration Tests', function () {
         });
     });
 
-    describe('injury and healing actions', function () {
+    describe('injury and clearance actions', function () {
         test('injure action works for healthy employed referee', function () {
             actingAs($this->admin);
 
@@ -163,7 +163,7 @@ describe('RefereesActions Integration Tests', function () {
             expect(true)->toBeTrue();
         });
 
-        test('heal action works for injured referee', function () {
+        test('clear-from-injury action works for injured referee', function () {
             $injuredReferee = Referee::factory()->injured()->create([
                 'first_name' => 'Injured',
                 'last_name' => 'Referee',
@@ -173,7 +173,7 @@ describe('RefereesActions Integration Tests', function () {
 
             $component = livewire(Actions::class, ['referee' => $injuredReferee]);
 
-            $component->call('healFromInjury')
+            $component->call('clearFromInjury')
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
@@ -182,12 +182,12 @@ describe('RefereesActions Integration Tests', function () {
             expect(true)->toBeTrue();
         });
 
-        test('heal action fails for healthy referee', function () {
+        test('clear-from-injury action fails for healthy referee', function () {
             actingAs($this->admin);
 
             $component = livewire(Actions::class, ['referee' => $this->referee]);
 
-            $component->call('healFromInjury');
+            $component->call('clearFromInjury');
 
             // expect(session('error'))->toMatch('/cannot be cleared from injury/');
             expect(true)->toBeTrue();
@@ -352,8 +352,8 @@ describe('RefereesActions Integration Tests', function () {
             $component->call('injure');
             expect(freshModel($referee)->isInjured())->toBeTrue();
 
-            // Heal (medical clearance)
-            $component->call('healFromInjury');
+            // Clear from injury
+            $component->call('clearFromInjury');
             expect(freshModel($referee)->isInjured())->toBeFalse();
 
             // Suspend (for poor performance, missed calls, etc.)
@@ -388,13 +388,13 @@ describe('RefereesActions Integration Tests', function () {
             expect($injuredReferee->isEmployed())->toBeTrue();
             expect($injuredReferee->isInjured())->toBeTrue();
 
-            // Cannot suspend injured referee without healing first
+            // Cannot suspend injured referee without injury clearance first
             $component->call('suspend');
             // expect(session('error'))->toMatch('/cannot be suspended/');
             expect(true)->toBeTrue();
 
-            // Can heal first, then suspend
-            $component->call('healFromInjury');
+            // Can clear from injury first, then suspend
+            $component->call('clearFromInjury');
             expect(freshModel($injuredReferee)->isInjured())->toBeFalse();
 
             $component->call('suspend');
@@ -459,7 +459,7 @@ describe('RefereesActions Integration Tests', function () {
             expect(freshModel($seniorReferee)->isSuspended())->toBeTrue();
 
             // Both can be restored to active status
-            $juniorComponent->call('healFromInjury');
+            $juniorComponent->call('clearFromInjury');
             expect(freshModel($juniorReferee)->isInjured())->toBeFalse();
 
             $seniorComponent->call('reinstate');

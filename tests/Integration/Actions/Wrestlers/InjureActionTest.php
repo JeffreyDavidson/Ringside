@@ -89,7 +89,7 @@ test('it handles DateHelper date resolution', function () {
 test('it handles multiple injury scenarios', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    // Create old injury record (already healed)
+    // Create old injury record (already cleared from injury)
     $wrestler->injuries()->create([
         'started_at' => now()->subDays(60),
         'ended_at' => now()->subDays(30),
@@ -207,13 +207,13 @@ test('it maintains injury history integrity', function () {
     expect($wrestler->injuries()->count())->toBe(3);
 });
 
-test('it allows re-injury after healing', function () {
+test('it allows re-injury after injury clearance', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    // Create and end an injury (wrestler was healed)
+    // Create and end an injury (wrestler was cleared from injury)
     $wrestler->injuries()->create([
         'started_at' => now()->subDays(30),
-        'ended_at' => now()->subDays(10), // Healed 10 days ago
+        'ended_at' => now()->subDays(10), // Cleared from injury 10 days ago
     ]);
 
     expect($wrestler->isInjured())->toBeFalse();

@@ -13,7 +13,7 @@ use function Spatie\PestPluginTestTime\testTime;
  *
  * Tests the complete business action workflow for wrestlers including:
  * - Employment lifecycle (employ, release)
- * - Injury management (injure, heal)
+ * - Injury management (injure, clear from injury)
  * - Suspension workflow (suspend, reinstate)
  * - Retirement lifecycle (retire, unretire)
  * - Status transitions and validation
@@ -103,7 +103,7 @@ describe('WrestlersActions Integration Tests', function () {
         });
     });
 
-    describe('injury and healing actions', function () {
+    describe('injury and clearance actions', function () {
         test('injure action works for healthy employed wrestler', function () {
             \Pest\Laravel\actingAs($this->admin);
 
@@ -131,14 +131,14 @@ describe('WrestlersActions Integration Tests', function () {
             expect(true)->toBeTrue();
         });
 
-        test('heal action works for injured wrestler', function () {
+        test('clear-from-injury action works for injured wrestler', function () {
             $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
 
             \Pest\Laravel\actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $injuredWrestler]);
 
-            $component->call('healFromInjury')
+            $component->call('clearFromInjury')
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
@@ -147,12 +147,12 @@ describe('WrestlersActions Integration Tests', function () {
             expect(true)->toBeTrue();
         });
 
-        test('heal action fails for healthy wrestler', function () {
+        test('clear-from-injury action fails for healthy wrestler', function () {
             \Pest\Laravel\actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 
-            $component->call('healFromInjury');
+            $component->call('clearFromInjury');
 
             // expect(session('error'))->toMatch('/cannot be cleared from injury/');
             expect(true)->toBeTrue();
@@ -308,8 +308,8 @@ describe('WrestlersActions Integration Tests', function () {
             $component->call('injure');
             expect(freshModel($wrestler)->isInjured())->toBeTrue();
 
-            // Heal
-            $component->call('healFromInjury');
+            // Clear from injury
+            $component->call('clearFromInjury');
             expect(freshModel($wrestler)->isInjured())->toBeFalse();
 
             // Suspend
@@ -346,8 +346,8 @@ describe('WrestlersActions Integration Tests', function () {
             // expect(session('error'))->toMatch('/cannot be injured/');
             expect(true)->toBeTrue();
 
-            // Can heal injured wrestler
-            $component->call('healFromInjury');
+            // Can clear from injury injured wrestler
+            $component->call('clearFromInjury');
             expect(freshModel($injuredWrestler)->isInjured())->toBeFalse();
             expect(true)->toBeTrue();
         });

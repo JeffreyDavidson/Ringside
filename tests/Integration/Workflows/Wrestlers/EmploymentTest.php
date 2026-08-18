@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\Wrestlers\ClearFromInjuryAction;
 use App\Actions\Wrestlers\EmployAction;
-use App\Actions\Wrestlers\HealAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReinstateAction;
 use App\Actions\Wrestlers\ReleaseAction;
@@ -80,7 +80,7 @@ describe('Wrestler Employment Workflows', function () {
     });
 
     describe('complex career lifecycle workflows', function () {
-        test('employ then injure then heal workflow maintains employment', function () {
+        test('employ then injure then clear-from-injury workflow maintains employment', function () {
             $wrestler = Wrestler::factory()->unemployed()->create();
 
             // Employ wrestler
@@ -96,12 +96,12 @@ describe('Wrestler Employment Workflows', function () {
             expect($injured->isInjured())->toBeTrue();
             expect(RosterBookingEligibility::allows($injured))->toBeFalse(); // Not bookable when injured
 
-            // Heal wrestler
-            resolve(HealAction::class)->handle($injured, Carbon::now());
-            $healed = freshModel($wrestler);
-            expect($healed->isEmployed())->toBeTrue();
-            expect($healed->isInjured())->toBeFalse();
-            expect(RosterBookingEligibility::allows($healed))->toBeTrue(); // Bookable again
+            // Clear wrestler from injury
+            resolve(ClearFromInjuryAction::class)->handle($injured, Carbon::now());
+            $cleared = freshModel($wrestler);
+            expect($cleared->isEmployed())->toBeTrue();
+            expect($cleared->isInjured())->toBeFalse();
+            expect(RosterBookingEligibility::allows($cleared))->toBeTrue(); // Bookable again
         });
 
         test('employ then suspend then reinstate workflow maintains employment', function () {
@@ -175,8 +175,8 @@ describe('Wrestler Employment Workflows', function () {
             expect($injured->isEmployed())->toBeTrue();
             expect($injured->isInjured())->toBeTrue();
 
-            // 5. Heal
-            resolve(HealAction::class)->handle($wrestler, Carbon::now()->subMonths(4));
+            // 5. Clear from injury
+            resolve(ClearFromInjuryAction::class)->handle($wrestler, Carbon::now()->subMonths(4));
             expect(freshModel($wrestler)->isInjured())->toBeFalse();
             expect(freshModel($wrestler)->isEmployed())->toBeTrue();
 
@@ -216,7 +216,7 @@ describe('Wrestler Employment Workflows', function () {
             expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeFalse();
 
             // Healing makes wrestler bookable again
-            resolve(HealAction::class)->handle($wrestler, Carbon::now());
+            resolve(ClearFromInjuryAction::class)->handle($wrestler, Carbon::now());
             expect(RosterBookingEligibility::allows(freshModel($wrestler)))->toBeTrue();
 
             // Suspension makes wrestler not bookable
@@ -246,9 +246,9 @@ describe('Wrestler Employment Workflows', function () {
             expect($injured->isEmployed())->toBeTrue();
             expect($injured->isInjured())->toBeTrue();
 
-            resolve(HealAction::class)->handle($injured, Carbon::now());
-            $healed = freshModel($wrestler);
-            resolve(SuspendAction::class)->handle($healed, Carbon::now());
+            resolve(ClearFromInjuryAction::class)->handle($injured, Carbon::now());
+            $cleared = freshModel($wrestler);
+            resolve(SuspendAction::class)->handle($cleared, Carbon::now());
             $suspended = freshModel($wrestler);
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($suspended))->toBeFalse();
             expect($suspended->isEmployed())->toBeTrue();
@@ -379,11 +379,11 @@ describe('Wrestler Employment Workflows', function () {
             resolve(EmployAction::class)->handle($wrestler, Carbon::now());
             expect(freshModel($wrestler)->employments()->whereNull('ended_at')->count())->toBe(1);
 
-            // Multiple injury/heal cycles
+            // Multiple injury/clearance cycles
             resolve(InjureAction::class)->handle($wrestler, Carbon::now());
             expect(freshModel($wrestler)->injuries()->whereNull('ended_at')->count())->toBe(1);
 
-            resolve(HealAction::class)->handle($wrestler, Carbon::now());
+            resolve(ClearFromInjuryAction::class)->handle($wrestler, Carbon::now());
             expect(freshModel($wrestler)->injuries()->whereNull('ended_at')->count())->toBe(0);
 
             resolve(InjureAction::class)->handle($wrestler, Carbon::now());

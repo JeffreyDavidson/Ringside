@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Tables;
 
+use App\Actions\Referees\ClearFromInjuryAction;
 use App\Actions\Referees\DeleteAction;
 use App\Actions\Referees\EmployAction;
-use App\Actions\Referees\HealAction;
 use App\Actions\Referees\InjureAction;
 use App\Actions\Referees\ReinstateAction;
 use App\Actions\Referees\ReleaseAction;
@@ -108,7 +108,7 @@ class Main extends BaseTable
 
     public function clearFromInjury(Referee $referee): void
     {
-        $this->handleRefereeAction(RosterLifecycleAction::Heal->value, $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::ClearFromInjury->value, $referee->id);
     }
 
     public function employ(Referee $referee): void
@@ -166,7 +166,7 @@ class Main extends BaseTable
             RosterLifecycleAction::Suspend => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(SuspendAction::class)->handle($referee)),
             RosterLifecycleAction::Reinstate => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(ReinstateAction::class)->handle($referee)),
             RosterLifecycleAction::Injure => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(InjureAction::class)->handle($referee)),
-            RosterLifecycleAction::Heal => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(HealAction::class)->handle($referee)),
+            RosterLifecycleAction::ClearFromInjury => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(ClearFromInjuryAction::class)->handle($referee)),
             RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(RestoreAction::class)->handle($referee)),
         };
     }

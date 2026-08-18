@@ -40,7 +40,7 @@ test('it ends and preserves the active injury period', function () {
     $effectiveDate = now()->subHour();
     $injuryId = $wrestler->currentInjury()->firstOrFail()->id;
 
-    resolve(InjuryPeriodManager::class)->end($wrestler, $effectiveDate, LifecycleTransitionType::Healed);
+    resolve(InjuryPeriodManager::class)->end($wrestler, $effectiveDate, LifecycleTransitionType::ClearedFromInjury);
 
     $this->assertDatabaseHas('injuries', [
         'id' => $injuryId,
@@ -51,7 +51,7 @@ test('it ends and preserves the active injury period', function () {
 
     $transition = $wrestler->lifecycleTransitions()->sole();
     expect($transition->dimension)->toBe(LifecycleDimension::Injury)
-        ->and($transition->transition)->toBe(LifecycleTransitionType::Healed)
+        ->and($transition->transition)->toBe(LifecycleTransitionType::ClearedFromInjury)
         ->and($transition->effective_at->toDateTimeString())->toBe($effectiveDate->toDateTimeString());
 });
 
@@ -76,7 +76,7 @@ test('it records injury transitions for every injurable owner', function (Lifecy
     LifecycleOwnerType::Wrestler,
 ]);
 
-test('it closes an injury without inventing a healing transition', function () {
+test('it closes an injury without inventing an injury clearance transition', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     resolve(InjuryPeriodManager::class)->end($wrestler, now());

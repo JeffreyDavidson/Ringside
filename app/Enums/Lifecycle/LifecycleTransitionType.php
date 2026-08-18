@@ -11,7 +11,7 @@ enum LifecycleTransitionType: string
     case Disbanded = 'disbanded';
     case Employed = 'employed';
     case Established = 'established';
-    case Healed = 'healed';
+    case ClearedFromInjury = 'cleared_from_injury';
     case Injured = 'injured';
     case LegacyStatusChanged = 'legacy_status_changed';
     case Pulled = 'pulled';
