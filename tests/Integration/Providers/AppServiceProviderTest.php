@@ -8,15 +8,14 @@ use Illuminate\Support\Facades\Validator;
 /**
  * Integration tests for AppServiceProvider registrations.
  *
- * Tests service provider boot process and custom registrations
- * including validation rule replacers and other provider-level integrations.
+ * Tests service provider boot process and framework integrations.
  *
  * @see AppServiceProvider
  */
 describe('AppServiceProvider', function () {
-    describe('custom validation rule replacers', function () {
-        describe('ends_with replacer', function () {
-            test('formats validation messages with proper grammar', function ($arguments, $expectedMessage) {
+    describe('Laravel validation rules', function () {
+        describe('ends_with rule', function () {
+            test('uses Laravel validation messages', function ($arguments, $expectedMessage) {
                 $validator = Validator::make(['name' => 'Hello world'], [
                     'name' => "ends_with:{$arguments}",
                 ]);
@@ -27,13 +26,13 @@ describe('AppServiceProvider', function () {
                 ['foo', 'The name field must end with one of the following: foo.'],
 
                 // Two arguments
-                ['foo,bar', 'The name field must end with one of the following: foo or bar.'],
+                ['foo,bar', 'The name field must end with one of the following: foo, bar.'],
 
                 // Multiple arguments with Oxford comma
-                ['foo,bar,baz', 'The name field must end with one of the following: foo, bar or baz.'],
+                ['foo,bar,baz', 'The name field must end with one of the following: foo, bar, baz.'],
 
                 // Four arguments
-                ['foo,bar,baz,qux', 'The name field must end with one of the following: foo, bar, baz or qux.'],
+                ['foo,bar,baz,qux', 'The name field must end with one of the following: foo, bar, baz, qux.'],
             ]);
 
             test('validates rule functionality correctly', function ($value, $rule, $shouldPass) {
