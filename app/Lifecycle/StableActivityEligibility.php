@@ -13,10 +13,14 @@ use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\StableMembershipService;
 
 final class StableActivityEligibility
 {
-    public function __construct(private readonly StableFormerMemberEligibility $formerMemberEligibility) {}
+    public function __construct(
+        private readonly StableFormerMemberEligibility $formerMemberEligibility,
+        private readonly StableMembershipService $membershipService,
+    ) {}
 
     public function allows(Stable $stable, StableActivityTransition $transition): bool
     {
@@ -50,6 +54,16 @@ final class StableActivityEligibility
 
         if ($stable->isRetired()) {
             throw CannotBeEstablishedException::retired($stable);
+        }
+
+        $members = $this->membershipService->currentMembers($stable);
+
+        if (! $members->hasMinimumMembers()) {
+            throw CannotBeEstablishedException::insufficientMembers(
+                $stable,
+                $members->getTotalMemberCount(),
+                StableMembershipData::MINIMUM_MEMBER_COUNT,
+            );
         }
     }
 

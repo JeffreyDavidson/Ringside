@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Stables\Forms\CreateEditForm;
 use App\Livewire\Stables\Modals\FormModal;
+use App\Models\Lifecycle\Employment;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -16,6 +17,10 @@ use function Pest\Livewire\livewire;
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
+    $this->minimumWrestlers = Wrestler::factory()
+        ->count(3)
+        ->has(Employment::factory()->started(Carbon::parse('2020-01-01')), 'employments')
+        ->create();
 });
 
 describe('FormModal Configuration', function () {
@@ -102,6 +107,7 @@ describe('FormModal Create Operations', function () {
             ->call('openModal')
             ->set('form.name', 'The New World Order')
             ->set('form.started_at', '2024-01-01')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -135,6 +141,7 @@ describe('FormModal Create Operations', function () {
             ->call('openModal')
             ->set('form.name', 'Existing Stable')
             ->set('form.started_at', '2024-01-01')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasErrors(['form.name']);
@@ -148,6 +155,7 @@ describe('FormModal Create Operations', function () {
             ->call('openModal')
             ->set('form.name', 'Existing Stable')
             ->set('form.started_at', '2024-01-01')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -162,6 +170,20 @@ describe('FormModal Create Operations', function () {
             ->call('save');
 
         $component->assertHasErrors(['form.started_at']);
+    });
+
+    it('requires the minimum member headcount when establishing a stable', function () {
+        $wrestler = Wrestler::factory()->bookable()->create();
+
+        livewire(FormModal::class)
+            ->call('openModal')
+            ->set('form.name', 'Undersized Stable')
+            ->set('form.started_at', now()->toDateString())
+            ->set('form.wrestlers', [$wrestler->id])
+            ->call('save')
+            ->assertHasErrors(['form.started_at']);
+
+        $this->assertDatabaseMissing('stables', ['name' => 'Undersized Stable']);
     });
 
     it('validates ended_at is after started_at', function () {
@@ -181,6 +203,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
             ->set('form.ended_at', '2024-12-31')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -206,6 +229,7 @@ describe('FormModal Create Operations', function () {
             ->set('form.name', 'Future Stable')
             ->set('form.started_at', $startDate->toDateString())
             ->set('form.ended_at', $endDate->toDateString())
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -229,6 +253,7 @@ describe('FormModal Edit Operations', function () {
             ->call('openModal', $stable->id)
             ->set('form.name', 'Updated Stable')
             ->set('form.started_at', '2024-01-02')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -252,6 +277,7 @@ describe('FormModal Edit Operations', function () {
             ->call('openModal', $stable->id)
             ->set('form.started_at', $startDate->toDateString())
             ->set('form.ended_at', $endDate->toDateString())
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -297,6 +323,7 @@ describe('FormModal Edit Operations', function () {
             ->call('openModal', $stable->id)
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-02')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -308,7 +335,12 @@ describe('FormModal Edit Operations', function () {
         // Create some wrestlers and associate them with the stable
         $wrestler1 = Wrestler::factory()->create();
         $wrestler2 = Wrestler::factory()->create();
-        $stable->wrestlers()->attach([$wrestler1->id => ['joined_at' => now()], $wrestler2->id => ['joined_at' => now()]]);
+        $wrestler3 = Wrestler::factory()->create();
+        $stable->wrestlers()->attach([
+            $wrestler1->id => ['joined_at' => now()],
+            $wrestler2->id => ['joined_at' => now()],
+            $wrestler3->id => ['joined_at' => now()],
+        ]);
 
         $component = livewire(FormModal::class)
             ->call('openModal', $stable->id)
@@ -326,6 +358,7 @@ describe('FormModal Activity Period Management', function () {
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -340,6 +373,7 @@ describe('FormModal Activity Period Management', function () {
             ->set('form.name', 'Disbanded Stable')
             ->set('form.started_at', '2024-01-01')
             ->set('form.ended_at', '2024-06-01')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -364,12 +398,13 @@ describe('FormModal Member Management', function () {
     it('can assign wrestlers to stable', function () {
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
+        $wrestler3 = Wrestler::factory()->bookable()->create();
 
         $component = livewire(FormModal::class)
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', now()->toDateString())
-            ->set('form.wrestlers', [$wrestler1->id, $wrestler2->id])
+            ->set('form.wrestlers', [$wrestler1->id, $wrestler2->id, $wrestler3->id])
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -378,6 +413,7 @@ describe('FormModal Member Management', function () {
         $stable->refresh();
         expect($stable->wrestlers->pluck('id'))->toContain($wrestler1->id);
         expect($stable->wrestlers->pluck('id'))->toContain($wrestler2->id);
+        expect($stable->wrestlers->pluck('id'))->toContain($wrestler3->id);
     });
 
     it('can assign tag teams to stable', function () {
@@ -517,6 +553,7 @@ describe('FormModal Member Management', function () {
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->set('form.tag_teams', [999])
             ->call('save');
 
@@ -542,6 +579,7 @@ describe('FormModal State Management', function () {
             ->call('openModal')
             ->set('form.name', 'Test Stable')
             ->set('form.started_at', '2024-01-01')
+            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
             ->call('save');
 
         $component->assertDispatched('closeModal');
