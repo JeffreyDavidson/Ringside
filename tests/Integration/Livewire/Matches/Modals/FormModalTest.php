@@ -14,6 +14,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Models\Users\User;
 
 use function Pest\Livewire\livewire;
@@ -509,6 +510,30 @@ describe('FormModal Title Championship Integration', function () {
             ->call('save');
 
         $component->assertHasErrors(['form.titles.0']);
+    });
+
+    it('rejects title stakes when the current champion is not a competitor', function () {
+        $title = Title::factory()->active()->create();
+        $champion = Wrestler::factory()->bookable()->create();
+        $firstChallenger = Wrestler::factory()->bookable()->create();
+        $secondChallenger = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+        TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.referees', [$referee->id])
+            ->set('form.competitors', [
+                ['wrestlers' => [$firstChallenger->id]],
+                ['wrestlers' => [$secondChallenger->id]],
+            ])
+            ->set('form.titles', [$title->id])
+            ->call('save')
+            ->assertHasErrors(['form.titles.0'])
+            ->assertNotDispatched('matchCreated');
+
+        expect(EventMatch::query()->whereBelongsTo($this->event)->exists())->toBeFalse();
     });
 });
 

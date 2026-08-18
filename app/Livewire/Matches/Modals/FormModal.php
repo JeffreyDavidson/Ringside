@@ -6,7 +6,9 @@ namespace App\Livewire\Matches\Modals;
 
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Matches\UpdateMatchAction;
+use App\Enums\BusinessRuleReason;
 use App\Enums\MatchType;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
 use App\Livewire\Concerns\Data\PresentsRefereesList;
@@ -63,12 +65,22 @@ class FormModal extends BaseFormModal
     {
         $this->form->validate();
 
-        if ($this->form->isEditing()) {
-            $match = EventMatch::query()->findOrFail($this->form->modelId);
-            $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
-        } else {
-            $event = Event::query()->findOrFail($this->eventId);
-            $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
+        try {
+            if ($this->form->isEditing()) {
+                $match = EventMatch::query()->findOrFail($this->form->modelId);
+                $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
+            } else {
+                $event = Event::query()->findOrFail($this->eventId);
+                $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
+            }
+        } catch (InvalidMatchConfigurationException $exception) {
+            if ($exception->reason() !== BusinessRuleReason::CurrentChampionMissing) {
+                throw $exception;
+            }
+
+            $this->addError('form.titles', $exception->getMessage());
+
+            return false;
         }
 
         $this->form->setModel($storedMatch);

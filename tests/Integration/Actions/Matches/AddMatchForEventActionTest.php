@@ -12,6 +12,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 test('it rejects a match without competitors', function () {
     $event = Event::factory()->create();
@@ -118,6 +119,54 @@ test('it rolls back the match when a side contains no eligible competitors', fun
 
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
         ->toThrow(EntityNotAvailableException::class);
+
+    expect(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
+});
+
+test('it creates a title match when the current champion is a competitor', function () {
+    $event = Event::factory()->create();
+    $referee = Referee::factory()->bookable()->create();
+    $champion = Wrestler::factory()->bookable()->create();
+    $challenger = Wrestler::factory()->bookable()->create();
+    $title = Title::factory()->active()->create();
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+    $matchData = new EventMatchData(
+        MatchType::Singles,
+        Referee::query()->whereKey($referee)->get(),
+        Title::query()->whereKey($title)->get(),
+        collect([
+            1 => ['wrestlers' => [$champion]],
+            2 => ['wrestlers' => [$challenger]],
+        ]),
+        null,
+    );
+
+    $match = resolve(AddMatchForEventAction::class)->handle($event, $matchData);
+
+    expect($match->titles()->whereKey($title)->exists())->toBeTrue();
+});
+
+test('it rolls back a title match when the current champion is absent', function () {
+    $event = Event::factory()->create();
+    $referee = Referee::factory()->bookable()->create();
+    $champion = Wrestler::factory()->bookable()->create();
+    $firstChallenger = Wrestler::factory()->bookable()->create();
+    $secondChallenger = Wrestler::factory()->bookable()->create();
+    $title = Title::factory()->active()->create();
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+    $matchData = new EventMatchData(
+        MatchType::Singles,
+        Referee::query()->whereKey($referee)->get(),
+        Title::query()->whereKey($title)->get(),
+        collect([
+            1 => ['wrestlers' => [$firstChallenger]],
+            2 => ['wrestlers' => [$secondChallenger]],
+        ]),
+        null,
+    );
+
+    expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
+        ->toThrow(InvalidMatchConfigurationException::class);
 
     expect(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
 });
