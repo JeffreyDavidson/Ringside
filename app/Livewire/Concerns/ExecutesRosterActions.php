@@ -8,9 +8,24 @@ use App\Enums\Roster\RosterEntityType;
 use App\Exceptions\BaseBusinessException;
 use App\Services\ErrorMessageMappingService;
 use Closure;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 
 trait ExecutesRosterActions
 {
+    /** @param Closure(): void $action */
+    protected function executeAuthorizedRosterAction(
+        string $ability,
+        string $actionName,
+        RosterEntityType $entityType,
+        Model $model,
+        Closure $action,
+    ): void {
+        Gate::authorize($ability, $model);
+
+        $this->executeRosterAction($actionName, $entityType, $action);
+    }
+
     /** @param Closure(): void $action */
     protected function executeRosterAction(
         string $actionName,

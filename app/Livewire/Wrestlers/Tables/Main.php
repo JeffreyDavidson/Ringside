@@ -24,7 +24,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
@@ -148,24 +147,16 @@ class Main extends BaseTable
             : Wrestler::findOrFail($wrestlerId);
 
         match ($action) {
-            'employ' => $this->executeWrestlerAction('employ', 'employed', $wrestler, fn () => resolve(EmployAction::class)->handle($wrestler)),
-            'release' => $this->executeWrestlerAction('release', 'released', $wrestler, fn () => resolve(ReleaseAction::class)->handle($wrestler)),
-            'retire' => $this->executeWrestlerAction('retire', 'retired', $wrestler, fn () => resolve(RetireAction::class)->handle($wrestler)),
-            'unretire' => $this->executeWrestlerAction('unretire', 'unretired', $wrestler, fn () => resolve(UnretireAction::class)->handle($wrestler)),
-            'suspend' => $this->executeWrestlerAction('suspend', 'suspended', $wrestler, fn () => resolve(SuspendAction::class)->handle($wrestler)),
-            'reinstate' => $this->executeWrestlerAction('reinstate', 'reinstated', $wrestler, fn () => resolve(ReinstateAction::class)->handle($wrestler)),
-            'injure' => $this->executeWrestlerAction('injure', 'injured', $wrestler, fn () => resolve(InjureAction::class)->handle($wrestler)),
-            'heal' => $this->executeWrestlerAction('clearFromInjury', 'healed', $wrestler, fn () => resolve(HealAction::class)->handle($wrestler)),
+            'employ' => $this->executeAuthorizedRosterAction('employ', 'employed', RosterEntityType::Wrestler, $wrestler, fn () => resolve(EmployAction::class)->handle($wrestler)),
+            'release' => $this->executeAuthorizedRosterAction('release', 'released', RosterEntityType::Wrestler, $wrestler, fn () => resolve(ReleaseAction::class)->handle($wrestler)),
+            'retire' => $this->executeAuthorizedRosterAction('retire', 'retired', RosterEntityType::Wrestler, $wrestler, fn () => resolve(RetireAction::class)->handle($wrestler)),
+            'unretire' => $this->executeAuthorizedRosterAction('unretire', 'unretired', RosterEntityType::Wrestler, $wrestler, fn () => resolve(UnretireAction::class)->handle($wrestler)),
+            'suspend' => $this->executeAuthorizedRosterAction('suspend', 'suspended', RosterEntityType::Wrestler, $wrestler, fn () => resolve(SuspendAction::class)->handle($wrestler)),
+            'reinstate' => $this->executeAuthorizedRosterAction('reinstate', 'reinstated', RosterEntityType::Wrestler, $wrestler, fn () => resolve(ReinstateAction::class)->handle($wrestler)),
+            'injure' => $this->executeAuthorizedRosterAction('injure', 'injured', RosterEntityType::Wrestler, $wrestler, fn () => resolve(InjureAction::class)->handle($wrestler)),
+            'heal' => $this->executeAuthorizedRosterAction('clearFromInjury', 'healed', RosterEntityType::Wrestler, $wrestler, fn () => resolve(HealAction::class)->handle($wrestler)),
             'restore' => $this->restore($wrestlerId),
             default => null,
         };
-    }
-
-    /** @param Closure(): void $action */
-    private function executeWrestlerAction(string $ability, string $successAction, Wrestler $wrestler, Closure $action): void
-    {
-        Gate::authorize($ability, $wrestler);
-
-        $this->executeRosterAction($successAction, RosterEntityType::Wrestler, $action);
     }
 }
