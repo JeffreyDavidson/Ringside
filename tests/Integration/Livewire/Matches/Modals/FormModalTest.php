@@ -530,7 +530,7 @@ describe('FormModal Title Championship Integration', function () {
             ])
             ->set('form.titles', [$title->id])
             ->call('save')
-            ->assertHasErrors(['form.titles'])
+            ->assertHasErrors(['form.titles.0'])
             ->assertNotDispatched('matchCreated');
 
         expect(EventMatch::query()->whereBelongsTo($this->event)->exists())->toBeFalse();

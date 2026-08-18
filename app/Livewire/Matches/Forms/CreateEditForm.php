@@ -18,6 +18,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Rules\Matches\CompetitorsNotDuplicated;
 use App\Rules\Matches\CorrectNumberOfSides;
+use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
@@ -146,7 +147,13 @@ class CreateEditForm extends BaseForm
             'referees' => ['required', 'array', 'min:1'],
             'referees.*' => ['integer', 'exists:referees,id'],
             'titles' => ['sometimes', 'array'],
-            'titles.*' => ['integer', 'exists:titles,id', new IsActive()],
+            'titles.*' => [
+                'bail',
+                'integer',
+                'exists:titles,id',
+                new IsActive(),
+                new CurrentChampionIsCompeting(),
+            ],
         ];
 
         $competitorRules = (new MatchCompetitorRuleSet($this->matchType))->rules();
