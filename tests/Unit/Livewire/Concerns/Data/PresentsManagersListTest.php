@@ -65,16 +65,16 @@ describe('PresentsManagersList Unit Tests', function () {
     });
 
     describe('computed attribute configuration', function () {
-        test('Computed attribute has correct parameters', function () {
+        test('does not cache options across requests', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $method = $reflection->getMethod('getManagers');
             $attributes = $method->getAttributes(Computed::class);
             $computed = $attributes[0]->newInstance();
 
             expect($computed)
-                ->cache->toBeTrue()
-                ->key->toBe('managers-list')
-                ->seconds->toBe(180);
+                ->cache->toBeFalse()
+                ->persist->toBeFalse()
+                ->key->toBeNull();
         });
     });
 
@@ -186,20 +186,12 @@ describe('PresentsManagersList Unit Tests', function () {
             expect($attributes)->toHaveCount(1);
         });
 
-        test('enables caching for performance', function () {
+        test('uses request-scoped memoization', function () {
             $reflection = new ReflectionClass(PresentsManagersList::class);
             $source = reflectionSource($reflection);
 
-            // Check for cache enabled
-            expect($source)->toContain('cache: true');
-        });
-
-        test('uses descriptive cache key', function () {
-            $reflection = new ReflectionClass(PresentsManagersList::class);
-            $source = reflectionSource($reflection);
-
-            // Check for meaningful cache key
-            expect($source)->toContain('key: \'managers-list\'');
+            expect($source)->toContain('#[Computed]');
+            expect($source)->not->toContain('cache: true');
         });
     });
 

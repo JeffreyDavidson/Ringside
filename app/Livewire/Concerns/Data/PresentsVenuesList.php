@@ -12,7 +12,7 @@ trait PresentsVenuesList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(seconds: 180, cache: true, key: 'venues-list')]
+    #[Computed]
     public function getVenues(): array
     {
         return Venue::query()

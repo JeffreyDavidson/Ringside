@@ -12,7 +12,7 @@ trait PresentsManagersList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(seconds: 180, cache: true, key: 'managers-list')]
+    #[Computed]
     public function getManagers(): array
     {
         return Manager::query()

@@ -98,23 +98,13 @@ class CreateEditForm extends BaseForm
      * Load additional data when editing existing event records.
      *
      * Handles any specialized data loading for event edit operations.
-     * Currently no additional data loading is required for events
-     * beyond the standard form fill mechanism and venue list caching.
-     *
-     * The venue list is automatically cached via the PresentsVenuesList
-     * trait's computed property system for efficient rendering.
-     *
-     *
-     * @see PresentsVenuesList::getVenues() For venue list caching
+     * Maps the persisted venue relationship to the form field.
      */
     public function loadExtraData(): void
     {
-        // Map venue_id from model to venue_id form field
         if (isset($this->formModel->venue_id)) {
             $this->venue_id = $this->formModel->venue_id;
         }
-
-        // Venue list is cached automatically via PresentsVenuesList trait
     }
 
     /**

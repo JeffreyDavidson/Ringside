@@ -12,7 +12,7 @@ trait PresentsTagTeamsList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(seconds: 180, cache: true, key: 'tag-teams-list')]
+    #[Computed]
     public function getTagTeams(): array
     {
         return TagTeam::query()
