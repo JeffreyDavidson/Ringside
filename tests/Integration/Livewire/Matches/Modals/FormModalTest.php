@@ -276,6 +276,23 @@ describe('FormModal Create Operations', function () {
         $component->assertHasErrors(['form.competitors.0.wrestlers.0', 'form.competitors.1.wrestlers.0']);
     });
 
+    it('rejects an unavailable competitor', function () {
+        $unavailableWrestler = Wrestler::factory()->unemployed()->create();
+        $bookableWrestler = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.competitors', [
+                0 => ['wrestlers' => [$unavailableWrestler->id]],
+                1 => ['wrestlers' => [$bookableWrestler->id]],
+            ])
+            ->set('form.referees', [$referee->id])
+            ->call('save')
+            ->assertHasErrors(['form.competitors.0.wrestlers.0']);
+    });
+
     it('validates referees exist and are bookable', function () {
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
@@ -291,6 +308,23 @@ describe('FormModal Create Operations', function () {
             ->call('save');
 
         $component->assertHasErrors(['form.referees.0']);
+    });
+
+    it('rejects an unavailable referee', function () {
+        $firstWrestler = Wrestler::factory()->bookable()->create();
+        $secondWrestler = Wrestler::factory()->bookable()->create();
+        $unavailableReferee = Referee::factory()->suspended()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.competitors', [
+                0 => ['wrestlers' => [$firstWrestler->id]],
+                1 => ['wrestlers' => [$secondWrestler->id]],
+            ])
+            ->set('form.referees', [$unavailableReferee->id])
+            ->call('save')
+            ->assertHasErrors(['form.referees.0']);
     });
 
     it('persists each battle royal entrant on an individual side', function () {
