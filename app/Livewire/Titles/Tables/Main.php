@@ -26,7 +26,6 @@ use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -176,47 +175,44 @@ class Main extends BaseTable
      * Debut a title for competition.
      *
      * @param  Title  $title  The title to debut
-     * @return RedirectResponse Redirect response with success or error message
      */
-    public function debut(Title $title): RedirectResponse
+    public function debut(Title $title): void
     {
         Gate::authorize('debut', $title);
 
         try {
             resolve(DebutAction::class)->handle($title);
         } catch (CannotBeDebutedException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
         }
 
-        return back();
+        $this->redirectRoute('titles.index');
     }
 
     /**
      * Put a title on hold (remove from active competition).
      *
      * @param  Title  $title  The title to put on hold
-     * @return RedirectResponse Redirect response with success or error message
      */
-    public function putOnHold(Title $title): RedirectResponse
+    public function putOnHold(Title $title): void
     {
         Gate::authorize('pull', $title);
 
         try {
             resolve(PullAction::class)->handle($title);
         } catch (CannotBePulledException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
         }
 
-        return back();
+        $this->redirectRoute('titles.index');
     }
 
     /**
      * Restore a previously deleted title.
      *
      * @param  int  $titleId  The ID of the deleted title to restore
-     * @return RedirectResponse Redirect response with success or error message
      */
-    public function restore(int $titleId): RedirectResponse
+    public function restore(int $titleId): void
     {
         $title = Title::onlyTrashed()->findOrFail($titleId);
 
@@ -224,57 +220,55 @@ class Main extends BaseTable
 
         resolve(RestoreAction::class)->handle($title);
 
-        return back();
+        $this->redirectRoute('titles.index');
     }
 
     /**
      * Retire a title permanently.
      *
      * @param  Title  $title  The title to retire
-     * @return RedirectResponse Redirect response with success or error message
      */
-    public function retire(Title $title): RedirectResponse
+    public function retire(Title $title): void
     {
         Gate::authorize('retire', $title);
 
         try {
             resolve(RetireAction::class)->handle($title);
         } catch (CannotBeRetiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
         }
 
-        return back();
+        $this->redirectRoute('titles.index');
     }
 
     /**
      * Unretire a previously retired title.
      *
      * @param  Title  $title  The title to unretire
-     * @return RedirectResponse Redirect response with success or error message
      */
-    public function unretire(Title $title): RedirectResponse
+    public function unretire(Title $title): void
     {
         Gate::authorize('unretire', $title);
 
         try {
             resolve(UnretireAction::class)->handle($title);
         } catch (CannotBeUnretiredException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            session()->flash('error', $e->getMessage());
         }
 
-        return back();
+        $this->redirectRoute('titles.index');
     }
 
-    public function reinstate(Title $title): RedirectResponse
+    public function reinstate(Title $title): void
     {
         Gate::authorize('reinstate', $title);
 
         try {
             resolve(ReinstateAction::class)->handle($title);
         } catch (CannotBeReinstatedException $exception) {
-            return redirect()->back()->with('error', $exception->getMessage());
+            session()->flash('error', $exception->getMessage());
         }
 
-        return back();
+        $this->redirectRoute('titles.index');
     }
 }

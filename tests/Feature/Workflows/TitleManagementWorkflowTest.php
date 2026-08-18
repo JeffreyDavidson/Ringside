@@ -101,7 +101,8 @@ describe('Title Lifecycle Management Workflow', function () {
 
         livewire(Main::class)
             ->call('debut', $title)
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be active (check after component execution)
         expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
@@ -111,7 +112,8 @@ describe('Title Lifecycle Management Workflow', function () {
 
         livewire(Main::class)
             ->call('putOnHold', $title)
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be inactive
         expect(freshModel($title)->isCurrentlyActive())->toBeFalse();
@@ -121,7 +123,8 @@ describe('Title Lifecycle Management Workflow', function () {
 
         livewire(Main::class)
             ->call('reinstate', $title)
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be active again
         expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
@@ -131,7 +134,8 @@ describe('Title Lifecycle Management Workflow', function () {
 
         livewire(Main::class)
             ->call('retire', $title)
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be retired
         expect(freshModel($title)->isRetired())->toBeTrue();
@@ -141,7 +145,8 @@ describe('Title Lifecycle Management Workflow', function () {
 
         livewire(Main::class)
             ->call('unretire', $title)
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('titles.index');
 
         // Then: Title should no longer be retired
         expect(freshModel($title)->isRetired())->toBeFalse();
@@ -299,7 +304,8 @@ describe('Title Deletion and Restoration Workflow', function () {
 
         livewire(Main::class)
             ->call('restore', $title->id)
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be restored
         expect($title->fresh())->not->toBeNull();
