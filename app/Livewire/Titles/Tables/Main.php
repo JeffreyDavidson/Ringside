@@ -277,21 +277,4 @@ class Main extends BaseTable
 
         return back();
     }
-
-    public function handleTitleAction(string $action, int $titleId): void
-    {
-        $title = $action === 'restore'
-            ? Title::onlyTrashed()->findOrFail($titleId)
-            : Title::findOrFail($titleId);
-
-        match ($action) {
-            'debut' => $this->debut($title),
-            'pull' => $this->putOnHold($title),
-            'reinstate' => $this->reinstate($title),
-            'retire' => $this->retire($title),
-            'unretire' => $this->unretire($title),
-            'restore' => $this->restore($titleId),
-            default => null,
-        };
-    }
 }

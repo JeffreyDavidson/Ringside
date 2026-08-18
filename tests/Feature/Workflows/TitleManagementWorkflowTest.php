@@ -8,6 +8,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 /**
  * Feature tests for complete title management workflows.
@@ -27,7 +28,7 @@ describe('Title Creation and Setup Workflow', function () {
         // And: Creating title through modal workflow
         actingAs($admin);
 
-        $modalComponent = \Pest\Livewire\livewire(FormModal::class)
+        $modalComponent = livewire(FormModal::class)
             ->call('openModal')
             ->assertSet('isModalOpen', true);
 
@@ -58,7 +59,7 @@ describe('Title Creation and Setup Workflow', function () {
         // And: Should appear in the titles table
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->assertSee('WWE Championship Title');
     });
 
@@ -69,7 +70,7 @@ describe('Title Creation and Setup Workflow', function () {
         // When: Opening create modal and using dummy data
         actingAs($admin);
 
-        $component = \Pest\Livewire\livewire(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal')
             ->call('fillDummyFields');
 
@@ -98,8 +99,8 @@ describe('Title Lifecycle Management Workflow', function () {
         // When: Debuting the title
         actingAs($admin);
 
-        $component = \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'debut', $title->id)
+        livewire(Main::class)
+            ->call('debut', $title)
             ->assertHasNoErrors();
 
         // Then: Title should be active (check after component execution)
@@ -108,8 +109,8 @@ describe('Title Lifecycle Management Workflow', function () {
         // When: Pulling (deactivating) the title
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'pull', $title->id)
+        livewire(Main::class)
+            ->call('putOnHold', $title)
             ->assertHasNoErrors();
 
         // Then: Title should be inactive
@@ -118,8 +119,8 @@ describe('Title Lifecycle Management Workflow', function () {
         // When: Reinstating the title
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'reinstate', $title->id)
+        livewire(Main::class)
+            ->call('reinstate', $title)
             ->assertHasNoErrors();
 
         // Then: Title should be active again
@@ -128,8 +129,8 @@ describe('Title Lifecycle Management Workflow', function () {
         // When: Retiring the title
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'retire', $title->id)
+        livewire(Main::class)
+            ->call('retire', $title)
             ->assertHasNoErrors();
 
         // Then: Title should be retired
@@ -138,8 +139,8 @@ describe('Title Lifecycle Management Workflow', function () {
         // When: Unretiring the title
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'unretire', $title->id)
+        livewire(Main::class)
+            ->call('unretire', $title)
             ->assertHasNoErrors();
 
         // Then: Title should no longer be retired
@@ -178,7 +179,7 @@ describe('Title Search and Filtering Workflow', function () {
         // When: Searching for specific title
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->set('search', 'WWE')
             ->assertSee('WWE Championship Title')
             ->assertDontSee('WCW Championship Title')
@@ -187,21 +188,21 @@ describe('Title Search and Filtering Workflow', function () {
         // When: Filtering by active status
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->set('filterValues.status', 'active')
             ->assertSee('WWE Championship Title');
 
         // When: Filtering by retired status
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->set('filterValues.status', 'retired')
             ->assertSee('WCW Championship Title');
 
         // When: Clearing filters
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->set('filterValues.status', '')
             ->set('search', '')
             ->assertSee('WWE Championship Title')
@@ -221,7 +222,7 @@ describe('Title Editing Workflow', function () {
         // When: Opening edit modal for the title
         actingAs($admin);
 
-        $component = \Pest\Livewire\livewire(FormModal::class)
+        $component = livewire(FormModal::class)
             ->call('openModal', $title->id)
             ->assertSet('isModalOpen', true);
 
@@ -242,7 +243,7 @@ describe('Title Editing Workflow', function () {
         // And: Updated information should appear in table
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->assertSee('Updated Championship Title');
     });
 });
@@ -271,7 +272,7 @@ describe('Championship Reign Workflow', function () {
         // And: Title appears in main titles listing
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->assertSee('United States Championship Title');
     });
 });
@@ -285,7 +286,7 @@ describe('Title Deletion and Restoration Workflow', function () {
         // When: Deleting the title
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->call('delete', $title)
             ->assertHasNoErrors();
 
@@ -296,7 +297,7 @@ describe('Title Deletion and Restoration Workflow', function () {
         // When: Restoring the title
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
+        livewire(Main::class)
             ->call('restore', $title->id)
             ->assertHasNoErrors();
 
@@ -315,15 +316,15 @@ describe('Title Business Rules Workflow', function () {
         // When: Attempting to pull an inactive title (business rule check)
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'pull', $title->id)
+        livewire(Main::class)
+            ->call('putOnHold', $title)
             ->assertHasNoErrors();
 
         // When: Properly debuting title first
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'debut', $title->id)
+        livewire(Main::class)
+            ->call('debut', $title)
             ->assertHasNoErrors();
 
         // Then: Title should be active
@@ -332,8 +333,8 @@ describe('Title Business Rules Workflow', function () {
         // When: Now pulling the active title (should succeed)
         actingAs($admin);
 
-        \Pest\Livewire\livewire(Main::class)
-            ->call('handleTitleAction', 'pull', $title->id)
+        livewire(Main::class)
+            ->call('putOnHold', $title)
             ->assertHasNoErrors();
 
         // Then: Title should be inactive
