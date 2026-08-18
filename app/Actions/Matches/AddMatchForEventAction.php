@@ -44,11 +44,11 @@ class AddMatchForEventAction
 
             $this->addRefereesToMatchAction->handle($createdMatch, $eventMatchData->referees);
 
+            $this->addCompetitorsToMatchAction->handle($createdMatch, $eventMatchData->sides);
+
             if ($eventMatchData->titles->isNotEmpty()) {
                 $this->addTitlesToMatchAction->handle($createdMatch, $eventMatchData->titles);
             }
-
-            $this->addCompetitorsToMatchAction->handle($createdMatch, $eventMatchData->sides);
 
             return $createdMatch;
         });

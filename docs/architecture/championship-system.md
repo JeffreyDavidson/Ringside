@@ -28,6 +28,8 @@ Models expose their explicit persisted naming fields: `name` for wrestlers and t
 
 `ApplyMatchTitleOutcomesAction` is the match-side championship orchestrator composed by `RecordResultAction`. It locks every attached title and its reigns before applying a result, so winner metadata and championship changes commit or roll back together. `ChampionshipReignManager` is the single reign write boundary: it opens, closes, and reconciles persisted reigns for match outcomes, title retirement, title deletion, and champion relationship cleanup. Reporting remains in `TitleChampionshipQuery`.
 
+Assign match competitors before attaching championship stakes. `AddTitlesToMatchAction` rejects any non-vacant title whose current wrestler or tag-team champion is not already assigned as a competitor; vacant titles do not require a defending champion. This invariant is enforced in the action boundary so every caller receives the same protection.
+
 A champion defense leaves the current reign open. A compatible challenger winning by a title-changing finish closes the current reign with the match and event date, then creates the challenger's reign with the same match and date. A vacant title creates only the new reign. Winner-take-all matches apply that transition independently to every attached title inside the same transaction.
 
 Correcting a result soft deletes a reign incorrectly created by that match and reopens the preceding reign before applying the corrected outcome. Corrections are rejected after a later reign has been recorded because rewriting that earlier result would invalidate dependent lineage.

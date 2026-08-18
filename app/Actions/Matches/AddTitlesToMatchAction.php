@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -57,10 +60,41 @@ class AddTitlesToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedTitles): void {
             $this->conflictService->ensureTitlesCanBeAssigned($eventMatch, $requestedTitles);
+            $this->ensureCurrentChampionsCompete($eventMatch, $requestedTitles);
 
             $requestedTitles->each(function (Title $title) use ($eventMatch): void {
                 $eventMatch->titles()->attach($title->id);
             });
         });
+    }
+
+    /** @param Collection<int, Title> $titles */
+    private function ensureCurrentChampionsCompete(EventMatch $eventMatch, Collection $titles): void
+    {
+        $assignedCompetitors = $eventMatch->competitors()
+            ->get(['competitor_type', 'competitor_id']);
+        $currentChampionships = TitleChampionship::query()
+            ->whereIn('title_id', $titles->pluck('id'))
+            ->current()
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get(['id', 'title_id', 'champion_type', 'champion_id']);
+
+        foreach ($currentChampionships as $championship) {
+            $championCompetes = $assignedCompetitors->contains(
+                fn (MatchCompetitor $competitor): bool => $competitor->competitor_type === $championship->champion_type
+                    && $competitor->competitor_id === $championship->champion_id,
+            );
+
+            if ($championCompetes) {
+                continue;
+            }
+
+            $title = $titles->firstWhere('id', $championship->title_id);
+
+            if ($title instanceof Title) {
+                throw InvalidMatchConfigurationException::currentChampionMissing($title);
+            }
+        }
     }
 }
