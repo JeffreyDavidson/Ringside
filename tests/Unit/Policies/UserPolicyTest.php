@@ -171,7 +171,7 @@ describe('UserPolicy integration with Gate facade', function () {
 
 describe('UserPolicy method signatures', function () {
     test('administrator bypass is not duplicated on the policy', function () {
-        expect(get_class_methods($this->policy))->not->toContain('before');
+        expect(get_class_methods(UserPolicy::class))->not->toContain('before');
     });
 
     test('policy methods have correct signatures', function () {
