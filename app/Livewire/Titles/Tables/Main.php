@@ -28,56 +28,18 @@ use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
-/**
- * Livewire table component for managing championship titles.
- *
- * This table displays all championship titles in the system with their current
- * status, activation dates, and provides actions for title lifecycle management.
- * It supports filtering by activation status and date ranges, along with search
- * functionality for title names.
- *
- * The table integrates with various title management actions including activation,
- * deactivation, retirement, restoration, and deletion through a comprehensive
- * action system with proper authorization and error handling.
- */
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
 {
-    /**
-     * Enable action column for this table.
-     */
     protected bool $showActionColumn = true;
 
-    /**
-     * The database table name for the main query.
-     *
-     * @var string The name of the titles table
-     */
     protected string $databaseTableName = 'titles';
 
-    /**
-     * The base route path for title-related actions.
-     *
-     * @var string The route prefix for title management
-     */
     protected string $routeBasePath = 'titles';
 
-    /**
-     * The resource name for authorization and routing.
-     *
-     * @var string The resource identifier for titles
-     */
     protected string $resourceName = 'titles';
 
-    /**
-     * Build the query for retrieving titles with their relationships.
-     *
-     * Creates a query that fetches all titles with their current activity period
-     * information, ordered alphabetically by name. The current activity period
-     * relationship provides access to activation status and dates.
-     *
-     * @return TitleBuilder<Title> Query builder for titles with eager loaded relationships
-     */
+    /** @return TitleBuilder<Title> */
     public function builder(): TitleBuilder
     {
         return Title::query()
@@ -86,26 +48,12 @@ class Main extends BaseTable
             ->oldest('name');
     }
 
-    /**
-     * Configure additional table settings and behavior.
-     *
-     * Includes authorization check to ensure only authorized users can access
-     * the titles table, plus any additional table-specific configuration.
-     */
     public function configure(): void
     {
         Gate::authorize('viewAny', Title::class);
     }
 
-    /**
-     * Define the table columns for title display.
-     *
-     * Configures the columns shown in the titles table including the title name,
-     * current status, and first activation date. The status column shows whether
-     * a title is currently active, inactive, or retired.
-     *
-     * @return array<int, Column> Array of column definitions for the table
-     */
+    /** @return array<int, Column> */
     public function columns(): array
     {
         return [
@@ -120,15 +68,7 @@ class Main extends BaseTable
         ];
     }
 
-    /**
-     * Define the available filters for the titles table.
-     *
-     * Provides filtering options including activity status filter (Undebuted,
-     * Active, Inactive, Pending Debut) and first activation date range filter for finding
-     * titles activated within specific time periods.
-     *
-     * @return array<int, Filter> Array of filter definitions for the table
-     */
+    /** @return array<int, Filter> */
     public function filters(): array
     {
         return [
@@ -154,15 +94,6 @@ class Main extends BaseTable
         ];
     }
 
-    /**
-     * Delete a title from the system.
-     *
-     * Performs soft deletion of the specified title using the base table's
-     * delete functionality. The title will be moved to trash and can be
-     * restored later if needed.
-     *
-     * @param  Title  $title  The title to delete
-     */
     public function delete(Title $title): void
     {
         Gate::authorize('delete', $title);
@@ -171,11 +102,6 @@ class Main extends BaseTable
         session()->flash('status', 'Title successfully deleted.');
     }
 
-    /**
-     * Debut a title for competition.
-     *
-     * @param  Title  $title  The title to debut
-     */
     public function debut(Title $title): void
     {
         Gate::authorize('debut', $title);
@@ -189,11 +115,6 @@ class Main extends BaseTable
         $this->redirectRoute('titles.index');
     }
 
-    /**
-     * Put a title on hold (remove from active competition).
-     *
-     * @param  Title  $title  The title to put on hold
-     */
     public function putOnHold(Title $title): void
     {
         Gate::authorize('pull', $title);
@@ -207,11 +128,6 @@ class Main extends BaseTable
         $this->redirectRoute('titles.index');
     }
 
-    /**
-     * Restore a previously deleted title.
-     *
-     * @param  int  $titleId  The ID of the deleted title to restore
-     */
     public function restore(int $titleId): void
     {
         $title = Title::onlyTrashed()->findOrFail($titleId);
@@ -223,11 +139,6 @@ class Main extends BaseTable
         $this->redirectRoute('titles.index');
     }
 
-    /**
-     * Retire a title permanently.
-     *
-     * @param  Title  $title  The title to retire
-     */
     public function retire(Title $title): void
     {
         Gate::authorize('retire', $title);
@@ -241,11 +152,6 @@ class Main extends BaseTable
         $this->redirectRoute('titles.index');
     }
 
-    /**
-     * Unretire a previously retired title.
-     *
-     * @param  Title  $title  The title to unretire
-     */
     public function unretire(Title $title): void
     {
         Gate::authorize('unretire', $title);

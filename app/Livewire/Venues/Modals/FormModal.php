@@ -88,7 +88,6 @@ class FormModal extends BaseFormModal
     public function closeModal(): void
     {
         parent::closeModal();
-        // Reset the form when modal is closed
         $this->form->reset();
     }
 }
