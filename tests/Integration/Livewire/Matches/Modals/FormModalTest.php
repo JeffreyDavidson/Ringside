@@ -275,6 +275,23 @@ describe('FormModal Create Operations', function () {
         $component->assertHasErrors(['form.competitors.0.wrestlers.0', 'form.competitors.1.wrestlers.0']);
     });
 
+    it('rejects an unavailable wrestler before constructing match data', function () {
+        $unavailableWrestler = Wrestler::factory()->retired()->create();
+        $availableWrestler = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.competitors', [
+                ['wrestlers' => [$unavailableWrestler->id]],
+                ['wrestlers' => [$availableWrestler->id]],
+            ])
+            ->set('form.referees', [$referee->id])
+            ->call('save')
+            ->assertHasErrors(['form.competitors.0.wrestlers.0']);
+    });
+
     it('validates referees exist and are bookable', function () {
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
@@ -290,6 +307,40 @@ describe('FormModal Create Operations', function () {
             ->call('save');
 
         $component->assertHasErrors(['form.referees.0']);
+    });
+
+    it('rejects an unavailable referee before constructing match data', function () {
+        $firstWrestler = Wrestler::factory()->bookable()->create();
+        $secondWrestler = Wrestler::factory()->bookable()->create();
+        $unavailableReferee = Referee::factory()->retired()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::Singles)
+            ->set('form.competitors', [
+                ['wrestlers' => [$firstWrestler->id]],
+                ['wrestlers' => [$secondWrestler->id]],
+            ])
+            ->set('form.referees', [$unavailableReferee->id])
+            ->call('save')
+            ->assertHasErrors(['form.referees.0']);
+    });
+
+    it('rejects an unavailable tag team before constructing match data', function () {
+        $unavailableTagTeam = TagTeam::factory()->retired()->create();
+        $availableTagTeam = TagTeam::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', MatchType::TagTeam)
+            ->set('form.competitors', [
+                ['tag_teams' => [$unavailableTagTeam->id]],
+                ['tag_teams' => [$availableTagTeam->id]],
+            ])
+            ->set('form.referees', [$referee->id])
+            ->call('save')
+            ->assertHasErrors(['form.competitors.0.tag_teams.0']);
     });
 
     it('persists each battle royal entrant on an individual side', function () {
