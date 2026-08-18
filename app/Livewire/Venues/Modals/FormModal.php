@@ -6,9 +6,11 @@ namespace App\Livewire\Venues\Modals;
 
 use App\Actions\Venues\CreateAction;
 use App\Actions\Venues\UpdateAction;
+use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Models\Events\Venue;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -42,17 +44,10 @@ class FormModal extends BaseFormModal
 
     protected function populateDummyData(): void
     {
-        /**
-         * @var string $state
-         *
-         * @phpstan-ignore-next-line
-         */
-        $state = fake('en_US')->state();
-
         $this->form->name = Str::of(fake()->sentence(2))->title()->append(' Arena')->value();
         $this->form->street_address = fake()->streetAddress();
         $this->form->city = fake()->city();
-        $this->form->state = $state;
+        $this->form->state = Collection::make(UnitedStatesState::cases())->random()->value;
         $this->form->zipcode = fake('en_US')->numerify('#####');
     }
 

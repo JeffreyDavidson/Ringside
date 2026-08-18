@@ -6,9 +6,11 @@ namespace App\Livewire\Wrestlers\Modals;
 
 use App\Actions\Wrestlers\CreateAction;
 use App\Actions\Wrestlers\UpdateAction;
+use App\Enums\Shared\UnitedStatesState;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -37,7 +39,7 @@ class FormModal extends BaseFormModal
     protected function populateDummyData(): void
     {
         $this->form->name = Str::of(fake()->sentence(2))->title()->value();
-        $this->form->hometown = fake()->city().', '.fake()->stateAbbr(); // @phpstan-ignore-line
+        $this->form->hometown = fake()->city().', '.Collection::make(UnitedStatesState::cases())->random()->value;
         $this->form->height_feet = fake()->numberBetween(5, 7);
         $this->form->height_inches = fake()->numberBetween(0, 11);
         $this->form->weight = fake()->numberBetween(180, 350);
