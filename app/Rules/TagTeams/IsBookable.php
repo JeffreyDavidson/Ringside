@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Rules\TagTeams;
+
+use App\Lifecycle\RosterBookingEligibility;
+use App\Models\Roster\TagTeams\TagTeam;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+
+class IsBookable implements ValidationRule
+{
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        $tagTeam = TagTeam::find($value);
+
+        if (! $tagTeam instanceof TagTeam || ! RosterBookingEligibility::allows($tagTeam)) {
+            $fail('This tag team is not available for booking.');
+        }
+    }
+}
