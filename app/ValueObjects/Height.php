@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
+use App\Casts\HeightCast;
+use Illuminate\Contracts\Database\Eloquent\Castable;
 use InvalidArgumentException;
 
 /**
@@ -14,7 +16,7 @@ use InvalidArgumentException;
  * Height is stored as feet and inches since this is the standard format
  * used in professional wrestling.
  */
-readonly class Height
+readonly class Height implements Castable
 {
     /**
      * Create a new Height instance.
@@ -46,6 +48,15 @@ readonly class Height
         }
 
         return new self(intdiv($inches, 12), $inches % 12);
+    }
+
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return class-string<HeightCast>
+     */
+    public static function castUsing(array $arguments): string
+    {
+        return HeightCast::class;
     }
 
     /**
