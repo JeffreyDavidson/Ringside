@@ -7,7 +7,6 @@ namespace App\Actions\Wrestlers;
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +34,7 @@ class RestoreAction
     {
         $this->eligibility->ensureCanRestore($wrestler);
 
-        $restoreDate = DateHelper::resolveDate($restoreDate);
+        $restoreDate = $restoreDate ?? now();
 
         DB::transaction(function () use ($wrestler, $restoreDate): void {
             $this->deletionState->restore($wrestler, $restoreDate);

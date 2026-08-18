@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Roster\Managers\Manager;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +34,7 @@ class InjureAction
      */
     public function handle(Manager $manager, ?Carbon $injureDate = null): void
     {
-        $injureDate = DateHelper::resolveDate($injureDate);
+        $injureDate = $injureDate ?? now();
 
         DB::transaction(function () use ($manager, $injureDate): void {
             $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();

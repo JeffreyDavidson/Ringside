@@ -10,7 +10,6 @@ use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Lifecycle\TagTeamEmploymentEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +39,7 @@ class ReleaseAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = DateHelper::resolveDate($releaseDate);
+        $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $releaseDate): void {
             $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();

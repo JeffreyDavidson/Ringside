@@ -48,7 +48,7 @@ test('it injures referee with specific injury date', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->employed()->create();
     $injuryDate = now()->subDays(7);
 
@@ -56,7 +56,7 @@ test('it handles DateHelper date resolution', function () {
 
     $referee->refresh();
 
-    // DateHelper should have processed the injury date
+    // The provided injury date should be persisted
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $referee->id,
         'injurable_type' => $referee->getMorphClass(),

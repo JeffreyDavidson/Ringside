@@ -9,7 +9,6 @@ use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -50,7 +49,7 @@ class UnretireAction
         bool $employImmediately = true,
         bool $requireAvailablePartners = true
     ): void {
-        $unretiredDate = DateHelper::resolveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $unretiredDate, $unretireMembers, $employImmediately, $requireAvailablePartners): void {
             $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
