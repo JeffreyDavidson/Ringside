@@ -15,12 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo('/dashboard');
-
-        $middleware->replaceInGroup('web', \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class, \App\Http\Middleware\PreventRequestForgery::class);
-
-        $middleware->alias([
-            'signed' => \App\Http\Middleware\ValidateSignature::class,
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
