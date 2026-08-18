@@ -12,6 +12,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeDebutDate;
 use App\Rules\Stables\CanJoinStable;
+use App\Rules\Stables\HasMinimumMembers;
 use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Support\Carbon;
@@ -186,7 +187,15 @@ class CreateEditForm extends BaseForm
                 'max:255',
                 Rule::unique('stables', 'name')->ignore($this->modelId)->withoutTrashed(),
             ],
-            'started_at' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
+            'started_at' => [
+                'nullable',
+                'date',
+                new CanChangeDebutDate($this->formModel),
+                new HasMinimumMembers(
+                    Wrestler::query()->whereKey($this->wrestlers)->get(),
+                    TagTeam::query()->whereKey($this->tag_teams)->get(),
+                ),
+            ],
             'ended_at' => ['nullable', 'date'],
             'wrestlers' => ['nullable', 'array'],
             'wrestlers.*' => [

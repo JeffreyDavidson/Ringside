@@ -212,7 +212,7 @@ describe('StablesTable Component', function () {
         });
 
         test('establish action integration works correctly', function () {
-            $unformedStable = Stable::factory()->unactivated()->create(['name' => 'Unformed Stable']);
+            $unformedStable = Stable::factory()->withEmployedDefaultMembers()->unactivated()->create(['name' => 'Unformed Stable']);
 
             actingAs($this->admin);
 
@@ -227,7 +227,7 @@ describe('StablesTable Component', function () {
         });
 
         test('lifecycle actions ignore an external referrer when redirecting', function () {
-            $unformedStable = Stable::factory()->unactivated()->create(['name' => 'Unformed Stable']);
+            $unformedStable = Stable::factory()->withEmployedDefaultMembers()->unactivated()->create(['name' => 'Unformed Stable']);
 
             actingAs($this->admin);
 

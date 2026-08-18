@@ -53,6 +53,8 @@ class UpdateAction
                 'name' => $stableData->getTrimmedName(),
             ]);
 
+            $this->membershipService->updateMembership($lockedStable, $stableData->members, now());
+
             if ($stableData->hasStartDate()) {
                 $activityPeriod = $lockedStable->firstActivityPeriod()->lockForUpdate()->first();
 
@@ -69,9 +71,6 @@ class UpdateAction
                     );
                 }
             }
-
-            // Update stable membership using service
-            $this->membershipService->updateMembership($lockedStable, $stableData->members, now());
 
             return $lockedStable;
         });
