@@ -22,3 +22,6 @@ Implement Livewire behavior in namespaced PHP classes using shared base classes 
 
 ## Translate only domain failures
 Catch and translate BaseBusinessException at Livewire user-interaction boundaries. Do not catch generic Exception or Throwable to produce business flash messages; let programmer, infrastructure, and framework failures propagate through Laravel's normal exception reporting.
+
+## Populate development data through typed forms
+Implement dummy-data population by assigning directly to the concrete Livewire form's typed properties. Do not return generic field-name arrays or dynamically assign arbitrary properties; dedicated collaborators such as match form population must accept the concrete form type.

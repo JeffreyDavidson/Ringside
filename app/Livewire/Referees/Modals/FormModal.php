@@ -40,13 +40,11 @@ class FormModal extends BaseFormModal
         return Referee::class;
     }
 
-    protected function getDummyDataFields(): array
+    protected function populateDummyData(): void
     {
-        return [
-            'first_name' => fn () => fake()->firstName(),
-            'last_name' => fn () => fake()->lastName(),
-            'employment_date' => fn (): ?string => $this->generateOptionalEmploymentDate(),
-        ];
+        $this->form->first_name = fake()->firstName();
+        $this->form->last_name = fake()->lastName();
+        $this->form->employment_date = $this->generateOptionalEmploymentDate();
     }
 
     protected function storeForm(): bool
