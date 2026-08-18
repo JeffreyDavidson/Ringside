@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns;
 
 use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Exceptions\BaseBusinessException;
 use App\Services\ErrorMessageMappingService;
 use Closure;
@@ -15,15 +16,14 @@ trait ExecutesRosterActions
 {
     /** @param Closure(): void $action */
     protected function executeAuthorizedRosterAction(
-        string $ability,
-        string $actionName,
+        RosterLifecycleAction $lifecycleAction,
         RosterEntityType $entityType,
         Model $model,
         Closure $action,
     ): void {
-        Gate::authorize($ability, $model);
+        Gate::authorize($lifecycleAction->ability(), $model);
 
-        $this->executeRosterAction($actionName, $entityType, $action);
+        $this->executeRosterAction($lifecycleAction->successAction(), $entityType, $action);
     }
 
     /** @param Closure(): void $action */

@@ -16,6 +16,7 @@ use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
@@ -107,66 +108,66 @@ class Main extends BaseTable
 
     public function clearFromInjury(Referee $referee): void
     {
-        $this->handleRefereeAction('heal', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Heal->value, $referee->id);
     }
 
     public function employ(Referee $referee): void
     {
-        $this->handleRefereeAction('employ', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Employ->value, $referee->id);
     }
 
     public function injure(Referee $referee): void
     {
-        $this->handleRefereeAction('injure', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Injure->value, $referee->id);
     }
 
     public function reinstate(Referee $referee): void
     {
-        $this->handleRefereeAction('reinstate', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Reinstate->value, $referee->id);
     }
 
     public function release(Referee $referee): void
     {
-        $this->handleRefereeAction('release', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Release->value, $referee->id);
     }
 
     public function restore(int $refereeId): void
     {
-        $this->handleRefereeAction('restore', $refereeId);
+        $this->handleRefereeAction(RosterLifecycleAction::Restore->value, $refereeId);
     }
 
     public function retire(Referee $referee): void
     {
-        $this->handleRefereeAction('retire', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Retire->value, $referee->id);
     }
 
     public function suspend(Referee $referee): void
     {
-        $this->handleRefereeAction('suspend', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Suspend->value, $referee->id);
     }
 
     public function unretire(Referee $referee): void
     {
-        $this->handleRefereeAction('unretire', $referee->id);
+        $this->handleRefereeAction(RosterLifecycleAction::Unretire->value, $referee->id);
     }
 
     public function handleRefereeAction(string $action, int $refereeId): void
     {
-        $referee = $action === 'restore'
+        $lifecycleAction = RosterLifecycleAction::from($action);
+        $referee = $lifecycleAction === RosterLifecycleAction::Restore
             ? Referee::onlyTrashed()->findOrFail($refereeId)
             : Referee::query()->findOrFail($refereeId);
 
-        match ($action) {
-            'employ' => $this->executeAuthorizedRosterAction('employ', 'employed', RosterEntityType::Referee, $referee, fn () => resolve(EmployAction::class)->handle($referee)),
-            'release' => $this->executeAuthorizedRosterAction('release', 'released', RosterEntityType::Referee, $referee, fn () => resolve(ReleaseAction::class)->handle($referee)),
-            'retire' => $this->executeAuthorizedRosterAction('retire', 'retired', RosterEntityType::Referee, $referee, fn () => resolve(RetireAction::class)->handle($referee)),
-            'unretire' => $this->executeAuthorizedRosterAction('unretire', 'unretired', RosterEntityType::Referee, $referee, fn () => resolve(UnretireAction::class)->handle($referee)),
-            'suspend' => $this->executeAuthorizedRosterAction('suspend', 'suspended', RosterEntityType::Referee, $referee, fn () => resolve(SuspendAction::class)->handle($referee)),
-            'reinstate' => $this->executeAuthorizedRosterAction('reinstate', 'reinstated', RosterEntityType::Referee, $referee, fn () => resolve(ReinstateAction::class)->handle($referee)),
-            'injure' => $this->executeAuthorizedRosterAction('injure', 'injured', RosterEntityType::Referee, $referee, fn () => resolve(InjureAction::class)->handle($referee)),
-            'heal' => $this->executeAuthorizedRosterAction('clearFromInjury', 'healed', RosterEntityType::Referee, $referee, fn () => resolve(HealAction::class)->handle($referee)),
-            'restore' => $this->executeAuthorizedRosterAction('restore', 'restored', RosterEntityType::Referee, $referee, fn () => resolve(RestoreAction::class)->handle($referee)),
-            default => null,
+        match ($lifecycleAction) {
+            RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(EmployAction::class)->handle($referee)),
+            RosterLifecycleAction::Release => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(ReleaseAction::class)->handle($referee)),
+            RosterLifecycleAction::Retire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(RetireAction::class)->handle($referee)),
+            RosterLifecycleAction::Unretire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(UnretireAction::class)->handle($referee)),
+            RosterLifecycleAction::Suspend => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(SuspendAction::class)->handle($referee)),
+            RosterLifecycleAction::Reinstate => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(ReinstateAction::class)->handle($referee)),
+            RosterLifecycleAction::Injure => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(InjureAction::class)->handle($referee)),
+            RosterLifecycleAction::Heal => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(HealAction::class)->handle($referee)),
+            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(RestoreAction::class)->handle($referee)),
         };
     }
 }

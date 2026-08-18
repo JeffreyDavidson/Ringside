@@ -16,6 +16,7 @@ use App\Actions\Managers\SuspendAction;
 use App\Actions\Managers\UnretireAction;
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
@@ -113,66 +114,66 @@ class Main extends BaseTable
 
     public function clearFromInjury(Manager $manager): void
     {
-        $this->handleManagerAction('heal', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Heal->value, $manager->id);
     }
 
     public function employ(Manager $manager): void
     {
-        $this->handleManagerAction('employ', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Employ->value, $manager->id);
     }
 
     public function injure(Manager $manager): void
     {
-        $this->handleManagerAction('injure', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Injure->value, $manager->id);
     }
 
     public function reinstate(Manager $manager): void
     {
-        $this->handleManagerAction('reinstate', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Reinstate->value, $manager->id);
     }
 
     public function release(Manager $manager): void
     {
-        $this->handleManagerAction('release', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Release->value, $manager->id);
     }
 
     public function restore(int $managerId): void
     {
-        $this->handleManagerAction('restore', $managerId);
+        $this->handleManagerAction(RosterLifecycleAction::Restore->value, $managerId);
     }
 
     public function retire(Manager $manager): void
     {
-        $this->handleManagerAction('retire', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Retire->value, $manager->id);
     }
 
     public function suspend(Manager $manager): void
     {
-        $this->handleManagerAction('suspend', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Suspend->value, $manager->id);
     }
 
     public function unretire(Manager $manager): void
     {
-        $this->handleManagerAction('unretire', $manager->id);
+        $this->handleManagerAction(RosterLifecycleAction::Unretire->value, $manager->id);
     }
 
     public function handleManagerAction(string $action, int $managerId): void
     {
-        $manager = $action === 'restore'
+        $lifecycleAction = RosterLifecycleAction::from($action);
+        $manager = $lifecycleAction === RosterLifecycleAction::Restore
             ? Manager::onlyTrashed()->findOrFail($managerId)
             : Manager::findOrFail($managerId);
 
-        match ($action) {
-            'employ' => $this->executeAuthorizedRosterAction('employ', 'employed', RosterEntityType::Manager, $manager, fn () => resolve(EmployAction::class)->handle($manager)),
-            'release' => $this->executeAuthorizedRosterAction('release', 'released', RosterEntityType::Manager, $manager, fn () => resolve(ReleaseAction::class)->handle($manager)),
-            'retire' => $this->executeAuthorizedRosterAction('retire', 'retired', RosterEntityType::Manager, $manager, fn () => resolve(RetireAction::class)->handle($manager)),
-            'unretire' => $this->executeAuthorizedRosterAction('unretire', 'unretired', RosterEntityType::Manager, $manager, fn () => resolve(UnretireAction::class)->handle($manager)),
-            'suspend' => $this->executeAuthorizedRosterAction('suspend', 'suspended', RosterEntityType::Manager, $manager, fn () => resolve(SuspendAction::class)->handle($manager)),
-            'reinstate' => $this->executeAuthorizedRosterAction('reinstate', 'reinstated', RosterEntityType::Manager, $manager, fn () => resolve(ReinstateAction::class)->handle($manager)),
-            'injure' => $this->executeAuthorizedRosterAction('injure', 'injured', RosterEntityType::Manager, $manager, fn () => resolve(InjureAction::class)->handle($manager)),
-            'heal' => $this->executeAuthorizedRosterAction('clearFromInjury', 'healed', RosterEntityType::Manager, $manager, fn () => resolve(HealAction::class)->handle($manager)),
-            'restore' => $this->executeAuthorizedRosterAction('restore', 'restored', RosterEntityType::Manager, $manager, fn () => resolve(RestoreAction::class)->handle($manager)),
-            default => null,
+        match ($lifecycleAction) {
+            RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(EmployAction::class)->handle($manager)),
+            RosterLifecycleAction::Release => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(ReleaseAction::class)->handle($manager)),
+            RosterLifecycleAction::Retire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(RetireAction::class)->handle($manager)),
+            RosterLifecycleAction::Unretire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(UnretireAction::class)->handle($manager)),
+            RosterLifecycleAction::Suspend => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(SuspendAction::class)->handle($manager)),
+            RosterLifecycleAction::Reinstate => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(ReinstateAction::class)->handle($manager)),
+            RosterLifecycleAction::Injure => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(InjureAction::class)->handle($manager)),
+            RosterLifecycleAction::Heal => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(HealAction::class)->handle($manager)),
+            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(RestoreAction::class)->handle($manager)),
         };
     }
 }
