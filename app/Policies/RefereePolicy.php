@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\Roster\Referees\Referee;
 use App\Models\Users\User;
 
 /**
@@ -32,7 +33,7 @@ class RefereePolicy
     /**
      * Only administrators can view entity lists (handled by before hook).
      */
-    public function viewList(User $user): bool
+    public function viewAny(User $user): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -40,7 +41,7 @@ class RefereePolicy
     /**
      * Only administrators can view individual entities (handled by before hook).
      */
-    public function view(User $user): bool
+    public function view(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -56,7 +57,7 @@ class RefereePolicy
     /**
      * Only administrators can update entities (handled by before hook).
      */
-    public function update(User $user): bool
+    public function update(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -64,7 +65,7 @@ class RefereePolicy
     /**
      * Only administrators can delete entities (handled by before hook).
      */
-    public function delete(User $user): bool
+    public function delete(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -72,7 +73,7 @@ class RefereePolicy
     /**
      * Only administrators can restore entities (handled by before hook).
      */
-    public function restore(User $user): bool
+    public function restore(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -80,7 +81,7 @@ class RefereePolicy
     /**
      * Only administrators can employ referees (handled by before hook).
      */
-    public function employ(User $user): bool
+    public function employ(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -88,7 +89,7 @@ class RefereePolicy
     /**
      * Only administrators can release referees (handled by before hook).
      */
-    public function release(User $user): bool
+    public function release(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -96,7 +97,7 @@ class RefereePolicy
     /**
      * Only administrators can retire referees (handled by before hook).
      */
-    public function retire(User $user): bool
+    public function retire(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -104,7 +105,7 @@ class RefereePolicy
     /**
      * Only administrators can unretire referees (handled by before hook).
      */
-    public function unretire(User $user): bool
+    public function unretire(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -112,7 +113,7 @@ class RefereePolicy
     /**
      * Only administrators can suspend referees (handled by before hook).
      */
-    public function suspend(User $user): bool
+    public function suspend(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -120,7 +121,7 @@ class RefereePolicy
     /**
      * Only administrators can reinstate referees (handled by before hook).
      */
-    public function reinstate(User $user): bool
+    public function reinstate(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -128,7 +129,7 @@ class RefereePolicy
     /**
      * Only administrators can injure referees (handled by before hook).
      */
-    public function injure(User $user): bool
+    public function injure(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -136,7 +137,7 @@ class RefereePolicy
     /**
      * Only administrators can clear referees from injury (handled by before hook).
      */
-    public function clearFromInjury(User $user): bool
+    public function clearFromInjury(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -144,7 +145,7 @@ class RefereePolicy
     /**
      * Only administrators can heal referees (alias for clearFromInjury, handled by before hook).
      */
-    public function heal(User $user): bool
+    public function heal(User $user, Referee $referee): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

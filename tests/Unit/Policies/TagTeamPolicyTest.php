@@ -32,7 +32,7 @@ describe('TagTeamPolicy Unit Tests', function () {
 
     describe('before hook authorization', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewList'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
             expect($this->policy->before($this->admin, 'view'))->toBeTrue();
             expect($this->policy->before($this->admin, 'create'))->toBeTrue();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
@@ -47,7 +47,7 @@ describe('TagTeamPolicy Unit Tests', function () {
         });
 
         test('non-administrators do not bypass authorization checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewList'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
@@ -63,8 +63,8 @@ describe('TagTeamPolicy Unit Tests', function () {
     });
 
     describe('view permissions', function () {
-        test('viewList denies access for basic users', function () {
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+        test('viewAny denies access for basic users', function () {
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
         });
 
         test('view denies access for basic users', function () {
@@ -195,7 +195,7 @@ describe('TagTeamPolicy Unit Tests', function () {
         test('view permissions follow same restrictive pattern as management permissions', function () {
             // Only admins can view
             expect($this->policy->view($this->basicUser, $this->tagTeam))->toBeFalse();
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
 
             // Only admins can manage
             expect($this->policy->update($this->basicUser, $this->tagTeam))->toBeFalse();
@@ -286,7 +286,7 @@ describe('TagTeamPolicy Unit Tests', function () {
     describe('policy consistency and edge cases', function () {
         test('policy methods return correct types', function () {
             // All policy methods should return boolean values
-            expect($this->policy->viewList($this->basicUser))->toBeBool();
+            expect($this->policy->viewAny($this->basicUser))->toBeBool();
             expect($this->policy->view($this->basicUser, $this->tagTeam))->toBeBool();
             expect($this->policy->create($this->basicUser))->toBeBool();
             expect($this->policy->update($this->basicUser, $this->tagTeam))->toBeBool();

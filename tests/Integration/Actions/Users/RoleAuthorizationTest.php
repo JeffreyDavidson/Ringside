@@ -35,11 +35,11 @@ describe('User Role Integration Tests', function () {
             actingAs($this->administrator);
 
             // Administrator should pass all Gate checks across different models
-            expect(Gate::allows('viewList', User::class))->toBeTrue();
+            expect(Gate::allows('viewAny', User::class))->toBeTrue();
             expect(Gate::allows('create', User::class))->toBeTrue();
-            expect(Gate::allows('update', User::class))->toBeTrue();
-            expect(Gate::allows('delete', User::class))->toBeTrue();
-            expect(Gate::allows('restore', User::class))->toBeTrue();
+            expect(Gate::allows('update', $this->basicUser))->toBeTrue();
+            expect(Gate::allows('delete', $this->basicUser))->toBeTrue();
+            expect(Gate::allows('restore', $this->basicUser))->toBeTrue();
 
             // Administrator should also pass custom abilities
             expect(Gate::allows('manageUsers', User::class))->toBeTrue();
@@ -51,11 +51,11 @@ describe('User Role Integration Tests', function () {
             actingAs($this->basicUser);
 
             // Basic user should be denied access across different operations
-            expect(Gate::denies('viewList', User::class))->toBeTrue();
+            expect(Gate::denies('viewAny', User::class))->toBeTrue();
             expect(Gate::denies('create', User::class))->toBeTrue();
-            expect(Gate::denies('update', User::class))->toBeTrue();
-            expect(Gate::denies('delete', User::class))->toBeTrue();
-            expect(Gate::denies('restore', User::class))->toBeTrue();
+            expect(Gate::denies('update', $this->administrator))->toBeTrue();
+            expect(Gate::denies('delete', $this->administrator))->toBeTrue();
+            expect(Gate::denies('restore', $this->administrator))->toBeTrue();
 
             // Basic user should also be denied custom abilities
             expect(Gate::denies('manageUsers', User::class))->toBeTrue();
@@ -141,16 +141,16 @@ describe('User Role Integration Tests', function () {
             actingAs($this->administrator);
 
             // Administrator should have access to other entity management
-            expect(Gate::allows('viewList', Wrestler::class))->toBeTrue();
-            expect(Gate::allows('viewList', Manager::class))->toBeTrue();
-            expect(Gate::allows('viewList', Title::class))->toBeTrue();
+            expect(Gate::allows('viewAny', Wrestler::class))->toBeTrue();
+            expect(Gate::allows('viewAny', Manager::class))->toBeTrue();
+            expect(Gate::allows('viewAny', Title::class))->toBeTrue();
 
             actingAs($this->basicUser);
 
             // Basic user should be denied access to other entities
-            expect(Gate::denies('viewList', Wrestler::class))->toBeTrue();
-            expect(Gate::denies('viewList', Manager::class))->toBeTrue();
-            expect(Gate::denies('viewList', Title::class))->toBeTrue();
+            expect(Gate::denies('viewAny', Wrestler::class))->toBeTrue();
+            expect(Gate::denies('viewAny', Manager::class))->toBeTrue();
+            expect(Gate::denies('viewAny', Title::class))->toBeTrue();
         });
 
         test('authentication system respects user roles', function () {

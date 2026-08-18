@@ -33,7 +33,7 @@ class StablePolicy
     /**
      * Only administrators can view entity lists (handled by before hook).
      */
-    public function viewList(User $user): bool
+    public function viewAny(User $user): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -41,7 +41,7 @@ class StablePolicy
     /**
      * Only administrators can view individual entities (handled by before hook).
      */
-    public function view(User $user, ?Stable $stable = null): bool
+    public function view(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -57,7 +57,7 @@ class StablePolicy
     /**
      * Only administrators can update entities (handled by before hook).
      */
-    public function update(User $user, ?Stable $stable = null): bool
+    public function update(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -65,7 +65,7 @@ class StablePolicy
     /**
      * Only administrators can delete entities (handled by before hook).
      */
-    public function delete(User $user, ?Stable $stable = null): bool
+    public function delete(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -73,7 +73,7 @@ class StablePolicy
     /**
      * Only administrators can restore entities (handled by before hook).
      */
-    public function restore(User $user, ?Stable $stable = null): bool
+    public function restore(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -81,7 +81,7 @@ class StablePolicy
     /**
      * Only administrators can establish stables (handled by before hook).
      */
-    public function establish(User $user, ?Stable $stable = null): bool
+    public function establish(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -89,7 +89,7 @@ class StablePolicy
     /**
      * Only administrators can disband stables (handled by before hook).
      */
-    public function disband(User $user, ?Stable $stable = null): bool
+    public function disband(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -97,7 +97,7 @@ class StablePolicy
     /**
      * Only administrators can retire stables (handled by before hook).
      */
-    public function retire(User $user, ?Stable $stable = null): bool
+    public function retire(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -105,7 +105,7 @@ class StablePolicy
     /**
      * Only administrators can unretire stables (handled by before hook).
      */
-    public function unretire(User $user, ?Stable $stable = null): bool
+    public function unretire(User $user, Stable $stable): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

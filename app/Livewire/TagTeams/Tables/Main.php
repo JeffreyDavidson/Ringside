@@ -53,7 +53,7 @@ class Main extends BaseTable
 
     public function configure(): void
     {
-        Gate::authorize('viewList', TagTeam::class);
+        Gate::authorize('viewAny', TagTeam::class);
     }
 
     /**

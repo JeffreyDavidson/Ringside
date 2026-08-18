@@ -32,7 +32,7 @@ class UserPolicy
     /**
      * Only administrators can view entity lists (handled by before hook).
      */
-    public function viewList(User $user): bool
+    public function viewAny(User $user): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -40,7 +40,7 @@ class UserPolicy
     /**
      * Only administrators can view individual entities (handled by before hook).
      */
-    public function view(User $user): bool
+    public function view(User $user, User $targetUser): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -56,7 +56,7 @@ class UserPolicy
     /**
      * Only administrators can update entities (handled by before hook).
      */
-    public function update(User $user): bool
+    public function update(User $user, User $targetUser): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -64,7 +64,7 @@ class UserPolicy
     /**
      * Only administrators can delete entities (handled by before hook).
      */
-    public function delete(User $user): bool
+    public function delete(User $user, User $targetUser): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }
@@ -72,7 +72,7 @@ class UserPolicy
     /**
      * Only administrators can restore entities (handled by before hook).
      */
-    public function restore(User $user): bool
+    public function restore(User $user, User $targetUser): bool
     {
         return false; // Will be bypassed by before hook for administrators
     }

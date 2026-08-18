@@ -49,7 +49,7 @@ class MatchesTable extends DataTableComponent
 
     public function configure(): void
     {
-        Gate::authorize('viewList', EventMatch::class);
+        Gate::authorize('viewAny', EventMatch::class);
 
         $this->addAdditionalSelects([
             'events_matches.event_id',

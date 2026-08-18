@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Gate;
  *
  * UNIT TEST SCOPE:
  * - Before hook behavior for administrator bypass
- * - Individual permission method testing (viewList, view, create, update, delete, restore)
+ * - Individual permission method testing (viewAny, view, create, update, delete, restore)
  * - Business-specific authorization methods (employ, release, retire, unretire, suspend, reinstate, injure, clearFromInjury)
  * - Policy method consistency and return value verification
  * - Laravel Gate integration testing
@@ -34,7 +34,7 @@ describe('WrestlerPolicy Unit Tests', function () {
 
     describe('before hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewList'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
             expect($this->policy->before($this->admin, 'view'))->toBeTrue();
             expect($this->policy->before($this->admin, 'create'))->toBeTrue();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
@@ -51,7 +51,7 @@ describe('WrestlerPolicy Unit Tests', function () {
         });
 
         test('basic users continue to individual method checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewList'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
@@ -74,12 +74,12 @@ describe('WrestlerPolicy Unit Tests', function () {
     });
 
     describe('basic CRUD permissions', function () {
-        test('viewList method denies basic users', function () {
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+        test('viewAny method denies basic users', function () {
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
         });
 
         test('view method denies basic users', function () {
-            expect($this->policy->view($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->wrestler))->toBeFalse();
         });
 
         test('create method denies basic users', function () {
@@ -87,69 +87,69 @@ describe('WrestlerPolicy Unit Tests', function () {
         });
 
         test('update method denies basic users', function () {
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->wrestler))->toBeFalse();
         });
 
         test('delete method denies basic users', function () {
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->wrestler))->toBeFalse();
         });
 
         test('restore method denies basic users', function () {
-            expect($this->policy->restore($this->basicUser))->toBeFalse();
+            expect($this->policy->restore($this->basicUser, $this->wrestler))->toBeFalse();
         });
     });
 
     describe('employment management permissions', function () {
         test('employ method denies basic users', function () {
-            expect($this->policy->employ($this->basicUser))->toBeFalse();
+            expect($this->policy->employ($this->basicUser, $this->wrestler))->toBeFalse();
         });
 
         test('release method denies basic users', function () {
-            expect($this->policy->release($this->basicUser))->toBeFalse();
+            expect($this->policy->release($this->basicUser, $this->wrestler))->toBeFalse();
         });
     });
 
     describe('retirement management permissions', function () {
         test('retire method denies basic users', function () {
-            expect($this->policy->retire($this->basicUser))->toBeFalse();
+            expect($this->policy->retire($this->basicUser, $this->wrestler))->toBeFalse();
         });
 
         test('unretire method denies basic users', function () {
-            expect($this->policy->unretire($this->basicUser))->toBeFalse();
+            expect($this->policy->unretire($this->basicUser, $this->wrestler))->toBeFalse();
         });
     });
 
     describe('suspension management permissions', function () {
         test('suspend method denies basic users', function () {
-            expect($this->policy->suspend($this->basicUser))->toBeFalse();
+            expect($this->policy->suspend($this->basicUser, $this->wrestler))->toBeFalse();
         });
 
         test('reinstate method denies basic users', function () {
-            expect($this->policy->reinstate($this->basicUser))->toBeFalse();
+            expect($this->policy->reinstate($this->basicUser, $this->wrestler))->toBeFalse();
         });
     });
 
     describe('injury management permissions', function () {
         test('injure method denies basic users', function () {
-            expect($this->policy->injure($this->basicUser))->toBeFalse();
+            expect($this->policy->injure($this->basicUser, $this->wrestler))->toBeFalse();
         });
 
         test('clearFromInjury method denies basic users', function () {
-            expect($this->policy->clearFromInjury($this->basicUser))->toBeFalse();
+            expect($this->policy->clearFromInjury($this->basicUser, $this->wrestler))->toBeFalse();
         });
     });
 
     describe('policy integration with Laravel Gate', function () {
         test('policy integrates correctly with Gate facade', function () {
             // Test administrator permissions through Gate
-            expect(Gate::forUser($this->admin)->allows('viewList', Wrestler::class))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('viewAny', Wrestler::class))->toBeTrue();
             expect(Gate::forUser($this->admin)->allows('create', Wrestler::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('employ', Wrestler::class))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('employ', $this->wrestler))->toBeTrue();
 
             // Test basic user permissions through Gate
-            expect(Gate::forUser($this->basicUser)->denies('viewList', Wrestler::class))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('viewAny', Wrestler::class))->toBeTrue();
             expect(Gate::forUser($this->basicUser)->denies('create', Wrestler::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('employ', Wrestler::class))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('employ', $this->wrestler))->toBeTrue();
         });
 
         test('policy works with specific wrestler instances', function () {
@@ -167,15 +167,16 @@ describe('WrestlerPolicy Unit Tests', function () {
     describe('policy method consistency', function () {
         test('all policy methods follow consistent pattern', function () {
             $methods = [
-                'viewList', 'view', 'create', 'update', 'delete', 'restore',
+                'viewAny', 'view', 'create', 'update', 'delete', 'restore',
                 'employ', 'release', 'retire', 'unretire', 'suspend',
                 'reinstate', 'injure', 'clearFromInjury',
             ];
 
             foreach ($methods as $method) {
-                // All methods should return false for basic users
-                expect($this->policy->{$method}($this->basicUser))
-                    ->toBeFalse("Method {$method} should deny basic users");
+                $subject = in_array($method, ['viewAny', 'create'], true) ? Wrestler::class : $this->wrestler;
+
+                expect(Gate::forUser($this->basicUser)->denies($method, $subject))
+                    ->toBeTrue("Method {$method} should deny basic users");
 
                 // All methods should be bypassed for administrators via before hook
                 expect($this->policy->before($this->admin, $method))
@@ -185,7 +186,7 @@ describe('WrestlerPolicy Unit Tests', function () {
 
         test('policy has all expected methods', function () {
             $expectedMethods = [
-                'before', 'viewList', 'view', 'create', 'update', 'delete', 'restore',
+                'before', 'viewAny', 'view', 'create', 'update', 'delete', 'restore',
                 'employ', 'release', 'retire', 'unretire', 'suspend',
                 'reinstate', 'injure', 'clearFromInjury',
             ];
@@ -203,7 +204,7 @@ describe('WrestlerPolicy Unit Tests', function () {
             $policy2 = new WrestlerPolicy();
 
             expect($policy1->before($this->admin, 'create'))->toBe($policy2->before($this->admin, 'create'));
-            expect($policy1->viewList($this->basicUser))->toBe($policy2->viewList($this->basicUser));
+            expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });
     });
 });

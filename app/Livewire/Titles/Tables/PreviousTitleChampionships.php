@@ -30,7 +30,7 @@ class PreviousTitleChampionships extends DataTableComponent
 
     public function configure(): void
     {
-        Gate::authorize('viewList', Title::class);
+        Gate::authorize('viewAny', Title::class);
     }
 
     /**

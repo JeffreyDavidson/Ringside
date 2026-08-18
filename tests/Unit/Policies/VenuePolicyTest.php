@@ -32,7 +32,7 @@ describe('VenuePolicy Unit Tests', function () {
 
     describe('before hook authorization', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewList'))->toBeTrue();
+            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
             expect($this->policy->before($this->admin, 'view'))->toBeTrue();
             expect($this->policy->before($this->admin, 'create'))->toBeTrue();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
@@ -41,7 +41,7 @@ describe('VenuePolicy Unit Tests', function () {
         });
 
         test('non-administrators do not bypass authorization checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewList'))->toBeNull();
+            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
             expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
@@ -51,12 +51,12 @@ describe('VenuePolicy Unit Tests', function () {
     });
 
     describe('view permissions', function () {
-        test('viewList denies access for basic users', function () {
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
+        test('viewAny denies access for basic users', function () {
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
         });
 
         test('view denies access for basic users', function () {
-            expect($this->policy->view($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
         });
     });
 
@@ -66,15 +66,15 @@ describe('VenuePolicy Unit Tests', function () {
         });
 
         test('update denies access for basic users', function () {
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('delete denies access for basic users', function () {
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('restore denies access for basic users', function () {
-            expect($this->policy->restore($this->basicUser))->toBeFalse();
+            expect($this->policy->restore($this->basicUser, $this->venue))->toBeFalse();
         });
     });
 
@@ -85,9 +85,9 @@ describe('VenuePolicy Unit Tests', function () {
             $outdoorVenue = Venue::factory()->make(['name' => 'Outdoor Stadium']);
 
             // All venue types should follow same authorization pattern
-            expect($this->policy->view($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('venue location management considers geographic factors', function () {
@@ -95,8 +95,8 @@ describe('VenuePolicy Unit Tests', function () {
             $remoteVenue = Venue::factory()->make(['city' => 'Remote City', 'state' => 'RS']);
 
             // Geographic location should not affect basic authorization
-            expect($this->policy->view($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('venue capacity and facilities do not affect base permissions', function () {
@@ -104,7 +104,7 @@ describe('VenuePolicy Unit Tests', function () {
             $smallVenue = Venue::factory()->make(['name' => 'Small Community Hall']);
 
             // Facility size should not affect authorization
-            expect($this->policy->view($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
             expect($this->policy->create($this->basicUser))->toBeFalse();
         });
     });
@@ -125,9 +125,9 @@ describe('VenuePolicy Unit Tests', function () {
         test('basic users cannot perform management actions', function () {
             // All management actions should be denied for basic users
             expect($this->policy->create($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
-            expect($this->policy->restore($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->restore($this->basicUser, $this->venue))->toBeFalse();
         });
     });
 
@@ -140,14 +140,14 @@ describe('VenuePolicy Unit Tests', function () {
 
             // Basic user has no access
             expect($this->policy->create($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('view permissions are consistently restrictive', function () {
             // Both list and individual view permissions deny basic users
-            expect($this->policy->viewList($this->basicUser))->toBeFalse();
-            expect($this->policy->view($this->basicUser))->toBeFalse();
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
         });
     });
 
@@ -161,7 +161,7 @@ describe('VenuePolicy Unit Tests', function () {
             ]);
 
             // Address complexity should not affect authorization
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
         });
 
@@ -174,8 +174,8 @@ describe('VenuePolicy Unit Tests', function () {
             ]);
 
             // Complex addresses should not change authorization
-            expect($this->policy->update($this->basicUser))->toBeFalse();
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
     });
 
@@ -185,9 +185,9 @@ describe('VenuePolicy Unit Tests', function () {
             $quietVenue = Venue::factory()->make(['name' => 'Quiet Venue']);
 
             // Event history should not affect base authorization
-            expect($this->policy->view($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('venue booking management requires proper authorization', function () {
@@ -195,7 +195,7 @@ describe('VenuePolicy Unit Tests', function () {
             $newVenue = Venue::factory()->make(['name' => 'New Venue']);
 
             // Popularity should not affect authorization rules
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
         });
     });
@@ -204,7 +204,7 @@ describe('VenuePolicy Unit Tests', function () {
         test('restoration permissions are properly restricted', function () {
             $deletedVenue = Venue::factory()->make(['name' => 'Deleted Venue']);
 
-            expect($this->policy->restore($this->basicUser))->toBeFalse();
+            expect($this->policy->restore($this->basicUser, $this->venue))->toBeFalse();
             expect($this->policy->before($this->admin, 'restore'))->toBeTrue();
         });
 
@@ -213,7 +213,7 @@ describe('VenuePolicy Unit Tests', function () {
             $unusedVenue = Venue::factory()->make(['name' => 'Unused Venue']);
 
             // Deletion should be restricted for basic users regardless of usage
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
             expect($this->policy->before($this->admin, 'delete'))->toBeTrue();
         });
     });
@@ -221,12 +221,12 @@ describe('VenuePolicy Unit Tests', function () {
     describe('policy consistency and edge cases', function () {
         test('policy methods return correct types', function () {
             // All policy methods should return boolean values
-            expect($this->policy->viewList($this->basicUser))->toBeBool();
-            expect($this->policy->view($this->basicUser))->toBeBool();
+            expect($this->policy->viewAny($this->basicUser))->toBeBool();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeBool();
             expect($this->policy->create($this->basicUser))->toBeBool();
-            expect($this->policy->update($this->basicUser))->toBeBool();
-            expect($this->policy->delete($this->basicUser))->toBeBool();
-            expect($this->policy->restore($this->basicUser))->toBeBool();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeBool();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeBool();
+            expect($this->policy->restore($this->basicUser, $this->venue))->toBeBool();
         });
 
         test('before hook returns correct types', function () {
@@ -244,8 +244,8 @@ describe('VenuePolicy Unit Tests', function () {
 
             // Facility type should not change authorization pattern
             expect($this->policy->create($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
-            expect($this->policy->delete($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('venue capacity planning requires admin access', function () {
@@ -253,7 +253,7 @@ describe('VenuePolicy Unit Tests', function () {
             $largeVenue = Venue::factory()->make(['name' => 'Large Stadium']);
 
             // Capacity planning should require administrative privileges
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
         });
     });
@@ -270,8 +270,8 @@ describe('VenuePolicy Unit Tests', function () {
             ]);
 
             // Geographic location should not change authorization
-            expect($this->policy->view($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('multi-state venue management follows standard rules', function () {
@@ -292,7 +292,7 @@ describe('VenuePolicy Unit Tests', function () {
             $operationalVenue = Venue::factory()->make(['name' => 'Operational Venue']);
 
             // Operational status should not affect basic authorization
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
             expect($this->policy->before($this->admin, 'update'))->toBeTrue();
         });
 
@@ -301,8 +301,8 @@ describe('VenuePolicy Unit Tests', function () {
             $bookedVenue = Venue::factory()->make(['name' => 'Fully Booked Venue']);
 
             // Availability should not change authorization requirements
-            expect($this->policy->view($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
         });
     });
 });

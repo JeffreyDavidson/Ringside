@@ -142,7 +142,7 @@ public function before(User $user, string $ability): ?bool
     return null; // Continue to individual method checks
 }
 
-public function viewList(User $user): bool
+public function viewAny(User $user): bool
 {
     return false; // Will be bypassed by before hook for administrators
 }
