@@ -191,7 +191,7 @@ describe('Title Actions Event Dispatching', function () {
 
         Livewire::actingAs($user);
 
-        $component = testLivewire(Actions::class, ['title' => $this->title]);
+        $component = livewire(Actions::class, ['title' => $this->title]);
 
         $component->call('debut')->assertForbidden();
         $component->assertNotDispatched('title-updated');

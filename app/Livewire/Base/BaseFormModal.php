@@ -28,6 +28,7 @@ abstract class BaseFormModal extends BaseModal
     public function openModal(int|string|null $modelId = null): void
     {
         $this->mount($modelId);
+        $this->authorizeFormAccess();
         $this->isModalOpen = true;
     }
 
@@ -47,7 +48,7 @@ abstract class BaseFormModal extends BaseModal
             $this->form->setModel($this->model);
         }
 
-        $this->authorizeSubmission();
+        $this->authorizeFormAccess();
 
         if (! $this->storeForm()) {
             return false;
@@ -63,7 +64,7 @@ abstract class BaseFormModal extends BaseModal
 
     abstract protected function storeForm(): bool;
 
-    private function authorizeSubmission(): void
+    private function authorizeFormAccess(): void
     {
         $modelClass = $this->getModelClass();
 

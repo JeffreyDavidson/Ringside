@@ -9,7 +9,6 @@ use App\Actions\Users\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Users\Forms\CreateEditForm;
 use App\Models\Users\User;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 /**
@@ -46,20 +45,6 @@ class FormModal extends BaseFormModal
         ];
     }
 
-    public function openModal(int|string|null $modelId = null): void
-    {
-        // Check authorization before opening modal
-        if ($modelId !== null) {
-            // Editing existing user - check update permission
-            Gate::authorize('update', User::class);
-        } else {
-            // Creating new user - check create permission
-            Gate::authorize('create', User::class);
-        }
-
-        parent::openModal($modelId);
-    }
-
     public function getModalTitle(): string
     {
         if (isset($this->model)) {
@@ -86,20 +71,17 @@ class FormModal extends BaseFormModal
 
     public function submitForm(): bool
     {
-        // Store whether we're creating or updating before the form submission
         $isCreating = $this->form->isCreating();
 
         $result = parent::submitForm();
 
         if ($result) {
-            // Dispatch the appropriate event based on whether we created or updated
             if ($isCreating) {
                 $this->dispatch('userCreated');
             } else {
                 $this->dispatch('userUpdated');
             }
 
-            // Reset the form after successful submission
             $this->form->reset();
         }
 
@@ -109,7 +91,6 @@ class FormModal extends BaseFormModal
     public function closeModal(): void
     {
         parent::closeModal();
-        // Reset the form when modal is closed
         $this->form->reset();
     }
 

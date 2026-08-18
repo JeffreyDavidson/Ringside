@@ -9,6 +9,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->actingAs(User::factory()->administrator()->create());
 });
@@ -55,8 +57,7 @@ it('shows distinct previous stables associated through managed roster members', 
         'hired_at' => now()->subMonths(5),
     ]);
 
-    $stables = testLivewire(PreviousStables::class, ['managerId' => $manager->id])
-        ->instance()
+    $stables = tap(app(PreviousStables::class), fn (PreviousStables $table) => $table->managerId = $manager->id)
         ->builder()
         ->get();
 
@@ -69,6 +70,6 @@ it('shows distinct previous stables associated through managed roster members', 
 it('renders for an administrator', function () {
     $manager = Manager::factory()->create();
 
-    testLivewire(PreviousStables::class, ['managerId' => $manager->id])
+    livewire(PreviousStables::class, ['managerId' => $manager->id])
         ->assertSuccessful();
 });

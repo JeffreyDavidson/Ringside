@@ -7,6 +7,8 @@ use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->actingAs($this->admin);
@@ -14,7 +16,7 @@ beforeEach(function () {
 
 describe('FormModal Configuration', function () {
     it('initializes the wrestler form', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
         expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
     });
@@ -29,32 +31,32 @@ describe('FormModal Configuration', function () {
     });
 
     it('renders the wrestler modal view', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
-        expect($component->instance()->render()->name())->toBe('livewire.wrestlers.modals.form-modal');
+        $component->assertViewIs('livewire.wrestlers.modals.form-modal');
     });
 });
 
 describe('FormModal Mounting', function () {
     it('can mount for creating new wrestler', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
-        expect($component->instance()->form)->toBeInstanceOf(CreateEditForm::class);
+        expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
         $component->assertSuccessful();
     });
 
     it('can mount for editing existing wrestler', function () {
         $wrestler = Wrestler::factory()->create();
 
-        $component = testLivewire(FormModal::class, ['modelId' => $wrestler->id]);
+        $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
-        expect($component->instance()->form)->toBeInstanceOf(CreateEditForm::class);
-        expect($component->instance()->form->name)->toBe($wrestler->name);
+        expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
+        $component->assertSet('form.name', $wrestler->name);
         $component->assertSuccessful();
     });
 
     it('sets modal form path correctly', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
         // Test that the component can mount without errors - this verifies the path works
         $component->assertSuccessful();
@@ -63,7 +65,7 @@ describe('FormModal Mounting', function () {
 
 describe('FormModal Component Functionality', function () {
     it('can render successfully', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
         $component->assertSuccessful();
     });
@@ -71,16 +73,16 @@ describe('FormModal Component Functionality', function () {
     it('can handle wrestler data correctly', function () {
         $wrestler = Wrestler::factory()->create();
 
-        $component = testLivewire(FormModal::class, ['modelId' => $wrestler->id]);
+        $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         $component->assertSuccessful();
-        expect($component->instance()->form->name)->toBe($wrestler->name);
+        $component->assertSet('form.name', $wrestler->name);
     });
 });
 
 describe('FormModal Form Integration', function () {
     it('handles form submission correctly', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
         $component->set('form.name', 'Test Wrestler')
             ->set('form.hometown', 'Test City, TX')
@@ -95,7 +97,7 @@ describe('FormModal Form Integration', function () {
     });
 
     it('handles form validation errors', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
         $component->set('form.name', '') // Required field empty
             ->call('submitForm')
@@ -110,7 +112,7 @@ describe('FormModal Form Integration', function () {
             'hometown' => 'Original City',
         ]);
 
-        $component = testLivewire(FormModal::class, ['modelId' => $wrestler->id]);
+        $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         $component->set('form.name', 'Updated Name')
             ->set('form.hometown', 'Updated City')
@@ -137,7 +139,7 @@ describe('FormModal Dummy Data', function () {
     });
 
     it('can fill dummy data', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
         $component->call('fillDummyFields');
 
         expect($component->get('form.name'))->not->toBeEmpty();
@@ -148,7 +150,7 @@ describe('FormModal Dummy Data', function () {
     });
 
     it('generates realistic dummy data', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
         $component->call('fillDummyFields');
 
         // Check that height is realistic (5-7 feet)
@@ -170,7 +172,7 @@ describe('FormModal Dummy Data', function () {
 
 describe('FormModal Event Handling', function () {
     it('dispatches close event when form submission succeeds', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
         $component->set('form.name', 'Test Wrestler')
             ->set('form.hometown', 'Test City, TX')
@@ -182,7 +184,7 @@ describe('FormModal Event Handling', function () {
     });
 
     it('can handle external close modal calls', function () {
-        $component = testLivewire(FormModal::class);
+        $component = livewire(FormModal::class);
 
         $component->assertSuccessful();
 
@@ -196,14 +198,14 @@ describe('FormModal Reset Functionality', function () {
     it('resets form when modal closes', function () {
         $wrestler = Wrestler::factory()->create();
 
-        $component = testLivewire(FormModal::class, ['modelId' => $wrestler->id]);
+        $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Modify form data
         $component->set('form.name', 'Modified Name');
 
         // Close modal and create new component instance with same wrestler
         $component->call('closeModal');
-        $newComponent = testLivewire(FormModal::class, ['modelId' => $wrestler->id]);
+        $newComponent = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         // Form should be reset to original data
         expect($newComponent->get('form.name'))->toBe($wrestler->name);
@@ -212,14 +214,14 @@ describe('FormModal Reset Functionality', function () {
     it('clears form when opening for creation after editing', function () {
         $wrestler = Wrestler::factory()->create();
 
-        $component = testLivewire(FormModal::class, ['modelId' => $wrestler->id]);
+        $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
 
         // First, edit a wrestler - verify it's loaded
         expect($component->get('form.name'))->toBe($wrestler->name);
         $component->call('closeModal');
 
         // Then create new component for creation (no model ID)
-        $creationComponent = testLivewire(FormModal::class);
+        $creationComponent = livewire(FormModal::class);
         expect($creationComponent->get('form.name'))->toBe('');
     });
 });

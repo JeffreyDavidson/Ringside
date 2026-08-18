@@ -10,6 +10,8 @@ use App\Models\Titles\TitleChampionship;
 use App\Models\Users\User;
 use Illuminate\Support\Collection;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->wrestler = Wrestler::factory()->create();
@@ -23,25 +25,25 @@ describe('PreviousTitleChampionshipsTable Configuration', function () {
     });
 
     it('can set wrestler id', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->wrestlerId)->toBe($this->wrestler->id);
+        $component->assertSet('wrestlerId', $this->wrestler->id);
     });
 
     it('has correct database table name', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
         // The databaseTableName property is protected, but we can verify through the query
-        $sql = $component->instance()->builder()->toSql();
+        $sql = tap(app(PreviousTitleChampionships::class), fn (PreviousTitleChampionships $table) => $table->wrestlerId = $this->wrestler->id)->builder()->toSql();
         expect($sql)->toContain('from "titles_championships"');
     });
 });
 
 describe('PreviousTitleChampionshipsTable Query Building', function () {
     it('builds query correctly with wrestler id', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $builder = $component->instance()->builder();
+        $builder = tap(app(PreviousTitleChampionships::class), fn (PreviousTitleChampionships $table) => $table->wrestlerId = $this->wrestler->id)->builder();
 
         expect($builder->toSql())->toContain('"champion_type" = ?');
         expect($builder->toSql())->toContain('and "lost_at" is not null');
@@ -49,17 +51,17 @@ describe('PreviousTitleChampionshipsTable Query Building', function () {
     });
 
     it('filters by wrestler id correctly', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousTitleChampionships::class), fn (PreviousTitleChampionships $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
 
         expect($results)->toBeInstanceOf(Collection::class);
     });
 
     it('only shows championships that have ended', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $builder = $component->instance()->builder();
+        $builder = tap(app(PreviousTitleChampionships::class), fn (PreviousTitleChampionships $table) => $table->wrestlerId = $this->wrestler->id)->builder();
 
         expect($builder->toSql())->toContain('and "lost_at" is not null');
     });
@@ -82,21 +84,21 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
             ->lostOn('2021-01-01')
             ->create();
 
-        testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id])
+        livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id])
             ->assertSee('Previous Champions')
             ->assertSeeHtml(route('tag-teams.show', $previousChampion));
     });
 
     it('can render with wrestler id set', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
 
     it('can render with no championship history', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousTitleChampionships::class), fn (PreviousTitleChampionships $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
         expect($results)->toHaveCount(0);
 
         $component->assertSuccessful();
@@ -105,7 +107,7 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
 
 describe('PreviousTitleChampionshipsTable Authorization', function () {
     it('allows access to administrators', function () {
-        $component = testLivewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });

@@ -50,7 +50,7 @@ class ResultModal extends ModalComponent
     public function save(): void
     {
         $match = $this->match();
-        Gate::authorize('update', EventMatch::class);
+        Gate::authorize('update', $match);
 
         $competitorIds = $match->competitors->modelKeys();
         $sideIds = $match->sides->modelKeys();

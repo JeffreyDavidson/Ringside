@@ -1,4 +1,4 @@
-name: Application Tests
+name: Application Quality
 
 on:
     push:
@@ -32,17 +32,39 @@ jobs:
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 22
+                  cache: npm
+
+            - name: Install frontend dependencies
+              run: npm ci --ignore-scripts --no-audit --no-fund
+
             - name: Prepare Laravel
               run: |
                   cp .env.testing .env
                   php artisan key:generate
                   php artisan config:cache
 
+            - name: Check PHP and Blade formatting
+              run: composer test:lint
+
+            - name: Check Rector
+              run: composer test:rector
+
+            - name: Run static analysis
+              run: composer test:types
+
+            - name: Check Pest type coverage
+              run: composer test:type-coverage
+
             - name: Run application tests
               run: php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite "Feature","Integration","Unit" --no-coverage --parallel
 
     browser-tests:
         name: Browser Tests
+        needs: tests
         runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
         timeout-minutes: 20
 

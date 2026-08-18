@@ -7,6 +7,8 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Collection;
 
+use function Pest\Livewire\livewire;
+
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->wrestler = Wrestler::factory()->create();
@@ -20,23 +22,23 @@ describe('PreviousStablesTable Configuration', function () {
     });
 
     it('can set wrestler id', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->wrestlerId)->toBe($this->wrestler->id);
+        $component->assertSet('wrestlerId', $this->wrestler->id);
     });
 
     it('has correct database table name', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($component->instance()->databaseTableName)->toBe('stables_wrestlers');
+        $component->assertSet('databaseTableName', 'stables_wrestlers');
     });
 });
 
 describe('PreviousStablesTable Query Building', function () {
     it('builds query correctly with wrestler id', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $builder = $component->instance()->builder();
+        $builder = tap(app(PreviousStables::class), fn (PreviousStables $table) => $table->wrestlerId = $this->wrestler->id)->builder();
 
         expect($builder->toSql())->toContain('where "stables_wrestlers"."wrestler_id" = ?');
         expect($builder->toSql())->toContain('"stables_wrestlers"."left_at" is not null');
@@ -44,17 +46,17 @@ describe('PreviousStablesTable Query Building', function () {
     });
 
     it('filters by wrestler id correctly', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousStables::class), fn (PreviousStables $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
 
         expect($results)->toBeInstanceOf(Collection::class);
     });
 
     it('only shows relationships that have ended', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $builder = $component->instance()->builder();
+        $builder = tap(app(PreviousStables::class), fn (PreviousStables $table) => $table->wrestlerId = $this->wrestler->id)->builder();
 
         expect($builder->toSql())->toContain('"left_at" is not null');
     });
@@ -62,15 +64,15 @@ describe('PreviousStablesTable Query Building', function () {
 
 describe('PreviousStablesTable Rendering', function () {
     it('can render with wrestler id set', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
 
     it('can render with no stable relationships', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = $component->instance()->builder()->get();
+        $results = tap(app(PreviousStables::class), fn (PreviousStables $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
         expect($results)->toHaveCount(0);
 
         $component->assertSuccessful();
@@ -79,7 +81,7 @@ describe('PreviousStablesTable Rendering', function () {
 
 describe('PreviousStablesTable Authorization', function () {
     it('allows access to administrators', function () {
-        $component = testLivewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
         $component->assertSuccessful();
     });
