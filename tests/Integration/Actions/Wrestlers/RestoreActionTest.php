@@ -31,6 +31,17 @@ test('it restores a soft-deleted wrestler', function () {
     ]);
 });
 
+test('it reloads a stale wrestler before restoring', function () {
+    $wrestler = Wrestler::factory()->create();
+    $staleWrestler = clone $wrestler;
+
+    $wrestler->delete();
+
+    resolve(RestoreAction::class)->handle($staleWrestler);
+
+    expect(Wrestler::query()->find($wrestler->getKey()))->not->toBeNull();
+});
+
 test('it restores wrestler with specific restore date', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestler->delete(); // Soft delete

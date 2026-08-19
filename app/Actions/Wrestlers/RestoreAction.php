@@ -32,12 +32,17 @@ class RestoreAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $restoreDate = null): void
     {
-        $this->eligibility->ensureCanRestore($wrestler);
-
         $restoreDate = $restoreDate ?? now();
 
         DB::transaction(function () use ($wrestler, $restoreDate): void {
-            $this->deletionState->restore($wrestler, $restoreDate);
+            $lockedWrestler = Wrestler::query()
+                ->withTrashed()
+                ->whereKey($wrestler->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanRestore($lockedWrestler);
+            $this->deletionState->restore($lockedWrestler, $restoreDate);
 
             // Note: No automatic relationship restoration to avoid conflicts.
             // All employment, tag team, stable, and manager relationships

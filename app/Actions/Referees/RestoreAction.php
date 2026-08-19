@@ -30,10 +30,15 @@ class RestoreAction
      */
     public function handle(Referee $referee): void
     {
-        $this->eligibility->ensureCanRestore($referee);
-
         DB::transaction(function () use ($referee): void {
-            $this->deletionState->restore($referee, now());
+            $lockedReferee = Referee::query()
+                ->withTrashed()
+                ->whereKey($referee->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanRestore($lockedReferee);
+            $this->deletionState->restore($lockedReferee, now());
 
             // Note: No automatic relationship restoration to avoid conflicts.
             // All employment relationships must be re-established explicitly using separate actions.

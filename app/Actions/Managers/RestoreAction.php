@@ -32,14 +32,19 @@ class RestoreAction
      */
     public function handle(Manager $manager): void
     {
-        $this->eligibility->ensureCanRestore($manager);
-
         DB::transaction(function () use ($manager): void {
-            $restorationDate = now();
-            $this->deletionState->restore($manager, $restorationDate);
+            $lockedManager = Manager::query()
+                ->withTrashed()
+                ->whereKey($manager->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-            $manager->employments()->whereNull('ended_at')->update(['ended_at' => $restorationDate]);
-            $this->managerAssignments->endCurrentAssignments($manager, $restorationDate);
+            $this->eligibility->ensureCanRestore($lockedManager);
+            $restorationDate = now();
+            $this->deletionState->restore($lockedManager, $restorationDate);
+
+            $lockedManager->employments()->whereNull('ended_at')->update(['ended_at' => $restorationDate]);
+            $this->managerAssignments->endCurrentAssignments($lockedManager, $restorationDate);
         });
     }
 }
