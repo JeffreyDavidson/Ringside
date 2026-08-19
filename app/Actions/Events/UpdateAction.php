@@ -6,7 +6,9 @@ namespace App\Actions\Events;
 
 use App\Data\Events\EventData;
 use App\Lifecycle\EventSchedulingEligibility;
+use App\Lifecycle\VenueSchedulingEligibility;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Facades\DB;
 
@@ -33,6 +35,11 @@ class UpdateAction
             $lockedEvent = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
 
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
+            $venue = $this->lockScheduledVenue($eventData);
+
+            if ($venue !== null && $eventData->date !== null) {
+                VenueSchedulingEligibility::ensureAvailable($venue, $eventData->date, $lockedEvent);
+            }
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
@@ -41,11 +48,23 @@ class UpdateAction
             $lockedEvent->update([
                 'name' => $eventData->name,
                 'date' => $eventData->date,
-                'venue_id' => $eventData->venue->id ?? null,
+                'venue_id' => $eventData->venue?->id,
                 'preview' => $eventData->preview,
             ]);
 
             return $lockedEvent;
         }, attempts: 3);
+    }
+
+    private function lockScheduledVenue(EventData $eventData): ?Venue
+    {
+        if ($eventData->date === null || $eventData->venue === null) {
+            return null;
+        }
+
+        return Venue::query()
+            ->whereKey($eventData->venue->id)
+            ->lockForUpdate()
+            ->firstOrFail();
     }
 }
