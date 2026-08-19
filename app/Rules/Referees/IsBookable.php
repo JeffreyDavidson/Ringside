@@ -9,12 +9,11 @@ use App\Models\Roster\Referees\Referee;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class CanRefereeMatch implements ValidationRule
+class IsBookable implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        /** @var Referee|null $referee */
-        $referee = Referee::find($value);
+        $referee = Referee::query()->find($value);
 
         if (! $referee instanceof Referee || ! RosterBookingEligibility::allows($referee)) {
             $fail('This referee is not available to officiate matches.');

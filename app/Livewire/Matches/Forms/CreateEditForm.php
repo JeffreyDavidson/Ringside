@@ -18,7 +18,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Rules\Matches\CompetitorsNotDuplicated;
 use App\Rules\Matches\CorrectNumberOfSides;
-use App\Rules\Referees\CanRefereeMatch;
+use App\Rules\Referees\IsBookable as RefereeIsBookable;
 use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
 use Illuminate\Validation\Rule;
@@ -146,7 +146,7 @@ class CreateEditForm extends BaseForm
             ],
             'preview' => ['sometimes', 'string'],
             'referees' => ['required', 'array', 'min:1'],
-            'referees.*' => ['integer', 'exists:referees,id', new CanRefereeMatch()],
+            'referees.*' => ['bail', 'integer', 'exists:referees,id', new RefereeIsBookable()],
             'titles' => ['sometimes', 'array'],
             'titles.*' => [
                 'bail',
