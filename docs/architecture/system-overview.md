@@ -250,6 +250,8 @@ Event dates become immutable once the event has occurred. `EventSchedulingEligib
 
 A venue may host only one event at a given date and time. Event creation and updates lock the selected venue row before `VenueSchedulingEligibility` checks its event relationship, serializing competing bookings and rolling back the complete event write when a conflict exists. Unscheduled events do not reserve a venue time.
 
+Restoring a soft-deleted event applies the same venue lock and availability check before reactivating its booking, so a later event cannot be displaced or share the same venue slot.
+
 ### Roster Management
 
 Dynamic competitor assignment from available talent:
