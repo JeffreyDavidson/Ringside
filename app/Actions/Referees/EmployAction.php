@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Roster\Referees\Referee;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +33,7 @@ class EmployAction
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void
     {
-        $employmentDate = DateHelper::resolveDate($employmentDate);
+        $employmentDate = $employmentDate ?? now();
 
         DB::transaction(function () use ($referee, $employmentDate): void {
             $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();

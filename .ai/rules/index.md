@@ -18,6 +18,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Exceptions/** | .ai/rules/exceptions.md |
 | tests/Feature/** | .ai/rules/feature.md |
 | tests/Integration/** | .ai/rules/integration.md |
+| app/{Livewire,Actions}/Matches/** | .ai/rules/livewire-actions-matches.md |
 | app/Livewire/** | .ai/rules/livewire.md |
 | app/Exceptions/{Matches,Scheduling}/** | .ai/rules/matches-scheduling.md |
 | app/{Actions/Matches,Services}/** | .ai/rules/matches-services.md |

@@ -89,12 +89,10 @@ class CreateEditForm extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Only process if we have a title model
         if (! $this->formModel instanceof Title) {
             return;
         }
 
-        // Load activation start date from first activity period relationship
         $this->start_date = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
     }
 

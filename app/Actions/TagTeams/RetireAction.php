@@ -11,7 +11,6 @@ use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -44,7 +43,7 @@ class RetireAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $retirementDate = null, bool $retireMembers = true): void
     {
-        $retirementDate = DateHelper::resolveDate($retirementDate);
+        $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $retirementDate, $retireMembers): void {
             $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();

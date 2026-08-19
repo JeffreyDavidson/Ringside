@@ -17,6 +17,7 @@ use App\Models\Users\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -61,6 +62,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::before(
+            fn (User $user): ?bool => $user->role->isAdministrator() ? true : null,
+        );
         Relation::enforceMorphMap([
             'wrestler' => Wrestler::class,
             'manager' => Manager::class,

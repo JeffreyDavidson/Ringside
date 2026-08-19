@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Livewire\Matches\Support;
 
 use App\Enums\MatchType;
+use App\Rules\TagTeams\IsBookable as TagTeamIsBookable;
+use App\Rules\Wrestlers\IsBookable as WrestlerIsBookable;
 
 final readonly class MatchCompetitorRuleSet
 {
@@ -41,9 +43,9 @@ final readonly class MatchCompetitorRuleSet
         return [
             'competitors' => ['sometimes', 'array'],
             'competitors.*.wrestlers' => ['sometimes', 'array'],
-            'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id', new WrestlerIsBookable()],
             'competitors.*.tag_teams' => ['sometimes', 'array'],
-            'competitors.*.tag_teams.*' => ['integer', 'exists:tag_teams,id'],
+            'competitors.*.tag_teams.*' => ['integer', 'exists:tag_teams,id', new TagTeamIsBookable()],
         ];
     }
 
@@ -54,7 +56,7 @@ final readonly class MatchCompetitorRuleSet
 
         foreach (range(0, $sideCount - 1) as $sideIndex) {
             $rules["competitors.{$sideIndex}.wrestlers"] = ['required', 'array', 'size:1'];
-            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['integer', 'exists:wrestlers,id'];
+            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['integer', 'exists:wrestlers,id', new WrestlerIsBookable()];
         }
 
         return $rules;
@@ -68,9 +70,9 @@ final readonly class MatchCompetitorRuleSet
         foreach (range(0, 1) as $sideIndex) {
             $rules["competitors.{$sideIndex}"] = ['required', 'array'];
             $rules["competitors.{$sideIndex}.wrestlers"] = ['sometimes', 'array', 'min:2'];
-            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['integer', 'exists:wrestlers,id'];
+            $rules["competitors.{$sideIndex}.wrestlers.*"] = ['integer', 'exists:wrestlers,id', new WrestlerIsBookable()];
             $rules["competitors.{$sideIndex}.tag_teams"] = ['sometimes', 'array', 'min:1'];
-            $rules["competitors.{$sideIndex}.tag_teams.*"] = ['integer', 'exists:tag_teams,id'];
+            $rules["competitors.{$sideIndex}.tag_teams.*"] = ['integer', 'exists:tag_teams,id', new TagTeamIsBookable()];
         }
 
         return $rules;
@@ -89,7 +91,7 @@ final readonly class MatchCompetitorRuleSet
         return [
             'competitors' => ['required', 'array', 'size:1'],
             'competitors.0.wrestlers' => $wrestlerRules,
-            'competitors.0.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            'competitors.0.wrestlers.*' => ['integer', 'exists:wrestlers,id', new WrestlerIsBookable()],
         ];
     }
 
@@ -99,9 +101,9 @@ final readonly class MatchCompetitorRuleSet
         return [
             'competitors' => ['required', 'array', 'min:2'],
             'competitors.*.wrestlers' => ['sometimes', 'array'],
-            'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id'],
+            'competitors.*.wrestlers.*' => ['integer', 'exists:wrestlers,id', new WrestlerIsBookable()],
             'competitors.*.tag_teams' => ['sometimes', 'array'],
-            'competitors.*.tag_teams.*' => ['integer', 'exists:tag_teams,id'],
+            'competitors.*.tag_teams.*' => ['integer', 'exists:tag_teams,id', new TagTeamIsBookable()],
         ];
     }
 }

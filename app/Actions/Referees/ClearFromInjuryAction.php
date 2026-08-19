@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Lifecycle\IndividualInjuryEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Roster\Referees\Referee;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +35,7 @@ class ClearFromInjuryAction
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
-        $recoveryDate = DateHelper::resolveDate($recoveryDate);
+        $recoveryDate = $recoveryDate ?? now();
 
         DB::transaction(function () use ($referee, $recoveryDate): void {
             $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();

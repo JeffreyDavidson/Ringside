@@ -12,6 +12,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeDebutDate;
 use App\Rules\Stables\CanJoinStable;
+use App\Rules\Stables\HasMinimumMembers;
 use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
 use Illuminate\Support\Carbon;
@@ -111,12 +112,10 @@ class CreateEditForm extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Only process if we have a stable model
         if (! $this->formModel instanceof Stable) {
             return;
         }
 
-        // Load activation dates from first activity period relationship
         $this->started_at = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
         $this->ended_at = $this->formModel->firstActivityPeriod?->ended_at?->toDateString();
         $this->wrestlers = $this->formModel->currentWrestlers->modelKeys();
@@ -188,7 +187,15 @@ class CreateEditForm extends BaseForm
                 'max:255',
                 Rule::unique('stables', 'name')->ignore($this->modelId)->withoutTrashed(),
             ],
-            'started_at' => ['nullable', 'date', new CanChangeDebutDate($this->formModel)],
+            'started_at' => [
+                'nullable',
+                'date',
+                new CanChangeDebutDate($this->formModel),
+                new HasMinimumMembers(
+                    Wrestler::query()->whereKey($this->wrestlers)->get(),
+                    TagTeam::query()->whereKey($this->tag_teams)->get(),
+                ),
+            ],
             'ended_at' => ['nullable', 'date'],
             'wrestlers' => ['nullable', 'array'],
             'wrestlers.*' => [
@@ -208,7 +215,6 @@ class CreateEditForm extends BaseForm
             ],
         ];
 
-        // Add validation that ended_at is after started_at if both are provided
         if (! in_array($this->started_at, [null, '', '0'], true) && ! in_array($this->ended_at, [null, '', '0'], true)) {
             $rules['ended_at'][] = 'after:started_at';
         }

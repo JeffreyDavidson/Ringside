@@ -10,7 +10,6 @@ use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Roster\Referees\Referee;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -38,7 +37,7 @@ class UnretireAction
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void
     {
-        $unretiredDate = DateHelper::resolveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($referee, $unretiredDate): void {
             $lockedReferee = Referee::query()->withTrashed()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();

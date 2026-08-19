@@ -25,6 +25,12 @@ abstract class BaseFormModal extends BaseModal
 
     public bool $isModalOpen = false;
 
+    protected ?string $createdEventName = null;
+
+    protected ?string $updatedEventName = null;
+
+    protected bool $resetFormAfterSubmission = false;
+
     public function openModal(int|string|null $modelId = null): void
     {
         $this->mount($modelId);
@@ -44,6 +50,8 @@ abstract class BaseFormModal extends BaseModal
 
     public function submitForm(): bool
     {
+        $wasCreating = $this->form->isCreating();
+
         if ($this->model !== null) {
             $this->form->setModel($this->model);
         }
@@ -58,6 +66,18 @@ abstract class BaseFormModal extends BaseModal
         $this->closeModal();
         $this->dispatch('closeModal');
         $this->dispatch('form-submitted');
+
+        $eventName = $wasCreating
+            ? $this->createdEventName
+            : $this->updatedEventName;
+
+        if ($eventName !== null) {
+            $this->dispatch($eventName);
+        }
+
+        if ($this->resetFormAfterSubmission) {
+            $this->form->reset();
+        }
 
         return true;
     }

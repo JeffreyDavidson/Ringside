@@ -24,28 +24,28 @@ describe('EventPolicy Unit Tests', function () {
         $this->event = Event::factory()->create();
     });
 
-    describe('before hook behavior', function () {
+    describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'view'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'create'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'update'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'delete'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('basic users continue to individual method checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'delete'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
         });
 
-        test('before hook works for arbitrary abilities', function () {
-            expect($this->policy->before($this->admin, 'custom-ability'))->toBeTrue();
-            expect($this->policy->before($this->basicUser, 'custom-ability'))->toBeNull();
+        test('global Gate hook works for arbitrary abilities', function () {
+            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
         });
     });
 
@@ -112,15 +112,15 @@ describe('EventPolicy Unit Tests', function () {
                 expect(Gate::forUser($this->basicUser)->denies($method, $subject))
                     ->toBeTrue("Method {$method} should deny basic users");
 
-                // All methods should be bypassed for administrators via before hook
-                expect($this->policy->before($this->admin, $method))
+                // All methods should be bypassed for administrators via the global Gate hook
+                expect(Gate::forUser($this->admin)->raw($method))
                     ->toBeTrue("Method {$method} should be bypassed for administrators");
             }
         });
 
         test('policy has all expected methods', function () {
             $expectedMethods = [
-                'before', 'viewAny', 'view', 'create', 'update', 'delete', 'restore',
+                'viewAny', 'view', 'create', 'update', 'delete', 'restore',
             ];
 
             foreach ($expectedMethods as $method) {
@@ -135,7 +135,6 @@ describe('EventPolicy Unit Tests', function () {
             $policy1 = new EventPolicy();
             $policy2 = new EventPolicy();
 
-            expect($policy1->before($this->admin, 'create'))->toBe($policy2->before($this->admin, 'create'));
             expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });
     });

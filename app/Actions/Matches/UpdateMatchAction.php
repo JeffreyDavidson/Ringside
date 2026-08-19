@@ -44,11 +44,11 @@ class UpdateMatchAction
 
             $this->addRefereesToMatchAction->handle($lockedMatch, $data->referees);
 
+            $this->addCompetitorsToMatchAction->handle($lockedMatch, $data->sides);
+
             if ($data->titles->isNotEmpty()) {
                 $this->addTitlesToMatchAction->handle($lockedMatch, $data->titles);
             }
-
-            $this->addCompetitorsToMatchAction->handle($lockedMatch, $data->sides);
 
             return $lockedMatch->refresh();
         });

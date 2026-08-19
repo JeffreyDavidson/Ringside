@@ -67,7 +67,7 @@ test('it reinstates referee with specific reinstatement date', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->suspended()->create();
     $reinstatementDate = now()->subDays(2);
 
@@ -75,7 +75,7 @@ test('it handles DateHelper date resolution', function () {
 
     $referee->refresh();
 
-    // DateHelper should have processed the reinstatement date
+    // The provided reinstatement date should be persisted
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $referee->id,
         'suspendable_type' => $referee->getMorphClass(),

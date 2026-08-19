@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Builders\Roster\WrestlerBuilder;
-use App\Casts\HeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasMatchParticipations;
@@ -19,6 +18,8 @@ use App\Models\Contracts\Manageable;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\Suspendable;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\ValueObjects\Height;
+use App\ValueObjects\Weight;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -60,7 +61,8 @@ describe('Wrestler Model Unit Tests', function () {
             $wrestler = new Wrestler();
             $casts = $wrestler->getCasts();
 
-            expect($casts['height'])->toBe(HeightCast::class);
+            expect($casts['height'])->toBe(Height::class)
+                ->and($casts['weight'])->toBe(Weight::class);
             // Status is computed attribute, no cast needed
             expect($casts)->not->toHaveKey('status');
         });

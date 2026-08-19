@@ -12,15 +12,16 @@ use App\Policies\TitlePolicy;
 use App\Policies\UserPolicy;
 use App\Policies\VenuePolicy;
 use App\Policies\WrestlerPolicy;
+use Illuminate\Support\Facades\Gate;
 
 /**
- * Shared tests for policy before hook pattern.
+ * Shared tests for global Gate hook.
  *
- * This test ensures all policies follow the consistent before hook pattern
+ * This test ensures all policies follow the consistent global Gate hook
  * where administrators bypass all authorization checks and basic users
  * continue to individual method checks.
  */
-describe('Policy Before Hook Pattern', function () {
+describe('Global Gate Hook Pattern', function () {
 
     beforeEach(function () {
         $this->policies = [
@@ -42,13 +43,13 @@ describe('Policy Before Hook Pattern', function () {
 
     test('administrators bypass all authorization methods', function () {
         foreach ($this->policies as $policy) {
-            // Test arbitrary ability (proves before hook works for non-method abilities)
-            expect($policy->before($this->admin, 'any-ability'))->toBeTrue();
+            // Test arbitrary ability (proves global Gate hook works for non-method abilities)
+            expect(Gate::forUser($this->admin)->raw('any-ability'))->toBeTrue();
 
             // Test all actual policy methods
             $methods = getPublicPolicyMethods($policy);
             foreach ($methods as $methodName) {
-                expect($policy->before($this->admin, $methodName))
+                expect(Gate::forUser($this->admin)->raw($methodName))
                     ->toBeTrue("Admin should bypass {$methodName} in ".get_class($policy));
             }
         }
@@ -56,13 +57,13 @@ describe('Policy Before Hook Pattern', function () {
 
     test('basic users continue to individual method checks', function () {
         foreach ($this->policies as $policy) {
-            // Test arbitrary ability (proves before hook works for non-method abilities)
-            expect($policy->before($this->basicUser, 'any-ability'))->toBeNull();
+            // Test arbitrary ability (proves global Gate hook works for non-method abilities)
+            expect(Gate::forUser($this->basicUser)->raw('any-ability'))->toBeNull();
 
             // Test all actual policy methods
             $methods = getPublicPolicyMethods($policy);
             foreach ($methods as $methodName) {
-                expect($policy->before($this->basicUser, $methodName))
+                expect(Gate::forUser($this->basicUser)->raw($methodName))
                     ->toBeNull("Basic user should continue to {$methodName} check in ".get_class($policy));
             }
         }

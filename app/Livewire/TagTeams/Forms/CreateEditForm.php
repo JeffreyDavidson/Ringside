@@ -122,22 +122,18 @@ class CreateEditForm extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Only process if we have a tag team model
         if (! $this->formModel instanceof TagTeam) {
             return;
         }
 
-        // Load employment start date from relationship (with type safety)
         if ($this->formModel->hasEmploymentHistory()) {
             $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
         }
 
-        // Load current wrestler assignments
         $currentWrestlers = $this->formModel->currentWrestlers;
         $this->wrestlerA = $currentWrestlers->first()?->id;
         $this->wrestlerB = $currentWrestlers->skip(1)->first()?->id;
 
-        // Load current manager assignments
         $this->managers = $this->formModel->currentManagers
             ->map(fn (Manager $manager): int => $manager->id)
             ->all();
