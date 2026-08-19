@@ -3,11 +3,18 @@
 declare(strict_types=1);
 
 use App\Actions\Matches\AddTitlesToMatchAction;
+use App\Enums\Titles\TitleType;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
+use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 use function Spatie\PestPluginTestTime\testTime;
 
@@ -149,4 +156,57 @@ test('it assigns a repeated title only once', function () {
     resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title, $title]));
 
     expect($match->titles()->count())->toBe(1);
+});
+
+test('it requires the current wrestler champion to compete in the title match', function () {
+    $match = EventMatch::factory()->create();
+    $side = MatchSide::factory()->for($match, 'match')->create();
+    $champion = Wrestler::factory()->bookable()->create();
+    $challenger = Wrestler::factory()->bookable()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->create([
+        'competitor_type' => $challenger->getMorphClass(),
+        'competitor_id' => $challenger->id,
+    ]);
+
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))
+        ->toThrow(
+            InvalidMatchConfigurationException::class,
+            "The current champion of [{$title->name}] must compete in the title match.",
+        );
+
+    expect($match->titles()->exists())->toBeFalse();
+});
+
+test('it accepts a title match containing the current wrestler champion', function () {
+    $match = EventMatch::factory()->create();
+    $side = MatchSide::factory()->for($match, 'match')->create();
+    $champion = Wrestler::factory()->bookable()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->create([
+        'competitor_type' => $champion->getMorphClass(),
+        'competitor_id' => $champion->id,
+    ]);
+
+    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    expect($match->titles()->whereKey($title)->exists())->toBeTrue();
+});
+
+test('it accepts a title match containing the current tag team champion', function () {
+    $match = EventMatch::factory()->create();
+    $side = MatchSide::factory()->for($match, 'match')->create();
+    $champion = TagTeam::factory()->bookable()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::TagTeam]);
+    TitleChampionship::factory()->for($title)->forTagTeam($champion)->current()->create();
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->create([
+        'competitor_type' => $champion->getMorphClass(),
+        'competitor_id' => $champion->id,
+    ]);
+
+    resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
+
+    expect($match->titles()->whereKey($title)->exists())->toBeTrue();
 });

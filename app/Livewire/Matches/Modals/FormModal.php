@@ -6,7 +6,9 @@ namespace App\Livewire\Matches\Modals;
 
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Actions\Matches\UpdateMatchAction;
+use App\Enums\BusinessRuleReason;
 use App\Enums\MatchType;
+use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Concerns\Data\PresentsMatchTypesList;
 use App\Livewire\Concerns\Data\PresentsRefereesList;
@@ -19,7 +21,6 @@ use App\Livewire\Matches\Support\MatchFormDummyData;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchStipulation;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -32,6 +33,12 @@ class FormModal extends BaseFormModal
     use PresentsTagTeamsList;
     use PresentsTitlesList;
     use PresentsWrestlersList;
+
+    protected ?string $createdEventName = 'matchCreated';
+
+    protected ?string $updatedEventName = 'matchUpdated';
+
+    protected bool $resetFormAfterSubmission = true;
 
     #[Locked]
     public int $eventId = 0;
@@ -63,12 +70,22 @@ class FormModal extends BaseFormModal
     {
         $this->form->validate();
 
-        if ($this->form->isEditing()) {
-            $match = EventMatch::query()->findOrFail($this->form->modelId);
-            $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
-        } else {
-            $event = Event::query()->findOrFail($this->eventId);
-            $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
+        try {
+            if ($this->form->isEditing()) {
+                $match = EventMatch::query()->findOrFail($this->form->modelId);
+                $storedMatch = $this->updateMatchAction->handle($match, $this->form->toData());
+            } else {
+                $event = Event::query()->findOrFail($this->eventId);
+                $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
+            }
+        } catch (InvalidMatchConfigurationException $exception) {
+            if ($exception->reason() !== BusinessRuleReason::CurrentChampionMissing) {
+                throw $exception;
+            }
+
+            $this->addError('form.titles', $exception->getMessage());
+
+            return false;
         }
 
         $this->form->setModel($storedMatch);
@@ -95,35 +112,9 @@ class FormModal extends BaseFormModal
         $this->dummyData->fill($this->form);
     }
 
-    public function openModal(int|string|null $modelId = null): void
-    {
-        if ($modelId === null) {
-            Gate::authorize('create', EventMatch::class);
-        } else {
-            Gate::authorize('update', EventMatch::query()->findOrFail($modelId));
-        }
-
-        parent::openModal($modelId);
-    }
-
     public function getModalTitle(): string
     {
         return isset($this->model) ? 'Edit Match' : 'Create Match';
-    }
-
-    public function submitForm(): bool
-    {
-        $isCreating = $this->form->isCreating();
-        $wasStored = parent::submitForm();
-
-        if (! $wasStored) {
-            return false;
-        }
-
-        $this->dispatch($isCreating ? 'matchCreated' : 'matchUpdated');
-        $this->form->reset();
-
-        return true;
     }
 
     public function updatedFormMatchType(mixed $value): void

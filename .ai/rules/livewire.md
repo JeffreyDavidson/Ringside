@@ -25,3 +25,6 @@ Catch and translate BaseBusinessException at Livewire user-interaction boundarie
 
 ## Populate development data through typed forms
 Implement dummy-data population by assigning directly to the concrete Livewire form's typed properties. Do not return generic field-name arrays or dynamically assign arbitrary properties; dedicated collaborators such as match form population must accept the concrete form type.
+
+## Use deterministic internal redirects
+Redirect Livewire actions with redirectRoute() to a named internal route. Do not derive redirect destinations from Referer or other request headers because clients control those values.

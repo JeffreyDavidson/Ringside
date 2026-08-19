@@ -7,7 +7,6 @@ namespace App\Actions\Wrestlers;
 use App\Data\Wrestlers\WrestlerData;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\ManagerAssignmentService;
-use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -32,7 +31,7 @@ class CreateAction
                 $this->managerAssignmentService->assign(
                     $wrestler,
                     $wrestlerData->managers,
-                    DateHelper::resolveDate($wrestlerData->employment_date),
+                    $wrestlerData->employment_date ?? now(),
                 );
             }
 

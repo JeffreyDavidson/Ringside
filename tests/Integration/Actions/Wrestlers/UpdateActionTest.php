@@ -183,7 +183,7 @@ test('it employs managers when wrestler gets employed', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution for employment', function () {
+test('it uses the provided employment date', function () {
     $wrestler = Wrestler::factory()->create();
 
     $updateData = new WrestlerData(
@@ -201,7 +201,7 @@ test('it handles DateHelper date resolution for employment', function () {
     $result->refresh();
     expect($result->isEmployed())->toBeTrue();
 
-    // DateHelper should have processed the employment date
+    // The provided employment date should be persisted
     $this->assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),

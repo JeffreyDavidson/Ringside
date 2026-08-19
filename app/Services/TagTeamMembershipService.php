@@ -22,8 +22,6 @@ class TagTeamMembershipService
             $tagTeam->wrestlers(),
             $members->wrestlers,
             $date,
-            'joined_at',
-            'left_at',
         );
         $this->managerAssignments->assign($tagTeam, $members->managers, $date);
     }
@@ -35,8 +33,6 @@ class TagTeamMembershipService
             $tagTeam->currentWrestlers,
             $members->wrestlers,
             $date,
-            'joined_at',
-            'left_at',
         );
         $this->managerAssignments->synchronize($tagTeam, $members->managers, $date);
     }
@@ -52,16 +48,14 @@ class TagTeamMembershipService
         BelongsToMany $relationship,
         ?Collection $members,
         Carbon $date,
-        string $startedAtColumn,
-        string $endedAtColumn,
     ): void {
         if ($members === null || $members->isEmpty()) {
             return;
         }
 
         $relationship->attach($members->modelKeys(), [
-            $startedAtColumn => $date,
-            $endedAtColumn => null,
+            'joined_at' => $date,
+            'left_at' => null,
         ]);
     }
 
@@ -78,8 +72,6 @@ class TagTeamMembershipService
         Collection $currentMembers,
         ?Collection $desiredMembers,
         Carbon $date,
-        string $startedAtColumn,
-        string $endedAtColumn,
     ): void {
         if ($desiredMembers === null) {
             return;
@@ -87,16 +79,14 @@ class TagTeamMembershipService
 
         foreach ($currentMembers->diff($desiredMembers) as $member) {
             $relationship->newPivotStatementForId($member->getKey())
-                ->whereNull($endedAtColumn)
-                ->update([$endedAtColumn => $date]);
+                ->whereNull('left_at')
+                ->update(['left_at' => $date]);
         }
 
         $this->addMembersToRelationship(
             $relationship,
             $desiredMembers->diff($currentMembers),
             $date,
-            $startedAtColumn,
-            $endedAtColumn,
         );
     }
 }

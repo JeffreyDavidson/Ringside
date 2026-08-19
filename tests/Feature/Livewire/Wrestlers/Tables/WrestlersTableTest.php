@@ -92,7 +92,8 @@ describe('Main Component Feature Workflows', function () {
 
             // Restore workflow
             $component->call('restore', $wrestler->id)
-                ->assertHasNoErrors();
+                ->assertHasNoErrors()
+                ->assertRedirectToRoute('wrestlers.index');
 
             // Verify wrestler is restored
             expect(Wrestler::withTrashed()->findOrFail($wrestler->id)->deleted_at)->toBeNull();

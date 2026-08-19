@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Referees\Referee;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +34,7 @@ class ReinstateAction
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
-        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
         DB::transaction(function () use ($referee, $reinstatementDate): void {
             $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();

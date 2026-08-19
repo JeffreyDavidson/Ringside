@@ -10,7 +10,6 @@ use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -38,7 +37,7 @@ class EmployAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void
     {
-        $employmentDate = DateHelper::resolveDate($employmentDate);
+        $employmentDate = $employmentDate ?? now();
 
         DB::transaction(function () use ($wrestler, $employmentDate): void {
             $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();

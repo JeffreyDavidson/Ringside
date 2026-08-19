@@ -112,7 +112,7 @@ test('it does not re-employ already employed referee', function () {
     expect($result->currentEmployment()->firstOrFail()->id)->toBe($originalEmployment->id);
 });
 
-test('it handles DateHelper date resolution for employment', function () {
+test('it uses the provided employment date', function () {
     $referee = Referee::factory()->create();
 
     $updateData = new RefereeData(
@@ -126,7 +126,7 @@ test('it handles DateHelper date resolution for employment', function () {
     $result->refresh();
     expect($result->isEmployed())->toBeTrue();
 
-    // DateHelper should have processed the employment date
+    // The provided employment date should be persisted
     $this->assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'started_at' => now()->subDays(10)->toDateTimeString(),

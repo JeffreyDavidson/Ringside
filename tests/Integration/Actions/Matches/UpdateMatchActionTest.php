@@ -14,6 +14,7 @@ use App\Models\Matches\MatchSide;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use App\Models\Titles\TitleChampionship;
 
 test('it atomically replaces a match configuration', function () {
     $match = EventMatch::factory()->create([
@@ -91,6 +92,47 @@ test('it rolls back the original configuration when a replacement is unavailable
 
     expect($match->preview)->toBe('Original preview')
         ->and($match->referees->modelKeys())->toBe([$originalReferee->id])
+        ->and($match->competitors()->pluck('competitor_id')->all())->toBe([$originalWrestler->id]);
+});
+
+test('it rolls back the original configuration when the current champion is not a replacement competitor', function () {
+    $match = EventMatch::factory()->create(['preview' => 'Original preview']);
+    $originalReferee = Referee::factory()->bookable()->create();
+    $originalWrestler = Wrestler::factory()->bookable()->create();
+    $originalTitle = Title::factory()->active()->create();
+    $originalSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($originalSide, 'side')->create([
+        'competitor_id' => $originalWrestler->id,
+        'competitor_type' => $originalWrestler->getMorphClass(),
+    ]);
+    $match->referees()->attach($originalReferee);
+    $match->titles()->attach($originalTitle);
+
+    $newReferee = Referee::factory()->bookable()->create();
+    $title = Title::factory()->active()->create();
+    $champion = Wrestler::factory()->bookable()->create();
+    $firstChallenger = Wrestler::factory()->bookable()->create();
+    $secondChallenger = Wrestler::factory()->bookable()->create();
+    TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
+    $data = new EventMatchData(
+        MatchType::Singles,
+        Referee::query()->whereKey($newReferee)->get(),
+        Title::query()->whereKey($title)->get(),
+        collect([
+            1 => ['wrestlers' => [$firstChallenger]],
+            2 => ['wrestlers' => [$secondChallenger]],
+        ]),
+        'Updated preview',
+    );
+
+    expect(fn () => resolve(UpdateMatchAction::class)->handle($match, $data))
+        ->toThrow(InvalidMatchConfigurationException::class);
+
+    $match->refresh();
+
+    expect($match->preview)->toBe('Original preview')
+        ->and($match->referees->modelKeys())->toBe([$originalReferee->id])
+        ->and($match->titles->modelKeys())->toBe([$originalTitle->id])
         ->and($match->competitors()->pluck('competitor_id')->all())->toBe([$originalWrestler->id]);
 });
 

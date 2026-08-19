@@ -10,7 +10,6 @@ use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Roster\Managers\Manager;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -38,7 +37,7 @@ class UnretireAction
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null, bool $employImmediately = true): void
     {
-        $unretiredDate = DateHelper::resolveDate($unretiredDate);
+        $unretiredDate = $unretiredDate ?? now();
 
         DB::transaction(function () use ($manager, $unretiredDate, $employImmediately): void {
             $lockedManager = Manager::query()->withTrashed()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();

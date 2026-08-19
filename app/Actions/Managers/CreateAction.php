@@ -6,7 +6,6 @@ namespace App\Actions\Managers;
 
 use App\Data\Managers\ManagerData;
 use App\Models\Roster\Managers\Manager;
-use App\Support\DateHelper;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -42,8 +41,7 @@ class CreateAction
 
             // Handle employment using EmployAction for consistency
             if (! is_null($managerData->employment_date)) {
-                $employmentDate = DateHelper::resolveDate($managerData->employment_date);
-                $this->employAction->handle($manager, $employmentDate);
+                $this->employAction->handle($manager, $managerData->employment_date);
             }
 
             return $manager;

@@ -67,7 +67,7 @@ test('it persists the release lifecycle', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     // Test with null date (should use now())
