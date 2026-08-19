@@ -81,3 +81,13 @@ test('it assigns a repeated referee only once', function () {
 
     expect($match->referees()->count())->toBe(1);
 });
+
+test('it does not duplicate an existing referee assignment', function () {
+    $match = EventMatch::factory()->create();
+    $referee = Referee::factory()->bookable()->create();
+
+    resolve(AddRefereesToMatchAction::class)->handle($match, collect([$referee]));
+    resolve(AddRefereesToMatchAction::class)->handle($match, collect([$referee]));
+
+    expect($match->referees()->whereKey($referee)->count())->toBe(1);
+});
