@@ -47,11 +47,11 @@ final class MatchAssignmentConflictService
         $titles = $matches->flatMap->titles->unique('id')->values();
 
         if ($wrestlers->isNotEmpty()) {
-            $this->ensureWrestlersCanBeAssigned($conflictingEventIds, $wrestlers);
+            $this->ensureCompetitorsCanBeAssigned($conflictingEventIds, $wrestlers, Wrestler::class, 'Wrestler');
         }
 
         if ($tagTeams->isNotEmpty()) {
-            $this->ensureTagTeamsCanBeAssigned($conflictingEventIds, $tagTeams);
+            $this->ensureCompetitorsCanBeAssigned($conflictingEventIds, $tagTeams, TagTeam::class, 'Tag team');
         }
 
         if ($referees->isNotEmpty()) {
@@ -65,14 +65,19 @@ final class MatchAssignmentConflictService
 
     /**
      * @param  Collection<int, int>  $conflictingEventIds
-     * @param  Collection<int, Wrestler>  $wrestlers
+     * @param  Collection<int, Wrestler>|Collection<int, TagTeam>  $competitors
+     * @param  class-string<Wrestler|TagTeam>  $competitorType
      */
-    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers): void
-    {
+    public function ensureCompetitorsCanBeAssigned(
+        Collection $conflictingEventIds,
+        Collection $competitors,
+        string $competitorType,
+        string $entityType,
+    ): void {
         $conflictingCompetitor = MatchCompetitor::query()
             ->forCompetitorIds(
-                Wrestler::class,
-                $wrestlers->map(fn (Wrestler $wrestler): int => $wrestler->id),
+                $competitorType,
+                $competitors->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id),
             )
             ->forEventIds($conflictingEventIds)
             ->first(['competitor_id']);
@@ -81,39 +86,12 @@ final class MatchAssignmentConflictService
             return;
         }
 
-        $conflictingWrestlerId = $conflictingCompetitor->competitor_id;
-        $wrestler = $wrestlers->firstWhere('id', $conflictingWrestlerId);
+        $conflictingCompetitorId = $conflictingCompetitor->competitor_id;
+        $competitor = $competitors->firstWhere('id', $conflictingCompetitorId);
 
         throw SchedulingConflictException::competitorAlreadyBooked(
-            'Wrestler',
-            $wrestler === null ? "ID: {$conflictingWrestlerId}" : (string) $wrestler->name,
-        );
-    }
-
-    /**
-     * @param  Collection<int, int>  $conflictingEventIds
-     * @param  Collection<int, TagTeam>  $tagTeams
-     */
-    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams): void
-    {
-        $conflictingCompetitor = MatchCompetitor::query()
-            ->forCompetitorIds(
-                TagTeam::class,
-                $tagTeams->map(fn (TagTeam $tagTeam): int => $tagTeam->id),
-            )
-            ->forEventIds($conflictingEventIds)
-            ->first(['competitor_id']);
-
-        if ($conflictingCompetitor === null) {
-            return;
-        }
-
-        $conflictingTagTeamId = $conflictingCompetitor->competitor_id;
-        $tagTeam = $tagTeams->firstWhere('id', $conflictingTagTeamId);
-
-        throw SchedulingConflictException::competitorAlreadyBooked(
-            'Tag team',
-            $tagTeam === null ? "ID: {$conflictingTagTeamId}" : (string) $tagTeam->name,
+            $entityType,
+            $competitor === null ? "ID: {$conflictingCompetitorId}" : (string) $competitor->name,
         );
     }
 
