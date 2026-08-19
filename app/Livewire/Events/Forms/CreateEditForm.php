@@ -158,7 +158,7 @@ class CreateEditForm extends BaseForm
      * Validation Requirements:
      * - Name: Required, unique across events, max 255 characters
      * - Date: Optional, valid date format, custom business rule validation
-     * - Venue: Required when date is provided, must exist in venues table
+     * - Venue: Optional, when provided must exist in venues table
      * - Preview: Required promotional content, string format
      *
      * @return array<string, array<int, mixed>> Laravel validation rules array
@@ -173,7 +173,7 @@ class CreateEditForm extends BaseForm
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->modelId)],
             'date' => ['bail', 'nullable', 'date', new DateCanBeChanged($this->isEditing() ? $this->event() : null)],
-            'venue_id' => ['nullable', 'required_with:date', 'integer', Rule::exists('venues', 'id')],
+            'venue_id' => ['nullable', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string'],
         ];
     }
