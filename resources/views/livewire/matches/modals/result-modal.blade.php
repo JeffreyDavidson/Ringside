@@ -8,6 +8,7 @@
 
         <div class="grid gap-4 md:grid-cols-2">
             <x-form.inputs.select
+                id="finish"
                 label="Finish"
                 wire:model.live="form.finish"
                 :options="$this->finishOptions"
@@ -15,6 +16,7 @@
             />
 
             <x-form.inputs.select
+                id="winningSideId"
                 label="Winning Side"
                 wire:model="form.winningSideId"
                 :options="$this->sideOptions"
