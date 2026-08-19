@@ -69,7 +69,7 @@ class AddRefereesToMatchAction
                 throw EntityNotAvailableException::forMatchAssignment('referees');
             }
 
-            $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch, $conflictingEventIds, $lockedReferees);
+            $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
 
             $lockedReferees->each(function (Referee $referee) use ($lockedMatch): void {
                 $lockedMatch->referees()->attach($referee->id);
