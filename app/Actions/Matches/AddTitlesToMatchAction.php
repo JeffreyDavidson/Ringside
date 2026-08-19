@@ -52,19 +52,31 @@ class AddTitlesToMatchAction
     {
         $requestedTitles = $titles->unique('id')->values();
 
-        if ($requestedTitles->isEmpty() || $requestedTitles->contains(
-            fn (Title $title): bool => ! $title->isCurrentlyActive()
-        )) {
+        if ($requestedTitles->isEmpty()) {
             throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
         DB::transaction(function () use ($eventMatch, $requestedTitles): void {
-            $this->conflictService->ensureTitlesCanBeAssigned($eventMatch, $requestedTitles);
-            $this->ensureTitleTypesMatchCompetitors($eventMatch, $requestedTitles);
-            $this->ensureCurrentChampionsCompete($eventMatch, $requestedTitles);
+            $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
+            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+            $lockedTitles = Title::query()
+                ->whereKey($requestedTitles->pluck('id'))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
 
-            $requestedTitles->each(function (Title $title) use ($eventMatch): void {
-                $eventMatch->titles()->attach($title->id);
+            if ($lockedTitles->count() !== $requestedTitles->count() || $lockedTitles->contains(
+                fn (Title $title): bool => ! $title->isCurrentlyActive()
+            )) {
+                throw EntityNotAvailableException::forMatchAssignment('titles');
+            }
+
+            $this->conflictService->ensureTitlesCanBeAssigned($conflictingEventIds, $lockedTitles);
+            $this->ensureTitleTypesMatchCompetitors($lockedMatch, $lockedTitles);
+            $this->ensureCurrentChampionsCompete($lockedMatch, $lockedTitles);
+
+            $lockedTitles->each(function (Title $title) use ($lockedMatch): void {
+                $lockedMatch->titles()->attach($title->id);
             });
         });
     }

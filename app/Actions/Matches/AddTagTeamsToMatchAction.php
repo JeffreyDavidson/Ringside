@@ -52,9 +52,7 @@ class AddTagTeamsToMatchAction
     {
         $requestedTagTeams = $tagTeams->unique('id')->values();
 
-        if ($requestedTagTeams->isEmpty() || $requestedTagTeams->contains(
-            fn (TagTeam $tagTeam): bool => ! RosterBookingEligibility::allows($tagTeam)
-        )) {
+        if ($requestedTagTeams->isEmpty()) {
             throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
 
@@ -64,11 +62,25 @@ class AddTagTeamsToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
-            $this->conflictService->ensureTagTeamsCanBeAssigned($eventMatch, $requestedTagTeams);
-            $side = $eventMatch->sides()->firstOrCreate(['position' => $sideNumber]);
+            $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
+            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+            $lockedTagTeams = TagTeam::query()
+                ->whereKey($requestedTagTeams->pluck('id'))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
 
-            $requestedTagTeams->each(function (TagTeam $tagTeam) use ($eventMatch, $side): void {
-                $eventMatch->competitors()->create([
+            if ($lockedTagTeams->count() !== $requestedTagTeams->count() || $lockedTagTeams->contains(
+                fn (TagTeam $tagTeam): bool => ! RosterBookingEligibility::allows($tagTeam)
+            )) {
+                throw EntityNotAvailableException::forMatchAssignment('tag teams');
+            }
+
+            $this->conflictService->ensureTagTeamsCanBeAssigned($conflictingEventIds, $lockedTagTeams);
+            $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
+
+            $lockedTagTeams->each(function (TagTeam $tagTeam) use ($lockedMatch, $side): void {
+                $lockedMatch->competitors()->create([
                     'competitor_id' => $tagTeam->id,
                     'competitor_type' => $tagTeam->getMorphClass(),
                     'match_side_id' => $side->id,

@@ -128,6 +128,19 @@ test('it throws exception when no eligible wrestlers provided', function () {
         ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.');
 });
 
+test('it reloads wrestlers before checking assignment eligibility', function () {
+    $match = EventMatch::factory()->create();
+    $wrestler = Wrestler::factory()->employed()->create();
+    $staleWrestler = Wrestler::query()->findOrFail($wrestler->id);
+
+    $wrestler->delete();
+
+    expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$staleWrestler]), 1))
+        ->toThrow(EntityNotAvailableException::class);
+
+    expect($match->competitors()->exists())->toBeFalse();
+});
+
 test('it throws exception when side number is invalid', function () {
     $match = EventMatch::factory()->create();
     $wrestler = Wrestler::factory()->employed()->create();

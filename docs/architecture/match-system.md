@@ -31,6 +31,8 @@ The match system handles complex wrestling match scenarios with flexible competi
 
 Match configuration and participant availability are separate failure boundaries. `InvalidMatchConfigurationException` describes an incomplete or structurally invalid match, such as missing referees, missing competitors, insufficient populated sides, or an invalid side number. `EntityNotAvailableException` describes a wrestler, tag team, referee, or title whose current state prevents assignment. `SchedulingConflictException` is reserved for an actual collision between bookings, times, or resources and must not substitute for either boundary.
 
+Match assignment actions lock the match and every event that shares its scheduling window before reloading and locking selected wrestlers, tag teams, referees, or titles. Availability and conflict checks use those locked rows, so stale caller models cannot bypass current booking rules and concurrent assignments serialize across the same event window.
+
 Recorded outcomes are checked by `MatchOutcomeRequirements`, which explicitly composes focused winning-side, entry-order, and elimination-history requirements. Each requirement owns one cohesive rule family and raises `InvalidMatchOutcomeException`; the coordinator preserves their deterministic validation order without using a dynamic specification registry or mutation pipeline. `RecordResultAction` locks the match, its event date, the selected winning side, and the complete competitor collection before validation. Outcome requirements and championship reconciliation consume that shared snapshot rather than querying mutable match state independently.
 
 ## Event Card Scheduling

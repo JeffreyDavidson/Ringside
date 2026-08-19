@@ -18,11 +18,11 @@ use Illuminate\Support\Collection;
 final class MatchAssignmentConflictService
 {
     /**
+     * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Wrestler>  $wrestlers
      */
-    public function ensureWrestlersCanBeAssigned(EventMatch $eventMatch, Collection $wrestlers): void
+    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers): void
     {
-        $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
         $conflictingCompetitor = MatchCompetitor::query()
             ->forCompetitorIds(
                 Wrestler::class,
@@ -45,11 +45,11 @@ final class MatchAssignmentConflictService
     }
 
     /**
+     * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, TagTeam>  $tagTeams
      */
-    public function ensureTagTeamsCanBeAssigned(EventMatch $eventMatch, Collection $tagTeams): void
+    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams): void
     {
-        $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
         $conflictingCompetitor = MatchCompetitor::query()
             ->forCompetitorIds(
                 TagTeam::class,
@@ -72,11 +72,12 @@ final class MatchAssignmentConflictService
     }
 
     /**
+     * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Referee>  $referees
      */
-    public function ensureRefereesCanBeAssigned(EventMatch $eventMatch, Collection $referees): void
+    public function ensureRefereesCanBeAssigned(EventMatch $eventMatch, Collection $conflictingEventIds, Collection $referees): void
     {
-        $conflictingEventIds = $this->lockConflictingEvents($eventMatch)
+        $conflictingEventIds = $conflictingEventIds
             ->reject(fn (int $eventId): bool => $eventId === $eventMatch->event_id);
 
         if ($conflictingEventIds->isEmpty()) {
@@ -99,11 +100,11 @@ final class MatchAssignmentConflictService
     }
 
     /**
+     * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Title>  $titles
      */
-    public function ensureTitlesCanBeAssigned(EventMatch $eventMatch, Collection $titles): void
+    public function ensureTitlesCanBeAssigned(Collection $conflictingEventIds, Collection $titles): void
     {
-        $conflictingEventIds = $this->lockConflictingEvents($eventMatch);
         $conflictingTitleId = EventMatch::query()
             ->forEventIds($conflictingEventIds)
             ->withAnyTitleIds($titles->map(fn (Title $title): int => $title->id))
@@ -125,7 +126,7 @@ final class MatchAssignmentConflictService
     /**
      * @return Collection<int, int>
      */
-    private function lockConflictingEvents(EventMatch $eventMatch): Collection
+    public function lockConflictingEventIds(EventMatch $eventMatch): Collection
     {
         $event = $eventMatch->event()->firstOrFail();
 
