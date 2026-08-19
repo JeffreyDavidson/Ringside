@@ -16,8 +16,22 @@ it('builds fixed individual-side rules', function (MatchType $matchType, int $si
     }
 })->with([
     'singles' => [MatchType::Singles, 2],
-    'triple threat' => [MatchType::TripleThreat, 3],
     'triangle' => [MatchType::Triangle, 3],
+]);
+
+it('builds mutually exclusive mixed-competitor side rules', function (MatchType $matchType, int $sideCount) {
+    $rules = (new MatchCompetitorRuleSet($matchType))->rules();
+
+    expect($rules['competitors'])->toContain("size:{$sideCount}")
+        ->and($rules['competitors.*.wrestlers.*'])->toContain('distinct')
+        ->and($rules['competitors.*.tag_teams.*'])->toContain('distinct');
+
+    foreach (range(0, $sideCount - 1) as $sideIndex) {
+        expect($rules["competitors.{$sideIndex}.wrestlers"])->toContain('max:1')
+            ->and($rules["competitors.{$sideIndex}.tag_teams"])->toContain('max:1');
+    }
+})->with([
+    'triple threat' => [MatchType::TripleThreat, 3],
     'fatal four way' => [MatchType::Fatal4Way, 4],
 ]);
 

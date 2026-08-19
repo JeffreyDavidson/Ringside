@@ -39,7 +39,7 @@ test('it adds wrestler competitors to a match', function () {
 });
 
 test('it adds tag team competitors to a match', function () {
-    $eventMatch = EventMatch::factory()->create();
+    $eventMatch = EventMatch::factory()->withMatchType(MatchType::TagTeam)->create();
     $tagTeamA = TagTeam::factory()->bookable()->create();
     $tagTeamB = TagTeam::factory()->bookable()->create();
     $competitors = collect([

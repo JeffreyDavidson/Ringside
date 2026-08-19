@@ -21,6 +21,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Livewire,Actions,Lifecycle}/Matches/** | .ai/rules/livewire-actions-lifecycle-matches.md |
 | app/{Livewire,Actions}/Matches/** | .ai/rules/livewire-actions-matches.md |
 | app/Livewire/** | .ai/rules/livewire.md |
+| app/{Enums/MatchType.php,Livewire/Matches/**,Actions/Matches/**,Lifecycle/MatchCompetitorRequirements.php} | .ai/rules/matches-matches.md |
 | app/Exceptions/{Matches,Scheduling}/** | .ai/rules/matches-scheduling.md |
 | app/{Actions/Matches,Services}/** | .ai/rules/matches-services.md |
 | app/{Actions,Models}/Matches/** | .ai/rules/matches.md |

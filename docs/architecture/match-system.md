@@ -50,6 +50,10 @@ The Livewire match form applies model-specific booking rules to every selected w
 
 Assignment Actions treat each requested collection as an atomic command. They reject the entire assignment when any selected wrestler, tag team, referee, or title is unavailable; they never silently discard unavailable selections and persist a partial request. Repeated selections of the same record are normalized before assignment.
 
+`MatchCompetitorRequirements` authoritatively validates competitor types and composition before assignments are persisted. Match formats whose names encode a roster-member count use the current wrestlers represented by each selected tag team: standard and tornado tag matches require 2-on-2, six/eight/ten-person tag matches require 3/4/5 per side, and handicap matches require 2-on-1 or 3-on-2 in either side order. A wrestler cannot also be selected directly when represented by a selected tag team.
+
+Competitor entries and represented roster members are separate concepts. Singles, Triple Threat, Triangle, and Fatal 4-Way matches require exactly one wrestler or tag-team entry on each side, subject to the match type's allowed competitor types. Battle Royal and Royal Rumble entrants each occupy an individual side.
+
 `MatchStipulation` is an optional match configuration selected from active definitions when a match is created or edited. The match retains that relationship as historical configuration even if the definition is later made inactive. Stipulation capabilities and match presentation must be implemented by the match domain when they are enforced; the model does not infer behavior from hard-coded slug lists.
 
 `AddMatchForEventAction` receives side-based `EventMatchData`, locks the owning event, allocates the next card position without reusing soft-deleted match numbers, and persists the match, officials, championship stakes, sides, and competitors in one transaction. Assignment Actions retain eligibility and scheduling-conflict enforcement for their respective relationships.

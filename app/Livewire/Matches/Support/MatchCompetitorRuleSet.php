@@ -25,9 +25,9 @@ final readonly class MatchCompetitorRuleSet
 
         return match ($this->matchType) {
             MatchType::Singles => $this->individualSideRules(2),
-            MatchType::TripleThreat,
             MatchType::Triangle => $this->individualSideRules(3),
-            MatchType::Fatal4Way => $this->individualSideRules(4),
+            MatchType::TripleThreat => $this->mixedSingleCompetitorSideRules(3),
+            MatchType::Fatal4Way => $this->mixedSingleCompetitorSideRules(4),
             MatchType::TagTeam,
             MatchType::SixManTagTeam,
             MatchType::EightManTagTeam,
@@ -80,6 +80,28 @@ final readonly class MatchCompetitorRuleSet
             $rules["competitors.{$sideIndex}.wrestlers.*"] = ['bail', 'integer', 'exists:wrestlers,id', new WrestlerIsBookable()];
             $rules["competitors.{$sideIndex}.tag_teams"] = ['sometimes', 'array', 'min:1'];
             $rules["competitors.{$sideIndex}.tag_teams.*"] = ['bail', 'integer', 'exists:tag_teams,id', new TagTeamIsBookable()];
+        }
+
+        return $rules;
+    }
+
+    /** @return array<string, array<int, mixed>> */
+    private function mixedSingleCompetitorSideRules(int $sideCount): array
+    {
+        $rules = [
+            'competitors' => ['required', 'array', 'list', "size:{$sideCount}"],
+            'competitors.*.wrestlers.*' => ['distinct'],
+            'competitors.*.tag_teams.*' => ['distinct'],
+        ];
+
+        foreach (range(0, $sideCount - 1) as $sideIndex) {
+            $wrestlers = "competitors.{$sideIndex}.wrestlers";
+            $tagTeams = "competitors.{$sideIndex}.tag_teams";
+
+            $rules[$wrestlers] = ['required_without:'.$tagTeams, 'array', 'max:1', 'prohibits:'.$tagTeams];
+            $rules["{$wrestlers}.*"] = ['bail', 'integer', 'exists:wrestlers,id', new WrestlerIsBookable()];
+            $rules[$tagTeams] = ['required_without:'.$wrestlers, 'array', 'max:1', 'prohibits:'.$wrestlers];
+            $rules["{$tagTeams}.*"] = ['bail', 'integer', 'exists:tag_teams,id', new TagTeamIsBookable()];
         }
 
         return $rules;

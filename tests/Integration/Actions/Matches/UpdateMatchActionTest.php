@@ -13,6 +13,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
@@ -34,16 +35,16 @@ test('it atomically replaces a match configuration', function () {
     $match->titles()->attach($originalTitle);
 
     $newReferee = Referee::factory()->bookable()->create();
-    $newTitle = Title::factory()->active()->create(['type' => TitleType::Singles]);
-    $firstWrestler = Wrestler::factory()->bookable()->create();
-    $secondWrestler = Wrestler::factory()->bookable()->create();
+    $newTitle = Title::factory()->active()->create(['type' => TitleType::TagTeam]);
+    $firstTagTeam = TagTeam::factory()->bookable()->create();
+    $secondTagTeam = TagTeam::factory()->bookable()->create();
     $data = new EventMatchData(
         MatchType::TagTeam,
         Referee::query()->whereKey($newReferee)->get(),
         Title::query()->whereKey($newTitle)->get(),
         collect([
-            1 => ['wrestlers' => [$firstWrestler]],
-            2 => ['wrestlers' => [$secondWrestler]],
+            1 => ['tag_teams' => [$firstTagTeam]],
+            2 => ['tag_teams' => [$secondTagTeam]],
         ]),
         'Updated preview',
     );
@@ -56,8 +57,8 @@ test('it atomically replaces a match configuration', function () {
         ->and($updatedMatch->referees->modelKeys())->toBe([$newReferee->id])
         ->and($updatedMatch->titles->modelKeys())->toBe([$newTitle->id])
         ->and($updatedMatch->competitors()->pluck('competitor_id')->all())->toEqualCanonicalizing([
-            $firstWrestler->id,
-            $secondWrestler->id,
+            $firstTagTeam->id,
+            $secondTagTeam->id,
         ]);
 });
 
