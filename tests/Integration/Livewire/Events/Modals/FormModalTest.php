@@ -97,6 +97,24 @@ describe('FormModal Create Operations', function () {
         ]);
     });
 
+    it('can create a dated event without a venue', function () {
+        $component = livewire(FormModal::class)
+            ->call('openModal')
+            ->set('form.name', 'Unassigned Event')
+            ->set('form.date', '2024-04-06')
+            ->set('form.venue_id', null)
+            ->call('save');
+
+        $component->assertHasNoErrors();
+        $component->assertDispatched('form-submitted');
+
+        $this->assertDatabaseHas('events', [
+            'name' => 'Unassigned Event',
+            'date' => '2024-04-06 00:00:00',
+            'venue_id' => null,
+        ]);
+    });
+
     it('validates required fields when creating', function () {
         $component = livewire(FormModal::class)
             ->call('openModal')
