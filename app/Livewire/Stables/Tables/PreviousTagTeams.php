@@ -11,6 +11,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\StableTagTeam;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends DataTableComponent<StableTagTeam> */
@@ -22,6 +23,7 @@ class PreviousTagTeams extends DataTableComponent
 
     protected string $databaseTableName = 'stables_tag_teams';
 
+    #[Locked]
     public ?int $stableId;
 
     /**

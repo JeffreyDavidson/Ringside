@@ -7,6 +7,7 @@ namespace App\Livewire\TagTeams\Tables;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends BasePreviousManagersTable<TagTeamManager> */
@@ -17,6 +18,7 @@ class PreviousManagers extends BasePreviousManagersTable
     /**
      * Tag Team to use for component.
      */
+    #[Locked]
     public ?int $tagTeamId;
 
     /**

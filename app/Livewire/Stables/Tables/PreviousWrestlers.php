@@ -11,6 +11,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\StableWrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends DataTableComponent<StableWrestler> */
@@ -22,6 +23,7 @@ class PreviousWrestlers extends DataTableComponent
 
     protected string $databaseTableName = 'stables_wrestlers';
 
+    #[Locked]
     public ?int $stableId;
 
     /**

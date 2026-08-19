@@ -11,6 +11,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Events\Event;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends DataTableComponent<Event> */
@@ -18,6 +19,7 @@ class PreviousEvents extends DataTableComponent
 {
     use ShowTableTrait;
 
+    #[Locked]
     public ?int $venueId;
 
     protected string $databaseTableName = 'events';

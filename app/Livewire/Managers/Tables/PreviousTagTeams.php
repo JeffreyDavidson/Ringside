@@ -10,6 +10,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends DataTableComponent<TagTeamManager> */
@@ -20,6 +21,7 @@ class PreviousTagTeams extends DataTableComponent
     /**
      * ManagerId to use for component.
      */
+    #[Locked]
     public ?int $managerId;
 
     protected string $databaseTableName = 'tag_teams_managers';

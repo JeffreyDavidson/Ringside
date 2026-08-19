@@ -9,6 +9,7 @@ use App\Livewire\Table\Column;
 use App\Models\Roster\Stables\Stable;
 use App\Queries\Roster\StableManagerHistoryQuery;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 /** @extends BasePreviousStablesTable<Stable> */
@@ -17,6 +18,7 @@ class PreviousStables extends BasePreviousStablesTable
     /**
      * ManagerId to use for component.
      */
+    #[Locked]
     public ?int $managerId;
 
     protected string $databaseTableName = 'stables';

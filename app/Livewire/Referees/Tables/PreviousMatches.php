@@ -8,6 +8,7 @@ use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 class PreviousMatches extends BasePreviousMatchesTable
@@ -15,6 +16,7 @@ class PreviousMatches extends BasePreviousMatchesTable
     /**
      * Referee to use for component.
      */
+    #[Locked]
     public ?int $refereeId;
 
     protected string $databaseTableName = 'event_matches';

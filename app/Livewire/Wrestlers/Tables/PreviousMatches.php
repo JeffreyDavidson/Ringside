@@ -8,6 +8,7 @@ use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 use LogicException;
 
 class PreviousMatches extends BasePreviousMatchesTable
@@ -15,6 +16,7 @@ class PreviousMatches extends BasePreviousMatchesTable
     /**
      * Wrestler to use for component.
      */
+    #[Locked]
     public ?int $wrestlerId;
 
     public string $databaseTableName = 'events_matches_competitors';
