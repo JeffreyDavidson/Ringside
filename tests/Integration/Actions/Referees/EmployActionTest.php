@@ -89,7 +89,7 @@ test('it rejects employing a retired referee without changing retirement', funct
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->create();
     $employmentDate = now()->subDays(10);
 
@@ -98,7 +98,7 @@ test('it handles DateHelper date resolution', function () {
     $referee->refresh();
     expect($referee->isEmployed())->toBeTrue();
 
-    // DateHelper should have processed the employment date
+    // The provided employment date should be persisted
     $this->assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'started_at' => $employmentDate->toDateTimeString(),

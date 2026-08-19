@@ -14,10 +14,10 @@ use App\Actions\Wrestlers\RetireAction;
 use App\Actions\Wrestlers\SuspendAction;
 use App\Actions\Wrestlers\UnretireAction;
 use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Actions extends Component
@@ -33,56 +33,47 @@ class Actions extends Component
 
     public function employ(): void
     {
-        Gate::authorize('employ', $this->wrestler);
-        $this->executeRosterAction('employed', RosterEntityType::Wrestler, fn () => resolve(EmployAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Employ, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(EmployAction::class)->handle($this->wrestler));
     }
 
     public function release(): void
     {
-        Gate::authorize('release', $this->wrestler);
-        $this->executeRosterAction('released', RosterEntityType::Wrestler, fn () => resolve(ReleaseAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Release, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(ReleaseAction::class)->handle($this->wrestler));
     }
 
     public function retire(): void
     {
-        Gate::authorize('retire', $this->wrestler);
-        $this->executeRosterAction('retired', RosterEntityType::Wrestler, fn () => resolve(RetireAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Retire, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(RetireAction::class)->handle($this->wrestler));
     }
 
     public function unretire(): void
     {
-        Gate::authorize('unretire', $this->wrestler);
-        $this->executeRosterAction('unretired', RosterEntityType::Wrestler, fn () => resolve(UnretireAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Unretire, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(UnretireAction::class)->handle($this->wrestler));
     }
 
     public function suspend(): void
     {
-        Gate::authorize('suspend', $this->wrestler);
-        $this->executeRosterAction('suspended', RosterEntityType::Wrestler, fn () => resolve(SuspendAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Suspend, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(SuspendAction::class)->handle($this->wrestler));
     }
 
     public function reinstate(): void
     {
-        Gate::authorize('reinstate', $this->wrestler);
-        $this->executeRosterAction('reinstated', RosterEntityType::Wrestler, fn () => resolve(ReinstateAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Reinstate, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(ReinstateAction::class)->handle($this->wrestler));
     }
 
     public function injure(): void
     {
-        Gate::authorize('injure', $this->wrestler);
-        $this->executeRosterAction('injured', RosterEntityType::Wrestler, fn () => resolve(InjureAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Injure, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(InjureAction::class)->handle($this->wrestler));
     }
 
     public function clearFromInjury(): void
     {
-        Gate::authorize('clearFromInjury', $this->wrestler);
-        $this->executeRosterAction('cleared_from_injury', RosterEntityType::Wrestler, fn () => resolve(ClearFromInjuryAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::ClearFromInjury, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(ClearFromInjuryAction::class)->handle($this->wrestler));
     }
 
     public function restore(): void
     {
-        Gate::authorize('restore', $this->wrestler);
-        $this->executeRosterAction('restored', RosterEntityType::Wrestler, fn () => resolve(RestoreAction::class)->handle($this->wrestler));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Wrestler, $this->wrestler, fn () => resolve(RestoreAction::class)->handle($this->wrestler));
     }
 
     public function render(): View

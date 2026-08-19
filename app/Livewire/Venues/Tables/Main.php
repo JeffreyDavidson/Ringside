@@ -10,7 +10,6 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Table\Column;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Venue> */
@@ -67,7 +66,7 @@ class Main extends BaseTable
     /**
      * Restore a deleted venue.
      */
-    public function restore(int $venueId): RedirectResponse
+    public function restore(int $venueId): void
     {
         $venue = Venue::onlyTrashed()->findOrFail($venueId);
 
@@ -75,6 +74,6 @@ class Main extends BaseTable
 
         resolve(RestoreAction::class)->handle($venue);
 
-        return back();
+        $this->redirectRoute('venues.index');
     }
 }

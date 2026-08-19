@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -34,7 +33,7 @@ class ReinstateAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $reinstatementDate = null): void
     {
-        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
         DB::transaction(function () use ($wrestler, $reinstatementDate): void {
             $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();

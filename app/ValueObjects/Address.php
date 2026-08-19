@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
+use App\Casts\AddressCast;
 use App\Enums\Shared\UnitedStatesState;
+use Illuminate\Contracts\Database\Eloquent\Castable;
 use InvalidArgumentException;
 
-readonly class Address
+readonly class Address implements Castable
 {
     public function __construct(
         public string $streetAddress,
@@ -27,6 +29,15 @@ readonly class Address
     public function formatted(): string
     {
         return "{$this->streetAddress}, {$this->city}, {$this->state->value} {$this->zipcode}";
+    }
+
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return class-string<AddressCast>
+     */
+    public static function castUsing(array $arguments): string
+    {
+        return AddressCast::class;
     }
 
     /** @return array{street_address: string, city: string, state: string, zipcode: string} */

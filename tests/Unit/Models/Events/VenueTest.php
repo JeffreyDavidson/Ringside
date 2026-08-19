@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Builders\Events\VenueBuilder;
-use App\Casts\AddressCast;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\ValueObjects\Address;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -47,7 +47,7 @@ describe('Venue Model Unit Tests', function () {
             $casts = $venue->getCasts();
 
             expect($casts)->toMatchArray([
-                'address' => AddressCast::class,
+                'address' => Address::class,
             ]);
         });
 

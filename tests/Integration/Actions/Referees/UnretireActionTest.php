@@ -77,7 +77,7 @@ test('it persists the unretirement lifecycle', function () {
     expect($referee->isEmployed())->toBeTrue();
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->retired()->create();
     $unretiredDate = now()->subDays(5);
 
@@ -85,7 +85,7 @@ test('it handles DateHelper date resolution', function () {
 
     $referee->refresh();
 
-    // DateHelper should have processed the unretirement date
+    // The provided unretirement date should be persisted
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $referee->id,
         'retirable_type' => $referee->getMorphClass(),

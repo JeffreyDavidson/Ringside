@@ -10,6 +10,7 @@ enum BusinessRuleReason: string
     case AlreadyInjured = 'already_injured';
     case AlreadyRetired = 'already_retired';
     case AlreadySuspended = 'already_suspended';
+    case CurrentChampionMissing = 'current_champion_missing';
     case General = 'general';
     case Injured = 'injured';
     case NotDeleted = 'not_deleted';

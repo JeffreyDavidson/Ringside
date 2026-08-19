@@ -9,7 +9,6 @@ use App\Exceptions\Roster\TagTeams\CannotBeReinstatedException;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Lifecycle\TagTeamSuspensionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -37,7 +36,7 @@ class ReinstateAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {
-        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $reinstatementDate): void {
             $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();

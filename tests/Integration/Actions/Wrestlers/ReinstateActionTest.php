@@ -94,7 +94,7 @@ test('it persists the reinstatement lifecycle', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     // Test with null date (should use now())

@@ -7,7 +7,6 @@ namespace App\Actions\TagTeams;
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -54,7 +53,7 @@ class DeleteAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = DateHelper::resolveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
             $lockedTagTeam = TagTeam::query()->withTrashed()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();

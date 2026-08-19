@@ -66,7 +66,7 @@ test('it persists the injury clearance lifecycle', function () {
     expect($referee->isEmployed())->toBeTrue(); // Should remain employed after injury clearance
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->injured()->create();
     $recoveryDate = now()->subDays(5);
 
@@ -74,7 +74,7 @@ test('it handles DateHelper date resolution', function () {
 
     $referee->refresh();
 
-    // DateHelper should have processed the recovery date
+    // The provided recovery date should be persisted
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $referee->id,
         'injurable_type' => $referee->getMorphClass(),

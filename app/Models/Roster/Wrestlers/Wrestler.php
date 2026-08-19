@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Roster\Wrestlers;
 
 use App\Builders\Roster\WrestlerBuilder;
-use App\Casts\HeightCast;
-use App\Casts\WeightCast;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
 use App\Models\Concerns\HasComputedEmploymentStatus;
@@ -246,8 +244,8 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     protected function casts(): array
     {
         return [
-            'height' => HeightCast::class,
-            'weight' => WeightCast::class,
+            'height' => Height::class,
+            'weight' => Weight::class,
         ];
     }
 }

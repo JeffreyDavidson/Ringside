@@ -16,130 +16,73 @@ use App\Models\Users\User;
  */
 class WrestlerPolicy
 {
-    /**
-     * Administrator bypass for all actions.
-     *
-     * This before hook allows administrators to perform any action without
-     * further permission checks, dramatically simplifying policy logic.
-     */
-    public function before(User $user, string $ability): ?bool
-    {
-        if ($user->role->isAdministrator()) {
-            return true;
-        }
-
-        return null; // Continue to individual method checks
-    }
-
-    /**
-     * Only administrators can view entity lists (handled by before hook).
-     */
     public function viewAny(User $user): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can view individual entities (handled by before hook).
-     */
     public function view(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can create entities (handled by before hook).
-     */
     public function create(User $user): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can update entities (handled by before hook).
-     */
     public function update(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can delete entities (handled by before hook).
-     */
     public function delete(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can restore entities (handled by before hook).
-     */
     public function restore(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can employ wrestlers (handled by before hook).
-     */
     public function employ(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can release wrestlers (handled by before hook).
-     */
     public function release(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can retire wrestlers (handled by before hook).
-     */
     public function retire(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can unretire wrestlers (handled by before hook).
-     */
     public function unretire(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can suspend wrestlers (handled by before hook).
-     */
     public function suspend(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can reinstate wrestlers (handled by before hook).
-     */
     public function reinstate(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can injure wrestlers (handled by before hook).
-     */
     public function injure(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 
-    /**
-     * Only administrators can clear wrestlers from injury (handled by before hook).
-     */
     public function clearFromInjury(User $user, Wrestler $wrestler): bool
     {
-        return false; // Will be bypassed by before hook for administrators
+        return false;
     }
 }

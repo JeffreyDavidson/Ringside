@@ -59,7 +59,7 @@ test('it retires referee with specific retirement date', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the provided date', function () {
     $referee = Referee::factory()->employed()->create();
     $retirementDate = now()->subDays(7);
 
@@ -67,7 +67,7 @@ test('it handles DateHelper date resolution', function () {
 
     $referee->refresh();
 
-    // DateHelper should have processed the retirement date
+    // The provided retirement date should be persisted
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $referee->id,
         'retirable_type' => $referee->getMorphClass(),

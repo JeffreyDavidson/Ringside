@@ -27,7 +27,8 @@ test('establishment predicate stays aligned with its guard', function (string $f
 
     expect(fn () => $eligibility->ensureAllowed($stable, StableActivityTransition::Establish))->toThrow(CannotBeEstablishedException::class);
 })->with([
-    'unformed' => ['default', true],
+    'unformed with enough members' => ['withEmployedDefaultMembers', true],
+    'unformed without enough members' => ['default', false],
     'active' => ['active', false],
     'disbanded' => ['disbanded', false],
     'retired' => ['retired', false],

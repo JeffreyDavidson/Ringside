@@ -150,7 +150,7 @@ test('it ends retirement before deletion', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution for deletion', function () {
+test('it uses the provided deletion date', function () {
     $referee = Referee::factory()->employed()->create();
     $deletionDate = now()->subDays(5);
 
@@ -159,7 +159,7 @@ test('it handles DateHelper date resolution for deletion', function () {
     $referee->refresh();
     expect($referee->trashed())->toBeTrue();
 
-    // DateHelper should have processed the deletion date for ending relationships
+    // The provided deletion date should end related records
     $this->assertDatabaseHas('employments', [
         'employable_id' => $referee->id,
         'ended_at' => $deletionDate->toDateTimeString(),

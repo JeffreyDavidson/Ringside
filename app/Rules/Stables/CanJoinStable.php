@@ -29,7 +29,19 @@ class CanJoinStable implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $member = $this->memberClass::query()->findOrFail($value);
+        if (! is_int($value) && ! is_string($value)) {
+            $fail('The selected stable member is invalid.');
+
+            return;
+        }
+
+        $member = $this->memberClass::query()->find($value);
+
+        if (! $member instanceof Model) {
+            $fail('The selected stable member is invalid.');
+
+            return;
+        }
 
         if (! $member instanceof CanBeAStableMember ||
             ! $member instanceof Employable ||
