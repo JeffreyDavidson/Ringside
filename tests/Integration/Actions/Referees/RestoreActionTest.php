@@ -33,6 +33,17 @@ test('it restores a soft-deleted referee', function () {
     ]);
 });
 
+test('it reloads a stale referee before restoring', function () {
+    $referee = Referee::factory()->create();
+    $staleReferee = clone $referee;
+
+    $referee->delete();
+
+    resolve(RestoreAction::class)->handle($staleReferee);
+
+    expect(Referee::query()->find($referee->getKey()))->not->toBeNull();
+});
+
 test('it validates referee can be restored', function () {
     $referee = Referee::factory()->create();
     $referee->delete(); // Soft delete

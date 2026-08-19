@@ -35,6 +35,17 @@ test('it restores a soft-deleted manager', function () {
     expect($restoredManager->deleted_at)->toBeNull();
 });
 
+test('it reloads a stale manager before restoring', function () {
+    $manager = Manager::factory()->create();
+    $staleManager = clone $manager;
+
+    $manager->delete();
+
+    resolve(RestoreAction::class)->handle($staleManager);
+
+    expect(Manager::query()->find($manager->getKey()))->not->toBeNull();
+});
+
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->employed()->create();
     $managerId = $manager->id;
