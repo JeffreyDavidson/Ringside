@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Contracts\Validation\ValidationRule;
+
 arch()->preset()->php();
 arch()->preset()->security();
 
@@ -36,3 +38,7 @@ arch('actions use the action suffix')
 arch('services use the service suffix')
     ->expect('App\\Services')
     ->toHaveSuffix('Service');
+
+arch('custom validation rules implement Laravel validation rules')
+    ->expect('App\\Rules')
+    ->toImplement(ValidationRule::class);

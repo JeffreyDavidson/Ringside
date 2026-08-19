@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Data\Matches\MatchResultData;
-use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\ChampionshipReignManager;
 use App\Models\Matches\EventMatch;
@@ -91,10 +90,7 @@ class ApplyMatchTitleOutcomesAction
     {
         $eligibleCompetitors = $winningCompetitors
             ->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor)
-            ->filter(fn (Wrestler|TagTeam $competitor): bool => match ($title->type) {
-                TitleType::Singles => $competitor instanceof Wrestler,
-                TitleType::TagTeam => $competitor instanceof TagTeam,
-            })
+            ->filter(fn (Wrestler|TagTeam $competitor): bool => $competitor instanceof ($title->type->championModelClass()))
             ->values();
 
         if ($eligibleCompetitors->count() !== 1) {

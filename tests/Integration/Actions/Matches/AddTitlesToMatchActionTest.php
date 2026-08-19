@@ -22,9 +22,16 @@ beforeEach(function () {
     testTime()->freeze();
 });
 
+function createSinglesMatchWithCompetitors(): EventMatch
+{
+    return EventMatch::factory()
+        ->withCompetitors(Wrestler::factory()->bookable()->count(2)->create()->all())
+        ->create();
+}
+
 test('it adds a single title to a match', function () {
-    $match = EventMatch::factory()->create();
-    $title = Title::factory()->active()->create();
+    $match = createSinglesMatchWithCompetitors();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
 
     $titles = collect([$title]);
 
@@ -42,9 +49,15 @@ test('it adds a single title to a match', function () {
 });
 
 test('it adds multiple titles to a match', function () {
-    $match = EventMatch::factory()->create();
-    $title1 = Title::factory()->active()->create(['name' => 'WWE Championship']);
-    $title2 = Title::factory()->active()->create(['name' => 'Universal Championship']);
+    $match = createSinglesMatchWithCompetitors();
+    $title1 = Title::factory()->active()->create([
+        'name' => 'WWE Championship',
+        'type' => TitleType::Singles,
+    ]);
+    $title2 = Title::factory()->active()->create([
+        'name' => 'Universal Championship',
+        'type' => TitleType::Singles,
+    ]);
 
     $titles = collect([$title1, $title2]);
 
@@ -98,12 +111,14 @@ test('it handles empty collection', function () {
 });
 
 test('it creates championship match correctly', function () {
-    $match = EventMatch::factory()->create();
+    $match = createSinglesMatchWithCompetitors();
     $wweChampionship = Title::factory()->active()->create([
         'name' => 'WWE Championship',
+        'type' => TitleType::Singles,
     ]);
     $intercontinentalTitle = Title::factory()->active()->create([
         'name' => 'Intercontinental Championship',
+        'type' => TitleType::Singles,
     ]);
 
     $titles = collect([$wweChampionship, $intercontinentalTitle]);
@@ -120,9 +135,9 @@ test('it creates championship match correctly', function () {
 });
 
 test('it handles transaction consistency', function () {
-    $match = EventMatch::factory()->create();
-    $title1 = Title::factory()->active()->create();
-    $title2 = Title::factory()->active()->create();
+    $match = createSinglesMatchWithCompetitors();
+    $title1 = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    $title2 = Title::factory()->active()->create(['type' => TitleType::Singles]);
 
     $titles = collect([$title1, $title2]);
 
@@ -150,8 +165,8 @@ test('it rejects a title already assigned on the event card', function () {
 });
 
 test('it assigns a repeated title only once', function () {
-    $match = EventMatch::factory()->create();
-    $title = Title::factory()->active()->create();
+    $match = createSinglesMatchWithCompetitors();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
 
     resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title, $title]));
 
@@ -209,4 +224,42 @@ test('it accepts a title match containing the current tag team champion', functi
     resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title]));
 
     expect($match->titles()->whereKey($title)->exists())->toBeTrue();
+});
+
+test('it rejects a singles title assigned to tag team competitors', function () {
+    $match = EventMatch::factory()->create();
+    $side = MatchSide::factory()->for($match, 'match')->create();
+    $tagTeam = TagTeam::factory()->bookable()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->create([
+        'competitor_type' => $tagTeam->getMorphClass(),
+        'competitor_id' => $tagTeam->id,
+    ]);
+
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))
+        ->toThrow(
+            InvalidMatchConfigurationException::class,
+            "The [{$title->name}] cannot be contested by this match's competitor type.",
+        );
+
+    expect($match->titles()->exists())->toBeFalse();
+});
+
+test('it rejects a tag team title assigned to wrestler competitors', function () {
+    $match = EventMatch::factory()->create();
+    $side = MatchSide::factory()->for($match, 'match')->create();
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::TagTeam]);
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->create([
+        'competitor_type' => $wrestler->getMorphClass(),
+        'competitor_id' => $wrestler->id,
+    ]);
+
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$title])))
+        ->toThrow(
+            InvalidMatchConfigurationException::class,
+            "The [{$title->name}] cannot be contested by this match's competitor type.",
+        );
+
+    expect($match->titles()->exists())->toBeFalse();
 });

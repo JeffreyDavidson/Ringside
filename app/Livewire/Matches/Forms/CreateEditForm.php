@@ -21,6 +21,7 @@ use App\Rules\Matches\CorrectNumberOfSides;
 use App\Rules\Referees\IsBookable as RefereeIsBookable;
 use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
+use App\Rules\Titles\MatchesCompetitorType;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use LogicException;
@@ -153,6 +154,7 @@ class CreateEditForm extends BaseForm
                 'integer',
                 'exists:titles,id',
                 new IsActive(),
+                new MatchesCompetitorType(),
                 new CurrentChampionIsCompeting(),
             ],
         ];

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\MatchType;
+use App\Enums\Titles\TitleType;
 use App\Livewire\Matches\Forms\CreateEditForm;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
@@ -512,7 +513,7 @@ describe('FormModal Edit Operations', function () {
 
 describe('FormModal Title Championship Integration', function () {
     it('can create championship match with title stakes', function () {
-        $title = Title::factory()->active()->create();
+        $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
         $referee = Referee::factory()->bookable()->create();

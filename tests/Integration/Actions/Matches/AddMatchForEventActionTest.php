@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Matches\AddMatchForEventAction;
 use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
+use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Events\Event;
@@ -50,7 +51,7 @@ test('it rejects a match without referees', function () {
 test('it creates a complete side-based match', function () {
     $event = Event::factory()->create();
     $referee = Referee::factory()->bookable()->create();
-    $title = Title::factory()->active()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $firstWrestler = Wrestler::factory()->bookable()->create();
     $secondWrestler = Wrestler::factory()->bookable()->create();
     $matchData = new EventMatchData(
@@ -128,7 +129,7 @@ test('it creates a title match when the current champion is a competitor', funct
     $referee = Referee::factory()->bookable()->create();
     $champion = Wrestler::factory()->bookable()->create();
     $challenger = Wrestler::factory()->bookable()->create();
-    $title = Title::factory()->active()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
     $matchData = new EventMatchData(
         MatchType::Singles,
@@ -152,7 +153,7 @@ test('it rolls back a title match when the current champion is absent', function
     $champion = Wrestler::factory()->bookable()->create();
     $firstChallenger = Wrestler::factory()->bookable()->create();
     $secondChallenger = Wrestler::factory()->bookable()->create();
-    $title = Title::factory()->active()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     TitleChampionship::factory()->for($title)->forWrestler($champion)->current()->create();
     $matchData = new EventMatchData(
         MatchType::Singles,
