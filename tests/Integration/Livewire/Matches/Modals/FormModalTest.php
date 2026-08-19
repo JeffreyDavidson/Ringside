@@ -507,7 +507,10 @@ describe('FormModal Edit Operations', function () {
                 ['wrestlers' => [$wrestler->id]],
             ])
             ->call('save')
-            ->assertHasErrors(['form.competitors']);
+            ->assertHasErrors([
+                'form.competitors.0.wrestlers.0' => 'distinct',
+                'form.competitors.1.wrestlers.0' => 'distinct',
+            ]);
     });
 });
 
