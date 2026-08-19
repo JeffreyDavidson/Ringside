@@ -14,7 +14,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 
 class ApplyMatchTitleOutcomesAction
 {
@@ -23,46 +22,44 @@ class ApplyMatchTitleOutcomesAction
     /** @param Collection<int, MatchCompetitor> $competitors */
     public function handle(EventMatch $match, MatchResultData $result, Collection $competitors): void
     {
-        DB::transaction(function () use ($match, $result, $competitors): void {
-            $titleIds = $match->titles()->pluck((new Title())->qualifyColumn('id'));
+        $titleIds = $match->titles()->pluck((new Title())->qualifyColumn('id'));
 
-            if ($titleIds->isEmpty()) {
-                return;
-            }
+        if ($titleIds->isEmpty()) {
+            return;
+        }
 
-            $titles = Title::query()
-                ->whereKey($titleIds)
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
-            $reigns = TitleChampionship::query()
-                ->withTrashed()
-                ->whereIn('title_id', $titleIds)
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
-            $winningCompetitors = $this->winningCompetitors($result, $competitors);
+        $titles = Title::query()
+            ->whereKey($titleIds)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+        $reigns = TitleChampionship::query()
+            ->withTrashed()
+            ->whereIn('title_id', $titleIds)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+        $winningCompetitors = $this->winningCompetitors($result, $competitors);
 
-            /** @var array<int, Wrestler|TagTeam|null> $desiredChampions */
-            $desiredChampions = [];
+        /** @var array<int, Wrestler|TagTeam|null> $desiredChampions */
+        $desiredChampions = [];
 
-            foreach ($titles as $title) {
-                $desiredChampions[$title->id] = $result->finish->allowsTitleChange()
-                    ? $this->championForTitle($title, $winningCompetitors)
-                    : null;
+        foreach ($titles as $title) {
+            $desiredChampions[$title->id] = $result->finish->allowsTitleChange()
+                ? $this->championForTitle($title, $winningCompetitors)
+                : null;
 
-                $this->championshipReigns->ensureMatchCanBeReconciled($match, $title, $reigns);
-            }
+            $this->championshipReigns->ensureMatchCanBeReconciled($match, $title, $reigns);
+        }
 
-            foreach ($titles as $title) {
-                $this->championshipReigns->reconcileMatchOutcome(
-                    $match,
-                    $title,
-                    $desiredChampions[$title->id],
-                    $reigns,
-                );
-            }
-        });
+        foreach ($titles as $title) {
+            $this->championshipReigns->reconcileMatchOutcome(
+                $match,
+                $title,
+                $desiredChampions[$title->id],
+                $reigns,
+            );
+        }
     }
 
     /**

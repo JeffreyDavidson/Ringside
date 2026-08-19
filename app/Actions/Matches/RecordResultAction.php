@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\DB;
 class RecordResultAction
 {
     public function __construct(
-        private MatchOutcomeRequirements $requirements,
-        private ApplyMatchTitleOutcomesAction $applyTitleOutcomes,
+        private readonly MatchOutcomeRequirements $requirements,
+        private readonly ApplyMatchTitleOutcomesAction $applyTitleOutcomes,
     ) {}
 
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
