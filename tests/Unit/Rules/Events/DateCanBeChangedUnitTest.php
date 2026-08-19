@@ -19,7 +19,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('date', now()->addWeek(), validationFailureCallback($failCallback));
+            $rule->validate('date', now()->addWeek()->toDateTimeString(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeFalse();
@@ -38,11 +38,11 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('date', now()->addWeek(), validationFailureCallback($failCallback));
+            $rule->validate('date', now()->addWeek()->toDateTimeString(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCalled)->toBeTrue();
-            expect($failMessage)->toBe('Cannot change the date of an event that has already occurred.');
+            expect($failMessage)->toBe("Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred.");
         });
 
         test('validation passes when no event provided', function () {
@@ -57,6 +57,21 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             $rule->validate('date', now()->addWeek(), validationFailureCallback($failCallback));
 
             // Assert
+            expect($failCalled)->toBeFalse();
+        });
+
+        test('validation passes when a past event keeps its existing date', function () {
+            $date = now()->subWeek();
+            $pastEvent = Event::factory()->make(['date' => $date]);
+            $rule = new DateCanBeChanged($pastEvent);
+            $failCalled = false;
+
+            $rule->validate('date', $date->toDateTimeString(), validationFailureCallback(
+                function () use (&$failCalled): void {
+                    $failCalled = true;
+                },
+            ));
+
             expect($failCalled)->toBeFalse();
         });
     });
@@ -81,7 +96,7 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             expect($rule)->toBeInstanceOf(DateCanBeChanged::class);
         });
 
-        test('rule handles various date value types', function () {
+        test('rule handles a validated date string', function () {
             // Arrange
             $futureEvent = Event::factory()->make(['date' => now()->addWeek()]);
             $rule = new DateCanBeChanged($futureEvent);
@@ -91,12 +106,10 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
                 $failCalled = true;
             };
 
-            // Act & Assert - string date
+            // Act
             $rule->validate('date', '2024-12-25', validationFailureCallback($failCallback));
-            expect($failCalled)->toBeFalse();
 
-            // Act & Assert - Carbon instance
-            $rule->validate('date', now()->addWeek(), validationFailureCallback($failCallback));
+            // Assert
             expect($failCalled)->toBeFalse();
         });
     });
@@ -135,13 +148,13 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('date', now()->addWeek(), validationFailureCallback($failCallback));
-            $rule->validate('different_field', now()->addMonth(), validationFailureCallback($failCallback));
+            $rule->validate('date', now()->addWeek()->toDateTimeString(), validationFailureCallback($failCallback));
+            $rule->validate('different_field', now()->addMonth()->toDateTimeString(), validationFailureCallback($failCallback));
 
             // Assert
             expect($messages)->toHaveCount(2);
             expect($messages[0])->toBe($messages[1]);
-            expect($messages[0])->toBe('Cannot change the date of an event that has already occurred.');
+            expect($messages[0])->toBe("Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred.");
         });
 
         test('attribute name does not affect validation logic', function () {
@@ -155,9 +168,9 @@ describe('DateCanBeChanged Validation Rule Unit Tests', function () {
             };
 
             // Act
-            $rule->validate('date', now(), validationFailureCallback($failCallback));
-            $rule->validate('event_date', now(), validationFailureCallback($failCallback));
-            $rule->validate('scheduled_date', now(), validationFailureCallback($failCallback));
+            $rule->validate('date', now()->toDateTimeString(), validationFailureCallback($failCallback));
+            $rule->validate('event_date', now()->toDateTimeString(), validationFailureCallback($failCallback));
+            $rule->validate('scheduled_date', now()->toDateTimeString(), validationFailureCallback($failCallback));
 
             // Assert
             expect($failCallCount)->toBe(3);

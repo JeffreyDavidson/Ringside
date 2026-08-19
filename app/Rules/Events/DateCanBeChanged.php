@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Rules\Events;
 
-use App\Enums\EventStatus;
+use App\Exceptions\Events\CannotBeRescheduledException;
+use App\Lifecycle\EventSchedulingEligibility;
 use App\Models\Events\Event;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Support\Facades\Date;
 
 class DateCanBeChanged implements ValidationRule
 {
@@ -15,8 +17,21 @@ class DateCanBeChanged implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if ($this->event?->status === EventStatus::Past) {
-            $fail('Cannot change the date of an event that has already occurred.');
+        if (! $this->event) {
+            return;
+        }
+
+        if ($value !== null && ! is_string($value)) {
+            return;
+        }
+
+        try {
+            EventSchedulingEligibility::ensureDateCanChange(
+                $this->event,
+                $value === null ? null : Date::parse($value),
+            );
+        } catch (CannotBeRescheduledException $exception) {
+            $fail($exception->getMessage());
         }
     }
 }
