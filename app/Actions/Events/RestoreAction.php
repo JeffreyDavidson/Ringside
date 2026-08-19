@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\VenueSchedulingEligibility;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
+use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
@@ -26,6 +29,23 @@ class RestoreAction
      */
     public function handle(Event $event): void
     {
-        $this->deletionState->restore($event, now());
+        DB::transaction(function () use ($event): void {
+            $lockedEvent = Event::query()
+                ->withTrashed()
+                ->whereKey($event->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($lockedEvent->date !== null && $lockedEvent->venue_id !== null) {
+                $venue = Venue::query()
+                    ->whereKey($lockedEvent->venue_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                VenueSchedulingEligibility::ensureAvailable($venue, $lockedEvent->date, $lockedEvent);
+            }
+
+            $this->deletionState->restore($lockedEvent, now());
+        });
     }
 }

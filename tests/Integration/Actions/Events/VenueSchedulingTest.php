@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\Events\CreateAction;
+use App\Actions\Events\DeleteAction;
+use App\Actions\Events\RestoreAction;
 use App\Actions\Events\UpdateAction;
 use App\Data\Events\EventData;
 use App\Exceptions\Scheduling\SchedulingConflictException;
@@ -80,4 +82,21 @@ test('it permits updating an event without changing its venue schedule', functio
         ->name->toBe('Updated Event')
         ->preview->toBe('Updated preview')
         ->venue_id->toBe($venue->id);
+});
+
+test('it rejects restoring an event into a venue scheduling conflict', function () {
+    $date = now()->addWeek();
+    $venue = Venue::factory()->create();
+    $deletedEvent = Event::factory()->for($venue)->create(['date' => $date]);
+
+    resolve(DeleteAction::class)->handle($deletedEvent);
+    Event::factory()->for($venue)->create(['date' => $date]);
+
+    expect(fn () => resolve(RestoreAction::class)->handle($deletedEvent))
+        ->toThrow(
+            SchedulingConflictException::class,
+            "Venue [{$venue->name}] is already booked at this event time.",
+        );
+
+    expect(Event::onlyTrashed()->whereKey($deletedEvent->getKey())->exists())->toBeTrue();
 });
