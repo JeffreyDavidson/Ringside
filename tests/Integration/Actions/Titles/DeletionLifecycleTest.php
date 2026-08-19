@@ -6,6 +6,7 @@ use App\Actions\Titles\DeleteAction;
 use App\Actions\Titles\RestoreAction;
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Exceptions\Titles\CannotBeRestoredException;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 
@@ -49,4 +50,16 @@ test('it audits title deletion and restoration', function () {
         ->and($deletedTransition->effective_at->toDateTimeString())->toBe($deletedAt->toDateTimeString())
         ->and($restoredTransition->dimension)->toBe(LifecycleDimension::Deletion)
         ->and($restoredTransition->effective_at->toDateTimeString())->toBe(now()->toDateTimeString());
+});
+
+test('it rejects restoring a title into an active name conflict', function () {
+    $title = Title::factory()->create(['name' => 'World Title']);
+
+    resolve(DeleteAction::class)->handle($title);
+    Title::factory()->create(['name' => 'World Title']);
+
+    expect(fn () => resolve(RestoreAction::class)->handle($title))
+        ->toThrow(CannotBeRestoredException::class);
+
+    expect(Title::onlyTrashed()->whereKey($title->getKey())->exists())->toBeTrue();
 });
