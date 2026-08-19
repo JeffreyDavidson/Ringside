@@ -60,12 +60,30 @@ class AddTitlesToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedTitles): void {
             $this->conflictService->ensureTitlesCanBeAssigned($eventMatch, $requestedTitles);
+            $this->ensureTitleTypesMatchCompetitors($eventMatch, $requestedTitles);
             $this->ensureCurrentChampionsCompete($eventMatch, $requestedTitles);
 
             $requestedTitles->each(function (Title $title) use ($eventMatch): void {
                 $eventMatch->titles()->attach($title->id);
             });
         });
+    }
+
+    /** @param Collection<int, Title> $titles */
+    private function ensureTitleTypesMatchCompetitors(EventMatch $eventMatch, Collection $titles): void
+    {
+        $assignedCompetitorTypes = $eventMatch->competitors()
+            ->pluck('competitor_type')
+            ->unique();
+
+        foreach ($titles as $title) {
+            if ($assignedCompetitorTypes->count() === 1
+                && $assignedCompetitorTypes->contains($title->type->championMorphClass())) {
+                continue;
+            }
+
+            throw InvalidMatchConfigurationException::titleCompetitorTypeMismatch($title);
+        }
     }
 
     /** @param Collection<int, Title> $titles */

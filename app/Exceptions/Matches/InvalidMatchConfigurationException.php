@@ -42,4 +42,9 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
             "The current champion of [{$title->name}] must compete in the title match.",
         );
     }
+
+    public static function titleCompetitorTypeMismatch(Title $title): static
+    {
+        return new self("The [{$title->name}] cannot be contested by this match's competitor type.");
+    }
 }

@@ -6,6 +6,7 @@ use App\Actions\Matches\UpdateMatchAction;
 use App\Data\Matches\EventMatchData;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
+use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Models\Matches\EventMatch;
@@ -22,7 +23,7 @@ test('it atomically replaces a match configuration', function () {
         'preview' => 'Original preview',
     ]);
     $originalReferee = Referee::factory()->bookable()->create();
-    $originalTitle = Title::factory()->active()->create();
+    $originalTitle = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $originalWrestler = Wrestler::factory()->bookable()->create();
     $originalSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
     MatchCompetitor::factory()->for($match, 'eventMatch')->for($originalSide, 'side')->create([
@@ -33,7 +34,7 @@ test('it atomically replaces a match configuration', function () {
     $match->titles()->attach($originalTitle);
 
     $newReferee = Referee::factory()->bookable()->create();
-    $newTitle = Title::factory()->active()->create();
+    $newTitle = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $firstWrestler = Wrestler::factory()->bookable()->create();
     $secondWrestler = Wrestler::factory()->bookable()->create();
     $data = new EventMatchData(
@@ -99,7 +100,7 @@ test('it rolls back the original configuration when the current champion is not 
     $match = EventMatch::factory()->create(['preview' => 'Original preview']);
     $originalReferee = Referee::factory()->bookable()->create();
     $originalWrestler = Wrestler::factory()->bookable()->create();
-    $originalTitle = Title::factory()->active()->create();
+    $originalTitle = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $originalSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
     MatchCompetitor::factory()->for($match, 'eventMatch')->for($originalSide, 'side')->create([
         'competitor_id' => $originalWrestler->id,
@@ -109,7 +110,7 @@ test('it rolls back the original configuration when the current champion is not 
     $match->titles()->attach($originalTitle);
 
     $newReferee = Referee::factory()->bookable()->create();
-    $title = Title::factory()->active()->create();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
     $champion = Wrestler::factory()->bookable()->create();
     $firstChallenger = Wrestler::factory()->bookable()->create();
     $secondChallenger = Wrestler::factory()->bookable()->create();
