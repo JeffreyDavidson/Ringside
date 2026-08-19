@@ -172,14 +172,16 @@ describe('FormModal Edit Operations', function () {
         $venue2 = Venue::factory()->create();
         $event = Event::factory()->create([
             'name' => 'Original Event',
-            'date' => '2024-04-06',
+            'date' => now()->addWeek(),
             'venue_id' => $venue1->id,
         ]);
+
+        $updatedDate = now()->addWeeks(2)->toDateString();
 
         $component = livewire(FormModal::class)
             ->call('openModal', $event->id)
             ->set('form.name', 'Updated Event')
-            ->set('form.date', '2024-04-07')
+            ->set('form.date', $updatedDate)
             ->set('form.venue_id', $venue2->id)
             ->call('save');
 
@@ -189,16 +191,17 @@ describe('FormModal Edit Operations', function () {
         $this->assertDatabaseHas('events', [
             'id' => $event->id,
             'name' => 'Updated Event',
-            'date' => '2024-04-07 00:00:00',
+            'date' => "{$updatedDate} 00:00:00",
             'venue_id' => $venue2->id,
         ]);
     });
 
     it('loads existing event data in edit mode', function () {
         $venue = Venue::factory()->create();
+        $eventDate = now()->addWeek()->startOfSecond();
         $event = Event::factory()->create([
             'name' => 'Test Event',
-            'date' => '2024-04-06',
+            'date' => $eventDate,
             'venue_id' => $venue->id,
         ]);
 
@@ -206,7 +209,7 @@ describe('FormModal Edit Operations', function () {
             ->call('openModal', $event->id);
 
         $component->assertSet('form.name', 'Test Event');
-        $component->assertSet('form.date', '2024-04-06 00:00:00');
+        $component->assertSet('form.date', $eventDate->toDateTimeString());
         $component->assertSet('form.venue_id', $venue->id);
     });
 
@@ -226,14 +229,15 @@ describe('FormModal Edit Operations', function () {
         $venue = Venue::factory()->create();
         $event = Event::factory()->create([
             'name' => 'Test Event',
-            'date' => '2024-04-06',
+            'date' => now()->addWeek(),
             'venue_id' => $venue->id,
         ]);
+        $updatedDate = now()->addWeeks(2)->toDateString();
 
         $component = livewire(FormModal::class)
             ->call('openModal', $event->id)
             ->set('form.name', 'Test Event')
-            ->set('form.date', '2024-04-07')
+            ->set('form.date', $updatedDate)
             ->call('save');
 
         $component->assertHasNoErrors();
@@ -243,6 +247,7 @@ describe('FormModal Edit Operations', function () {
     it('validates date change rules for existing events', function () {
         $venue = Venue::factory()->create();
         $event = Event::factory()->past()->create();
+        $originalDate = $event->date?->toDateTimeString();
 
         $component = livewire(FormModal::class)
             ->call('openModal', $event->id)
@@ -250,8 +255,9 @@ describe('FormModal Edit Operations', function () {
             ->set('form.venue_id', $venue->id)
             ->call('save');
 
-        // Should use DateCanBeChanged rule and allow future date changes
-        $component->assertHasNoErrors();
+        $component->assertHasErrors(['form.date']);
+
+        expect($event->refresh()->date?->toDateTimeString())->toBe($originalDate);
     });
 });
 

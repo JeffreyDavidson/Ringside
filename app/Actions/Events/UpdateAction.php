@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Data\Events\EventData;
+use App\Lifecycle\EventSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,9 @@ class UpdateAction
         return DB::transaction(function () use ($event, $eventData): Event {
             $lockedEvent = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
 
-            if ($this->dateIsChanging($lockedEvent, $eventData)) {
+            EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
+
+            if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
             }
 
@@ -44,14 +47,5 @@ class UpdateAction
 
             return $lockedEvent;
         }, attempts: 3);
-    }
-
-    private function dateIsChanging(Event $event, EventData $data): bool
-    {
-        if ($event->date === null) {
-            return $data->date !== null;
-        }
-
-        return $data->date === null || ! $event->date->equalTo($data->date);
     }
 }

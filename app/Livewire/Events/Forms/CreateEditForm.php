@@ -172,7 +172,7 @@ class CreateEditForm extends BaseForm
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('events', 'name')->ignore($this->modelId)],
-            'date' => ['nullable', 'date', new DateCanBeChanged($this->formModel)],
+            'date' => ['bail', 'nullable', 'date', new DateCanBeChanged($this->isEditing() ? $this->event() : null)],
             'venue_id' => ['nullable', 'required_with:date', 'integer', Rule::exists('venues', 'id')],
             'preview' => ['nullable', 'string'],
         ];
