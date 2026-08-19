@@ -5,6 +5,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | Applies to | Rule file |
 | --- | --- |
 | app/{Actions,Collections,Lifecycle,Models,Rules}/** | .ai/rules/actions-collections-lifecycle-models-rules.md |
+| app/{Actions,Lifecycle,Exceptions}/Titles/** | .ai/rules/actions-lifecycle-exceptions-titles.md |
 | app/{Actions,Lifecycle,Models}/** | .ai/rules/actions-lifecycle-models.md |
 | app/{Actions,Lifecycle}/** | .ai/rules/actions-lifecycle.md |
 | app/Actions/Matches/** | .ai/rules/actions-matches.md |
@@ -15,6 +16,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Http/Controllers/** | .ai/rules/controllers.md |
 | app/Data/** | .ai/rules/data.md |
 | app/Enums/** | .ai/rules/enums.md |
+| app/{Actions/Venues,Exceptions/Events,Lifecycle}/** | .ai/rules/events-lifecycle.md |
 | app/{Actions,Exceptions,Lifecycle,Rules,Livewire}/Events/** | .ai/rules/events.md |
 | app/Exceptions/** | .ai/rules/exceptions.md |
 | tests/Feature/** | .ai/rules/feature.md |

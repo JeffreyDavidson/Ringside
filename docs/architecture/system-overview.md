@@ -252,6 +252,8 @@ A venue may host only one event at a given date and time. Event creation and upd
 
 Restoring a soft-deleted event applies the same venue lock and availability check before reactivating its booking, so a later event cannot be displaced or share the same venue slot.
 
+Restoring a soft-deleted venue locks the venue row and verifies that no active venue has claimed its name, preserving venue identity without bypassing active-name uniqueness.
+
 ### Roster Management
 
 Dynamic competitor assignment from available talent:

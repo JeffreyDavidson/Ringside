@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Venues;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\VenueDeletionEligibility;
 use App\Models\Events\Venue;
+use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly VenueDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted venue.
@@ -24,6 +29,15 @@ class RestoreAction
      */
     public function handle(Venue $venue): void
     {
-        $this->deletionState->restore($venue, now());
+        DB::transaction(function () use ($venue): void {
+            $lockedVenue = Venue::query()
+                ->withTrashed()
+                ->whereKey($venue->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanRestore($lockedVenue);
+            $this->deletionState->restore($lockedVenue, now());
+        });
     }
 }
