@@ -7,6 +7,7 @@ use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
 use App\Actions\Venues\UpdateAction;
 use App\Data\Events\VenueData;
+use App\Exceptions\Events\CannotBeRestoredException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
@@ -249,6 +250,18 @@ describe('Venue Action Integration Tests', function () {
 
             $restoredVenue = Venue::findOrFail($venueId);
             expect($restoredVenue->name)->toBe('Restoration Test Arena');
+        });
+
+        test('restore action rejects an active venue name conflict', function () {
+            $venue = Venue::factory()->create(['name' => 'Restoration Test Arena']);
+
+            resolve(DeleteAction::class)->handle($venue);
+            Venue::factory()->create(['name' => 'Restoration Test Arena']);
+
+            expect(fn () => resolve(RestoreAction::class)->handle($venue))
+                ->toThrow(CannotBeRestoredException::class);
+
+            expect(Venue::onlyTrashed()->whereKey($venue->getKey())->exists())->toBeTrue();
         });
 
         test('restore action maintains event relationships', function () {
