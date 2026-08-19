@@ -12,7 +12,6 @@ use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Referees\Referee;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -43,7 +42,7 @@ class RetireAction
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
-        $retirementDate = DateHelper::resolveDate($retirementDate);
+        $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($referee, $retirementDate): void {
             $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();

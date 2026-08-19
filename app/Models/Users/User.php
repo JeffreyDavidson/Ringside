@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Users;
 
 use App\Builders\Users\UserBuilder;
-use App\Casts\PhoneNumberCast;
 use App\Enums\Users\Role;
 use App\Enums\Users\UserStatus;
 use App\ValueObjects\PhoneNumber;
@@ -77,7 +76,7 @@ class User extends Authenticatable
         return [
             'role' => Role::class,
             'status' => UserStatus::class,
-            'phone_number' => PhoneNumberCast::class,
+            'phone_number' => PhoneNumber::class,
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];

@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +38,7 @@ class UnretireAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void
     {
-        $unretirementDate = DateHelper::resolveDate($unretirementDate);
+        $unretirementDate = $unretirementDate ?? now();
 
         DB::transaction(function () use ($wrestler, $unretirementDate, $employImmediately): void {
             $lockedWrestler = Wrestler::query()->withTrashed()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();

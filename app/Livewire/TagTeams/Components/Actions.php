@@ -13,6 +13,7 @@ use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
 use App\Actions\TagTeams\UnretireAction;
 use App\Enums\Roster\RosterEntityType;
+use App\Enums\Roster\RosterLifecycleAction;
 use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Contracts\View\View;
@@ -32,38 +33,32 @@ class Actions extends Component
 
     public function employ(): void
     {
-        Gate::authorize('employ', $this->tagTeam);
-        $this->executeRosterAction('employed', RosterEntityType::TagTeam, fn () => resolve(EmployAction::class)->handle($this->tagTeam));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Employ, RosterEntityType::TagTeam, $this->tagTeam, fn () => resolve(EmployAction::class)->handle($this->tagTeam));
     }
 
     public function release(): void
     {
-        Gate::authorize('release', $this->tagTeam);
-        $this->executeRosterAction('released', RosterEntityType::TagTeam, fn () => resolve(ReleaseAction::class)->handle($this->tagTeam));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Release, RosterEntityType::TagTeam, $this->tagTeam, fn () => resolve(ReleaseAction::class)->handle($this->tagTeam));
     }
 
     public function retire(): void
     {
-        Gate::authorize('retire', $this->tagTeam);
-        $this->executeRosterAction('retired', RosterEntityType::TagTeam, fn () => resolve(RetireAction::class)->handle($this->tagTeam));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Retire, RosterEntityType::TagTeam, $this->tagTeam, fn () => resolve(RetireAction::class)->handle($this->tagTeam));
     }
 
     public function unretire(): void
     {
-        Gate::authorize('unretire', $this->tagTeam);
-        $this->executeRosterAction('unretired', RosterEntityType::TagTeam, fn () => resolve(UnretireAction::class)->handle($this->tagTeam));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Unretire, RosterEntityType::TagTeam, $this->tagTeam, fn () => resolve(UnretireAction::class)->handle($this->tagTeam));
     }
 
     public function suspend(): void
     {
-        Gate::authorize('suspend', $this->tagTeam);
-        $this->executeRosterAction('suspended', RosterEntityType::TagTeam, fn () => resolve(SuspendAction::class)->handle($this->tagTeam));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Suspend, RosterEntityType::TagTeam, $this->tagTeam, fn () => resolve(SuspendAction::class)->handle($this->tagTeam));
     }
 
     public function reinstate(): void
     {
-        Gate::authorize('reinstate', $this->tagTeam);
-        $this->executeRosterAction('reinstated', RosterEntityType::TagTeam, fn () => resolve(ReinstateAction::class)->handle($this->tagTeam));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Reinstate, RosterEntityType::TagTeam, $this->tagTeam, fn () => resolve(ReinstateAction::class)->handle($this->tagTeam));
     }
 
     public function delete(): void
@@ -74,8 +69,7 @@ class Actions extends Component
 
     public function restore(): void
     {
-        Gate::authorize('restore', $this->tagTeam);
-        $this->executeRosterAction('restored', RosterEntityType::TagTeam, fn () => resolve(RestoreAction::class)->handle($this->tagTeam));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::TagTeam, $this->tagTeam, fn () => resolve(RestoreAction::class)->handle($this->tagTeam));
     }
 
     public function render(): View

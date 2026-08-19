@@ -51,7 +51,7 @@ test('it restores wrestler with specific restore date', function () {
     ]);
 });
 
-test('it handles DateHelper date resolution', function () {
+test('it uses the current time when no date is provided', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestler->delete(); // Soft delete
 

@@ -32,7 +32,7 @@ use Illuminate\Support\Carbon;
  */
 describe('Stable Activation Action Integration', function () {
     beforeEach(function () {
-        $this->stable = Stable::factory()->create();
+        $this->stable = Stable::factory()->withEmployedDefaultMembers()->create();
     });
 
     describe('debut action workflow', function () {
@@ -71,6 +71,18 @@ describe('Stable Activation Action Integration', function () {
                 ->toThrow(InvalidDateRangeException::class);
 
             expect($this->stable->activityPeriods()->doesntExist())->toBeTrue();
+        });
+
+        test('debut action requires the minimum member headcount', function () {
+            $stable = Stable::factory()->withNoMembers()->create();
+
+            expect(fn () => resolve(EstablishAction::class)->handle($stable))
+                ->toThrow(
+                    CannotBeEstablishedException::class,
+                    CannotBeEstablishedException::insufficientMembers($stable, 0, 3)->getMessage(),
+                );
+
+            expect($stable->activityPeriods()->doesntExist())->toBeTrue();
         });
 
         test('establishment records its lifecycle transition', function () {

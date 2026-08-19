@@ -11,7 +11,6 @@ use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
-use App\Exceptions\BaseBusinessException;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeRestoredException;
@@ -112,11 +111,11 @@ class Main extends BaseTable
 
         try {
             resolve(EstablishAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeEstablishedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        } catch (CannotBeEstablishedException $exception) {
+            session()->flash('error', $exception->getMessage());
         }
+
+        $this->redirectRoute('stables.index');
     }
 
     /**
@@ -128,11 +127,11 @@ class Main extends BaseTable
 
         try {
             resolve(DisbandAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeDisbandedException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        } catch (CannotBeDisbandedException $exception) {
+            session()->flash('error', $exception->getMessage());
         }
+
+        $this->redirectRoute('stables.index');
     }
 
     /**
@@ -146,11 +145,11 @@ class Main extends BaseTable
 
         try {
             resolve(RestoreAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeRestoredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        } catch (CannotBeRestoredException $exception) {
+            session()->flash('error', $exception->getMessage());
         }
+
+        $this->redirectRoute('stables.index');
     }
 
     /**
@@ -162,11 +161,11 @@ class Main extends BaseTable
 
         try {
             resolve(RetireAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeRetiredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        } catch (CannotBeRetiredException $exception) {
+            session()->flash('error', $exception->getMessage());
         }
+
+        $this->redirectRoute('stables.index');
     }
 
     /**
@@ -178,30 +177,10 @@ class Main extends BaseTable
 
         try {
             resolve(UnretireAction::class)->handle($stable);
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
-        } catch (CannotBeUnretiredException $e) {
-            session()->flash('error', $e->getMessage());
-            $this->redirect(request()->header('Referer') ?: route('stables.index'));
+        } catch (CannotBeUnretiredException $exception) {
+            session()->flash('error', $exception->getMessage());
         }
-    }
 
-    /**
-     * Handle stable actions through a unified interface.
-     */
-    public function handleStableAction(string $action, int $stableId): void
-    {
-        $stable = Stable::findOrFail($stableId);
-
-        try {
-            match ($action) {
-                'establish' => resolve(EstablishAction::class)->handle($stable),
-                'disband' => resolve(DisbandAction::class)->handle($stable),
-                'retire' => resolve(RetireAction::class)->handle($stable),
-                'unretire' => resolve(UnretireAction::class)->handle($stable),
-                default => null,
-            };
-        } catch (BaseBusinessException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->redirectRoute('stables.index');
     }
 }

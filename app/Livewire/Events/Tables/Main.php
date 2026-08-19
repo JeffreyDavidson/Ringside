@@ -143,6 +143,6 @@ class Main extends BaseTable
 
         resolve(RestoreAction::class)->handle($event);
         session()->flash('status', 'Event successfully restored.');
-        $this->redirect(route('events.index'));
+        $this->redirectRoute('events.index');
     }
 }

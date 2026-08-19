@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +34,7 @@ class SuspendAction
      */
     public function handle(Manager $manager, ?Carbon $suspensionDate = null): void
     {
-        $suspensionDate = DateHelper::resolveDate($suspensionDate);
+        $suspensionDate = $suspensionDate ?? now();
 
         DB::transaction(function () use ($manager, $suspensionDate): void {
             $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();

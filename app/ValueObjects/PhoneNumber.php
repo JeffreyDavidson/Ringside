@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\ValueObjects;
 
+use App\Casts\PhoneNumberCast;
+use Illuminate\Contracts\Database\Eloquent\Castable;
 use InvalidArgumentException;
 
-readonly class PhoneNumber
+readonly class PhoneNumber implements Castable
 {
     private string $digits;
 
@@ -24,6 +26,15 @@ readonly class PhoneNumber
     public function __toString(): string
     {
         return $this->digits;
+    }
+
+    /**
+     * @param  array<string, mixed>  $arguments
+     * @return class-string<PhoneNumberCast>
+     */
+    public static function castUsing(array $arguments): string
+    {
+        return PhoneNumberCast::class;
     }
 
     public function formatted(): string

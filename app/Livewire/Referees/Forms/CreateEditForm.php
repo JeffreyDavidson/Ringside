@@ -90,12 +90,10 @@ class CreateEditForm extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Only process if we have a referee model
         if (! $this->formModel instanceof Referee) {
             return;
         }
 
-        // Load employment start date from relationship
         $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
     }
 

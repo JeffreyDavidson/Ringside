@@ -203,7 +203,7 @@ test('it handles database transactions correctly', function () {
     ]);
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $manager = Manager::factory()->suspended()->create();
     $customReleaseDate = now()->subDays(2)->startOfDay();
 
@@ -211,7 +211,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $manager->refresh();
 
-    // Verify DateHelper was used for date resolution across all operations
+    // Verify the provided date was used across all operations
     $this->assertDatabaseHas('employments', [
         'employable_id' => $manager->id,
         'ended_at' => $customReleaseDate->toDateTimeString(),

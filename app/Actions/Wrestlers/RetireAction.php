@@ -12,7 +12,6 @@ use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\RetirementPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -44,7 +43,7 @@ class RetireAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $retirementDate = null): void
     {
-        $retirementDate = DateHelper::resolveDate($retirementDate);
+        $retirementDate = $retirementDate ?? now();
 
         DB::transaction(function () use ($wrestler, $retirementDate): void {
             $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();

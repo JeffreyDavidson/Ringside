@@ -211,7 +211,7 @@ test('it creates new retirement period', function () {
     expect($currentRetirement->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
     $customRetirementDate = now()->subDays(2)->startOfDay();
 
@@ -219,7 +219,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $tagTeam->refresh();
 
-    // Verify DateHelper was used for date resolution across all operations
+    // Verify the provided date was used across all operations
     $this->assertDatabaseHas('employments', [
         'employable_id' => $tagTeam->id,
         'ended_at' => $customRetirementDate->toDateTimeString(),

@@ -10,7 +10,6 @@ use App\Enums\Titles\TitleType;
 use App\Livewire\Base\BaseFormModal;
 use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Models\Titles\Title;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -52,19 +51,6 @@ class FormModal extends BaseFormModal
         }
 
         return 'Create Title';
-    }
-
-    public function openModal(int|string|null $modelId = null): void
-    {
-        // Authorization check - only administrators can access title management
-        if ($modelId) {
-            $title = Title::findOrFail($modelId);
-            Gate::authorize('update', $title);
-        } else {
-            Gate::authorize('create', Title::class);
-        }
-
-        parent::openModal($modelId);
     }
 
     protected function storeForm(): bool

@@ -270,7 +270,7 @@ test('it creates new employment period', function () {
     expect($currentEmployment->ended_at)->toBeNull();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
     $customUnretirementDate = now()->subDays(2)->startOfDay();
 
@@ -278,7 +278,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $tagTeam->refresh();
 
-    // Verify DateHelper was used for date resolution across all operations
+    // Verify the provided date was used across all operations
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $tagTeam->id,
         'retirable_type' => $tagTeam->getMorphClass(),

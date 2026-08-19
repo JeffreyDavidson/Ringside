@@ -11,7 +11,6 @@ use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Lifecycle\InjuryPeriodManager;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +39,7 @@ class ReleaseAction
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = DateHelper::resolveDate($releaseDate);
+        $releaseDate = $releaseDate ?? now();
 
         DB::transaction(function () use ($manager, $releaseDate): void {
             $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
