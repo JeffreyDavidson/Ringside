@@ -8,15 +8,17 @@
 
         <div class="grid gap-4 md:grid-cols-2">
             <x-form.inputs.select
+                id="finish"
                 label="Finish"
-                wire:model.live="finish"
+                wire:model.live="form.finish"
                 :options="$this->finishOptions"
                 placeholder="Select a finish"
             />
 
             <x-form.inputs.select
+                id="winningSideId"
                 label="Winning Side"
-                wire:model="winningSideId"
+                wire:model="form.winningSideId"
                 :options="$this->sideOptions"
                 placeholder="No winning side"
             />
@@ -50,17 +52,17 @@
                                         <input
                                             type="number"
                                             min="1"
-                                            wire:model="eliminations.{{ $competitor->id }}.order"
+                                            wire:model="form.eliminations.{{ $competitor->id }}.order"
                                             class="block h-8.5 w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-gray-500 focus:ring-gray-500"
                                             aria-label="Elimination order for {{ $competitor->competitor->name }}"
                                         />
-                                        @error("eliminations.{$competitor->id}.order")
+                                        @error("form.eliminations.{$competitor->id}.order")
                                             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                         @enderror
                                     </td>
                                     <td class="px-4 py-3">
                                         <x-form.inputs.select
-                                            wire:model="eliminations.{{ $competitor->id }}.eliminatedById"
+                                            wire:model="form.eliminations.{{ $competitor->id }}.eliminatedById"
                                             :options="collect($this->competitorOptions)->except($competitor->id)->all()"
                                             placeholder="Not recorded"
                                             size="sm"
