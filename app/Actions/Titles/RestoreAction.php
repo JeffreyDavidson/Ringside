@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\TitleDeletionEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(
+        private readonly DeletionStateManager $deletionState,
+        private readonly TitleDeletionEligibility $eligibility,
+    ) {}
 
     /**
      * Restore a soft-deleted title.
@@ -27,7 +31,14 @@ class RestoreAction
     public function handle(Title $title): void
     {
         DB::transaction(function () use ($title): void {
-            $this->deletionState->restore($title, now());
+            $lockedTitle = Title::query()
+                ->withTrashed()
+                ->whereKey($title->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanRestore($lockedTitle);
+            $this->deletionState->restore($lockedTitle, now());
         });
     }
 }
