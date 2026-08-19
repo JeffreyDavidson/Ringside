@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Exceptions\Matches;
 
 use App\Enums\BusinessRuleReason;
+use App\Enums\MatchType;
 use App\Exceptions\BaseBusinessException;
 use App\Models\Titles\Title;
 
@@ -27,6 +28,37 @@ final class InvalidMatchConfigurationException extends BaseBusinessException
     public static function duplicateCompetitors(): static
     {
         return new self('The same competitor cannot compete multiple times in a match.');
+    }
+
+    public static function duplicateCompetitorRepresentation(): static
+    {
+        return new self('A wrestler cannot compete directly and through a selected tag team in the same match.');
+    }
+
+    public static function unsupportedCompetitorType(MatchType $matchType): static
+    {
+        return new self("The [{$matchType->label()}] match does not support the selected competitor type.");
+    }
+
+    /** @param list<int> $requiredRosterMembersPerSide */
+    public static function invalidSideComposition(MatchType $matchType, array $requiredRosterMembersPerSide): static
+    {
+        $composition = implode('-on-', $requiredRosterMembersPerSide);
+
+        return new self("The [{$matchType->label()}] match requires a {$composition} roster-member composition.");
+    }
+
+    /** @param list<int> $requiredCompetitorEntriesPerSide */
+    public static function invalidCompetitorEntryComposition(MatchType $matchType, array $requiredCompetitorEntriesPerSide): static
+    {
+        $composition = implode('-on-', $requiredCompetitorEntriesPerSide);
+
+        return new self("The [{$matchType->label()}] match requires a {$composition} competitor-entry composition.");
+    }
+
+    public static function individualCompetitorSidesRequired(MatchType $matchType): static
+    {
+        return new self("Each [{$matchType->label()}] entrant must compete on an individual side.");
     }
 
     public static function invalidSideNumber(int $sideNumber): static

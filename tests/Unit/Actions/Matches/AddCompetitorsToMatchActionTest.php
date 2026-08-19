@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Matches\AddCompetitorsToMatchAction;
 use App\Actions\Matches\AddTagTeamsToMatchAction;
 use App\Actions\Matches\AddWrestlersToMatchAction;
+use App\Enums\MatchType;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -40,7 +41,7 @@ test('it adds wrestler competitors to a match', function () {
 });
 
 test('it adds tag team competitors to a match', function () {
-    $eventMatch = EventMatch::factory()->create();
+    $eventMatch = EventMatch::factory()->withMatchType(MatchType::TagTeam)->create();
     $tagTeamA = TagTeam::factory()->bookable()->create();
     $tagTeamB = TagTeam::factory()->bookable()->create();
     $competitors = collect([

@@ -68,9 +68,35 @@ enum MatchType: string
     {
         return match ($this) {
             self::TagTeam, self::TornadoTagTeam, self::SixManTagTeam,
-            self::EightManTagTeam, self::TenManTagTeam => ['wrestler', 'tag_team'],
-            self::TripleThreat, self::Fatal4Way => ['wrestler', 'tag_team'],
-            default => ['wrestler'], // Singles and other types default to wrestler-only
+            self::EightManTagTeam, self::TenManTagTeam, self::TripleThreat,
+            self::Fatal4Way, self::TwoOnOneHandicap, self::ThreeOnTwoHandicap,
+            self::Gauntlet => ['wrestler', 'tag_team'],
+            default => ['wrestler'],
+        };
+    }
+
+    /** @return list<int>|null */
+    public function requiredRosterMembersPerSide(): ?array
+    {
+        return match ($this) {
+            self::TagTeam, self::TornadoTagTeam => [2, 2],
+            self::SixManTagTeam => [3, 3],
+            self::EightManTagTeam => [4, 4],
+            self::TenManTagTeam => [5, 5],
+            self::TwoOnOneHandicap => [1, 2],
+            self::ThreeOnTwoHandicap => [2, 3],
+            default => null,
+        };
+    }
+
+    /** @return list<int>|null */
+    public function requiredCompetitorEntriesPerSide(): ?array
+    {
+        return match ($this) {
+            self::Singles => [1, 1],
+            self::TripleThreat, self::Triangle => [1, 1, 1],
+            self::Fatal4Way => [1, 1, 1, 1],
+            default => null,
         };
     }
 
