@@ -45,8 +45,8 @@ it('records an ordinary match result', function () {
     $winningSide = $competitors[0]->side;
 
     livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('finish', MatchFinish::Pinfall->value)
-        ->set('winningSideId', $winningSide->id)
+        ->set('form.finish', MatchFinish::Pinfall->value)
+        ->set('form.winningSideId', $winningSide->id)
         ->call('save')
         ->assertHasNoErrors()
         ->assertDispatched('refreshDatatable')
@@ -60,9 +60,9 @@ it('records a draw without a winning side', function () {
     [$match, $competitors] = matchWithResultCompetitors();
 
     livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('winningSideId', $competitors[0]->match_side_id)
-        ->set('finish', MatchFinish::TimeLimitDraw->value)
-        ->assertSet('winningSideId', null)
+        ->set('form.winningSideId', $competitors[0]->match_side_id)
+        ->set('form.finish', MatchFinish::TimeLimitDraw->value)
+        ->assertSet('form.winningSideId', null)
         ->call('save')
         ->assertHasNoErrors();
 
@@ -75,12 +75,12 @@ it('records a complete elimination match result', function () {
     $winner = $competitors[2];
 
     livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('finish', MatchFinish::Stipulation->value)
-        ->set('winningSideId', $winner->match_side_id)
-        ->set("eliminations.{$competitors[0]->id}.order", '1')
-        ->set("eliminations.{$competitors[0]->id}.eliminatedById", (string) $winner->id)
-        ->set("eliminations.{$competitors[1]->id}.order", '2')
-        ->set("eliminations.{$competitors[1]->id}.eliminatedById", (string) $winner->id)
+        ->set('form.finish', MatchFinish::Stipulation->value)
+        ->set('form.winningSideId', $winner->match_side_id)
+        ->set("form.eliminations.{$competitors[0]->id}.order", '1')
+        ->set("form.eliminations.{$competitors[0]->id}.eliminatedById", (string) $winner->id)
+        ->set("form.eliminations.{$competitors[1]->id}.order", '2')
+        ->set("form.eliminations.{$competitors[1]->id}.eliminatedById", (string) $winner->id)
         ->call('save')
         ->assertHasNoErrors();
 
@@ -102,19 +102,19 @@ it('loads an existing result for correction', function () {
     ])->save();
 
     livewire(ResultModal::class, ['matchId' => $match->id])
-        ->assertSet('finish', MatchFinish::Stipulation->value)
-        ->assertSet('winningSideId', $competitors[2]->match_side_id)
-        ->assertSet("eliminations.{$competitors[0]->id}.order", 1)
+        ->assertSet('form.finish', MatchFinish::Stipulation->value)
+        ->assertSet('form.winningSideId', $competitors[2]->match_side_id)
+        ->assertSet("form.eliminations.{$competitors[0]->id}.order", 1)
         ->assertSee('Correct Match Result');
 });
 
-it('shows domain validation failures without closing the modal', function () {
+it('requires a winning side for a decisive finish', function () {
     [$match] = matchWithResultCompetitors();
 
     livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('finish', MatchFinish::Pinfall->value)
+        ->set('form.finish', MatchFinish::Pinfall->value)
         ->call('save')
-        ->assertHasErrors(['outcome'])
+        ->assertHasErrors(['form.winningSideId' => ['required']])
         ->assertNotDispatched('closeModal');
 
     expect($match->refresh()->match_finish)->toBeNull();
@@ -141,7 +141,23 @@ it('requires an administrator to record a result', function () {
     $this->actingAs(User::factory()->create());
 
     livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('finish', MatchFinish::TimeLimitDraw->value)
+        ->set('form.finish', MatchFinish::TimeLimitDraw->value)
         ->call('save')
         ->assertForbidden();
+});
+
+it('rejects elimination data for a competitor outside the match', function () {
+    [$match] = matchWithResultCompetitors(MatchType::BattleRoyal, 3);
+
+    livewire(ResultModal::class, ['matchId' => $match->id])
+        ->set('form.finish', MatchFinish::Stipulation->value)
+        ->set('form.eliminations.999999', [
+            'order' => 1,
+            'eliminatedById' => null,
+        ])
+        ->call('save')
+        ->assertHasErrors(['form.eliminations' => ['array']])
+        ->assertNotDispatched('closeModal');
+
+    expect($match->refresh()->match_finish)->toBeNull();
 });
