@@ -7,6 +7,7 @@ namespace App\Actions\Matches;
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
 use App\Lifecycle\MatchOutcomeRequirements;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
@@ -23,11 +24,15 @@ class RecordResultAction
     {
         return DB::transaction(function () use ($match, $result): EventMatch {
             $lockedMatch = EventMatch::query()->whereKey($match->id)->lockForUpdate()->firstOrFail();
+            $lockedEvent = Event::query()->whereKey($lockedMatch->event_id)->lockForUpdate()->firstOrFail();
+            $lockedMatch->setRelation('event', $lockedEvent);
             $lockedWinningSide = $result->winningSide === null
                 ? null
                 : MatchSide::query()->whereKey($result->winningSide->id)->lockForUpdate()->firstOrFail();
             $lockedCompetitors = MatchCompetitor::query()
                 ->whereBelongsTo($lockedMatch, 'eventMatch')
+                ->with('competitor')
+                ->orderBy('id')
                 ->lockForUpdate()
                 ->get();
             $lockedResult = new MatchResultData(
@@ -37,7 +42,7 @@ class RecordResultAction
             );
 
             $this->requirements->ensureSatisfied($lockedMatch, $lockedResult, $lockedCompetitors);
-            $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult);
+            $this->applyTitleOutcomes->handle($lockedMatch, $lockedResult, $lockedCompetitors);
 
             $lockedMatch->update([
                 'match_finish' => $result->finish,
