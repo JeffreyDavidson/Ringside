@@ -52,6 +52,19 @@ test('it rejects the entire assignment when any tag team is unavailable', functi
         ->and($match->sides()->count())->toBe(0);
 });
 
+test('it reloads tag teams before checking assignment eligibility', function () {
+    $match = EventMatch::factory()->create();
+    $tagTeam = TagTeam::factory()->bookable()->create();
+    $staleTagTeam = TagTeam::query()->findOrFail($tagTeam->id);
+
+    $tagTeam->delete();
+
+    expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$staleTagTeam]), 1))
+        ->toThrow(EntityNotAvailableException::class);
+
+    expect($match->competitors()->exists())->toBeFalse();
+});
+
 test('it rejects a tag team already booked on the event card', function () {
     $event = Event::factory()->scheduled()->create();
     $existingMatch = EventMatch::factory()->forEvent($event)->create();

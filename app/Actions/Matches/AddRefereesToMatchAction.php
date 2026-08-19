@@ -50,17 +50,29 @@ class AddRefereesToMatchAction
     {
         $requestedReferees = $referees->unique('id')->values();
 
-        if ($requestedReferees->isEmpty() || $requestedReferees->contains(
-            fn (Referee $referee): bool => ! RosterBookingEligibility::allows($referee)
-        )) {
+        if ($requestedReferees->isEmpty()) {
             throw EntityNotAvailableException::forMatchAssignment('referees');
         }
 
         DB::transaction(function () use ($eventMatch, $requestedReferees): void {
-            $this->conflictService->ensureRefereesCanBeAssigned($eventMatch, $requestedReferees);
+            $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
+            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+            $lockedReferees = Referee::query()
+                ->whereKey($requestedReferees->pluck('id'))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
 
-            $requestedReferees->each(function (Referee $referee) use ($eventMatch): void {
-                $eventMatch->referees()->attach($referee->id);
+            if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
+                fn (Referee $referee): bool => ! RosterBookingEligibility::allows($referee)
+            )) {
+                throw EntityNotAvailableException::forMatchAssignment('referees');
+            }
+
+            $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch, $conflictingEventIds, $lockedReferees);
+
+            $lockedReferees->each(function (Referee $referee) use ($lockedMatch): void {
+                $lockedMatch->referees()->attach($referee->id);
             });
         });
     }

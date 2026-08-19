@@ -41,12 +41,13 @@ class AddCompetitorsToMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
-        $this->requirements->ensureSatisfied($eventMatch, $competitors);
-
         DB::transaction(function () use ($eventMatch, $competitors): void {
+            $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
+            $this->requirements->ensureSatisfied($lockedMatch, $competitors);
+
             // Process each side and add competitors
             foreach ($competitors as $sideNumber => $sideCompetitors) {
-                $this->addSideCompetitors($eventMatch, (int) $sideNumber, $sideCompetitors);
+                $this->addSideCompetitors($lockedMatch, (int) $sideNumber, $sideCompetitors);
             }
         });
     }

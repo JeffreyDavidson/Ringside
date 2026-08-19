@@ -102,6 +102,19 @@ test('it throws exception when no eligible titles provided', function () {
         ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.');
 });
 
+test('it reloads titles before checking assignment eligibility', function () {
+    $match = createSinglesMatchWithCompetitors();
+    $title = Title::factory()->active()->create(['type' => TitleType::Singles]);
+    $staleTitle = Title::query()->findOrFail($title->id);
+
+    $title->delete();
+
+    expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$staleTitle])))
+        ->toThrow(EntityNotAvailableException::class);
+
+    expect($match->titles()->exists())->toBeFalse();
+});
+
 test('it handles empty collection', function () {
     $match = EventMatch::factory()->create();
     $titles = Title::query()->whereKey([])->get();

@@ -30,6 +30,19 @@ test('it rejects the entire assignment when any referee is unavailable', functio
     expect($match->referees()->count())->toBe(0);
 });
 
+test('it reloads referees before checking assignment eligibility', function () {
+    $match = EventMatch::factory()->create();
+    $referee = Referee::factory()->bookable()->create();
+    $staleReferee = Referee::query()->findOrFail($referee->id);
+
+    $referee->delete();
+
+    expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($match, collect([$staleReferee])))
+        ->toThrow(EntityNotAvailableException::class);
+
+    expect($match->referees()->exists())->toBeFalse();
+});
+
 test('it allows a referee to officiate multiple matches on one event card', function () {
     $event = Event::factory()->scheduled()->create();
     $existingMatch = EventMatch::factory()->forEvent($event)->create();

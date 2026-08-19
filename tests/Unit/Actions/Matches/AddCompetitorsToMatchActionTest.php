@@ -31,8 +31,8 @@ test('it adds wrestler competitors to a match', function () {
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addWrestlersToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 0);
-    $addWrestlersToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 1);
+    $addWrestlersToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type('Illuminate\Support\Collection'), 0);
+    $addWrestlersToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type('Illuminate\Support\Collection'), 1);
 
     resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 
@@ -59,8 +59,8 @@ test('it adds tag team competitors to a match', function () {
     app()->instance(AddWrestlersToMatchAction::class, $addWrestlersToMatchAction);
     app()->instance(AddTagTeamsToMatchAction::class, $addTagTeamsToMatchAction);
 
-    $addTagTeamsToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 0);
-    $addTagTeamsToMatchAction->expects('handle')->with($eventMatch, Argument::type('Illuminate\Support\Collection'), 1);
+    $addTagTeamsToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type('Illuminate\Support\Collection'), 0);
+    $addTagTeamsToMatchAction->expects('handle')->with(Argument::type(EventMatch::class), Argument::type('Illuminate\Support\Collection'), 1);
 
     resolve(AddCompetitorsToMatchAction::class)->handle($eventMatch, $competitors);
 

@@ -51,9 +51,7 @@ class AddWrestlersToMatchAction
     {
         $requestedWrestlers = $wrestlers->unique('id')->values();
 
-        if ($requestedWrestlers->isEmpty() || $requestedWrestlers->contains(
-            fn (Wrestler $wrestler): bool => ! RosterBookingEligibility::allows($wrestler)
-        )) {
+        if ($requestedWrestlers->isEmpty()) {
             throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }
 
@@ -63,17 +61,31 @@ class AddWrestlersToMatchAction
         }
 
         DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
-            $this->conflictService->ensureWrestlersCanBeAssigned($eventMatch, $requestedWrestlers);
-            $side = $eventMatch->sides()->firstOrCreate(['position' => $sideNumber]);
+            $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
+            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+            $lockedWrestlers = Wrestler::query()
+                ->whereKey($requestedWrestlers->pluck('id'))
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
 
-            $requestedWrestlers->each(function (Wrestler $wrestler) use ($eventMatch, $side): void {
-                $competitor = $eventMatch->competitors()->create([
+            if ($lockedWrestlers->count() !== $requestedWrestlers->count() || $lockedWrestlers->contains(
+                fn (Wrestler $wrestler): bool => ! RosterBookingEligibility::allows($wrestler)
+            )) {
+                throw EntityNotAvailableException::forMatchAssignment('wrestlers');
+            }
+
+            $this->conflictService->ensureWrestlersCanBeAssigned($conflictingEventIds, $lockedWrestlers);
+            $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
+
+            $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {
+                $competitor = $lockedMatch->competitors()->create([
                     'competitor_id' => $wrestler->id,
                     'competitor_type' => $wrestler->getMorphClass(),
                     'match_side_id' => $side->id,
                 ]);
 
-                if ($eventMatch->match_type === MatchType::RoyalRumble) {
+                if ($lockedMatch->match_type === MatchType::RoyalRumble) {
                     $competitor->forceFill(['entry_order' => $side->position])->save();
                 }
             });
