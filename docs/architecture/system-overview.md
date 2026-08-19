@@ -246,6 +246,8 @@ An event's nullable `date` remains the authoritative scheduling value. `EventSta
 
 Event dates become immutable once the event has occurred. `EventSchedulingEligibility` owns that rule, while both Livewire validation and `Events\UpdateAction` enforce it so non-UI callers cannot bypass the invariant. Other event details may still be corrected without changing the historical date.
 
+A venue may host only one event at a given date and time. Event creation and updates lock the selected venue row before `VenueSchedulingEligibility` checks its event relationship, serializing competing bookings and rolling back the complete event write when a conflict exists. Unscheduled events do not reserve a venue time.
+
 ### Roster Management
 
 Dynamic competitor assignment from available talent:
