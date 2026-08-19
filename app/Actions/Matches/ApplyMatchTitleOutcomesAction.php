@@ -20,15 +20,11 @@ class ApplyMatchTitleOutcomesAction
 {
     public function __construct(private readonly ChampionshipReignManager $championshipReigns) {}
 
-    public function handle(EventMatch $match, MatchResultData $result): void
+    /** @param Collection<int, MatchCompetitor> $competitors */
+    public function handle(EventMatch $match, MatchResultData $result, Collection $competitors): void
     {
-        DB::transaction(function () use ($match, $result): void {
-            $lockedMatch = EventMatch::query()
-                ->with('event')
-                ->whereKey($match->id)
-                ->lockForUpdate()
-                ->firstOrFail();
-            $titleIds = $lockedMatch->titles()->pluck((new Title())->qualifyColumn('id'));
+        DB::transaction(function () use ($match, $result, $competitors): void {
+            $titleIds = $match->titles()->pluck((new Title())->qualifyColumn('id'));
 
             if ($titleIds->isEmpty()) {
                 return;
@@ -45,7 +41,7 @@ class ApplyMatchTitleOutcomesAction
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get();
-            $winningCompetitors = $this->winningCompetitors($lockedMatch, $result);
+            $winningCompetitors = $this->winningCompetitors($result, $competitors);
 
             /** @var array<int, Wrestler|TagTeam|null> $desiredChampions */
             $desiredChampions = [];
@@ -55,12 +51,12 @@ class ApplyMatchTitleOutcomesAction
                     ? $this->championForTitle($title, $winningCompetitors)
                     : null;
 
-                $this->championshipReigns->ensureMatchCanBeReconciled($lockedMatch, $title, $reigns);
+                $this->championshipReigns->ensureMatchCanBeReconciled($match, $title, $reigns);
             }
 
             foreach ($titles as $title) {
                 $this->championshipReigns->reconcileMatchOutcome(
-                    $lockedMatch,
+                    $match,
                     $title,
                     $desiredChampions[$title->id],
                     $reigns,
@@ -69,18 +65,19 @@ class ApplyMatchTitleOutcomesAction
         });
     }
 
-    /** @return Collection<int, MatchCompetitor> */
-    private function winningCompetitors(EventMatch $match, MatchResultData $result): Collection
+    /**
+     * @param  Collection<int, MatchCompetitor>  $competitors
+     * @return Collection<int, MatchCompetitor>
+     */
+    private function winningCompetitors(MatchResultData $result, Collection $competitors): Collection
     {
         if (! $result->finish->allowsTitleChange() || $result->winningSide === null) {
             return new Collection();
         }
 
-        return MatchCompetitor::query()
-            ->whereBelongsTo($match, 'eventMatch')
+        return $competitors
             ->where('match_side_id', $result->winningSide->id)
-            ->with('competitor')
-            ->get();
+            ->values();
     }
 
     /**
