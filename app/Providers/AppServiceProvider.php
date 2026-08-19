@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -66,19 +65,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(
             fn (User $user): ?bool => $user->role->isAdministrator() ? true : null,
         );
-
-        /** @param array<string> $parameters */
-        Validator::replacer('ends_with', static function (string $message, string $attribute, string $rule, array $parameters): string {
-            /** @var string $values */
-            $values = array_pop($parameters);
-
-            if (count($parameters) !== 0) {
-                $values = implode(', ', $parameters).' or '.$values;
-            }
-
-            return str_replace(':values', $values, $message);
-        });
-
         Relation::enforceMorphMap([
             'wrestler' => Wrestler::class,
             'manager' => Manager::class,
