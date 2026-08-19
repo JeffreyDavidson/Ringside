@@ -12,7 +12,7 @@ trait PresentsRefereesList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: false)]
+    #[Computed]
     public function getReferees(): array
     {
         return Referee::query()

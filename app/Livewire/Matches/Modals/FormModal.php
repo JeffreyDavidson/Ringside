@@ -94,7 +94,7 @@ class FormModal extends BaseFormModal
     }
 
     /** @return array<int, string> */
-    #[Computed(seconds: 180, cache: true, key: 'active-match-stipulations-list')]
+    #[Computed]
     public function getMatchStipulations(): array
     {
         return MatchStipulation::query()

@@ -12,7 +12,7 @@ trait PresentsTitlesList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(seconds: 180, cache: true, key: 'titles-list')]
+    #[Computed]
     public function getTitles(): array
     {
         return Title::query()

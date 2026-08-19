@@ -12,7 +12,7 @@ trait PresentsWrestlersList
     /**
      * @return array<int|string,string|null>
      */
-    #[Computed(cache: false)]
+    #[Computed]
     public function getWrestlers(): array
     {
         return Wrestler::query()
