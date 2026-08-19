@@ -10,9 +10,23 @@ use App\Models\Titles\Title;
 
 final class InvalidMatchConfigurationException extends BaseBusinessException
 {
-    public static function insufficientSides(int $minimumSides): static
+    public static function incorrectSideCount(int $requiredSides): static
     {
-        return new self("A match must have competitors assigned to at least {$minimumSides} sides.");
+        return new self("This match requires exactly {$requiredSides} competitor sides.");
+    }
+
+    public static function invalidCompetitorCount(int $minimumCompetitors, ?int $maximumCompetitors): static
+    {
+        if ($maximumCompetitors === null) {
+            return new self("This match requires at least {$minimumCompetitors} competitors.");
+        }
+
+        return new self("This match requires between {$minimumCompetitors} and {$maximumCompetitors} competitors.");
+    }
+
+    public static function duplicateCompetitors(): static
+    {
+        return new self('The same competitor cannot compete multiple times in a match.');
     }
 
     public static function invalidSideNumber(int $sideNumber): static

@@ -16,8 +16,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Rules\Matches\CompetitorsNotDuplicated;
-use App\Rules\Matches\CorrectNumberOfSides;
 use App\Rules\Referees\IsBookable as RefereeIsBookable;
 use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
@@ -157,14 +155,7 @@ class CreateEditForm extends BaseForm
             ],
         ];
 
-        $competitorRules = (new MatchCompetitorRuleSet($this->matchType))->rules();
-        $competitorRules['competitors'] = [
-            ...$competitorRules['competitors'],
-            new CorrectNumberOfSides(),
-            new CompetitorsNotDuplicated(),
-        ];
-
-        return array_merge($baseRules, $competitorRules);
+        return array_merge($baseRules, (new MatchCompetitorRuleSet($this->matchType))->rules());
     }
 
     private function requiredMatchType(): MatchType

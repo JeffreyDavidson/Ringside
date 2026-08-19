@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
-use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Lifecycle\MatchCompetitorRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -16,6 +16,7 @@ class AddCompetitorsToMatchAction
     public function __construct(
         protected AddTagTeamsToMatchAction $addTagTeamsToMatchAction,
         protected AddWrestlersToMatchAction $addWrestlersToMatchAction,
+        private readonly MatchCompetitorRequirements $requirements,
     ) {}
 
     /**
@@ -30,7 +31,7 @@ class AddCompetitorsToMatchAction
      * - Ensures all competitors are available for the event date
      *
      * BUSINESS RULES:
-     * - Matches must have at least 2 sides with competitors
+     * - Competitor side and entrant counts must satisfy the selected match type
      * - Wrestlers cannot be assigned to multiple sides in the same match
      * - Tag teams must be active and available for competition
      * - Competitors must not have conflicting bookings on the event date
@@ -40,10 +41,7 @@ class AddCompetitorsToMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
-        // Validate competitor distribution before processing
-        if (! $this->validateCompetitorDistribution($competitors)) {
-            throw InvalidMatchConfigurationException::insufficientSides(2);
-        }
+        $this->requirements->ensureSatisfied($eventMatch, $competitors);
 
         DB::transaction(function () use ($eventMatch, $competitors): void {
             // Process each side and add competitors
@@ -83,28 +81,5 @@ class AddCompetitorsToMatchAction
                 $sideNumber
             );
         }
-    }
-
-    /**
-     * Validate match competitors for proper side distribution.
-     *
-     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors  Competitors organized by side
-     * @return bool True if competitor distribution is valid for the match type
-     */
-    private function validateCompetitorDistribution(Collection $competitors): bool
-    {
-        // Ensure we have at least 2 sides with competitors
-        $sidesWithCompetitors = 0;
-
-        foreach ($competitors as $sideCompetitors) {
-            $hasWrestlers = ! empty($sideCompetitors['wrestlers'] ?? []);
-            $hasTagTeams = ! empty($sideCompetitors['tag_teams'] ?? []);
-
-            if ($hasWrestlers || $hasTagTeams) {
-                $sidesWithCompetitors++;
-            }
-        }
-
-        return $sidesWithCompetitors >= 2;
     }
 }

@@ -33,7 +33,7 @@ final readonly class MatchCompetitorRuleSet
             MatchType::EightManTagTeam,
             MatchType::TenManTagTeam,
             MatchType::TornadoTagTeam => $this->tagTeamRules(),
-            default => $this->genericRules(),
+            default => $this->mixedCompetitorSideRules($this->matchType),
         };
     }
 
@@ -43,16 +43,19 @@ final readonly class MatchCompetitorRuleSet
         return [
             'competitors' => ['sometimes', 'array'],
             'competitors.*.wrestlers' => ['sometimes', 'array'],
-            'competitors.*.wrestlers.*' => ['bail', 'integer', 'exists:wrestlers,id', new WrestlerIsBookable()],
+            'competitors.*.wrestlers.*' => ['bail', 'integer', 'distinct', 'exists:wrestlers,id', new WrestlerIsBookable()],
             'competitors.*.tag_teams' => ['sometimes', 'array'],
-            'competitors.*.tag_teams.*' => ['bail', 'integer', 'exists:tag_teams,id', new TagTeamIsBookable()],
+            'competitors.*.tag_teams.*' => ['bail', 'integer', 'distinct', 'exists:tag_teams,id', new TagTeamIsBookable()],
         ];
     }
 
     /** @return array<string, array<int, mixed>> */
     private function individualSideRules(int $sideCount): array
     {
-        $rules = ['competitors' => ['required', 'array', "size:{$sideCount}"]];
+        $rules = [
+            'competitors' => ['required', 'array', 'list', "size:{$sideCount}"],
+            'competitors.*.wrestlers.*' => ['distinct'],
+        ];
 
         foreach (range(0, $sideCount - 1) as $sideIndex) {
             $rules["competitors.{$sideIndex}.wrestlers"] = ['required', 'array', 'size:1'];
@@ -65,7 +68,11 @@ final readonly class MatchCompetitorRuleSet
     /** @return array<string, array<int, mixed>> */
     private function tagTeamRules(): array
     {
-        $rules = ['competitors' => ['required', 'array', 'size:2']];
+        $rules = [
+            'competitors' => ['required', 'array', 'list', 'size:2'],
+            'competitors.*.wrestlers.*' => ['distinct'],
+            'competitors.*.tag_teams.*' => ['distinct'],
+        ];
 
         foreach (range(0, 1) as $sideIndex) {
             $rules["competitors.{$sideIndex}"] = ['required', 'array'];
@@ -89,21 +96,23 @@ final readonly class MatchCompetitorRuleSet
         }
 
         return [
-            'competitors' => ['required', 'array', 'size:1'],
-            'competitors.0.wrestlers' => $wrestlerRules,
-            'competitors.0.wrestlers.*' => ['bail', 'integer', 'exists:wrestlers,id', new WrestlerIsBookable()],
+            'competitors' => ['required', 'array', 'list', 'size:1'],
+            'competitors.0.wrestlers' => [...$wrestlerRules, 'list'],
+            'competitors.0.wrestlers.*' => ['bail', 'integer', 'distinct', 'exists:wrestlers,id', new WrestlerIsBookable()],
         ];
     }
 
     /** @return array<string, array<int, mixed>> */
-    private function genericRules(): array
+    private function mixedCompetitorSideRules(MatchType $matchType): array
     {
+        $requiredSides = $matchType->numberOfSides();
+
         return [
-            'competitors' => ['required', 'array', 'min:2'],
+            'competitors' => ['required', 'array', 'list', $requiredSides === null ? 'min:2' : "size:{$requiredSides}"],
             'competitors.*.wrestlers' => ['sometimes', 'array'],
-            'competitors.*.wrestlers.*' => ['bail', 'integer', 'exists:wrestlers,id', new WrestlerIsBookable()],
+            'competitors.*.wrestlers.*' => ['bail', 'integer', 'distinct', 'exists:wrestlers,id', new WrestlerIsBookable()],
             'competitors.*.tag_teams' => ['sometimes', 'array'],
-            'competitors.*.tag_teams.*' => ['bail', 'integer', 'exists:tag_teams,id', new TagTeamIsBookable()],
+            'competitors.*.tag_teams.*' => ['bail', 'integer', 'distinct', 'exists:tag_teams,id', new TagTeamIsBookable()],
         ];
     }
 }
