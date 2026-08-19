@@ -94,18 +94,7 @@ class CreateEditForm extends BaseForm
      */
     public int|string|null $zipcode = '';
 
-    /**
-     * Load additional data when editing existing venue records.
-     *
-     * Handles data loading for venue-specific fields when editing
-     * existing venues. Called automatically during form initialization
-     * for edit operations. No special data transformation needed for venues.
-     */
-    public function loadExtraData(): void
-    {
-        // No additional data loading required for venues
-        // All venue data is loaded via standard form fill mechanism
-    }
+    public function loadExtraData(): void {}
 
     /**
      * Prepare venue data for model storage.

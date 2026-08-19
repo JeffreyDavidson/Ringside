@@ -224,7 +224,7 @@ describe('EventsTable Component Integration', function () {
 
             $component->call('restore', $deletedEvent->id)
                 ->assertHasNoErrors()
-                ->assertRedirect();
+                ->assertRedirectToRoute('events.index');
 
             // Verify event is restored
             expect(Event::find($deletedEvent->id))->not()->toBeNull();
@@ -256,7 +256,7 @@ describe('EventsTable Component Integration', function () {
 
             $component->call('restore', $deletedEvent->id)
                 ->assertHasNoErrors()
-                ->assertRedirect();
+                ->assertRedirectToRoute('events.index');
 
             expect(Event::find($deletedEvent->id))->not()->toBeNull();
         });

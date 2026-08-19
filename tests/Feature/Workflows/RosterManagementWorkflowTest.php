@@ -132,7 +132,7 @@ describe('Stable Formation and Management Workflow', function () {
         actingAs($admin);
 
         \Pest\Livewire\livewire(StablesTable::class)
-            ->call('handleStableAction', 'establish', $stable->id)
+            ->call('establish', $stable)
             ->assertHasNoErrors();
 
         // Then: Stable should be active
@@ -142,7 +142,7 @@ describe('Stable Formation and Management Workflow', function () {
         actingAs($admin);
 
         \Pest\Livewire\livewire(StablesTable::class)
-            ->call('handleStableAction', 'retire', $stable->id)
+            ->call('retire', $stable)
             ->assertHasNoErrors();
 
         // Then: Stable should be retired
@@ -155,7 +155,7 @@ describe('Stable Formation and Management Workflow', function () {
         actingAs($admin);
 
         \Pest\Livewire\livewire(StablesTable::class)
-            ->call('handleStableAction', 'unretire', $retiredStable->id)
+            ->call('unretire', $retiredStable)
             ->assertHasNoErrors();
 
         // Then: Stable should no longer be retired

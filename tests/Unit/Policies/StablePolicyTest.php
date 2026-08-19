@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Gate;
  * UNIT TEST SCOPE:
  * - Policy method logic in isolation
  * - User role and permission checking
- * - Before hook behavior and bypass logic
+ * - global Gate hook behavior and bypass logic
  * - Individual authorization rules
  * - Policy registration and Gate integration
  *
@@ -31,36 +31,36 @@ describe('StablePolicy Unit Tests', function () {
         $this->stable = Stable::factory()->active()->create();
     });
 
-    describe('before hook behavior', function () {
+    describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'view'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'create'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'update'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'delete'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'restore'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'establish'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'disband'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'retire'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'unretire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('establish'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('disband'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
         });
 
         test('basic users do not bypass authorization checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'delete'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'restore'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'establish'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'disband'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'retire'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'unretire'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('establish'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('disband'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
         });
 
-        test('before hook handles unknown abilities correctly', function () {
-            expect($this->policy->before($this->admin, 'nonexistentAbility'))->toBeTrue();
-            expect($this->policy->before($this->basicUser, 'nonexistentAbility'))->toBeNull();
+        test('global Gate hook handles unknown abilities correctly', function () {
+            expect(Gate::forUser($this->admin)->raw('nonexistentAbility'))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->raw('nonexistentAbility'))->toBeNull();
         });
     });
 
@@ -169,7 +169,7 @@ describe('StablePolicy Unit Tests', function () {
     //         expect(Gate::allows('update', $this->stable))->toBeFalse();
     //         expect(Gate::allows('delete', $this->stable))->toBeFalse();
     //
-    //         // Test admin permissions (should be allowed via before hook)
+    //         // Test admin permissions (should be allowed via the global Gate hook)
     //         Gate::forUser($this->admin);
     //         expect(Gate::allows('viewAny', Stable::class))->toBeTrue();
     //         expect(Gate::allows('view', $this->stable))->toBeTrue();
@@ -213,7 +213,6 @@ describe('StablePolicy Unit Tests', function () {
     describe('policy method completeness', function () {
         test('all required policy methods exist', function () {
             $requiredMethods = [
-                'before',
                 'viewAny',
                 'view',
                 'create',
@@ -235,10 +234,6 @@ describe('StablePolicy Unit Tests', function () {
 
         test('policy methods have correct signatures', function () {
             $reflection = new ReflectionClass($this->policy);
-
-            // Before hook should accept user and ability
-            $beforeMethod = $reflection->getMethod('before');
-            expect($beforeMethod->getNumberOfParameters())->toBe(2);
 
             // View methods should accept user and optionally model
             $viewMethod = $reflection->getMethod('view');
@@ -273,12 +268,12 @@ describe('StablePolicy Unit Tests', function () {
             }
         });
 
-        test('before hook returns boolean true for admin or null for others', function () {
+        test('global Gate hook returns boolean true for admin or null for others', function () {
             $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire'];
 
             foreach ($abilities as $ability) {
-                expect($this->policy->before($this->admin, $ability))->toBeTrue();
-                expect($this->policy->before($this->basicUser, $ability))->toBeNull();
+                expect(Gate::forUser($this->admin)->raw($ability))->toBeTrue();
+                expect(Gate::forUser($this->basicUser)->raw($ability))->toBeNull();
             }
         });
     });

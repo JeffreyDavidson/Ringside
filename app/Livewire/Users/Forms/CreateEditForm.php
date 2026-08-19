@@ -103,12 +103,8 @@ class CreateEditForm extends BaseForm
      */
     public function loadExtraData(): void
     {
-        // Clear password fields for security when editing existing users
         $this->password = '';
         $this->password_confirmation = '';
-
-        // Additional user data can be loaded here as needed:
-        // $this->roles = $this->formModel?->roles->pluck('name')->toArray() ?? [];
     }
 
     /**
@@ -180,12 +176,10 @@ class CreateEditForm extends BaseForm
             'role' => ['required', 'string', 'in:administrator,basic'],
         ];
 
-        // Password rules - required for creation, optional for updates
         if ($this->isCreating()) {
             $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
             $rules['password_confirmation'] = ['required'];
         } elseif (! empty($this->password)) {
-            // Only validate password during updates if user is actually trying to change it
             $rules['password'] = ['required', 'string', 'min:8', 'confirmed'];
             $rules['password_confirmation'] = ['required'];
         }

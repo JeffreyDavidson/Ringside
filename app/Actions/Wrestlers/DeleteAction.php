@@ -8,7 +8,6 @@ use App\Lifecycle\DeletionPeriodCloser;
 use App\Lifecycle\DeletionStateManager;
 use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -45,7 +44,7 @@ class DeleteAction
     {
         $this->eligibility->ensureCanDelete($wrestler);
 
-        $deletionDate = DateHelper::resolveDate($deletionDate);
+        $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($wrestler, $deletionDate): void {
             $this->periods->close($wrestler, $deletionDate);

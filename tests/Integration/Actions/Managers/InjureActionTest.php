@@ -142,7 +142,7 @@ test('it prevents injuring a suspended manager', function () {
     expect($manager->isEmployed())->toBeTrue();
 });
 
-test('it uses DateHelper for consistent date handling', function () {
+test('it uses the provided date', function () {
     $manager = Manager::factory()->employed()->create();
     $customInjuryDate = now()->subDays(2)->startOfDay();
 
@@ -150,7 +150,7 @@ test('it uses DateHelper for consistent date handling', function () {
 
     $manager->refresh();
 
-    // Verify DateHelper was used for date resolution
+    // Verify the provided date was persisted
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $manager->id,
         'injurable_type' => $manager->getMorphClass(),

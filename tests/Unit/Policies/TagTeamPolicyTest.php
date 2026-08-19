@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Users\User;
 use App\Policies\TagTeamPolicy;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Unit tests for TagTeamPolicy authorization logic.
@@ -12,7 +13,7 @@ use App\Policies\TagTeamPolicy;
  * UNIT TEST SCOPE:
  * - Policy method logic in isolation
  * - User role checking and authorization rules
- * - Before hook behavior for administrators
+ * - global Gate hook behavior for administrators
  * - Individual authorization rules for tag team operations
  * - Employment status-based authorization decisions
  *
@@ -30,35 +31,35 @@ describe('TagTeamPolicy Unit Tests', function () {
         $this->tagTeam = TagTeam::factory()->make(['id' => 1]);
     });
 
-    describe('before hook authorization', function () {
+    describe('global Gate hook authorization', function () {
         test('administrators bypass all authorization checks', function () {
-            expect($this->policy->before($this->admin, 'viewAny'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'view'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'create'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'update'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'delete'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'restore'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'employ'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'release'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'suspend'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'reinstate'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'retire'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'unretire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('employ'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('release'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
         });
 
         test('non-administrators do not bypass authorization checks', function () {
-            expect($this->policy->before($this->basicUser, 'viewAny'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'view'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'create'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'update'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'delete'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'restore'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'employ'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'release'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'suspend'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'reinstate'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'retire'))->toBeNull();
-            expect($this->policy->before($this->basicUser, 'unretire'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('employ'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('release'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('suspend'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
         });
     });
 
@@ -160,12 +161,12 @@ describe('TagTeamPolicy Unit Tests', function () {
             $releasedTagTeam = TagTeam::factory()->released()->make();
 
             // Admin should be able to manage any tag team regardless of status
-            expect($this->policy->before($this->admin, 'employ'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'release'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'suspend'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'reinstate'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'retire'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'unretire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('employ'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('release'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
         });
 
         test('basic users cannot perform management actions', function () {
@@ -182,9 +183,9 @@ describe('TagTeamPolicy Unit Tests', function () {
     describe('role-based authorization patterns', function () {
         test('role hierarchy is respected for tag team operations', function () {
             // Administrator has full access
-            expect($this->policy->before($this->admin, 'create'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'update'))->toBeTrue();
-            expect($this->policy->before($this->admin, 'delete'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
 
             // Basic user has restricted access
             expect($this->policy->create($this->basicUser))->toBeFalse();
@@ -270,7 +271,7 @@ describe('TagTeamPolicy Unit Tests', function () {
             $deletedTagTeam = TagTeam::factory()->trashed()->make();
 
             expect($this->policy->restore($this->basicUser, $deletedTagTeam))->toBeFalse();
-            expect($this->policy->before($this->admin, 'restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('deletion permissions consider tag team status', function () {
@@ -299,10 +300,10 @@ describe('TagTeamPolicy Unit Tests', function () {
             expect($this->policy->unretire($this->basicUser, $this->tagTeam))->toBeBool();
         });
 
-        test('before hook returns correct types', function () {
-            // Before hook should return true for admin, null for others
-            expect($this->policy->before($this->admin, 'any_ability'))->toBeTrue();
-            expect($this->policy->before($this->basicUser, 'any_ability'))->toBeNull();
+        test('global Gate hook returns correct types', function () {
+            // global Gate hook should return true for admin, null for others
+            expect(Gate::forUser($this->admin)->raw('any_ability'))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->raw('any_ability'))->toBeNull();
         });
     });
 });

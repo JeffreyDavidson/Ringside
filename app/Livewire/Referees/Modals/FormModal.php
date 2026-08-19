@@ -66,7 +66,6 @@ class FormModal extends BaseFormModal
     {
         parent::mount($modelId);
 
-        // Set the title field to use full_name instead of name
         $this->modelTitleField = 'full_name';
     }
 
@@ -74,7 +73,6 @@ class FormModal extends BaseFormModal
     {
         parent::openModal($modelId);
 
-        // Store original model data if editing
         if (isset($this->model)) {
             $this->originalModelData = [
                 'first_name' => $this->model->first_name,
@@ -89,14 +87,12 @@ class FormModal extends BaseFormModal
     public function clear(): void
     {
         if ($this->originalModelData) {
-            // Reset to original model data when editing
             $this->form->first_name = $this->originalModelData['first_name'];
             $this->form->last_name = $this->originalModelData['last_name'];
             $this->form->employment_date = $this->originalModelData['employment_date'];
             $this->form->resetErrorBag();
             $this->form->resetValidation();
         } else {
-            // Reset to empty state when creating - explicitly set defaults
             $this->form->first_name = '';
             $this->form->last_name = '';
             $this->form->employment_date = '';

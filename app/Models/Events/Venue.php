@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Builders\Events\VenueBuilder;
-use App\Casts\AddressCast;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Contracts\SoftDeletable;
 use App\ValueObjects\Address;
@@ -66,7 +65,7 @@ class Venue extends Model implements SoftDeletable
     protected function casts(): array
     {
         return [
-            'address' => AddressCast::class,
+            'address' => Address::class,
         ];
     }
 }

@@ -9,7 +9,6 @@ use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Lifecycle\IndividualSuspensionEligibility;
 use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +34,7 @@ final class ReinstateAction
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void
     {
-        $reinstatementDate = DateHelper::resolveDate($reinstatementDate);
+        $reinstatementDate = $reinstatementDate ?? now();
 
         DB::transaction(function () use ($manager, $reinstatementDate): void {
             $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();

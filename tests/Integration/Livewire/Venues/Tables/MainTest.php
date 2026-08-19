@@ -256,7 +256,8 @@ describe('VenuesTable Integration Tests', function () {
             $component = livewire(Main::class);
 
             $component->call('restore', $this->deletedVenue->id)
-                ->assertHasNoErrors();
+                ->assertHasNoErrors()
+                ->assertRedirectToRoute('venues.index');
 
             expect(Venue::find($this->deletedVenue->id))->not()->toBeNull();
         });

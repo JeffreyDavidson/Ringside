@@ -25,7 +25,6 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Wrestler> */
@@ -113,7 +112,7 @@ class Main extends BaseTable
     /**
      * Restore a deleted wrestler.
      */
-    public function restore(int $wrestlerId): RedirectResponse
+    public function restore(int $wrestlerId): void
     {
         $wrestler = Wrestler::onlyTrashed()->findOrFail($wrestlerId);
 
@@ -121,7 +120,7 @@ class Main extends BaseTable
 
         resolve(RestoreAction::class)->handle($wrestler);
 
-        return back();
+        $this->redirectRoute('wrestlers.index');
     }
 
     /**

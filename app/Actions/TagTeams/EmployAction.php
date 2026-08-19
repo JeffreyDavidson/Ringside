@@ -10,7 +10,6 @@ use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\TagTeamEmploymentEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Support\DateHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +38,7 @@ class EmployAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $employmentDate = null): void
     {
-        $employmentDate = DateHelper::resolveDate($employmentDate);
+        $employmentDate = $employmentDate ?? now();
 
         DB::transaction(function () use ($tagTeam, $employmentDate): void {
             $lockedTagTeam = TagTeam::query()->whereKey($tagTeam->getKey())->lockForUpdate()->firstOrFail();
