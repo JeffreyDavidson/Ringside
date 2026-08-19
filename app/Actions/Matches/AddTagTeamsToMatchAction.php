@@ -63,34 +63,45 @@ class AddTagTeamsToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
             $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
-            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
-            $lockedTagTeams = TagTeam::query()
-                ->whereKey($requestedTagTeams->pluck('id'))
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
+            $this->handleWithinTransaction($lockedMatch, $requestedTagTeams, $sideNumber);
+        });
+    }
 
-            if ($lockedTagTeams->count() !== $requestedTagTeams->count() || $lockedTagTeams->contains(
-                fn (TagTeam $tagTeam): bool => ! RosterBookingEligibility::allows($tagTeam)
-            )) {
-                throw EntityNotAvailableException::forMatchAssignment('tag teams');
-            }
+    /**
+     * Assign tag teams while the caller owns the match transaction and lock.
+     *
+     * @param  Collection<int, TagTeam>  $tagTeams
+     */
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $tagTeams, int $sideNumber): void
+    {
+        $requestedTagTeams = $tagTeams->unique('id')->values();
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedTagTeams = TagTeam::query()
+            ->whereKey($requestedTagTeams->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
 
-            $this->conflictService->ensureCompetitorsCanBeAssigned(
-                $conflictingEventIds,
-                $lockedTagTeams,
-                TagTeam::class,
-                'Tag team',
-            );
-            $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
+        if ($lockedTagTeams->count() !== $requestedTagTeams->count() || $lockedTagTeams->contains(
+            fn (TagTeam $tagTeam): bool => ! RosterBookingEligibility::allows($tagTeam)
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('tag teams');
+        }
 
-            $lockedTagTeams->each(function (TagTeam $tagTeam) use ($lockedMatch, $side): void {
-                $lockedMatch->competitors()->create([
-                    'competitor_id' => $tagTeam->id,
-                    'competitor_type' => $tagTeam->getMorphClass(),
-                    'match_side_id' => $side->id,
-                ]);
-            });
+        $this->conflictService->ensureCompetitorsCanBeAssigned(
+            $conflictingEventIds,
+            $lockedTagTeams,
+            TagTeam::class,
+            'Tag team',
+        );
+        $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
+
+        $lockedTagTeams->each(function (TagTeam $tagTeam) use ($lockedMatch, $side): void {
+            $lockedMatch->competitors()->create([
+                'competitor_id' => $tagTeam->id,
+                'competitor_type' => $tagTeam->getMorphClass(),
+                'match_side_id' => $side->id,
+            ]);
         });
     }
 }

@@ -65,7 +65,7 @@ class AddCompetitorsToMatchAction
         $wrestlers = $sideCompetitors['wrestlers'] ?? [];
 
         if ($wrestlers !== []) {
-            $this->addWrestlersToMatchAction->handle(
+            $this->addWrestlersToMatchAction->handleWithinTransaction(
                 $eventMatch,
                 collect($wrestlers),
                 $sideNumber
@@ -76,7 +76,7 @@ class AddCompetitorsToMatchAction
         $tagTeams = $sideCompetitors['tag_teams'] ?? [];
 
         if ($tagTeams !== []) {
-            $this->addTagTeamsToMatchAction->handle(
+            $this->addTagTeamsToMatchAction->handleWithinTransaction(
                 $eventMatch,
                 collect($tagTeams),
                 $sideNumber

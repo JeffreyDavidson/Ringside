@@ -62,38 +62,49 @@ class AddWrestlersToMatchAction
 
         DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
             $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
-            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
-            $lockedWrestlers = Wrestler::query()
-                ->whereKey($requestedWrestlers->pluck('id'))
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
+            $this->handleWithinTransaction($lockedMatch, $requestedWrestlers, $sideNumber);
+        });
+    }
 
-            if ($lockedWrestlers->count() !== $requestedWrestlers->count() || $lockedWrestlers->contains(
-                fn (Wrestler $wrestler): bool => ! RosterBookingEligibility::allows($wrestler)
-            )) {
-                throw EntityNotAvailableException::forMatchAssignment('wrestlers');
+    /**
+     * Assign wrestlers while the caller owns the match transaction and lock.
+     *
+     * @param  Collection<int, Wrestler>  $wrestlers
+     */
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $wrestlers, int $sideNumber): void
+    {
+        $requestedWrestlers = $wrestlers->unique('id')->values();
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedWrestlers = Wrestler::query()
+            ->whereKey($requestedWrestlers->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        if ($lockedWrestlers->count() !== $requestedWrestlers->count() || $lockedWrestlers->contains(
+            fn (Wrestler $wrestler): bool => ! RosterBookingEligibility::allows($wrestler)
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('wrestlers');
+        }
+
+        $this->conflictService->ensureCompetitorsCanBeAssigned(
+            $conflictingEventIds,
+            $lockedWrestlers,
+            Wrestler::class,
+            'Wrestler',
+        );
+        $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
+
+        $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {
+            $competitor = $lockedMatch->competitors()->create([
+                'competitor_id' => $wrestler->id,
+                'competitor_type' => $wrestler->getMorphClass(),
+                'match_side_id' => $side->id,
+            ]);
+
+            if ($lockedMatch->match_type === MatchType::RoyalRumble) {
+                $competitor->forceFill(['entry_order' => $side->position])->save();
             }
-
-            $this->conflictService->ensureCompetitorsCanBeAssigned(
-                $conflictingEventIds,
-                $lockedWrestlers,
-                Wrestler::class,
-                'Wrestler',
-            );
-            $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
-
-            $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {
-                $competitor = $lockedMatch->competitors()->create([
-                    'competitor_id' => $wrestler->id,
-                    'competitor_type' => $wrestler->getMorphClass(),
-                    'match_side_id' => $side->id,
-                ]);
-
-                if ($lockedMatch->match_type === MatchType::RoyalRumble) {
-                    $competitor->forceFill(['entry_order' => $side->position])->save();
-                }
-            });
         });
     }
 }
