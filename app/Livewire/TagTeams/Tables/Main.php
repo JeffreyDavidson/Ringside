@@ -109,42 +109,41 @@ class Main extends BaseTable
 
     public function employ(TagTeam $tagTeam): void
     {
-        $this->handleTagTeamAction(RosterLifecycleAction::Employ->value, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Employ, $tagTeam->id);
     }
 
     public function reinstate(TagTeam $tagTeam): void
     {
-        $this->handleTagTeamAction(RosterLifecycleAction::Reinstate->value, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Reinstate, $tagTeam->id);
     }
 
     public function release(TagTeam $tagTeam): void
     {
-        $this->handleTagTeamAction(RosterLifecycleAction::Release->value, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Release, $tagTeam->id);
     }
 
     public function restore(int $tagTeamId): void
     {
-        $this->handleTagTeamAction(RosterLifecycleAction::Restore->value, $tagTeamId);
+        $this->executeTagTeamAction(RosterLifecycleAction::Restore, $tagTeamId);
     }
 
     public function retire(TagTeam $tagTeam): void
     {
-        $this->handleTagTeamAction(RosterLifecycleAction::Retire->value, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Retire, $tagTeam->id);
     }
 
     public function suspend(TagTeam $tagTeam): void
     {
-        $this->handleTagTeamAction(RosterLifecycleAction::Suspend->value, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Suspend, $tagTeam->id);
     }
 
     public function unretire(TagTeam $tagTeam): void
     {
-        $this->handleTagTeamAction(RosterLifecycleAction::Unretire->value, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Unretire, $tagTeam->id);
     }
 
-    public function handleTagTeamAction(string $action, int $tagTeamId): void
+    private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId): void
     {
-        $lifecycleAction = RosterLifecycleAction::from($action);
         $tagTeam = $lifecycleAction === RosterLifecycleAction::Restore
             ? TagTeam::onlyTrashed()->findOrFail($tagTeamId)
             : TagTeam::query()->findOrFail($tagTeamId);
