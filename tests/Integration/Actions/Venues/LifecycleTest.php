@@ -152,6 +152,25 @@ describe('Venue Action Integration Tests', function () {
             expect($retrievedVenue->state)->toBe('Utah');
         });
 
+        test('update action uses the current persisted venue state', function () {
+            $venue = Venue::factory()->create(['name' => 'Original Arena']);
+            $staleVenue = $venue->replicate(['id']);
+            $staleVenue->id = $venue->id;
+            $staleVenue->exists = true;
+            $venueData = new VenueData(
+                name: 'Updated Arena',
+                street_address: $venue->street_address,
+                city: $venue->city,
+                state: $venue->state,
+                zipcode: $venue->zipcode
+            );
+
+            $updatedVenue = resolve(UpdateAction::class)->handle($staleVenue, $venueData);
+
+            expect($updatedVenue->getKey())->toBe($venue->getKey())
+                ->and(Venue::findOrFail($venue->getKey())->name)->toBe('Updated Arena');
+        });
+
         test('update action handles address changes', function () {
             $venue = Venue::factory()->create([
                 'street_address' => '123 Old Street',
