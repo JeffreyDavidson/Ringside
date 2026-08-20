@@ -7,6 +7,7 @@ namespace App\Actions\Events;
 use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Event;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
@@ -38,6 +39,14 @@ class DeleteAction
      */
     public function handle(Event $event, ?Carbon $deletionDate = null): void
     {
-        $this->deletionState->delete($event, $deletionDate ?? now());
+        DB::transaction(function () use ($event, $deletionDate): void {
+            $lockedEvent = Event::query()
+                ->withTrashed()
+                ->whereKey($event->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->deletionState->delete($lockedEvent, $deletionDate ?? now());
+        });
     }
 }

@@ -6,6 +6,7 @@ namespace App\Actions\Venues;
 
 use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Venue;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
@@ -24,6 +25,14 @@ class DeleteAction
      */
     public function handle(Venue $venue): void
     {
-        $this->deletionState->delete($venue, now());
+        DB::transaction(function () use ($venue): void {
+            $lockedVenue = Venue::query()
+                ->withTrashed()
+                ->whereKey($venue->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->deletionState->delete($lockedVenue, now());
+        });
     }
 }
