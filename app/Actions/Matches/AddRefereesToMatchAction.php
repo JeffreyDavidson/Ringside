@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 class AddRefereesToMatchAction
 {
     public function __construct(
-        protected MatchAssignmentConflictService $conflictService,
+        private readonly MatchAssignmentConflictService $conflictService,
     ) {}
 
     /**
@@ -71,9 +71,7 @@ class AddRefereesToMatchAction
 
             $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
 
-            $lockedReferees->each(function (Referee $referee) use ($lockedMatch): void {
-                $lockedMatch->referees()->attach($referee->id);
-            });
+            $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->modelKeys());
         });
     }
 }
