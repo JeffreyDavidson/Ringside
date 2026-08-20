@@ -6,6 +6,7 @@ namespace App\Actions\Venues;
 
 use App\Data\Events\VenueData;
 use App\Models\Events\Venue;
+use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
@@ -23,11 +24,18 @@ class UpdateAction
      */
     public function handle(Venue $venue, VenueData $venueData): Venue
     {
-        $venue->update([
-            'name' => $venueData->name,
-            'address' => $venueData->address,
-        ]);
+        return DB::transaction(function () use ($venue, $venueData): Venue {
+            $lockedVenue = Venue::query()
+                ->whereKey($venue->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return $venue;
+            $lockedVenue->update([
+                'name' => $venueData->name,
+                'address' => $venueData->address,
+            ]);
+
+            return $lockedVenue;
+        });
     }
 }
