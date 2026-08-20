@@ -34,6 +34,24 @@ test('it updates a manager with new information', function () {
     ]);
 });
 
+test('it updates using the current persisted manager state', function () {
+    $manager = Manager::factory()->create([
+        'first_name' => 'Original',
+        'last_name' => 'Name',
+    ]);
+    $staleManager = $manager->replicate(['id']);
+    $staleManager->id = $manager->id;
+    $staleManager->exists = true;
+
+    $updatedManager = resolve(UpdateAction::class)->handle(
+        $staleManager,
+        new ManagerData('Updated', 'From Stale State', null),
+    );
+
+    expect($updatedManager->first_name)->toBe('Updated')
+        ->and(Manager::query()->findOrFail($manager->id)->last_name)->toBe('From Stale State');
+});
+
 test('it updates manager and creates employment when employment date is provided', function () {
     $manager = Manager::factory()->create([
         'first_name' => 'John',

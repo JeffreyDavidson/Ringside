@@ -33,18 +33,22 @@ class UpdateAction
     public function handle(Manager $manager, ManagerData $managerData): Manager
     {
         return DB::transaction(function () use ($manager, $managerData): Manager {
-            // Update the manager's basic information
-            $manager->update([
+            $lockedManager = Manager::query()
+                ->whereKey($manager->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $lockedManager->update([
                 'first_name' => $managerData->first_name,
                 'last_name' => $managerData->last_name,
             ]);
 
             // Handle employment using EmployAction for consistency
-            if (! is_null($managerData->employment_date) && ! $manager->isEmployed()) {
-                $this->employAction->handle($manager, $managerData->employment_date);
+            if (! is_null($managerData->employment_date) && ! $lockedManager->isEmployed()) {
+                $this->employAction->handle($lockedManager, $managerData->employment_date);
             }
 
-            return $manager;
+            return $lockedManager;
         });
     }
 }
