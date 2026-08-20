@@ -28,8 +28,12 @@ class UpdateAction
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam
     {
         return DB::transaction(function () use ($tagTeam, $tagTeamData): TagTeam {
-            // Update the tag team's basic information
-            $tagTeam->update([
+            $lockedTagTeam = TagTeam::query()
+                ->whereKey($tagTeam->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $lockedTagTeam->update([
                 'name' => mb_trim($tagTeamData->name),
                 'signature_move' => $tagTeamData->signature_move,
             ]);
@@ -40,21 +44,21 @@ class UpdateAction
             $membershipData = $tagTeamData->getMembershipData();
 
             $this->membershipService->updateMembership(
-                $tagTeam,
+                $lockedTagTeam,
                 $membershipData,
                 $updateDate,
             );
 
             if ($tagTeamData->employment_date) {
-                if (! $tagTeam->isEmployed()) {
-                    $this->employAction->handle($tagTeam, $tagTeamData->employment_date);
+                if (! $lockedTagTeam->isEmployed()) {
+                    $this->employAction->handle($lockedTagTeam, $tagTeamData->employment_date);
                 } else {
-                    $this->employCurrentWrestlersAction->handle($tagTeam, $tagTeamData->employment_date);
-                    $this->employCurrentManagersAction->handle($tagTeam, $tagTeamData->employment_date);
+                    $this->employCurrentWrestlersAction->handle($lockedTagTeam, $tagTeamData->employment_date);
+                    $this->employCurrentManagersAction->handle($lockedTagTeam, $tagTeamData->employment_date);
                 }
             }
 
-            return $tagTeam;
+            return $lockedTagTeam;
         });
     }
 }
