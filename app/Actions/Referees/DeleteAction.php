@@ -43,15 +43,20 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        $this->eligibility->ensureCanDelete($referee);
-
         $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($referee, $deletionDate): void {
-            $this->periods->close($referee, $deletionDate);
+            $lockedReferee = Referee::query()
+                ->withTrashed()
+                ->whereKey($referee->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanDelete($lockedReferee);
+            $this->periods->close($lockedReferee, $deletionDate);
 
             // Soft delete the referee record
-            $this->deletionState->delete($referee, $deletionDate);
+            $this->deletionState->delete($lockedReferee, $deletionDate);
         });
     }
 }

@@ -31,6 +31,18 @@ test('it soft deletes an unemployed referee', function () {
     ]);
 });
 
+test('it deletes using the current persisted referee state', function () {
+    $referee = Referee::factory()->create();
+    $staleReferee = $referee->replicate(['id']);
+    $staleReferee->id = $referee->id;
+    $staleReferee->exists = true;
+
+    resolve(DeleteAction::class)->handle($staleReferee);
+
+    expect(Referee::find($referee->id))->toBeNull();
+    expect(Referee::withTrashed()->findOrFail($referee->id)->trashed())->toBeTrue();
+});
+
 test('it rejects deleting an already deleted referee', function () {
     $referee = Referee::factory()->create();
     $referee->delete();
