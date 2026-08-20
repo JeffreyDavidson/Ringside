@@ -7,6 +7,7 @@ namespace App\Actions\Matches;
 use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
+use App\Lifecycle\MatchConfigurationRequirements;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use Illuminate\Support\Facades\DB;
@@ -14,15 +15,16 @@ use Illuminate\Support\Facades\DB;
 class AddMatchForEventAction
 {
     public function __construct(
-        protected AddRefereesToMatchAction $addRefereesToMatchAction,
-        protected AddTitlesToMatchAction $addTitlesToMatchAction,
-        protected AddCompetitorsToMatchAction $addCompetitorsToMatchAction
+        private readonly AddRefereesToMatchAction $addRefereesToMatchAction,
+        private readonly AddTitlesToMatchAction $addTitlesToMatchAction,
+        private readonly AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
+        private readonly MatchConfigurationRequirements $requirements,
     ) {}
 
     /** @throws EntityNotAvailableException|InvalidMatchConfigurationException */
     public function handle(Event $event, EventMatchData $eventMatchData): EventMatch
     {
-        $this->validateMatchData($eventMatchData);
+        $this->requirements->ensureComplete($eventMatchData);
 
         return DB::transaction(function () use ($event, $eventMatchData): EventMatch {
             $lockedEvent = Event::query()
@@ -52,22 +54,5 @@ class AddMatchForEventAction
 
             return $createdMatch;
         });
-    }
-
-    /**
-     * Validate match data for completeness and business rules.
-     *
-     * @param  EventMatchData  $eventMatchData  The match data to validate
-     * @throws InvalidMatchConfigurationException When validation fails
-     */
-    private function validateMatchData(EventMatchData $eventMatchData): void
-    {
-        if ($eventMatchData->sides->isEmpty()) {
-            throw InvalidMatchConfigurationException::missingCompetitors();
-        }
-
-        if ($eventMatchData->referees->isEmpty()) {
-            throw InvalidMatchConfigurationException::missingReferees();
-        }
     }
 }

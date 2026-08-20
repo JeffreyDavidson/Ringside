@@ -6,6 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
+use App\Lifecycle\MatchConfigurationRequirements;
 use App\Models\Matches\EventMatch;
 use Illuminate\Support\Facades\DB;
 
@@ -15,11 +16,12 @@ class UpdateMatchAction
         private AddRefereesToMatchAction $addRefereesToMatchAction,
         private AddTitlesToMatchAction $addTitlesToMatchAction,
         private AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
+        private MatchConfigurationRequirements $requirements,
     ) {}
 
     public function handle(EventMatch $match, EventMatchData $data): EventMatch
     {
-        $this->ensureComplete($data);
+        $this->requirements->ensureComplete($data);
 
         return DB::transaction(function () use ($match, $data): EventMatch {
             $lockedMatch = EventMatch::query()
@@ -52,16 +54,5 @@ class UpdateMatchAction
 
             return $lockedMatch->refresh();
         });
-    }
-
-    private function ensureComplete(EventMatchData $data): void
-    {
-        if ($data->sides->isEmpty()) {
-            throw InvalidMatchConfigurationException::missingCompetitors();
-        }
-
-        if ($data->referees->isEmpty()) {
-            throw InvalidMatchConfigurationException::missingReferees();
-        }
     }
 }
