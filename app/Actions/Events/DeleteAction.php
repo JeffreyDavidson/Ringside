@@ -41,6 +41,7 @@ class DeleteAction
     {
         DB::transaction(function () use ($event, $deletionDate): void {
             $lockedEvent = Event::query()
+                ->withTrashed()
                 ->whereKey($event->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();

@@ -27,6 +27,7 @@ class DeleteAction
     {
         DB::transaction(function () use ($venue): void {
             $lockedVenue = Venue::query()
+                ->withTrashed()
                 ->whereKey($venue->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
