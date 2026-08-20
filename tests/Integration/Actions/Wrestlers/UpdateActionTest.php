@@ -51,6 +51,36 @@ test('it updates wrestler basic information', function () {
     ]);
 });
 
+test('it updates using the current persisted wrestler state', function () {
+    $wrestler = Wrestler::factory()->create([
+        'name' => 'Original Name',
+        'height' => 70,
+        'weight' => 200,
+    ]);
+    $staleWrestler = $wrestler->replicate(['id']);
+    $staleWrestler->id = $wrestler->id;
+    $staleWrestler->exists = true;
+
+    $updatedWrestler = resolve(UpdateAction::class)->handle(
+        $staleWrestler,
+        new WrestlerData(
+            name: 'Updated From Stale State',
+            height: 75,
+            weight: 250,
+            hometown: $wrestler->hometown,
+            signature_move: $wrestler->signature_move,
+            employment_date: null,
+            managers: null,
+        ),
+    );
+    $persistedWrestler = Wrestler::query()
+        ->whereKey($wrestler->getKey())
+        ->firstOrFail();
+
+    expect($updatedWrestler->getKey())->toBe($wrestler->getKey())
+        ->and($persistedWrestler->name)->toBe('Updated From Stale State');
+});
+
 test('it updates wrestler and employs them when employment date provided', function () {
     $wrestler = Wrestler::factory()->create();
     $employmentDate = now();

@@ -42,8 +42,12 @@ class UpdateAction
     public function handle(Wrestler $wrestler, WrestlerData $wrestlerData): Wrestler
     {
         return DB::transaction(function () use ($wrestler, $wrestlerData): Wrestler {
-            // Update the wrestler's basic information
-            $wrestler->update([
+            $lockedWrestler = Wrestler::query()
+                ->whereKey($wrestler->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $lockedWrestler->update([
                 'name' => $wrestlerData->name,
                 'height' => $wrestlerData->height->toInches(),
                 'weight' => $wrestlerData->weight->toPounds(),
@@ -52,11 +56,11 @@ class UpdateAction
             ]);
 
             // Employ wrestler if employment_date is provided and they're not already employed
-            if (! is_null($wrestlerData->employment_date) && ! $wrestler->isEmployed()) {
-                $this->employAction->handle($wrestler, $wrestlerData->employment_date);
+            if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->isEmployed()) {
+                $this->employAction->handle($lockedWrestler, $wrestlerData->employment_date);
             }
 
-            return $wrestler;
+            return $lockedWrestler;
         });
     }
 }
