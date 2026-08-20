@@ -36,8 +36,6 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 
         return TitleChampionship::query()
             ->forChampion($wrestler)
-            ->previous()
-            ->withPreviousChampionshipId()
-            ->with(['title', 'previousChampionship.champion']);
+            ->forPreviousHistory();
     }
 }
