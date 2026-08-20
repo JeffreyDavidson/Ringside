@@ -7,6 +7,7 @@ namespace App\Queries\Titles;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 final class TitleChampionshipQuery
 {
@@ -51,24 +52,24 @@ final class TitleChampionshipQuery
         return self::firstChampionship($title)?->champion;
     }
 
-    public static function longestChampionship(Title $title): ?TitleChampionship
+    public static function longestChampionship(Title $title, ?Carbon $asOf = null): ?TitleChampionship
     {
         return $title->championships()
             ->get()
-            ->sortByDesc(self::reignLengthInDays(...))
+            ->sortByDesc(fn (TitleChampionship $championship): int => self::reignLengthInDays($championship, $asOf))
             ->first();
     }
 
-    public static function reignLengthInDays(TitleChampionship $championship): int
+    public static function reignLengthInDays(TitleChampionship $championship, ?Carbon $asOf = null): int
     {
-        $reignEnd = $championship->lost_at ?? now();
+        $reignEnd = $championship->lost_at ?? ($asOf ?? now());
 
         return (int) $championship->won_at->diffInDays($reignEnd);
     }
 
-    public static function longestChampion(Title $title): ?Model
+    public static function longestChampion(Title $title, ?Carbon $asOf = null): ?Model
     {
-        return self::longestChampionship($title)?->champion;
+        return self::longestChampionship($title, $asOf)?->champion;
     }
 
     public static function reignCount(Title $title): int

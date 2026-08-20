@@ -35,9 +35,7 @@ class PreviousMatches extends BasePreviousMatchesTable
         $referee = Referee::query()->findOrFail($this->refereeId);
 
         return EventMatch::query()
-            ->forPastEvents()
-            ->with(['titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
-            ->forReferee($referee)
-            ->latestEventFirst();
+            ->forHistory()
+            ->forReferee($referee);
     }
 }

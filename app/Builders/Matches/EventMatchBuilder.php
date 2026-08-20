@@ -39,6 +39,19 @@ class EventMatchBuilder extends Builder
         return $this;
     }
 
+    public function forHistory(): static
+    {
+        return $this
+            ->forPastEvents()
+            ->with([
+                'titles',
+                'competitors.competitor',
+                'competitors.side',
+                'winningSide.competitors.competitor',
+            ])
+            ->latestEventFirst();
+    }
+
     /**
      * @template TRelatedModel of Model
      *

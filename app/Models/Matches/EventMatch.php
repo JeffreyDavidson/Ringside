@@ -57,6 +57,7 @@ use Illuminate\Support\Carbon;
  *
  * @method static \Database\Factories\Matches\MatchFactory factory($count = null, $state = [])
  * @method static EventMatchBuilder<static>|EventMatch forPastEvents()
+ * @method static EventMatchBuilder<static>|EventMatch forHistory()
  * @method static EventMatchBuilder<static>|EventMatch forCompetitor(Wrestler|TagTeam $competitor)
  * @method static EventMatchBuilder<static>|EventMatch forEventIds(\Illuminate\Support\Collection<int, int> $eventIds)
  * @method static EventMatchBuilder<static>|EventMatch forReferee(Referee $referee)
