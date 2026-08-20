@@ -10,14 +10,14 @@ use Livewire\Attributes\Computed;
 trait PresentsTitlesList
 {
     /**
-     * @return array<int|string,string>
+     * @return array<int|string,string|null>
      */
     #[Computed]
     public function getTitles(): array
     {
         return Title::query()
             ->get(['id', 'name'])
-            ->mapWithKeys(fn (Title $title): array => [$title->id => $title->name ?? ''])
+            ->mapWithKeys(fn (Title $title): array => [$title->id => $title->name])
             ->all();
     }
 }

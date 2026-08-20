@@ -10,14 +10,14 @@ use Livewire\Attributes\Computed;
 trait PresentsRefereesList
 {
     /**
-     * @return array<int|string,string>
+     * @return array<int|string,string|null>
      */
     #[Computed]
     public function getReferees(): array
     {
         return Referee::query()
             ->get(['id', 'full_name'])
-            ->mapWithKeys(fn (Referee $referee): array => [$referee->id => $referee->full_name ?? ''])
+            ->mapWithKeys(fn (Referee $referee): array => [$referee->id => $referee->full_name])
             ->all();
     }
 }

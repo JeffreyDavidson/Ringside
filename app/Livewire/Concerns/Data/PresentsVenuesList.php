@@ -10,7 +10,7 @@ use Livewire\Attributes\Computed;
 trait PresentsVenuesList
 {
     /**
-     * @return array<int|string,string>
+     * @return array<int|string,string|null>
      */
     #[Computed]
     public function getVenues(): array
@@ -18,7 +18,7 @@ trait PresentsVenuesList
         return Venue::query()
             ->alphabetical()
             ->get(['id', 'name'])
-            ->mapWithKeys(fn (Venue $venue): array => [$venue->id => $venue->name ?? ''])
+            ->mapWithKeys(fn (Venue $venue): array => [$venue->id => $venue->name])
             ->all();
     }
 }
