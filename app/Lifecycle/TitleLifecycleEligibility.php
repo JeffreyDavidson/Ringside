@@ -13,7 +13,7 @@ use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Models\Titles\Title;
 
-class TitleLifecycleEligibility
+final class TitleLifecycleEligibility
 {
     public function allows(Title $title, TitleLifecycleTransition $transition): bool
     {

@@ -11,7 +11,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-class IndividualRetirementEligibility
+final class IndividualRetirementEligibility
 {
     public function canRetire(Wrestler|Manager|Referee $individual): bool
     {
