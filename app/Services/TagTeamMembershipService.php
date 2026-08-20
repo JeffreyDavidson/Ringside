@@ -6,19 +6,18 @@ namespace App\Services;
 
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Models\Roster\TagTeams\TagTeam;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
 class TagTeamMembershipService
 {
-    public function __construct(private ManagerAssignmentService $managerAssignments) {}
+    public function __construct(
+        private ManagerAssignmentService $managerAssignments,
+        private HistoricalMembershipService $historicalMemberships,
+    ) {}
 
     public function establishMembership(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
-        $this->addMembersToRelationship(
+        $this->historicalMemberships->add(
             $tagTeam->wrestlers(),
             $members->wrestlers,
             $date,
@@ -28,65 +27,12 @@ class TagTeamMembershipService
 
     public function updateMembership(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
-        $this->synchronizeRelationship(
+        $this->historicalMemberships->synchronize(
             $tagTeam->wrestlers(),
             $tagTeam->currentWrestlers,
             $members->wrestlers,
             $date,
         );
         $this->managerAssignments->synchronize($tagTeam, $members->managers, $date);
-    }
-
-    /**
-     * @template TRelatedModel of Model
-     * @template TPivotModel of Pivot
-     *
-     * @param  BelongsToMany<TRelatedModel, TagTeam, TPivotModel>  $relationship
-     * @param  Collection<int, TRelatedModel>|null  $members
-     */
-    private function addMembersToRelationship(
-        BelongsToMany $relationship,
-        ?Collection $members,
-        Carbon $date,
-    ): void {
-        if ($members === null || $members->isEmpty()) {
-            return;
-        }
-
-        $relationship->attach($members->modelKeys(), [
-            'joined_at' => $date,
-            'left_at' => null,
-        ]);
-    }
-
-    /**
-     * @template TRelatedModel of Model
-     * @template TPivotModel of Pivot
-     *
-     * @param  BelongsToMany<TRelatedModel, TagTeam, TPivotModel>  $relationship
-     * @param  Collection<int, TRelatedModel>  $currentMembers
-     * @param  Collection<int, TRelatedModel>|null  $desiredMembers
-     */
-    private function synchronizeRelationship(
-        BelongsToMany $relationship,
-        Collection $currentMembers,
-        ?Collection $desiredMembers,
-        Carbon $date,
-    ): void {
-        if ($desiredMembers === null) {
-            return;
-        }
-
-        foreach ($currentMembers->diff($desiredMembers) as $member) {
-            $relationship->newPivotStatementForId($member->getKey())
-                ->whereNull('left_at')
-                ->update(['left_at' => $date]);
-        }
-
-        $this->addMembersToRelationship(
-            $relationship,
-            $desiredMembers->diff($currentMembers),
-            $date,
-        );
     }
 }
