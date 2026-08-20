@@ -10,12 +10,9 @@ use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
-use App\Exceptions\Titles\CannotBeDebutedException;
-use App\Exceptions\Titles\CannotBePulledException;
-use App\Exceptions\Titles\CannotBeReinstatedException;
-use App\Exceptions\Titles\CannotBeRetiredException;
-use App\Exceptions\Titles\CannotBeUnretiredException;
+use App\Exceptions\BaseBusinessException;
 use App\Models\Titles\Title;
+use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -45,13 +42,12 @@ class Actions extends Component
     {
         Gate::authorize('debut', $this->title);
 
-        try {
-            resolve(DebutAction::class)->handle($this->title);
-            $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully debuted.');
-        } catch (CannotBeDebutedException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeTitleAction(
+            function (): void {
+                resolve(DebutAction::class)->handle($this->title);
+            },
+            'Title successfully debuted.',
+        );
     }
 
     /**
@@ -61,13 +57,12 @@ class Actions extends Component
     {
         Gate::authorize('retire', $this->title);
 
-        try {
-            resolve(RetireAction::class)->handle($this->title);
-            $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully retired.');
-        } catch (CannotBeRetiredException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeTitleAction(
+            function (): void {
+                resolve(RetireAction::class)->handle($this->title);
+            },
+            'Title successfully retired.',
+        );
     }
 
     /**
@@ -77,13 +72,12 @@ class Actions extends Component
     {
         Gate::authorize('unretire', $this->title);
 
-        try {
-            resolve(UnretireAction::class)->handle($this->title);
-            $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully unretired.');
-        } catch (CannotBeUnretiredException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeTitleAction(
+            function (): void {
+                resolve(UnretireAction::class)->handle($this->title);
+            },
+            'Title successfully unretired.',
+        );
     }
 
     /**
@@ -93,13 +87,12 @@ class Actions extends Component
     {
         Gate::authorize('pull', $this->title);
 
-        try {
-            resolve(PullAction::class)->handle($this->title);
-            $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully pulled.');
-        } catch (CannotBePulledException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeTitleAction(
+            function (): void {
+                resolve(PullAction::class)->handle($this->title);
+            },
+            'Title successfully pulled.',
+        );
     }
 
     /**
@@ -109,13 +102,12 @@ class Actions extends Component
     {
         Gate::authorize('reinstate', $this->title);
 
-        try {
-            resolve(ReinstateAction::class)->handle($this->title);
-            $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully reinstated.');
-        } catch (CannotBeReinstatedException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        $this->executeTitleAction(
+            function (): void {
+                resolve(ReinstateAction::class)->handle($this->title);
+            },
+            'Title successfully reinstated.',
+        );
     }
 
     /**
@@ -125,9 +117,25 @@ class Actions extends Component
     {
         Gate::authorize('restore', $this->title);
 
-        resolve(RestoreAction::class)->handle($this->title);
-        $this->dispatch('title-updated');
-        session()->flash('status', 'Title successfully restored.');
+        $this->executeTitleAction(
+            function (): void {
+                resolve(RestoreAction::class)->handle($this->title);
+            },
+            'Title successfully restored.',
+        );
+    }
+
+    /** @param Closure(): void $action */
+    private function executeTitleAction(Closure $action, string $successMessage): void
+    {
+        try {
+            $action();
+
+            $this->dispatch('title-updated');
+            session()->flash('status', $successMessage);
+        } catch (BaseBusinessException $exception) {
+            session()->flash('error', $exception->getMessage());
+        }
     }
 
     public function render(): View

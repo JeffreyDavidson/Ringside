@@ -75,7 +75,6 @@ describe('Title Debut Actions', function () {
         $component = livewire(Actions::class, ['title' => $title])
             ->call('debut');
 
-        // Should handle gracefully without errors
         $component->assertHasNoErrors();
     });
 });
