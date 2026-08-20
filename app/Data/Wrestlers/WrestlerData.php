@@ -10,7 +10,7 @@ use App\ValueObjects\Weight;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
-class WrestlerData
+readonly class WrestlerData
 {
     public Height $height;
 
