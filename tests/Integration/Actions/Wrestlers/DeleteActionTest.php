@@ -31,6 +31,18 @@ test('it soft deletes an unemployed wrestler', function () {
     ]);
 });
 
+test('it deletes using the current persisted wrestler state', function () {
+    $wrestler = Wrestler::factory()->create();
+    $staleWrestler = $wrestler->replicate(['id']);
+    $staleWrestler->id = $wrestler->id;
+    $staleWrestler->exists = true;
+
+    resolve(DeleteAction::class)->handle($staleWrestler);
+
+    expect(Wrestler::find($wrestler->id))->toBeNull();
+    expect(Wrestler::withTrashed()->findOrFail($wrestler->id)->trashed())->toBeTrue();
+});
+
 test('it soft deletes wrestler with specific deletion date', function () {
     $wrestler = Wrestler::factory()->create();
     $deletionDate = now()->subDays(2);

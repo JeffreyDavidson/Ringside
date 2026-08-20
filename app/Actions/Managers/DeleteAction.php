@@ -44,16 +44,21 @@ class DeleteAction
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
-        $this->eligibility->ensureCanDelete($manager);
-
         $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($manager, $deletionDate): void {
-            $this->periods->close($manager, $deletionDate);
-            $this->endCurrentRelationships->handle($manager, $deletionDate);
+            $lockedManager = Manager::query()
+                ->withTrashed()
+                ->whereKey($manager->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanDelete($lockedManager);
+            $this->periods->close($lockedManager, $deletionDate);
+            $this->endCurrentRelationships->handle($lockedManager, $deletionDate);
 
             // Soft delete the manager record
-            $this->deletionState->delete($manager, $deletionDate);
+            $this->deletionState->delete($lockedManager, $deletionDate);
         });
     }
 }

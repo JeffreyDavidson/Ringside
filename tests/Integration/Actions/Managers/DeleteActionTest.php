@@ -33,6 +33,18 @@ test('it soft deletes an unemployed manager', function () {
     expect($trashedManager->deleted_at)->not->toBeNull();
 });
 
+test('it deletes using the current persisted manager state', function () {
+    $manager = Manager::factory()->create();
+    $staleManager = $manager->replicate(['id']);
+    $staleManager->id = $manager->id;
+    $staleManager->exists = true;
+
+    resolve(DeleteAction::class)->handle($staleManager);
+
+    expect(Manager::find($manager->id))->toBeNull();
+    expect(Manager::withTrashed()->findOrFail($manager->id)->trashed())->toBeTrue();
+});
+
 test('it rejects deleting an already deleted manager', function () {
     $manager = Manager::factory()->create();
     $manager->delete();

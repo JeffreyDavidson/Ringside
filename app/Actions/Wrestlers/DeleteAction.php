@@ -42,16 +42,21 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        $this->eligibility->ensureCanDelete($wrestler);
-
         $deletionDate = $deletionDate ?? now();
 
         DB::transaction(function () use ($wrestler, $deletionDate): void {
-            $this->periods->close($wrestler, $deletionDate);
-            $this->endCurrentRelationships->handle($wrestler, $deletionDate);
+            $lockedWrestler = Wrestler::query()
+                ->withTrashed()
+                ->whereKey($wrestler->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanDelete($lockedWrestler);
+            $this->periods->close($lockedWrestler, $deletionDate);
+            $this->endCurrentRelationships->handle($lockedWrestler, $deletionDate);
 
             // Soft delete the wrestler record
-            $this->deletionState->delete($wrestler, $deletionDate);
+            $this->deletionState->delete($lockedWrestler, $deletionDate);
         });
     }
 }
