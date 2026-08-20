@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Builders\Roster;
 
+use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\ProjectsActivityStatus;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class StableBuilder extends Builder
 {
+    use FiltersByName;
     use ProjectsActivityStatus;
 
     public function previousForTagTeamId(int $tagTeamId): static

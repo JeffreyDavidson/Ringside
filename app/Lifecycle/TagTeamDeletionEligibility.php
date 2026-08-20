@@ -59,7 +59,7 @@ final class TagTeamDeletionEligibility
         }
 
         $conflictingTeam = TagTeam::query()
-            ->where('name', $tagTeam->name)
+            ->whereName($tagTeam->name)
             ->whereKeyNot($tagTeam->getKey())
             ->whereHas('employments', fn (Builder $employmentQuery) => $employmentQuery->whereNull('ended_at'))
             ->first();
