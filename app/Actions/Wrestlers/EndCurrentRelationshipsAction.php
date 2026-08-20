@@ -10,6 +10,7 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EndCurrentRelationshipsAction
 {
@@ -17,21 +18,28 @@ class EndCurrentRelationshipsAction
 
     public function handle(Wrestler $wrestler, Carbon $effectiveDate): void
     {
-        TagTeamWrestler::query()
-            ->forWrestlerId($wrestler->id)
-            ->current()
-            ->update(['left_at' => $effectiveDate]);
+        DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $lockedWrestler = Wrestler::query()
+                ->whereKey($wrestler->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        StableWrestler::query()
-            ->where('wrestler_id', $wrestler->id)
-            ->current()
-            ->update(['left_at' => $effectiveDate]);
+            TagTeamWrestler::query()
+                ->forWrestlerId($lockedWrestler->id)
+                ->current()
+                ->update(['left_at' => $effectiveDate]);
 
-        WrestlerManager::query()
-            ->where('wrestler_id', $wrestler->id)
-            ->current()
-            ->update(['fired_at' => $effectiveDate]);
+            StableWrestler::query()
+                ->where('wrestler_id', $lockedWrestler->id)
+                ->current()
+                ->update(['left_at' => $effectiveDate]);
 
-        $this->championshipReigns->endCurrentReignsForChampion($wrestler, $effectiveDate);
+            WrestlerManager::query()
+                ->where('wrestler_id', $lockedWrestler->id)
+                ->current()
+                ->update(['fired_at' => $effectiveDate]);
+
+            $this->championshipReigns->endCurrentReignsForChampion($lockedWrestler, $effectiveDate);
+        });
     }
 }

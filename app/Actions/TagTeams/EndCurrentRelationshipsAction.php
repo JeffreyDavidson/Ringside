@@ -9,6 +9,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class EndCurrentRelationshipsAction
 {
@@ -16,16 +17,23 @@ class EndCurrentRelationshipsAction
 
     public function handle(TagTeam $tagTeam, Carbon $effectiveDate): void
     {
-        TagTeamWrestler::query()
-            ->forTagTeamId($tagTeam->id)
-            ->current()
-            ->update(['left_at' => $effectiveDate]);
+        DB::transaction(function () use ($tagTeam, $effectiveDate): void {
+            $lockedTagTeam = TagTeam::query()
+                ->whereKey($tagTeam->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        TagTeamManager::query()
-            ->where('tag_team_id', $tagTeam->id)
-            ->current()
-            ->update(['fired_at' => $effectiveDate]);
+            TagTeamWrestler::query()
+                ->forTagTeamId($lockedTagTeam->id)
+                ->current()
+                ->update(['left_at' => $effectiveDate]);
 
-        $this->championshipReigns->endCurrentReignsForChampion($tagTeam, $effectiveDate);
+            TagTeamManager::query()
+                ->where('tag_team_id', $lockedTagTeam->id)
+                ->current()
+                ->update(['fired_at' => $effectiveDate]);
+
+            $this->championshipReigns->endCurrentReignsForChampion($lockedTagTeam, $effectiveDate);
+        });
     }
 }
