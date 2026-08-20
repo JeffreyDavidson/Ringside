@@ -69,3 +69,35 @@ it('filters and orders title championship history', function () {
         $firstChampionship->id,
     ]);
 });
+
+it('builds previous championship history with display relationships', function () {
+    $title = Title::factory()->create();
+    $champion = Wrestler::factory()->create();
+    $firstChampionship = TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($champion)
+        ->ended()
+        ->create([
+            'won_at' => now()->subYears(2),
+            'lost_at' => now()->subYear()->subDay(),
+        ]);
+    $latestChampionship = TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($champion)
+        ->ended()
+        ->create([
+            'won_at' => now()->subYear(),
+            'lost_at' => now()->subMonth(),
+        ]);
+
+    $history = TitleChampionship::query()
+        ->forChampion($champion)
+        ->forPreviousHistory()
+        ->get();
+
+    expect($history->modelKeys())->toBe([$latestChampionship->id, $firstChampionship->id])
+        ->and($history->firstOrFail()->getAttribute('previous_championship_id'))->toBe($firstChampionship->id)
+        ->and($history->firstOrFail()->relationLoaded('title'))->toBeTrue()
+        ->and($history->firstOrFail()->relationLoaded('previousChampionship'))->toBeTrue()
+        ->and($history->firstOrFail()->previousChampionship?->champion?->is($champion))->toBeTrue();
+});

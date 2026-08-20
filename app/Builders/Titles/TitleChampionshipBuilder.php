@@ -42,6 +42,15 @@ class TitleChampionshipBuilder extends Builder
         return $this->whereMorphedTo('champion', $champion);
     }
 
+    public function forPreviousHistory(): static
+    {
+        return $this
+            ->previous()
+            ->mostRecentlyLostFirst()
+            ->withPreviousChampionshipId()
+            ->with(['title', 'previousChampionship.champion']);
+    }
+
     public function earliestWonFirst(): static
     {
         $this->orderBy('won_at');
