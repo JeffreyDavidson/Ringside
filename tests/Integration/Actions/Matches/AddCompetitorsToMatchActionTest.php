@@ -27,7 +27,7 @@ test('it adds wrestler competitors to a match', function () {
 
     $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
-    $addWrestlersAction->expects('handle')->times(2);
+    $addWrestlersAction->expects('handleWithinTransaction')->times(2);
 
     $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
     $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
@@ -53,7 +53,7 @@ test('it adds tag team competitors to a match', function () {
 
     $addWrestlersAction = Double::for(AddWrestlersToMatchAction::class);
     $addTagTeamsAction = Double::for(AddTagTeamsToMatchAction::class);
-    $addTagTeamsAction->expects('handle')->times(2);
+    $addTagTeamsAction->expects('handleWithinTransaction')->times(2);
 
     $this->app->instance(AddWrestlersToMatchAction::class, $addWrestlersAction);
     $this->app->instance(AddTagTeamsToMatchAction::class, $addTagTeamsAction);
