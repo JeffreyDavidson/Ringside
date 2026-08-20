@@ -75,7 +75,12 @@ class AddWrestlersToMatchAction
                 throw EntityNotAvailableException::forMatchAssignment('wrestlers');
             }
 
-            $this->conflictService->ensureWrestlersCanBeAssigned($conflictingEventIds, $lockedWrestlers);
+            $this->conflictService->ensureCompetitorsCanBeAssigned(
+                $conflictingEventIds,
+                $lockedWrestlers,
+                Wrestler::class,
+                'Wrestler',
+            );
             $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 
             $lockedWrestlers->each(function (Wrestler $wrestler) use ($lockedMatch, $side): void {
