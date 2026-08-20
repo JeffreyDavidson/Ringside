@@ -32,23 +32,22 @@ class UpdateAction
      */
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {
-        if (method_exists($referee, 'ensureCanBeUpdated')) {
-            $referee->ensureCanBeUpdated();
-        }
-
         return DB::transaction(function () use ($referee, $refereeData): Referee {
-            // Update the referee's basic information
-            $referee->update([
+            $lockedReferee = Referee::query()
+                ->whereKey($referee->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $lockedReferee->update([
                 'first_name' => $refereeData->first_name,
                 'last_name' => $refereeData->last_name,
             ]);
 
-            // Handle employment using EmployAction for consistency
-            if (! is_null($refereeData->employment_date) && ! $referee->isEmployed()) {
-                $this->employAction->handle($referee, $refereeData->employment_date);
+            if ($refereeData->employment_date !== null && ! $lockedReferee->isEmployed()) {
+                $this->employAction->handle($lockedReferee, $refereeData->employment_date);
             }
 
-            return $referee;
+            return $lockedReferee;
         });
     }
 }
