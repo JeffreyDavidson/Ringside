@@ -64,6 +64,30 @@ test('it updates referee and employs them when employment date provided', functi
     ]);
 });
 
+test('it updates using the current persisted referee state', function () {
+    $referee = Referee::factory()->create([
+        'first_name' => 'Original',
+        'last_name' => 'Name',
+    ]);
+    $staleReferee = $referee->replicate(['id']);
+    $staleReferee->id = $referee->id;
+    $staleReferee->exists = true;
+
+    $updateData = new RefereeData(
+        first_name: 'Updated',
+        last_name: 'Referee',
+        employment_date: null
+    );
+
+    $updatedReferee = resolve(UpdateAction::class)->handle($staleReferee, $updateData);
+    $persistedReferee = Referee::query()
+        ->whereKey($referee->getKey())
+        ->firstOrFail();
+
+    expect($updatedReferee->getKey())->toBe($referee->getKey())
+        ->and($persistedReferee->first_name)->toBe('Updated');
+});
+
 test('it updates referee without employing when no employment date', function () {
     $referee = Referee::factory()->create();
 
