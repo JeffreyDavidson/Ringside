@@ -64,7 +64,7 @@ final class StableRetirementEligibility
         }
 
         $conflictingStable = Stable::query()
-            ->where('name', $stable->name)
+            ->whereName($stable->name)
             ->whereKeyNot($stable->getKey())
             ->whereHas('activityPeriods', fn (Builder $query): Builder => $query->whereNull('ended_at'))
             ->first();

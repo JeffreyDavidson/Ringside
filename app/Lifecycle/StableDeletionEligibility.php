@@ -66,7 +66,7 @@ final class StableDeletionEligibility
         }
 
         $conflictingStable = Stable::query()
-            ->where('name', $stable->name)
+            ->whereName($stable->name)
             ->whereKeyNot($stable->getKey())
             ->first();
 

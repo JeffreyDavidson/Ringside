@@ -27,7 +27,7 @@ final class VenueDeletionEligibility
         }
 
         $conflictingVenue = Venue::query()
-            ->where('name', $venue->name)
+            ->whereName($venue->name)
             ->whereKeyNot($venue->getKey())
             ->first();
 
