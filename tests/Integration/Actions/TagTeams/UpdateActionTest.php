@@ -42,6 +42,25 @@ test('it updates tag team basic information', function () {
     ]);
 });
 
+test('it updates using the current persisted tag team state', function () {
+    $staleTagTeam = $this->tagTeam->replicate(['id']);
+    $staleTagTeam->id = $this->tagTeam->id;
+    $staleTagTeam->exists = true;
+
+    $updateData = new TagTeamData(
+        name: 'Updated From Stale Team',
+        signature_move: $this->tagTeam->signature_move,
+        employment_date: null,
+        wrestlerA: $this->wrestlerA,
+        wrestlerB: $this->wrestlerB,
+    );
+
+    $updatedTagTeam = resolve(UpdateAction::class)->handle($staleTagTeam, $updateData);
+
+    expect($updatedTagTeam->name)->toBe('Updated From Stale Team')
+        ->and(TagTeam::query()->findOrFail($this->tagTeam->id)->name)->toBe('Updated From Stale Team');
+});
+
 test('it updates only the name when signature move is repeated', function () {
     $updateData = new TagTeamData(
         name: 'Updated Team Only',
