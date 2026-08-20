@@ -10,14 +10,14 @@ use Livewire\Attributes\Computed;
 trait PresentsWrestlersList
 {
     /**
-     * @return array<int|string,string|null>
+     * @return array<int|string,string>
      */
     #[Computed]
     public function getWrestlers(): array
     {
         return Wrestler::query()
             ->get(['id', 'name'])
-            ->mapWithKeys(fn (Wrestler $wrestler): array => [$wrestler->id => $wrestler->name])
+            ->mapWithKeys(fn (Wrestler $wrestler): array => [$wrestler->id => $wrestler->name ?? ''])
             ->all();
     }
 }

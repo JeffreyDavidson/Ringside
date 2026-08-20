@@ -10,14 +10,14 @@ use Livewire\Attributes\Computed;
 trait PresentsManagersList
 {
     /**
-     * @return array<int|string,string|null>
+     * @return array<int|string,string>
      */
     #[Computed]
     public function getManagers(): array
     {
         return Manager::query()
             ->get(['id', 'full_name'])
-            ->mapWithKeys(fn (Manager $manager): array => [$manager->id => $manager->full_name])
+            ->mapWithKeys(fn (Manager $manager): array => [$manager->id => $manager->full_name ?? ''])
             ->all();
     }
 }

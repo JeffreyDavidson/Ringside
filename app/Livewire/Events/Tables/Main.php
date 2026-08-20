@@ -9,6 +9,7 @@ use App\Actions\Events\RestoreAction;
 use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -16,13 +17,14 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
-use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Event> */
 class Main extends BaseTable
 {
+    use PresentsVenuesList;
+
     protected bool $showActionColumn = true;
 
     protected string $databaseTableName = 'events';
@@ -77,12 +79,6 @@ class Main extends BaseTable
      */
     public function filters(): array
     {
-        $venues = Venue::query()
-            ->alphabetical()
-            ->get(['id', 'name'])
-            ->mapWithKeys(fn (Venue $venue): array => [$venue->id => $venue->name])
-            ->all();
-
         $statusOptions = ['' => __('core.all')];
 
         foreach (EventStatus::cases() as $status) {
@@ -119,7 +115,7 @@ class Main extends BaseTable
             SelectFilter::make('Venue')
                 ->options([
                     '' => 'All',
-                    ...$venues,
+                    ...$this->getVenues(),
                 ]),
         ];
     }
