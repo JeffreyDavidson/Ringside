@@ -91,6 +91,17 @@ test('calculates the length of a current championship reign', function () {
     Carbon::setTestNow();
 });
 
+test('calculates current reign length from an explicit as-of date', function () {
+    $championship = TitleChampionship::factory()
+        ->for($this->title)
+        ->forWrestler($this->firstChampion)
+        ->wonOn('2025-01-01')
+        ->current()
+        ->make();
+
+    expect(TitleChampionshipQuery::reignLengthInDays($championship, Carbon::parse('2025-01-11')))->toBe(10);
+});
+
 test('counts reigns and reports vacancy from the current relationship', function () {
     expect(TitleChampionshipQuery::reignCount($this->title))->toBe(3)
         ->and(TitleChampionshipQuery::isVacant($this->title))->toBeFalse();

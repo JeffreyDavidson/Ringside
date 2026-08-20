@@ -35,9 +35,7 @@ class PreviousMatches extends BasePreviousMatchesTable
         $tagTeam = TagTeam::query()->findOrFail($this->tagTeamId);
 
         return EventMatch::query()
-            ->forPastEvents()
-            ->with(['titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
-            ->forCompetitor($tagTeam)
-            ->latestEventFirst();
+            ->forHistory()
+            ->forCompetitor($tagTeam);
     }
 }

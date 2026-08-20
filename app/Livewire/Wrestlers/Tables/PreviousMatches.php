@@ -33,9 +33,7 @@ class PreviousMatches extends BasePreviousMatchesTable
         $wrestler = Wrestler::query()->findOrFail($this->wrestlerId);
 
         return EventMatch::query()
-            ->forPastEvents()
-            ->with(['titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
-            ->forCompetitor($wrestler)
-            ->latestEventFirst();
+            ->forHistory()
+            ->forCompetitor($wrestler);
     }
 }

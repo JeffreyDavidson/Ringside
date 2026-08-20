@@ -52,6 +52,22 @@ it('retrieves matches for past events and eager loads their events', function ()
         ->and($matches->firstOrFail()->relationLoaded('event'))->toBeTrue();
 });
 
+it('retrieves match history with its display relationships eager loaded and ordered', function () {
+    $pastEvent = Event::factory()->past()->create();
+    $wrestler = Wrestler::factory()->create();
+    $match = EventMatch::factory()->forEvent($pastEvent)->create();
+    attachBuilderTestCompetitor($match, $wrestler);
+
+    $history = EventMatch::query()->forHistory()->get();
+
+    expect($history)->toHaveCount(1)
+        ->and($history->firstOrFail()->is($match))->toBeTrue()
+        ->and($history->firstOrFail()->relationLoaded('event'))->toBeTrue()
+        ->and($history->firstOrFail()->relationLoaded('titles'))->toBeTrue()
+        ->and($history->firstOrFail()->relationLoaded('competitors'))->toBeTrue()
+        ->and($history->firstOrFail()->relationLoaded('winningSide'))->toBeTrue();
+});
+
 it('retrieves matches for a competitor and eager loads competitors', function () {
     $event = Event::factory()->past()->create();
     $wrestler = Wrestler::factory()->create();
