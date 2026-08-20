@@ -166,9 +166,12 @@ describe('Venue Action Integration Tests', function () {
             );
 
             $updatedVenue = resolve(UpdateAction::class)->handle($staleVenue, $venueData);
+            $persistedVenue = Venue::query()
+                ->whereKey($venue->getKey())
+                ->firstOrFail();
 
             expect($updatedVenue->getKey())->toBe($venue->getKey())
-                ->and(Venue::findOrFail($venue->getKey())->name)->toBe('Updated Arena');
+                ->and($persistedVenue->name)->toBe('Updated Arena');
         });
 
         test('update action handles address changes', function () {

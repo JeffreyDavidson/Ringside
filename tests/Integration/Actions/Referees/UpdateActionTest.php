@@ -80,9 +80,12 @@ test('it updates using the current persisted referee state', function () {
     );
 
     $updatedReferee = resolve(UpdateAction::class)->handle($staleReferee, $updateData);
+    $persistedReferee = Referee::query()
+        ->whereKey($referee->getKey())
+        ->firstOrFail();
 
     expect($updatedReferee->getKey())->toBe($referee->getKey())
-        ->and(Referee::findOrFail($referee->getKey())->first_name)->toBe('Updated');
+        ->and($persistedReferee->first_name)->toBe('Updated');
 });
 
 test('it updates referee without employing when no employment date', function () {
