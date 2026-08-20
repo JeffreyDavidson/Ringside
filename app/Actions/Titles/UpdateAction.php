@@ -29,19 +29,23 @@ class UpdateAction
     public function handle(Title $title, TitleData $titleData): Title
     {
         return DB::transaction(function () use ($title, $titleData): Title {
-            // Update the title's basic information
-            $title->update([
+            $lockedTitle = Title::query()
+                ->whereKey($title->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $lockedTitle->update([
                 'name' => $titleData->name,
                 'type' => $titleData->type,
             ]);
 
             // Handle conditional debut creation - only debut titles that have never debuted before
             // Note: This will not reactivate pulled titles - use ReinstateAction for that
-            if (! is_null($titleData->debut_date) && ! $title->hasActivityPeriods()) {
-                $this->startActivityPeriod->handle($title, $titleData->debut_date);
+            if (! is_null($titleData->debut_date) && ! $lockedTitle->hasActivityPeriods()) {
+                $this->startActivityPeriod->handle($lockedTitle, $titleData->debut_date);
             }
 
-            return $title;
+            return $lockedTitle;
         });
     }
 }

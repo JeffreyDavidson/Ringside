@@ -24,6 +24,24 @@ test('it updates a title', function () {
     expect($title->type)->toBe(TitleType::Singles);
 });
 
+test('it updates using the current persisted title state', function () {
+    $title = Title::factory()->unactivated()->create(['name' => 'Original Title']);
+    $staleTitle = $title->replicate(['id']);
+    $staleTitle->id = $title->id;
+    $staleTitle->exists = true;
+
+    $updatedTitle = resolve(UpdateAction::class)->handle(
+        $staleTitle,
+        new TitleData('Updated From Stale State', TitleType::Singles, null),
+    );
+    $persistedTitle = Title::query()
+        ->whereKey($title->getKey())
+        ->firstOrFail();
+
+    expect($updatedTitle->name)->toBe('Updated From Stale State')
+        ->and($persistedTitle->name)->toBe('Updated From Stale State');
+});
+
 test('it activates an unactivated title if activation date is filled in request', function () {
     $datetime = now();
     $data = new TitleData('New Example Title', TitleType::Singles, $datetime);
