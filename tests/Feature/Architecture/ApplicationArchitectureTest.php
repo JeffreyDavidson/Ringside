@@ -42,3 +42,10 @@ arch('services use the service suffix')
 arch('custom validation rules implement Laravel validation rules')
     ->expect('App\\Rules')
     ->toImplement(ValidationRule::class);
+
+arch('lifecycle eligibility policies are final')
+    ->expect([
+        'App\\Lifecycle\\IndividualRetirementEligibility',
+        'App\\Lifecycle\\TitleLifecycleEligibility',
+    ])
+    ->toBeFinal();
