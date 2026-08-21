@@ -312,6 +312,18 @@ describe('StablesTable Component', function () {
             expect(freshModel($inactiveStable)->isInactive())->toBeTrue();
         });
 
+        test('retire action fails for an already retired stable', function () {
+            $retiredStable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
+
+            actingAs($this->admin);
+
+            livewire(Main::class)
+                ->call('retire', $retiredStable)
+                ->assertNoRedirect();
+
+            expect(freshModel($retiredStable)->isRetired())->toBeTrue();
+        });
+
         test('unretire action fails for non-retired stable', function () {
             $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
 
