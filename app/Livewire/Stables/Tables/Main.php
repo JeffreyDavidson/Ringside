@@ -168,6 +168,8 @@ class Main extends BaseTable
             resolve(RetireAction::class)->handle($stable);
         } catch (CannotBeRetiredException $exception) {
             session()->flash('error', $exception->getMessage());
+
+            return;
         }
 
         $this->redirectRoute('stables.index');
