@@ -10,6 +10,7 @@ use App\Exceptions\BaseBusinessException;
 use App\Services\ErrorMessageMappingService;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Gate;
 
 trait ExecutesRosterActions
@@ -27,10 +28,15 @@ trait ExecutesRosterActions
     ): Model {
         $model = new $modelClass();
 
-        return ($lifecycleAction->usesTrashedModel()
-            ? $model->newQuery()->onlyTrashed()
-            : $model->newQuery()
-        )->findOrFail($modelId);
+        $query = $model->newQuery();
+
+        if ($lifecycleAction->usesTrashedModel()) {
+            $query
+                ->withoutGlobalScope(SoftDeletingScope::class)
+                ->whereNotNull($model->getDeletedAtColumn());
+        }
+
+        return $query->findOrFail($modelId);
     }
 
     /** @param Closure(): void $action */
