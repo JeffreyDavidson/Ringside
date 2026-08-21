@@ -111,13 +111,9 @@ class Main extends BaseTable
      */
     public function restore(int $wrestlerId): void
     {
-        $wrestler = Wrestler::onlyTrashed()->findOrFail($wrestlerId);
-
-        Gate::authorize('restore', $wrestler);
-
-        resolve(RestoreAction::class)->handle($wrestler);
-
-        $this->redirectRoute('wrestlers.index');
+        if ($this->executeWrestlerAction(RosterLifecycleAction::Restore, $wrestlerId)) {
+            $this->redirectRoute('wrestlers.index');
+        }
     }
 
     /**
@@ -140,11 +136,23 @@ class Main extends BaseTable
     public function handleWrestlerAction(string $action, int $wrestlerId): void
     {
         $lifecycleAction = RosterLifecycleAction::from($action);
+
+        if ($lifecycleAction === RosterLifecycleAction::Restore) {
+            $this->restore($wrestlerId);
+
+            return;
+        }
+
+        $this->executeWrestlerAction($lifecycleAction, $wrestlerId);
+    }
+
+    private function executeWrestlerAction(RosterLifecycleAction $lifecycleAction, int $wrestlerId): bool
+    {
         $wrestler = $lifecycleAction->usesTrashedModel()
             ? Wrestler::onlyTrashed()->findOrFail($wrestlerId)
             : Wrestler::findOrFail($wrestlerId);
 
-        match ($lifecycleAction) {
+        return match ($lifecycleAction) {
             RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(EmployAction::class)->handle($wrestler)),
             RosterLifecycleAction::Release => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(ReleaseAction::class)->handle($wrestler)),
             RosterLifecycleAction::Retire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(RetireAction::class)->handle($wrestler)),
@@ -153,7 +161,7 @@ class Main extends BaseTable
             RosterLifecycleAction::Reinstate => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(ReinstateAction::class)->handle($wrestler)),
             RosterLifecycleAction::Injure => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(InjureAction::class)->handle($wrestler)),
             RosterLifecycleAction::ClearFromInjury => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler)),
-            RosterLifecycleAction::Restore => $this->restore($wrestlerId),
+            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(RestoreAction::class)->handle($wrestler)),
         };
     }
 }

@@ -21,14 +21,14 @@ trait ExecutesRosterActions
         RosterEntityType $entityType,
         Model $model,
         Closure $action,
-    ): void {
+    ): bool {
         if (! $lifecycleAction->supports($entityType)) {
             throw new InvalidArgumentException("{$lifecycleAction->value} is not a {$entityType->value} lifecycle action.");
         }
 
         Gate::authorize($lifecycleAction->ability(), $model);
 
-        $this->executeRosterAction($lifecycleAction->successAction(), $entityType, $action);
+        return $this->executeRosterAction($lifecycleAction->successAction(), $entityType, $action);
     }
 
     /** @param Closure(): void $action */
@@ -36,14 +36,18 @@ trait ExecutesRosterActions
         string $actionName,
         RosterEntityType $entityType,
         Closure $action,
-    ): void {
+    ): bool {
         try {
             $action();
 
             $this->dispatch("{$entityType->value}-updated");
             session()->flash('success', __("{$entityType->translationNamespace()}.actions.{$actionName}"));
+
+            return true;
         } catch (BaseBusinessException $exception) {
             session()->flash('error', __(ErrorMessageMappingService::map($exception, $entityType)));
+
+            return false;
         }
     }
 }
