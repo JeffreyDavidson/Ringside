@@ -19,8 +19,8 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Concerns\ExecutesRosterActions;
-use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -31,8 +31,8 @@ use InvalidArgumentException;
 /** @extends BaseTable<TagTeam> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
     use ExecutesRosterActions;
-    use ExecutesSoftDeleteActions;
 
     protected bool $showActionColumn = true;
 
@@ -99,7 +99,7 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $tagTeam);
 
-        $this->executeSoftDeleteAction(function () use ($tagTeam): void {
+        $this->executeBusinessAction(function () use ($tagTeam): void {
             resolve(DeleteAction::class)->handle($tagTeam);
         }, 'Tag team successfully deleted.');
     }
