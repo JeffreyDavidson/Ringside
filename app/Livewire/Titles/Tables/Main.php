@@ -107,22 +107,22 @@ class Main extends BaseTable
     {
         Gate::authorize('debut', $title);
 
-        $this->executeTitleAction(function () use ($title): void {
+        if ($this->executeTitleAction(function () use ($title): void {
             resolve(DebutAction::class)->handle($title);
-        });
-
-        $this->redirectRoute('titles.index');
+        })) {
+            $this->redirectRoute('titles.index');
+        }
     }
 
     public function putOnHold(Title $title): void
     {
         Gate::authorize('pull', $title);
 
-        $this->executeTitleAction(function () use ($title): void {
+        if ($this->executeTitleAction(function () use ($title): void {
             resolve(PullAction::class)->handle($title);
-        });
-
-        $this->redirectRoute('titles.index');
+        })) {
+            $this->redirectRoute('titles.index');
+        }
     }
 
     public function restore(int $titleId): void
@@ -142,32 +142,32 @@ class Main extends BaseTable
     {
         Gate::authorize('retire', $title);
 
-        $this->executeTitleAction(function () use ($title): void {
+        if ($this->executeTitleAction(function () use ($title): void {
             resolve(RetireAction::class)->handle($title);
-        });
-
-        $this->redirectRoute('titles.index');
+        })) {
+            $this->redirectRoute('titles.index');
+        }
     }
 
     public function unretire(Title $title): void
     {
         Gate::authorize('unretire', $title);
 
-        $this->executeTitleAction(function () use ($title): void {
+        if ($this->executeTitleAction(function () use ($title): void {
             resolve(UnretireAction::class)->handle($title);
-        });
-
-        $this->redirectRoute('titles.index');
+        })) {
+            $this->redirectRoute('titles.index');
+        }
     }
 
     public function reinstate(Title $title): void
     {
         Gate::authorize('reinstate', $title);
 
-        $this->executeTitleAction(function () use ($title): void {
+        if ($this->executeTitleAction(function () use ($title): void {
             resolve(ReinstateAction::class)->handle($title);
-        });
-
-        $this->redirectRoute('titles.index');
+        })) {
+            $this->redirectRoute('titles.index');
+        }
     }
 }

@@ -161,6 +161,46 @@ describe('TitlesTable Component', function () {
             $component->assertOk();
             $component->assertSee($title->name);
         });
+
+        test('failed debut remains on the titles table', function () {
+            $title = Title::factory()->active()->create();
+
+            livewire(Main::class)
+                ->call('debut', $title)
+                ->assertNoRedirect();
+        });
+
+        test('failed pull remains on the titles table', function () {
+            $title = Title::factory()->inactive()->create();
+
+            livewire(Main::class)
+                ->call('putOnHold', $title)
+                ->assertNoRedirect();
+        });
+
+        test('failed retirement remains on the titles table', function () {
+            $title = Title::factory()->retired()->create();
+
+            livewire(Main::class)
+                ->call('retire', $title)
+                ->assertNoRedirect();
+        });
+
+        test('failed unretirement remains on the titles table', function () {
+            $title = Title::factory()->active()->create();
+
+            livewire(Main::class)
+                ->call('unretire', $title)
+                ->assertNoRedirect();
+        });
+
+        test('failed reinstatement remains on the titles table', function () {
+            $title = Title::factory()->active()->create();
+
+            livewire(Main::class)
+                ->call('reinstate', $title)
+                ->assertNoRedirect();
+        });
     });
 
     describe('championship integration', function () {
