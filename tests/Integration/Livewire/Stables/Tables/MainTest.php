@@ -254,6 +254,19 @@ describe('StablesTable Component', function () {
             expect($deletedStable->fresh())->not()->toBeNull();
         });
 
+        test('restore remains on the table when a stable cannot be restored', function () {
+            Stable::factory()->create(['name' => 'Existing Stable']);
+            $deletedStable = Stable::factory()->trashed()->create(['name' => 'Existing Stable']);
+
+            actingAs($this->admin);
+
+            livewire(Main::class)
+                ->call('restore', $deletedStable->id)
+                ->assertNoRedirect();
+
+            expect(Stable::onlyTrashed()->find($deletedStable->id))->not()->toBeNull();
+        });
+
         test('delete action integration works correctly', function () {
             $stable = Stable::factory()->inactive()->create(['name' => 'Test Stable']);
 
