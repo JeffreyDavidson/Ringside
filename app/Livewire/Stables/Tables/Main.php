@@ -11,13 +11,10 @@ use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
-use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
-use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
-use App\Exceptions\Roster\Stables\CannotBeRetiredException;
-use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
@@ -29,6 +26,7 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Stable> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
     use ExecutesSoftDeleteActions;
 
     protected bool $showActionColumn = true;
@@ -112,15 +110,11 @@ class Main extends BaseTable
     {
         Gate::authorize('establish', $stable);
 
-        try {
+        if ($this->executeBusinessAction(function () use ($stable): void {
             resolve(EstablishAction::class)->handle($stable);
-        } catch (CannotBeEstablishedException $exception) {
-            session()->flash('error', $exception->getMessage());
-
-            return;
+        })) {
+            $this->redirectRoute('stables.index');
         }
-
-        $this->redirectRoute('stables.index');
     }
 
     /**
@@ -130,15 +124,11 @@ class Main extends BaseTable
     {
         Gate::authorize('disband', $stable);
 
-        try {
+        if ($this->executeBusinessAction(function () use ($stable): void {
             resolve(DisbandAction::class)->handle($stable);
-        } catch (CannotBeDisbandedException $exception) {
-            session()->flash('error', $exception->getMessage());
-
-            return;
+        })) {
+            $this->redirectRoute('stables.index');
         }
-
-        $this->redirectRoute('stables.index');
     }
 
     /**
@@ -164,15 +154,11 @@ class Main extends BaseTable
     {
         Gate::authorize('retire', $stable);
 
-        try {
+        if ($this->executeBusinessAction(function () use ($stable): void {
             resolve(RetireAction::class)->handle($stable);
-        } catch (CannotBeRetiredException $exception) {
-            session()->flash('error', $exception->getMessage());
-
-            return;
+        })) {
+            $this->redirectRoute('stables.index');
         }
-
-        $this->redirectRoute('stables.index');
     }
 
     /**
@@ -182,14 +168,10 @@ class Main extends BaseTable
     {
         Gate::authorize('unretire', $stable);
 
-        try {
+        if ($this->executeBusinessAction(function () use ($stable): void {
             resolve(UnretireAction::class)->handle($stable);
-        } catch (CannotBeUnretiredException $exception) {
-            session()->flash('error', $exception->getMessage());
-
-            return;
+        })) {
+            $this->redirectRoute('stables.index');
         }
-
-        $this->redirectRoute('stables.index');
     }
 }
