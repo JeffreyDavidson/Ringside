@@ -21,8 +21,8 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Concerns\ExecutesRosterActions;
-use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -32,8 +32,8 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Wrestler> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
     use ExecutesRosterActions;
-    use ExecutesSoftDeleteActions;
 
     protected bool $showActionColumn = true;
 
@@ -101,7 +101,7 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $wrestler);
 
-        $this->executeSoftDeleteAction(function () use ($wrestler): void {
+        $this->executeBusinessAction(function () use ($wrestler): void {
             resolve(DeleteAction::class)->handle($wrestler);
         }, 'Wrestler successfully deleted.');
     }

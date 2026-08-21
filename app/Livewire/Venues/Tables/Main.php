@@ -7,7 +7,7 @@ namespace App\Livewire\Venues\Tables;
 use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
 use App\Livewire\Base\Tables\BaseTable;
-use App\Livewire\Concerns\ExecutesSoftDeleteActions;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Venue> */
 class Main extends BaseTable
 {
-    use ExecutesSoftDeleteActions;
+    use ExecutesBusinessActions;
 
     protected bool $showActionColumn = true;
 
@@ -62,7 +62,7 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $venue);
 
-        $this->executeSoftDeleteAction(function () use ($venue): void {
+        $this->executeBusinessAction(function () use ($venue): void {
             resolve(DeleteAction::class)->handle($venue);
         }, 'Venue successfully deleted.');
     }
@@ -76,7 +76,7 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $venue);
 
-        if ($this->executeSoftRestoreAction(function () use ($venue): void {
+        if ($this->executeBusinessAction(function () use ($venue): void {
             resolve(RestoreAction::class)->handle($venue);
         })) {
             $this->redirectRoute('venues.index');

@@ -7,7 +7,7 @@ namespace App\Livewire\Matches\Tables;
 use App\Actions\Matches\DeleteAction;
 use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BaseTable;
-use App\Livewire\Concerns\ExecutesSoftDeleteActions;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Models\Matches\EventMatch;
@@ -21,7 +21,7 @@ use LogicException;
 /** @extends BaseTable<EventMatch> */
 class Main extends BaseTable
 {
-    use ExecutesSoftDeleteActions;
+    use ExecutesBusinessActions;
 
     protected bool $showActionColumn = false;
 
@@ -95,7 +95,7 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $eventMatch);
 
-        $this->executeSoftDeleteAction(function () use ($eventMatch): void {
+        $this->executeBusinessAction(function () use ($eventMatch): void {
             resolve(DeleteAction::class)->handle($eventMatch);
         }, 'Match successfully deleted.');
     }

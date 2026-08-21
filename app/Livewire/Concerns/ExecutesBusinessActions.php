@@ -10,7 +10,7 @@ use Closure;
 trait ExecutesBusinessActions
 {
     /** @param Closure(): void $action */
-    protected function executeBusinessAction(Closure $action): bool
+    protected function executeBusinessAction(Closure $action, ?string $successMessage = null): bool
     {
         try {
             $action();
@@ -18,6 +18,10 @@ trait ExecutesBusinessActions
             session()->flash('error', $exception->getMessage());
 
             return false;
+        }
+
+        if ($successMessage !== null) {
+            session()->flash('status', $successMessage);
         }
 
         return true;

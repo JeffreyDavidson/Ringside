@@ -15,7 +15,6 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Livewire\Concerns\ExecutesBusinessActions;
-use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -27,7 +26,6 @@ use Illuminate\Support\Facades\Gate;
 class Main extends BaseTable
 {
     use ExecutesBusinessActions;
-    use ExecutesSoftDeleteActions;
 
     protected bool $showActionColumn = true;
 
@@ -98,7 +96,7 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $stable);
 
-        $this->executeSoftDeleteAction(function () use ($stable): void {
+        $this->executeBusinessAction(function () use ($stable): void {
             resolve(DeleteAction::class)->handle($stable);
         }, 'Stable successfully deleted.');
     }
@@ -140,7 +138,7 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $stable);
 
-        if ($this->executeSoftRestoreAction(function () use ($stable): void {
+        if ($this->executeBusinessAction(function () use ($stable): void {
             resolve(RestoreAction::class)->handle($stable);
         })) {
             $this->redirectRoute('stables.index');

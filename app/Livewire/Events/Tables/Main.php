@@ -10,7 +10,7 @@ use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\Data\PresentsVenuesList;
-use App\Livewire\Concerns\ExecutesSoftDeleteActions;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Event> */
 class Main extends BaseTable
 {
-    use ExecutesSoftDeleteActions;
+    use ExecutesBusinessActions;
     use PresentsVenuesList;
 
     protected bool $showActionColumn = true;
@@ -129,7 +129,7 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $event);
 
-        $this->executeSoftDeleteAction(function () use ($event): void {
+        $this->executeBusinessAction(function () use ($event): void {
             resolve(DeleteAction::class)->handle($event);
         }, 'Event successfully deleted.');
     }
@@ -143,7 +143,7 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $event);
 
-        if ($this->executeSoftRestoreAction(function () use ($event): void {
+        if ($this->executeBusinessAction(function () use ($event): void {
             resolve(RestoreAction::class)->handle($event);
         }, 'Event successfully restored.')) {
             $this->redirectRoute('events.index');
