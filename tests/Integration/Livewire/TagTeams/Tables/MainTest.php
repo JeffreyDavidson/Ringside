@@ -154,6 +154,17 @@ describe('TagTeamsTable Component', function () {
             $component->assertOk();
             $component->assertSee($tagTeam->name);
         });
+
+        test('restores a deleted tag team and redirects to the index', function () {
+            $deletedTagTeam = TagTeam::factory()->trashed()->create(['name' => 'Deleted Tag Team']);
+
+            livewire(Main::class)
+                ->call('restore', $deletedTagTeam->id)
+                ->assertHasNoErrors()
+                ->assertRedirectToRoute('tag-teams.index');
+
+            expect(TagTeam::find($deletedTagTeam->id))->not->toBeNull();
+        });
     });
 
     describe('employment status integration', function () {

@@ -121,7 +121,9 @@ class Main extends BaseTable
 
     public function restore(int $tagTeamId): void
     {
-        $this->executeTagTeamAction(RosterLifecycleAction::Restore, $tagTeamId);
+        if ($this->executeTagTeamAction(RosterLifecycleAction::Restore, $tagTeamId)) {
+            $this->redirectRoute('tag-teams.index');
+        }
     }
 
     public function retire(TagTeam $tagTeam): void
@@ -139,13 +141,13 @@ class Main extends BaseTable
         $this->executeTagTeamAction(RosterLifecycleAction::Unretire, $tagTeam->id);
     }
 
-    private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId): void
+    private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId): bool
     {
         $tagTeam = $lifecycleAction->usesTrashedModel()
             ? TagTeam::onlyTrashed()->findOrFail($tagTeamId)
             : TagTeam::query()->findOrFail($tagTeamId);
 
-        match ($lifecycleAction) {
+        return match ($lifecycleAction) {
             RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(EmployAction::class)->handle($tagTeam)),
             RosterLifecycleAction::Release => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(ReleaseAction::class)->handle($tagTeam)),
             RosterLifecycleAction::Suspend => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(SuspendAction::class)->handle($tagTeam)),
