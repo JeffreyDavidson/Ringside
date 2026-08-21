@@ -15,6 +15,7 @@ use App\Builders\Titles\TitleBuilder;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Concerns\ExecutesTitleActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
 {
+    use ExecutesSoftDeleteActions;
     use ExecutesTitleActions;
 
     protected bool $showActionColumn = true;
@@ -96,8 +98,9 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $title);
 
-        resolve(DeleteAction::class)->handle($title);
-        session()->flash('status', 'Title successfully deleted.');
+        $this->executeSoftDeleteAction(function () use ($title): void {
+            resolve(DeleteAction::class)->handle($title);
+        }, 'Title successfully deleted.');
     }
 
     public function debut(Title $title): void

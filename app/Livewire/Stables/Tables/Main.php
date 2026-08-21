@@ -19,6 +19,7 @@ use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -29,6 +30,8 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Stable> */
 class Main extends BaseTable
 {
+    use ExecutesSoftDeleteActions;
+
     protected bool $showActionColumn = true;
 
     protected string $databaseTableName = 'stables';
@@ -98,8 +101,9 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $stable);
 
-        resolve(DeleteAction::class)->handle($stable);
-        session()->flash('status', 'Stable successfully deleted.');
+        $this->executeSoftDeleteAction(function () use ($stable): void {
+            resolve(DeleteAction::class)->handle($stable);
+        }, 'Stable successfully deleted.');
     }
 
     /**
