@@ -8,6 +8,35 @@ use App\Livewire\Concerns\ExecutesRosterActions;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Model;
 
+test('it flashes successful roster actions under the standard status key', function (): void {
+    $component = new class
+    {
+        use ExecutesRosterActions;
+
+        /** @var list<string> */
+        public array $dispatchedEvents = [];
+
+        public function execute(): bool
+        {
+            return $this->executeRosterAction(
+                'employed',
+                RosterEntityType::Wrestler,
+                static function (): void {},
+            );
+        }
+
+        public function dispatch(string $event): void
+        {
+            $this->dispatchedEvents[] = $event;
+        }
+    };
+
+    expect($component->execute())->toBeTrue()
+        ->and(session('status'))->toBe('Wrestler has been hired.')
+        ->and(session('success'))->toBeNull()
+        ->and($component->dispatchedEvents)->toBe(['wrestler-updated']);
+});
+
 test('it rejects lifecycle actions unsupported by the roster entity', function (): void {
     $component = new class
     {

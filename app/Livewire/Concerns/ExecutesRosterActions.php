@@ -41,7 +41,7 @@ trait ExecutesRosterActions
             $action();
 
             $this->dispatch("{$entityType->value}-updated");
-            session()->flash('success', __("{$entityType->translationNamespace()}.actions.{$actionName}"));
+            session()->flash('status', __("{$entityType->translationNamespace()}.actions.{$actionName}"));
 
             return true;
         } catch (BaseBusinessException $exception) {
