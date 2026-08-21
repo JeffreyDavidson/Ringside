@@ -14,6 +14,25 @@ use Illuminate\Support\Facades\Gate;
 
 trait ExecutesRosterActions
 {
+    /**
+     * @template TModel of Model
+     *
+     * @param  class-string<TModel>  $modelClass
+     * @return TModel
+     */
+    protected function findRosterModel(
+        RosterLifecycleAction $lifecycleAction,
+        string $modelClass,
+        int $modelId,
+    ): Model {
+        $model = new $modelClass();
+
+        return ($lifecycleAction->usesTrashedModel()
+            ? $model->newQuery()->onlyTrashed()
+            : $model->newQuery()
+        )->findOrFail($modelId);
+    }
+
     /** @param Closure(): void $action */
     protected function executeAuthorizedRosterAction(
         RosterLifecycleAction $lifecycleAction,

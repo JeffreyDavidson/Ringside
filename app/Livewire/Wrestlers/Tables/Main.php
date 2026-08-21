@@ -140,9 +140,7 @@ class Main extends BaseTable
     public function handleWrestlerAction(string $action, int $wrestlerId): void
     {
         $lifecycleAction = RosterLifecycleAction::from($action);
-        $wrestler = $lifecycleAction->usesTrashedModel()
-            ? Wrestler::onlyTrashed()->findOrFail($wrestlerId)
-            : Wrestler::findOrFail($wrestlerId);
+        $wrestler = $this->findRosterModel($lifecycleAction, Wrestler::class, $wrestlerId);
 
         match ($lifecycleAction) {
             RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Wrestler, $wrestler, fn () => resolve(EmployAction::class)->handle($wrestler)),
