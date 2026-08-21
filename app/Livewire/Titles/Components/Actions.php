@@ -47,9 +47,9 @@ class Actions extends Component
             function (): void {
                 resolve(DebutAction::class)->handle($this->title);
             },
+            'Title successfully debuted.',
         )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully debuted.');
         }
     }
 
@@ -64,9 +64,9 @@ class Actions extends Component
             function (): void {
                 resolve(RetireAction::class)->handle($this->title);
             },
+            'Title successfully retired.',
         )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully retired.');
         }
     }
 
@@ -81,9 +81,9 @@ class Actions extends Component
             function (): void {
                 resolve(UnretireAction::class)->handle($this->title);
             },
+            'Title successfully unretired.',
         )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully unretired.');
         }
     }
 
@@ -98,9 +98,9 @@ class Actions extends Component
             function (): void {
                 resolve(PullAction::class)->handle($this->title);
             },
+            'Title successfully pulled.',
         )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully pulled.');
         }
     }
 
@@ -115,9 +115,9 @@ class Actions extends Component
             function (): void {
                 resolve(ReinstateAction::class)->handle($this->title);
             },
+            'Title successfully reinstated.',
         )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully reinstated.');
         }
     }
 
@@ -132,9 +132,9 @@ class Actions extends Component
             function (): void {
                 resolve(RestoreAction::class)->handle($this->title);
             },
+            'Title successfully restored.',
         )) {
             $this->dispatch('title-updated');
-            session()->flash('status', 'Title successfully restored.');
         }
     }
 
