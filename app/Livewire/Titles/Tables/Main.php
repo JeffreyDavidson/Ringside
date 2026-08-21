@@ -131,11 +131,11 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $title);
 
-        $this->executeTitleAction(function () use ($title): void {
+        if ($this->executeTitleAction(function () use ($title): void {
             resolve(RestoreAction::class)->handle($title);
-        });
-
-        $this->redirectRoute('titles.index');
+        })) {
+            $this->redirectRoute('titles.index');
+        }
     }
 
     public function retire(Title $title): void
