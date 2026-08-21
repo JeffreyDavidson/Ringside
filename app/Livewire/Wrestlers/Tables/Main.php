@@ -146,7 +146,7 @@ class Main extends BaseTable
     public function handleWrestlerAction(string $action, int $wrestlerId): void
     {
         $lifecycleAction = RosterLifecycleAction::from($action);
-        $wrestler = $lifecycleAction === RosterLifecycleAction::Restore
+        $wrestler = $lifecycleAction->usesTrashedModel()
             ? Wrestler::onlyTrashed()->findOrFail($wrestlerId)
             : Wrestler::findOrFail($wrestlerId);
 

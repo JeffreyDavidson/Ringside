@@ -36,3 +36,8 @@ test('it maps lifecycle actions to policy abilities and success messages', funct
     [RosterLifecycleAction::Suspend, 'suspend', 'suspended'],
     [RosterLifecycleAction::Unretire, 'unretire', 'unretired'],
 ]);
+
+test('it identifies actions that operate on trashed roster models', function (): void {
+    expect(RosterLifecycleAction::Restore->usesTrashedModel())->toBeTrue()
+        ->and(RosterLifecycleAction::Retire->usesTrashedModel())->toBeFalse();
+});

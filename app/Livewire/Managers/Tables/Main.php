@@ -162,7 +162,7 @@ class Main extends BaseTable
 
     private function executeManagerAction(RosterLifecycleAction $lifecycleAction, int $managerId): void
     {
-        $manager = $lifecycleAction === RosterLifecycleAction::Restore
+        $manager = $lifecycleAction->usesTrashedModel()
             ? Manager::onlyTrashed()->findOrFail($managerId)
             : Manager::findOrFail($managerId);
 

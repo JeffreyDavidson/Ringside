@@ -24,6 +24,11 @@ enum RosterLifecycleAction: string
         };
     }
 
+    public function usesTrashedModel(): bool
+    {
+        return $this === self::Restore;
+    }
+
     public function successAction(): string
     {
         return match ($this) {
