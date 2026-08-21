@@ -136,7 +136,9 @@ class Main extends BaseTable
 
     public function restore(int $managerId): void
     {
-        $this->executeManagerAction(RosterLifecycleAction::Restore, $managerId);
+        if ($this->executeManagerAction(RosterLifecycleAction::Restore, $managerId)) {
+            $this->redirectRoute('managers.index');
+        }
     }
 
     public function retire(Manager $manager): void
@@ -154,13 +156,13 @@ class Main extends BaseTable
         $this->executeManagerAction(RosterLifecycleAction::Unretire, $manager->id);
     }
 
-    private function executeManagerAction(RosterLifecycleAction $lifecycleAction, int $managerId): void
+    private function executeManagerAction(RosterLifecycleAction $lifecycleAction, int $managerId): bool
     {
         $manager = $lifecycleAction->usesTrashedModel()
             ? Manager::onlyTrashed()->findOrFail($managerId)
             : Manager::findOrFail($managerId);
 
-        match ($lifecycleAction) {
+        return match ($lifecycleAction) {
             RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(EmployAction::class)->handle($manager)),
             RosterLifecycleAction::Release => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(ReleaseAction::class)->handle($manager)),
             RosterLifecycleAction::Retire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Manager, $manager, fn () => resolve(RetireAction::class)->handle($manager)),
