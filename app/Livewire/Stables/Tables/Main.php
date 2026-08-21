@@ -134,6 +134,8 @@ class Main extends BaseTable
             resolve(DisbandAction::class)->handle($stable);
         } catch (CannotBeDisbandedException $exception) {
             session()->flash('error', $exception->getMessage());
+
+            return;
         }
 
         $this->redirectRoute('stables.index');
