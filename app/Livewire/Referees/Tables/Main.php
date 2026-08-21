@@ -130,7 +130,9 @@ class Main extends BaseTable
 
     public function restore(int $refereeId): void
     {
-        $this->executeRefereeAction(RosterLifecycleAction::Restore, $refereeId);
+        if ($this->executeRefereeAction(RosterLifecycleAction::Restore, $refereeId)) {
+            $this->redirectRoute('referees.index');
+        }
     }
 
     public function retire(Referee $referee): void
@@ -148,13 +150,13 @@ class Main extends BaseTable
         $this->executeRefereeAction(RosterLifecycleAction::Unretire, $referee->id);
     }
 
-    private function executeRefereeAction(RosterLifecycleAction $lifecycleAction, int $refereeId): void
+    private function executeRefereeAction(RosterLifecycleAction $lifecycleAction, int $refereeId): bool
     {
         $referee = $lifecycleAction->usesTrashedModel()
             ? Referee::onlyTrashed()->findOrFail($refereeId)
             : Referee::query()->findOrFail($refereeId);
 
-        match ($lifecycleAction) {
+        return match ($lifecycleAction) {
             RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(EmployAction::class)->handle($referee)),
             RosterLifecycleAction::Release => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(ReleaseAction::class)->handle($referee)),
             RosterLifecycleAction::Retire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(RetireAction::class)->handle($referee)),
