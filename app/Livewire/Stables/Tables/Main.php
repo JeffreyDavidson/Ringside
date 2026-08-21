@@ -186,6 +186,8 @@ class Main extends BaseTable
             resolve(UnretireAction::class)->handle($stable);
         } catch (CannotBeUnretiredException $exception) {
             session()->flash('error', $exception->getMessage());
+
+            return;
         }
 
         $this->redirectRoute('stables.index');
