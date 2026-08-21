@@ -29,6 +29,26 @@ enum RosterLifecycleAction: string
         return $this === self::Restore;
     }
 
+    /**
+     * @return list<RosterEntityType>
+     */
+    public function supportedEntityTypes(): array
+    {
+        return match ($this) {
+            self::ClearFromInjury, self::Injure => [
+                RosterEntityType::Wrestler,
+                RosterEntityType::Manager,
+                RosterEntityType::Referee,
+            ],
+            default => RosterEntityType::cases(),
+        };
+    }
+
+    public function supports(RosterEntityType $entityType): bool
+    {
+        return in_array($entityType, $this->supportedEntityTypes(), true);
+    }
+
     public function successAction(): string
     {
         return match ($this) {
