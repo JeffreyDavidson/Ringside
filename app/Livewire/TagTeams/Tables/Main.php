@@ -15,6 +15,7 @@ use App\Actions\TagTeams\UnretireAction;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
@@ -78,22 +79,15 @@ class Main extends BaseTable
         return [
             SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
-                ->options([
-                    '' => __('core.all'),
-                    'employed' => 'Employed',
-                    'future_employment' => 'Awaiting Employment',
-                    'released' => 'Released',
-                    'unemployed' => 'Unemployed',
-                    'retired' => 'Retired',
-                ])
+                ->options(EmploymentStatus::filterOptions())
                 ->filter(function (TagTeamBuilder $builder, string $value): void {
                     /** @var TagTeamBuilder<TagTeam> $builder */
-                    match ($value) {
-                        'employed' => $builder->employed(),
-                        'future_employment' => $builder->futureEmployed(),
-                        'released' => $builder->released(),
-                        'unemployed' => $builder->unemployed(),
-                        'retired' => $builder->retired(),
+                    match (EmploymentStatus::tryFrom($value)) {
+                        EmploymentStatus::Employed => $builder->employed(),
+                        EmploymentStatus::FutureEmployment => $builder->futureEmployed(),
+                        EmploymentStatus::Released => $builder->released(),
+                        EmploymentStatus::Unemployed => $builder->unemployed(),
+                        EmploymentStatus::Retired => $builder->retired(),
                         default => null,
                     };
                 }),
