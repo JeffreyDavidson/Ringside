@@ -7,10 +7,10 @@ namespace App\Livewire\Concerns;
 use App\Exceptions\BaseBusinessException;
 use Closure;
 
-trait ExecutesTitleActions
+trait ExecutesBusinessActions
 {
     /** @param Closure(): void $action */
-    protected function executeTitleAction(Closure $action): bool
+    protected function executeBusinessAction(Closure $action): bool
     {
         try {
             $action();

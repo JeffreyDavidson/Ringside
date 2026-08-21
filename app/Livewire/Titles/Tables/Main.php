@@ -15,8 +15,8 @@ use App\Builders\Titles\TitleBuilder;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Concerns\ExecutesSoftDeleteActions;
-use App\Livewire\Concerns\ExecutesTitleActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -28,8 +28,8 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
 {
+    use ExecutesBusinessActions;
     use ExecutesSoftDeleteActions;
-    use ExecutesTitleActions;
 
     protected bool $showActionColumn = true;
 
@@ -107,7 +107,7 @@ class Main extends BaseTable
     {
         Gate::authorize('debut', $title);
 
-        if ($this->executeTitleAction(function () use ($title): void {
+        if ($this->executeBusinessAction(function () use ($title): void {
             resolve(DebutAction::class)->handle($title);
         })) {
             $this->redirectRoute('titles.index');
@@ -118,7 +118,7 @@ class Main extends BaseTable
     {
         Gate::authorize('pull', $title);
 
-        if ($this->executeTitleAction(function () use ($title): void {
+        if ($this->executeBusinessAction(function () use ($title): void {
             resolve(PullAction::class)->handle($title);
         })) {
             $this->redirectRoute('titles.index');
@@ -131,7 +131,7 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $title);
 
-        if ($this->executeTitleAction(function () use ($title): void {
+        if ($this->executeBusinessAction(function () use ($title): void {
             resolve(RestoreAction::class)->handle($title);
         })) {
             $this->redirectRoute('titles.index');
@@ -142,7 +142,7 @@ class Main extends BaseTable
     {
         Gate::authorize('retire', $title);
 
-        if ($this->executeTitleAction(function () use ($title): void {
+        if ($this->executeBusinessAction(function () use ($title): void {
             resolve(RetireAction::class)->handle($title);
         })) {
             $this->redirectRoute('titles.index');
@@ -153,7 +153,7 @@ class Main extends BaseTable
     {
         Gate::authorize('unretire', $title);
 
-        if ($this->executeTitleAction(function () use ($title): void {
+        if ($this->executeBusinessAction(function () use ($title): void {
             resolve(UnretireAction::class)->handle($title);
         })) {
             $this->redirectRoute('titles.index');
@@ -164,7 +164,7 @@ class Main extends BaseTable
     {
         Gate::authorize('reinstate', $title);
 
-        if ($this->executeTitleAction(function () use ($title): void {
+        if ($this->executeBusinessAction(function () use ($title): void {
             resolve(ReinstateAction::class)->handle($title);
         })) {
             $this->redirectRoute('titles.index');

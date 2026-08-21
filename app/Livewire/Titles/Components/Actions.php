@@ -10,7 +10,7 @@ use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
-use App\Livewire\Concerns\ExecutesTitleActions;
+use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Models\Titles\Title;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -27,7 +27,7 @@ use Livewire\Component;
  */
 class Actions extends Component
 {
-    use ExecutesTitleActions;
+    use ExecutesBusinessActions;
 
     public Title $title;
 
@@ -43,7 +43,7 @@ class Actions extends Component
     {
         Gate::authorize('debut', $this->title);
 
-        if ($this->executeTitleAction(
+        if ($this->executeBusinessAction(
             function (): void {
                 resolve(DebutAction::class)->handle($this->title);
             },
@@ -60,7 +60,7 @@ class Actions extends Component
     {
         Gate::authorize('retire', $this->title);
 
-        if ($this->executeTitleAction(
+        if ($this->executeBusinessAction(
             function (): void {
                 resolve(RetireAction::class)->handle($this->title);
             },
@@ -77,7 +77,7 @@ class Actions extends Component
     {
         Gate::authorize('unretire', $this->title);
 
-        if ($this->executeTitleAction(
+        if ($this->executeBusinessAction(
             function (): void {
                 resolve(UnretireAction::class)->handle($this->title);
             },
@@ -94,7 +94,7 @@ class Actions extends Component
     {
         Gate::authorize('pull', $this->title);
 
-        if ($this->executeTitleAction(
+        if ($this->executeBusinessAction(
             function (): void {
                 resolve(PullAction::class)->handle($this->title);
             },
@@ -111,7 +111,7 @@ class Actions extends Component
     {
         Gate::authorize('reinstate', $this->title);
 
-        if ($this->executeTitleAction(
+        if ($this->executeBusinessAction(
             function (): void {
                 resolve(ReinstateAction::class)->handle($this->title);
             },
@@ -128,7 +128,7 @@ class Actions extends Component
     {
         Gate::authorize('restore', $this->title);
 
-        if ($this->executeTitleAction(
+        if ($this->executeBusinessAction(
             function (): void {
                 resolve(RestoreAction::class)->handle($this->title);
             },
