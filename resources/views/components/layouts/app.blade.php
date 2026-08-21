@@ -36,6 +36,7 @@
             <!-- Header -->
             <x-layouts.partials.header />
             <!-- End of Header -->
+            <x-flash-messages />
             <!-- Content -->
             <main class="grow pt-5">{{ $slot }}</main>
             <!-- End of Content -->

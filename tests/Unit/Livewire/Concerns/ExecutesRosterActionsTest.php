@@ -13,7 +13,7 @@ test('it flashes successful roster actions under the standard status key', funct
     {
         use ExecutesRosterActions;
 
-        /** @var list<string> */
+        /** @var list<array{event: string, parameters: array<string, mixed>}> */
         public array $dispatchedEvents = [];
 
         public function execute(): bool
@@ -25,16 +25,31 @@ test('it flashes successful roster actions under the standard status key', funct
             );
         }
 
-        public function dispatch(string $event): void
+        public function dispatch(string $event, mixed ...$parameters): void
         {
-            $this->dispatchedEvents[] = $event;
+            $this->dispatchedEvents[] = [
+                'event' => $event,
+                'parameters' => $parameters,
+            ];
         }
     };
 
     expect($component->execute())->toBeTrue()
         ->and(session('status'))->toBe('Wrestler has been hired.')
         ->and(session('success'))->toBeNull()
-        ->and($component->dispatchedEvents)->toBe(['wrestler-updated']);
+        ->and($component->dispatchedEvents)->toBe([
+            [
+                'event' => 'wrestler-updated',
+                'parameters' => [],
+            ],
+            [
+                'event' => 'flash-message',
+                'parameters' => [
+                    'type' => 'status',
+                    'message' => 'Wrestler has been hired.',
+                ],
+            ],
+        ]);
 });
 
 test('it rejects lifecycle actions unsupported by the roster entity', function (): void {
