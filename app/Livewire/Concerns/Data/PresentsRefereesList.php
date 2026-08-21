@@ -16,8 +16,10 @@ trait PresentsRefereesList
     public function getReferees(): array
     {
         return Referee::query()
-            ->get(['id', 'full_name'])
-            ->mapWithKeys(fn (Referee $referee): array => [$referee->id => $referee->full_name])
+            ->pluck('full_name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
             ->all();
     }
 }

@@ -16,8 +16,10 @@ trait PresentsTagTeamsList
     public function getTagTeams(): array
     {
         return TagTeam::query()
-            ->get(['id', 'name'])
-            ->mapWithKeys(fn (TagTeam $tagTeam): array => [$tagTeam->id => $tagTeam->name])
+            ->pluck('name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
             ->all();
     }
 }

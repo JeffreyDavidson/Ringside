@@ -16,8 +16,10 @@ trait PresentsTitlesList
     public function getTitles(): array
     {
         return Title::query()
-            ->get(['id', 'name'])
-            ->mapWithKeys(fn (Title $title): array => [$title->id => $title->name])
+            ->pluck('name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
             ->all();
     }
 }

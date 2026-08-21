@@ -16,8 +16,10 @@ trait PresentsManagersList
     public function getManagers(): array
     {
         return Manager::query()
-            ->get(['id', 'full_name'])
-            ->mapWithKeys(fn (Manager $manager): array => [$manager->id => $manager->full_name])
+            ->pluck('full_name', 'id')
+            ->mapWithKeys(
+                static fn (mixed $name, int|string $id): array => [$id => is_string($name) ? $name : null]
+            )
             ->all();
     }
 }
