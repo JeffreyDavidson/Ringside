@@ -24,4 +24,22 @@ trait ExecutesSoftDeleteActions
 
         return true;
     }
+
+    /** @param Closure(): void $action */
+    protected function executeSoftRestoreAction(Closure $action, ?string $successMessage = null): bool
+    {
+        try {
+            $action();
+        } catch (BaseBusinessException $exception) {
+            session()->flash('error', $exception->getMessage());
+
+            return false;
+        }
+
+        if ($successMessage !== null) {
+            session()->flash('status', $successMessage);
+        }
+
+        return true;
+    }
 }
