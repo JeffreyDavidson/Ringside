@@ -12,14 +12,10 @@ use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Builders\Titles\TitleBuilder;
-use App\Exceptions\Titles\CannotBeDebutedException;
-use App\Exceptions\Titles\CannotBePulledException;
-use App\Exceptions\Titles\CannotBeReinstatedException;
-use App\Exceptions\Titles\CannotBeRetiredException;
-use App\Exceptions\Titles\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
+use App\Livewire\Concerns\ExecutesTitleActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -31,6 +27,8 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Title> */
 class Main extends BaseTable
 {
+    use ExecutesTitleActions;
+
     protected bool $showActionColumn = true;
 
     protected string $databaseTableName = 'titles';
@@ -106,11 +104,9 @@ class Main extends BaseTable
     {
         Gate::authorize('debut', $title);
 
-        try {
+        $this->executeTitleAction(function () use ($title): void {
             resolve(DebutAction::class)->handle($title);
-        } catch (CannotBeDebutedException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        });
 
         $this->redirectRoute('titles.index');
     }
@@ -119,11 +115,9 @@ class Main extends BaseTable
     {
         Gate::authorize('pull', $title);
 
-        try {
+        $this->executeTitleAction(function () use ($title): void {
             resolve(PullAction::class)->handle($title);
-        } catch (CannotBePulledException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        });
 
         $this->redirectRoute('titles.index');
     }
@@ -134,7 +128,9 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $title);
 
-        resolve(RestoreAction::class)->handle($title);
+        $this->executeTitleAction(function () use ($title): void {
+            resolve(RestoreAction::class)->handle($title);
+        });
 
         $this->redirectRoute('titles.index');
     }
@@ -143,11 +139,9 @@ class Main extends BaseTable
     {
         Gate::authorize('retire', $title);
 
-        try {
+        $this->executeTitleAction(function () use ($title): void {
             resolve(RetireAction::class)->handle($title);
-        } catch (CannotBeRetiredException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        });
 
         $this->redirectRoute('titles.index');
     }
@@ -156,11 +150,9 @@ class Main extends BaseTable
     {
         Gate::authorize('unretire', $title);
 
-        try {
+        $this->executeTitleAction(function () use ($title): void {
             resolve(UnretireAction::class)->handle($title);
-        } catch (CannotBeUnretiredException $e) {
-            session()->flash('error', $e->getMessage());
-        }
+        });
 
         $this->redirectRoute('titles.index');
     }
@@ -169,11 +161,9 @@ class Main extends BaseTable
     {
         Gate::authorize('reinstate', $title);
 
-        try {
+        $this->executeTitleAction(function () use ($title): void {
             resolve(ReinstateAction::class)->handle($title);
-        } catch (CannotBeReinstatedException $exception) {
-            session()->flash('error', $exception->getMessage());
-        }
+        });
 
         $this->redirectRoute('titles.index');
     }

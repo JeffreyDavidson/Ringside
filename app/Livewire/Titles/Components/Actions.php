@@ -10,9 +10,8 @@ use App\Actions\Titles\ReinstateAction;
 use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
-use App\Exceptions\BaseBusinessException;
+use App\Livewire\Concerns\ExecutesTitleActions;
 use App\Models\Titles\Title;
-use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -28,6 +27,8 @@ use Livewire\Component;
  */
 class Actions extends Component
 {
+    use ExecutesTitleActions;
+
     public Title $title;
 
     public function mount(Title $title): void
@@ -42,12 +43,14 @@ class Actions extends Component
     {
         Gate::authorize('debut', $this->title);
 
-        $this->executeTitleAction(
+        if ($this->executeTitleAction(
             function (): void {
                 resolve(DebutAction::class)->handle($this->title);
             },
-            'Title successfully debuted.',
-        );
+        )) {
+            $this->dispatch('title-updated');
+            session()->flash('status', 'Title successfully debuted.');
+        }
     }
 
     /**
@@ -57,12 +60,14 @@ class Actions extends Component
     {
         Gate::authorize('retire', $this->title);
 
-        $this->executeTitleAction(
+        if ($this->executeTitleAction(
             function (): void {
                 resolve(RetireAction::class)->handle($this->title);
             },
-            'Title successfully retired.',
-        );
+        )) {
+            $this->dispatch('title-updated');
+            session()->flash('status', 'Title successfully retired.');
+        }
     }
 
     /**
@@ -72,12 +77,14 @@ class Actions extends Component
     {
         Gate::authorize('unretire', $this->title);
 
-        $this->executeTitleAction(
+        if ($this->executeTitleAction(
             function (): void {
                 resolve(UnretireAction::class)->handle($this->title);
             },
-            'Title successfully unretired.',
-        );
+        )) {
+            $this->dispatch('title-updated');
+            session()->flash('status', 'Title successfully unretired.');
+        }
     }
 
     /**
@@ -87,12 +94,14 @@ class Actions extends Component
     {
         Gate::authorize('pull', $this->title);
 
-        $this->executeTitleAction(
+        if ($this->executeTitleAction(
             function (): void {
                 resolve(PullAction::class)->handle($this->title);
             },
-            'Title successfully pulled.',
-        );
+        )) {
+            $this->dispatch('title-updated');
+            session()->flash('status', 'Title successfully pulled.');
+        }
     }
 
     /**
@@ -102,12 +111,14 @@ class Actions extends Component
     {
         Gate::authorize('reinstate', $this->title);
 
-        $this->executeTitleAction(
+        if ($this->executeTitleAction(
             function (): void {
                 resolve(ReinstateAction::class)->handle($this->title);
             },
-            'Title successfully reinstated.',
-        );
+        )) {
+            $this->dispatch('title-updated');
+            session()->flash('status', 'Title successfully reinstated.');
+        }
     }
 
     /**
@@ -117,24 +128,13 @@ class Actions extends Component
     {
         Gate::authorize('restore', $this->title);
 
-        $this->executeTitleAction(
+        if ($this->executeTitleAction(
             function (): void {
                 resolve(RestoreAction::class)->handle($this->title);
             },
-            'Title successfully restored.',
-        );
-    }
-
-    /** @param Closure(): void $action */
-    private function executeTitleAction(Closure $action, string $successMessage): void
-    {
-        try {
-            $action();
-
+        )) {
             $this->dispatch('title-updated');
-            session()->flash('status', $successMessage);
-        } catch (BaseBusinessException $exception) {
-            session()->flash('error', $exception->getMessage());
+            session()->flash('status', 'Title successfully restored.');
         }
     }
 
