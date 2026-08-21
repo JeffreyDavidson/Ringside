@@ -150,7 +150,9 @@ class Main extends BaseTable
 
     private function executeRefereeAction(RosterLifecycleAction $lifecycleAction, int $refereeId): void
     {
-        $referee = $this->findRosterModel($lifecycleAction, Referee::class, $refereeId);
+        $referee = $lifecycleAction->usesTrashedModel()
+            ? Referee::onlyTrashed()->findOrFail($refereeId)
+            : Referee::query()->findOrFail($refereeId);
 
         match ($lifecycleAction) {
             RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::Referee, $referee, fn () => resolve(EmployAction::class)->handle($referee)),

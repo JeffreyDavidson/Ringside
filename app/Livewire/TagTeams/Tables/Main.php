@@ -141,7 +141,9 @@ class Main extends BaseTable
 
     private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId): void
     {
-        $tagTeam = $this->findRosterModel($lifecycleAction, TagTeam::class, $tagTeamId);
+        $tagTeam = $lifecycleAction->usesTrashedModel()
+            ? TagTeam::onlyTrashed()->findOrFail($tagTeamId)
+            : TagTeam::query()->findOrFail($tagTeamId);
 
         match ($lifecycleAction) {
             RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(EmployAction::class)->handle($tagTeam)),
