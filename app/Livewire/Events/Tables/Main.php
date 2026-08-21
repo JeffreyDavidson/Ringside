@@ -143,9 +143,10 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $event);
 
-        $this->executeSoftRestoreAction(function () use ($event): void {
+        if ($this->executeSoftRestoreAction(function () use ($event): void {
             resolve(RestoreAction::class)->handle($event);
-        }, 'Event successfully restored.');
-        $this->redirectRoute('events.index');
+        }, 'Event successfully restored.')) {
+            $this->redirectRoute('events.index');
+        }
     }
 }

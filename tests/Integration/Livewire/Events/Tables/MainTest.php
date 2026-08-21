@@ -260,6 +260,7 @@ describe('EventsTable Component Integration', function () {
 
             expect(Event::find($deletedEvent->id))->not()->toBeNull();
         });
+
     });
 
     describe('authorization integration', function () {
