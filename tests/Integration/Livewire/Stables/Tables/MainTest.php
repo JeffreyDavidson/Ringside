@@ -306,7 +306,7 @@ describe('StablesTable Component', function () {
             $component = livewire(Main::class);
 
             $component->call('disband', $inactiveStable)
-                ->assertRedirect();
+                ->assertNoRedirect();
 
             // Verify stable status unchanged
             expect(freshModel($inactiveStable)->isInactive())->toBeTrue();
@@ -335,7 +335,7 @@ describe('StablesTable Component', function () {
 
             // Disband should fail for already disbanded stable
             $component->call('disband', $disbandedStable)
-                ->assertRedirect();
+                ->assertNoRedirect();
 
             expect(freshModel($disbandedStable)->status)->toBe(StableStatus::Inactive);
         });
