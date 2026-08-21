@@ -13,7 +13,6 @@ use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
-use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Exceptions\Roster\Stables\CannotBeRetiredException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Livewire\Base\Tables\BaseTable;
@@ -147,11 +146,9 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $stable);
 
-        try {
+        $this->executeSoftRestoreAction(function () use ($stable): void {
             resolve(RestoreAction::class)->handle($stable);
-        } catch (CannotBeRestoredException $exception) {
-            session()->flash('error', $exception->getMessage());
-        }
+        });
 
         $this->redirectRoute('stables.index');
     }
