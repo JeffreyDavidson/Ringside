@@ -11,6 +11,7 @@ use App\Services\ErrorMessageMappingService;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use InvalidArgumentException;
 
 trait ExecutesRosterActions
 {
@@ -21,6 +22,10 @@ trait ExecutesRosterActions
         Model $model,
         Closure $action,
     ): void {
+        if (! $lifecycleAction->supports($entityType)) {
+            throw new InvalidArgumentException("{$lifecycleAction->value} is not a {$entityType->value} lifecycle action.");
+        }
+
         Gate::authorize($lifecycleAction->ability(), $model);
 
         $this->executeRosterAction($lifecycleAction->successAction(), $entityType, $action);

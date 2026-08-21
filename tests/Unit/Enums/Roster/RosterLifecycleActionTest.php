@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
 
 test('it defines backed lifecycle action values', function (RosterLifecycleAction $action, string $value): void {
@@ -40,4 +41,30 @@ test('it maps lifecycle actions to policy abilities and success messages', funct
 test('it identifies actions that operate on trashed roster models', function (): void {
     expect(RosterLifecycleAction::Restore->usesTrashedModel())->toBeTrue()
         ->and(RosterLifecycleAction::Retire->usesTrashedModel())->toBeFalse();
+});
+
+test('it exposes the roster entities supported by each lifecycle action', function (
+    RosterLifecycleAction $action,
+    array $supportedEntityTypes,
+): void {
+    expect($action->supportedEntityTypes())->toEqual($supportedEntityTypes);
+})->with([
+    [RosterLifecycleAction::Employ, RosterEntityType::cases()],
+    [RosterLifecycleAction::ClearFromInjury, [
+        RosterEntityType::Wrestler,
+        RosterEntityType::Manager,
+        RosterEntityType::Referee,
+    ]],
+    [RosterLifecycleAction::Injure, [
+        RosterEntityType::Wrestler,
+        RosterEntityType::Manager,
+        RosterEntityType::Referee,
+    ]],
+    [RosterLifecycleAction::Restore, RosterEntityType::cases()],
+]);
+
+test('it identifies whether a lifecycle action supports a roster entity', function (): void {
+    expect(RosterLifecycleAction::Injure->supports(RosterEntityType::Wrestler))->toBeTrue()
+        ->and(RosterLifecycleAction::Injure->supports(RosterEntityType::TagTeam))->toBeFalse()
+        ->and(RosterLifecycleAction::Employ->supports(RosterEntityType::TagTeam))->toBeTrue();
 });
