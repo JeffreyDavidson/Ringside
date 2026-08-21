@@ -161,6 +161,20 @@ describe('ManagersTable Component', function () {
             $component->assertOk();
             $component->assertSee($manager->full_name);
         });
+
+        test('restores a deleted manager and redirects to the index', function () {
+            $deletedManager = Manager::factory()->trashed()->create([
+                'first_name' => 'Deleted',
+                'last_name' => 'Manager',
+            ]);
+
+            livewire(Main::class)
+                ->call('restore', $deletedManager->id)
+                ->assertHasNoErrors()
+                ->assertRedirectToRoute('managers.index');
+
+            expect(Manager::find($deletedManager->id))->not->toBeNull();
+        });
     });
 
     describe('employment status integration', function () {
