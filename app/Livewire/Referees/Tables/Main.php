@@ -21,6 +21,7 @@ use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstEmploymentDateColumn;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Concerns\ExecutesRosterActions;
+use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\Gate;
 class Main extends BaseTable
 {
     use ExecutesRosterActions;
+    use ExecutesSoftDeleteActions;
 
     protected bool $showActionColumn = true;
 
@@ -102,8 +104,9 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $referee);
 
-        resolve(DeleteAction::class)->handle($referee);
-        session()->flash('status', 'Referee successfully deleted.');
+        $this->executeSoftDeleteAction(function () use ($referee): void {
+            resolve(DeleteAction::class)->handle($referee);
+        }, 'Referee successfully deleted.');
     }
 
     public function clearFromInjury(Referee $referee): void

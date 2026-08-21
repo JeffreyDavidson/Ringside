@@ -7,6 +7,7 @@ namespace App\Livewire\Venues\Tables;
 use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
 use App\Livewire\Base\Tables\BaseTable;
+use App\Livewire\Concerns\ExecutesSoftDeleteActions;
 use App\Livewire\Table\Column;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<Venue> */
 class Main extends BaseTable
 {
+    use ExecutesSoftDeleteActions;
+
     protected bool $showActionColumn = true;
 
     protected string $databaseTableName = 'venues';
@@ -59,8 +62,9 @@ class Main extends BaseTable
     {
         Gate::authorize('delete', $venue);
 
-        resolve(DeleteAction::class)->handle($venue);
-        session()->flash('status', 'Venue successfully deleted.');
+        $this->executeSoftDeleteAction(function () use ($venue): void {
+            resolve(DeleteAction::class)->handle($venue);
+        }, 'Venue successfully deleted.');
     }
 
     /**
