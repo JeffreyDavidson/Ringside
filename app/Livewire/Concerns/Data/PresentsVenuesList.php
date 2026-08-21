@@ -17,8 +17,7 @@ trait PresentsVenuesList
     {
         return Venue::query()
             ->alphabetical()
-            ->get(['id', 'name'])
-            ->mapWithKeys(fn (Venue $venue): array => [$venue->id => $venue->name])
+            ->pluck('name', 'id')
             ->all();
     }
 }

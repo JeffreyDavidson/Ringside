@@ -16,8 +16,7 @@ trait PresentsWrestlersList
     public function getWrestlers(): array
     {
         return Wrestler::query()
-            ->get(['id', 'name'])
-            ->mapWithKeys(fn (Wrestler $wrestler): array => [$wrestler->id => $wrestler->name])
+            ->pluck('name', 'id')
             ->all();
     }
 }
