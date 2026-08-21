@@ -146,11 +146,11 @@ class Main extends BaseTable
 
         Gate::authorize('restore', $stable);
 
-        $this->executeSoftRestoreAction(function () use ($stable): void {
+        if ($this->executeSoftRestoreAction(function () use ($stable): void {
             resolve(RestoreAction::class)->handle($stable);
-        });
-
-        $this->redirectRoute('stables.index');
+        })) {
+            $this->redirectRoute('stables.index');
+        }
     }
 
     /**
