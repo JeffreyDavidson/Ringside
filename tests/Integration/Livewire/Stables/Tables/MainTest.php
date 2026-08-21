@@ -292,7 +292,7 @@ describe('StablesTable Component', function () {
             $component = livewire(Main::class);
 
             $component->call('establish', $activeStable)
-                ->assertRedirect();
+                ->assertNoRedirect();
 
             // Verify stable status unchanged
             expect(freshModel($activeStable)->isCurrentlyActive())->toBeTrue();

@@ -116,6 +116,8 @@ class Main extends BaseTable
             resolve(EstablishAction::class)->handle($stable);
         } catch (CannotBeEstablishedException $exception) {
             session()->flash('error', $exception->getMessage());
+
+            return;
         }
 
         $this->redirectRoute('stables.index');
