@@ -147,7 +147,7 @@ class Main extends BaseTable
 
     private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId): void
     {
-        $tagTeam = $lifecycleAction === RosterLifecycleAction::Restore
+        $tagTeam = $lifecycleAction->usesTrashedModel()
             ? TagTeam::onlyTrashed()->findOrFail($tagTeamId)
             : TagTeam::query()->findOrFail($tagTeamId);
 
