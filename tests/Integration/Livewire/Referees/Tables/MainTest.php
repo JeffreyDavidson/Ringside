@@ -162,6 +162,20 @@ describe('RefereesTable Component', function () {
             $component->assertOk();
             $component->assertSee($referee->full_name);
         });
+
+        test('restores a deleted referee and redirects to the index', function () {
+            $deletedReferee = Referee::factory()->trashed()->create([
+                'first_name' => 'Deleted',
+                'last_name' => 'Referee',
+            ]);
+
+            livewire(Main::class)
+                ->call('restore', $deletedReferee->id)
+                ->assertHasNoErrors()
+                ->assertRedirectToRoute('referees.index');
+
+            expect(Referee::find($deletedReferee->id))->not->toBeNull();
+        });
     });
 
     describe('employment status integration', function () {
