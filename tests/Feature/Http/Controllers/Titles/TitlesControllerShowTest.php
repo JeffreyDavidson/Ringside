@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Titles\TitlesController;
 use App\Livewire\Titles\Tables\PreviousTitleChampionships;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Titles\Title;
 
 use function Pest\Laravel\actingAs;
@@ -29,6 +30,24 @@ describe('Titles Controller', function () {
             ->assertViewIs('titles.show')
             ->assertViewHas('title', $this->title)
             ->assertSeeLivewire(PreviousTitleChampionships::class);
+    });
+
+    /**
+     * @see TitlesController::show()
+     */
+    test('show renders the title summary from only its required relationship', function () {
+        $startedAt = today()->subDay();
+        ActivityPeriod::factory()
+            ->for($this->title, 'activeable')
+            ->started($startedAt)
+            ->create();
+
+        actingAs(administrator())
+            ->get(action([TitlesController::class, 'show'], $this->title))
+            ->assertOk()
+            ->assertSee($startedAt->toDateString())
+            ->assertViewHas('title', fn (Title $title): bool => count($title->getRelations()) === 1
+                && $title->relationLoaded('firstActivityPeriod'));
     });
 
     /**
