@@ -17,6 +17,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use LivewireUI\Modal\ModalComponent;
 
+/** @property-read EventMatch $match */
 class ResultModal extends ModalComponent
 {
     #[Locked]
@@ -28,12 +29,12 @@ class ResultModal extends ModalComponent
     {
         $this->matchId = $matchId;
 
-        $this->form->fillFrom($this->match());
+        $this->form->fillFrom($this->match);
     }
 
     public function save(): void
     {
-        $match = $this->match();
+        $match = $this->match;
         Gate::authorize('update', $match);
 
         $this->form->validateFor($match);
@@ -85,7 +86,7 @@ class ResultModal extends ModalComponent
     #[Computed]
     public function sideOptions(): array
     {
-        return $this->match()->sides
+        return $this->match->sides
             ->mapWithKeys(fn (MatchSide $side): array => [
                 $side->id => $side->competitors
                     ->map(fn (MatchCompetitor $competitor): string => $competitor->competitor->name)
@@ -98,7 +99,7 @@ class ResultModal extends ModalComponent
     #[Computed]
     public function competitorOptions(): array
     {
-        return $this->match()->competitors
+        return $this->match->competitors
             ->mapWithKeys(fn (MatchCompetitor $competitor): array => [
                 $competitor->id => $competitor->competitor->name,
             ])
@@ -107,7 +108,7 @@ class ResultModal extends ModalComponent
 
     public function getModalTitle(): string
     {
-        return $this->match()->match_finish === null ? 'Record Match Result' : 'Correct Match Result';
+        return $this->match->match_finish === null ? 'Record Match Result' : 'Correct Match Result';
     }
 
     public function render(): View
