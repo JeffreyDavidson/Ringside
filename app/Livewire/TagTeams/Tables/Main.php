@@ -101,7 +101,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($tagTeam): void {
             resolve(DeleteAction::class)->handle($tagTeam);
-        }, 'Tag team successfully deleted.');
+        }, __('tag-teams.actions.deleted'));
     }
 
     public function employ(TagTeam $tagTeam): void

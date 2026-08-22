@@ -98,7 +98,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($stable): void {
             resolve(DeleteAction::class)->handle($stable);
-        }, 'Stable successfully deleted.');
+        }, __('stables.actions.deleted'));
     }
 
     /**

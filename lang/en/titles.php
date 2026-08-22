@@ -6,6 +6,7 @@ return [
     'name' => 'Title Name',
 
     'actions' => [
+        'deleted' => 'Title successfully deleted.',
         'debuted' => 'Title successfully debuted.',
         'retired' => 'Title successfully retired.',
         'unretired' => 'Title successfully unretired.',

@@ -106,7 +106,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($manager): void {
             resolve(DeleteAction::class)->handle($manager);
-        }, 'Manager successfully deleted.');
+        }, __('managers.actions.deleted'));
     }
 
     public function clearFromInjury(Manager $manager): void

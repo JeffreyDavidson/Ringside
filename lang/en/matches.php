@@ -8,4 +8,8 @@ return [
     'titles' => 'Titles',
     'preview' => 'Preview',
     'result' => 'Result',
+
+    'actions' => [
+        'deleted' => 'Match successfully deleted.',
+    ],
 ];

@@ -98,7 +98,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($title): void {
             resolve(DeleteAction::class)->handle($title);
-        }, 'Title successfully deleted.');
+        }, __('titles.actions.deleted'));
     }
 
     public function debut(Title $title): void

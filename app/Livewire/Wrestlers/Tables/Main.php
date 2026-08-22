@@ -103,7 +103,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($wrestler): void {
             resolve(DeleteAction::class)->handle($wrestler);
-        }, 'Wrestler successfully deleted.');
+        }, __('wrestlers.actions.deleted'));
     }
 
     /**

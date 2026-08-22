@@ -12,6 +12,7 @@ return [
     'inches' => 'Inches',
 
     'actions' => [
+        'deleted' => 'Wrestler successfully deleted.',
         'employed' => 'Wrestler has been hired.',
         'released' => 'Contract has been terminated.',
         'retired' => 'Wrestler has been retired.',
