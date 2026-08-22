@@ -44,9 +44,9 @@ describe('Managers FormModal Tests', function () {
         test('modal renders with correct form fields', function () {
             livewire(FormModal::class)
                 ->call('openModal')
-                ->assertPropertyWired('modelForm.first_name')
-                ->assertPropertyWired('modelForm.last_name')
-                ->assertPropertyWired('modelForm.start_date');
+                ->assertPropertyWired('form.first_name')
+                ->assertPropertyWired('form.last_name')
+                ->assertPropertyWired('form.employment_date');
         });
 
         test('modal shows correct title for create mode', function () {
