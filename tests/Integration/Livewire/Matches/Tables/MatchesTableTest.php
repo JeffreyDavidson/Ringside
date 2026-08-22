@@ -97,6 +97,17 @@ describe('MatchesTable Rendering', function () {
             ->assertSee('Earl Hebner');
     });
 
+    it('eager loads referee assignments for displayed matches', function () {
+        $event = Event::factory()->create();
+        EventMatch::factory()->for($event)->create();
+        $table = app(MatchesTable::class);
+        $table->eventId = $event->id;
+
+        $match = $table->builder()->firstOrFail();
+
+        expect($match->relationLoaded('referees'))->toBeTrue();
+    });
+
     it('displays championship titles', function () {
         $event = Event::factory()->create();
         $match = EventMatch::factory()->for($event)->create();
