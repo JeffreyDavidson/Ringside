@@ -10,6 +10,7 @@ use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Livewire\livewire;
 
@@ -134,6 +135,28 @@ it('renders elimination inputs for supported match types', function () {
         ->assertSee('Eliminations')
         ->assertSee('Competitor 1')
         ->assertSee('Competitor 10');
+});
+
+it('reuses the computed match across result option consumers', function () {
+    [$match] = matchWithResultCompetitors();
+    $modal = livewire(ResultModal::class, ['matchId' => $match->id])->instance();
+
+    if (! $modal instanceof ResultModal) {
+        throw new LogicException('Expected the result modal component instance.');
+    }
+
+    unset($modal->match);
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+
+    $modal->sideOptions();
+    $initialQueries = DB::getQueryLog();
+
+    $modal->competitorOptions();
+    $modal->getModalTitle();
+
+    expect($initialQueries)->not->toBeEmpty()
+        ->and(DB::getQueryLog())->toHaveCount(count($initialQueries));
 });
 
 it('requires an administrator to record a result', function () {
