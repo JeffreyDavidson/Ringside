@@ -6,6 +6,7 @@ use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReleaseAction;
 use App\Actions\TagTeams\RetireAction;
 use App\Actions\TagTeams\SuspendAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\TagTeams\Tables\Main;
 use App\Livewire\TagTeams\Tables\TagTeamsTable;
 use App\Models\Lifecycle\Employment;
@@ -105,17 +106,24 @@ describe('TagTeamsTable Component', function () {
         });
 
         test('status filter functionality works with real data', function () {
-            $employedTagTeam = TagTeam::factory()->employed()->create(['name' => 'Employed Tag Team']);
-            $retiredTagTeam = TagTeam::factory()->retired()->create(['name' => 'Retired Tag Team']);
-            $suspendedTagTeam = TagTeam::factory()->suspended()->create(['name' => 'Suspended Tag Team']);
+            $tagTeams = [
+                EmploymentStatus::Employed->value => TagTeam::factory()->employed()->create(['name' => 'Employed Tag Team']),
+                EmploymentStatus::Released->value => TagTeam::factory()->released()->create(['name' => 'Released Tag Team']),
+                EmploymentStatus::Unemployed->value => TagTeam::factory()->unemployed()->create(['name' => 'Unemployed Tag Team']),
+                EmploymentStatus::Retired->value => TagTeam::factory()->retired()->create(['name' => 'Retired Tag Team']),
+            ];
 
-            $component = livewire(Main::class);
+            foreach ($tagTeams as $status => $visibleTagTeam) {
+                $component = livewire(Main::class)
+                    ->set('filterValues.status', $status)
+                    ->assertSee($visibleTagTeam->name);
 
-            // Test filtering by status (if component supports it)
-            $component
-                ->assertSee('Employed Tag Team')
-                ->assertSee('Retired Tag Team')
-                ->assertSee('Suspended Tag Team');
+                foreach ($tagTeams as $otherStatus => $hiddenTagTeam) {
+                    if ($otherStatus !== $status) {
+                        $component->assertDontSee($hiddenTagTeam->name);
+                    }
+                }
+            }
         });
 
         test('future employment filter returns only tag teams awaiting employment', function () {

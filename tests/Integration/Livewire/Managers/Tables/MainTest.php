@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
 use App\Actions\Managers\InjureAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Managers\Tables\Main;
 use App\Livewire\Managers\Tables\ManagersTable;
 use App\Models\Lifecycle\Employment;
@@ -106,24 +107,33 @@ describe('ManagersTable Component', function () {
         });
 
         test('status filter functionality works with real data', function () {
-            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
+            $managers = [
+                EmploymentStatus::Employed->value => Manager::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Manager'])->refresh(),
+                EmploymentStatus::Released->value => Manager::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Manager'])->refresh(),
+                EmploymentStatus::Unemployed->value => Manager::factory()->unemployed()->create(['first_name' => 'Unemployed', 'last_name' => 'Manager'])->refresh(),
+                EmploymentStatus::Retired->value => Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager'])->refresh(),
+            ];
 
-            $component = livewire(Main::class);
+            foreach ($managers as $status => $visibleManager) {
+                $component = livewire(Main::class)
+                    ->set('filterValues.status', $status)
+                    ->assertSee($visibleManager->full_name);
 
-            // Test filtering by status (if component supports it)
-            $component
-                ->assertSee('Employed Manager')
-                ->assertSee('Retired Manager')
-                ->assertSee('Injured Manager');
+                foreach ($managers as $otherStatus => $hiddenManager) {
+                    if ($otherStatus !== $status) {
+                        $component->assertDontSee($hiddenManager->full_name);
+                    }
+                }
+            }
         });
 
         test('future employment filter returns only managers awaiting employment', function () {
-            $futureManager = Manager::factory()->withFutureEmployment()->create([
-                'first_name' => 'Future',
-                'last_name' => 'Manager',
-            ]);
+            $futureManager = Manager::factory()->withFutureEmployment()
+                ->create([
+                    'first_name' => 'Future',
+                    'last_name' => 'Manager',
+                ])
+                ->refresh();
             Manager::factory()->employed()->create([
                 'first_name' => 'Employed',
                 'last_name' => 'Manager',
