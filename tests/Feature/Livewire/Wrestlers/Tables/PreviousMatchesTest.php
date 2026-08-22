@@ -27,10 +27,11 @@ describe('PreviousMatchesTable Configuration', function () {
         $component->assertSet('wrestlerId', $this->wrestler->id);
     });
 
-    it('has correct database table name', function () {
-        $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
+    it('queries the event matches table', function () {
+        $table = app(PreviousMatches::class);
+        $table->wrestlerId = $this->wrestler->id;
 
-        $component->assertSet('databaseTableName', 'events_matches_competitors');
+        expect($table->builder()->getModel()->getTable())->toBe('events_matches');
     });
 });
 

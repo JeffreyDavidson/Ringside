@@ -19,8 +19,6 @@ class PreviousMatches extends BasePreviousMatchesTable
     #[Locked]
     public ?int $wrestlerId;
 
-    public string $databaseTableName = 'events_matches_competitors';
-
     /**
      * @return Builder<EventMatch>
      */
