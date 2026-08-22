@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Builders\Users;
 
 use App\Builders\Concerns\HasNameSearch;
+use App\Enums\Users\UserStatus;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -16,4 +17,9 @@ use Illuminate\Database\Eloquent\Builder;
 class UserBuilder extends Builder
 {
     use HasNameSearch;
+
+    public function whereStatus(UserStatus $status): static
+    {
+        return $this->where('status', $status->value);
+    }
 }
