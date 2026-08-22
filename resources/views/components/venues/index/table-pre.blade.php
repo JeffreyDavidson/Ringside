@@ -1,6 +1,6 @@
 <x-layouts.table-header title="Venues">
     <x-slot:actions>
-        @can('create', \App\Models\Venue::class)
+        @can('create', \App\Models\Events\Venue::class)
             <x-buttons.primary size="sm" @click="$dispatch('openModal', { component: 'venues.modals.form-modal' })">
                 Add Venue</x-buttons.primary>
         @endcan

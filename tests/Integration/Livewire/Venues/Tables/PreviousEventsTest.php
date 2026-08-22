@@ -75,6 +75,7 @@ describe('PreviousEventsTable Integration Tests', function () {
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
             $component->assertOk()
+                ->assertSeeHtml('placeholder="Search events"')
                 ->assertSee('Recent Wrestling Show')
                 ->assertSee('Classic Wrestling Event')
                 ->assertSee('Upcoming Wrestling Show');

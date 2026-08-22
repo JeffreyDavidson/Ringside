@@ -6,7 +6,7 @@ namespace App\Livewire\Concerns;
 
 trait ShowTableTrait
 {
-    public function configuringShowTableTrait(): void
+    public function mountShowTableTrait(): void
     {
         $this->setSearchPlaceholder('Search '.$this->resourceName)
             ->addAdditionalSelects([$this->databaseTableName.'.id as id'])

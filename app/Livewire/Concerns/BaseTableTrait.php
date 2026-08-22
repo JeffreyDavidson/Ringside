@@ -19,7 +19,7 @@ trait BaseTableTrait
 
     protected string $resourceName = '';
 
-    public function configuringBaseTableTrait(): void
+    public function mountBaseTableTrait(): void
     {
         $this->addAdditionalSelects([$this->databaseTableName.'.id as id'])
             ->setPerPageAccepted([5, 10, 25, 50, 100])
@@ -28,7 +28,6 @@ trait BaseTableTrait
         $this->setConfigurableAreas([
             'before-wrapper' => $this->routeBasePath.'.index.table-pre',
         ]);
-
     }
 
     /** @return array<int, Column> */
