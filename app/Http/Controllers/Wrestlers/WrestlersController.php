@@ -16,6 +16,13 @@ class WrestlersController
 
     public function show(Wrestler $wrestler): View
     {
-        return view('wrestlers.show', ['wrestler' => $wrestler]);
+        return view('wrestlers.show', [
+            'wrestler' => $wrestler->load([
+                'currentManagers',
+                'currentStable',
+                'currentTagTeam',
+                'firstEmployment',
+            ]),
+        ]);
     }
 }
