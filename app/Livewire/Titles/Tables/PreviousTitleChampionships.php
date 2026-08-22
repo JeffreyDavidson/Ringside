@@ -30,7 +30,7 @@ class PreviousTitleChampionships extends DataTableComponent
     #[Locked]
     public ?int $titleId;
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', Title::class);
     }

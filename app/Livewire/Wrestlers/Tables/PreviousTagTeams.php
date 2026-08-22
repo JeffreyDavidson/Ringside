@@ -72,7 +72,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * to ensure proper data retrieval for the table display. This allows
      * the table to access both the pivot data and related tag team information.
      */
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'tag_teams_wrestlers.tag_team_id',

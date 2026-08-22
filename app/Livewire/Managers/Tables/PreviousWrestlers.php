@@ -40,7 +40,7 @@ class PreviousWrestlers extends DataTableComponent
             ->mostRecentlyHiredFirst();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'wrestlers_managers.wrestler_id as wrestler_id',

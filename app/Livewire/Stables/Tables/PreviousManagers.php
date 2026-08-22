@@ -33,8 +33,6 @@ class PreviousManagers extends BasePreviousManagersTable
         return StableManagerHistoryQuery::previousManagersForStableId($this->stableId);
     }
 
-    public function configure(): void {}
-
     /**
      * @return array<int, Column>
      */

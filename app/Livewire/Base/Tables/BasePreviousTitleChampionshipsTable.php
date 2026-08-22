@@ -25,7 +25,7 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
 
     protected string $resourceName = 'title championships';
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'titles_championships.title_id',

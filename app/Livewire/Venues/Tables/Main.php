@@ -35,7 +35,7 @@ class Main extends BaseTable
             ->alphabetical();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', Venue::class);
     }

@@ -59,7 +59,7 @@ abstract class DataTableComponent extends Component
     /**
      * Configure the table component. Called during mount.
      */
-    public function configure(): void {}
+    protected function configure(): void {}
 
     /**
      * Return filter definitions for the table.

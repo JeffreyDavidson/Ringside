@@ -58,7 +58,7 @@ class PreviousWrestlers extends DataTableComponent
         ];
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'stables_wrestlers.wrestler_id',

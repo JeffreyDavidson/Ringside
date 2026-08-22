@@ -27,8 +27,6 @@ class TitleChampionshipsTable extends DataTableComponent
         parent::mount();
     }
 
-    public function configure(): void {}
-
     /**
      * Return the query builder for title championship rows.
      *

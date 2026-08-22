@@ -43,7 +43,7 @@ class PreviousTagTeams extends DataTableComponent
             ->mostRecentlyHiredFirst();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'tag_teams_managers.tag_team_id as tag_team_id',

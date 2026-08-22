@@ -38,7 +38,7 @@ class PreviousManagers extends BasePreviousManagersTable
             ->mostRecentlyHiredFirst();
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'wrestlers_managers.manager_id',

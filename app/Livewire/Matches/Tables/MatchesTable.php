@@ -49,7 +49,7 @@ class MatchesTable extends DataTableComponent
             ->where('event_id', $this->eventId);
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', EventMatch::class);
 

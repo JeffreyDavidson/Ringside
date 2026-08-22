@@ -22,8 +22,6 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
 
     protected string $databaseTableName;
 
-    public function configure(): void {}
-
     /**
      * Get the partner wrestler name for the given tag team relationship.
      */

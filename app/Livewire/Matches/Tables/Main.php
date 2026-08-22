@@ -41,7 +41,7 @@ class Main extends BaseTable
             ->with(['event', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor']);
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', EventMatch::class);
 

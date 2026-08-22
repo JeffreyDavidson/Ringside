@@ -29,7 +29,7 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
 
     protected string $resourceName = 'matches';
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'events_matches.event_id as event_id',
