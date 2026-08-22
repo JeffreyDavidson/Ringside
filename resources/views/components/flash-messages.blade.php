@@ -5,9 +5,9 @@
     x-data="{
         notification: $el.dataset.notificationMessage
             ? {
-                type: $el.dataset.notificationType,
-                message: $el.dataset.notificationMessage,
-            }
+                  type: $el.dataset.notificationType,
+                  message: $el.dataset.notificationMessage,
+              }
             : null,
     }"
     x-on:flash-message.window="notification = $event.detail"
@@ -17,9 +17,11 @@
     <x-container-fixed>
         <div
             class="flex items-center justify-between gap-4 rounded border px-4 py-3 text-sm"
-            x-bind:class="notification?.type === 'error'
-                ? 'border-danger bg-danger-light text-danger'
-                : 'border-success bg-success-light text-success'"
+            x-bind:class="
+                notification?.type === 'error'
+                    ? 'border-danger bg-danger-light text-danger'
+                    : 'border-success bg-success-light text-success'
+            "
             role="{{ session()->has('error') ? 'alert' : 'status' }}"
             x-bind:role="notification?.type === 'error' ? 'alert' : 'status'"
             aria-live="{{ session()->has('error') ? 'assertive' : 'polite' }}"
