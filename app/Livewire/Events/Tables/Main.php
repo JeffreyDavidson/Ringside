@@ -85,24 +85,16 @@ class Main extends BaseTable
      */
     public function filters(): array
     {
-        $statusOptions = ['' => __('core.all')];
-
-        foreach (EventStatus::cases() as $status) {
-            $statusOptions[$status->value] = $status->label();
-        }
-
         return [
             SelectFilter::make(__('core.status'))
                 ->setFilterPillTitle(__('core.status'))
-                ->options($statusOptions)
+                ->options(EventStatus::filterOptions())
                 ->filter(function (EventBuilder $builder, string $value): void {
-                    /** @var EventBuilder<Event> $builder */
-                    match (EventStatus::tryFrom($value)) {
-                        EventStatus::Scheduled => $builder->scheduled(),
-                        EventStatus::Past => $builder->past(),
-                        EventStatus::Unscheduled => $builder->unscheduled(),
-                        default => null,
-                    };
+                    $status = EventStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereStatus($status);
+                    }
                 }),
             DateRangeFilter::make('Event Dates')
                 ->config([
