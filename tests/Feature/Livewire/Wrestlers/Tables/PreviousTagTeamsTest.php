@@ -3,9 +3,12 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousTagTeams;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Livewire\livewire;
 
@@ -76,6 +79,48 @@ describe('PreviousTagTeamsTable Rendering', function () {
         expect($results)->toHaveCount(0);
 
         $component->assertSuccessful();
+    });
+
+    it('renders the overlapping historical partner without additional queries', function () {
+        $tagTeam = TagTeam::factory()->create();
+        $partner = Wrestler::factory()->create();
+        $nonOverlappingWrestler = Wrestler::factory()->create();
+        $joinedAt = now()->subYear();
+        $leftAt = now()->subMonths(6);
+
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => $tagTeam->id,
+            'wrestler_id' => $this->wrestler->id,
+            'joined_at' => $joinedAt,
+            'left_at' => $leftAt,
+        ]);
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => $tagTeam->id,
+            'wrestler_id' => $partner->id,
+            'joined_at' => $joinedAt->copy()->addMonth(),
+            'left_at' => $leftAt->copy()->subMonth(),
+        ]);
+        TagTeamWrestler::factory()->create([
+            'tag_team_id' => $tagTeam->id,
+            'wrestler_id' => $nonOverlappingWrestler->id,
+            'joined_at' => $leftAt->copy()->addMonth(),
+            'left_at' => null,
+        ]);
+
+        $table = tap(app(PreviousTagTeams::class), fn (PreviousTagTeams $component) => $component->wrestlerId = $this->wrestler->id);
+        $membership = $table->builder()->firstOrFail();
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $partnerColumn = $table->columns()[1];
+        $renderedPartner = $partnerColumn->resolveValue($membership);
+
+        expect($renderedPartner)
+            ->toContain($partner->name)
+            ->toContain(route('wrestlers.show', $partner))
+            ->not->toContain($nonOverlappingWrestler->name)
+            ->and(DB::getQueryLog())->toBeEmpty();
     });
 });
 

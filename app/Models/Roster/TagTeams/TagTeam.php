@@ -37,6 +37,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -75,6 +76,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Wrestler> $wrestlers
  * @property-read Collection<int, Wrestler> $currentWrestlers
  * @property-read Collection<int, Wrestler> $previousWrestlers
+ * @property-read Collection<int, TagTeamWrestler> $wrestlerMemberships
  * @property-read Collection<int, Manager> $managers
  * @property-read Collection<int, Manager> $currentManagers
  * @property-read Collection<int, Manager> $previousManagers
@@ -155,6 +157,12 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
             ->using(TagTeamWrestler::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
+    }
+
+    /** @return HasMany<TagTeamWrestler, $this> */
+    public function wrestlerMemberships(): HasMany
+    {
+        return $this->hasMany(TagTeamWrestler::class, 'tag_team_id');
     }
 
     /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */

@@ -62,6 +62,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
         return TagTeamWrestler::query()
             ->forWrestlerId($this->wrestlerId)
             ->ended()
+            ->with('tagTeam.wrestlerMemberships.wrestler')
             ->mostRecentlyJoinedFirst();
     }
 
@@ -104,13 +105,12 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      */
     private function getPartner(TagTeamWrestler $row): ?Wrestler
     {
-        $partnerRecord = TagTeamWrestler::query()
-            ->forTagTeamId($row->tag_team_id)
-            ->excludingWrestlerId($row->wrestler_id)
-            ->overlappingPeriod($row->joined_at, $row->left_at ?? now())
-            ->with('wrestler')
-            ->first();
+        $partnerMembership = $row->tagTeam?->wrestlerMemberships->first(
+            fn (TagTeamWrestler $membership): bool => $membership->wrestler_id !== $row->wrestler_id
+                && $membership->joined_at->lte($row->left_at ?? now())
+                && ($membership->left_at === null || $membership->left_at->gte($row->joined_at)),
+        );
 
-        return $partnerRecord?->wrestler;
+        return $partnerMembership?->wrestler;
     }
 }
