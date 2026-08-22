@@ -41,6 +41,14 @@ describe('FormModal Configuration', function () {
 });
 
 describe('FormModal Rendering', function () {
+    it('binds both stable activity period fields', function () {
+        livewire(FormModal::class)
+            ->call('openModal')
+            ->assertSeeHtml('wire:model="form.started_at"')
+            ->assertSeeHtml('wire:model="form.ended_at"')
+            ->assertDontSeeHtml('wire:model="form.start_date"');
+    });
+
     it('can render in create mode', function () {
         $component = livewire(FormModal::class)
             ->call('openModal');
@@ -91,13 +99,15 @@ describe('FormModal Rendering', function () {
         $component->assertSee('Test Tag Team');
     });
 
-    it('presents managers list for selection', function () {
+    it('does not expose direct manager assignment', function () {
         $manager = Manager::factory()->create(['first_name' => 'Test', 'last_name' => 'Manager']);
 
         $component = livewire(FormModal::class)
             ->call('openModal');
 
-        $component->assertSee('Test Manager');
+        $component
+            ->assertDontSee('Test Manager')
+            ->assertDontSeeHtml('wire:model="form.managers"');
     });
 });
 

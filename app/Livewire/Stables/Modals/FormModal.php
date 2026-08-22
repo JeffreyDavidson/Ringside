@@ -7,7 +7,6 @@ namespace App\Livewire\Stables\Modals;
 use App\Actions\Stables\CreateAction;
 use App\Actions\Stables\UpdateAction;
 use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Concerns\Data\PresentsManagersList;
 use App\Livewire\Concerns\Data\PresentsTagTeamsList;
 use App\Livewire\Concerns\Data\PresentsWrestlersList;
 use App\Livewire\Stables\Forms\CreateEditForm;
@@ -20,7 +19,6 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    use PresentsManagersList;
     use PresentsTagTeamsList;
     use PresentsWrestlersList;
 

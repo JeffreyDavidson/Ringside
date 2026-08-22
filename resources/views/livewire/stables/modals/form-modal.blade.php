@@ -4,7 +4,11 @@
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
-        <x-form.inputs.date label="{{ __('activations.started_at') }}" wire:model="form.start_date" />
+        <x-form.inputs.date label="{{ __('activations.started_at') }}" wire:model="form.started_at" />
+    </x-form-modal.modal-input>
+
+    <x-form-modal.modal-input>
+        <x-form.inputs.date label="{{ __('activations.ended_at') }}" wire:model="form.ended_at" />
     </x-form-modal.modal-input>
 
     <x-form-modal.modal-input>
@@ -22,15 +26,6 @@
             wire:model="form.tag_teams"
             :options="$this->getTagTeams"
             selected="form.tag_teams"
-        />
-    </x-form-modal.modal-input>
-
-    <x-form-modal.modal-input>
-        <x-form.inputs.select
-            label="{{ __('core.managers') }}"
-            wire:model="form.managers"
-            :options="$this->getManagers"
-            selected="form.managers"
         />
     </x-form-modal.modal-input>
 </x-form-modal>
