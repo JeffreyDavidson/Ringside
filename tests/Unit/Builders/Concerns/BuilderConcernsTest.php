@@ -2,10 +2,25 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+
+test('employment statuses map to their shared roster query constraints', function (): void {
+    $employed = Wrestler::factory()->employed()->create();
+    $futureEmployed = Wrestler::factory()->withFutureEmployment()->create();
+    $released = Wrestler::factory()->released()->create();
+    $retired = Wrestler::factory()->retired()->create();
+    $unemployed = Wrestler::factory()->unemployed()->create();
+
+    expect(Wrestler::query()->whereEmploymentStatus(EmploymentStatus::Employed)->pluck('id')->all())->toBe([$employed->id])
+        ->and(Wrestler::query()->whereEmploymentStatus(EmploymentStatus::FutureEmployment)->pluck('id')->all())->toBe([$futureEmployed->id])
+        ->and(Wrestler::query()->whereEmploymentStatus(EmploymentStatus::Released)->pluck('id')->all())->toBe([$released->id])
+        ->and(Wrestler::query()->whereEmploymentStatus(EmploymentStatus::Retired)->pluck('id')->all())->toBe([$retired->id])
+        ->and(Wrestler::query()->whereEmploymentStatus(EmploymentStatus::Unemployed)->pluck('id')->all())->toBe([$unemployed->id]);
+});
 
 test('wrestlers may be filtered by employment status', function (): void {
     $employed = Wrestler::factory()->employed()->create();

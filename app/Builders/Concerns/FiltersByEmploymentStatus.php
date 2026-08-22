@@ -4,8 +4,23 @@ declare(strict_types=1);
 
 namespace App\Builders\Concerns;
 
+use App\Enums\Shared\EmploymentStatus;
+
 trait FiltersByEmploymentStatus
 {
+    abstract public function retired(): static;
+
+    public function whereEmploymentStatus(EmploymentStatus $status): static
+    {
+        return match ($status) {
+            EmploymentStatus::Employed => $this->employed(),
+            EmploymentStatus::FutureEmployment => $this->futureEmployed(),
+            EmploymentStatus::Released => $this->released(),
+            EmploymentStatus::Retired => $this->retired(),
+            EmploymentStatus::Unemployed => $this->unemployed(),
+        };
+    }
+
     public function withEmploymentStatusState(): static
     {
         return $this->withExists([
