@@ -129,27 +129,32 @@
                         <p class="mt-1 text-sm text-gray-600">Select all wrestlers participating in this match</p>
                     </x-form-modal.modal-input>
                     @break
-                @default
-                    {{-- Default/Unknown Match Type: Generic competitor selection --}}
+                @case (\App\Livewire\Matches\Enums\CompetitorSelectionLayout::Generic)
                     <x-form-modal.modal-input>
-                        <x-form.inputs.select
-                            label="Wrestlers"
-                            wire:model="form.competitors.0.wrestlers"
-                            :options="$this->getWrestlers"
-                            multiple
-                        />
-                    </x-form-modal.modal-input>
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            @foreach ($form->competitors as $sideIndex => $competitors)
+                                <div wire:key="competitor-side-{{ $sideIndex }}" class="space-y-2">
+                                    <p class="text-sm font-medium">Side {{ $loop->iteration }}</p>
+                                    <x-form.inputs.select
+                                        label="Wrestlers"
+                                        wire:model="form.competitors.{{ $sideIndex }}.wrestlers"
+                                        :options="$this->getWrestlers"
+                                        multiple
+                                    />
 
-                    @if ($this->matchTypeAllowsTagTeams)
-                        <x-form-modal.modal-input>
-                            <x-form.inputs.select
-                                label="Tag Teams"
-                                wire:model="form.competitors.0.tag_teams"
-                                :options="$this->getTagTeams"
-                                multiple
-                            />
-                        </x-form-modal.modal-input>
-                    @endif
+                                    @if ($this->matchTypeAllowsTagTeams)
+                                        <x-form.inputs.select
+                                            label="Tag Teams"
+                                            wire:model="form.competitors.{{ $sideIndex }}.tag_teams"
+                                            :options="$this->getTagTeams"
+                                            multiple
+                                        />
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </x-form-modal.modal-input>
+                    @break
 
             @endswitch
         </div>

@@ -102,6 +102,20 @@ describe('FormModal Rendering', function () {
         $component->assertSee('Singles');
     });
 
+    it('renders controls for every flexible competitor side', function (MatchType $matchType) {
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', $matchType)
+            ->assertSeeHtml('wire:model="form.competitors.0.wrestlers"')
+            ->assertSeeHtml('wire:model="form.competitors.1.wrestlers"')
+            ->assertSeeHtml('wire:model="form.competitors.0.tag_teams"')
+            ->assertSeeHtml('wire:model="form.competitors.1.tag_teams"');
+    })->with([
+        MatchType::TwoOnOneHandicap,
+        MatchType::ThreeOnTwoHandicap,
+        MatchType::Gauntlet,
+    ]);
+
     it('fills the form with valid match data', function () {
         $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
         $referee = Referee::factory()->bookable()->create();
