@@ -6,6 +6,7 @@ use App\Http\Controllers\Stables\StablesController;
 use App\Livewire\Stables\Tables\PreviousManagers;
 use App\Livewire\Stables\Tables\PreviousTagTeams;
 use App\Livewire\Stables\Tables\PreviousWrestlers;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 
 use function Pest\Laravel\actingAs;
@@ -34,6 +35,26 @@ describe('Stables Controller', function () {
             ->assertSeeLivewire(PreviousWrestlers::class)
             ->assertSeeLivewire(PreviousTagTeams::class)
             ->assertSeeLivewire(PreviousManagers::class);
+    });
+
+    /**
+     * @see StablesController::show()
+     */
+    test('show renders the stable summary from only its required relationships', function () {
+        $startedAt = today()->subDay();
+        ActivityPeriod::factory()
+            ->for($this->stable, 'activeable')
+            ->started($startedAt)
+            ->create();
+
+        actingAs(administrator())
+            ->get(action([StablesController::class, 'show'], $this->stable))
+            ->assertOk()
+            ->assertSee($startedAt->toDateString())
+            ->assertViewHas('stable', fn (Stable $stable): bool => count($stable->getRelations()) === 3
+                && $stable->relationLoaded('currentTagTeams')
+                && $stable->relationLoaded('currentWrestlers')
+                && $stable->relationLoaded('firstActivityPeriod'));
     });
 
     /**
