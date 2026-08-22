@@ -83,7 +83,7 @@ describe('PreviousTagTeamsTable Rendering', function () {
 
     it('renders the overlapping historical partner without additional queries', function () {
         $tagTeam = TagTeam::factory()->create();
-        $partner = Wrestler::factory()->create();
+        $partner = Wrestler::factory()->create(['name' => "Louisa O'Hara"]);
         $nonOverlappingWrestler = Wrestler::factory()->create();
         $joinedAt = now()->subYear();
         $leftAt = now()->subMonths(6);
@@ -117,7 +117,7 @@ describe('PreviousTagTeamsTable Rendering', function () {
         $renderedPartner = $partnerColumn->resolveValue($membership);
 
         expect($renderedPartner)
-            ->toContain($partner->name)
+            ->toContain(e($partner->name))
             ->toContain(route('wrestlers.show', $partner))
             ->not->toContain($nonOverlappingWrestler->name)
             ->and(DB::getQueryLog())->toBeEmpty();
