@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -41,19 +41,8 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      */
     public string $databaseTableName = 'tag_teams_wrestlers';
 
-    /**
-     * Build the query for retrieving the wrestler's previous tag teams.
-     *
-     * Creates a query using the TagTeamWrestler pivot model to find all
-     * tag team memberships where the wrestler has left (left_at is not null).
-     * Results are ordered by join date in descending order to show the
-     * most recent previous memberships first.
-     *
-     *
-     * @throws LogicException If wrestlerId is not set
-     * @return Builder<TagTeamWrestler> Query builder for tag team wrestler pivot records
-     */
-    public function builder(): Builder
+    /** @return TagTeamMembershipBuilder<TagTeamWrestler> */
+    public function builder(): TagTeamMembershipBuilder
     {
         if (! isset($this->wrestlerId)) {
             throw new LogicException('A wrestler was not provided.');
