@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Tables\Main;
 use App\Livewire\Titles\Tables\TitlesTable;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -125,14 +126,18 @@ describe('TitlesTable Component', function () {
         });
 
         test('type filter integration works correctly', function () {
-            $singlesTitle = Title::factory()->singles()->create(['name' => 'Singles Championship']);
-            $tagTeamTitle = Title::factory()->tagTeam()->create(['name' => 'Tag Team Championship']);
+            $singlesTitle = Title::factory()->singles()->create(['name' => 'Singles Title']);
+            $tagTeamTitle = Title::factory()->tagTeam()->create(['name' => 'Tag Team Titles']);
 
             $component = livewire(Main::class);
 
             $component
-                ->assertSee('Singles Championship')
-                ->assertSee('Tag Team Championship');
+                ->set('filterValues.type', TitleType::Singles->value)
+                ->assertSee($singlesTitle->name)
+                ->assertDontSee($tagTeamTitle->name)
+                ->set('filterValues.type', TitleType::TagTeam->value)
+                ->assertSee($tagTeamTitle->name)
+                ->assertDontSee($singlesTitle->name);
         });
     });
 

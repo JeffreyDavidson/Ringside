@@ -13,6 +13,7 @@ use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
+use App\Enums\Titles\TitleType;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
@@ -90,6 +91,20 @@ class Main extends BaseTable
                         TitleStatus::Retired => $builder->retired(),
                         default => null,
                     };
+                }),
+            SelectFilter::make('Type', 'type')
+                ->options([
+                    '' => 'All',
+                    TitleType::Singles->value => TitleType::Singles->label(),
+                    TitleType::TagTeam->value => TitleType::TagTeam->label(),
+                ])
+                ->filter(function (Builder $builder, string $value): void {
+                    /** @var TitleBuilder<Title> $builder */
+                    $type = TitleType::tryFrom($value);
+
+                    if ($type !== null) {
+                        $builder->whereType($type);
+                    }
                 }),
             FirstActivityPeriodFilter::make('Activation Date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
         ];
