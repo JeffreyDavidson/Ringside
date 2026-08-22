@@ -6,11 +6,11 @@ namespace App\Livewire\Venues\Tables;
 
 use App\Actions\Venues\DeleteAction;
 use App\Actions\Venues\RestoreAction;
+use App\Builders\Events\VenueBuilder;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Concerns\ExecutesBusinessActions;
 use App\Livewire\Table\Column;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Venue> */
@@ -27,9 +27,9 @@ class Main extends BaseTable
     protected string $resourceName = 'venues';
 
     /**
-     * @return Builder<Venue>
+     * @return VenueBuilder<Venue>
      */
-    public function builder(): Builder
+    public function builder(): VenueBuilder
     {
         return Venue::query()
             ->alphabetical();
