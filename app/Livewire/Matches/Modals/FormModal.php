@@ -79,11 +79,11 @@ class FormModal extends BaseFormModal
                 $storedMatch = $this->addMatchForEventAction->handle($event, $this->form->toData());
             }
         } catch (InvalidMatchConfigurationException $exception) {
-            if ($exception->reason() !== BusinessRuleReason::CurrentChampionMissing) {
-                throw $exception;
-            }
+            $field = $exception->reason() === BusinessRuleReason::CurrentChampionMissing
+                ? 'form.titles'
+                : 'form.configuration';
 
-            $this->addError('form.titles', $exception->getMessage());
+            $this->addError($field, $exception->getMessage());
 
             return false;
         }
