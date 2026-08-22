@@ -48,7 +48,7 @@ class ArrayColumn extends Column
     public function resolveValue(mixed $row): string
     {
         $items = $this->dataCallback
-            ? ($this->dataCallback)(null, $row)
+            ? ($this->dataCallback)($row)
             : collect();
 
         if ($items->isEmpty()) {
@@ -56,7 +56,7 @@ class ArrayColumn extends Column
         }
 
         if ($this->outputFormatCallback) {
-            return $items->map(fn (mixed $item, int $index) => ($this->outputFormatCallback)($index, $item))
+            return $items->map(fn (mixed $item) => ($this->outputFormatCallback)($item))
                 ->implode($this->separator);
         }
 

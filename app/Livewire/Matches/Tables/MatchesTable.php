@@ -80,15 +80,15 @@ class MatchesTable extends DataTableComponent
                     ->join(' vs '))
                 ->html(),
             ArrayColumn::make(__('matches.referees'))
-                ->data(fn (mixed $value, EventMatch $row) => ($row->referees))
-                ->outputFormat(function (int $index, Referee $value): string {
+                ->data(fn (EventMatch $row) => $row->referees)
+                ->outputFormat(function (Referee $value): string {
                     return '<a href="'.route('referees.show', $value->id).'">'.$value->full_name.'</a>';
                 })
                 ->separator(', ')
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('matches.titles'))
-                ->data(fn (mixed $value, EventMatch $row) => ($row->titles))
-                ->outputFormat(function (int $index, Title $value): string {
+                ->data(fn (EventMatch $row) => $row->titles)
+                ->outputFormat(function (Title $value): string {
                     return '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>';
                 })
                 ->separator(', ')
