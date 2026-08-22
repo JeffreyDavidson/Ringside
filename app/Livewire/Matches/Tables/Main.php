@@ -97,7 +97,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($eventMatch): void {
             resolve(DeleteAction::class)->handle($eventMatch);
-        }, 'Match successfully deleted.');
+        }, __('matches.actions.deleted'));
     }
 
     private function competitorName(mixed $competitor): string

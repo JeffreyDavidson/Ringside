@@ -24,6 +24,7 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use Illuminate\Support\Facades\Lang;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -51,12 +52,28 @@ test('table deletions use the typed lifecycle action', function (LifecycleOwnerT
         LifecycleOwnerType::Venue => VenuesTable::class,
         LifecycleOwnerType::Wrestler => WrestlersTable::class,
     };
+    $translationKey = match ($ownerType) {
+        LifecycleOwnerType::Event => 'events.actions.deleted',
+        LifecycleOwnerType::Manager => 'managers.actions.deleted',
+        LifecycleOwnerType::Match => 'matches.actions.deleted',
+        LifecycleOwnerType::Referee => 'referees.actions.deleted',
+        LifecycleOwnerType::Stable => 'stables.actions.deleted',
+        LifecycleOwnerType::TagTeam => 'tag-teams.actions.deleted',
+        LifecycleOwnerType::Title => 'titles.actions.deleted',
+        LifecycleOwnerType::Venue => 'venues.actions.deleted',
+        LifecycleOwnerType::Wrestler => 'wrestlers.actions.deleted',
+    };
 
     actingAs(administrator());
 
     livewire($component)
         ->call('delete', $owner)
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched(
+            'flash-message',
+            type: 'status',
+            message: __($translationKey),
+        );
 
     $transition = LifecycleTransition::query()
         ->where('subject_type', $ownerType->morphAlias())
@@ -64,7 +81,8 @@ test('table deletions use the typed lifecycle action', function (LifecycleOwnerT
         ->sole();
     $owner->refresh();
 
-    expect($owner->trashed())->toBeTrue()
+    expect(Lang::has($translationKey))->toBeTrue()
+        ->and($owner->trashed())->toBeTrue()
         ->and($transition->dimension)->toBe(LifecycleDimension::Deletion)
         ->and($transition->transition)->toBe(LifecycleTransitionType::Deleted);
 })->with(LifecycleOwnerType::cases());

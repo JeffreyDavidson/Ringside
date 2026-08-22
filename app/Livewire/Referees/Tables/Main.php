@@ -100,7 +100,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($referee): void {
             resolve(DeleteAction::class)->handle($referee);
-        }, 'Referee successfully deleted.');
+        }, __('referees.actions.deleted'));
     }
 
     public function clearFromInjury(Referee $referee): void
