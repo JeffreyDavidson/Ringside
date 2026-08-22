@@ -1,4 +1,6 @@
 <x-form-modal>
+    <x-form.error name="form.configuration" show-icon />
+
     <x-form-modal.modal-input>
         <x-form.inputs.select label="Match Type" wire:model.live="form.matchType" :options="$this->getMatchTypes" />
     </x-form-modal.modal-input>

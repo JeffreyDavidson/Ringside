@@ -272,6 +272,29 @@ describe('FormModal Create Operations', function () {
         MatchType::Gauntlet,
     ]);
 
+    it('translates invalid match composition into form feedback', function (MatchType $matchType, string $message) {
+        $wrestlers = Wrestler::factory()->count(4)->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', $matchType)
+            ->set('form.referees', [$referee->id])
+            ->set('form.competitors', [
+                ['wrestlers' => $wrestlers->take(2)->modelKeys()],
+                ['wrestlers' => $wrestlers->skip(2)->modelKeys()],
+            ])
+            ->call('save')
+            ->assertHasErrors(['form.configuration'])
+            ->assertSee($message);
+
+        expect(EventMatch::query()->whereBelongsTo($this->event)->doesntExist())->toBeTrue();
+    })->with([
+        [MatchType::SixManTagTeam, 'The [6 Man Tag Team] match requires a 3-on-3 roster-member composition.'],
+        [MatchType::EightManTagTeam, 'The [8 Man Tag Team] match requires a 4-on-4 roster-member composition.'],
+        [MatchType::TenManTagTeam, 'The [10 Man Tag Team] match requires a 5-on-5 roster-member composition.'],
+    ]);
+
     it('validates match type exists', function () {
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
