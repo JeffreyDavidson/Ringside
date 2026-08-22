@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -19,10 +19,8 @@ class PreviousMatches extends BasePreviousMatchesTable
     #[Locked]
     public ?int $wrestlerId;
 
-    /**
-     * @return Builder<EventMatch>
-     */
-    public function builder(): Builder
+    /** @return EventMatchBuilder<EventMatch> */
+    public function builder(): EventMatchBuilder
     {
         if (! isset($this->wrestlerId)) {
             throw new LogicException('A wrestler was not provided.');
