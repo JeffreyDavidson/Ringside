@@ -6,7 +6,10 @@ namespace App\Livewire\Titles\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
+use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
@@ -20,7 +23,7 @@ class PreviousTitleChampionships extends DataTableComponent
 {
     use ShowTableTrait;
 
-    protected string $databaseTableName = 'title_championships';
+    protected string $databaseTableName = 'titles_championships';
 
     protected string $resourceName = 'title championships';
 
@@ -46,8 +49,8 @@ class PreviousTitleChampionships extends DataTableComponent
 
         return TitleChampionship::query()
             ->forTitleId($this->titleId)
-            ->previous()
-            ->mostRecentlyLostFirst();
+            ->forPreviousHistory()
+            ->with('champion');
     }
 
     /**
@@ -56,11 +59,39 @@ class PreviousTitleChampionships extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('championships.new_champion'), 'current_champion'),
-            Column::make(__('championships.previous_champion'), 'former_champion'),
-            Column::make(__('championships.dates_held'), 'dates_held'),
+            LinkColumn::make(__('championships.new_champion'))
+                ->title(fn (TitleChampionship $row): string => $row->champion->name)
+                ->location(fn (TitleChampionship $row): string => $this->championLocation($row->champion)),
+            LinkColumn::make(__('championships.previous_champion'))
+                ->title(fn (TitleChampionship $row): string => $row->previousChampionship?->champion->name ?? 'N/A')
+                ->location(fn (TitleChampionship $row): ?string => $this->previousChampionLocation($row)),
+            Column::make(__('championships.dates_held'))
+                ->label(fn (TitleChampionship $row): string => $this->datesHeld($row)),
             Column::make(__('championships.days_held'))
                 ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
         ];
+    }
+
+    private function championLocation(Wrestler|TagTeam $champion): string
+    {
+        return match (true) {
+            $champion instanceof Wrestler => route('wrestlers.show', $champion),
+            $champion instanceof TagTeam => route('tag-teams.show', $champion),
+        };
+    }
+
+    private function datesHeld(TitleChampionship $championship): string
+    {
+        $wonAt = $championship->won_at->toDateString();
+        $lostAt = $championship->lost_at?->toDateString();
+
+        return $lostAt === null ? $wonAt : "{$wonAt} - {$lostAt}";
+    }
+
+    private function previousChampionLocation(TitleChampionship $championship): ?string
+    {
+        $champion = $championship->previousChampionship?->champion;
+
+        return $champion === null ? null : $this->championLocation($champion);
     }
 }
