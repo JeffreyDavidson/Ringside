@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
+use Livewire\Form;
 use Symfony\Component\Finder\Finder;
 
 test('table configuration hooks are not exposed as Livewire actions', function (): void {
@@ -17,6 +20,48 @@ test('table configuration hooks are not exposed as Livewire actions', function (
     }
 
     expect($publicConfigurationHooks)->toBeEmpty();
+});
+
+test('modal form bindings reference public properties on their form objects', function (): void {
+    $checkedBindings = 0;
+    $invalidBindings = [];
+
+    foreach (File::glob(resource_path('views/livewire/*/modals/*-modal.blade.php')) as $viewPath) {
+        $domain = basename(dirname(dirname($viewPath)));
+        $modal = Str::of(basename($viewPath, '.blade.php'))->studly();
+        $component = 'App\\Livewire\\'.Str::studly($domain).'\\Modals\\'.$modal;
+
+        if (! class_exists($component)) {
+            throw new LogicException("Livewire component {$component} does not exist.");
+        }
+
+        $formType = (new ReflectionProperty($component, 'form'))->getType();
+
+        if (! $formType instanceof ReflectionNamedType || ! is_a($formType->getName(), Form::class, true)) {
+            throw new LogicException("Livewire component {$component} must declare a typed form object.");
+        }
+
+        preg_match_all(
+            '/wire:model(?:\.[A-Za-z0-9.-]+)?=["\']form\.([A-Za-z_][A-Za-z0-9_]*)/',
+            File::get($viewPath),
+            $matches,
+        );
+
+        $form = new ReflectionClass($formType->getName());
+
+        foreach (array_unique($matches[1]) as $property) {
+            $checkedBindings++;
+
+            if ($form->hasProperty($property) && $form->getProperty($property)->isPublic()) {
+                continue;
+            }
+
+            $invalidBindings[] = "{$viewPath}: form.{$property}";
+        }
+    }
+
+    expect($checkedBindings)->toBeGreaterThan(0)
+        ->and($invalidBindings)->toBeEmpty();
 });
 
 test('component context identifiers are locked', function (string $component, string $property): void {
