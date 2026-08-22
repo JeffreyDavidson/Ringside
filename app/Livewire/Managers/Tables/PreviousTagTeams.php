@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeamManager;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -28,10 +28,8 @@ class PreviousTagTeams extends DataTableComponent
 
     protected string $resourceName = 'tag teams';
 
-    /**
-     * @return Builder<TagTeamManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<TagTeamManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
         if (! isset($this->managerId)) {
             throw new LogicException('A manager was not provided.');

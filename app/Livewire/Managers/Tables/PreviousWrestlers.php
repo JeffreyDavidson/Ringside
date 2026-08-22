@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Wrestlers\WrestlerManager;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -25,10 +25,8 @@ class PreviousWrestlers extends DataTableComponent
 
     protected string $resourceName = 'wrestlers';
 
-    /**
-     * @return Builder<WrestlerManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<WrestlerManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
         if (! isset($this->managerId)) {
             throw new LogicException('A manager was not provided.');
