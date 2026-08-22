@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -26,10 +26,8 @@ class PreviousWrestlers extends DataTableComponent
     #[Locked]
     public ?int $tagTeamId;
 
-    /**
-     * @return Builder<TagTeamWrestler>
-     */
-    public function builder(): Builder
+    /** @return TagTeamMembershipBuilder<TagTeamWrestler> */
+    public function builder(): TagTeamMembershipBuilder
     {
         if (! isset($this->tagTeamId)) {
             throw new LogicException('A tag team was not provided.');
