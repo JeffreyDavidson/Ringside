@@ -12,17 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
-    /**
-     * Create an event.
-     *
-     * This handles the complete event creation workflow:
-     * - Creates the event record with name, date, venue, and description
-     * - Sets initial status based on whether a date is provided
-     * - Establishes the event for future match booking and scheduling
-     *
-     * @param  EventData  $eventData  The data transfer object containing event information
-     * @return Event The newly created event instance
-     */
     public function handle(EventData $eventData): Event
     {
         return DB::transaction(function () use ($eventData): Event {
