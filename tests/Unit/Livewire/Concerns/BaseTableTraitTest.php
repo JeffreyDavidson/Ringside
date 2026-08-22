@@ -10,13 +10,8 @@ test('base table behavior composes the action column concern', function () {
         ->toContain(HasActionColumn::class);
 });
 
-test('base table behavior exposes only its configuration and appended columns', function () {
-    $methods = collect((new ReflectionClass(BaseTableTrait::class))->getMethods(ReflectionMethod::IS_PUBLIC))
-        ->filter(fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === BaseTableTrait::class)
-        ->map(fn (ReflectionMethod $method): string => $method->getName())
-        ->sort()
-        ->values()
-        ->all();
+test('base table behavior supplies additional columns through the protected extension point', function () {
+    $method = (new ReflectionClass(BaseTableTrait::class))->getMethod('additionalColumns');
 
-    expect($methods)->toBe(['appendColumns', 'configuringBaseTableTrait']);
+    expect($method->isProtected())->toBeTrue();
 });

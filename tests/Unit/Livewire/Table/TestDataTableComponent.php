@@ -26,4 +26,12 @@ class TestDataTableComponent extends DataTableComponent
             Column::make('Email', 'email'),
         ];
     }
+
+    /** @return array<int, Column> */
+    protected function additionalColumns(): array
+    {
+        return [
+            Column::make('Created At', 'created_at'),
+        ];
+    }
 }
