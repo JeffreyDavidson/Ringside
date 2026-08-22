@@ -42,6 +42,19 @@ describe('TagTeams Controller', function () {
     /**
      * @see TagTeamsController::show()
      */
+    test('show loads only the relationships rendered by the tag team summary', function () {
+        actingAs(administrator())
+            ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
+            ->assertOk()
+            ->assertViewHas('tagTeam', fn (TagTeam $tagTeam): bool => count($tagTeam->getRelations()) === 3
+                && $tagTeam->relationLoaded('currentManagers')
+                && $tagTeam->relationLoaded('currentStable')
+                && $tagTeam->relationLoaded('currentWrestlers'));
+    });
+
+    /**
+     * @see TagTeamsController::show()
+     */
     test('a basic user cannot view tag team profiles', function () {
         actingAs(basicUser())
             ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))

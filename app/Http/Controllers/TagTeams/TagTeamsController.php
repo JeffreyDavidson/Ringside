@@ -16,6 +16,12 @@ class TagTeamsController
 
     public function show(TagTeam $tagTeam): View
     {
-        return view('tag-teams.show', ['tagTeam' => $tagTeam]);
+        return view('tag-teams.show', [
+            'tagTeam' => $tagTeam->load([
+                'currentManagers',
+                'currentStable',
+                'currentWrestlers',
+            ]),
+        ]);
     }
 }
