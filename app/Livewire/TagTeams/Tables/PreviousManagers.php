@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\TagTeams\TagTeamManager;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -21,10 +21,8 @@ class PreviousManagers extends BasePreviousManagersTable
     #[Locked]
     public ?int $tagTeamId;
 
-    /**
-     * @return Builder<TagTeamManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<TagTeamManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
         if (! isset($this->tagTeamId)) {
             throw new LogicException('A tag team was not provided.');

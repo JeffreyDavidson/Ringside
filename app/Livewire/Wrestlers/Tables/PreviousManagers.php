@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\Wrestlers\WrestlerManager;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -21,10 +21,8 @@ class PreviousManagers extends BasePreviousManagersTable
 
     public string $databaseTableName = 'wrestlers_managers';
 
-    /**
-     * @return Builder<WrestlerManager>
-     */
-    public function builder(): Builder
+    /** @return ManagerAssignmentBuilder<WrestlerManager> */
+    public function builder(): ManagerAssignmentBuilder
     {
         if (! isset($this->wrestlerId)) {
             throw new LogicException('A wrestler was not provided.');
@@ -32,7 +30,7 @@ class PreviousManagers extends BasePreviousManagersTable
 
         return WrestlerManager::query()
             ->with('manager')
-            ->whereHas('manager') // Only include records where manager exists (not soft deleted)
+            ->whereHas('manager')
             ->where('wrestler_id', $this->wrestlerId)
             ->ended()
             ->mostRecentlyHiredFirst();
