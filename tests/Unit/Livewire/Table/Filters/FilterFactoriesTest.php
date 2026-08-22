@@ -21,12 +21,39 @@ test('related period filter factories preserve their requested types', function 
     [FirstEmploymentFilter::make('Employment Period'), FirstEmploymentFilter::class, 'employment_period'],
 ]);
 
-test('related period filters constrain parents without loading history collections', function () {
-    $matchingWrestler = Wrestler::factory()
+test('related period filters include every period overlapping the selected range without loading history collections', function () {
+    $startsWithinRange = Wrestler::factory()
         ->has(Employment::factory()->started(Date::parse('2024-06-15')), 'employments')
         ->create();
-    Wrestler::factory()
-        ->has(Employment::factory()->started(Date::parse('2024-05-15')), 'employments')
+    $endsWithinRange = Wrestler::factory()
+        ->has(
+            Employment::factory()
+                ->started(Date::parse('2024-05-15'))
+                ->ended(Date::parse('2024-06-15')),
+            'employments',
+        )
+        ->create();
+    $spansRange = Wrestler::factory()
+        ->has(
+            Employment::factory()
+                ->started(Date::parse('2024-05-15'))
+                ->ended(Date::parse('2024-07-15')),
+            'employments',
+        )
+        ->create();
+    $continuesThroughRange = Wrestler::factory()
+        ->has(Employment::factory()->started(Date::parse('2024-05-15'))->current(), 'employments')
+        ->create();
+    $endsBeforeRange = Wrestler::factory()
+        ->has(
+            Employment::factory()
+                ->started(Date::parse('2024-05-01'))
+                ->ended(Date::parse('2024-05-31 23:59:59')),
+            'employments',
+        )
+        ->create();
+    $startsAfterRange = Wrestler::factory()
+        ->has(Employment::factory()->started(Date::parse('2024-07-01'))->current(), 'employments')
         ->create();
 
     $filter = FirstEmploymentFilter::make('Employment Period')
@@ -38,10 +65,15 @@ test('related period filters constrain parents without loading history collectio
         'maxDate' => '2024-06-30',
     ]);
 
-    $wrestlers = $query->get();
+    $wrestlers = $query->orderBy('id')->get();
 
-    expect($wrestlers->modelKeys())->toBe([$matchingWrestler->id])
-        ->and($wrestlers->firstOrFail()->relationLoaded('employments'))->toBeFalse();
+    expect($wrestlers->modelKeys())->toBe([
+        $startsWithinRange->id,
+        $endsWithinRange->id,
+        $spansRange->id,
+        $continuesThroughRange->id,
+    ])->not->toContain($endsBeforeRange->id, $startsAfterRange->id)
+        ->and($wrestlers->every(fn (Wrestler $wrestler): bool => ! $wrestler->relationLoaded('employments')))->toBeTrue();
 });
 
 test('select filter factory creates a configured filter', function () {
