@@ -28,8 +28,6 @@ class Main extends BaseTable
             ->oldest('last_name');
     }
 
-    public function configure(): void {}
-
     /** @return array<Column> */
     public function columns(): array
     {

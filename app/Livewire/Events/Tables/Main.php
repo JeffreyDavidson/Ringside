@@ -45,7 +45,7 @@ class Main extends BaseTable
             ->with(['venue']);
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', Event::class);
 

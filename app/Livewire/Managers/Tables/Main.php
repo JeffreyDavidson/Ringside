@@ -54,7 +54,7 @@ class Main extends BaseTable
             ->oldest('last_name');
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', Manager::class);
     }

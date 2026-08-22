@@ -58,7 +58,7 @@ class PreviousTagTeams extends DataTableComponent
         ];
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->addAdditionalSelects([
             'stables_tag_teams.tag_team_id',

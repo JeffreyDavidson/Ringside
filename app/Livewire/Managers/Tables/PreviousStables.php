@@ -46,6 +46,4 @@ class PreviousStables extends BasePreviousStablesTable
                 ->searchable(),
         ];
     }
-
-    public function configure(): void {}
 }

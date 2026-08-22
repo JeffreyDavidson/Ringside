@@ -23,8 +23,6 @@ abstract class BasePreviousWrestlersTable extends DataTableComponent
 
     protected string $databaseTableName;
 
-    public function configure(): void {}
-
     /**
      * @return array<int, Column>
      */

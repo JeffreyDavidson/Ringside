@@ -40,8 +40,6 @@ class PreviousEvents extends DataTableComponent
             ->latestDatedFirst();
     }
 
-    public function configure(): void {}
-
     /**
      * @return array<int, Column>
      */

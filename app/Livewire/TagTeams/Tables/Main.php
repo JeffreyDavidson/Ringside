@@ -51,7 +51,7 @@ class Main extends BaseTable
             ->oldest('name');
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', TagTeam::class);
     }

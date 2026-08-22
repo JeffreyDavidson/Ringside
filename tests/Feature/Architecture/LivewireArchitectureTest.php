@@ -3,6 +3,21 @@
 declare(strict_types=1);
 
 use Livewire\Attributes\Locked;
+use Symfony\Component\Finder\Finder;
+
+test('table configuration hooks are not exposed as Livewire actions', function (): void {
+    $publicConfigurationHooks = [];
+
+    foreach (Finder::create()->files()->in(app_path('Livewire'))->name('*.php') as $file) {
+        if (! preg_match('/public function configure\s*\(/', $file->getContents())) {
+            continue;
+        }
+
+        $publicConfigurationHooks[] = $file->getRelativePathname();
+    }
+
+    expect($publicConfigurationHooks)->toBeEmpty();
+});
 
 test('component context identifiers are locked', function (string $component, string $property): void {
     if (! class_exists($component)) {

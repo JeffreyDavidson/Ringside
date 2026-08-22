@@ -51,7 +51,7 @@ class Main extends BaseTable
             ->with('firstEmployment');
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         Gate::authorize('viewAny', Wrestler::class);
     }

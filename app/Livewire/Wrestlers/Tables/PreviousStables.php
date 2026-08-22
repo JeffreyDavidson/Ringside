@@ -34,7 +34,7 @@ class PreviousStables extends BasePreviousStablesTable
             ->previousForWrestlerId($this->wrestlerId);
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->setSearchPlaceholder('Search '.$this->resourceName)
             ->setPerPageAccepted([5, 10, 25, 50, 100]);
