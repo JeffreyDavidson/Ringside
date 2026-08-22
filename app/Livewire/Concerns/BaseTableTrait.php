@@ -11,9 +11,6 @@ trait BaseTableTrait
 {
     use HasActionColumn;
 
-    /** @var array<string, bool> */
-    protected array $actionLinksToDisplay = ['view' => true, 'edit' => true, 'delete' => true];
-
     protected bool $showActionColumn = false;
 
     protected string $databaseTableName = '';
@@ -34,8 +31,8 @@ trait BaseTableTrait
 
     }
 
-    /** @return array<Column> */
-    public function appendColumns(): array
+    /** @return array<int, Column> */
+    protected function additionalColumns(): array
     {
         return $this->showActionColumn ? [
             $this->getDefaultActionColumn(),

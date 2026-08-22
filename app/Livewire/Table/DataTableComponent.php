@@ -130,13 +130,18 @@ abstract class DataTableComponent extends Component
      */
     protected function getColumns(): array
     {
-        $columns = $this->columns();
+        return [
+            ...$this->columns(),
+            ...$this->additionalColumns(),
+        ];
+    }
 
-        if (method_exists($this, 'appendColumns')) {
-            return array_merge($columns, $this->appendColumns());
-        }
-
-        return $columns;
+    /**
+     * @return array<int, Column>
+     */
+    protected function additionalColumns(): array
+    {
+        return [];
     }
 
     /**
