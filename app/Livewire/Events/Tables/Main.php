@@ -21,7 +21,11 @@ use App\Models\Events\Event;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
-/** @extends BaseTable<Event> */
+/**
+ * @property-read array<int|string, string|null> $getVenues
+ *
+ * @extends BaseTable<Event>
+ */
 class Main extends BaseTable
 {
     use ExecutesBusinessActions;
@@ -119,9 +123,12 @@ class Main extends BaseTable
                     '' => 'All',
                     ...array_map(
                         static fn (?string $name): string => $name ?? '',
-                        $this->getVenues(),
+                        $this->getVenues,
                     ),
-                ]),
+                ])
+                ->filter(function (EventBuilder $builder, string $value): void {
+                    $builder->where('venue_id', $value);
+                }),
         ];
     }
 
