@@ -233,3 +233,14 @@ describe('Title Business Logic Integration', function () {
         expect($component->get('title')->id)->toBe($originalId);
     });
 });
+
+it('provides translated title action messages', function (string $action, string $message) {
+    expect(__("titles.actions.{$action}"))->toBe($message);
+})->with([
+    'debuted' => ['debuted', 'Title successfully debuted.'],
+    'retired' => ['retired', 'Title successfully retired.'],
+    'unretired' => ['unretired', 'Title successfully unretired.'],
+    'pulled' => ['pulled', 'Title successfully pulled.'],
+    'reinstated' => ['reinstated', 'Title successfully reinstated.'],
+    'restored' => ['restored', 'Title successfully restored.'],
+]);
