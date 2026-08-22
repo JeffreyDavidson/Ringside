@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -23,10 +23,8 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 
     protected string $resourceName = 'title championships';
 
-    /**
-     * @return Builder<TitleChampionship>
-     */
-    public function builder(): Builder
+    /** @return TitleChampionshipBuilder<TitleChampionship> */
+    public function builder(): TitleChampionshipBuilder
     {
         if (! isset($this->wrestlerId)) {
             throw new LogicException('A wrestler was not provided.');

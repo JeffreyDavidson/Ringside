@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Titles\Tables;
 
+use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -13,7 +14,6 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 use LogicException;
@@ -38,10 +38,8 @@ class PreviousTitleChampionships extends DataTableComponent
         Gate::authorize('viewAny', Title::class);
     }
 
-    /**
-     * @return Builder<TitleChampionship>
-     */
-    public function builder(): Builder
+    /** @return TitleChampionshipBuilder<TitleChampionship> */
+    public function builder(): TitleChampionshipBuilder
     {
         if (! isset($this->titleId)) {
             throw new LogicException('A title was not provided.');
