@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Livewire\Stables\Tables;
 
+use App\Builders\Roster\StableMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\StableTagTeam;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -26,10 +26,8 @@ class PreviousTagTeams extends DataTableComponent
     #[Locked]
     public ?int $stableId;
 
-    /**
-     * @return Builder<StableTagTeam>
-     */
-    public function builder(): Builder
+    /** @return StableMembershipBuilder<StableTagTeam> */
+    public function builder(): StableMembershipBuilder
     {
         if (! isset($this->stableId)) {
             throw new LogicException('A stable was not provided.');
