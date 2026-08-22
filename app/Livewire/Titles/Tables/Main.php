@@ -23,7 +23,6 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Titles\Title;
 use App\Queries\Titles\TitleChampionshipQuery;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<Title> */
@@ -73,24 +72,13 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make('Status', 'status')
-                ->options([
-                    '' => 'All',
-                    TitleStatus::Undebuted->value => TitleStatus::Undebuted->label(),
-                    TitleStatus::PendingDebut->value => TitleStatus::PendingDebut->label(),
-                    TitleStatus::Active->value => TitleStatus::Active->label(),
-                    TitleStatus::Inactive->value => TitleStatus::Inactive->label(),
-                    TitleStatus::Retired->value => TitleStatus::Retired->label(),
-                ])
-                ->filter(function (Builder $builder, string $value): void {
-                    /** @var TitleBuilder<Title> $builder */
-                    match (TitleStatus::tryFrom($value)) {
-                        TitleStatus::Undebuted => $builder->undebuted(),
-                        TitleStatus::PendingDebut => $builder->withPendingDebut(),
-                        TitleStatus::Active => $builder->active(),
-                        TitleStatus::Inactive => $builder->inactive(),
-                        TitleStatus::Retired => $builder->retired(),
-                        default => null,
-                    };
+                ->options(TitleStatus::filterOptions())
+                ->filter(function (TitleBuilder $builder, string $value): void {
+                    $status = TitleStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereStatus($status);
+                    }
                 }),
             SelectFilter::make('Type', 'type')
                 ->options([
@@ -98,8 +86,7 @@ class Main extends BaseTable
                     TitleType::Singles->value => TitleType::Singles->label(),
                     TitleType::TagTeam->value => TitleType::TagTeam->label(),
                 ])
-                ->filter(function (Builder $builder, string $value): void {
-                    /** @var TitleBuilder<Title> $builder */
+                ->filter(function (TitleBuilder $builder, string $value): void {
                     $type = TitleType::tryFrom($value);
 
                     if ($type !== null) {

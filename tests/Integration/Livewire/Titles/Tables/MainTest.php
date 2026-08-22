@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Tables\Main;
 use App\Livewire\Titles\Tables\TitlesTable;
@@ -112,17 +113,25 @@ describe('TitlesTable Component', function () {
         });
 
         test('status filter functionality works with real data', function () {
-            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
-            $retiredTitle = Title::factory()->retired()->create(['name' => 'Retired Title']);
-            $undebutedTitle = Title::factory()->create(['name' => 'Undebuted Title']);
+            $titles = [
+                TitleStatus::Undebuted->value => Title::factory()->undebuted()->create(['name' => 'Undebuted Title']),
+                TitleStatus::PendingDebut->value => Title::factory()->withFutureDebut()->create(['name' => 'Pending Title']),
+                TitleStatus::Active->value => Title::factory()->active()->create(['name' => 'Active Title']),
+                TitleStatus::Inactive->value => Title::factory()->inactive()->create(['name' => 'Inactive Title']),
+                TitleStatus::Retired->value => Title::factory()->retired()->create(['name' => 'Retired Title']),
+            ];
 
-            $component = livewire(Main::class);
+            foreach ($titles as $status => $visibleTitle) {
+                $component = livewire(Main::class)
+                    ->set('filterValues.status', $status)
+                    ->assertSee($visibleTitle->name);
 
-            // Test filtering by status (if component supports it)
-            $component
-                ->assertSee('Active Title')
-                ->assertSee('Retired Title')
-                ->assertSee('Undebuted Title');
+                foreach ($titles as $otherStatus => $hiddenTitle) {
+                    if ($otherStatus !== $status) {
+                        $component->assertDontSee($hiddenTitle->name);
+                    }
+                }
+            }
         });
 
         test('type filter integration works correctly', function () {
