@@ -9,7 +9,6 @@ use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Livewire\Table\Column;
 use App\Models\Roster\Managers\Manager;
 use App\Queries\Roster\StableManagerHistoryQuery;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -22,9 +21,9 @@ class PreviousManagers extends BasePreviousManagersTable
     public ?int $stableId;
 
     /**
-     * @return Builder<Manager>
+     * @return ManagerBuilder<Manager>
      */
-    public function builder(): Builder
+    public function builder(): ManagerBuilder
     {
         if (! isset($this->stableId)) {
             throw new LogicException('A stable was not provided.');
