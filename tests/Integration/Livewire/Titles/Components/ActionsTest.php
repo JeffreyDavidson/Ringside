@@ -62,6 +62,11 @@ describe('Title Debut Actions', function () {
 
         $component->assertHasNoErrors();
         $component->assertDispatched('title-updated');
+        $component->assertDispatched(
+            'flash-message',
+            type: 'status',
+            message: 'Title successfully debuted.',
+        );
 
         // Verify the title status changed through the action
         expect(freshModel($title)->isCurrentlyActive())->toBeTrue();

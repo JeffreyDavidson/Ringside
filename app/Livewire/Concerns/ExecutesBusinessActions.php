@@ -15,13 +15,17 @@ trait ExecutesBusinessActions
         try {
             $action();
         } catch (BaseBusinessException $exception) {
-            session()->flash('error', $exception->getMessage());
+            $message = $exception->getMessage();
+
+            session()->flash('error', $message);
+            $this->dispatch('flash-message', type: 'error', message: $message);
 
             return false;
         }
 
         if ($successMessage !== null) {
             session()->flash('status', $successMessage);
+            $this->dispatch('flash-message', type: 'status', message: $successMessage);
         }
 
         return true;

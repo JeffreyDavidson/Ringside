@@ -40,12 +40,18 @@ trait ExecutesRosterActions
         try {
             $action();
 
+            $message = __("{$entityType->translationNamespace()}.actions.{$actionName}");
+
             $this->dispatch("{$entityType->value}-updated");
-            session()->flash('status', __("{$entityType->translationNamespace()}.actions.{$actionName}"));
+            session()->flash('status', $message);
+            $this->dispatch('flash-message', type: 'status', message: $message);
 
             return true;
         } catch (BaseBusinessException $exception) {
-            session()->flash('error', __(ErrorMessageMappingService::map($exception, $entityType)));
+            $message = __(ErrorMessageMappingService::map($exception, $entityType));
+
+            session()->flash('error', $message);
+            $this->dispatch('flash-message', type: 'error', message: $message);
 
             return false;
         }
