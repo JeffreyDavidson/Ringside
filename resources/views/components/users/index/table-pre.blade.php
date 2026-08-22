@@ -3,7 +3,7 @@
         <x-tables.meta-data enum="\App\Enums\Users\UserStatus" />
     </div>
     <div class="flex items-center gap-2.5">
-        @can('create', \App\Models\User::class)
+        @can('create', \App\Models\Users\User::class)
             <x-buttons.primary size="sm" @click="$dispatch('openModal', { component: 'users.modals.form-modal' })">
                 Add User</x-buttons.primary>
         @endcan

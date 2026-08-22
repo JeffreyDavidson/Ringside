@@ -38,6 +38,12 @@ describe('Main Component Integration', function () {
     });
 
     describe('component rendering integration', function () {
+        test('renders the configured table header and search prompt', function () {
+            livewire(Main::class)
+                ->assertSee('Add Wrestler')
+                ->assertSeeHtml('placeholder="Search wrestlers"');
+        });
+
         /** @group wrestlers @group tables @group rendering */
         test('renders wrestlers table with complete data relationships', function () {
             // Create wrestlers with different statuses and relationships

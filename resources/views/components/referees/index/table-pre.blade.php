@@ -1,6 +1,6 @@
 <x-layouts.table-header title="Referees">
     <x-slot:actions>
-        @can('create', \App\Models\Referee::class)
+        @can('create', \App\Models\Roster\Referees\Referee::class)
             <x-buttons.primary size="sm" @click="$dispatch('openModal', { component: 'referees.modals.form-modal' })">
                 Add Referee</x-buttons.primary>
         @endcan
