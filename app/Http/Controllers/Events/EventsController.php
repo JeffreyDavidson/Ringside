@@ -17,12 +17,7 @@ class EventsController
     public function show(Event $event): View
     {
         return view('events.show', [
-            'event' => $event->load([
-                'venue',
-                'matches.referees',
-                'matches.titles',
-                'matches.competitors.competitor',
-            ]),
+            'event' => $event->load('venue'),
         ]);
     }
 }
