@@ -27,6 +27,16 @@ describe('Form Modal Initialization', function () {
         $modal->assertViewIs('livewire.venues.modals.form-modal');
     });
 
+    it('binds the modal fields to the form object', function () {
+        livewire(FormModal::class)
+            ->call('openModal')
+            ->assertPropertyWired('form.name')
+            ->assertPropertyWired('form.street_address')
+            ->assertPropertyWired('form.city')
+            ->assertPropertyWired('form.state')
+            ->assertPropertyWired('form.zipcode');
+    });
+
     it('initializes with empty form for creation', function () {
         $modal = livewire(FormModal::class);
 
