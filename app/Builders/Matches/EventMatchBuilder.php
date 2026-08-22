@@ -44,6 +44,7 @@ class EventMatchBuilder extends Builder
         return $this
             ->forPastEvents()
             ->with([
+                'referees',
                 'titles',
                 'competitors.competitor',
                 'competitors.side',
