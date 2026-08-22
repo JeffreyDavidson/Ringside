@@ -183,6 +183,11 @@ describe('EventsTable Component Integration', function () {
                 ->assertSee('Event at Venue One')
                 ->assertSee('Event at Venue Two')
                 ->assertSee('Event with No Venue');
+
+            $component->set('filterValues.venue', (string) $venue1->id)
+                ->assertSee('Event at Venue One')
+                ->assertDontSee('Event at Venue Two')
+                ->assertDontSee('Event with No Venue');
         });
 
         test('date range filter functionality', function () {
