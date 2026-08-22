@@ -10,7 +10,7 @@ test('it flashes the provided message after a successful business action', funct
     {
         use ExecutesBusinessActions;
 
-        /** @var list<array{event: string, parameters: array<string, mixed>}> */
+        /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
         public array $dispatchedEvents = [];
 
         public function execute(): bool
@@ -48,7 +48,7 @@ test('it flashes and dispatches business action failures', function (): void {
     {
         use ExecutesBusinessActions;
 
-        /** @var list<array{event: string, parameters: array<string, mixed>}> */
+        /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
         public array $dispatchedEvents = [];
 
         public function execute(): bool

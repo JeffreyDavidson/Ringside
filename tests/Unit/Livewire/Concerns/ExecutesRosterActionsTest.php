@@ -13,7 +13,7 @@ test('it flashes successful roster actions under the standard status key', funct
     {
         use ExecutesRosterActions;
 
-        /** @var list<array{event: string, parameters: array<string, mixed>}> */
+        /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
         public array $dispatchedEvents = [];
 
         public function execute(): bool
