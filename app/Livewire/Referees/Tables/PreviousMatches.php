@@ -19,10 +19,6 @@ class PreviousMatches extends BasePreviousMatchesTable
     #[Locked]
     public ?int $refereeId;
 
-    protected string $databaseTableName = 'event_matches';
-
-    protected string $resourceName = 'matches';
-
     /**
      * @return Builder<EventMatch>
      */
