@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Referees\Tables;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -19,10 +19,8 @@ class PreviousMatches extends BasePreviousMatchesTable
     #[Locked]
     public ?int $refereeId;
 
-    /**
-     * @return Builder<EventMatch>
-     */
-    public function builder(): Builder
+    /** @return EventMatchBuilder<EventMatch> */
+    public function builder(): EventMatchBuilder
     {
         if (! isset($this->refereeId)) {
             throw new LogicException('A referee was not provided.');
