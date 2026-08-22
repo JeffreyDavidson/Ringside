@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Managers\Tables;
 
+use App\Builders\Roster\StableBuilder;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Livewire\Table\Column;
 use App\Models\Roster\Stables\Stable;
 use App\Queries\Roster\StableManagerHistoryQuery;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -28,9 +28,9 @@ class PreviousStables extends BasePreviousStablesTable
     /**
      * Get stables that the manager was associated with through wrestlers/tag teams they managed.
      *
-     * @return Builder<Stable>
+     * @return StableBuilder<Stable>
      */
-    public function builder(): Builder
+    public function builder(): StableBuilder
     {
         if (! isset($this->managerId)) {
             throw new LogicException('A manager was not provided.');

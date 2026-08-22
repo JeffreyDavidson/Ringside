@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Wrestlers\Tables;
 
+use App\Builders\Roster\StableBuilder;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -22,9 +22,9 @@ class PreviousStables extends BasePreviousStablesTable
     public string $databaseTableName = 'stables_wrestlers';
 
     /**
-     * @return Builder<Stable>
+     * @return StableBuilder<Stable>
      */
-    public function builder(): Builder
+    public function builder(): StableBuilder
     {
         if (! isset($this->wrestlerId)) {
             throw new LogicException('A wrestler was not provided.');

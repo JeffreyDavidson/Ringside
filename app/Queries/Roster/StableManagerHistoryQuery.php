@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Queries\Roster;
 
+use App\Builders\Roster\ManagerBuilder;
+use App\Builders\Roster\StableBuilder;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,8 +13,8 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 final class StableManagerHistoryQuery
 {
-    /** @return Builder<Stable> */
-    public static function previousStablesForManagerId(int $managerId): Builder
+    /** @return StableBuilder<Stable> */
+    public static function previousStablesForManagerId(int $managerId): StableBuilder
     {
         return Stable::query()
             ->where(function (Builder $stableQuery) use ($managerId): void {
@@ -41,8 +43,8 @@ final class StableManagerHistoryQuery
             ->orderBy('stables.name');
     }
 
-    /** @return Builder<Manager> */
-    public static function previousManagersForStableId(int $stableId): Builder
+    /** @return ManagerBuilder<Manager> */
+    public static function previousManagersForStableId(int $stableId): ManagerBuilder
     {
         return Manager::query()
             ->where(function (Builder $managerQuery) use ($stableId): void {

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\TagTeams\Tables;
 
+use App\Builders\Roster\StableBuilder;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -19,9 +19,9 @@ class PreviousStables extends BasePreviousStablesTable
     public ?int $tagTeamId;
 
     /**
-     * @return Builder<Stable>
+     * @return StableBuilder<Stable>
      */
-    public function builder(): Builder
+    public function builder(): StableBuilder
     {
         if (! isset($this->tagTeamId)) {
             throw new LogicException('A tag team was not provided.');
