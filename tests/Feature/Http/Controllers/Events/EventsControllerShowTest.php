@@ -34,13 +34,14 @@ describe('Events Controller', function () {
     /**
      * @see EventsController::show()
      */
-    test('show loads an event with matches', function () {
+    test('show loads only the relationship rendered by the event summary', function () {
         EventMatch::factory()->for($this->event)->create();
 
         actingAs(administrator())
             ->get(action([EventsController::class, 'show'], $this->event))
             ->assertOk()
-            ->assertViewHas('event', fn (Event $event): bool => $event->relationLoaded('matches'));
+            ->assertViewHas('event', fn (Event $event): bool => $event->relationLoaded('venue')
+                && ! $event->relationLoaded('matches'));
     });
 
     /**
