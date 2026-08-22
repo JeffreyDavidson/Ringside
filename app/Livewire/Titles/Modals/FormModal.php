@@ -12,6 +12,7 @@ use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Models\Titles\Title;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Title>
@@ -51,6 +52,13 @@ class FormModal extends BaseFormModal
         }
 
         return 'Create Title';
+    }
+
+    /** @return array<string, string> */
+    #[Computed]
+    public function getTitleTypes(): array
+    {
+        return TitleType::options();
     }
 
     protected function storeForm(): bool

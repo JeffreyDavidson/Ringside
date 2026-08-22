@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'name' => 'Title Name',
+    'type' => 'Title Type',
 
     'actions' => [
         'deleted' => 'Title successfully deleted.',

@@ -33,6 +33,14 @@ describe('FormModal Configuration', function () {
 });
 
 describe('FormModal Rendering', function () {
+    it('renders the required title type selector', function () {
+        livewire(FormModal::class)
+            ->call('openModal')
+            ->assertSeeHtml('wire:model="form.type"')
+            ->assertSee('Singles')
+            ->assertSee('Tag Team');
+    });
+
     it('can render in create mode', function () {
         $component = livewire(FormModal::class)
             ->call('openModal');
