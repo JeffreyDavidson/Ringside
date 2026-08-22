@@ -16,6 +16,8 @@ class TitlesController
 
     public function show(Title $title): View
     {
-        return view('titles.show', ['title' => $title]);
+        return view('titles.show', [
+            'title' => $title->load('firstActivityPeriod'),
+        ]);
     }
 }
