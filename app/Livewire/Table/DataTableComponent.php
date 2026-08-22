@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Table;
 
+use App\Livewire\Table\Filters\SelectFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -69,6 +71,39 @@ abstract class DataTableComponent extends Component
     public function filters(): array
     {
         return [];
+    }
+
+    /**
+     * @return array{total: int, statuses: list<array{value: string, label: string, count: int}>}
+     */
+    #[Computed]
+    public function metadata(): array
+    {
+        $statusFilter = collect($this->filters())
+            ->first(fn (Filter $filter): bool => $filter instanceof SelectFilter && $filter->getKey() === 'status');
+
+        $statuses = [];
+
+        if ($statusFilter instanceof SelectFilter) {
+            foreach ($statusFilter->getOptions() as $value => $label) {
+                if ($value === '') {
+                    continue;
+                }
+
+                $query = $this->builder();
+                $statusFilter->apply($query, $value);
+                $statuses[] = [
+                    'value' => (string) $value,
+                    'label' => $label,
+                    'count' => $query->count(),
+                ];
+            }
+        }
+
+        return [
+            'total' => $this->builder()->count(),
+            'statuses' => $statuses,
+        ];
     }
 
     public function mount(): void

@@ -12,6 +12,7 @@ use App\Actions\Titles\RestoreAction;
 use App\Actions\Titles\RetireAction;
 use App\Actions\Titles\UnretireAction;
 use App\Builders\Titles\TitleBuilder;
+use App\Enums\Titles\TitleStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
@@ -73,18 +74,20 @@ class Main extends BaseTable
             SelectFilter::make('Status', 'status')
                 ->options([
                     '' => 'All',
-                    'undebuted' => 'Undebuted',
-                    'active' => 'Active',
-                    'inactive' => 'Inactive',
-                    'with_pending_debut' => 'Pending Debut',
+                    TitleStatus::Undebuted->value => TitleStatus::Undebuted->label(),
+                    TitleStatus::PendingDebut->value => TitleStatus::PendingDebut->label(),
+                    TitleStatus::Active->value => TitleStatus::Active->label(),
+                    TitleStatus::Inactive->value => TitleStatus::Inactive->label(),
+                    TitleStatus::Retired->value => TitleStatus::Retired->label(),
                 ])
                 ->filter(function (Builder $builder, string $value): void {
                     /** @var TitleBuilder<Title> $builder */
-                    match ($value) {
-                        'undebuted' => $builder->undebuted(),
-                        'active' => $builder->active(),
-                        'inactive' => $builder->inactive(),
-                        'with_pending_debut' => $builder->withPendingDebut(),
+                    match (TitleStatus::tryFrom($value)) {
+                        TitleStatus::Undebuted => $builder->undebuted(),
+                        TitleStatus::PendingDebut => $builder->withPendingDebut(),
+                        TitleStatus::Active => $builder->active(),
+                        TitleStatus::Inactive => $builder->inactive(),
+                        TitleStatus::Retired => $builder->retired(),
                         default => null,
                     };
                 }),

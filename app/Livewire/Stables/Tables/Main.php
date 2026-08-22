@@ -11,6 +11,7 @@ use App\Actions\Stables\RestoreAction;
 use App\Actions\Stables\RetireAction;
 use App\Actions\Stables\UnretireAction;
 use App\Builders\Roster\StableBuilder;
+use App\Enums\Stables\StableStatus;
 use App\Livewire\Base\Tables\BaseTable;
 use App\Livewire\Components\Tables\Columns\FirstActivityPeriodColumn;
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
@@ -73,18 +74,20 @@ class Main extends BaseTable
             SelectFilter::make('Status', 'status')
                 ->options([
                     '' => 'All',
-                    'unestablished' => 'Unestablished',
-                    'established' => 'Established',
-                    'disbanded' => 'Disbanded',
-                    'with_future_establishment' => 'Pending Establishment',
+                    StableStatus::Unformed->value => StableStatus::Unformed->label(),
+                    StableStatus::PendingEstablishment->value => StableStatus::PendingEstablishment->label(),
+                    StableStatus::Active->value => StableStatus::Active->label(),
+                    StableStatus::Inactive->value => StableStatus::Inactive->label(),
+                    StableStatus::Retired->value => StableStatus::Retired->label(),
                 ])
                 ->filter(function (Builder $builder, string $value): void {
                     /** @var StableBuilder<Stable> $builder */
-                    match ($value) {
-                        'unestablished' => $builder->unestablished(),
-                        'established' => $builder->established(),
-                        'disbanded' => $builder->disbanded(),
-                        'with_future_establishment' => $builder->withFutureEstablishment(),
+                    match (StableStatus::tryFrom($value)) {
+                        StableStatus::Unformed => $builder->unestablished(),
+                        StableStatus::PendingEstablishment => $builder->withFutureEstablishment(),
+                        StableStatus::Active => $builder->established(),
+                        StableStatus::Inactive => $builder->disbanded(),
+                        StableStatus::Retired => $builder->retired(),
                         default => null,
                     };
                 }),

@@ -7,4 +7,4 @@
     </x-slot:actions>
 </x-layouts.table-header>
 
-<x-tables.meta-data enum="\App\Enums\Shared\ActivationStatus" />
+<x-tables.meta-data />
