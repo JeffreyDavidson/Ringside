@@ -42,6 +42,20 @@ describe('Wrestlers Controller', function () {
     /**
      * @see WrestlersController::show()
      */
+    test('show loads only the relationships rendered by the wrestler summary', function () {
+        actingAs(administrator())
+            ->get(action([WrestlersController::class, 'show'], $this->wrestler))
+            ->assertOk()
+            ->assertViewHas('wrestler', fn (Wrestler $wrestler): bool => count($wrestler->getRelations()) === 4
+                && $wrestler->relationLoaded('currentManagers')
+                && $wrestler->relationLoaded('currentStable')
+                && $wrestler->relationLoaded('currentTagTeam')
+                && $wrestler->relationLoaded('firstEmployment'));
+    });
+
+    /**
+     * @see WrestlersController::show()
+     */
     test('a basic user cannot view wrestler profiles', function () {
         actingAs(basicUser())
             ->get(action([WrestlersController::class, 'show'], $this->wrestler))
