@@ -121,6 +121,37 @@ describe('UsersTable Component', function () {
     });
 
     describe('filtering and search integration', function () {
+        test('status filter returns only users with the selected status', function () {
+            $users = [
+                UserStatus::Unverified->value => User::factory()->unverified()->create([
+                    'first_name' => 'Unverified',
+                    'last_name' => 'Account',
+                ]),
+                UserStatus::Active->value => User::factory()->create([
+                    'status' => UserStatus::Active,
+                    'first_name' => 'Active',
+                    'last_name' => 'Account',
+                ]),
+                UserStatus::Inactive->value => User::factory()->create([
+                    'status' => UserStatus::Inactive,
+                    'first_name' => 'Inactive',
+                    'last_name' => 'Account',
+                ]),
+            ];
+
+            foreach ($users as $status => $visibleUser) {
+                $component = livewire(Main::class)
+                    ->set('filterValues.status', $status)
+                    ->assertSee("{$visibleUser->first_name} {$visibleUser->last_name}");
+
+                foreach ($users as $otherStatus => $hiddenUser) {
+                    if ($otherStatus !== $status) {
+                        $component->assertDontSee("{$hiddenUser->first_name} {$hiddenUser->last_name}");
+                    }
+                }
+            }
+        });
+
         test('search functionality filters users by name correctly', function () {
             $john = User::factory()->create([
                 'first_name' => 'John',

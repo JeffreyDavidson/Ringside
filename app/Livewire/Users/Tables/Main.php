@@ -56,14 +56,13 @@ class Main extends BaseTable
     {
         return [
             SelectFilter::make(__('core.status'))
-                ->options([
-                    '' => __('core.all'),
-                    UserStatus::Unverified->value => UserStatus::Unverified->label(),
-                    UserStatus::Active->value => UserStatus::Active->label(),
-                    UserStatus::Inactive->value => UserStatus::Inactive->label(),
-                ])
+                ->options(UserStatus::filterOptions())
                 ->filter(function (UserBuilder $builder, string $value): void {
-                    $builder->where('status', $value);
+                    $status = UserStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereStatus($status);
+                    }
                 }),
         ];
     }
