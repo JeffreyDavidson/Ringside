@@ -7,7 +7,7 @@ namespace App\Livewire\Concerns;
 use App\Enums\Roster\RosterEntityType;
 use App\Enums\Roster\RosterLifecycleAction;
 use App\Exceptions\BaseBusinessException;
-use App\Services\ErrorMessageMappingService;
+use App\Livewire\Support\RosterErrorMessageResolver;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
@@ -48,7 +48,7 @@ trait ExecutesRosterActions
 
             return true;
         } catch (BaseBusinessException $exception) {
-            $message = __(ErrorMessageMappingService::map($exception, $entityType));
+            $message = __(RosterErrorMessageResolver::translationKey($exception, $entityType));
 
             session()->flash('error', $message);
             $this->dispatch('flash-message', type: 'error', message: $message);

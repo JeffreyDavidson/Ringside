@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Livewire\Support;
 
 use App\Enums\BusinessRuleReason;
 use App\Enums\Roster\RosterEntityType;
@@ -24,9 +24,9 @@ use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRe
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
 
-final class ErrorMessageMappingService
+final class RosterErrorMessageResolver
 {
-    public static function map(BaseBusinessException $exception, RosterEntityType $entityType): string
+    public static function translationKey(BaseBusinessException $exception, RosterEntityType $entityType): string
     {
         $reason = $exception->reason();
 
