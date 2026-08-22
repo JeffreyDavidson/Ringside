@@ -7,6 +7,7 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\ProjectsActivityStatus;
+use App\Enums\Stables\StableStatus;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
@@ -22,6 +23,17 @@ class StableBuilder extends Builder
     use FiltersByName;
     use FiltersByRetirementStatus;
     use ProjectsActivityStatus;
+
+    public function whereStatus(StableStatus $status): static
+    {
+        return match ($status) {
+            StableStatus::Unformed => $this->unestablished(),
+            StableStatus::PendingEstablishment => $this->withFutureEstablishment(),
+            StableStatus::Active => $this->established(),
+            StableStatus::Inactive => $this->disbanded(),
+            StableStatus::Retired => $this->retired(),
+        };
+    }
 
     public function previousForTagTeamId(int $tagTeamId): static
     {
@@ -71,6 +83,7 @@ class StableBuilder extends Builder
     {
         return $this->whereHas('previousActivityPeriods')
             ->whereDoesntHave('currentActivityPeriod')
+            ->whereDoesntHave('futureActivityPeriod')
             ->whereDoesntHave('currentRetirement');
     }
 
