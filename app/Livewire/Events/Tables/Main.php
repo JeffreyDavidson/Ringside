@@ -131,7 +131,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($event): void {
             resolve(DeleteAction::class)->handle($event);
-        }, 'Event successfully deleted.');
+        }, __('events.actions.deleted'));
     }
 
     /**
@@ -145,7 +145,7 @@ class Main extends BaseTable
 
         if ($this->executeBusinessAction(function () use ($event): void {
             resolve(RestoreAction::class)->handle($event);
-        }, 'Event successfully restored.')) {
+        }, __('events.actions.restored'))) {
             $this->redirectRoute('events.index');
         }
     }

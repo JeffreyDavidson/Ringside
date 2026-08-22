@@ -528,3 +528,10 @@ describe('EventsTable Component Integration', function () {
         });
     });
 });
+
+it('provides translated event action messages', function (string $action, string $message) {
+    expect(__("events.actions.{$action}"))->toBe($message);
+})->with([
+    'deleted' => ['deleted', 'Event successfully deleted.'],
+    'restored' => ['restored', 'Event successfully restored.'],
+]);
