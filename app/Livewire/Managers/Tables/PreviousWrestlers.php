@@ -37,6 +37,7 @@ class PreviousWrestlers extends DataTableComponent
         return WrestlerManager::query()
             ->forManagerId($this->managerId)
             ->ended()
+            ->with('wrestler')
             ->mostRecentlyHiredFirst();
     }
 
