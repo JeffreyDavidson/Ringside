@@ -64,7 +64,7 @@ class Main extends BaseTable
 
         $this->executeBusinessAction(function () use ($venue): void {
             resolve(DeleteAction::class)->handle($venue);
-        }, 'Venue successfully deleted.');
+        }, __('venues.actions.deleted'));
     }
 
     /**
@@ -78,7 +78,7 @@ class Main extends BaseTable
 
         if ($this->executeBusinessAction(function () use ($venue): void {
             resolve(RestoreAction::class)->handle($venue);
-        })) {
+        }, __('venues.actions.restored'))) {
             $this->redirectRoute('venues.index');
         }
 

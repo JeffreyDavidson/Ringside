@@ -494,3 +494,10 @@ describe('VenuesTable Integration Tests', function () {
         });
     });
 });
+
+it('provides translated venue action messages', function (string $action, string $message) {
+    expect(__("venues.actions.{$action}"))->toBe($message);
+})->with([
+    'deleted' => ['deleted', 'Venue successfully deleted.'],
+    'restored' => ['restored', 'Venue successfully restored.'],
+]);
