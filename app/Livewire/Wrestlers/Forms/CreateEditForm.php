@@ -219,8 +219,8 @@ class CreateEditForm extends BaseForm
     protected function validationAttributes(): array
     {
         return [
-            'height_feet' => 'first name',
-            'height_inches' => 'last name',
+            'height_feet' => 'height in feet',
+            'height_inches' => 'height in inches',
             'signature_move' => 'signature move',
             'employment_date' => 'employment date',
         ];
