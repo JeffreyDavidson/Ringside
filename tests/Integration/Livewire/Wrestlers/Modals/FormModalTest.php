@@ -81,6 +81,12 @@ describe('FormModal Component Functionality', function () {
 });
 
 describe('FormModal Form Integration', function () {
+    it('binds the employment date input to the form property', function () {
+        livewire(FormModal::class)
+            ->assertSeeHtml('wire:model="form.employment_date"')
+            ->assertDontSeeHtml('wire:model="form.start_date"');
+    });
+
     it('handles form submission correctly', function () {
         $component = livewire(FormModal::class);
 
@@ -104,6 +110,20 @@ describe('FormModal Form Integration', function () {
             ->assertHasErrors(['form.name' => 'required']);
 
         $component->assertSuccessful(); // Modal should stay open on validation errors
+    });
+
+    it('uses height field names in validation messages', function () {
+        livewire(FormModal::class)
+            ->set('form.name', 'Test Wrestler')
+            ->set('form.hometown', 'Test City, TX')
+            ->set('form.height_feet', 8)
+            ->set('form.height_inches', 12)
+            ->set('form.weight', 220)
+            ->call('submitForm')
+            ->assertHasErrors([
+                'form.height_feet' => 'The height in feet field must not be greater than 7.',
+                'form.height_inches' => 'The height in inches field must not be greater than 11.',
+            ]);
     });
 
     it('handles form update correctly', function () {
