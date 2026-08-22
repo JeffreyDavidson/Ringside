@@ -33,6 +33,17 @@ describe('Referees Controller', function () {
     /**
      * @see RefereesController::show()
      */
+    test('show loads only the relationship rendered by the referee summary', function () {
+        actingAs(administrator())
+            ->get(action([RefereesController::class, 'show'], $this->referee))
+            ->assertOk()
+            ->assertViewHas('referee', fn (Referee $referee): bool => count($referee->getRelations()) === 1
+                && $referee->relationLoaded('firstEmployment'));
+    });
+
+    /**
+     * @see RefereesController::show()
+     */
     test('a basic user cannot view a referee profile', function () {
         actingAs(basicUser())
             ->get(action([RefereesController::class, 'show'], $this->referee))
