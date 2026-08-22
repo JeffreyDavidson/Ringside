@@ -63,6 +63,7 @@ it('retrieves match history with its display relationships eager loaded and orde
     expect($history)->toHaveCount(1)
         ->and($history->firstOrFail()->is($match))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('event'))->toBeTrue()
+        ->and($history->firstOrFail()->relationLoaded('referees'))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('titles'))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('competitors'))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('winningSide'))->toBeTrue();
