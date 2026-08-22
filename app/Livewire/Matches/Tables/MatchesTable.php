@@ -45,7 +45,7 @@ class MatchesTable extends DataTableComponent
         }
 
         return EventMatch::query()
-            ->with(['event', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
+            ->with(['event', 'referees', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
             ->where('event_id', $this->eventId);
     }
 
