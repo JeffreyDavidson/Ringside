@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\Stables\StableStatus;
 use App\Livewire\Stables\Tables\Main;
 use App\Livewire\Stables\Tables\StablesTable;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -133,22 +134,35 @@ describe('StablesTable Component', function () {
         });
 
         test('status filter works correctly', function () {
-            $activeStable = Stable::factory()->active()->create(['name' => 'Active Stable']);
-            $retiredStable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
-            $disbandedStable = Stable::factory()->disbanded()->create(['name' => 'Disbanded Stable']);
+            $stables = [
+                StableStatus::Unformed->value => Stable::factory()->unactivated()->create(['name' => 'Unformed Stable']),
+                StableStatus::PendingEstablishment->value => Stable::factory()
+                    ->has(
+                        ActivityPeriod::factory()
+                            ->started(now()->subDays(4))
+                            ->ended(now()->subDays(2)),
+                        'activityPeriods',
+                    )
+                    ->has(ActivityPeriod::factory()->started(now()->addDays(2)), 'activityPeriods')
+                    ->create(['name' => 'Pending Stable']),
+                StableStatus::Active->value => Stable::factory()->active()->create(['name' => 'Active Stable']),
+                StableStatus::Inactive->value => Stable::factory()->disbanded()->create(['name' => 'Inactive Stable']),
+                StableStatus::Retired->value => Stable::factory()->retired()->create(['name' => 'Retired Stable']),
+            ];
 
             actingAs($this->admin);
 
-            $component = livewire(Main::class);
+            foreach ($stables as $status => $visibleStable) {
+                $component = livewire(Main::class)
+                    ->set('filterValues.status', $status)
+                    ->assertSee($visibleStable->name);
 
-            // Initially should see all stables
-            $component->assertSee('Active Stable')
-                ->assertSee('Retired Stable')
-                ->assertSee('Disbanded Stable');
-
-            // Test filtering (exact filter implementation depends on component)
-            // This verifies the component loads and displays filtered content
-            $component->assertOk();
+                foreach ($stables as $otherStatus => $hiddenStable) {
+                    if ($otherStatus !== $status) {
+                        $component->assertDontSee($hiddenStable->name);
+                    }
+                }
+            }
         });
 
         test('activity period filter functionality', function () {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -41,6 +42,15 @@ test('disbanded stables can be retrieved', function () {
     $inactiveStable = Stable::factory()->inactive()->create();
     $retiredStable = Stable::factory()->retired()->create();
     $unactivatedStable = Stable::factory()->unactivated()->create();
+    $pendingReestablishmentStable = Stable::factory()
+        ->has(
+            ActivityPeriod::factory()
+                ->started(now()->subDays(4))
+                ->ended(now()->subDays(2)),
+            'activityPeriods',
+        )
+        ->has(ActivityPeriod::factory()->started(now()->addDays(2)), 'activityPeriods')
+        ->create();
 
     $inactiveStables = Stable::query()->disbanded()->get();
 

@@ -82,14 +82,11 @@ class Main extends BaseTable
                 ])
                 ->filter(function (Builder $builder, string $value): void {
                     /** @var StableBuilder<Stable> $builder */
-                    match (StableStatus::tryFrom($value)) {
-                        StableStatus::Unformed => $builder->unestablished(),
-                        StableStatus::PendingEstablishment => $builder->withFutureEstablishment(),
-                        StableStatus::Active => $builder->established(),
-                        StableStatus::Inactive => $builder->disbanded(),
-                        StableStatus::Retired => $builder->retired(),
-                        default => null,
-                    };
+                    $status = StableStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereStatus($status);
+                    }
                 }),
             FirstActivityPeriodFilter::make('Activation Date')->setFields('activityPeriods', 'activity_periods.started_at', 'activity_periods.ended_at'),
         ];
