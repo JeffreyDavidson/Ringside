@@ -7,6 +7,7 @@ namespace App\Builders\Titles;
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByRetirementStatus;
 use App\Builders\Concerns\ProjectsActivityStatus;
+use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +26,17 @@ class TitleBuilder extends Builder
     public function whereType(TitleType $type): static
     {
         return $this->where('type', $type->value);
+    }
+
+    public function whereStatus(TitleStatus $status): static
+    {
+        return match ($status) {
+            TitleStatus::Undebuted => $this->undebuted(),
+            TitleStatus::PendingDebut => $this->withPendingDebut(),
+            TitleStatus::Active => $this->active(),
+            TitleStatus::Inactive => $this->inactive(),
+            TitleStatus::Retired => $this->retired(),
+        };
     }
 
     public function undebuted(): static
