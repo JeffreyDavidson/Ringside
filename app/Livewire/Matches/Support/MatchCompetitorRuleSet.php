@@ -131,7 +131,7 @@ final readonly class MatchCompetitorRuleSet
 
         return [
             'competitors' => ['required', 'array', 'list', $requiredSides === null ? 'min:2' : "size:{$requiredSides}"],
-            'competitors.*.wrestlers' => ['sometimes', 'array'],
+            'competitors.*.wrestlers' => ['required_without:competitors.*.tag_teams', 'array'],
             'competitors.*.wrestlers.*' => ['bail', 'integer', 'distinct', 'exists:wrestlers,id', new WrestlerIsBookable()],
             'competitors.*.tag_teams' => ['sometimes', 'array'],
             'competitors.*.tag_teams.*' => ['bail', 'integer', 'distinct', 'exists:tag_teams,id', new TagTeamIsBookable()],

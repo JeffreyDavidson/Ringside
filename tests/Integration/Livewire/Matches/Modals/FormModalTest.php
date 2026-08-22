@@ -253,6 +253,25 @@ describe('FormModal Create Operations', function () {
         $component->assertHasErrors(['form.competitors']);
     });
 
+    it('requires a competitor on every flexible match side', function (MatchType $matchType) {
+        $wrestler = Wrestler::factory()->bookable()->create();
+        $referee = Referee::factory()->bookable()->create();
+
+        livewire(FormModal::class, ['eventId' => $this->event->id])
+            ->call('openModal')
+            ->set('form.matchType', $matchType)
+            ->set('form.referees', [$referee->id])
+            ->set('form.competitors.0.wrestlers', [$wrestler->id])
+            ->call('save')
+            ->assertHasErrors([
+                'form.competitors.1.wrestlers' => 'required_without',
+            ]);
+    })->with([
+        MatchType::TwoOnOneHandicap,
+        MatchType::ThreeOnTwoHandicap,
+        MatchType::Gauntlet,
+    ]);
+
     it('validates match type exists', function () {
         $wrestler1 = Wrestler::factory()->bookable()->create();
         $wrestler2 = Wrestler::factory()->bookable()->create();
