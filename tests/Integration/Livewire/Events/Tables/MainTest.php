@@ -191,16 +191,22 @@ describe('EventsTable Component Integration', function () {
         });
 
         test('date range filter functionality', function () {
-            $earlyEvent = Event::factory()->scheduledOn('2024-01-15')->create(['name' => 'Early Event']);
-            $lateEvent = Event::factory()->scheduledOn('2024-12-15')->create(['name' => 'Late Event']);
+            Event::factory()->scheduledOn('2024-05-31 23:59:59')->create(['name' => 'Before Range Event']);
+            Event::factory()->scheduledOn('2024-06-15 19:00:00')->create(['name' => 'Within Range Event']);
+            Event::factory()->scheduledOn('2024-06-30 23:59:59')->create(['name' => 'End Date Event']);
+            Event::factory()->scheduledOn('2024-07-01 00:00:00')->create(['name' => 'After Range Event']);
 
             actingAs($this->admin);
 
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Early Event')
-                ->assertSee('Late Event');
+            livewire(Main::class)
+                ->set('filterValues.event_dates', [
+                    'minDate' => '2024-06-01',
+                    'maxDate' => '2024-06-30',
+                ])
+                ->assertDontSee('Before Range Event')
+                ->assertSee('Within Range Event')
+                ->assertSee('End Date Event')
+                ->assertDontSee('After Range Event');
         });
     });
 

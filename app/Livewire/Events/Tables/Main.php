@@ -18,7 +18,7 @@ use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\DateRangeFilter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Events\Event;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -114,9 +114,19 @@ class Main extends BaseTable
                     'locale' => 'en',
                 ])
                 ->setFilterPillValues([0 => 'minDate', 1 => 'maxDate']) // The values that will be displayed for the Min/Max Date Values
-                ->filter(function (Builder $builder, array $dateRange): void { // Expects an array.
-                    $builder
-                        ->whereBetween('date', [$dateRange['minDate'], $dateRange['maxDate']]);
+                ->filter(function (EventBuilder $builder, array $dateRange): void {
+                    /** @var array{minDate: string, maxDate: string} $dateRange */
+                    $startDate = Date::createFromFormat('Y-m-d', $dateRange['minDate']);
+                    $endDate = Date::createFromFormat('Y-m-d', $dateRange['maxDate']);
+
+                    if ($startDate === null || $endDate === null) {
+                        return;
+                    }
+
+                    $builder->whereBetween('date', [
+                        $startDate->startOfDay(),
+                        $endDate->endOfDay(),
+                    ]);
                 }),
             SelectFilter::make('Venue')
                 ->options([
