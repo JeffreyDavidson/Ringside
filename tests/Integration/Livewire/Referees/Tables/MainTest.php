@@ -7,6 +7,7 @@ use App\Actions\Referees\EmployAction;
 use App\Actions\Referees\InjureAction;
 use App\Actions\Referees\ReleaseAction;
 use App\Actions\Referees\RetireAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Referees\Tables\Main;
 use App\Livewire\Referees\Tables\RefereesTable;
 use App\Models\Events\Event;
@@ -107,24 +108,33 @@ describe('RefereesTable Component', function () {
         });
 
         test('status filter functionality works with real data', function () {
-            $employedReferee = Referee::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Referee']);
-            $retiredReferee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
-            $injuredReferee = Referee::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Referee']);
+            $referees = [
+                EmploymentStatus::Employed->value => Referee::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Referee'])->refresh(),
+                EmploymentStatus::Released->value => Referee::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Referee'])->refresh(),
+                EmploymentStatus::Unemployed->value => Referee::factory()->unemployed()->create(['first_name' => 'Unemployed', 'last_name' => 'Referee'])->refresh(),
+                EmploymentStatus::Retired->value => Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee'])->refresh(),
+            ];
 
-            $component = livewire(Main::class);
+            foreach ($referees as $status => $visibleReferee) {
+                $component = livewire(Main::class)
+                    ->set('filterValues.status', $status)
+                    ->assertSee($visibleReferee->full_name);
 
-            // Test filtering by status (if component supports it)
-            $component
-                ->assertSee('Employed Referee')
-                ->assertSee('Retired Referee')
-                ->assertSee('Injured Referee');
+                foreach ($referees as $otherStatus => $hiddenReferee) {
+                    if ($otherStatus !== $status) {
+                        $component->assertDontSee($hiddenReferee->full_name);
+                    }
+                }
+            }
         });
 
         test('future employment filter returns only referees awaiting employment', function () {
-            $futureReferee = Referee::factory()->withFutureEmployment()->create([
-                'first_name' => 'Future',
-                'last_name' => 'Referee',
-            ]);
+            $futureReferee = Referee::factory()->withFutureEmployment()
+                ->create([
+                    'first_name' => 'Future',
+                    'last_name' => 'Referee',
+                ])
+                ->refresh();
             Referee::factory()->employed()->create([
                 'first_name' => 'Employed',
                 'last_name' => 'Referee',

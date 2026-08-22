@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Wrestlers\EmployAction;
 use App\Actions\Wrestlers\InjureAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
@@ -111,17 +112,24 @@ describe('Main Component Integration', function () {
         });
 
         test('status filter functionality works with real data', function () {
-            $employedWrestler = Wrestler::factory()->employed()->create(['name' => 'Employed Wrestler']);
-            $retiredWrestler = Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']);
-            $injuredWrestler = Wrestler::factory()->injured()->create(['name' => 'Injured Wrestler']);
+            $wrestlers = [
+                EmploymentStatus::Employed->value => Wrestler::factory()->employed()->create(['name' => 'Employed Wrestler']),
+                EmploymentStatus::Released->value => Wrestler::factory()->released()->create(['name' => 'Released Wrestler']),
+                EmploymentStatus::Unemployed->value => Wrestler::factory()->unemployed()->create(['name' => 'Unemployed Wrestler']),
+                EmploymentStatus::Retired->value => Wrestler::factory()->retired()->create(['name' => 'Retired Wrestler']),
+            ];
 
-            $component = livewire(Main::class);
+            foreach ($wrestlers as $status => $visibleWrestler) {
+                $component = livewire(Main::class)
+                    ->set('filterValues.status', $status)
+                    ->assertSee($visibleWrestler->name);
 
-            // Test filtering by status (if component supports it)
-            $component
-                ->assertSee('Employed Wrestler')
-                ->assertSee('Retired Wrestler')
-                ->assertSee('Injured Wrestler');
+                foreach ($wrestlers as $otherStatus => $hiddenWrestler) {
+                    if ($otherStatus !== $status) {
+                        $component->assertDontSee($hiddenWrestler->name);
+                    }
+                }
+            }
         });
 
         test('future employment filter returns only wrestlers awaiting employment', function () {
