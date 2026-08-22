@@ -38,6 +38,19 @@ describe('Managers Controller', function () {
     /**
      * @see ManagersController::show()
      */
+    test('show loads only the relationships rendered by the manager summary', function () {
+        actingAs(administrator())
+            ->get(action([ManagersController::class, 'show'], $this->manager))
+            ->assertOk()
+            ->assertViewHas('manager', fn (Manager $manager): bool => count($manager->getRelations()) === 3
+                && $manager->relationLoaded('currentTagTeams')
+                && $manager->relationLoaded('currentWrestlers')
+                && $manager->relationLoaded('firstEmployment'));
+    });
+
+    /**
+     * @see ManagersController::show()
+     */
     test('a basic user cannot view manager profiles', function () {
         actingAs(basicUser())
             ->get(action([ManagersController::class, 'show'], $this->manager))

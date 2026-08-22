@@ -17,14 +17,6 @@
             @endforeach
         </x-card.general-info.link-list>
     @endif
-    @if ($manager->currentStable)
-        <x-card.general-info.links label="Current Stable">
-            <x-route-link
-                :route="route('stables.show', $manager->currentStable)"
-                label="{{ $manager->currentStable->name }}"
-            />
-        </x-card.general-info.links>
-    @endif
     <x-card.general-info.stat
         label="Start Date"
         :value="$manager->firstEmployment?->started_at->toDateString() ?? 'No Start Date Set'"
