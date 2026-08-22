@@ -84,14 +84,11 @@ class Main extends BaseTable
                 ->setFilterPillTitle(__('core.status'))
                 ->options(EmploymentStatus::filterOptions())
                 ->filter(function (WrestlerBuilder $builder, string $value): void {
-                    match (EmploymentStatus::tryFrom($value)) {
-                        EmploymentStatus::Employed => $builder->employed(),
-                        EmploymentStatus::FutureEmployment => $builder->futureEmployed(),
-                        EmploymentStatus::Released => $builder->released(),
-                        EmploymentStatus::Unemployed => $builder->unemployed(),
-                        EmploymentStatus::Retired => $builder->retired(),
-                        default => null,
-                    };
+                    $status = EmploymentStatus::tryFrom($value);
+
+                    if ($status !== null) {
+                        $builder->whereEmploymentStatus($status);
+                    }
                 }),
             FirstEmploymentFilter::make('Employment Date')->setFields('employments', 'employments.started_at', 'employments.ended_at'),
         ];
