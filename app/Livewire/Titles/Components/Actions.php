@@ -47,7 +47,7 @@ class Actions extends Component
             function (): void {
                 resolve(DebutAction::class)->handle($this->title);
             },
-            'Title successfully debuted.',
+            __('titles.actions.debuted'),
         )) {
             $this->dispatch('title-updated');
         }
@@ -64,7 +64,7 @@ class Actions extends Component
             function (): void {
                 resolve(RetireAction::class)->handle($this->title);
             },
-            'Title successfully retired.',
+            __('titles.actions.retired'),
         )) {
             $this->dispatch('title-updated');
         }
@@ -81,7 +81,7 @@ class Actions extends Component
             function (): void {
                 resolve(UnretireAction::class)->handle($this->title);
             },
-            'Title successfully unretired.',
+            __('titles.actions.unretired'),
         )) {
             $this->dispatch('title-updated');
         }
@@ -98,7 +98,7 @@ class Actions extends Component
             function (): void {
                 resolve(PullAction::class)->handle($this->title);
             },
-            'Title successfully pulled.',
+            __('titles.actions.pulled'),
         )) {
             $this->dispatch('title-updated');
         }
@@ -115,7 +115,7 @@ class Actions extends Component
             function (): void {
                 resolve(ReinstateAction::class)->handle($this->title);
             },
-            'Title successfully reinstated.',
+            __('titles.actions.reinstated'),
         )) {
             $this->dispatch('title-updated');
         }
@@ -132,7 +132,7 @@ class Actions extends Component
             function (): void {
                 resolve(RestoreAction::class)->handle($this->title);
             },
-            'Title successfully restored.',
+            __('titles.actions.restored'),
         )) {
             $this->dispatch('title-updated');
         }
