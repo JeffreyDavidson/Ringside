@@ -13,6 +13,14 @@ enum TitleType: string
     case Singles = 'singles';
     case TagTeam = 'tag-team';
 
+    public function label(): string
+    {
+        return match ($this) {
+            self::Singles => 'Singles',
+            self::TagTeam => 'Tag Team',
+        };
+    }
+
     /** @return class-string<Wrestler|TagTeam> */
     public function championModelClass(): string
     {
