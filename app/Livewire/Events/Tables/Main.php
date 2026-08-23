@@ -129,7 +129,7 @@ class Main extends BaseTable
                     ),
                 ])
                 ->filter(function (EventBuilder $builder, string $value): void {
-                    $builder->where('venue_id', $value);
+                    $builder->forVenueId((int) $value);
                 }),
         ];
     }
