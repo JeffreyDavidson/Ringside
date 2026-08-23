@@ -37,7 +37,7 @@ final class MatchAssignmentConflictService
         }
 
         $matches = EventMatch::query()
-            ->where('event_id', $event->id)
+            ->whereBelongsTo($event)
             ->with(['competitors.competitor', 'referees', 'titles'])
             ->get();
         $competitors = $matches->flatMap->competitors->pluck('competitor');
