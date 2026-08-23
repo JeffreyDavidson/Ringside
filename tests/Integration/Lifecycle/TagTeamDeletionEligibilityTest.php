@@ -50,3 +50,14 @@ test('restoration predicate stays aligned with its guard', function (bool $delet
     'deleted' => [true, true],
     'active' => [false, false],
 ]);
+
+test('future employment does not block restoring a duplicate tag-team name', function () {
+    $tagTeam = TagTeam::factory()->create(['name' => 'Future Conflict Team']);
+    $tagTeam->delete();
+
+    TagTeam::factory()->create(['name' => $tagTeam->name])
+        ->employments()
+        ->create(['started_at' => now()->addDay()]);
+
+    expect(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeTrue();
+});

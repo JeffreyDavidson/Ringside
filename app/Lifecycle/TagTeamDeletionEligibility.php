@@ -7,7 +7,6 @@ namespace App\Lifecycle;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
 use App\Exceptions\Roster\TagTeams\CannotBeRestoredException;
 use App\Models\Roster\TagTeams\TagTeam;
-use Illuminate\Database\Eloquent\Builder;
 
 final class TagTeamDeletionEligibility
 {
@@ -61,7 +60,7 @@ final class TagTeamDeletionEligibility
         $conflictingTeam = TagTeam::query()
             ->whereName($tagTeam->name)
             ->whereKeyNot($tagTeam->getKey())
-            ->whereHas('employments', fn (Builder $employmentQuery) => $employmentQuery->whereNull('ended_at'))
+            ->whereHas('currentEmployment')
             ->first();
 
         if ($conflictingTeam) {
