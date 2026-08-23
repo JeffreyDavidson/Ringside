@@ -30,12 +30,12 @@ class EndCurrentRelationshipsAction
                 ->update(['left_at' => $effectiveDate]);
 
             StableWrestler::query()
-                ->where('wrestler_id', $lockedWrestler->id)
+                ->whereBelongsTo($lockedWrestler)
                 ->current()
                 ->update(['left_at' => $effectiveDate]);
 
             WrestlerManager::query()
-                ->where('wrestler_id', $lockedWrestler->id)
+                ->whereBelongsTo($lockedWrestler)
                 ->current()
                 ->update(['fired_at' => $effectiveDate]);
 
