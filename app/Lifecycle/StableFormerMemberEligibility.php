@@ -16,16 +16,16 @@ final class StableFormerMemberEligibility
     public function availableFor(Stable $stable): Collection
     {
         $wrestlers = $stable->previousWrestlers()
-            ->whereHas('employments', fn (Builder $employmentQuery): Builder => $employmentQuery->whereNull('ended_at'))
-            ->whereDoesntHave('injuries', fn (Builder $injuryQuery): Builder => $injuryQuery->whereNull('ended_at'))
-            ->whereDoesntHave('suspensions', fn (Builder $suspensionQuery): Builder => $suspensionQuery->whereNull('ended_at'))
-            ->whereDoesntHave('retirements', fn (Builder $retirementQuery): Builder => $retirementQuery->whereNull('ended_at'))
+            ->whereHas('currentEmployment')
+            ->whereDoesntHave('currentInjury')
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentRetirement')
             ->get();
 
         $tagTeams = $stable->previousTagTeams()
-            ->whereHas('employments', fn (Builder $employmentQuery): Builder => $employmentQuery->whereNull('ended_at'))
-            ->whereDoesntHave('suspensions', fn (Builder $suspensionQuery): Builder => $suspensionQuery->whereNull('ended_at'))
-            ->whereDoesntHave('retirements', fn (Builder $retirementQuery): Builder => $retirementQuery->whereNull('ended_at'))
+            ->whereHas('currentEmployment')
+            ->whereDoesntHave('currentSuspension')
+            ->whereDoesntHave('currentRetirement')
             ->get();
 
         return $wrestlers->concat($tagTeams);
@@ -37,9 +37,9 @@ final class StableFormerMemberEligibility
         $wrestlers = $stable->previousWrestlers()
             ->where(function (Builder $wrestlerQuery) use ($stable): void {
                 $wrestlerQuery
-                    ->whereHas('retirements', fn (Builder $retirementQuery): Builder => $retirementQuery->whereNull('ended_at'))
-                    ->orWhereHas('injuries', fn (Builder $injuryQuery): Builder => $injuryQuery->whereNull('ended_at'))
-                    ->orWhereHas('suspensions', fn (Builder $suspensionQuery): Builder => $suspensionQuery->whereNull('ended_at'))
+                    ->whereHas('currentRetirement')
+                    ->orWhereHas('currentInjury')
+                    ->orWhereHas('currentSuspension')
                     ->orWhereHas('currentStable', fn (Builder $stableQuery): Builder => $stableQuery->whereKeyNot($stable->getKey()));
             })
             ->get();
@@ -47,8 +47,8 @@ final class StableFormerMemberEligibility
         $tagTeams = $stable->previousTagTeams()
             ->where(function (Builder $tagTeamQuery) use ($stable): void {
                 $tagTeamQuery
-                    ->whereHas('retirements', fn (Builder $retirementQuery): Builder => $retirementQuery->whereNull('ended_at'))
-                    ->orWhereHas('suspensions', fn (Builder $suspensionQuery): Builder => $suspensionQuery->whereNull('ended_at'))
+                    ->whereHas('currentRetirement')
+                    ->orWhereHas('currentSuspension')
                     ->orWhereHas('currentStable', fn (Builder $stableQuery): Builder => $stableQuery->whereKeyNot($stable->getKey()));
             })
             ->get();

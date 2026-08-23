@@ -53,3 +53,26 @@ test('employed healthy former members are available', function () {
         ->and($eligibility->availableFor($stable)->contains(fn ($member): bool => $member->is($tagTeam)))->toBeTrue()
         ->and($eligibility->unavailableKeyMembersFor($stable))->toBeEmpty();
 });
+
+test('future-employed former members are not available yet', function () {
+    $stable = Stable::factory()->retired()->create();
+    $wrestler = Wrestler::factory()->create();
+    $wrestler->employments()->create(['started_at' => now()->addDay()]);
+    $tagTeam = TagTeam::factory()->create();
+    $tagTeam->employments()->create(['started_at' => now()->addDay()]);
+
+    $stable->wrestlers()->attach($wrestler, [
+        'joined_at' => now()->subMonth(),
+        'left_at' => now()->subWeek(),
+    ]);
+    $stable->tagTeams()->attach($tagTeam, [
+        'joined_at' => now()->subMonth(),
+        'left_at' => now()->subWeek(),
+    ]);
+
+    $eligibility = resolve(StableFormerMemberEligibility::class);
+    $availableFormerMembers = $eligibility->availableFor($stable);
+
+    expect($availableFormerMembers->contains(fn ($member): bool => $member->is($wrestler)))->toBeFalse()
+        ->and($availableFormerMembers->contains(fn ($member): bool => $member->is($tagTeam)))->toBeFalse();
+});
