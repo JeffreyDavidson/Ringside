@@ -46,3 +46,14 @@ test('unretirement predicate stays aligned with its guard', function (string $fa
     'employed' => ['employed', false],
     'unemployed' => ['unemployed', false],
 ]);
+
+test('future employment does not block unretiring a duplicate tag-team name', function () {
+    $tagTeam = TagTeam::factory()->retired()->create(['name' => 'Future Conflict Team']);
+
+    TagTeam::factory()->create(['name' => $tagTeam->name])
+        ->employments()
+        ->create(['started_at' => now()->addDay()]);
+
+    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam, requireAvailablePartners: false))
+        ->toBeTrue();
+});
