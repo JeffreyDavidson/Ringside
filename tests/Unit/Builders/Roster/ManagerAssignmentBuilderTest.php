@@ -88,6 +88,40 @@ test('manager assignments can be queried by manager', function () {
         ->and($tagTeamAssignments->firstOrFail()->manager_id)->toBe($manager->id);
 });
 
+test('manager assignments can be queried by roster owner', function () {
+    $manager = Manager::factory()->create();
+    $wrestler = Wrestler::factory()->create();
+    $otherWrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+    $otherTagTeam = TagTeam::factory()->create();
+
+    WrestlerManager::query()->create([
+        'manager_id' => $manager->id,
+        'wrestler_id' => $wrestler->id,
+        'hired_at' => now(),
+    ]);
+    WrestlerManager::query()->create([
+        'manager_id' => $manager->id,
+        'wrestler_id' => $otherWrestler->id,
+        'hired_at' => now(),
+    ]);
+    TagTeamManager::query()->create([
+        'manager_id' => $manager->id,
+        'tag_team_id' => $tagTeam->id,
+        'hired_at' => now(),
+    ]);
+    TagTeamManager::query()->create([
+        'manager_id' => $manager->id,
+        'tag_team_id' => $otherTagTeam->id,
+        'hired_at' => now(),
+    ]);
+
+    expect(WrestlerManager::query()->forWrestlerId($wrestler->id)->pluck('wrestler_id')->all())
+        ->toBe([$wrestler->id])
+        ->and(TagTeamManager::query()->forTagTeamId($tagTeam->id)->pluck('tag_team_id')->all())
+        ->toBe([$tagTeam->id]);
+});
+
 test('manager assignments can be ordered by most recent hire', function () {
     $manager = Manager::factory()->create();
     $wrestler = Wrestler::factory()->create();

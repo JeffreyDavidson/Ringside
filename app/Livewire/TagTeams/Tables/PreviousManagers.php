@@ -29,7 +29,7 @@ class PreviousManagers extends BasePreviousManagersTable
         }
 
         return TagTeamManager::query()
-            ->where('tag_team_id', $this->tagTeamId)
+            ->forTagTeamId($this->tagTeamId)
             ->ended()
             ->with('manager')
             ->mostRecentlyHiredFirst();

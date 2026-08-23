@@ -31,7 +31,7 @@ class PreviousManagers extends BasePreviousManagersTable
         return WrestlerManager::query()
             ->with('manager')
             ->whereHas('manager')
-            ->where('wrestler_id', $this->wrestlerId)
+            ->forWrestlerId($this->wrestlerId)
             ->ended()
             ->mostRecentlyHiredFirst();
     }

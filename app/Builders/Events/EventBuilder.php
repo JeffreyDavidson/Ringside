@@ -15,6 +15,13 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class EventBuilder extends Builder
 {
+    public function forVenueId(int $venueId): static
+    {
+        $this->where('venue_id', $venueId);
+
+        return $this;
+    }
+
     public function whereStatus(EventStatus $status): static
     {
         return match ($status) {

@@ -36,7 +36,7 @@ class PreviousEvents extends DataTableComponent
         }
 
         return Event::query()
-            ->where('venue_id', $this->venueId)
+            ->forVenueId($this->venueId)
             ->latestDatedFirst();
     }
 
