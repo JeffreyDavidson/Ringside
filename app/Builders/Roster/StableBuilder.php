@@ -37,27 +37,24 @@ class StableBuilder extends Builder
 
     public function previousForTagTeamId(int $tagTeamId): static
     {
-        $membership = new StableTagTeam();
-
-        $this->join($membership->getTable(), 'stables.id', '=', $membership->qualifyColumn('stable_id'))
-            ->where($membership->qualifyColumn('tag_team_id'), $tagTeamId)
-            ->whereNotNull($membership->qualifyColumn('left_at'))
-            ->select(
-                'stables.*',
-                $membership->qualifyColumn('joined_at').' as joined_at',
-                $membership->qualifyColumn('left_at').' as left_at',
-            )
-            ->orderByDesc($membership->qualifyColumn('joined_at'));
-
-        return $this;
+        return $this->previousForMember(new StableTagTeam(), 'tag_team_id', $tagTeamId);
     }
 
     public function previousForWrestlerId(int $wrestlerId): static
     {
-        $membership = new StableWrestler();
+        return $this->previousForMember(new StableWrestler(), 'wrestler_id', $wrestlerId);
+    }
 
+    /**
+     * Apply the shared historical-membership projection for a stable member.
+     */
+    private function previousForMember(
+        StableTagTeam|StableWrestler $membership,
+        string $memberColumn,
+        int $memberId,
+    ): static {
         $this->join($membership->getTable(), 'stables.id', '=', $membership->qualifyColumn('stable_id'))
-            ->where($membership->qualifyColumn('wrestler_id'), $wrestlerId)
+            ->where($membership->qualifyColumn($memberColumn), $memberId)
             ->whereNotNull($membership->qualifyColumn('left_at'))
             ->select(
                 'stables.*',
