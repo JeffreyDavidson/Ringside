@@ -86,7 +86,7 @@ final class ChampionshipReignManager
     public function endCurrentReign(Title $title, Carbon $endedAt): void
     {
         TitleChampionship::query()
-            ->forTitleId($title->id)
+            ->whereBelongsTo($title)
             ->current()
             ->lockForUpdate()
             ->first()
