@@ -6,7 +6,6 @@ namespace App\Livewire\TagTeams\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
-use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Titles\TitleChampionship;
 use Livewire\Attributes\Locked;
 use LogicException;
@@ -26,10 +25,8 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             throw new LogicException('A tag team was not provided.');
         }
 
-        $tagTeam = TagTeam::query()->findOrFail($this->tagTeamId);
-
         return TitleChampionship::query()
-            ->forChampion($tagTeam)
+            ->forTagTeamId($this->tagTeamId)
             ->forPreviousHistory();
     }
 }

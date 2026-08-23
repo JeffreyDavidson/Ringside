@@ -6,7 +6,6 @@ namespace App\Livewire\Wrestlers\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
-use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\TitleChampionship;
 use Livewire\Attributes\Locked;
 use LogicException;
@@ -30,10 +29,8 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             throw new LogicException('A wrestler was not provided.');
         }
 
-        $wrestler = Wrestler::query()->findOrFail($this->wrestlerId);
-
         return TitleChampionship::query()
-            ->forChampion($wrestler)
+            ->forWrestlerId($this->wrestlerId)
             ->forPreviousHistory();
     }
 }
