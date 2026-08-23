@@ -7,7 +7,6 @@ namespace App\Livewire\Referees\Tables;
 use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
-use App\Models\Roster\Referees\Referee;
 use Livewire\Attributes\Locked;
 use LogicException;
 
@@ -26,10 +25,8 @@ class PreviousMatches extends BasePreviousMatchesTable
             throw new LogicException('A referee was not provided.');
         }
 
-        $referee = Referee::query()->findOrFail($this->refereeId);
-
         return EventMatch::query()
             ->forHistory()
-            ->forReferee($referee);
+            ->forRefereeId($this->refereeId);
     }
 }

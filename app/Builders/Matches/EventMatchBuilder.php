@@ -21,6 +21,13 @@ use Illuminate\Support\Collection;
  */
 class EventMatchBuilder extends Builder
 {
+    public function forEventId(int $eventId): static
+    {
+        $this->where('event_id', $eventId);
+
+        return $this;
+    }
+
     /**
      * @param  Collection<int, int>  $eventIds
      */
@@ -98,6 +105,15 @@ class EventMatchBuilder extends Builder
     {
         $this->whereHas('referees', function (Builder $query) use ($referee): void {
             $query->whereKey($referee->getKey());
+        })->with('referees');
+
+        return $this;
+    }
+
+    public function forRefereeId(int $refereeId): static
+    {
+        $this->whereHas('referees', function (Builder $query) use ($refereeId): void {
+            $query->whereKey($refereeId);
         })->with('referees');
 
         return $this;
