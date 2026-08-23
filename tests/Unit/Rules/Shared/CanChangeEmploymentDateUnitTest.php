@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\Lifecycle\Employment;
+use App\Models\Roster\Managers\Manager;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +26,24 @@ use Illuminate\Support\Carbon;
  * @see CanChangeEmploymentDate
  */
 describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
+    test('rejects changing the original employment date while the model is employed', function () {
+        $employmentDate = today()->subMonth();
+        $manager = Manager::factory()
+            ->has(Employment::factory()->started($employmentDate), 'employments')
+            ->create();
+        $message = null;
+
+        (new CanChangeEmploymentDate($manager))->validate(
+            'employment_date',
+            $employmentDate->copy()->subDay(),
+            validationFailureCallback(function (string $failure) use (&$message): void {
+                $message = $failure;
+            }),
+        );
+
+        expect($message)->toBe('The employment date cannot be changed while Manager is currently employed.');
+    });
+
     test('rejects an invalid employment date value', function () {
         $model = new class extends Model
         {
