@@ -124,13 +124,12 @@ class CreateEditForm extends BaseForm
 
     public function toData(): StableData
     {
+        $members = $this->selectedMembers();
+
         return new StableData(
             name: $this->name,
             start_date: $this->started_at ? Carbon::parse($this->started_at) : null,
-            members: new StableMembershipData(
-                wrestlers: Wrestler::query()->whereKey($this->wrestlers)->get(),
-                tagTeams: TagTeam::query()->whereKey($this->tag_teams)->get(),
-            ),
+            members: $members,
             end_date: $this->ended_at ? Carbon::parse($this->ended_at) : null,
         );
     }
@@ -179,6 +178,7 @@ class CreateEditForm extends BaseForm
     protected function rules(): array
     {
         $stableStartDate = $this->parseStartDate();
+        $members = $this->selectedMembers();
 
         $rules = [
             'name' => [
@@ -192,8 +192,8 @@ class CreateEditForm extends BaseForm
                 'date',
                 new CanChangeDebutDate($this->formModel),
                 new HasMinimumMembers(
-                    Wrestler::query()->whereKey($this->wrestlers)->get(),
-                    TagTeam::query()->whereKey($this->tag_teams)->get(),
+                    $members->wrestlers ?? collect(),
+                    $members->tagTeams ?? collect(),
                 ),
             ],
             'ended_at' => ['nullable', 'date'],
@@ -220,6 +220,17 @@ class CreateEditForm extends BaseForm
         }
 
         return $rules;
+    }
+
+    /**
+     * Load the members selected by the form into the shared stable data object.
+     */
+    private function selectedMembers(): StableMembershipData
+    {
+        return new StableMembershipData(
+            wrestlers: Wrestler::query()->whereKey($this->wrestlers)->get(),
+            tagTeams: TagTeam::query()->whereKey($this->tag_teams)->get(),
+        );
     }
 
     private function parseStartDate(): ?Carbon
