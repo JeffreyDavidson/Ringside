@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
 
 test('dated events can be ordered newest first with unscheduled events last', function () {
     $oldestEvent = Event::factory()->create(['date' => '2025-01-01 19:00:00']);
@@ -20,6 +21,15 @@ test('dated events can be ordered newest first with unscheduled events last', fu
         $oldestEvent->id,
         $unscheduledEvent->id,
     ]);
+});
+
+test('events can be queried by venue', function () {
+    $venue = Venue::factory()->create();
+    $otherVenue = Venue::factory()->create();
+    $event = Event::factory()->create(['venue_id' => $venue->id]);
+    Event::factory()->create(['venue_id' => $otherVenue->id]);
+
+    expect(Event::query()->forVenueId($venue->id)->pluck('id')->all())->toBe([$event->id]);
 });
 
 test('scheduled events can be retrieved', function () {

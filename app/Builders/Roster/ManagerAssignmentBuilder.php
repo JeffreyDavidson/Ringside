@@ -22,6 +22,20 @@ class ManagerAssignmentBuilder extends Builder
         return $this;
     }
 
+    public function forTagTeamId(int $tagTeamId): static
+    {
+        $this->where('tag_team_id', $tagTeamId);
+
+        return $this;
+    }
+
+    public function forWrestlerId(int $wrestlerId): static
+    {
+        $this->where('wrestler_id', $wrestlerId);
+
+        return $this;
+    }
+
     public function mostRecentlyHiredFirst(): static
     {
         $this->orderByDesc('hired_at');
