@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Tables;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\ArrayColumn;
@@ -14,7 +15,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
@@ -36,17 +36,17 @@ class MatchesTable extends DataTableComponent
     public ?int $eventId = null;
 
     /**
-     * @return Builder<EventMatch>
+     * @return EventMatchBuilder<EventMatch>
      */
-    public function builder(): Builder
+    public function builder(): EventMatchBuilder
     {
         if ($this->eventId === null) {
             throw new LogicException('An event was not provided.');
         }
 
         return EventMatch::query()
-            ->with(['event', 'referees', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor'])
-            ->where('event_id', $this->eventId);
+            ->forEventId($this->eventId)
+            ->with(['event', 'referees', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor']);
     }
 
     protected function configure(): void

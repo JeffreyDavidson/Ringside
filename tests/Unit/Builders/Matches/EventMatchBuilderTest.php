@@ -37,6 +37,14 @@ it('retrieves matches for selected events', function () {
         ->and($matches->firstOrFail()->is($selectedMatch))->toBeTrue();
 });
 
+it('retrieves matches for one event by id', function () {
+    $event = Event::factory()->create();
+    $match = EventMatch::factory()->forEvent($event)->create();
+    EventMatch::factory()->create();
+
+    expect(EventMatch::query()->forEventId($event->id)->pluck('id')->all())->toBe([$match->id]);
+});
+
 it('retrieves matches for past events and eager loads their events', function () {
     $pastEvent = Event::factory()->past()->create();
     $scheduledEvent = Event::factory()->scheduled()->create();
@@ -126,6 +134,15 @@ it('retrieves matches officiated by a referee and eager loads every assigned ref
         ->and($matches->firstOrFail()->is($officiatedMatch))->toBeTrue()
         ->and($matches->firstOrFail()->relationLoaded('referees'))->toBeTrue()
         ->and($matches->firstOrFail()->referees)->toHaveCount(2);
+});
+
+it('retrieves matches officiated by a referee id', function () {
+    $referee = Referee::factory()->create();
+    $match = EventMatch::factory()->create();
+    $match->referees()->attach($referee);
+    EventMatch::factory()->create();
+
+    expect(EventMatch::query()->forRefereeId($referee->id)->pluck('id')->all())->toBe([$match->id]);
 });
 
 it('retrieves matches assigned to any selected referee', function () {
