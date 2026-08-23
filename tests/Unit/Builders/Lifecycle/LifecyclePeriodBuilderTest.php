@@ -50,3 +50,29 @@ test('lifecycle periods can be queried by temporal state', function () {
         ->and(Employment::query()->scheduled()->pluck('id')->all())
         ->toBe([$scheduledEmployment->id]);
 });
+
+test('lifecycle periods can be queried as active on a date', function () {
+    $date = now()->startOfDay();
+
+    $activeOpenEmployment = Employment::factory()
+        ->for(Wrestler::factory(), 'employable')
+        ->started($date->copy()->subDay())
+        ->create();
+    $activeEndedEmployment = Employment::factory()
+        ->for(Wrestler::factory(), 'employable')
+        ->started($date->copy()->subWeek())
+        ->ended($date->copy()->addDay())
+        ->create();
+    Employment::factory()
+        ->for(Wrestler::factory(), 'employable')
+        ->started($date->copy()->addDay())
+        ->create();
+    Employment::factory()
+        ->for(Wrestler::factory(), 'employable')
+        ->started($date->copy()->subWeek())
+        ->ended($date->copy()->subDay())
+        ->create();
+
+    expect(Employment::query()->activeOn($date)->pluck('id')->all())
+        ->toEqualCanonicalizing([$activeOpenEmployment->id, $activeEndedEmployment->id]);
+});

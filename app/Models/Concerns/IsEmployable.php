@@ -7,6 +7,7 @@ namespace App\Models\Concerns;
 use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Employable;
 use App\Models\Lifecycle\Employment;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -103,5 +104,13 @@ trait IsEmployable
     public function hasEmploymentHistory(): bool
     {
         return $this->employments()->exists();
+    }
+
+    public function employedOn(DateTimeInterface $date): bool
+    {
+        $query = $this->employments()->getQuery();
+        LifecyclePeriodBuilder::constrainToActiveOn($query, $date);
+
+        return $query->exists();
     }
 }

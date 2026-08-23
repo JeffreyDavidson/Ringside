@@ -9,6 +9,7 @@ use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -43,6 +44,13 @@ class LifecyclePeriodBuilder extends Builder
     public function scheduled(): static
     {
         self::constrainToScheduled($this);
+
+        return $this;
+    }
+
+    public function activeOn(DateTimeInterface $date): static
+    {
+        self::constrainToActiveOn($this, $date);
 
         return $this;
     }
@@ -87,5 +95,21 @@ class LifecyclePeriodBuilder extends Builder
     {
         self::constrainToOpen($query);
         $query->where('started_at', '>', now());
+    }
+
+    /**
+     * @template TRelatedModel of Model
+     *
+     * @param  Builder<TRelatedModel>  $query
+     */
+    public static function constrainToActiveOn(Builder $query, DateTimeInterface $date): void
+    {
+        $query
+            ->where('started_at', '<=', $date)
+            ->where(function (Builder $query) use ($date): void {
+                $query
+                    ->whereNull('ended_at')
+                    ->orWhere('ended_at', '>=', $date);
+            });
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Shared;
 
+use App\Models\Contracts\Employable;
 use Closure;
 use DateTimeInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -33,11 +34,17 @@ class CanChangeEmploymentDate implements ValidationRule
 
         $targetDate = Carbon::parse($value);
 
-        if ($model->isEmployed()) {
-            if (method_exists($model, 'employedOn') && ! $model->employedOn($targetDate)) {
-                $modelName = $this->getModelName($model);
-                $fail("The employment date cannot be changed while {$modelName} is currently employed.");
-            }
+        if (! $model->isEmployed()) {
+            return;
+        }
+
+        $isEmployedOnTargetDate = $model instanceof Employable
+            ? $model->employedOn($targetDate)
+            : (method_exists($model, 'employedOn') ? $model->employedOn($targetDate) : true);
+
+        if (! $isEmployedOnTargetDate) {
+            $modelName = $this->getModelName($model);
+            $fail("The employment date cannot be changed while {$modelName} is currently employed.");
         }
     }
 
