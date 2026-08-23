@@ -47,19 +47,14 @@ class FormModal extends BaseFormModal
         $this->form->employment_date = $this->generateOptionalEmploymentDate();
     }
 
-    protected function storeForm(): bool
+    protected function updateForm(): void
     {
-        $this->form->validate();
+        $this->updateAction->handle($this->form->referee(), $this->form->toData());
+    }
 
-        if ($this->form->isEditing()) {
-            $this->updateAction->handle($this->form->referee(), $this->form->toData());
-
-            return true;
-        }
-
+    protected function createForm(): void
+    {
         $this->createAction->handle($this->form->toData());
-
-        return true;
     }
 
     public function mount(int|string|null $modelId = null): void

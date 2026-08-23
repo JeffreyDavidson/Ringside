@@ -7,6 +7,7 @@ namespace App\Livewire\Base;
 use App\Livewire\Concerns\GeneratesDummyData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
+use LogicException;
 
 /**
  * @template TForm of BaseForm
@@ -82,7 +83,30 @@ abstract class BaseFormModal extends BaseModal
         return true;
     }
 
-    abstract protected function storeForm(): bool;
+    protected function storeForm(): bool
+    {
+        $this->form->validate();
+
+        if ($this->form->isEditing()) {
+            $this->updateForm();
+
+            return true;
+        }
+
+        $this->createForm();
+
+        return true;
+    }
+
+    protected function createForm(): void
+    {
+        throw new LogicException('A form modal must define createForm().');
+    }
+
+    protected function updateForm(): void
+    {
+        throw new LogicException('A form modal must define updateForm().');
+    }
 
     private function authorizeFormAccess(): void
     {

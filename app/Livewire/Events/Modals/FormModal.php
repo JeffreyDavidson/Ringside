@@ -59,19 +59,14 @@ class FormModal extends BaseFormModal
         return 'Create Event';
     }
 
-    protected function storeForm(): bool
+    protected function updateForm(): void
     {
-        $this->form->validate();
+        $this->updateAction->handle($this->form->event(), $this->form->toData());
+    }
 
-        if ($this->form->isEditing()) {
-            $this->updateAction->handle($this->form->event(), $this->form->toData());
-
-            return true;
-        }
-
+    protected function createForm(): void
+    {
         $this->createAction->handle($this->form->toData());
-
-        return true;
     }
 
     public function render(): View

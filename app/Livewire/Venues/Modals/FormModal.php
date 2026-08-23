@@ -65,19 +65,14 @@ class FormModal extends BaseFormModal
         return view('livewire.venues.modals.form-modal');
     }
 
-    protected function storeForm(): bool
+    protected function updateForm(): void
     {
-        $this->form->validate();
+        $this->updateAction->handle($this->form->venue(), $this->form->toData());
+    }
 
-        if ($this->form->isEditing()) {
-            $this->updateAction->handle($this->form->venue(), $this->form->toData());
-
-            return true;
-        }
-
+    protected function createForm(): void
+    {
         $this->createAction->handle($this->form->toData());
-
-        return true;
     }
 
     public function closeModal(): void
