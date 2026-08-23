@@ -74,6 +74,26 @@ class EventMatchBuilder extends Builder
         return $this;
     }
 
+    public function forWrestlerId(int $wrestlerId): static
+    {
+        $this->whereHas('competitors', function (Builder $query) use ($wrestlerId): void {
+            $query->where('competitor_type', (new Wrestler())->getMorphClass())
+                ->where('competitor_id', $wrestlerId);
+        })->with('competitors');
+
+        return $this;
+    }
+
+    public function forTagTeamId(int $tagTeamId): static
+    {
+        $this->whereHas('competitors', function (Builder $query) use ($tagTeamId): void {
+            $query->where('competitor_type', (new TagTeam())->getMorphClass())
+                ->where('competitor_id', $tagTeamId);
+        })->with('competitors');
+
+        return $this;
+    }
+
     public function forReferee(Referee $referee): static
     {
         $this->whereHas('referees', function (Builder $query) use ($referee): void {

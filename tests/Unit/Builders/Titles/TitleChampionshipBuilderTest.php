@@ -35,6 +35,18 @@ it('filters championships by supported champion type', function () {
         ->and($tagTeamChampionships->firstOrFail()->is($tagTeamChampionship))->toBeTrue();
 });
 
+it('filters championships by wrestler and tag team ids', function () {
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+    $wrestlerChampionship = TitleChampionship::factory()->forWrestler($wrestler)->create();
+    $tagTeamChampionship = TitleChampionship::factory()->forTagTeam($tagTeam)->create();
+
+    expect(TitleChampionship::query()->forWrestlerId($wrestler->id)->pluck('id')->all())
+        ->toBe([$wrestlerChampionship->id])
+        ->and(TitleChampionship::query()->forTagTeamId($tagTeam->id)->pluck('id')->all())
+        ->toBe([$tagTeamChampionship->id]);
+});
+
 it('filters and orders title championship history', function () {
     $title = Title::factory()->create();
     $otherTitle = Title::factory()->create();

@@ -97,6 +97,21 @@ it('retrieves matches for a competitor and eager loads competitors', function ()
         ->and($tagTeamMatches->contains($tagTeamMatch))->toBeTrue();
 });
 
+it('retrieves matches by wrestler and tag team ids', function () {
+    $event = Event::factory()->past()->create();
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+    $wrestlerMatch = EventMatch::factory()->forEvent($event)->create();
+    attachBuilderTestCompetitor($wrestlerMatch, $wrestler);
+    $tagTeamMatch = EventMatch::factory()->forEvent($event)->create();
+    attachBuilderTestCompetitor($tagTeamMatch, $tagTeam);
+
+    expect(EventMatch::query()->forWrestlerId($wrestler->id)->pluck('id')->all())
+        ->toBe([$wrestlerMatch->id])
+        ->and(EventMatch::query()->forTagTeamId($tagTeam->id)->pluck('id')->all())
+        ->toBe([$tagTeamMatch->id]);
+});
+
 it('retrieves matches officiated by a referee and eager loads every assigned referee', function () {
     $referee = Referee::factory()->create();
     $otherReferee = Referee::factory()->create();

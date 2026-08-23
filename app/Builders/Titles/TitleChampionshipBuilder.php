@@ -42,6 +42,20 @@ class TitleChampionshipBuilder extends Builder
         return $this->whereMorphedTo('champion', $champion);
     }
 
+    public function forWrestlerId(int $wrestlerId): static
+    {
+        return $this
+            ->where('champion_type', (new Wrestler())->getMorphClass())
+            ->where('champion_id', $wrestlerId);
+    }
+
+    public function forTagTeamId(int $tagTeamId): static
+    {
+        return $this
+            ->where('champion_type', (new TagTeam())->getMorphClass())
+            ->where('champion_id', $tagTeamId);
+    }
+
     public function forPreviousHistory(): static
     {
         return $this
