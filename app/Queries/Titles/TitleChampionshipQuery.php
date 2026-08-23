@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Queries\Titles;
 
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 final class TitleChampionshipQuery
@@ -20,7 +21,7 @@ final class TitleChampionshipQuery
         return $title->currentChampionship()->first();
     }
 
-    public static function currentChampion(Title $title): ?Model
+    public static function currentChampion(Title $title): Wrestler|TagTeam|null
     {
         return self::currentChampionship($title)?->champion;
     }
@@ -34,7 +35,7 @@ final class TitleChampionshipQuery
             ->first();
     }
 
-    public static function previousChampion(Title $title): ?Model
+    public static function previousChampion(Title $title): Wrestler|TagTeam|null
     {
         return self::previousChampionship($title)?->champion;
     }
@@ -47,7 +48,7 @@ final class TitleChampionshipQuery
             ->first();
     }
 
-    public static function firstChampion(Title $title): ?Model
+    public static function firstChampion(Title $title): Wrestler|TagTeam|null
     {
         return self::firstChampionship($title)?->champion;
     }
@@ -67,7 +68,7 @@ final class TitleChampionshipQuery
         return (int) $championship->won_at->diffInDays($reignEnd);
     }
 
-    public static function longestChampion(Title $title, ?Carbon $asOf = null): ?Model
+    public static function longestChampion(Title $title, ?Carbon $asOf = null): Wrestler|TagTeam|null
     {
         return self::longestChampionship($title, $asOf)?->champion;
     }
