@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -18,6 +16,12 @@ use Illuminate\Support\Collection;
 
 final class MatchAssignmentConflictService
 {
+    public function __construct(
+        private readonly MatchCompetitorConflictChecker $competitorConflicts,
+        private readonly MatchRefereeConflictChecker $refereeConflicts,
+        private readonly MatchTitleConflictChecker $titleConflicts,
+    ) {}
+
     public function ensureEventCanBeRescheduled(Event $event, ?Carbon $date): void
     {
         if ($date === null) {
@@ -74,24 +78,11 @@ final class MatchAssignmentConflictService
         string $competitorType,
         string $entityType,
     ): void {
-        $conflictingCompetitor = MatchCompetitor::query()
-            ->forCompetitorIds(
-                $competitorType,
-                $competitors->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id),
-            )
-            ->forEventIds($conflictingEventIds)
-            ->first(['competitor_id']);
-
-        if ($conflictingCompetitor === null) {
-            return;
-        }
-
-        $conflictingCompetitorId = $conflictingCompetitor->competitor_id;
-        $competitor = $competitors->firstWhere('id', $conflictingCompetitorId);
-
-        throw SchedulingConflictException::competitorAlreadyBooked(
+        $this->competitorConflicts->ensureCanBeAssigned(
+            $conflictingEventIds,
+            $competitors,
+            $competitorType,
             $entityType,
-            $competitor === null ? "ID: {$conflictingCompetitorId}" : (string) $competitor->name,
         );
     }
 
@@ -101,26 +92,7 @@ final class MatchAssignmentConflictService
      */
     public function ensureRefereesCanBeAssigned(int $eventId, Collection $conflictingEventIds, Collection $referees): void
     {
-        $conflictingEventIds = $conflictingEventIds
-            ->reject(fn (int $conflictingEventId): bool => $conflictingEventId === $eventId);
-
-        if ($conflictingEventIds->isEmpty()) {
-            return;
-        }
-
-        $conflictingReferee = EventMatch::query()
-            ->forEventIds($conflictingEventIds)
-            ->withAnyRefereeIds($referees->map(fn (Referee $referee): int => $referee->id))
-            ->with('referees:id,first_name,last_name,full_name')
-            ->get()
-            ->flatMap->referees
-            ->first(fn (Referee $referee): bool => $referees->contains('id', $referee->id));
-
-        if ($conflictingReferee === null) {
-            return;
-        }
-
-        throw SchedulingConflictException::refereeAlreadyAssigned($conflictingReferee->full_name);
+        $this->refereeConflicts->ensureCanBeAssigned($eventId, $conflictingEventIds, $referees);
     }
 
     /**
@@ -129,22 +101,7 @@ final class MatchAssignmentConflictService
      */
     public function ensureTitlesCanBeAssigned(Collection $conflictingEventIds, Collection $titles): void
     {
-        $conflictingTitleId = EventMatch::query()
-            ->forEventIds($conflictingEventIds)
-            ->withAnyTitleIds($titles->map(fn (Title $title): int => $title->id))
-            ->with('titles:id,name')
-            ->get()
-            ->flatMap->titles
-            ->first(fn (Title $title): bool => $titles->contains('id', $title->id))
-            ?->id;
-
-        if ($conflictingTitleId === null) {
-            return;
-        }
-
-        $title = $titles->firstWhere('id', $conflictingTitleId);
-
-        throw SchedulingConflictException::titleAlreadyAssigned($title === null ? "ID: {$conflictingTitleId}" : (string) $title->name);
+        $this->titleConflicts->ensureCanBeAssigned($conflictingEventIds, $titles);
     }
 
     /**
