@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
-use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualEmploymentEligibility;
-use App\Lifecycle\InjuryPeriodManager;
-use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualReleasePeriodService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ReleaseAction
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualReleasePeriodService $releasePeriods,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
         private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
@@ -46,13 +41,7 @@ class ReleaseAction
             $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRelease($lockedWrestler);
 
-            $this->employmentPeriods->end($lockedWrestler, $releaseDate, LifecycleTransitionType::Released);
-
-            if ($lockedWrestler->isSuspended()) {
-                $this->suspensionPeriods->end($lockedWrestler, $releaseDate);
-            } elseif ($lockedWrestler->isInjured()) {
-                $this->injuryPeriods->end($lockedWrestler, $releaseDate);
-            }
+            $this->releasePeriods->end($lockedWrestler, $releaseDate);
 
             $this->endCurrentRelationships->handle($lockedWrestler, $releaseDate);
         });

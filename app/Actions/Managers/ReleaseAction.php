@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
-use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualEmploymentEligibility;
-use App\Lifecycle\InjuryPeriodManager;
-use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
+use App\Services\IndividualReleasePeriodService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ReleaseAction
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualReleasePeriodService $releasePeriods,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
         private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
@@ -45,13 +40,7 @@ class ReleaseAction
             $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRelease($lockedManager);
 
-            $this->employmentPeriods->end($lockedManager, $releaseDate, LifecycleTransitionType::Released);
-
-            if ($lockedManager->isSuspended()) {
-                $this->suspensionPeriods->end($lockedManager, $releaseDate);
-            } elseif ($lockedManager->isInjured()) {
-                $this->injuryPeriods->end($lockedManager, $releaseDate);
-            }
+            $this->releasePeriods->end($lockedManager, $releaseDate);
 
             $this->endCurrentRelationships->handle($lockedManager, $releaseDate);
         });
