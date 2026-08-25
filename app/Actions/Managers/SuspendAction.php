@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
-use App\Lifecycle\IndividualSuspensionEligibility;
-use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
+use App\Services\IndividualSuspensionService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
     public function __construct(
-        private readonly SuspensionPeriodManager $suspensionPeriods,
-        private readonly IndividualSuspensionEligibility $eligibility,
+        private readonly IndividualSuspensionService $suspension,
     ) {}
 
     /**
@@ -34,13 +30,6 @@ class SuspendAction
      */
     public function handle(Manager $manager, ?Carbon $suspensionDate = null): void
     {
-        $suspensionDate = $suspensionDate ?? now();
-
-        DB::transaction(function () use ($manager, $suspensionDate): void {
-            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanSuspend($lockedManager);
-
-            $this->suspensionPeriods->start($lockedManager, $suspensionDate, LifecycleTransitionType::Suspended);
-        });
+        $this->suspension->suspend($manager, $suspensionDate ?? now());
     }
 }
