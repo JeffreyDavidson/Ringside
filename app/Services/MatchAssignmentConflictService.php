@@ -17,9 +17,9 @@ use Illuminate\Support\Collection;
 final class MatchAssignmentConflictService
 {
     public function __construct(
-        private readonly MatchCompetitorConflictChecker $competitorConflicts,
-        private readonly MatchRefereeConflictChecker $refereeConflicts,
-        private readonly MatchTitleConflictChecker $titleConflicts,
+        private readonly MatchCompetitorConflictService $competitorConflicts,
+        private readonly MatchRefereeConflictService $refereeConflicts,
+        private readonly MatchTitleConflictService $titleConflicts,
     ) {}
 
     public function ensureEventCanBeRescheduled(Event $event, ?Carbon $date): void

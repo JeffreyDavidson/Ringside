@@ -10,7 +10,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 
-final class MatchCompetitorConflictChecker
+final class MatchCompetitorConflictService
 {
     /**
      * @param  Collection<int, int>  $conflictingEventIds

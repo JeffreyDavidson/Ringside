@@ -9,7 +9,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use Illuminate\Support\Collection;
 
-final class MatchTitleConflictChecker
+final class MatchTitleConflictService
 {
     /**
      * @param  Collection<int, int>  $conflictingEventIds

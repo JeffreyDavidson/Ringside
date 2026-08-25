@@ -9,7 +9,7 @@ use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Collection;
 
-final class MatchRefereeConflictChecker
+final class MatchRefereeConflictService
 {
     /**
      * @param  Collection<int, int>  $conflictingEventIds
