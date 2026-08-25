@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
-use App\Lifecycle\IndividualInjuryEligibility;
-use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualInjuryRecoveryService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ClearFromInjuryAction
 {
     public function __construct(
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly IndividualInjuryEligibility $eligibility,
+        private readonly IndividualInjuryRecoveryService $recovery,
     ) {}
 
     /**
@@ -30,13 +26,6 @@ class ClearFromInjuryAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
-        $recoveryDate = $recoveryDate ?? now();
-
-        DB::transaction(function () use ($wrestler, $recoveryDate): void {
-            $lockedWrestler = Wrestler::query()->whereKey($wrestler->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanBeClearedFromInjury($lockedWrestler);
-
-            $this->injuryPeriods->end($lockedWrestler, $recoveryDate, LifecycleTransitionType::ClearedFromInjury);
-        });
+        $this->recovery->clear($wrestler, $recoveryDate ?? now());
     }
 }

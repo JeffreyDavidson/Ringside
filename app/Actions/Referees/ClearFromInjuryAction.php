@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
-use App\Lifecycle\IndividualInjuryEligibility;
-use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Roster\Referees\Referee;
+use App\Services\IndividualInjuryRecoveryService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ClearFromInjuryAction
 {
     public function __construct(
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly IndividualInjuryEligibility $eligibility,
+        private readonly IndividualInjuryRecoveryService $recovery,
     ) {}
 
     /**
@@ -35,13 +31,6 @@ class ClearFromInjuryAction
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void
     {
-        $recoveryDate = $recoveryDate ?? now();
-
-        DB::transaction(function () use ($referee, $recoveryDate): void {
-            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanBeClearedFromInjury($lockedReferee);
-
-            $this->injuryPeriods->end($lockedReferee, $recoveryDate, LifecycleTransitionType::ClearedFromInjury);
-        });
+        $this->recovery->clear($referee, $recoveryDate ?? now());
     }
 }
