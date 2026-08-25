@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
-use App\Lifecycle\IndividualSuspensionEligibility;
-use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Referees\Referee;
+use App\Services\IndividualSuspensionService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ReinstateAction
 {
     public function __construct(
-        private readonly SuspensionPeriodManager $suspensionPeriods,
-        private readonly IndividualSuspensionEligibility $eligibility,
+        private readonly IndividualSuspensionService $suspension,
     ) {}
 
     /**
@@ -34,13 +30,6 @@ class ReinstateAction
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void
     {
-        $reinstatementDate = $reinstatementDate ?? now();
-
-        DB::transaction(function () use ($referee, $reinstatementDate): void {
-            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanReinstate($lockedReferee);
-
-            $this->suspensionPeriods->end($lockedReferee, $reinstatementDate, LifecycleTransitionType::Reinstated);
-        });
+        $this->suspension->reinstate($referee, $reinstatementDate ?? now());
     }
 }
