@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\StableDeletionEligibility;
 use App\Models\Roster\Stables\Stable;
-use Illuminate\Support\Facades\DB;
+use App\Services\StableDeletionService;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly DeletionStateManager $deletionState,
-        private readonly StableDeletionEligibility $eligibility,
+        private readonly StableDeletionService $deletion,
     ) {}
 
     /**
@@ -26,15 +23,6 @@ class DeleteAction
      */
     public function handle(Stable $stable): void
     {
-        DB::transaction(function () use ($stable): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanDelete($lockedStable);
-            $this->deletionState->delete($lockedStable, now());
-        });
+        $this->deletion->delete($stable, now());
     }
 }
