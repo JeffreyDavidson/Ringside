@@ -26,7 +26,7 @@ final class VenueDeletionService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->deletionState->delete($lockedVenue, $deletionDate);
+            $this->deletionState->deleteWithinTransaction($lockedVenue, $deletionDate);
         });
     }
 
@@ -40,7 +40,7 @@ final class VenueDeletionService
                 ->firstOrFail();
 
             $this->eligibility->ensureCanRestore($lockedVenue);
-            $this->deletionState->restore($lockedVenue, $restoreDate);
+            $this->deletionState->restoreWithinTransaction($lockedVenue, $restoreDate);
         });
     }
 }

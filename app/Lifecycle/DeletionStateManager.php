@@ -19,28 +19,38 @@ final class DeletionStateManager
     public function delete(Model&SoftDeletable $subject, Carbon $effectiveAt): void
     {
         DB::transaction(function () use ($subject, $effectiveAt): void {
-            $subject->delete();
-
-            $this->recordLifecycleTransition->handle(
-                $subject,
-                LifecycleDimension::Deletion,
-                LifecycleTransitionType::Deleted,
-                $effectiveAt,
-            );
+            $this->deleteWithinTransaction($subject, $effectiveAt);
         });
+    }
+
+    public function deleteWithinTransaction(Model&SoftDeletable $subject, Carbon $effectiveAt): void
+    {
+        $subject->delete();
+
+        $this->recordLifecycleTransition->handle(
+            $subject,
+            LifecycleDimension::Deletion,
+            LifecycleTransitionType::Deleted,
+            $effectiveAt,
+        );
     }
 
     public function restore(Model&SoftDeletable $subject, Carbon $effectiveAt): void
     {
         DB::transaction(function () use ($subject, $effectiveAt): void {
-            $subject->restore();
-
-            $this->recordLifecycleTransition->handle(
-                $subject,
-                LifecycleDimension::Deletion,
-                LifecycleTransitionType::Restored,
-                $effectiveAt,
-            );
+            $this->restoreWithinTransaction($subject, $effectiveAt);
         });
+    }
+
+    public function restoreWithinTransaction(Model&SoftDeletable $subject, Carbon $effectiveAt): void
+    {
+        $subject->restore();
+
+        $this->recordLifecycleTransition->handle(
+            $subject,
+            LifecycleDimension::Deletion,
+            LifecycleTransitionType::Restored,
+            $effectiveAt,
+        );
     }
 }
