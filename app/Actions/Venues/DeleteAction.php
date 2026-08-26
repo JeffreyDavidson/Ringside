@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Venues;
 
-use App\Lifecycle\DeletionStateManager;
 use App\Models\Events\Venue;
-use Illuminate\Support\Facades\DB;
+use App\Services\VenueDeletionService;
+use Illuminate\Support\Carbon;
 
 class DeleteAction
 {
-    public function __construct(private readonly DeletionStateManager $deletionState) {}
+    public function __construct(private readonly VenueDeletionService $deletion) {}
 
     /**
      * Delete a venue.
@@ -22,17 +22,10 @@ class DeleteAction
      * - Allows for future restoration if needed
      *
      * @param  Venue  $venue  The venue to delete
+     * @param  Carbon|null  $deletionDate  The deletion date (defaults to now)
      */
-    public function handle(Venue $venue): void
+    public function handle(Venue $venue, ?Carbon $deletionDate = null): void
     {
-        DB::transaction(function () use ($venue): void {
-            $lockedVenue = Venue::query()
-                ->withTrashed()
-                ->whereKey($venue->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->deletionState->delete($lockedVenue, now());
-        });
+        $this->deletion->delete($venue, $deletionDate ?? now());
     }
 }
