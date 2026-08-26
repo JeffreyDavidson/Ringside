@@ -43,13 +43,22 @@ class AddCompetitorsToMatchAction
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
         $this->assignmentTransaction->execute($eventMatch, function (EventMatch $lockedMatch) use ($competitors): void {
-            $this->requirements->ensureSatisfied($lockedMatch, $competitors);
-
-            // Process each side and add competitors
-            foreach ($competitors as $sideNumber => $sideCompetitors) {
-                $this->addSideCompetitors($lockedMatch, (int) $sideNumber, $sideCompetitors);
-            }
+            $this->handleWithinTransaction($lockedMatch, $competitors);
         });
+    }
+
+    /**
+     * Add competitors while the caller owns the match transaction and lock.
+     *
+     * @param  Collection<int, covariant array{wrestlers?: array<int, Wrestler>, tag_teams?: array<int, TagTeam>}>  $competitors
+     */
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $competitors): void
+    {
+        $this->requirements->ensureSatisfied($lockedMatch, $competitors);
+
+        foreach ($competitors as $sideNumber => $sideCompetitors) {
+            $this->addSideCompetitors($lockedMatch, (int) $sideNumber, $sideCompetitors);
+        }
     }
 
     /**

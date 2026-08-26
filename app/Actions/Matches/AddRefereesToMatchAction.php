@@ -56,22 +56,38 @@ class AddRefereesToMatchAction
         }
 
         $this->assignmentTransaction->execute($eventMatch, function (EventMatch $lockedMatch) use ($requestedReferees): void {
-            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
-            $lockedReferees = Referee::query()
-                ->whereKey($requestedReferees->pluck('id'))
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
-
-            if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
-                fn (Referee $referee): bool => ! RosterBookingEligibility::allows($referee)
-            )) {
-                throw EntityNotAvailableException::forMatchAssignment('referees');
-            }
-
-            $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
-
-            $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->modelKeys());
+            $this->handleWithinTransaction($lockedMatch, $requestedReferees);
         });
+    }
+
+    /**
+     * Assign referees while the caller owns the match transaction and lock.
+     *
+     * @param  Collection<int, Referee>  $referees
+     */
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $referees): void
+    {
+        $requestedReferees = $referees->unique('id')->values();
+
+        if ($requestedReferees->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('referees');
+        }
+
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedReferees = Referee::query()
+            ->whereKey($requestedReferees->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
+            fn (Referee $referee): bool => ! RosterBookingEligibility::allows($referee)
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('referees');
+        }
+
+        $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
+
+        $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->modelKeys());
     }
 }
