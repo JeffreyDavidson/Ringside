@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\StableDeletionEligibility;
 use App\Models\Roster\Stables\Stable;
-use Illuminate\Support\Facades\DB;
+use App\Services\StableDeletionService;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly DeletionStateManager $deletionState,
-        private readonly StableDeletionEligibility $eligibility,
+        private readonly StableDeletionService $deletion,
     ) {}
 
     /**
@@ -27,15 +24,6 @@ class RestoreAction
      */
     public function handle(Stable $stable): void
     {
-        DB::transaction(function () use ($stable): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanRestore($lockedStable);
-            $this->deletionState->restore($lockedStable, now());
-        });
+        $this->deletion->restore($stable, now());
     }
 }
