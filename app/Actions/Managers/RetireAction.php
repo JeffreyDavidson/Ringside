@@ -4,24 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
-use App\Lifecycle\EmploymentPeriodManager;
 use App\Lifecycle\IndividualRetirementEligibility;
-use App\Lifecycle\InjuryPeriodManager;
-use App\Lifecycle\RetirementPeriodManager;
-use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
+use App\Services\IndividualRetirementPeriodService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
-        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualRetirementPeriodService $retirementPeriods,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
         private readonly IndividualRetirementEligibility $eligibility,
     ) {}
@@ -49,17 +42,7 @@ class RetireAction
             $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
             $this->eligibility->ensureCanRetire($lockedManager);
 
-            if ($lockedManager->isEmployed()) {
-                $this->employmentPeriods->end($lockedManager, $retirementDate);
-            }
-
-            if ($lockedManager->isSuspended()) {
-                $this->suspensionPeriods->end($lockedManager, $retirementDate);
-            } elseif ($lockedManager->isInjured()) {
-                $this->injuryPeriods->end($lockedManager, $retirementDate);
-            }
-
-            $this->retirementPeriods->start($lockedManager, $retirementDate, LifecycleTransitionType::Retired);
+            $this->retirementPeriods->start($lockedManager, $retirementDate);
             $this->endCurrentRelationships->handle($lockedManager, $retirementDate);
         });
     }
