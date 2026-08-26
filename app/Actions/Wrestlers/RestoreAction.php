@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualRestoreService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly DeletionStateManager $deletionState,
-        private readonly IndividualDeletionEligibility $eligibility,
+        private readonly IndividualRestoreService $restore,
     ) {}
 
     /**
@@ -34,19 +31,6 @@ class RestoreAction
     {
         $restoreDate = $restoreDate ?? now();
 
-        DB::transaction(function () use ($wrestler, $restoreDate): void {
-            $lockedWrestler = Wrestler::query()
-                ->withTrashed()
-                ->whereKey($wrestler->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanRestore($lockedWrestler);
-            $this->deletionState->restore($lockedWrestler, $restoreDate);
-
-            // Note: No automatic relationship restoration to avoid conflicts.
-            // All employment, tag team, stable, and manager relationships
-            // must be re-established explicitly using separate actions.
-        });
+        $this->restore->restore($wrestler, $restoreDate);
     }
 }

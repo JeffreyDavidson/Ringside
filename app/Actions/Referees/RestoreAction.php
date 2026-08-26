@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Roster\Referees\Referee;
-use Illuminate\Support\Facades\DB;
+use App\Services\IndividualRestoreService;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly DeletionStateManager $deletionState,
-        private readonly IndividualDeletionEligibility $eligibility,
+        private readonly IndividualRestoreService $restore,
     ) {}
 
     /**
@@ -30,18 +27,6 @@ class RestoreAction
      */
     public function handle(Referee $referee): void
     {
-        DB::transaction(function () use ($referee): void {
-            $lockedReferee = Referee::query()
-                ->withTrashed()
-                ->whereKey($referee->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanRestore($lockedReferee);
-            $this->deletionState->restore($lockedReferee, now());
-
-            // Note: No automatic relationship restoration to avoid conflicts.
-            // All employment relationships must be re-established explicitly using separate actions.
-        });
+        $this->restore->restore($referee, now());
     }
 }
