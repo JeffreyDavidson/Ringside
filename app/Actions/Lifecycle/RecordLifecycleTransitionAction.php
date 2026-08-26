@@ -24,10 +24,10 @@ class RecordLifecycleTransitionAction
         Carbon $effectiveAt,
         array $context = [],
     ): LifecycleTransition {
-        $ownerType = LifecycleOwnerType::fromModel($subject);
+        LifecycleOwnerType::fromModel($subject);
 
         return LifecycleTransition::query()->create([
-            'subject_type' => $ownerType->morphAlias(),
+            'subject_type' => $subject->getMorphClass(),
             'subject_id' => $subject->getKey(),
             'dimension' => $dimension,
             'transition' => $transition,
