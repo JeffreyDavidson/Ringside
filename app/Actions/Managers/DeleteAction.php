@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Lifecycle\DeletionPeriodCloser;
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualDeletionService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly DeletionPeriodCloser $periods,
-        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionService $deletion,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
-        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -44,21 +42,16 @@ class DeleteAction
      */
     public function handle(Manager $manager, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
+        $this->deletion->delete(
+            $manager,
+            $deletionDate ?? now(),
+            function (Wrestler|Manager|Referee $lockedIndividual, Carbon $date): void {
+                if (! $lockedIndividual instanceof Manager) {
+                    return;
+                }
 
-        DB::transaction(function () use ($manager, $deletionDate): void {
-            $lockedManager = Manager::query()
-                ->withTrashed()
-                ->whereKey($manager->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanDelete($lockedManager);
-            $this->periods->close($lockedManager, $deletionDate);
-            $this->endCurrentRelationships->handle($lockedManager, $deletionDate);
-
-            // Soft delete the manager record
-            $this->deletionState->delete($lockedManager, $deletionDate);
-        });
+                $this->endCurrentRelationships->handle($lockedIndividual, $date);
+            },
+        );
     }
 }
