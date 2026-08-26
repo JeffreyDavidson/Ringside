@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
-use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Roster\Referees\Referee;
+use App\Services\IndividualEmploymentService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly IndividualEmploymentEligibility $eligibility,
+        private readonly IndividualEmploymentService $employment,
     ) {}
 
     /**
@@ -33,13 +29,6 @@ class EmployAction
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void
     {
-        $employmentDate = $employmentDate ?? now();
-
-        DB::transaction(function () use ($referee, $employmentDate): void {
-            $lockedReferee = Referee::query()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanEmploy($lockedReferee);
-
-            $this->employmentPeriods->start($lockedReferee, $employmentDate, LifecycleTransitionType::Employed);
-        });
+        $this->employment->employ($referee, $employmentDate ?? now());
     }
 }

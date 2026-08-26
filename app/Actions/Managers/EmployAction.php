@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
-use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Roster\Managers\Manager;
+use App\Services\IndividualEmploymentService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class EmployAction
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly IndividualEmploymentEligibility $eligibility,
+        private readonly IndividualEmploymentService $employment,
     ) {}
 
     /**
@@ -33,13 +29,6 @@ class EmployAction
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void
     {
-        $startDate = $startDate ?? now();
-
-        DB::transaction(function () use ($manager, $startDate): void {
-            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanEmploy($lockedManager);
-
-            $this->employmentPeriods->start($lockedManager, $startDate, LifecycleTransitionType::Employed);
-        });
+        $this->employment->employ($manager, $startDate ?? now());
     }
 }
