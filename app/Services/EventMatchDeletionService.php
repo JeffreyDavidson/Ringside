@@ -22,7 +22,7 @@ final class EventMatchDeletionService
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $this->deletionState->deleteWithinTransaction($lockedMatch, $deletionDate);
+            $this->deletionState->delete($lockedMatch, $deletionDate);
         });
     }
 }

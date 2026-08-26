@@ -19,7 +19,7 @@ final class EventDeletionService
     {
         DB::transaction(function () use ($event, $deletionDate): void {
             $lockedEvent = Event::query()->withTrashed()->whereKey($event->getKey())->lockForUpdate()->firstOrFail();
-            $this->deletionState->deleteWithinTransaction($lockedEvent, $deletionDate);
+            $this->deletionState->delete($lockedEvent, $deletionDate);
         });
     }
 
@@ -33,7 +33,7 @@ final class EventDeletionService
                 VenueSchedulingEligibility::ensureAvailable($venue, $lockedEvent->date, $lockedEvent);
             }
 
-            $this->deletionState->restoreWithinTransaction($lockedEvent, $restoreDate);
+            $this->deletionState->restore($lockedEvent, $restoreDate);
         });
     }
 }

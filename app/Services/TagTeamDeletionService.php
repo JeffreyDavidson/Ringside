@@ -30,7 +30,7 @@ final class TagTeamDeletionService
 
             $this->eligibility->ensureCanDelete($lockedTagTeam);
             $this->endCurrentRelationships->handle($lockedTagTeam, $deletionDate);
-            $this->deletionState->deleteWithinTransaction($lockedTagTeam, $deletionDate);
+            $this->deletionState->delete($lockedTagTeam, $deletionDate);
         });
 
         $tagTeam->setAttribute($tagTeam->getDeletedAtColumn(), $deletionDate);
@@ -46,7 +46,7 @@ final class TagTeamDeletionService
                 ->firstOrFail();
 
             $this->eligibility->ensureCanRestore($lockedTagTeam);
-            $this->deletionState->restoreWithinTransaction($lockedTagTeam, $restoreDate);
+            $this->deletionState->restore($lockedTagTeam, $restoreDate);
         });
 
         $tagTeam->setAttribute($tagTeam->getDeletedAtColumn(), null);
