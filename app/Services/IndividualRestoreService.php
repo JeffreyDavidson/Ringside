@@ -36,7 +36,7 @@ final class IndividualRestoreService
                 ->firstOrFail();
 
             $this->eligibility->ensureCanRestore($lockedIndividual);
-            $this->deletionState->restoreWithinTransaction($lockedIndividual, $restoreDate);
+            $this->deletionState->restore($lockedIndividual, $restoreDate);
             $afterRestore?->__invoke($lockedIndividual, $restoreDate);
         });
     }

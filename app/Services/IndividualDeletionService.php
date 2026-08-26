@@ -40,7 +40,7 @@ final class IndividualDeletionService
             $this->eligibility->ensureCanDelete($lockedIndividual);
             $this->periods->close($lockedIndividual, $deletionDate);
             $afterPeriodsClosed?->__invoke($lockedIndividual, $deletionDate);
-            $this->deletionState->deleteWithinTransaction($lockedIndividual, $deletionDate);
+            $this->deletionState->delete($lockedIndividual, $deletionDate);
         });
     }
 }
