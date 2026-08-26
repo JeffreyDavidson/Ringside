@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Venues;
 
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\VenueDeletionEligibility;
 use App\Models\Events\Venue;
-use Illuminate\Support\Facades\DB;
+use App\Services\VenueDeletionService;
+use Illuminate\Support\Carbon;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly DeletionStateManager $deletionState,
-        private readonly VenueDeletionEligibility $eligibility,
+        private readonly VenueDeletionService $deletion,
     ) {}
 
     /**
@@ -26,18 +24,10 @@ class RestoreAction
      * - Reactivates the venue for future bookings
      *
      * @param  Venue  $venue  The soft-deleted venue to restore
+     * @param  Carbon|null  $restoreDate  The restoration date (defaults to now)
      */
-    public function handle(Venue $venue): void
+    public function handle(Venue $venue, ?Carbon $restoreDate = null): void
     {
-        DB::transaction(function () use ($venue): void {
-            $lockedVenue = Venue::query()
-                ->withTrashed()
-                ->whereKey($venue->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanRestore($lockedVenue);
-            $this->deletionState->restore($lockedVenue, now());
-        });
+        $this->deletion->restore($venue, $restoreDate ?? now());
     }
 }
