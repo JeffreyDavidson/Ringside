@@ -57,25 +57,41 @@ class AddTitlesToMatchAction
         }
 
         $this->assignmentTransaction->execute($eventMatch, function (EventMatch $lockedMatch) use ($requestedTitles): void {
-            $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
-            $lockedTitles = Title::query()
-                ->whereKey($requestedTitles->pluck('id'))
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
+            $this->handleWithinTransaction($lockedMatch, $requestedTitles);
+        });
+    }
 
-            if ($lockedTitles->count() !== $requestedTitles->count() || $lockedTitles->contains(
-                fn (Title $title): bool => ! $title->isCurrentlyActive()
-            )) {
-                throw EntityNotAvailableException::forMatchAssignment('titles');
-            }
+    /**
+     * Assign titles while the caller owns the match transaction and lock.
+     *
+     * @param  Collection<int, Title>  $titles
+     */
+    public function handleWithinTransaction(EventMatch $lockedMatch, Collection $titles): void
+    {
+        $requestedTitles = $titles->unique('id')->values();
 
-            $this->conflictService->ensureTitlesCanBeAssigned($conflictingEventIds, $lockedTitles);
-            $this->requirements->ensureSatisfied($lockedMatch, $lockedTitles);
+        if ($requestedTitles->isEmpty()) {
+            throw EntityNotAvailableException::forMatchAssignment('titles');
+        }
 
-            $lockedTitles->each(function (Title $title) use ($lockedMatch): void {
-                $lockedMatch->titles()->attach($title->id);
-            });
+        $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
+        $lockedTitles = Title::query()
+            ->whereKey($requestedTitles->pluck('id'))
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        if ($lockedTitles->count() !== $requestedTitles->count() || $lockedTitles->contains(
+            fn (Title $title): bool => ! $title->isCurrentlyActive()
+        )) {
+            throw EntityNotAvailableException::forMatchAssignment('titles');
+        }
+
+        $this->conflictService->ensureTitlesCanBeAssigned($conflictingEventIds, $lockedTitles);
+        $this->requirements->ensureSatisfied($lockedMatch, $lockedTitles);
+
+        $lockedTitles->each(function (Title $title) use ($lockedMatch): void {
+            $lockedMatch->titles()->attach($title->id);
         });
     }
 }

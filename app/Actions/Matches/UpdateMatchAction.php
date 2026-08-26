@@ -44,12 +44,12 @@ class UpdateMatchAction
             $lockedMatch->competitors()->delete();
             $lockedMatch->sides()->delete();
 
-            $this->addRefereesToMatchAction->handle($lockedMatch, $data->referees);
+            $this->addRefereesToMatchAction->handleWithinTransaction($lockedMatch, $data->referees);
 
-            $this->addCompetitorsToMatchAction->handle($lockedMatch, $data->sides);
+            $this->addCompetitorsToMatchAction->handleWithinTransaction($lockedMatch, $data->sides);
 
             if ($data->titles->isNotEmpty()) {
-                $this->addTitlesToMatchAction->handle($lockedMatch, $data->titles);
+                $this->addTitlesToMatchAction->handleWithinTransaction($lockedMatch, $data->titles);
             }
 
             return $lockedMatch->refresh();

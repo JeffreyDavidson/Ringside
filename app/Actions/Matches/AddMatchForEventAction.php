@@ -44,12 +44,12 @@ class AddMatchForEventAction
                 'preview' => $eventMatchData->preview,
             ]);
 
-            $this->addRefereesToMatchAction->handle($createdMatch, $eventMatchData->referees);
+            $this->addRefereesToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->referees);
 
-            $this->addCompetitorsToMatchAction->handle($createdMatch, $eventMatchData->sides);
+            $this->addCompetitorsToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->sides);
 
             if ($eventMatchData->titles->isNotEmpty()) {
-                $this->addTitlesToMatchAction->handle($createdMatch, $eventMatchData->titles);
+                $this->addTitlesToMatchAction->handleWithinTransaction($createdMatch, $eventMatchData->titles);
             }
 
             return $createdMatch;
