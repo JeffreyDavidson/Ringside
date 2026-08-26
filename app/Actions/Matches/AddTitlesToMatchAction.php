@@ -8,15 +8,16 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\MatchTitleRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
+use App\Services\EventMatchAssignmentService;
 use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class AddTitlesToMatchAction
 {
     public function __construct(
         private readonly MatchAssignmentConflictService $conflictService,
         private readonly MatchTitleRequirements $requirements,
+        private readonly EventMatchAssignmentService $assignmentTransaction,
     ) {}
 
     /**
@@ -55,8 +56,7 @@ class AddTitlesToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('titles');
         }
 
-        DB::transaction(function () use ($eventMatch, $requestedTitles): void {
-            $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
+        $this->assignmentTransaction->execute($eventMatch, function (EventMatch $lockedMatch) use ($requestedTitles): void {
             $conflictingEventIds = $this->conflictService->lockConflictingEventIds($lockedMatch);
             $lockedTitles = Title::query()
                 ->whereKey($requestedTitles->pluck('id'))
