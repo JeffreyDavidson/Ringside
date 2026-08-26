@@ -10,14 +10,15 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\EventMatchAssignmentService;
 use App\Services\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class AddWrestlersToMatchAction
 {
     public function __construct(
         protected MatchAssignmentConflictService $conflictService,
+        private readonly EventMatchAssignmentService $assignmentTransaction,
     ) {}
 
     /**
@@ -60,8 +61,7 @@ class AddWrestlersToMatchAction
             throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
-        DB::transaction(function () use ($eventMatch, $requestedWrestlers, $sideNumber): void {
-            $lockedMatch = EventMatch::query()->whereKey($eventMatch->id)->lockForUpdate()->firstOrFail();
+        $this->assignmentTransaction->execute($eventMatch, function (EventMatch $lockedMatch) use ($requestedWrestlers, $sideNumber): void {
             $this->handleWithinTransaction($lockedMatch, $requestedWrestlers, $sideNumber);
         });
     }
