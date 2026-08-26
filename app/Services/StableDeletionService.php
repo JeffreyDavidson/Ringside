@@ -27,7 +27,7 @@ final class StableDeletionService
                 ->firstOrFail();
 
             $this->eligibility->ensureCanDelete($lockedStable);
-            $this->deletionState->delete($lockedStable, $deletionDate);
+            $this->deletionState->deleteWithinTransaction($lockedStable, $deletionDate);
         });
     }
 
@@ -41,7 +41,7 @@ final class StableDeletionService
                 ->firstOrFail();
 
             $this->eligibility->ensureCanRestore($lockedStable);
-            $this->deletionState->restore($lockedStable, $restoreDate);
+            $this->deletionState->restoreWithinTransaction($lockedStable, $restoreDate);
         });
     }
 }

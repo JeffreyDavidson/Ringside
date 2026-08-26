@@ -34,7 +34,7 @@ final class TitleDeletionService
             }
 
             $this->championshipReigns->endCurrentReign($lockedTitle, $deletionDate);
-            $this->deletionState->delete($lockedTitle, $deletionDate);
+            $this->deletionState->deleteWithinTransaction($lockedTitle, $deletionDate);
         });
     }
 
@@ -48,7 +48,7 @@ final class TitleDeletionService
                 ->firstOrFail();
 
             $this->eligibility->ensureCanRestore($lockedTitle);
-            $this->deletionState->restore($lockedTitle, $restoreDate);
+            $this->deletionState->restoreWithinTransaction($lockedTitle, $restoreDate);
         });
     }
 }
