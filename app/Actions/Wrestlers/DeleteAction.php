@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Lifecycle\DeletionPeriodCloser;
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\IndividualDeletionEligibility;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualDeletionService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly DeletionPeriodCloser $periods,
-        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionService $deletion,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
-        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -42,21 +39,16 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
+        $this->deletion->delete(
+            $wrestler,
+            $deletionDate ?? now(),
+            function (Wrestler|Manager|Referee $lockedIndividual, Carbon $date): void {
+                if (! $lockedIndividual instanceof Wrestler) {
+                    return;
+                }
 
-        DB::transaction(function () use ($wrestler, $deletionDate): void {
-            $lockedWrestler = Wrestler::query()
-                ->withTrashed()
-                ->whereKey($wrestler->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanDelete($lockedWrestler);
-            $this->periods->close($lockedWrestler, $deletionDate);
-            $this->endCurrentRelationships->handle($lockedWrestler, $deletionDate);
-
-            // Soft delete the wrestler record
-            $this->deletionState->delete($lockedWrestler, $deletionDate);
-        });
+                $this->endCurrentRelationships->handle($lockedIndividual, $date);
+            },
+        );
     }
 }
