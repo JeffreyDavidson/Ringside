@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Lifecycle\ChampionshipReignManager;
-use App\Lifecycle\DeletionStateManager;
 use App\Models\Titles\Title;
+use App\Services\TitleDeletionService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly ChampionshipReignManager $championshipReigns,
-        private readonly DeletionStateManager $deletionState,
+        private readonly TitleDeletionService $deletion,
     ) {}
 
     /**
@@ -42,28 +39,6 @@ class DeleteAction
      */
     public function handle(Title $title, ?Carbon $deletionDate = null): void
     {
-        $deletionDate = $deletionDate ?? now();
-
-        DB::transaction(function () use ($title, $deletionDate): void {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            // Handle title status cleanup based on current state
-            if ($lockedTitle->isCurrentlyActive()) {
-                // End active status (pull the title from active competition)
-                $lockedTitle->activityPeriods()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
-            } elseif ($lockedTitle->isRetired()) {
-                // End retirement period (retired titles are not active)
-                $lockedTitle->retirements()->where('ended_at', null)->update(['ended_at' => $deletionDate]);
-            }
-            // Note: Inactive (pulled) titles that have debuted require no status cleanup
-
-            $this->championshipReigns->endCurrentReign($lockedTitle, $deletionDate);
-
-            // Soft delete the title record
-            $this->deletionState->delete($lockedTitle, $deletionDate);
-        });
+        $this->deletion->delete($title, $deletionDate ?? now());
     }
 }

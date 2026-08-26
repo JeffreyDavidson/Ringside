@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\TitleDeletionEligibility;
 use App\Models\Titles\Title;
-use Illuminate\Support\Facades\DB;
+use App\Services\TitleDeletionService;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly DeletionStateManager $deletionState,
-        private readonly TitleDeletionEligibility $eligibility,
+        private readonly TitleDeletionService $deletion,
     ) {}
 
     /**
@@ -30,15 +27,6 @@ class RestoreAction
      */
     public function handle(Title $title): void
     {
-        DB::transaction(function () use ($title): void {
-            $lockedTitle = Title::query()
-                ->withTrashed()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanRestore($lockedTitle);
-            $this->deletionState->restore($lockedTitle, now());
-        });
+        $this->deletion->restore($title, now());
     }
 }
