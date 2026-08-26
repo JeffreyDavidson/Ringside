@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\IndividualDeletionEligibility;
 use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualRestoreService;
 use App\Services\ManagerAssignmentService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class RestoreAction
 {
     public function __construct(
         private readonly ManagerAssignmentService $managerAssignments,
-        private readonly DeletionStateManager $deletionState,
-        private readonly IndividualDeletionEligibility $eligibility,
+        private readonly IndividualRestoreService $restore,
     ) {}
 
     /**
@@ -32,19 +32,13 @@ class RestoreAction
      */
     public function handle(Manager $manager): void
     {
-        DB::transaction(function () use ($manager): void {
-            $lockedManager = Manager::query()
-                ->withTrashed()
-                ->whereKey($manager->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+        $this->restore->restore($manager, now(), function (Wrestler|Manager|Referee $lockedIndividual, Carbon $date): void {
+            if (! $lockedIndividual instanceof Manager) {
+                return;
+            }
 
-            $this->eligibility->ensureCanRestore($lockedManager);
-            $restorationDate = now();
-            $this->deletionState->restore($lockedManager, $restorationDate);
-
-            $lockedManager->employments()->whereNull('ended_at')->update(['ended_at' => $restorationDate]);
-            $this->managerAssignments->endCurrentAssignments($lockedManager, $restorationDate);
+            $lockedIndividual->employments()->whereNull('ended_at')->update(['ended_at' => $date]);
+            $this->managerAssignments->endCurrentAssignments($lockedIndividual, $date);
         });
     }
 }
