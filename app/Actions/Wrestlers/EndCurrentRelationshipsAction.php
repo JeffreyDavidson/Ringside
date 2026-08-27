@@ -8,13 +8,16 @@ use App\Lifecycle\ChampionshipReignManager;
 use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Roster\Wrestlers\WrestlerManager;
+use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class EndCurrentRelationshipsAction
 {
-    public function __construct(private readonly ChampionshipReignManager $championshipReigns) {}
+    public function __construct(
+        private readonly ChampionshipReignManager $championshipReigns,
+        private readonly ManagerAssignmentService $managerAssignments,
+    ) {}
 
     public function handle(Wrestler $wrestler, Carbon $effectiveDate): void
     {
@@ -34,10 +37,7 @@ class EndCurrentRelationshipsAction
                 ->current()
                 ->update(['left_at' => $effectiveDate]);
 
-            WrestlerManager::query()
-                ->whereBelongsTo($lockedWrestler)
-                ->current()
-                ->update(['fired_at' => $effectiveDate]);
+            $this->managerAssignments->endAssignmentsFor($lockedWrestler, $effectiveDate);
 
             $this->championshipReigns->endCurrentReignsForChampion($lockedWrestler, $effectiveDate);
         });
