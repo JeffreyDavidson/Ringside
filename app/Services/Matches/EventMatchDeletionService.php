@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Events;
+namespace App\Services\Matches;
 
 use App\Lifecycle\DeletionStateManager;
 use App\Models\Matches\EventMatch;
