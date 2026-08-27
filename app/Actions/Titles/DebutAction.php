@@ -27,7 +27,6 @@ class DebutAction
      * @param  Title  $title  The title to debut
      * @param  Carbon|null  $debutDate  The debut date (defaults to now)
      * @param  string|null  $notes  Optional notes about the debut
-     * @throws CannotBeDebutedException When title cannot be debuted due to business rules
      */
     public function handle(Title $title, ?Carbon $debutDate = null, ?string $notes = null): void
     {
