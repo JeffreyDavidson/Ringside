@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Models\Roster\Managers\Manager;
-use App\Models\Roster\TagTeams\TagTeamManager;
-use App\Models\Roster\Wrestlers\WrestlerManager;
+use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class EndCurrentRelationshipsAction
 {
+    public function __construct(private readonly ManagerAssignmentService $managerAssignments) {}
+
     public function handle(Manager $manager, Carbon $effectiveDate): void
     {
         DB::transaction(function () use ($manager, $effectiveDate): void {
@@ -20,15 +21,7 @@ class EndCurrentRelationshipsAction
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            WrestlerManager::query()
-                ->forManagerId($lockedManager->id)
-                ->current()
-                ->update(['fired_at' => $effectiveDate]);
-
-            TagTeamManager::query()
-                ->forManagerId($lockedManager->id)
-                ->current()
-                ->update(['fired_at' => $effectiveDate]);
+            $this->managerAssignments->endCurrentAssignments($lockedManager, $effectiveDate);
         });
     }
 }
