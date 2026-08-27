@@ -13,10 +13,7 @@ class UpdateAction
     public function handle(User $user, UserData $data): User
     {
         return DB::transaction(function () use ($user, $data): User {
-            $lockedUser = User::query()
-                ->whereKey($user->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedUser = $user->refreshForUpdate();
 
             $attributes = [
                 'first_name' => $data->firstName,

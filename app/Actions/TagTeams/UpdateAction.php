@@ -28,10 +28,7 @@ class UpdateAction
     public function handle(TagTeam $tagTeam, TagTeamData $tagTeamData): TagTeam
     {
         return DB::transaction(function () use ($tagTeam, $tagTeamData): TagTeam {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $lockedTagTeam->update([
                 'name' => mb_trim($tagTeamData->name),

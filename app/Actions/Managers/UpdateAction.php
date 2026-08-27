@@ -33,10 +33,7 @@ class UpdateAction
     public function handle(Manager $manager, ManagerData $managerData): Manager
     {
         return DB::transaction(function () use ($manager, $managerData): Manager {
-            $lockedManager = Manager::query()
-                ->whereKey($manager->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedManager = $manager->refreshForUpdate();
 
             $lockedManager->update([
                 'first_name' => $managerData->first_name,

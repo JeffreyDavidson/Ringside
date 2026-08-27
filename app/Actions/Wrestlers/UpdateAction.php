@@ -42,10 +42,7 @@ class UpdateAction
     public function handle(Wrestler $wrestler, WrestlerData $wrestlerData): Wrestler
     {
         return DB::transaction(function () use ($wrestler, $wrestlerData): Wrestler {
-            $lockedWrestler = Wrestler::query()
-                ->whereKey($wrestler->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedWrestler = $wrestler->refreshForUpdate();
 
             $lockedWrestler->update([
                 'name' => $wrestlerData->name,
