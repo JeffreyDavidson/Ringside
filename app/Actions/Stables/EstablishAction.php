@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
-use App\Actions\Lifecycle\StartActivityPeriodAction;
-use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
@@ -14,15 +11,15 @@ use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Lifecycle\StableActivityEligibility;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
+use App\Services\StableActivityPeriodService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class EstablishAction
 {
     public function __construct(
-        protected StartActivityPeriodAction $startActivityPeriodAction,
-        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
         protected StableActivityEligibility $eligibility,
+        protected StableActivityPeriodService $activityPeriods,
     ) {}
 
     /**
@@ -61,21 +58,7 @@ class EstablishAction
 
                 $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Establish);
 
-                $activityPeriod = $this->startActivityPeriodAction->handle($lockedStable, $activationDate);
-
-                if ($endDate) {
-                    $activityPeriod->update(['ended_at' => $endDate]);
-                }
-
-                $this->recordLifecycleTransitionAction->handle(
-                    $lockedStable,
-                    LifecycleDimension::Activity,
-                    LifecycleTransitionType::Established,
-                    $activationDate,
-                    array_filter(['ended_at' => $endDate?->toDateTimeString()]),
-                );
-
-                return $activityPeriod;
+                return $this->activityPeriods->start($lockedStable, $activationDate, LifecycleTransitionType::Established, $endDate);
             }
         );
     }
