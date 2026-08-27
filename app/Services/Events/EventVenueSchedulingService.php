@@ -11,6 +11,14 @@ use Illuminate\Support\Carbon;
 
 final class EventVenueSchedulingService
 {
+    public function schedule(?Carbon $date, ?Venue $venue, ?Event $event = null): ?Venue
+    {
+        $lockedVenue = $this->lockScheduledVenue($date, $venue);
+        $this->ensureAvailable($lockedVenue, $date, $event);
+
+        return $lockedVenue;
+    }
+
     public function lockScheduledVenue(?Carbon $date, ?Venue $venue): ?Venue
     {
         if ($date === null || $venue === null) {
