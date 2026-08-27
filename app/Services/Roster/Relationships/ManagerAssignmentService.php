@@ -59,6 +59,19 @@ final class ManagerAssignmentService
     }
 
     /**
+     * End every current manager assignment for a manageable roster entity.
+     *
+     * @param  Manageable<*, *>  $manageable
+     */
+    public function endAssignmentsFor(Manageable $manageable, Carbon $date): void
+    {
+        $manageable->managers()
+            ->newPivotQuery()
+            ->whereNull('fired_at')
+            ->update(['fired_at' => $date]);
+    }
+
+    /**
      * @template TRelatedModel of Model
      * @template TDeclaringModel of Model
      * @template TPivotModel of Pivot

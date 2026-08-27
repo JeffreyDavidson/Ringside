@@ -37,4 +37,14 @@ final class TagTeamMembershipService
         );
         $this->managerAssignments->synchronize($tagTeam, $members->managers, $date);
     }
+
+    public function endCurrentMemberships(TagTeam $tagTeam, Carbon $date): void
+    {
+        $this->historicalMemberships->remove(
+            $tagTeam->wrestlers(),
+            $tagTeam->currentWrestlers,
+            $date,
+        );
+        $this->managerAssignments->endAssignmentsFor($tagTeam, $date);
+    }
 }
