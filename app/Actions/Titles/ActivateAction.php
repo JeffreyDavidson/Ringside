@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Models\Titles\Title;
+use App\Services\TitleActivationService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Activate action for titles.
@@ -17,9 +17,7 @@ use Illuminate\Support\Facades\DB;
 class ActivateAction
 {
     public function __construct(
-        private DebutAction $debutAction,
-        private ReinstateAction $reinstateAction,
-        private UnretireAction $unretireAction
+        private TitleActivationService $activation,
     ) {}
 
     /**
@@ -30,27 +28,6 @@ class ActivateAction
      */
     public function handle(Title $title, ?Carbon $activationDate = null): void
     {
-        $activationDate = $activationDate ?? now();
-
-        DB::transaction(function () use ($title, $activationDate): void {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            // If the title is retired, first unretire it
-            if ($lockedTitle->isRetired()) {
-                $this->unretireAction->handle($lockedTitle, $activationDate);
-            }
-
-            // Determine if this is a debut or reinstatement
-            if ($lockedTitle->hasActivityPeriods()) {
-                // Title has been debuted before, so reinstate it
-                $this->reinstateAction->handle($lockedTitle, $activationDate);
-            } else {
-                // Title has never been debuted, so debut it
-                $this->debutAction->handle($lockedTitle, $activationDate);
-            }
-        });
+        $this->activation->activate($title, $activationDate ?? now());
     }
 }
