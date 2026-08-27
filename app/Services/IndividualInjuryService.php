@@ -13,12 +13,25 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-final class IndividualInjuryRecoveryService
+final class IndividualInjuryService
 {
     public function __construct(
         private readonly InjuryPeriodManager $injuryPeriods,
         private readonly IndividualInjuryEligibility $eligibility,
     ) {}
+
+    public function injure(Wrestler|Manager|Referee $individual, Carbon $injuryDate): void
+    {
+        DB::transaction(function () use ($individual, $injuryDate): void {
+            $lockedIndividual = $individual::query()
+                ->whereKey($individual->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanInjure($lockedIndividual);
+            $this->injuryPeriods->start($lockedIndividual, $injuryDate, LifecycleTransitionType::Injured);
+        });
+    }
 
     public function clear(Wrestler|Manager|Referee $individual, Carbon $recoveryDate): void
     {

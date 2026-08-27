@@ -6,13 +6,13 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Models\Roster\Managers\Manager;
-use App\Services\IndividualInjuryRecoveryService;
+use App\Services\IndividualInjuryService;
 use Illuminate\Support\Carbon;
 
 class ClearFromInjuryAction
 {
     public function __construct(
-        private readonly IndividualInjuryRecoveryService $recovery,
+        private readonly IndividualInjuryService $injury,
     ) {}
 
     /**
@@ -31,6 +31,6 @@ class ClearFromInjuryAction
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void
     {
-        $this->recovery->clear($manager, $recoveryDate ?? now());
+        $this->injury->clear($manager, $recoveryDate ?? now());
     }
 }

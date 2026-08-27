@@ -6,13 +6,13 @@ namespace App\Actions\Wrestlers;
 
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\IndividualInjuryRecoveryService;
+use App\Services\IndividualInjuryService;
 use Illuminate\Support\Carbon;
 
 class ClearFromInjuryAction
 {
     public function __construct(
-        private readonly IndividualInjuryRecoveryService $recovery,
+        private readonly IndividualInjuryService $injury,
     ) {}
 
     /**
@@ -26,6 +26,6 @@ class ClearFromInjuryAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $recoveryDate = null): void
     {
-        $this->recovery->clear($wrestler, $recoveryDate ?? now());
+        $this->injury->clear($wrestler, $recoveryDate ?? now());
     }
 }

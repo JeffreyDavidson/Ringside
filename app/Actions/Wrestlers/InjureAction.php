@@ -4,19 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
-use App\Lifecycle\IndividualInjuryEligibility;
-use App\Lifecycle\InjuryPeriodManager;
 use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualInjuryService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class InjureAction
 {
     public function __construct(
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly IndividualInjuryEligibility $eligibility,
+        private readonly IndividualInjuryService $injury,
     ) {}
 
     /**
@@ -36,15 +32,6 @@ class InjureAction
     {
         $injuryDate = $injuryDate ?? now();
 
-        DB::transaction(function () use ($wrestler, $injuryDate): void {
-            $lockedWrestler = Wrestler::query()
-                ->whereKey($wrestler->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureCanInjure($lockedWrestler);
-
-            $this->injuryPeriods->start($lockedWrestler, $injuryDate, LifecycleTransitionType::Injured);
-        });
+        $this->injury->injure($wrestler, $injuryDate);
     }
 }
