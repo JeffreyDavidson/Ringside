@@ -29,10 +29,7 @@ class UpdateAction
     public function handle(Title $title, TitleData $titleData): Title
     {
         return DB::transaction(function () use ($title, $titleData): Title {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTitle = $title->refreshForUpdate();
 
             $lockedTitle->update([
                 'name' => $titleData->name,

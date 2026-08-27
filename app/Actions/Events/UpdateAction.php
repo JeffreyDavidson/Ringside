@@ -21,7 +21,7 @@ class UpdateAction
     public function handle(Event $event, EventData $eventData): Event
     {
         return DB::transaction(function () use ($event, $eventData): Event {
-            $lockedEvent = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
+            $lockedEvent = $event->refreshForUpdate();
 
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
             $this->venueScheduling->schedule($eventData->date, $eventData->venue, $lockedEvent);

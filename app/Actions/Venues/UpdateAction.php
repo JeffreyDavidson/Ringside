@@ -25,10 +25,7 @@ class UpdateAction
     public function handle(Venue $venue, VenueData $venueData): Venue
     {
         return DB::transaction(function () use ($venue, $venueData): Venue {
-            $lockedVenue = Venue::query()
-                ->whereKey($venue->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedVenue = $venue->refreshForUpdate();
 
             $lockedVenue->update([
                 'name' => $venueData->name,

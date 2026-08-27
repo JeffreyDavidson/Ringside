@@ -44,10 +44,7 @@ class UpdateAction
         }
 
         return DB::transaction(function () use ($stable, $stableData): Stable {
-            $lockedStable = Stable::query()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $lockedStable->update([
                 'name' => $stableData->getTrimmedName(),

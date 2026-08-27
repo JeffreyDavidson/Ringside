@@ -33,10 +33,7 @@ class UpdateAction
     public function handle(Referee $referee, RefereeData $refereeData): Referee
     {
         return DB::transaction(function () use ($referee, $refereeData): Referee {
-            $lockedReferee = Referee::query()
-                ->whereKey($referee->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedReferee = $referee->refreshForUpdate();
 
             $lockedReferee->update([
                 'first_name' => $refereeData->first_name,

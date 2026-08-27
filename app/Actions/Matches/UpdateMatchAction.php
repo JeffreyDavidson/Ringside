@@ -24,10 +24,7 @@ class UpdateMatchAction
         $this->requirements->ensureComplete($data);
 
         return DB::transaction(function () use ($match, $data): EventMatch {
-            $lockedMatch = EventMatch::query()
-                ->whereKey($match->id)
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedMatch = $match->refreshForUpdate();
 
             if ($lockedMatch->match_finish !== null) {
                 throw InvalidMatchConfigurationException::resultAlreadyRecorded();
