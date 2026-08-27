@@ -65,7 +65,10 @@ final class ManagerAssignmentService
      */
     public function endAssignmentsFor(Manageable $manageable, Carbon $date): void
     {
-        $this->endCurrentRelationship($manageable->managers(), $date);
+        $manageable->managers()
+            ->newPivotQuery()
+            ->whereNull('fired_at')
+            ->update(['fired_at' => $date]);
     }
 
     /**
