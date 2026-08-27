@@ -16,8 +16,7 @@ class CreateAction
     public function handle(EventData $eventData): Event
     {
         return DB::transaction(function () use ($eventData): Event {
-            $venue = $this->venueScheduling->lockScheduledVenue($eventData->date, $eventData->venue);
-            $this->venueScheduling->ensureAvailable($venue, $eventData->date);
+            $this->venueScheduling->schedule($eventData->date, $eventData->venue);
 
             $event = Event::query()->create([
                 'name' => $eventData->name,

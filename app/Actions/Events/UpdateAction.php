@@ -24,8 +24,7 @@ class UpdateAction
             $lockedEvent = Event::query()->whereKey($event->id)->lockForUpdate()->firstOrFail();
 
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
-            $venue = $this->venueScheduling->lockScheduledVenue($eventData->date, $eventData->venue);
-            $this->venueScheduling->ensureAvailable($venue, $eventData->date, $lockedEvent);
+            $this->venueScheduling->schedule($eventData->date, $eventData->venue, $lockedEvent);
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);
