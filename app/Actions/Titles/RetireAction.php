@@ -4,24 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Actions\Lifecycle\EndActivityPeriodAction;
-use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Titles\TitleLifecycleTransition;
-use App\Exceptions\Titles\CannotBeRetiredException;
-use App\Lifecycle\ChampionshipReignManager;
-use App\Lifecycle\RetirementPeriodManager;
-use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
+use App\Services\TitleRetirementService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
     public function __construct(
-        private readonly EndActivityPeriodAction $endActivityPeriod,
-        private readonly ChampionshipReignManager $championshipReigns,
-        private readonly RetirementPeriodManager $retirementPeriods,
-        private readonly TitleLifecycleEligibility $eligibility,
+        private readonly TitleRetirementService $retirement,
     ) {}
 
     /**
@@ -37,28 +27,9 @@ class RetireAction
      *
      * @param  Title  $title  The title to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
-     * @throws CannotBeRetiredException When title cannot be retired due to business rules
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
-        $retirementDate = $retirementDate ?? now();
-        $operationalDate = $retirementDate->isFuture() ? now() : $retirementDate;
-
-        DB::transaction(function () use ($title, $retirementDate, $operationalDate): void {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Retire);
-
-            if ($lockedTitle->hasActivityPeriods() && $lockedTitle->isCurrentlyActive()) {
-                $this->endActivityPeriod->handle($lockedTitle, $operationalDate);
-            }
-
-            $this->championshipReigns->endCurrentReign($lockedTitle, $retirementDate);
-
-            $this->retirementPeriods->start($lockedTitle, $retirementDate, LifecycleTransitionType::Retired);
-        });
+        $this->retirement->retire($title, $retirementDate ?? now());
     }
 }
