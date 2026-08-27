@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Actions\Lifecycle\EndActivityPeriodAction;
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
-use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Lifecycle\StableActivityEligibility;
 use App\Models\Roster\Stables\Stable;
+use App\Services\StableActivityPeriodService;
 use App\Services\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -22,11 +20,10 @@ class DisbandAction
      * Create a new disband action instance.
      */
     public function __construct(
-        protected EndActivityPeriodAction $endActivityPeriodAction,
         protected RemoveStableMembersAction $removeStableMembersAction,
-        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
         protected StableActivityEligibility $eligibility,
         protected StableMembershipService $membershipService,
+        protected StableActivityPeriodService $activityPeriods,
     ) {}
 
     /**
@@ -55,7 +52,7 @@ class DisbandAction
                 ->firstOrFail();
 
             $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Disband);
-            $this->endActivityPeriodAction->handle($lockedStable, $disbandDate);
+            $this->activityPeriods->end($lockedStable, $disbandDate, LifecycleTransitionType::Disbanded);
 
             $currentMembers = $this->membershipService->currentMembers($lockedStable);
 
@@ -67,12 +64,6 @@ class DisbandAction
                 );
             }
 
-            $this->recordLifecycleTransitionAction->handle(
-                $lockedStable,
-                LifecycleDimension::Activity,
-                LifecycleTransitionType::Disbanded,
-                $disbandDate,
-            );
         });
     }
 }
