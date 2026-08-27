@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Titles\TitleLifecycleTransition;
-use App\Exceptions\Titles\CannotBeReinstatedException;
-use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
-use App\Services\TitleActivityPeriodService;
+use App\Services\TitleLifecycleService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ReinstateAction
 {
     public function __construct(
-        private TitleLifecycleEligibility $eligibility,
-        private TitleActivityPeriodService $activityPeriods,
+        private TitleLifecycleService $lifecycle,
     ) {}
 
     /**
@@ -33,21 +27,9 @@ class ReinstateAction
      * @param  Title  $title  The title to reinstate
      * @param  Carbon|null  $reinstateDate  The reinstatement date (defaults to now)
      * @param  string|null  $notes  Optional notes about the reinstatement
-     * @throws CannotBeReinstatedException When title cannot be reinstated due to business rules
      */
     public function handle(Title $title, ?Carbon $reinstateDate = null, ?string $notes = null): void
     {
-        $reinstateDate = $reinstateDate ?? now();
-
-        DB::transaction(function () use ($title, $reinstateDate, $notes): void {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Reinstate);
-
-            $this->activityPeriods->start($lockedTitle, $reinstateDate, LifecycleTransitionType::Reinstated, $notes);
-        });
+        $this->lifecycle->reinstate($title, $reinstateDate ?? now(), $notes);
     }
 }
