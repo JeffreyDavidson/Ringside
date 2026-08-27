@@ -7,18 +7,17 @@ namespace App\Actions\Managers;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\IndividualRetirementEligibility;
-use App\Lifecycle\RetirementPeriodManager;
 use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualUnretirementService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
-        private readonly IndividualRetirementEligibility $eligibility,
+        private readonly IndividualUnretirementService $unretirement,
     ) {}
 
     /**
@@ -39,13 +38,11 @@ class UnretireAction
     {
         $unretiredDate = $unretiredDate ?? now();
 
-        DB::transaction(function () use ($manager, $unretiredDate, $employImmediately): void {
-            $lockedManager = Manager::query()->withTrashed()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanUnretire($lockedManager);
-            $this->retirementPeriods->end($lockedManager, $unretiredDate, LifecycleTransitionType::Unretired);
-
+        $this->unretirement->unretire($manager, $unretiredDate, function (Wrestler|Manager|Referee $lockedManager, Carbon $date) use ($employImmediately): void {
             if ($employImmediately) {
-                $this->employmentPeriods->start($lockedManager, $unretiredDate, LifecycleTransitionType::Employed);
+                if ($lockedManager instanceof Manager) {
+                    $this->employmentPeriods->start($lockedManager, $date, LifecycleTransitionType::Employed);
+                }
             }
         });
     }
