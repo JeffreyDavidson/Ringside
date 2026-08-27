@@ -19,7 +19,7 @@ final class EventDeletionService
     public function delete(Event $event, Carbon $deletionDate): void
     {
         DB::transaction(function () use ($event, $deletionDate): void {
-            $lockedEvent = Event::query()->withTrashed()->whereKey($event->getKey())->lockForUpdate()->firstOrFail();
+            $lockedEvent = $event->refreshForUpdate();
             $this->deletionState->delete($lockedEvent, $deletionDate);
         });
     }
@@ -27,7 +27,7 @@ final class EventDeletionService
     public function restore(Event $event, Carbon $restoreDate): void
     {
         DB::transaction(function () use ($event, $restoreDate): void {
-            $lockedEvent = Event::query()->withTrashed()->whereKey($event->getKey())->lockForUpdate()->firstOrFail();
+            $lockedEvent = $event->refreshForUpdate();
 
             $this->venueScheduling->schedule($lockedEvent->date, $lockedEvent->venue, $lockedEvent);
 
