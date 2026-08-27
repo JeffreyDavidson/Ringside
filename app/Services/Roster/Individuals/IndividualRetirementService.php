@@ -28,10 +28,7 @@ final class IndividualRetirementService
         ?Closure $afterRetirement = null,
     ): void {
         DB::transaction(function () use ($individual, $retirementDate, $afterRetirement): void {
-            $lockedIndividual = $individual::query()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanRetire($lockedIndividual);
             $this->retirementPeriods->start($lockedIndividual, $retirementDate);
