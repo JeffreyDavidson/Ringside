@@ -4,23 +4,20 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
-use App\Actions\Lifecycle\StartActivityPeriodAction;
-use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
+use App\Services\TitleActivityPeriodService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DebutAction
 {
     public function __construct(
-        private StartActivityPeriodAction $startActivityPeriod,
-        private RecordLifecycleTransitionAction $recordLifecycleTransition,
         private TitleLifecycleEligibility $eligibility,
+        private TitleActivityPeriodService $activityPeriods,
     ) {}
 
     /**
@@ -50,14 +47,7 @@ class DebutAction
 
             $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Debut);
 
-            $this->startActivityPeriod->handle($lockedTitle, $debutDate, rescheduleFuturePeriod: true);
-            $this->recordLifecycleTransition->handle(
-                $lockedTitle,
-                LifecycleDimension::Activity,
-                LifecycleTransitionType::Debuted,
-                $debutDate,
-                array_filter(['notes' => $notes]),
-            );
+            $this->activityPeriods->start($lockedTitle, $debutDate, LifecycleTransitionType::Debuted, $notes);
         });
     }
 }
