@@ -28,7 +28,7 @@ class UnretireAction
         bool $establishImmediately = true,
         bool $requireFormerMembers = true
     ): void {
-        $this->unretirement->unretire($stable, $unretiredDate ?? now(), $requireFormerMembers, function (Stable $lockedStable, Carbon $effectiveDate): void {
+        $this->unretirement->unretire($stable, $unretiredDate ?? now(), $requireFormerMembers, function (Stable $lockedStable, Carbon $effectiveDate) use ($establishImmediately): void {
             if ($establishImmediately) {
                 $this->startActivityPeriodAction->handle($lockedStable, $effectiveDate);
             }
