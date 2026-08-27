@@ -20,6 +20,26 @@ final class TagTeamSuspensionService
     ) {}
 
     /**
+     * @param  Closure(TagTeam, Carbon): void|null  $afterReinstatement
+     */
+    public function reinstate(
+        TagTeam $tagTeam,
+        Carbon $reinstatementDate,
+        ?Closure $afterReinstatement = null,
+    ): void {
+        DB::transaction(function () use ($tagTeam, $reinstatementDate, $afterReinstatement): void {
+            $lockedTagTeam = TagTeam::query()
+                ->whereKey($tagTeam->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $this->eligibility->ensureCanReinstate($lockedTagTeam);
+            $this->suspensionPeriods->end($lockedTagTeam, $reinstatementDate, LifecycleTransitionType::Reinstated);
+            $afterReinstatement?->__invoke($lockedTagTeam, $reinstatementDate);
+        });
+    }
+
+    /**
      * @param  Closure(TagTeam, Carbon): void|null  $afterSuspension
      */
     public function suspend(
