@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
-class ManagerAssignmentService
+final class ManagerAssignmentService
 {
     /**
      * @param  Manageable<*, *>  $manageable

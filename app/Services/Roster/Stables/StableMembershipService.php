@@ -9,7 +9,7 @@ use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Relationships\HistoricalMembershipService;
 use Illuminate\Support\Carbon;
 
-class StableMembershipService
+final class StableMembershipService
 {
     public function __construct(private HistoricalMembershipService $historicalMemberships) {}
 
