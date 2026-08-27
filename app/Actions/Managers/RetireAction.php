@@ -5,18 +5,17 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
-use App\Lifecycle\IndividualRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
-use App\Services\IndividualRetirementPeriodService;
+use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualRetirementService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
     public function __construct(
-        private readonly IndividualRetirementPeriodService $retirementPeriods,
+        private readonly IndividualRetirementService $retirement,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
-        private readonly IndividualRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -38,12 +37,12 @@ class RetireAction
     {
         $retirementDate = $retirementDate ?? now();
 
-        DB::transaction(function () use ($manager, $retirementDate): void {
-            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanRetire($lockedManager);
+        $this->retirement->retire($manager, $retirementDate, function (Wrestler|Manager|Referee $lockedManager, Carbon $date): void {
+            if (! $lockedManager instanceof Manager) {
+                return;
+            }
 
-            $this->retirementPeriods->start($lockedManager, $retirementDate);
-            $this->endCurrentRelationships->handle($lockedManager, $retirementDate);
+            $this->endCurrentRelationships->handle($lockedManager, $date);
         });
     }
 }
