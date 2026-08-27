@@ -7,18 +7,17 @@ namespace App\Actions\Referees;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\IndividualRetirementEligibility;
-use App\Lifecycle\RetirementPeriodManager;
+use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
+use App\Models\Roster\Wrestlers\Wrestler;
+use App\Services\IndividualUnretirementService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
-        private readonly IndividualRetirementEligibility $eligibility,
+        private readonly IndividualUnretirementService $unretirement,
     ) {}
 
     /**
@@ -39,11 +38,10 @@ class UnretireAction
     {
         $unretiredDate = $unretiredDate ?? now();
 
-        DB::transaction(function () use ($referee, $unretiredDate): void {
-            $lockedReferee = Referee::query()->withTrashed()->whereKey($referee->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanUnretire($lockedReferee);
-            $this->retirementPeriods->end($lockedReferee, $unretiredDate, LifecycleTransitionType::Unretired);
-            $this->employmentPeriods->start($lockedReferee, $unretiredDate, LifecycleTransitionType::Employed);
+        $this->unretirement->unretire($referee, $unretiredDate, function (Wrestler|Manager|Referee $lockedReferee, Carbon $date): void {
+            if ($lockedReferee instanceof Referee) {
+                $this->employmentPeriods->start($lockedReferee, $date, LifecycleTransitionType::Employed);
+            }
         });
     }
 }
