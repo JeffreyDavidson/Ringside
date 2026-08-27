@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\TagTeamReinstatementService;
+use App\Services\TagTeamSuspensionService;
 use Illuminate\Support\Carbon;
 
 class ReinstateAction
 {
     public function __construct(
-        private readonly TagTeamReinstatementService $reinstatement,
+        private readonly TagTeamSuspensionService $suspension,
         private readonly ReinstateCurrentMembersAction $reinstateCurrentMembers,
     ) {}
 
@@ -20,7 +20,7 @@ class ReinstateAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $reinstatementDate = null): void
     {
-        $this->reinstatement->reinstate(
+        $this->suspension->reinstate(
             $tagTeam,
             $reinstatementDate ?? now(),
             function (TagTeam $lockedTagTeam, Carbon $effectiveDate): void {
