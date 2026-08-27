@@ -20,7 +20,10 @@ final class IndividualReleaseService
     ) {}
 
     /**
-     * @param  Closure(Wrestler|Manager|Referee, Carbon): void|null  $afterRelease
+     * @template TIndividual of Wrestler|Manager|Referee
+     *
+     * @param  TIndividual  $individual
+     * @param  Closure(TIndividual, Carbon): void|null  $afterRelease
      */
     public function release(
         Wrestler|Manager|Referee $individual,
