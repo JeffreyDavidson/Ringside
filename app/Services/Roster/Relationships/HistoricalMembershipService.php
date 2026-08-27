@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-class HistoricalMembershipService
+final class HistoricalMembershipService
 {
     /**
      * @template TRelatedModel of Model

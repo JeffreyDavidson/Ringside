@@ -10,7 +10,7 @@ use App\Services\Roster\Relationships\HistoricalMembershipService;
 use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Support\Carbon;
 
-class TagTeamMembershipService
+final class TagTeamMembershipService
 {
     public function __construct(
         private ManagerAssignmentService $managerAssignments,
