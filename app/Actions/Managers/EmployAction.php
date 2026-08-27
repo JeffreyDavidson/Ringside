@@ -6,7 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Models\Roster\Managers\Manager;
-use App\Services\IndividualEmploymentService;
+use App\Services\Roster\Individuals\IndividualEmploymentService;
 use Illuminate\Support\Carbon;
 
 class EmployAction

@@ -6,7 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\IndividualInjuryService;
+use App\Services\Roster\Individuals\IndividualInjuryService;
 use Illuminate\Support\Carbon;
 
 class ClearFromInjuryAction

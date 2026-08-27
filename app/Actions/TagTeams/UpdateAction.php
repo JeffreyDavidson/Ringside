@@ -7,7 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\TagTeamMembershipService;
+use App\Services\Roster\TagTeams\TagTeamMembershipService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction

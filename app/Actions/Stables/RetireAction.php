@@ -9,8 +9,8 @@ use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
 use App\Lifecycle\IndividualRetirementEligibility;
 use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableMembershipService;
-use App\Services\StableRetirementService;
+use App\Services\Roster\Stables\StableMembershipService;
+use App\Services\Roster\Stables\StableRetirementService;
 use Illuminate\Support\Carbon;
 
 class RetireAction

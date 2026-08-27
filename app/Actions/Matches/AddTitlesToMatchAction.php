@@ -8,8 +8,8 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\MatchTitleRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
-use App\Services\EventMatchAssignmentService;
-use App\Services\MatchAssignmentConflictService;
+use App\Services\Events\EventMatchAssignmentService;
+use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 
 class AddTitlesToMatchAction

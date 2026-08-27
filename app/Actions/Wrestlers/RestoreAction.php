@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Wrestlers;
 
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\IndividualRestoreService;
+use App\Services\Roster\Individuals\IndividualRestoreService;
 use Illuminate\Support\Carbon;
 
 class RestoreAction

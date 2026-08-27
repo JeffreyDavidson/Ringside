@@ -6,7 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
 use App\Models\Roster\Referees\Referee;
-use App\Services\IndividualRetirementService;
+use App\Services\Roster\Individuals\IndividualRetirementService;
 use Illuminate\Support\Carbon;
 
 class RetireAction

@@ -7,7 +7,7 @@ namespace App\Actions\Wrestlers;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\IndividualDeletionService;
+use App\Services\Roster\Individuals\IndividualDeletionService;
 use Illuminate\Support\Carbon;
 
 class DeleteAction

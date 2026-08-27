@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableDisbandService;
-use App\Services\StableMembershipService;
+use App\Services\Roster\Stables\StableDisbandService;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 
 class DisbandAction

@@ -6,7 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Models\Roster\Referees\Referee;
-use App\Services\IndividualInjuryService;
+use App\Services\Roster\Individuals\IndividualInjuryService;
 use Illuminate\Support\Carbon;
 
 class ClearFromInjuryAction

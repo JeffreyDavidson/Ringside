@@ -6,7 +6,7 @@ namespace App\Actions\Events;
 
 use App\Data\Events\EventData;
 use App\Models\Events\Event;
-use App\Services\EventVenueSchedulingService;
+use App\Services\Events\EventVenueSchedulingService;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction

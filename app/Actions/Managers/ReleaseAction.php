@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Managers;
 
 use App\Models\Roster\Managers\Manager;
-use App\Services\IndividualReleaseService;
+use App\Services\Roster\Individuals\IndividualReleaseService;
 use Illuminate\Support\Carbon;
 
 class ReleaseAction

@@ -13,7 +13,7 @@ use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\StableMembershipService;
+use App\Services\Roster\Stables\StableMembershipService;
 
 final class StableActivityEligibility
 {

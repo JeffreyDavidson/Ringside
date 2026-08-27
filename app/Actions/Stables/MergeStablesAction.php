@@ -8,7 +8,7 @@ use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Data\Stables\StableMembershipData;
 use App\Lifecycle\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableMembershipService;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 

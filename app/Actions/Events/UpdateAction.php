@@ -7,8 +7,8 @@ namespace App\Actions\Events;
 use App\Data\Events\EventData;
 use App\Lifecycle\EventSchedulingEligibility;
 use App\Models\Events\Event;
-use App\Services\EventVenueSchedulingService;
-use App\Services\MatchAssignmentConflictService;
+use App\Services\Events\EventVenueSchedulingService;
+use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction

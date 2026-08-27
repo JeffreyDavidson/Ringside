@@ -6,7 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\TagTeamEmploymentService;
+use App\Services\Roster\TagTeams\TagTeamEmploymentService;
 use Illuminate\Support\Carbon;
 
 class EmployAction

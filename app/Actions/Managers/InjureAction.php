@@ -6,7 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
 use App\Models\Roster\Managers\Manager;
-use App\Services\IndividualInjuryService;
+use App\Services\Roster\Individuals\IndividualInjuryService;
 use Illuminate\Support\Carbon;
 
 class InjureAction

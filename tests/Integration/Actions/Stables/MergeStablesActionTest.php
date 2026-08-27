@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Actions\Stables\MergeStablesAction;
 use App\Exceptions\Roster\Stables\CannotBeMergedException;
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableMembershipService;
+use App\Services\Roster\Stables\StableMembershipService;
 
 it('moves current members to the primary stable and preserves secondary history', function () {
     $primaryStable = Stable::factory()->active()->create();
