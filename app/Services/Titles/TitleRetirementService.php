@@ -43,11 +43,7 @@ final class TitleRetirementService
     public function unretire(Title $title, Carbon $unretirementDate): void
     {
         DB::transaction(function () use ($title, $unretirementDate): void {
-            $lockedTitle = Title::query()
-                ->withTrashed()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTitle = $title->refreshForUpdate();
 
             $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Unretire);
             $this->retirementPeriods->end($lockedTitle, $unretirementDate, LifecycleTransitionType::Unretired);
@@ -56,6 +52,6 @@ final class TitleRetirementService
 
     private function lock(Title $title): Title
     {
-        return Title::query()->whereKey($title->getKey())->lockForUpdate()->firstOrFail();
+        return $title->refreshForUpdate();
     }
 }

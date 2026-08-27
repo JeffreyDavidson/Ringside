@@ -22,7 +22,7 @@ final class TitleActivationService
     public function activate(Title $title, Carbon $activationDate): void
     {
         DB::transaction(function () use ($title, $activationDate): void {
-            $lockedTitle = Title::query()->whereKey($title->getKey())->lockForUpdate()->firstOrFail();
+            $lockedTitle = $title->refreshForUpdate();
 
             if ($lockedTitle->isRetired()) {
                 $this->unretire->handle($lockedTitle, $activationDate);

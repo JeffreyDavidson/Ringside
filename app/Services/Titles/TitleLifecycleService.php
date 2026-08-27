@@ -53,6 +53,6 @@ final class TitleLifecycleService
 
     private function lock(Title $title): Title
     {
-        return Title::query()->whereKey($title->getKey())->lockForUpdate()->firstOrFail();
+        return $title->refreshForUpdate();
     }
 }
