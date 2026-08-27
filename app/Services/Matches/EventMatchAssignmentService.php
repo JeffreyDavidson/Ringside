@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Events;
+namespace App\Services\Matches;
 
 use App\Models\Matches\EventMatch;
 use Closure;

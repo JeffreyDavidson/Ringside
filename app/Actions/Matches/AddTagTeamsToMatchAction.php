@@ -9,7 +9,7 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Events\EventMatchAssignmentService;
+use App\Services\Matches\EventMatchAssignmentService;
 use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
 
