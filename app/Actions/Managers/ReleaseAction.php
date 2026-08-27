@@ -4,45 +4,28 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
-use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
-use App\Lifecycle\IndividualEmploymentEligibility;
 use App\Models\Roster\Managers\Manager;
-use App\Services\IndividualReleasePeriodService;
+use App\Services\IndividualReleaseService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ReleaseAction
 {
     public function __construct(
-        private readonly IndividualReleasePeriodService $releasePeriods,
+        private readonly IndividualReleaseService $release,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
-        private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
 
     /**
      * Release a manager from employment and end all current relationships.
-     *
-     * This handles the complete manager release workflow with cascading effects:
-     * - Validates the manager can be released (currently employed)
-     * - Ends current management relationships through a typed domain action
-     * - Ends suspension, injury, and employment through lifecycle period managers
-     * - Maintains all historical records for tracking purposes
-     *
-     * @param  Manager  $manager  The manager to release
-     * @param  Carbon|null  $releaseDate  The release date (defaults to now)
-     * @throws CannotBeReleasedException When manager cannot be released due to business rules
      */
     public function handle(Manager $manager, ?Carbon $releaseDate = null): void
     {
-        $releaseDate = $releaseDate ?? now();
-
-        DB::transaction(function () use ($manager, $releaseDate): void {
-            $lockedManager = Manager::query()->whereKey($manager->getKey())->lockForUpdate()->firstOrFail();
-            $this->eligibility->ensureCanRelease($lockedManager);
-
-            $this->releasePeriods->end($lockedManager, $releaseDate);
-
-            $this->endCurrentRelationships->handle($lockedManager, $releaseDate);
-        });
+        $this->release->release(
+            $manager,
+            $releaseDate ?? now(),
+            function (Manager $lockedManager, Carbon $effectiveDate): void {
+                $this->endCurrentRelationships->handle($lockedManager, $effectiveDate);
+            },
+        );
     }
 }
