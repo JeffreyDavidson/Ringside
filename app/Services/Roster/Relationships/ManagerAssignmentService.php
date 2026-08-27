@@ -59,6 +59,16 @@ final class ManagerAssignmentService
     }
 
     /**
+     * End every current manager assignment for a manageable roster entity.
+     *
+     * @param  Manageable<*, *>  $manageable
+     */
+    public function endAssignmentsFor(Manageable $manageable, Carbon $date): void
+    {
+        $this->endCurrentRelationship($manageable->managers(), $date);
+    }
+
+    /**
      * @template TRelatedModel of Model
      * @template TDeclaringModel of Model
      * @template TPivotModel of Pivot
