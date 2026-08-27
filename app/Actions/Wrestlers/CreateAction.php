@@ -6,7 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Data\Wrestlers\WrestlerData;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\ManagerAssignmentService;
+use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Models\Titles\Title;
-use App\Services\TitleDeletionService;
+use App\Services\Titles\TitleDeletionService;
 
 class RestoreAction
 {

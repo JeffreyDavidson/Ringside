@@ -6,7 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Models\Roster\Referees\Referee;
-use App\Services\IndividualSuspensionService;
+use App\Services\Roster\Individuals\IndividualSuspensionService;
 use Illuminate\Support\Carbon;
 
 class SuspendAction

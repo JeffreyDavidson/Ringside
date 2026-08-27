@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Models\Titles\Title;
-use App\Services\TitleLifecycleService;
+use App\Services\Titles\TitleLifecycleService;
 use Illuminate\Support\Carbon;
 
 class ReinstateAction

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Models\Matches\EventMatch;
-use App\Services\EventMatchDeletionService;
+use App\Services\Events\EventMatchDeletionService;
 use Illuminate\Support\Carbon;
 
 class DeleteAction

@@ -6,7 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Models\Roster\Referees\Referee;
-use App\Services\IndividualEmploymentService;
+use App\Services\Roster\Individuals\IndividualEmploymentService;
 use Illuminate\Support\Carbon;
 
 class EmployAction

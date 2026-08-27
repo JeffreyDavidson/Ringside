@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Models\Roster\Referees\Referee;
-use App\Services\IndividualDeletionService;
+use App\Services\Roster\Individuals\IndividualDeletionService;
 use Illuminate\Support\Carbon;
 
 class DeleteAction

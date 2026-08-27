@@ -7,8 +7,8 @@ namespace App\Actions\Managers;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\IndividualRestoreService;
-use App\Services\ManagerAssignmentService;
+use App\Services\Roster\Individuals\IndividualRestoreService;
+use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Support\Carbon;
 
 class RestoreAction

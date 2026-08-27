@@ -10,7 +10,7 @@ use App\Lifecycle\EmploymentPeriodManager;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\IndividualUnretirementService;
+use App\Services\Roster\Individuals\IndividualUnretirementService;
 use Illuminate\Support\Carbon;
 
 class UnretireAction

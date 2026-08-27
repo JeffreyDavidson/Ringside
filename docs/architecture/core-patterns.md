@@ -29,6 +29,7 @@ single-consumer relationship traits or speculative override helpers.
 - Roster-owned Eloquent models live under `app/Models/Roster/{Entity}/`; lifecycle records, matches, titles, events, and users remain in their owning model namespaces.
 - `AppServiceProvider` retains aliases for the former top-level roster model class names because immutable historical migrations reference them. Application code must use the `App\\Models\\Roster` classes directly.
 - Domain-organized builders in `app/Builders/{Domain}/`
+- Domain-organized services in `app/Services/{Domain}/`, with shared roster services under `app/Services/Roster/Relationships/` and cross-entity services kept in their owning domains.
 - Domain-organized enums in `app/Enums/{Domain}/`
 
 ## Related Model Resolution

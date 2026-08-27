@@ -8,7 +8,7 @@ use App\Lifecycle\MatchCompetitorRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\EventMatchAssignmentService;
+use App\Services\Events\EventMatchAssignmentService;
 use Illuminate\Support\Collection;
 
 class AddCompetitorsToMatchAction

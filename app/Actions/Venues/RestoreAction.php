@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Venues;
 
 use App\Models\Events\Venue;
-use App\Services\VenueDeletionService;
+use App\Services\Venues\VenueDeletionService;
 use Illuminate\Support\Carbon;
 
 class RestoreAction

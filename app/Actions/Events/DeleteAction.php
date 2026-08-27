@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Models\Events\Event;
-use App\Services\EventDeletionService;
+use App\Services\Events\EventDeletionService;
 use Illuminate\Support\Carbon;
 
 class DeleteAction

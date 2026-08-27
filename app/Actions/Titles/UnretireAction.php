@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Titles;
 
 use App\Models\Titles\Title;
-use App\Services\TitleRetirementService;
+use App\Services\Titles\TitleRetirementService;
 use Illuminate\Support\Carbon;
 
 class UnretireAction

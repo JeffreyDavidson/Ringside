@@ -7,7 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableMembershipService;
+use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 
 /**

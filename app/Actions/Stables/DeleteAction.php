@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Stables;
 
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableDeletionService;
+use App\Services\Roster\Stables\StableDeletionService;
 
 class DeleteAction
 {

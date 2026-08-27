@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\TagTeams;
 
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\TagTeamDeletionService;
+use App\Services\Roster\TagTeams\TagTeamDeletionService;
 use Illuminate\Support\Carbon;
 
 class DeleteAction

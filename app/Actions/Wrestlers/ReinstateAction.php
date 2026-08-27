@@ -6,7 +6,7 @@ namespace App\Actions\Wrestlers;
 
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\IndividualSuspensionService;
+use App\Services\Roster\Individuals\IndividualSuspensionService;
 use Illuminate\Support\Carbon;
 
 class ReinstateAction

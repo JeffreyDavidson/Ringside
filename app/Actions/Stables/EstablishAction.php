@@ -6,7 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableEstablishmentService;
+use App\Services\Roster\Stables\StableEstablishmentService;
 use Illuminate\Support\Carbon;
 
 class EstablishAction

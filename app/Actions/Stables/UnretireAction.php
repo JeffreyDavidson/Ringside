@@ -6,7 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Actions\Lifecycle\StartActivityPeriodAction;
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableUnretirementService;
+use App\Services\Roster\Stables\StableUnretirementService;
 use Illuminate\Support\Carbon;
 
 class UnretireAction
