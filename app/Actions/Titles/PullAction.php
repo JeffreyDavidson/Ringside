@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Titles\TitleLifecycleTransition;
-use App\Exceptions\Titles\CannotBePulledException;
-use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
-use App\Services\TitleActivityPeriodService;
+use App\Services\TitleLifecycleService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class PullAction
 {
     public function __construct(
-        private TitleLifecycleEligibility $eligibility,
-        private TitleActivityPeriodService $activityPeriods,
+        private TitleLifecycleService $lifecycle,
     ) {}
 
     /**
@@ -39,16 +33,6 @@ class PullAction
      */
     public function handle(Title $title, ?Carbon $pullDate = null, ?string $notes = null): void
     {
-        $pullDate = $pullDate ?? now();
-
-        DB::transaction(function () use ($title, $pullDate, $notes): void {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Pull);
-            $this->activityPeriods->end($lockedTitle, $pullDate, LifecycleTransitionType::Pulled, $notes);
-        });
+        $this->lifecycle->pull($title, $pullDate ?? now(), $notes);
     }
 }

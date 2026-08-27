@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Titles\TitleLifecycleTransition;
-use App\Exceptions\Titles\CannotBeDebutedException;
-use App\Lifecycle\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
-use App\Services\TitleActivityPeriodService;
+use App\Services\TitleLifecycleService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DebutAction
 {
     public function __construct(
-        private TitleLifecycleEligibility $eligibility,
-        private TitleActivityPeriodService $activityPeriods,
+        private TitleLifecycleService $lifecycle,
     ) {}
 
     /**
@@ -37,17 +31,6 @@ class DebutAction
      */
     public function handle(Title $title, ?Carbon $debutDate = null, ?string $notes = null): void
     {
-        $debutDate = $debutDate ?? now();
-
-        DB::transaction(function () use ($title, $debutDate, $notes): void {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Debut);
-
-            $this->activityPeriods->start($lockedTitle, $debutDate, LifecycleTransitionType::Debuted, $notes);
-        });
+        $this->lifecycle->debut($title, $debutDate ?? now(), $notes);
     }
 }
