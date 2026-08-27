@@ -4,62 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
-use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Enums\Stables\StableActivityTransition;
-use App\Exceptions\Lifecycle\InvalidDateRangeException;
-use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
-use App\Lifecycle\StableActivityEligibility;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
-use App\Services\StableActivityPeriodService;
+use App\Services\StableEstablishmentService;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class EstablishAction
 {
     public function __construct(
-        protected StableActivityEligibility $eligibility,
-        protected StableActivityPeriodService $activityPeriods,
+        protected StableEstablishmentService $establishment,
     ) {}
 
     /**
      * Establish a stable and make it active.
-     *
-     * This handles the complete stable establishment workflow:
-     * - Validates the stable can be established (currently unactivated)
-     * - Creates an establishment record with the specified date
-     * - Makes the stable available for storylines and championship opportunities
-     * - Activates the stable's debut period
-     *
-     * @param  Stable  $stable  The stable to establish
-     * @param  Carbon|null  $activationDate  The establishment date (defaults to now)
-     * @param  Carbon|null  $endDate  The date the stable stopped being active
-     * @throws CannotBeEstablishedException When stable cannot be established due to business rules
-     * @throws InvalidDateRangeException When the end date precedes the activation date
      */
     public function handle(
         Stable $stable,
         ?Carbon $activationDate = null,
         ?Carbon $endDate = null,
     ): ActivityPeriod {
-        $activationDate = $activationDate ?? now();
-
-        if ($endDate?->lt($activationDate)) {
-            throw InvalidDateRangeException::endBeforeStart($activationDate, $endDate, 'stable establishment');
-        }
-
-        return DB::transaction(
-            function () use ($stable, $activationDate, $endDate): ActivityPeriod {
-                $lockedStable = Stable::query()
-                    ->withTrashed()
-                    ->whereKey($stable->getKey())
-                    ->lockForUpdate()
-                    ->firstOrFail();
-
-                $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Establish);
-
-                return $this->activityPeriods->start($lockedStable, $activationDate, LifecycleTransitionType::Established, $endDate);
-            }
-        );
+        return $this->establishment->establish($stable, $activationDate ?? now(), $endDate);
     }
 }
