@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
-use App\Lifecycle\IndividualSuspensionEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;

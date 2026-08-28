@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Wrestlers\RestoreAction;
-use App\Lifecycle\IndividualEmploymentEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 use function Spatie\PestPluginTestTime\testTime;

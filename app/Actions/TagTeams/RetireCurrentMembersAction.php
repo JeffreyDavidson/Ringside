@@ -6,7 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Actions\Managers\RetireAction as RetireManagerAction;
 use App\Actions\Wrestlers\RetireAction as RetireWrestlerAction;
-use App\Lifecycle\IndividualRetirementEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;

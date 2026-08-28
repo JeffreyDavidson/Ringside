@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Exceptions\Roster\Individuals\CannotBeEmployedException;
 use App\Exceptions\Roster\Individuals\CannotBeReleasedException;
-use App\Lifecycle\IndividualEmploymentEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
