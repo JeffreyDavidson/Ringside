@@ -22,10 +22,7 @@ class EndCurrentRelationshipsAction
     public function handle(Wrestler $wrestler, Carbon $effectiveDate): void
     {
         DB::transaction(function () use ($wrestler, $effectiveDate): void {
-            $lockedWrestler = Wrestler::query()
-                ->whereKey($wrestler->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedWrestler = $wrestler->refreshForUpdate();
 
             TagTeamWrestler::query()
                 ->forWrestlerId($lockedWrestler->id)

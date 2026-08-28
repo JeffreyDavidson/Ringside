@@ -20,10 +20,7 @@ class EndCurrentRelationshipsAction
     public function handle(TagTeam $tagTeam, Carbon $effectiveDate): void
     {
         DB::transaction(function () use ($tagTeam, $effectiveDate): void {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->memberships->endCurrentMemberships($lockedTagTeam, $effectiveDate);
 

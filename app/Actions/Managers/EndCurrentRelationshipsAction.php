@@ -16,10 +16,7 @@ class EndCurrentRelationshipsAction
     public function handle(Manager $manager, Carbon $effectiveDate): void
     {
         DB::transaction(function () use ($manager, $effectiveDate): void {
-            $lockedManager = Manager::query()
-                ->whereKey($manager->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedManager = $manager->refreshForUpdate();
 
             $this->managerAssignments->endCurrentAssignments($lockedManager, $effectiveDate);
         });

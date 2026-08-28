@@ -25,10 +25,7 @@ final class EventVenueSchedulingService
             return null;
         }
 
-        return Venue::query()
-            ->whereKey($venue->getKey())
-            ->lockForUpdate()
-            ->firstOrFail();
+        return $venue->refreshForUpdate();
     }
 
     public function ensureAvailable(?Venue $venue, ?Carbon $date, ?Event $event = null): void
