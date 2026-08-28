@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Titles\TitleStatus;
-use App\Lifecycle\TitleStatusResolver;
+use App\Lifecycle\Titles\TitleStatusResolver;
 
 test('resolves title status from lifecycle state', function (
     bool $isRetired,

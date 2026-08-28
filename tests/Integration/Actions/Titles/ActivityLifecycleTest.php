@@ -8,7 +8,7 @@ use App\Actions\Titles\ReinstateAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBePulledException;
-use App\Lifecycle\TitleLifecycleEligibility;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 
 test('title activity actions preserve an attributed transition history', function () {

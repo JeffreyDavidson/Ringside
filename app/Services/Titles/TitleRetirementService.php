@@ -9,7 +9,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Lifecycle\ChampionshipReignManager;
 use App\Lifecycle\RetirementPeriodManager;
-use App\Lifecycle\TitleLifecycleEligibility;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
