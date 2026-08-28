@@ -27,10 +27,7 @@ class AddMatchForEventAction
         $this->requirements->ensureComplete($eventMatchData);
 
         return DB::transaction(function () use ($event, $eventMatchData): EventMatch {
-            $lockedEvent = Event::query()
-                ->whereKey($event->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedEvent = $event->refreshForUpdate();
             $lastMatch = $lockedEvent->matches()
                 ->withTrashed()
                 ->orderByDesc('match_number')
