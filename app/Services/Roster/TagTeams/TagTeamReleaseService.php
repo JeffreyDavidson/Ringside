@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Roster\TagTeams;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
 use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
-use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\TagTeams\TagTeam;
 use Closure;
 use Illuminate\Support\Carbon;

@@ -6,7 +6,7 @@ namespace App\Actions\Managers;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
-use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;

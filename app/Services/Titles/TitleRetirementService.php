@@ -7,7 +7,7 @@ namespace App\Services\Titles;
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
-use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;

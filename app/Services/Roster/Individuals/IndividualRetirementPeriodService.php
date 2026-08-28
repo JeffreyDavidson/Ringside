@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Roster\Individuals;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\InjuryPeriodManager;
-use App\Lifecycle\RetirementPeriodManager;
-use App\Lifecycle\SuspensionPeriodManager;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\InjuryPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;

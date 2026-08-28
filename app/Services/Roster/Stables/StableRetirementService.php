@@ -6,7 +6,7 @@ namespace App\Services\Roster\Stables;
 
 use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
 use App\Models\Roster\Stables\Stable;
 use Closure;

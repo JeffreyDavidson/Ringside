@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Roster\Individuals;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\EmploymentPeriodManager;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;

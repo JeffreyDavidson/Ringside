@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Roster\TagTeams;
 
 use App\Actions\TagTeams\EndCurrentRelationshipsAction;
-use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
