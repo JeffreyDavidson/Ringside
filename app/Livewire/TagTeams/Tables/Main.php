@@ -47,7 +47,7 @@ class Main extends BaseTable
     {
         return TagTeam::query()
             ->withEmploymentStatusState()
-            ->with('firstEmployment')
+            ->withFirstEmployment()
             ->oldest('name');
     }
 
