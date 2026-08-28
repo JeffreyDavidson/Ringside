@@ -50,9 +50,8 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
 
         return TagTeamWrestler::query()
             ->forWrestlerId($this->wrestlerId)
-            ->ended()
             ->with('tagTeam.wrestlerMemberships.wrestler')
-            ->mostRecentlyJoinedFirst();
+            ->forHistory();
     }
 
     /**

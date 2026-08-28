@@ -30,6 +30,7 @@ use Illuminate\Support\Carbon;
  *
  * @method static TagTeamMembershipBuilder<static> current()
  * @method static TagTeamMembershipBuilder<static> ended()
+ * @method static TagTeamMembershipBuilder<static> forHistory()
  * @method static TagTeamMembershipBuilder<static> excludingWrestlerId(int $wrestlerId)
  * @method static TagTeamMembershipBuilder<static> forTagTeamId(int $tagTeamId)
  * @method static TagTeamMembershipBuilder<static> forWrestlerId(int $wrestlerId)
