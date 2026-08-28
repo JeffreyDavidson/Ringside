@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Venues;
 
 use App\Exceptions\Events\CannotBeRestoredException;
 use App\Models\Events\Venue;

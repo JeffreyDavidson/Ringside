@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Venues;
 
 use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\VenueDeletionEligibility;
+use App\Lifecycle\Venues\VenueDeletionEligibility;
 use App\Models\Events\Venue;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
