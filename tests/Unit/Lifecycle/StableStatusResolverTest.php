@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Stables\StableStatus;
-use App\Lifecycle\StableStatusResolver;
+use App\Lifecycle\Roster\Stables\StableStatusResolver;
 
 test('resolves stable status from lifecycle state', function (
     bool $isRetired,

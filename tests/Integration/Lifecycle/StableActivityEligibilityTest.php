@@ -6,7 +6,7 @@ use App\Enums\Stables\StableActivityTransition;
 use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
-use App\Lifecycle\StableActivityEligibility;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 

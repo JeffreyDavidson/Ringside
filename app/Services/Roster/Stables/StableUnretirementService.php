@@ -6,7 +6,7 @@ namespace App\Services\Roster\Stables;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\RetirementPeriodManager;
-use App\Lifecycle\StableRetirementEligibility;
+use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
 use App\Models\Roster\Stables\Stable;
 use Closure;
 use Illuminate\Support\Carbon;

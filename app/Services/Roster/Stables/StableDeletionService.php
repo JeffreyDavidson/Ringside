@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Roster\Stables;
 
 use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\StableDeletionEligibility;
+use App\Lifecycle\Roster\Stables\StableDeletionEligibility;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

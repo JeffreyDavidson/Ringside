@@ -7,7 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Data\Stables\StableMembershipData;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
-use App\Lifecycle\StableRestructuringEligibility;
+use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;

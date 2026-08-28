@@ -7,7 +7,7 @@ use App\Actions\Stables\SplitStableAction;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Stables\CannotBeSplitException;
-use App\Lifecycle\StableRestructuringEligibility;
+use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
