@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Exceptions\Scheduling\EntityNotAvailableException;
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Services\Matches\EventMatchAssignmentService;

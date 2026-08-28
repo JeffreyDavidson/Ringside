@@ -6,7 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Services\Matches\EventMatchAssignmentService;

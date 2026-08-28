@@ -6,7 +6,7 @@ use App\Actions\Titles\RetireAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Concerns;
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Lifecycle\EmploymentStatusResolver;
+use App\Lifecycle\Roster\EmploymentStatusResolver;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 trait HasComputedEmploymentStatus

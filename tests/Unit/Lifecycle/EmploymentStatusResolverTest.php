@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Lifecycle\EmploymentStatusResolver;
+use App\Lifecycle\Roster\EmploymentStatusResolver;
 
 test('resolves employment status from lifecycle state', function (
     bool $isRetired,

@@ -8,7 +8,7 @@ use App\Actions\Referees\SuspendAction;
 use App\Actions\Referees\UnretireAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\Referees\Referee;
 use Illuminate\Support\Carbon;
 

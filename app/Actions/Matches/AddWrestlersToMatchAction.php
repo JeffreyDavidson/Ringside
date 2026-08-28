@@ -7,7 +7,7 @@ namespace App\Actions\Matches;
 use App\Enums\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Exceptions\Scheduling\EntityNotAvailableException;
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Matches\EventMatchAssignmentService;

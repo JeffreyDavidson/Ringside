@@ -14,7 +14,7 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Lifecycle\Roster\Individuals\IndividualInjuryEligibility;
 use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
 
