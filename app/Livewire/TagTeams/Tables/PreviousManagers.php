@@ -30,9 +30,8 @@ class PreviousManagers extends BasePreviousManagersTable
 
         return TagTeamManager::query()
             ->forTagTeamId($this->tagTeamId)
-            ->ended()
-            ->with('manager')
-            ->mostRecentlyHiredFirst();
+            ->forHistory()
+            ->with('manager');
     }
 
     protected function configure(): void

@@ -37,9 +37,8 @@ class PreviousTagTeams extends DataTableComponent
 
         return TagTeamManager::query()
             ->forManagerId($this->managerId)
-            ->ended()
-            ->with('tagTeam')
-            ->mostRecentlyHiredFirst();
+            ->forHistory()
+            ->with('tagTeam');
     }
 
     protected function configure(): void

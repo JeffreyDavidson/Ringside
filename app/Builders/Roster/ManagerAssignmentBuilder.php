@@ -56,4 +56,11 @@ class ManagerAssignmentBuilder extends Builder
 
         return $this;
     }
+
+    public function forHistory(): static
+    {
+        return $this
+            ->ended()
+            ->mostRecentlyHiredFirst();
+    }
 }
