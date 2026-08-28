@@ -29,11 +29,7 @@ final class StableUnretirementService
         ?Closure $afterUnretirement = null,
     ): void {
         DB::transaction(function () use ($stable, $unretirementDate, $requireFormerMembers, $afterUnretirement): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureCanUnretire($lockedStable, $requireFormerMembers);
             $this->retirementPeriods->end($lockedStable, $unretirementDate, LifecycleTransitionType::Unretired);

@@ -20,11 +20,7 @@ final class StableDeletionService
     public function delete(Stable $stable, Carbon $deletionDate): void
     {
         DB::transaction(function () use ($stable, $deletionDate): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureCanDelete($lockedStable);
             $this->deletionState->delete($lockedStable, $deletionDate);
@@ -34,11 +30,7 @@ final class StableDeletionService
     public function restore(Stable $stable, Carbon $restoreDate): void
     {
         DB::transaction(function () use ($stable, $restoreDate): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedStable);
             $this->deletionState->restore($lockedStable, $restoreDate);

@@ -27,11 +27,7 @@ final class StableEstablishmentService
         }
 
         return DB::transaction(function () use ($stable, $activationDate, $endDate): ActivityPeriod {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Establish);
 

@@ -28,11 +28,7 @@ final class StableDisbandService
         ?Closure $afterDisbandment = null,
     ): void {
         DB::transaction(function () use ($stable, $disbandDate, $afterDisbandment): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Disband);
             $this->activityPeriods->end($lockedStable, $disbandDate, LifecycleTransitionType::Disbanded);
