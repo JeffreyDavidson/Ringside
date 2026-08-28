@@ -48,7 +48,7 @@ class Main extends BaseTable
     {
         return Wrestler::query()
             ->withEmploymentStatusState()
-            ->with('firstEmployment');
+            ->withFirstEmployment();
     }
 
     protected function configure(): void

@@ -7,6 +7,7 @@ namespace App\Builders\Roster;
 use App\Builders\Concerns\FiltersByEmploymentStatus;
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByRetirementStatus;
+use App\Builders\Concerns\LoadsFirstEmployment;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -20,4 +21,5 @@ class TagTeamBuilder extends Builder
     use FiltersByEmploymentStatus;
     use FiltersByName;
     use FiltersByRetirementStatus;
+    use LoadsFirstEmployment;
 }

@@ -50,7 +50,7 @@ class Main extends BaseTable
     {
         return Manager::query()
             ->withEmploymentStatusState()
-            ->with('firstEmployment')
+            ->withFirstEmployment()
             ->oldest('last_name');
     }
 
