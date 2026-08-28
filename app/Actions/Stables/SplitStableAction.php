@@ -46,10 +46,7 @@ class SplitStableAction
         Carbon $date
     ): Stable {
         return DB::transaction(function () use ($originalStable, $newStableName, $membersForNewStable, $date): Stable {
-            $lockedStable = Stable::query()
-                ->whereKey($originalStable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $originalStable->refreshForUpdate();
 
             $this->eligibility->ensureCanSplit($lockedStable);
 
