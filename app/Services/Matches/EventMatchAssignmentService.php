@@ -18,10 +18,7 @@ final class EventMatchAssignmentService
     public function execute(EventMatch $eventMatch, Closure $assignment): void
     {
         DB::transaction(function () use ($eventMatch, $assignment): void {
-            $lockedMatch = EventMatch::query()
-                ->whereKey($eventMatch->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedMatch = $eventMatch->refreshForUpdate();
 
             $assignment($lockedMatch);
         });

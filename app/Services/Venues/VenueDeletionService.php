@@ -20,11 +20,7 @@ final class VenueDeletionService
     public function delete(Venue $venue, Carbon $deletionDate): void
     {
         DB::transaction(function () use ($venue, $deletionDate): void {
-            $lockedVenue = Venue::query()
-                ->withTrashed()
-                ->whereKey($venue->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedVenue = $venue->refreshForUpdate();
 
             $this->deletionState->delete($lockedVenue, $deletionDate);
         });
@@ -33,11 +29,7 @@ final class VenueDeletionService
     public function restore(Venue $venue, Carbon $restoreDate): void
     {
         DB::transaction(function () use ($venue, $restoreDate): void {
-            $lockedVenue = Venue::query()
-                ->withTrashed()
-                ->whereKey($venue->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedVenue = $venue->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedVenue);
             $this->deletionState->restore($lockedVenue, $restoreDate);
