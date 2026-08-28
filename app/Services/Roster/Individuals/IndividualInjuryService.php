@@ -23,10 +23,7 @@ final class IndividualInjuryService
     public function injure(Wrestler|Manager|Referee $individual, Carbon $injuryDate): void
     {
         DB::transaction(function () use ($individual, $injuryDate): void {
-            $lockedIndividual = $individual::query()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanInjure($lockedIndividual);
             $this->injuryPeriods->start($lockedIndividual, $injuryDate, LifecycleTransitionType::Injured);
@@ -36,10 +33,7 @@ final class IndividualInjuryService
     public function clear(Wrestler|Manager|Referee $individual, Carbon $recoveryDate): void
     {
         DB::transaction(function () use ($individual, $recoveryDate): void {
-            $lockedIndividual = $individual::query()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanBeClearedFromInjury($lockedIndividual);
             $this->injuryPeriods->end($lockedIndividual, $recoveryDate, LifecycleTransitionType::ClearedFromInjury);

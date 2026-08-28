@@ -29,11 +29,7 @@ final class IndividualRestoreService
         ?Closure $afterRestore = null,
     ): void {
         DB::transaction(function () use ($individual, $restoreDate, $afterRestore): void {
-            $lockedIndividual = $individual::query()
-                ->withTrashed()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedIndividual);
             $this->deletionState->restore($lockedIndividual, $restoreDate);

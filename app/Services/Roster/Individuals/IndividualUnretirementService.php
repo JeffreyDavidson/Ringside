@@ -30,11 +30,7 @@ final class IndividualUnretirementService
         ?Closure $afterUnretirement = null,
     ): void {
         DB::transaction(function () use ($individual, $unretirementDate, $afterUnretirement): void {
-            $lockedIndividual = $individual::query()
-                ->withTrashed()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanUnretire($lockedIndividual);
             $this->retirementPeriods->end($lockedIndividual, $unretirementDate, LifecycleTransitionType::Unretired);

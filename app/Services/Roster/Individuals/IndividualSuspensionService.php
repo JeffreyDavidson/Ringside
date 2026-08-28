@@ -23,10 +23,7 @@ final class IndividualSuspensionService
     public function suspend(Wrestler|Manager|Referee $individual, Carbon $suspensionDate): void
     {
         DB::transaction(function () use ($individual, $suspensionDate): void {
-            $lockedIndividual = $individual::query()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanSuspend($lockedIndividual);
             $this->suspensionPeriods->start($lockedIndividual, $suspensionDate, LifecycleTransitionType::Suspended);
@@ -36,10 +33,7 @@ final class IndividualSuspensionService
     public function reinstate(Wrestler|Manager|Referee $individual, Carbon $reinstatementDate): void
     {
         DB::transaction(function () use ($individual, $reinstatementDate): void {
-            $lockedIndividual = $individual::query()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanReinstate($lockedIndividual);
             $this->suspensionPeriods->end($lockedIndividual, $reinstatementDate, LifecycleTransitionType::Reinstated);

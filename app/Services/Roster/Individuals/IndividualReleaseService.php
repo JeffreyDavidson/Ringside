@@ -31,10 +31,7 @@ final class IndividualReleaseService
         ?Closure $afterRelease = null,
     ): void {
         DB::transaction(function () use ($individual, $releaseDate, $afterRelease): void {
-            $lockedIndividual = $individual::query()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanRelease($lockedIndividual);
             $this->releasePeriods->end($lockedIndividual, $releaseDate);
