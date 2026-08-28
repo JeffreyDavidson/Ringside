@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Events;
 
-use App\Lifecycle\VenueSchedulingEligibility;
+use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use Illuminate\Support\Carbon;
