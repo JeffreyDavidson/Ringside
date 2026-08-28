@@ -6,7 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
-use App\Lifecycle\MatchOutcomeRequirements;
+use App\Lifecycle\Matches\MatchOutcomeRequirements;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;

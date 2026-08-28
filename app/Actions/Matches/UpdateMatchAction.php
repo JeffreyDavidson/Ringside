@@ -6,7 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Data\Matches\EventMatchData;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
-use App\Lifecycle\MatchConfigurationRequirements;
+use App\Lifecycle\Matches\MatchConfigurationRequirements;
 use App\Models\Matches\EventMatch;
 use Illuminate\Support\Facades\DB;
 

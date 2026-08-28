@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Matches;
 
 use App\Enums\MatchType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;

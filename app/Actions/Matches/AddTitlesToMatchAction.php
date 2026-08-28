@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Matches;
 
 use App\Exceptions\Scheduling\EntityNotAvailableException;
-use App\Lifecycle\MatchTitleRequirements;
+use App\Lifecycle\Matches\MatchTitleRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Titles\Title;
 use App\Services\Matches\EventMatchAssignmentService;

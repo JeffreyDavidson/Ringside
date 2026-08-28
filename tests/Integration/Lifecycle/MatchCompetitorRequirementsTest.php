@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\MatchType;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
-use App\Lifecycle\MatchCompetitorRequirements;
+use App\Lifecycle\Matches\MatchCompetitorRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
