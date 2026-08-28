@@ -6,7 +6,7 @@ namespace App\Actions\Stables;
 
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
-use App\Lifecycle\IndividualRetirementEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Lifecycle\TagTeamRetirementEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;

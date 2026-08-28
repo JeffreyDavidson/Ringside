@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
 use App\Exceptions\Roster\Individuals\CannotBeInjuredException;
-use App\Lifecycle\IndividualInjuryEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualInjuryEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;

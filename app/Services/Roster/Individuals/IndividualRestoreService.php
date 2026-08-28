@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Roster\Individuals;
 
 use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\IndividualDeletionEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;

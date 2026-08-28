@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Roster\Individuals;
 
-use App\Lifecycle\IndividualEmploymentEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
