@@ -6,6 +6,7 @@ namespace App\Builders\Roster;
 
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByRetirementStatus;
+use App\Builders\Concerns\LoadsFirstActivityPeriod;
 use App\Builders\Concerns\ProjectsActivityStatus;
 use App\Enums\Stables\StableStatus;
 use App\Models\Roster\Stables\Stable;
@@ -22,6 +23,7 @@ class StableBuilder extends Builder
 {
     use FiltersByName;
     use FiltersByRetirementStatus;
+    use LoadsFirstActivityPeriod;
     use ProjectsActivityStatus;
 
     public function whereStatus(StableStatus $status): static

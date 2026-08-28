@@ -41,7 +41,7 @@ class Main extends BaseTable
     {
         return Stable::query()
             ->withActivityStatusState()
-            ->with('firstActivityPeriod')
+            ->withFirstActivityPeriod()
             ->oldest('name');
     }
 
