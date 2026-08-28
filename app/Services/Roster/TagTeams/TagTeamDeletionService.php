@@ -22,11 +22,7 @@ final class TagTeamDeletionService
     public function delete(TagTeam $tagTeam, Carbon $deletionDate): void
     {
         DB::transaction(function () use ($tagTeam, $deletionDate): void {
-            $lockedTagTeam = TagTeam::query()
-                ->withTrashed()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanDelete($lockedTagTeam);
             $this->endCurrentRelationships->handle($lockedTagTeam, $deletionDate);
@@ -39,11 +35,7 @@ final class TagTeamDeletionService
     public function restore(TagTeam $tagTeam, Carbon $restoreDate): void
     {
         DB::transaction(function () use ($tagTeam, $restoreDate): void {
-            $lockedTagTeam = TagTeam::query()
-                ->withTrashed()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedTagTeam);
             $this->deletionState->restore($lockedTagTeam, $restoreDate);

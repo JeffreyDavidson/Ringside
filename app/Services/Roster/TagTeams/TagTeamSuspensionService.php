@@ -28,10 +28,7 @@ final class TagTeamSuspensionService
         ?Closure $afterReinstatement = null,
     ): void {
         DB::transaction(function () use ($tagTeam, $reinstatementDate, $afterReinstatement): void {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanReinstate($lockedTagTeam);
             $this->suspensionPeriods->end($lockedTagTeam, $reinstatementDate, LifecycleTransitionType::Reinstated);
@@ -48,10 +45,7 @@ final class TagTeamSuspensionService
         ?Closure $afterSuspension = null,
     ): void {
         DB::transaction(function () use ($tagTeam, $suspensionDate, $afterSuspension): void {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanSuspend($lockedTagTeam);
             $this->suspensionPeriods->start($lockedTagTeam, $suspensionDate, LifecycleTransitionType::Suspended);
