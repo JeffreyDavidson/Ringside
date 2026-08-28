@@ -31,11 +31,7 @@ final class IndividualDeletionService
         ?Closure $afterPeriodsClosed = null,
     ): void {
         DB::transaction(function () use ($individual, $deletionDate, $afterPeriodsClosed): void {
-            $lockedIndividual = $individual::query()
-                ->withTrashed()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanDelete($lockedIndividual);
             $this->periods->close($lockedIndividual, $deletionDate);

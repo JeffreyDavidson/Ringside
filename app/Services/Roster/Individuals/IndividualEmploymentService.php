@@ -30,10 +30,7 @@ final class IndividualEmploymentService
         ?Closure $afterEmployment = null,
     ): void {
         DB::transaction(function () use ($individual, $employmentDate, $afterEmployment): void {
-            $lockedIndividual = $individual::query()
-                ->whereKey($individual->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedIndividual = $individual->refreshForUpdate();
 
             $this->eligibility->ensureCanEmploy($lockedIndividual);
             $this->employmentPeriods->start($lockedIndividual, $employmentDate, LifecycleTransitionType::Employed);
