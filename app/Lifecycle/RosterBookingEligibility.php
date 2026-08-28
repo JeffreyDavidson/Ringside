@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle;
 
+use App\Lifecycle\Roster\TagTeams\TagTeamMembershipRequirements;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
