@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
-use App\Lifecycle\ChampionshipReignManager;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Services\Roster\TagTeams\TagTeamMembershipService;
 use Illuminate\Support\Carbon;
