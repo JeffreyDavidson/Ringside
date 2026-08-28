@@ -88,6 +88,6 @@ class AddRefereesToMatchAction
 
         $this->conflictService->ensureRefereesCanBeAssigned($lockedMatch->event_id, $conflictingEventIds, $lockedReferees);
 
-        $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->modelKeys());
+        $lockedMatch->referees()->syncWithoutDetaching($lockedReferees->pluck('id'));
     }
 }
