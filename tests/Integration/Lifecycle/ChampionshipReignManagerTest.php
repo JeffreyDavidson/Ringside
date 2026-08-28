@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Lifecycle\ChampionshipReignManager;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Facades\DB;

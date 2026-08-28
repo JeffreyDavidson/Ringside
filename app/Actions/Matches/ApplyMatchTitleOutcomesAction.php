@@ -6,7 +6,7 @@ namespace App\Actions\Matches;
 
 use App\Data\Matches\MatchResultData;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
-use App\Lifecycle\ChampionshipReignManager;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\TagTeams\TagTeam;
