@@ -16,11 +16,7 @@ final class EventMatchDeletionService
     public function delete(EventMatch $eventMatch, Carbon $deletionDate): void
     {
         DB::transaction(function () use ($eventMatch, $deletionDate): void {
-            $lockedMatch = EventMatch::query()
-                ->withTrashed()
-                ->whereKey($eventMatch->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedMatch = $eventMatch->refreshForUpdate();
 
             $this->deletionState->delete($lockedMatch, $deletionDate);
         });
