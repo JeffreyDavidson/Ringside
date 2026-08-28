@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Events;
 
 use App\Enums\EventStatus;
 use App\Exceptions\Events\CannotBeRescheduledException;

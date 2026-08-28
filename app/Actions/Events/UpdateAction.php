@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Events;
 
 use App\Data\Events\EventData;
-use App\Lifecycle\EventSchedulingEligibility;
+use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Services\Events\EventVenueSchedulingService;
 use App\Services\Matches\MatchAssignmentConflictService;

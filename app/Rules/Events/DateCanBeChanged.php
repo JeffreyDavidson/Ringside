@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Rules\Events;
 
 use App\Exceptions\Events\CannotBeRescheduledException;
-use App\Lifecycle\EventSchedulingEligibility;
+use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Models\Events\Event;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
