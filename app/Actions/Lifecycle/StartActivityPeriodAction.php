@@ -22,10 +22,6 @@ class StartActivityPeriodAction
         return DB::transaction(function () use ($activeable, $startedAt, $rescheduleFuturePeriod): ActivityPeriod {
             $lockedActiveable = $activeable->refreshForUpdate();
 
-            if (! $lockedActiveable instanceof HasActivityPeriods) {
-                throw new LogicException(class_basename($activeable).' does not support activity periods.');
-            }
-
             $openActivityPeriod = $lockedActiveable->activityPeriods()
                 ->whereNull('ended_at')
                 ->lockForUpdate()
