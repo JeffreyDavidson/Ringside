@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Lifecycle\StableFormerMemberEligibility;
+use App\Lifecycle\Roster\Stables\StableFormerMemberEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Roster\Stables;
 
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Stables\StableActivityTransition;

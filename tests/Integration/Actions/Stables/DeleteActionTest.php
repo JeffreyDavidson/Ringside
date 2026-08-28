@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Stables\DeleteAction;
 use App\Exceptions\Roster\Stables\CannotBeDeletedException;
-use App\Lifecycle\StableDeletionEligibility;
+use App\Lifecycle\Roster\Stables\StableDeletionEligibility;
 use App\Models\Roster\Stables\Stable;
 
 test('it deletes an inactive stable without current members', function () {

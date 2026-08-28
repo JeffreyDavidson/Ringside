@@ -6,7 +6,7 @@ namespace App\Models\Roster\Stables;
 
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
-use App\Lifecycle\StableStatusResolver;
+use App\Lifecycle\Roster\Stables\StableStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;

@@ -6,7 +6,7 @@ namespace App\Services\Roster\Stables;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Stables\StableActivityTransition;
-use App\Lifecycle\StableActivityEligibility;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

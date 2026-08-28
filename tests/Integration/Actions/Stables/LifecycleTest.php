@@ -14,7 +14,7 @@ use App\Exceptions\Roster\Stables\CannotBeDisbandedException;
 use App\Exceptions\Roster\Stables\CannotBeEstablishedException;
 use App\Exceptions\Roster\Stables\CannotBeReunitedException;
 use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
-use App\Lifecycle\StableRetirementEligibility;
+use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
