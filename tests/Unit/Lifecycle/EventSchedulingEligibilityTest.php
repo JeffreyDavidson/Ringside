@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Exceptions\Events\CannotBeRescheduledException;
-use App\Lifecycle\EventSchedulingEligibility;
+use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Models\Events\Event;
 
 test('it rejects changing the date of a past event', function () {
