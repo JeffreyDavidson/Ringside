@@ -7,7 +7,7 @@ use App\Data\Matches\MatchResultData;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
-use App\Lifecycle\MatchOutcomeRequirements;
+use App\Lifecycle\Matches\MatchOutcomeRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Matches;
 
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
