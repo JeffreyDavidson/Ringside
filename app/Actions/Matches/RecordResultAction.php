@@ -10,7 +10,6 @@ use App\Lifecycle\MatchOutcomeRequirements;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
-use App\Models\Matches\MatchSide;
 use Illuminate\Support\Facades\DB;
 
 class RecordResultAction
@@ -28,7 +27,7 @@ class RecordResultAction
             $lockedMatch->setRelation('event', $lockedEvent);
             $lockedWinningSide = $result->winningSide === null
                 ? null
-                : MatchSide::query()->whereKey($result->winningSide->id)->lockForUpdate()->firstOrFail();
+                : $result->winningSide->refreshForUpdate();
             $lockedCompetitors = MatchCompetitor::query()
                 ->whereBelongsTo($lockedMatch, 'eventMatch')
                 ->with('competitor')
