@@ -32,8 +32,7 @@ class PreviousManagers extends BasePreviousManagersTable
             ->with('manager')
             ->whereHas('manager')
             ->forWrestlerId($this->wrestlerId)
-            ->ended()
-            ->mostRecentlyHiredFirst();
+            ->forHistory();
     }
 
     protected function configure(): void
