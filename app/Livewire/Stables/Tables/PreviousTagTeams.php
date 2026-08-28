@@ -36,8 +36,7 @@ class PreviousTagTeams extends DataTableComponent
         return StableTagTeam::query()
             ->with('tagTeam')
             ->forStableId($this->stableId)
-            ->ended()
-            ->mostRecentlyJoinedFirst();
+            ->forHistory();
     }
 
     /**

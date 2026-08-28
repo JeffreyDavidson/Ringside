@@ -27,6 +27,7 @@ use Illuminate\Support\Carbon;
  *
  * @method static StableMembershipBuilder<static> current()
  * @method static StableMembershipBuilder<static> ended()
+ * @method static StableMembershipBuilder<static> forHistory()
  * @method static StableMembershipBuilder<static> forStableId(int $stableId)
  * @method static StableMembershipBuilder<static> mostRecentlyJoinedFirst()
  * @method static StableMembershipBuilder<static> newModelQuery()

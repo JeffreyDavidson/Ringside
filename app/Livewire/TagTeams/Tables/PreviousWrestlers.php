@@ -36,8 +36,7 @@ class PreviousWrestlers extends DataTableComponent
         return TagTeamWrestler::query()
             ->with('wrestler')
             ->forTagTeamId($this->tagTeamId)
-            ->ended()
-            ->mostRecentlyJoinedFirst();
+            ->forHistory();
     }
 
     /**

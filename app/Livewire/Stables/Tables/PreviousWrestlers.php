@@ -36,8 +36,7 @@ class PreviousWrestlers extends DataTableComponent
         return StableWrestler::query()
             ->with('wrestler')
             ->forStableId($this->stableId)
-            ->ended()
-            ->mostRecentlyJoinedFirst();
+            ->forHistory();
     }
 
     /**

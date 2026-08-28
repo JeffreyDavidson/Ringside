@@ -36,4 +36,11 @@ class MembershipPeriodBuilder extends Builder
 
         return $this;
     }
+
+    public function forHistory(): static
+    {
+        return $this
+            ->ended()
+            ->mostRecentlyJoinedFirst();
+    }
 }
