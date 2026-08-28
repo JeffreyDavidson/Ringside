@@ -20,10 +20,7 @@ class StartActivityPeriodAction
         bool $rescheduleFuturePeriod = false,
     ): ActivityPeriod {
         return DB::transaction(function () use ($activeable, $startedAt, $rescheduleFuturePeriod): ActivityPeriod {
-            $lockedActiveable = $activeable->newQueryWithoutScopes()
-                ->whereKey($activeable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedActiveable = $activeable->refreshForUpdate();
 
             if (! $lockedActiveable instanceof HasActivityPeriods) {
                 throw new LogicException(class_basename($activeable).' does not support activity periods.');

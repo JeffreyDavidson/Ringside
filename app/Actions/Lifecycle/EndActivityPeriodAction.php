@@ -23,10 +23,7 @@ class EndActivityPeriodAction
         }
 
         DB::transaction(function () use ($activeable, $endedAt, $context): void {
-            $lockedActiveable = $activeable->newQueryWithoutScopes()
-                ->whereKey($activeable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedActiveable = $activeable->refreshForUpdate();
 
             if (! $lockedActiveable instanceof HasActivityPeriods) {
                 throw new LogicException(class_basename($activeable).' does not support activity periods.');
