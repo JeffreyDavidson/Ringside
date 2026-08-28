@@ -8,9 +8,8 @@ use App\Data\Matches\EventMatchData;
 use App\Enums\MatchType;
 use App\Livewire\Base\BaseForm;
 use App\Livewire\Matches\Support\MatchCompetitorRuleSet;
+use App\Livewire\Matches\Support\MatchCompetitorStateMapper;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
-use App\Models\Matches\MatchSide;
 use App\Models\Matches\MatchStipulation;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -69,35 +68,13 @@ class CreateEditForm extends BaseForm
         $this->titles = $this->formModel->titles
             ->map(fn (Title $title): int => $title->id)
             ->all();
-        $competitorsBySide = $this->formModel->sides()
+        $sides = $this->formModel->sides()
             ->with('competitors.competitor')
-            ->get()
-            ->map(function (MatchSide $side): array {
-                return [
-                    'wrestlers' => $side->competitors
-                        ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof Wrestler)
-                        ->map(fn (MatchCompetitor $competitor): int => $competitor->competitor_id)
-                        ->values()
-                        ->all(),
-                    'tag_teams' => $side->competitors
-                        ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof TagTeam)
-                        ->map(fn (MatchCompetitor $competitor): int => $competitor->competitor_id)
-                        ->values()
-                        ->all(),
-                ];
-            })
-            ->values()
-            ->all();
-
-        $this->competitors = $this->requiredMatchType()->usesIndividualCompetitorSides()
-            ? [[
-                'wrestlers' => collect($competitorsBySide)
-                    ->flatMap(fn (array $side): array => $side['wrestlers'])
-                    ->values()
-                    ->all(),
-                'tag_teams' => [],
-            ]]
-            : $competitorsBySide;
+            ->get();
+        $this->competitors = app(MatchCompetitorStateMapper::class)->fromSides(
+            $sides,
+            $this->requiredMatchType()->usesIndividualCompetitorSides(),
+        );
     }
 
     public function toData(): EventMatchData
