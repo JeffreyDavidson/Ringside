@@ -6,7 +6,7 @@ namespace App\Services\Roster\TagTeams;
 
 use App\Actions\TagTeams\EndCurrentRelationshipsAction;
 use App\Lifecycle\DeletionStateManager;
-use App\Lifecycle\TagTeamDeletionEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

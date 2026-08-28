@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\DeleteAction;
 use App\Exceptions\Roster\TagTeams\CannotBeDeletedException;
-use App\Lifecycle\TagTeamDeletionEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 

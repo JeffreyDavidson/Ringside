@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Roster\TagTeams;
 
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;

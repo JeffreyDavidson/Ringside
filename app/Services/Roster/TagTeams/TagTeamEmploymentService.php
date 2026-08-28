@@ -6,7 +6,7 @@ namespace App\Services\Roster\TagTeams;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Lifecycle\EmploymentPeriodManager;
-use App\Lifecycle\TagTeamEmploymentEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use Closure;
 use Illuminate\Support\Carbon;
