@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Matches\EventMatch;

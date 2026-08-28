@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Roster\Individuals;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
 use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
-use App\Lifecycle\SuspensionPeriodManager;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;

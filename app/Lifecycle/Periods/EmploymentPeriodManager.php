@@ -2,47 +2,47 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Periods;
 
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Models\Contracts\Injurable;
+use App\Models\Contracts\Employable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-final class InjuryPeriodManager
+final class EmploymentPeriodManager
 {
     public function __construct(private LifecyclePeriodWriter $periodWriter) {}
 
     /**
-     * @param  Model&Injurable<*>  $injurable
+     * @param  Model&Employable<*>  $employable
      */
     public function start(
-        Model&Injurable $injurable,
+        Model&Employable $employable,
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
     ): void {
         $this->periodWriter->start(
-            $injurable,
-            $injurable->injuries(),
-            LifecycleDimension::Injury,
+            $employable,
+            $employable->employments(),
+            LifecycleDimension::Employment,
             $date,
             $transition,
         );
     }
 
     /**
-     * @param  Model&Injurable<*>  $injurable
+     * @param  Model&Employable<*>  $employable
      */
     public function end(
-        Model&Injurable $injurable,
+        Model&Employable $employable,
         Carbon $date,
         ?LifecycleTransitionType $transition = null,
     ): void {
         $this->periodWriter->end(
-            $injurable,
-            $injurable->currentInjury(),
-            LifecycleDimension::Injury,
+            $employable,
+            $employable->currentEmployment(),
+            LifecycleDimension::Employment,
             $date,
             $transition,
         );

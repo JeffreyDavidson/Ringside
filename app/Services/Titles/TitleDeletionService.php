@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Titles;
 
-use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Lifecycle\Titles\TitleDeletionEligibility;
 use App\Models\Titles\Title;

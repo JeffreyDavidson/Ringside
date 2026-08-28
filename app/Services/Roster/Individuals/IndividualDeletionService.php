@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Roster\Individuals;
 
-use App\Lifecycle\DeletionPeriodCloser;
-use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\Periods\DeletionPeriodCloser;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;

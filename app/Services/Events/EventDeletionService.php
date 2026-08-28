@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Events;
 
-use App\Lifecycle\DeletionStateManager;
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

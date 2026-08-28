@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Enums\Lifecycle\LifecycleDimension;
 use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\InjuryPeriodManager;
+use App\Lifecycle\Periods\InjuryPeriodManager;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;

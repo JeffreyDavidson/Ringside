@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Lifecycle\DeletionPeriodCloser;
+use App\Lifecycle\Periods\DeletionPeriodCloser;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\DB;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Periods;
 
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;

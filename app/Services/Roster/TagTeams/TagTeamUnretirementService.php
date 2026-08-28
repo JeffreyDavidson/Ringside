@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Roster\TagTeams;
 
 use App\Enums\Lifecycle\LifecycleTransitionType;
-use App\Lifecycle\RetirementPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use Closure;
