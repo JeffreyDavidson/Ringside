@@ -28,10 +28,7 @@ final class TagTeamEmploymentService
         ?Closure $afterEmployment = null,
     ): void {
         DB::transaction(function () use ($tagTeam, $employmentDate, $afterEmployment): void {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanEmploy($lockedTagTeam);
             $this->employmentPeriods->start($lockedTagTeam, $employmentDate, LifecycleTransitionType::Employed);

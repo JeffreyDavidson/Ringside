@@ -33,10 +33,7 @@ final class TagTeamRetirementService
         ?Closure $afterRetirement = null,
     ): void {
         DB::transaction(function () use ($tagTeam, $retirementDate, $retireMembers, $afterRetirement): void {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanRetire($lockedTagTeam);
 

@@ -29,10 +29,7 @@ final class TagTeamUnretirementService
         ?Closure $afterUnretirement = null,
     ): void {
         DB::transaction(function () use ($tagTeam, $unretirementDate, $requireAvailablePartners, $afterUnretirement): void {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanUnretire($lockedTagTeam, $requireAvailablePartners);
             $this->retirementPeriods->end($lockedTagTeam, $unretirementDate, LifecycleTransitionType::Unretired);

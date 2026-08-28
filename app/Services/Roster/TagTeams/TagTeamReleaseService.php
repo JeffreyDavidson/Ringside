@@ -30,10 +30,7 @@ final class TagTeamReleaseService
         ?Closure $afterRelease = null,
     ): void {
         DB::transaction(function () use ($tagTeam, $releaseDate, $afterRelease): void {
-            $lockedTagTeam = TagTeam::query()
-                ->whereKey($tagTeam->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
 
             $this->eligibility->ensureCanRelease($lockedTagTeam);
             $this->employmentPeriods->end($lockedTagTeam, $releaseDate, LifecycleTransitionType::Released);
