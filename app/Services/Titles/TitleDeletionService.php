@@ -22,10 +22,7 @@ final class TitleDeletionService
     public function delete(Title $title, Carbon $deletionDate): void
     {
         DB::transaction(function () use ($title, $deletionDate): void {
-            $lockedTitle = Title::query()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTitle = $title->refreshForUpdate();
 
             if ($lockedTitle->isCurrentlyActive()) {
                 $lockedTitle->activityPeriods()->whereNull('ended_at')->update(['ended_at' => $deletionDate]);
@@ -41,11 +38,7 @@ final class TitleDeletionService
     public function restore(Title $title, Carbon $restoreDate): void
     {
         DB::transaction(function () use ($title, $restoreDate): void {
-            $lockedTitle = Title::query()
-                ->withTrashed()
-                ->whereKey($title->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedTitle = $title->refreshForUpdate();
 
             $this->eligibility->ensureCanRestore($lockedTitle);
             $this->deletionState->restore($lockedTitle, $restoreDate);
