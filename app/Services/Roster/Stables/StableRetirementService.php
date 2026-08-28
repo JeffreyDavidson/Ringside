@@ -31,11 +31,7 @@ final class StableRetirementService
         ?Closure $afterRetirement = null,
     ): void {
         DB::transaction(function () use ($stable, $retirementDate, $operationalDate, $afterRetirement): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureCanRetire($lockedStable);
 

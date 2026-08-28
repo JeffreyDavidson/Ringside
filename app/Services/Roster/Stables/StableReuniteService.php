@@ -21,11 +21,7 @@ final class StableReuniteService
     public function reunite(Stable $stable, Carbon $reuniteDate): void
     {
         DB::transaction(function () use ($stable, $reuniteDate): void {
-            $lockedStable = Stable::query()
-                ->withTrashed()
-                ->whereKey($stable->getKey())
-                ->lockForUpdate()
-                ->firstOrFail();
+            $lockedStable = $stable->refreshForUpdate();
 
             $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Reunite);
             $this->activityPeriods->start($lockedStable, $reuniteDate, LifecycleTransitionType::Reunited);
