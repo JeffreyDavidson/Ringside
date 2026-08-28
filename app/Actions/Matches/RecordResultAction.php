@@ -23,7 +23,7 @@ class RecordResultAction
     public function handle(EventMatch $match, MatchResultData $result): EventMatch
     {
         return DB::transaction(function () use ($match, $result): EventMatch {
-            $lockedMatch = EventMatch::query()->whereKey($match->id)->lockForUpdate()->firstOrFail();
+            $lockedMatch = $match->refreshForUpdate();
             $lockedEvent = Event::query()->whereKey($lockedMatch->event_id)->lockForUpdate()->firstOrFail();
             $lockedMatch->setRelation('event', $lockedEvent);
             $lockedWinningSide = $result->winningSide === null

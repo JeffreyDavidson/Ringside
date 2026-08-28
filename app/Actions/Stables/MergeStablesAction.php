@@ -43,8 +43,8 @@ class MergeStablesAction
                 ? [$primaryStable, $secondaryStable]
                 : [$secondaryStable, $primaryStable];
 
-            $firstLockedStable = Stable::query()->whereKey($firstStable->getKey())->lockForUpdate()->firstOrFail();
-            $secondLockedStable = Stable::query()->whereKey($secondStable->getKey())->lockForUpdate()->firstOrFail();
+            $firstLockedStable = $firstStable->refreshForUpdate();
+            $secondLockedStable = $secondStable->refreshForUpdate();
 
             $lockedPrimaryStable = $firstLockedStable->is($primaryStable)
                 ? $firstLockedStable
