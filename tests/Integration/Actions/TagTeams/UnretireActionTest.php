@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\TagTeams\UnretireAction;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
-use App\Lifecycle\TagTeamRetirementEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;

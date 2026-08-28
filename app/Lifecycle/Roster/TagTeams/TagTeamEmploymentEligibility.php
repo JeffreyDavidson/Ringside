@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Roster\TagTeams;
 
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Exceptions\Roster\TagTeams\CannotBeReleasedException;

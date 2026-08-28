@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Exceptions\Roster\TagTeams\CannotBeRetiredException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException;
-use App\Lifecycle\TagTeamRetirementEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 
 test('retirement predicate stays aligned with its guard', function (string $factoryState, bool $canRetire) {

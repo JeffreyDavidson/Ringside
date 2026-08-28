@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Lifecycle\TagTeamMembershipRequirements;
+use App\Lifecycle\Roster\TagTeams\TagTeamMembershipRequirements;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
