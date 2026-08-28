@@ -6,6 +6,7 @@ namespace App\Builders\Titles;
 
 use App\Builders\Concerns\FiltersByName;
 use App\Builders\Concerns\FiltersByRetirementStatus;
+use App\Builders\Concerns\LoadsFirstActivityPeriod;
 use App\Builders\Concerns\ProjectsActivityStatus;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
@@ -21,6 +22,7 @@ class TitleBuilder extends Builder
 {
     use FiltersByName;
     use FiltersByRetirementStatus;
+    use LoadsFirstActivityPeriod;
     use ProjectsActivityStatus;
 
     public function whereType(TitleType $type): static

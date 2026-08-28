@@ -43,7 +43,8 @@ class Main extends BaseTable
     {
         return Title::query()
             ->withActivityStatusState()
-            ->with(['firstActivityPeriod', 'currentChampionship.champion'])
+            ->withFirstActivityPeriod()
+            ->with('currentChampionship.champion')
             ->oldest('name');
     }
 
