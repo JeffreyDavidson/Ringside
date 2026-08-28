@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBeRetiredException;
 use App\Exceptions\Titles\CannotBeUnretiredException;
-use App\Lifecycle\TitleLifecycleEligibility;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 
 describe('title lifecycle eligibility', function () {

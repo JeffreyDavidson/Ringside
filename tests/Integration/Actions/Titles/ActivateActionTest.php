@@ -7,7 +7,7 @@ use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Enums\Titles\TitleLifecycleTransition;
 use App\Exceptions\Titles\CannotBeDebutedException;
 use App\Exceptions\Titles\CannotBeReinstatedException;
-use App\Lifecycle\TitleLifecycleEligibility;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
 
 use function Spatie\PestPluginTestTime\testTime;

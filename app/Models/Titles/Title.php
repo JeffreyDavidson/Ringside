@@ -7,7 +7,7 @@ namespace App\Models\Titles;
 use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
-use App\Lifecycle\TitleStatusResolver;
+use App\Lifecycle\Titles\TitleStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;

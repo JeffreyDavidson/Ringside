@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Titles;
 
 use App\Exceptions\Titles\CannotBeRestoredException;
 use App\Models\Titles\Title;
