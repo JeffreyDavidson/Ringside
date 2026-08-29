@@ -102,7 +102,7 @@ jobs:
               run: composer test:type-coverage
 
     application-tests:
-        name: Application tests
+        name: CI - PHP-8.4 - Laravel-13.*
         runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
         timeout-minutes: 20
 
