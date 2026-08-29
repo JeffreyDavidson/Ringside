@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;

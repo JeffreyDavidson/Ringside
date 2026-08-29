@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 
 test('a tag team must satisfy its own roster state requirements', function (string $factoryState, bool $eligible) {

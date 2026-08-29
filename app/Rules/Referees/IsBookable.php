@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Referees;
 
-use App\Lifecycle\RosterBookingEligibility;
+use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\Referees\Referee;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Roster;
 
 use App\Enums\Shared\EmploymentStatus;
 

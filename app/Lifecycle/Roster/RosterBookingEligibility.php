@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Lifecycle;
+namespace App\Lifecycle\Roster;
 
 use App\Lifecycle\Roster\TagTeams\TagTeamMembershipRequirements;
 use App\Models\Roster\Referees\Referee;
