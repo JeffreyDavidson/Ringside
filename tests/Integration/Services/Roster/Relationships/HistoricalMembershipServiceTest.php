@@ -67,3 +67,43 @@ it('removes only current memberships while preserving history', function () {
         ->and($endedMembership->left_at?->equalTo($leftAt))->toBeTrue()
         ->and($tagTeam->currentWrestlers()->exists())->toBeFalse();
 });
+
+it('synchronizes membership changes without rewriting retained history', function () {
+    $tagTeam = TagTeam::factory()->create();
+    $removedWrestler = Wrestler::factory()->create();
+    $retainedWrestler = Wrestler::factory()->create();
+    $addedWrestler = Wrestler::factory()->create();
+    $joinedAt = now()->subDay()->startOfSecond();
+    $changedAt = now()->startOfSecond();
+
+    $tagTeam->wrestlers()->attach($removedWrestler, [
+        'joined_at' => $joinedAt,
+        'left_at' => null,
+    ]);
+    $tagTeam->wrestlers()->attach($retainedWrestler, [
+        'joined_at' => $joinedAt,
+        'left_at' => null,
+    ]);
+
+    resolve(HistoricalMembershipService::class)->synchronize(
+        $tagTeam->wrestlers(),
+        new Collection([$removedWrestler, $retainedWrestler]),
+        new Collection([$retainedWrestler, $addedWrestler]),
+        $changedAt,
+    );
+
+    $removedMembership = TagTeamWrestler::query()
+        ->whereBelongsTo($tagTeam)
+        ->whereBelongsTo($removedWrestler, 'wrestler')
+        ->firstOrFail();
+    $retainedMembership = TagTeamWrestler::query()
+        ->whereBelongsTo($tagTeam)
+        ->whereBelongsTo($retainedWrestler, 'wrestler')
+        ->firstOrFail();
+
+    expect($tagTeam->currentWrestlers()->pluck('wrestlers.id')->all())
+        ->toEqualCanonicalizing([$retainedWrestler->id, $addedWrestler->id])
+        ->and($removedMembership->left_at?->equalTo($changedAt))->toBeTrue()
+        ->and($retainedMembership->joined_at->equalTo($joinedAt))->toBeTrue()
+        ->and($retainedMembership->left_at)->toBeNull();
+});
