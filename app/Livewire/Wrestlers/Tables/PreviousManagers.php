@@ -8,7 +8,6 @@ use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends BasePreviousManagersTable<WrestlerManager> */
 class PreviousManagers extends BasePreviousManagersTable
@@ -24,14 +23,12 @@ class PreviousManagers extends BasePreviousManagersTable
     /** @return ManagerAssignmentBuilder<WrestlerManager> */
     public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->wrestlerId)) {
-            throw new LogicException('A wrestler was not provided.');
-        }
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         return WrestlerManager::query()
             ->with('manager')
             ->whereHas('manager')
-            ->forWrestlerId($this->wrestlerId)
+            ->forWrestlerId($wrestlerId)
             ->forHistory();
     }
 
