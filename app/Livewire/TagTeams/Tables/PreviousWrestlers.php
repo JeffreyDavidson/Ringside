@@ -12,7 +12,6 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends DataTableComponent<TagTeamWrestler> */
 class PreviousWrestlers extends DataTableComponent
@@ -29,13 +28,11 @@ class PreviousWrestlers extends DataTableComponent
     /** @return TagTeamMembershipBuilder<TagTeamWrestler> */
     public function builder(): TagTeamMembershipBuilder
     {
-        if (! isset($this->tagTeamId)) {
-            throw new LogicException('A tag team was not provided.');
-        }
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return TagTeamWrestler::query()
             ->with('wrestler')
-            ->forTagTeamId($this->tagTeamId)
+            ->forTagTeamId($tagTeamId)
             ->forHistory();
     }
 
