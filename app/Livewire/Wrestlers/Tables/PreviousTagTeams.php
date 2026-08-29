@@ -9,6 +9,7 @@ use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Livewire\Attributes\Locked;
+use LogicException;
 
 /**
  * Livewire table component for displaying a wrestler's previous tag team memberships.
@@ -43,10 +44,12 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     /** @return TagTeamMembershipBuilder<TagTeamWrestler> */
     public function builder(): TagTeamMembershipBuilder
     {
-        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
+        if (! isset($this->wrestlerId)) {
+            throw new LogicException('A wrestler was not provided.');
+        }
 
         return TagTeamWrestler::query()
-            ->forWrestlerId($wrestlerId)
+            ->forWrestlerId($this->wrestlerId)
             ->with('tagTeam.wrestlerMemberships.wrestler')
             ->forHistory();
     }
