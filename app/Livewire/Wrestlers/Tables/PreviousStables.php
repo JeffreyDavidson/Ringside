@@ -8,7 +8,6 @@ use App\Builders\Roster\StableBuilder;
 use App\Livewire\Base\Tables\BasePreviousStablesTable;
 use App\Models\Roster\Stables\Stable;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
@@ -26,12 +25,10 @@ class PreviousStables extends BasePreviousStablesTable
      */
     public function builder(): StableBuilder
     {
-        if (! isset($this->wrestlerId)) {
-            throw new LogicException('A wrestler was not provided.');
-        }
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         return Stable::query()
-            ->previousForWrestlerId($this->wrestlerId);
+            ->previousForWrestlerId($wrestlerId);
     }
 
     protected function configure(): void
