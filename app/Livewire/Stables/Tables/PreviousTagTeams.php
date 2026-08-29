@@ -12,7 +12,6 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\StableTagTeam;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends DataTableComponent<StableTagTeam> */
 class PreviousTagTeams extends DataTableComponent
@@ -29,13 +28,11 @@ class PreviousTagTeams extends DataTableComponent
     /** @return StableMembershipBuilder<StableTagTeam> */
     public function builder(): StableMembershipBuilder
     {
-        if (! isset($this->stableId)) {
-            throw new LogicException('A stable was not provided.');
-        }
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
 
         return StableTagTeam::query()
             ->with('tagTeam')
-            ->forStableId($this->stableId)
+            ->forStableId($stableId)
             ->forHistory();
     }
 

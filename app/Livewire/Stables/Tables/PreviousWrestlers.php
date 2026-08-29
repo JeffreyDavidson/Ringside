@@ -12,7 +12,6 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\StableWrestler;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends DataTableComponent<StableWrestler> */
 class PreviousWrestlers extends DataTableComponent
@@ -29,13 +28,11 @@ class PreviousWrestlers extends DataTableComponent
     /** @return StableMembershipBuilder<StableWrestler> */
     public function builder(): StableMembershipBuilder
     {
-        if (! isset($this->stableId)) {
-            throw new LogicException('A stable was not provided.');
-        }
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
 
         return StableWrestler::query()
             ->with('wrestler')
-            ->forStableId($this->stableId)
+            ->forStableId($stableId)
             ->forHistory();
     }
 
