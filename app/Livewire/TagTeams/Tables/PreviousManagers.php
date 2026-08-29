@@ -8,7 +8,6 @@ use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends BasePreviousManagersTable<TagTeamManager> */
 class PreviousManagers extends BasePreviousManagersTable
@@ -24,12 +23,10 @@ class PreviousManagers extends BasePreviousManagersTable
     /** @return ManagerAssignmentBuilder<TagTeamManager> */
     public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->tagTeamId)) {
-            throw new LogicException('A tag team was not provided.');
-        }
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return TagTeamManager::query()
-            ->forTagTeamId($this->tagTeamId)
+            ->forTagTeamId($tagTeamId)
             ->forHistory()
             ->with('manager');
     }

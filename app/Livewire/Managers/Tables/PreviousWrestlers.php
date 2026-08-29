@@ -11,7 +11,6 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Wrestlers\WrestlerManager;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends DataTableComponent<WrestlerManager> */
 class PreviousWrestlers extends DataTableComponent
@@ -28,12 +27,10 @@ class PreviousWrestlers extends DataTableComponent
     /** @return ManagerAssignmentBuilder<WrestlerManager> */
     public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->managerId)) {
-            throw new LogicException('A manager was not provided.');
-        }
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
         return WrestlerManager::query()
-            ->forManagerId($this->managerId)
+            ->forManagerId($managerId)
             ->forHistory()
             ->with('wrestler');
     }

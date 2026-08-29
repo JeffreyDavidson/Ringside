@@ -13,6 +13,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
+use LogicException;
 
 /**
  * @template TModel of Model
@@ -110,6 +111,15 @@ abstract class DataTableComponent extends Component
     {
         $this->configure();
         $this->initializeFilterValues();
+    }
+
+    protected function requireContextId(?int $id, string $resource): int
+    {
+        if ($id === null) {
+            throw new LogicException("A {$resource} was not provided.");
+        }
+
+        return $id;
     }
 
     public function updatedSearch(): void
