@@ -7,9 +7,7 @@ namespace App\Services\Roster\Relationships;
 use App\Models\Contracts\Manageable;
 use App\Models\Roster\Managers\Manager;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Carbon;
 
 final class ManagerAssignmentService
@@ -65,18 +63,11 @@ final class ManagerAssignmentService
      */
     public function endAssignmentsFor(Manageable $manageable, Carbon $date): void
     {
-        $manageable->managers()
-            ->newPivotQuery()
-            ->whereNull('fired_at')
-            ->update(['fired_at' => $date]);
+        $this->endCurrentRelationship($manageable->managers(), $date);
     }
 
     /**
-     * @template TRelatedModel of Model
-     * @template TDeclaringModel of Model
-     * @template TPivotModel of Pivot
-     *
-     * @param  BelongsToMany<TRelatedModel, TDeclaringModel, TPivotModel>  $relationship
+     * @param  BelongsToMany<*, *, *>  $relationship
      */
     private function endCurrentRelationship(BelongsToMany $relationship, Carbon $date): void
     {
