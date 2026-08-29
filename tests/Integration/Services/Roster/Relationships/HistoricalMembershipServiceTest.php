@@ -104,6 +104,6 @@ it('synchronizes membership changes without rewriting retained history', functio
     expect($tagTeam->currentWrestlers()->pluck('wrestlers.id')->all())
         ->toEqualCanonicalizing([$retainedWrestler->id, $addedWrestler->id])
         ->and($removedMembership->left_at?->equalTo($changedAt))->toBeTrue()
-        ->and($retainedMembership->joined_at?->equalTo($joinedAt))->toBeTrue()
+        ->and($retainedMembership->joined_at->equalTo($joinedAt))->toBeTrue()
         ->and($retainedMembership->left_at)->toBeNull();
 });
