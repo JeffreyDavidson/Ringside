@@ -8,6 +8,7 @@ use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use Livewire\Attributes\Locked;
+use LogicException;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
@@ -20,10 +21,12 @@ class PreviousMatches extends BasePreviousMatchesTable
     /** @return EventMatchBuilder<EventMatch> */
     public function builder(): EventMatchBuilder
     {
-        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+        if (! isset($this->tagTeamId)) {
+            throw new LogicException('A tag team was not provided.');
+        }
 
         return EventMatch::query()
             ->forHistory()
-            ->forTagTeamId($tagTeamId);
+            ->forTagTeamId($this->tagTeamId);
     }
 }

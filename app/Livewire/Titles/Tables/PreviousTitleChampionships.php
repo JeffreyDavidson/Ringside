@@ -16,6 +16,7 @@ use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
+use LogicException;
 
 /** @extends DataTableComponent<TitleChampionship> */
 class PreviousTitleChampionships extends DataTableComponent
@@ -40,10 +41,12 @@ class PreviousTitleChampionships extends DataTableComponent
     /** @return TitleChampionshipBuilder<TitleChampionship> */
     public function builder(): TitleChampionshipBuilder
     {
-        $titleId = $this->requireContextId($this->titleId ?? null, 'title');
+        if (! isset($this->titleId)) {
+            throw new LogicException('A title was not provided.');
+        }
 
         return TitleChampionship::query()
-            ->forTitleId($titleId)
+            ->forTitleId($this->titleId)
             ->forPreviousHistory()
             ->with('champion');
     }

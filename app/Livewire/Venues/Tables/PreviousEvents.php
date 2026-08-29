@@ -12,6 +12,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Events\Event;
 use Livewire\Attributes\Locked;
+use LogicException;
 
 /** @extends DataTableComponent<Event> */
 class PreviousEvents extends DataTableComponent
@@ -30,10 +31,12 @@ class PreviousEvents extends DataTableComponent
      */
     public function builder(): EventBuilder
     {
-        $venueId = $this->requireContextId($this->venueId ?? null, 'venue');
+        if (! isset($this->venueId)) {
+            throw new LogicException('A venue was not provided.');
+        }
 
         return Event::query()
-            ->forVenueId($venueId)
+            ->forVenueId($this->venueId)
             ->latestDatedFirst();
     }
 
