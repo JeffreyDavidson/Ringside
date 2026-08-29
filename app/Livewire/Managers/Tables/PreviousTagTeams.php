@@ -11,7 +11,6 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends DataTableComponent<TagTeamManager> */
 class PreviousTagTeams extends DataTableComponent
@@ -31,12 +30,10 @@ class PreviousTagTeams extends DataTableComponent
     /** @return ManagerAssignmentBuilder<TagTeamManager> */
     public function builder(): ManagerAssignmentBuilder
     {
-        if (! isset($this->managerId)) {
-            throw new LogicException('A manager was not provided.');
-        }
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
         return TagTeamManager::query()
-            ->forManagerId($this->managerId)
+            ->forManagerId($managerId)
             ->forHistory()
             ->with('tagTeam');
     }

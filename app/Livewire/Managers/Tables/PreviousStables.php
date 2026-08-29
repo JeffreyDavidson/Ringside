@@ -10,7 +10,6 @@ use App\Livewire\Table\Column;
 use App\Models\Roster\Stables\Stable;
 use App\Queries\Roster\StableManagerHistoryQuery;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
@@ -32,11 +31,9 @@ class PreviousStables extends BasePreviousStablesTable
      */
     public function builder(): StableBuilder
     {
-        if (! isset($this->managerId)) {
-            throw new LogicException('A manager was not provided.');
-        }
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
-        return StableManagerHistoryQuery::previousStablesForManagerId($this->managerId);
+        return StableManagerHistoryQuery::previousStablesForManagerId($managerId);
     }
 
     public function columns(): array
