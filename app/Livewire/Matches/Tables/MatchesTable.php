@@ -18,7 +18,6 @@ use App\Models\Titles\Title;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 /** @extends DataTableComponent<EventMatch> */
 class MatchesTable extends DataTableComponent
@@ -40,12 +39,10 @@ class MatchesTable extends DataTableComponent
      */
     public function builder(): EventMatchBuilder
     {
-        if ($this->eventId === null) {
-            throw new LogicException('An event was not provided.');
-        }
+        $eventId = $this->requireContextId($this->eventId, 'event');
 
         return EventMatch::query()
-            ->forEventId($this->eventId)
+            ->forEventId($eventId)
             ->with(['event', 'referees', 'titles', 'competitors.competitor', 'competitors.side', 'winningSide.competitors.competitor']);
     }
 

@@ -8,7 +8,6 @@ use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Base\Tables\BasePreviousMatchesTable;
 use App\Models\Matches\EventMatch;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 class PreviousMatches extends BasePreviousMatchesTable
 {
@@ -21,12 +20,10 @@ class PreviousMatches extends BasePreviousMatchesTable
     /** @return EventMatchBuilder<EventMatch> */
     public function builder(): EventMatchBuilder
     {
-        if (! isset($this->refereeId)) {
-            throw new LogicException('A referee was not provided.');
-        }
+        $refereeId = $this->requireContextId($this->refereeId ?? null, 'referee');
 
         return EventMatch::query()
             ->forHistory()
-            ->forRefereeId($this->refereeId);
+            ->forRefereeId($refereeId);
     }
 }
