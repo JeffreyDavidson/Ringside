@@ -45,7 +45,7 @@ arch('custom validation rules implement Laravel validation rules')
 
 arch('lifecycle eligibility policies are final')
     ->expect([
-        'App\\Lifecycle\\IndividualRetirementEligibility',
-        'App\\Lifecycle\\TitleLifecycleEligibility',
+        'App\\Lifecycle\\Roster\\Individuals\\IndividualRetirementEligibility',
+        'App\\Lifecycle\\Titles\\TitleLifecycleEligibility',
     ])
     ->toBeFinal();
