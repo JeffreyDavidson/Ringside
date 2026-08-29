@@ -45,7 +45,24 @@ arch('custom validation rules implement Laravel validation rules')
 
 arch('lifecycle eligibility policies are final')
     ->expect([
+        'App\\Lifecycle\\Events\\EventSchedulingEligibility',
+        'App\\Lifecycle\\Roster\\Individuals\\IndividualDeletionEligibility',
+        'App\\Lifecycle\\Roster\\Individuals\\IndividualEmploymentEligibility',
+        'App\\Lifecycle\\Roster\\Individuals\\IndividualInjuryEligibility',
         'App\\Lifecycle\\Roster\\Individuals\\IndividualRetirementEligibility',
+        'App\\Lifecycle\\Roster\\Individuals\\IndividualSuspensionEligibility',
+        'App\\Lifecycle\\Roster\\Stables\\StableActivityEligibility',
+        'App\\Lifecycle\\Roster\\Stables\\StableDeletionEligibility',
+        'App\\Lifecycle\\Roster\\Stables\\StableFormerMemberEligibility',
+        'App\\Lifecycle\\Roster\\Stables\\StableRestructuringEligibility',
+        'App\\Lifecycle\\Roster\\Stables\\StableRetirementEligibility',
+        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamDeletionEligibility',
+        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamEmploymentEligibility',
+        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamRetirementEligibility',
+        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamSuspensionEligibility',
+        'App\\Lifecycle\\Titles\\TitleDeletionEligibility',
         'App\\Lifecycle\\Titles\\TitleLifecycleEligibility',
+        'App\\Lifecycle\\Venues\\VenueDeletionEligibility',
+        'App\\Lifecycle\\Venues\\VenueSchedulingEligibility',
     ])
     ->toBeFinal();
