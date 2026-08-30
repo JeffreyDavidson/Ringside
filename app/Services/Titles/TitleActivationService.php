@@ -28,7 +28,7 @@ final class TitleActivationService
                 $this->unretire->handle($lockedTitle, $activationDate);
             }
 
-            if ($lockedTitle->hasActivityPeriods()) {
+            if ($lockedTitle->activityPeriods()->exists()) {
                 $this->reinstate->handle($lockedTitle, $activationDate);
 
                 return;

@@ -10,7 +10,7 @@ code demonstrates a repeated need for it.
 ### Model status API boundary
 
 **Priority:** High  
-**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries.
+**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()` predicate has been removed in favor of the typed relationship query.
 
 Review `IsEmployable`, `IsInjurable`, `IsSuspendable`, `IsRetirable`, and
 `HasActivityPeriods`. Their relationships and current-state accessors are used
@@ -18,8 +18,9 @@ throughout Actions, Services, Livewire, Rules, and tests. Eligibility classes
 and status resolvers already own transition decisions, so removing predicates
 incrementally would create a breaking API without a clear replacement.
 
-Next step: migrate callers to the resolver and relationship-backed state facts,
-then remove model predicates in a dedicated change.
+Next step: migrate remaining callers to resolver and relationship-backed state
+facts, then remove the remaining redundant activity predicates in dedicated
+changes.
 
 ### Lifecycle status consistency
 

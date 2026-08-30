@@ -48,7 +48,7 @@ final class StableActivityEligibility
             throw CannotBeEstablishedException::deleted($stable);
         }
 
-        if ($stable->hasActivityPeriods()) {
+        if ($stable->activityPeriods()->exists()) {
             throw CannotBeEstablishedException::established($stable);
         }
 
@@ -73,7 +73,7 @@ final class StableActivityEligibility
             throw CannotBeDisbandedException::deleted($stable);
         }
 
-        if (! $stable->hasActivityPeriods()) {
+        if (! $stable->activityPeriods()->exists()) {
             throw CannotBeDisbandedException::unactivated($stable);
         }
 
@@ -96,7 +96,7 @@ final class StableActivityEligibility
             throw CannotBeReunitedException::deleted($stable);
         }
 
-        if (! $stable->hasActivityPeriods()) {
+        if (! $stable->activityPeriods()->exists()) {
             throw CannotBeReunitedException::neverActive($stable);
         }
 

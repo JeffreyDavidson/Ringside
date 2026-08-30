@@ -39,7 +39,7 @@ final class TitleLifecycleEligibility
 
     private function ensureCanDebut(Title $title): void
     {
-        if ($title->hasActivityPeriods()) {
+        if ($title->activityPeriods()->exists()) {
             throw CannotBeDebutedException::alreadyDebuted($title);
         }
 
@@ -50,7 +50,7 @@ final class TitleLifecycleEligibility
 
     private function ensureCanReinstate(Title $title): void
     {
-        if (! $title->hasActivityPeriods()) {
+        if (! $title->activityPeriods()->exists()) {
             throw CannotBeReinstatedException::neverActivated($title);
         }
 
@@ -80,7 +80,7 @@ final class TitleLifecycleEligibility
             throw CannotBeRetiredException::alreadyRetired($title);
         }
 
-        if (! $title->hasActivityPeriods()) {
+        if (! $title->activityPeriods()->exists()) {
             throw CannotBeRetiredException::unactivated($title);
         }
 
