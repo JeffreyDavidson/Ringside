@@ -54,7 +54,7 @@ final class TitleLifecycleEligibility
             throw CannotBeReinstatedException::neverActivated($title);
         }
 
-        if ($title->isCurrentlyActive()) {
+        if ($title->currentActivityPeriod()->exists()) {
             throw CannotBeReinstatedException::active($title);
         }
 
@@ -65,7 +65,7 @@ final class TitleLifecycleEligibility
 
     private function ensureCanPull(Title $title): void
     {
-        if (! $title->isCurrentlyActive()) {
+        if (! $title->currentActivityPeriod()->exists()) {
             throw CannotBePulledException::notActive($title);
         }
 

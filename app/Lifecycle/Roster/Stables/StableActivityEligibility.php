@@ -81,7 +81,7 @@ final class StableActivityEligibility
             throw CannotBeDisbandedException::hasFutureActivation($stable);
         }
 
-        if (! $stable->isCurrentlyActive()) {
+        if (! $stable->currentActivityPeriod()->exists()) {
             throw CannotBeDisbandedException::disbanded($stable);
         }
 
@@ -100,7 +100,7 @@ final class StableActivityEligibility
             throw CannotBeReunitedException::neverActive($stable);
         }
 
-        if ($stable->isCurrentlyActive() || $stable->futureActivityPeriod()->exists()) {
+        if ($stable->currentActivityPeriod()->exists() || $stable->futureActivityPeriod()->exists()) {
             throw CannotBeReunitedException::currentlyActive($stable);
         }
 

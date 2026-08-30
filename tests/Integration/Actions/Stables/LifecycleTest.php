@@ -42,7 +42,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(EstablishAction::class)->handle($this->stable, $debutDate);
 
             $refreshedStable = freshModel($this->stable);
-            expect($refreshedStable->isCurrentlyActive())->toBeTrue();
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue();
             expect($refreshedStable->status)->toBe(StableStatus::Active);
 
             // Verify activity period is created
@@ -144,7 +144,7 @@ describe('Stable Activation Action Integration', function () {
 
             $refreshedStable = freshModel($this->activeStable);
 
-            expect($refreshedStable->isCurrentlyActive())->toBeTrue()
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue()
                 ->and(resolve(StableMembershipService::class)->currentMembers($refreshedStable)->getTotalMemberCount())->toBe($currentMemberCount);
         });
     });
@@ -161,7 +161,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(ReuniteAction::class)->handle($this->disbandedStable, $reuniteDate);
 
             $refreshedStable = freshModel($this->disbandedStable);
-            expect($refreshedStable->isCurrentlyActive())->toBeTrue();
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue();
             expect($refreshedStable->status)->toBe(StableStatus::Active);
 
             // Verify new activity period is created
@@ -236,7 +236,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(UnretireAction::class)->handle($this->retiredStable, $unretireDate);
 
             $refreshedStable = freshModel($this->retiredStable);
-            expect($refreshedStable->isCurrentlyActive())->toBeTrue();
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue();
             expect($refreshedStable->status)->toBe(StableStatus::Active);
 
             // Verify retirement is ended
@@ -309,7 +309,7 @@ describe('Stable Activation Action Integration', function () {
             // Debut
             $debutDate = Carbon::now()->subYear();
             resolve(EstablishAction::class)->handle($stable, $debutDate);
-            expect(freshModel($stable)->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
 
             // Disband
             $disbandDate = Carbon::now()->subMonths(6);
@@ -319,7 +319,7 @@ describe('Stable Activation Action Integration', function () {
             // Reunite
             $reuniteDate = Carbon::now()->subMonths(3);
             resolve(ReuniteAction::class)->handle($stable, $reuniteDate);
-            expect(freshModel($stable)->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
 
             // Retire
             $retireDate = Carbon::now()->subMonths(1);

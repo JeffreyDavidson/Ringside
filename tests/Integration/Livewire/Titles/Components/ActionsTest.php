@@ -69,7 +69,7 @@ describe('Title Debut Actions', function () {
         );
 
         // Verify the title status changed through the action
-        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->currentActivityPeriod()->exists())->toBeTrue();
     });
 
     it('handles debut for already active title', function () {
@@ -212,7 +212,7 @@ describe('Title Business Logic Integration', function () {
 
         // Debut the title
         $component->call('debut');
-        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->currentActivityPeriod()->exists())->toBeTrue();
 
         // Retire the title
         $component->call('retire');

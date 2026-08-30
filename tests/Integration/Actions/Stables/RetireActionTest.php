@@ -19,7 +19,7 @@ test('it retires an active stable at the current datetime by default', function 
     $stable = Stable::factory()->active()->create();
 
     // Verify stable is active before retirement
-    expect($stable->isCurrentlyActive())->toBeTrue();
+    expect($stable->currentActivityPeriod()->exists())->toBeTrue();
     expect($stable->isRetired())->toBeFalse();
 
     // Call the action
@@ -28,7 +28,7 @@ test('it retires an active stable at the current datetime by default', function 
     // Verify stable is retired after action
     $stable->refresh();
     expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires an active stable at a specific datetime', function () {
@@ -36,7 +36,7 @@ test('it retires an active stable at a specific datetime', function () {
     $datetime = now();
 
     // Verify stable is active before retirement
-    expect($stable->isCurrentlyActive())->toBeTrue();
+    expect($stable->currentActivityPeriod()->exists())->toBeTrue();
     expect($stable->isRetired())->toBeFalse();
 
     // Call the action
@@ -45,7 +45,7 @@ test('it retires an active stable at a specific datetime', function () {
     // Verify stable is retired after action
     $stable->refresh();
     expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it records a future retirement date while ending current operations now', function () {
@@ -87,7 +87,7 @@ test('it retires an inactive stable at the current datetime by default', functio
     $stable = Stable::factory()->inactive()->create();
 
     // Verify stable is inactive before retirement
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
     expect($stable->isRetired())->toBeFalse();
 
     // Call the action
@@ -96,7 +96,7 @@ test('it retires an inactive stable at the current datetime by default', functio
     // Verify stable is retired after action
     $stable->refresh();
     expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires an inactive stable at a specific datetime', function () {
@@ -104,7 +104,7 @@ test('it retires an inactive stable at a specific datetime', function () {
     $datetime = now();
 
     // Verify stable is inactive before retirement
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
     expect($stable->isRetired())->toBeFalse();
 
     // Call the action
@@ -113,7 +113,7 @@ test('it retires an inactive stable at a specific datetime', function () {
     // Verify stable is retired after action
     $stable->refresh();
     expect($stable->isRetired())->toBeTrue();
-    expect($stable->isCurrentlyActive())->toBeFalse();
+    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires the current tag teams and current wrestlers of a stable', function () {

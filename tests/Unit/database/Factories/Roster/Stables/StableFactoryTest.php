@@ -49,7 +49,7 @@ describe('StableFactory Unit Tests', function () {
             $stable = Stable::factory()->active()->create();
 
             // Assert
-            expect($stable->isCurrentlyActive())->toBeTrue();
+            expect($stable->currentActivityPeriod()->exists())->toBeTrue();
         });
 
         test('inactive state works correctly', function () {
@@ -57,7 +57,7 @@ describe('StableFactory Unit Tests', function () {
             $stable = Stable::factory()->inactive()->create();
 
             // Assert
-            expect($stable->isCurrentlyActive())->toBeFalse();
+            expect($stable->currentActivityPeriod()->exists())->toBeFalse();
         });
 
         test('retired state works correctly', function () {

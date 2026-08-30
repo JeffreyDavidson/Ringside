@@ -33,7 +33,7 @@ final class StableRestructuringEligibility
             throw CannotBeSplitException::retired($stable);
         }
 
-        if (! $stable->isCurrentlyActive()) {
+        if (! $stable->currentActivityPeriod()->exists()) {
             throw CannotBeSplitException::notActive($stable);
         }
 
@@ -70,11 +70,11 @@ final class StableRestructuringEligibility
             throw CannotBeMergedException::secondaryRetired($secondaryStable);
         }
 
-        if (! $primaryStable->isCurrentlyActive()) {
+        if (! $primaryStable->currentActivityPeriod()->exists()) {
             throw CannotBeMergedException::primaryNotActive($primaryStable);
         }
 
-        if (! $secondaryStable->isCurrentlyActive()) {
+        if (! $secondaryStable->currentActivityPeriod()->exists()) {
             throw CannotBeMergedException::secondaryNotActive($secondaryStable);
         }
     }

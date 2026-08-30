@@ -82,7 +82,7 @@ class AddTitlesToMatchAction
             ->get();
 
         if ($lockedTitles->count() !== $requestedTitles->count() || $lockedTitles->contains(
-            fn (Title $title): bool => ! $title->isCurrentlyActive()
+            fn (Title $title): bool => ! $title->currentActivityPeriod()->exists()
         )) {
             throw EntityNotAvailableException::forMatchAssignment('titles');
         }

@@ -24,7 +24,7 @@ final class TitleDeletionService
         DB::transaction(function () use ($title, $deletionDate): void {
             $lockedTitle = $title->refreshForUpdate();
 
-            if ($lockedTitle->isCurrentlyActive()) {
+            if ($lockedTitle->currentActivityPeriod()->exists()) {
                 $lockedTitle->activityPeriods()->whereNull('ended_at')->update(['ended_at' => $deletionDate]);
             } elseif ($lockedTitle->isRetired()) {
                 $lockedTitle->retirements()->whereNull('ended_at')->update(['ended_at' => $deletionDate]);

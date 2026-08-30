@@ -160,12 +160,12 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
                 'started_at' => now()->subWeek(),
                 'ended_at' => null,
             ]);
-            expect($model->isCurrentlyActive())->toBeTrue();
+            expect($model->currentActivityPeriod()->exists())->toBeTrue();
         });
 
         test('isCurrentlyActive returns false when model has no current period', function () {
             $model = $this->model;
-            expect($model->isCurrentlyActive())->toBeFalse();
+            expect($model->currentActivityPeriod()->exists())->toBeFalse();
         });
 
         test('future activity relationship exists when model has future period', function () {

@@ -105,7 +105,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be active (check after component execution)
-        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->currentActivityPeriod()->exists())->toBeTrue();
 
         // When: Pulling (deactivating) the title
         actingAs($admin);
@@ -116,7 +116,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be inactive
-        expect(freshModel($title)->isCurrentlyActive())->toBeFalse();
+        expect(freshModel($title)->currentActivityPeriod()->exists())->toBeFalse();
 
         // When: Reinstating the title
         actingAs($admin);
@@ -127,7 +127,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be active again
-        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->currentActivityPeriod()->exists())->toBeTrue();
 
         // When: Retiring the title
         actingAs($admin);
@@ -334,7 +334,7 @@ describe('Title Business Rules Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be active
-        expect(freshModel($title)->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($title)->currentActivityPeriod()->exists())->toBeTrue();
 
         // When: Now pulling the active title (should succeed)
         actingAs($admin);
@@ -344,6 +344,6 @@ describe('Title Business Rules Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Title should be inactive
-        expect(freshModel($title)->isCurrentlyActive())->toBeFalse();
+        expect(freshModel($title)->currentActivityPeriod()->exists())->toBeFalse();
     });
 });

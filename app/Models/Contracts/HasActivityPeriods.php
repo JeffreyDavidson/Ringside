@@ -20,13 +20,6 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 interface HasActivityPeriods
 {
     /**
-     * Check if the model is currently activated/active.
-     *
-     * @return bool True if the model has an active period without an end date
-     */
-    public function isCurrentlyActive(): bool;
-
-    /**
      * Get all activity periods for this model.
      *
      * @return MorphMany<ActivityPeriod, TDeclaringModel>
