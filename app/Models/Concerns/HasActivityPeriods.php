@@ -104,9 +104,4 @@ trait HasActivityPeriods
     {
         return $this->currentActivityPeriod()->exists();
     }
-
-    public function hasFutureActivity(): bool
-    {
-        return $this->futureActivityPeriod()->exists();
-    }
 }
