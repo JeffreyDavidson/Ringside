@@ -29,6 +29,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/{Actions/Matches,Services}/** | .ai/rules/matches-services.md |
 | app/{Actions,Models}/Matches/** | .ai/rules/matches.md |
 | database/migrations/** | .ai/rules/migrations.md |
+| app/{Models,Lifecycle}/** | .ai/rules/models-lifecycle.md |
 | app/{Models,Providers,Actions,Lifecycle}/** | .ai/rules/models-providers-actions-lifecycle.md |
 | app/{Models,ValueObjects,Casts}/** | .ai/rules/models-value-objects-casts.md |
 | app/Models/** | .ai/rules/models.md |

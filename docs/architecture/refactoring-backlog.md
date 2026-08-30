@@ -10,7 +10,7 @@ code demonstrates a repeated need for it.
 ### Model status API boundary
 
 **Priority:** High  
-**Status:** Audit complete; deliberate contract redesign required.
+**Status:** In progress; employment state reads are centralized in the resolver.
 
 Review `IsEmployable`, `IsInjurable`, `IsSuspendable`, `IsRetirable`, and
 `HasActivityPeriods`. Their relationships and current-state accessors are used
@@ -18,8 +18,8 @@ throughout Actions, Services, Livewire, Rules, and tests. Eligibility classes
 and status resolvers already own transition decisions, so removing predicates
 incrementally would create a breaking API without a clear replacement.
 
-Next step: design one status-read contract, migrate callers, then remove model
-predicates in a dedicated change.
+Next step: migrate callers to the resolver and relationship-backed state facts,
+then remove model predicates in a dedicated change.
 
 ### Lifecycle status consistency
 
