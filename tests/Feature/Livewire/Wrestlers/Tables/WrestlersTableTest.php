@@ -44,7 +44,7 @@ describe('Main Component Feature Workflows', function () {
                 ->assertSessionMissing('error');
 
             // Verify workflow completed successfully
-            expect(freshModel($wrestler)->isEmployed())->toBeTrue();
+            expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
         });
 
         test('complete wrestler release workflow', function () {

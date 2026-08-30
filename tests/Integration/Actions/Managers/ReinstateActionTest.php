@@ -16,13 +16,13 @@ test('it reinstates a suspended manager', function () {
     $manager = Manager::factory()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isSuspended())->toBeFalse();
-    expect($manager->isEmployed())->toBeTrue(); // Should remain employed after reinstatement
+    expect($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed after reinstatement
 
     // Verify suspension record was ended
     $this->assertDatabaseHas('suspensions', [
@@ -122,7 +122,7 @@ test('it maintains employment status during reinstatement', function () {
     $manager = Manager::factory()->suspended()->create();
     $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
     expect($manager->isSuspended())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($manager);
@@ -130,7 +130,7 @@ test('it maintains employment status during reinstatement', function () {
     $manager->refresh();
 
     // Should maintain employment while ending suspension
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
 
     // Employment record should remain unchanged

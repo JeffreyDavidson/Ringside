@@ -16,7 +16,7 @@ beforeEach(function () {
 test('it soft deletes an unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
     expect($wrestler->trashed())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($wrestler);
@@ -153,7 +153,7 @@ test('it closes lifecycle periods and applies relationship cascades', function (
         'fired_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
     expect($wrestler->currentManagers)->toHaveCount(1);
 
     resolve(DeleteAction::class)->handle($wrestler);
@@ -252,7 +252,7 @@ test('it handles wrestler with no active relationships', function () {
         'ended_at' => now()->subDays(80),
     ]);
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
     expect($wrestler->isRetired())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($wrestler);

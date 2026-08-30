@@ -64,7 +64,7 @@ test('it updates manager and creates employment when employment date is provided
     $result = resolve(UpdateAction::class)->handle($manager, $updateData);
 
     expect($result->last_name)->toBe('Updated');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('managers', [
         'id' => $manager->id,
@@ -85,7 +85,7 @@ test('it updates manager without affecting existing employment', function () {
         'last_name' => 'Manager',
     ]);
 
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     $updateData = new ManagerData('Still', 'Employed', null);
 
@@ -93,7 +93,7 @@ test('it updates manager without affecting existing employment', function () {
 
     expect($result->first_name)->toBe('Still');
     expect($result->last_name)->toBe('Employed');
-    expect($result->isEmployed())->toBeTrue(); // Should still be employed
+    expect($result->currentEmployment()->exists())->toBeTrue(); // Should still be employed
 
     $this->assertDatabaseHas('managers', [
         'id' => $manager->id,

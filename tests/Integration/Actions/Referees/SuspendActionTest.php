@@ -15,7 +15,7 @@ beforeEach(function () {
 test('it suspends an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isSuspended())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($referee);
@@ -78,7 +78,7 @@ test('it validates referee can be suspended', function () {
 test('it throws exception when referee cannot be suspended', function () {
     $referee = Referee::factory()->create(); // Not employed
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(SuspendAction::class)->handle($referee))
         ->toThrow(CannotBeSuspendedException::class);
@@ -87,7 +87,7 @@ test('it throws exception when referee cannot be suspended', function () {
 test('it prevents suspending an injured referee', function () {
     $referee = Referee::factory()->injured()->create();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(SuspendAction::class)->handle($referee))
         ->toThrow(CannotBeSuspendedException::class);
@@ -96,14 +96,14 @@ test('it prevents suspending an injured referee', function () {
 
     expect($referee->isInjured())->toBeTrue()
         ->and($referee->isSuspended())->toBeFalse()
-        ->and($referee->isEmployed())->toBeTrue();
+        ->and($referee->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it maintains referee employment after suspension', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
     resolve(SuspendAction::class)->handle($referee);
 
@@ -111,7 +111,7 @@ test('it maintains referee employment after suspension', function () {
     $employment->refresh();
 
     // Should remain employed after suspension
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isSuspended())->toBeTrue();
     expect($employment->ended_at)->toBeNull();
 });

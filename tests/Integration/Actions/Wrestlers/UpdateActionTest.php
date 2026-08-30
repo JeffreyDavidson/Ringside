@@ -85,7 +85,7 @@ test('it updates wrestler and employs them when employment date provided', funct
     $wrestler = Wrestler::factory()->create();
     $employmentDate = now();
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     $updateData = new WrestlerData(
         name: 'John Cena',
@@ -101,7 +101,7 @@ test('it updates wrestler and employs them when employment date provided', funct
 
     $result->refresh();
     expect($result->name)->toBe('John Cena');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created via EmployAction
     $this->assertDatabaseHas('employments', [
@@ -114,7 +114,7 @@ test('it updates wrestler and employs them when employment date provided', funct
 test('it updates wrestler without employing when no employment date', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     $updateData = new WrestlerData(
         name: 'The Rock',
@@ -130,7 +130,7 @@ test('it updates wrestler without employing when no employment date', function (
 
     $result->refresh();
     expect($result->name)->toBe('The Rock');
-    expect($result->isEmployed())->toBeFalse();
+    expect($result->currentEmployment()->exists())->toBeFalse();
 
     // Verify no employment record was created
     $this->assertDatabaseMissing('employments', [
@@ -142,7 +142,7 @@ test('it does not re-employ already employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
     $originalEmployment = $wrestler->currentEmployment()->firstOrFail();
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     $updateData = new WrestlerData(
         name: 'Updated Name',
@@ -158,7 +158,7 @@ test('it does not re-employ already employed wrestler', function () {
 
     $result->refresh();
     expect($result->name)->toBe('Updated Name');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     // Should still have only the original employment record
     expect($result->employments()->count())->toBe(1);
@@ -174,9 +174,9 @@ test('it employs managers when wrestler gets employed', function () {
     $wrestler->managers()->attach($manager1->id, ['hired_at' => now()->subDays(5)]);
     $wrestler->managers()->attach($manager2->id, ['hired_at' => now()->subDays(3)]);
 
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($manager1->isEmployed())->toBeFalse();
-    expect($manager2->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
+    expect($manager1->currentEmployment()->exists())->toBeFalse();
+    expect($manager2->currentEmployment()->exists())->toBeTrue();
 
     $employmentDate = now();
     $updateData = new WrestlerData(
@@ -195,9 +195,9 @@ test('it employs managers when wrestler gets employed', function () {
     $manager1->refresh();
     $manager2->refresh();
 
-    expect($result->isEmployed())->toBeTrue();
-    expect($manager1->isEmployed())->toBeTrue(); // Should now be employed via cascade
-    expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
+    expect($result->currentEmployment()->exists())->toBeTrue();
+    expect($manager1->currentEmployment()->exists())->toBeTrue(); // Should now be employed via cascade
+    expect($manager2->currentEmployment()->exists())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
     $this->assertDatabaseHas('employments', [
@@ -229,7 +229,7 @@ test('it uses the provided employment date', function () {
     $result = resolve(UpdateAction::class)->handle($wrestler, $updateData);
 
     $result->refresh();
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     // The provided employment date should be persisted
     $this->assertDatabaseHas('employments', [

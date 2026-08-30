@@ -229,8 +229,8 @@ test('it employs newly assigned members when the tag team is employed', function
         managers: new Collection([$newManager]),
     ));
 
-    expect($newWrestler->isEmployed())->toBeTrue()
-        ->and($newManager->isEmployed())->toBeTrue()
+    expect($newWrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($newManager->currentEmployment()->exists())->toBeTrue()
         ->and($this->tagTeam->currentWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeFalse()
         ->and($this->tagTeam->previousWrestlers()->whereKey($this->wrestlerB->id)->exists())->toBeTrue();
 });

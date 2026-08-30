@@ -37,7 +37,7 @@ final class TagTeamRetirementService
 
             $this->eligibility->ensureCanRetire($lockedTagTeam);
 
-            if ($lockedTagTeam->isEmployed()) {
+            if ($lockedTagTeam->currentEmployment()->exists()) {
                 $this->employmentPeriods->end($lockedTagTeam, $retirementDate);
             }
 

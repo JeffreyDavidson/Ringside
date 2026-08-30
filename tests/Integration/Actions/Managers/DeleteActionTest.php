@@ -17,7 +17,7 @@ beforeEach(function () {
 test('it soft deletes an unemployed manager', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($manager);
 
@@ -56,7 +56,7 @@ test('it rejects deleting an already deleted manager', function () {
 test('it soft deletes an employed manager and ends employment', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     $deletionDate = now();
     resolve(DeleteAction::class)->handle($manager, $deletionDate);

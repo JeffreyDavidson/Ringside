@@ -16,7 +16,7 @@ test('it retires an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isRetired())->toBeFalse();
 
     resolve(RetireAction::class)->handle($referee);
@@ -25,7 +25,7 @@ test('it retires an employed referee', function () {
     $employment->refresh();
 
     expect($referee->isRetired())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
     expect($employment->ended_at)->not->toBeNull();
 
     $this->assertDatabaseHas('retirements', [
@@ -89,7 +89,7 @@ test('it validates referee can be retired', function () {
 test('it throws exception when referee cannot be retired', function () {
     $referee = Referee::factory()->create(); // Not employed
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(RetireAction::class)->handle($referee))
         ->toThrow(CannotBeRetiredException::class);

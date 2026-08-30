@@ -91,7 +91,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($unemployedReferee)->isEmployed())->toBeTrue();
+            expect(freshModel($unemployedReferee)->currentEmployment()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Referee successfully employed.');
             expect(true)->toBeTrue();
         });
@@ -346,7 +346,7 @@ describe('RefereesActions Integration Tests', function () {
 
             // Employ
             $component->call('employ');
-            expect(freshModel($referee)->isEmployed())->toBeTrue();
+            expect(freshModel($referee)->currentEmployment()->exists())->toBeTrue();
 
             // Injure (referee injury during match)
             $component->call('injure');
@@ -371,7 +371,7 @@ describe('RefereesActions Integration Tests', function () {
             // Comeback
             $component->call('unretire');
             expect(freshModel($referee)->isRetired())->toBeFalse();
-            expect(freshModel($referee)->isEmployed())->toBeTrue();
+            expect(freshModel($referee)->currentEmployment()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
@@ -385,7 +385,7 @@ describe('RefereesActions Integration Tests', function () {
             $component = livewire(Actions::class, ['referee' => $injuredReferee]);
 
             // Referee is employed but injured (not available for matches)
-            expect($injuredReferee->isEmployed())->toBeTrue();
+            expect($injuredReferee->currentEmployment()->exists())->toBeTrue();
             expect($injuredReferee->isInjured())->toBeTrue();
 
             // Cannot suspend injured referee without injury clearance first
@@ -412,7 +412,7 @@ describe('RefereesActions Integration Tests', function () {
             $component = livewire(Actions::class, ['referee' => $suspendedReferee]);
 
             // Suspended referee still employed but cannot officiate
-            expect($suspendedReferee->isEmployed())->toBeTrue();
+            expect($suspendedReferee->currentEmployment()->exists())->toBeTrue();
             expect($suspendedReferee->isSuspended())->toBeTrue();
 
             // Cannot retire while suspended (must be reinstated first)

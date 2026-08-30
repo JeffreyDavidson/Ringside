@@ -26,7 +26,7 @@ test('it employs unemployed current wrestlers', function () {
     foreach ($wrestlers as $wrestler) {
         $wrestler->refresh();
 
-        expect($wrestler->isEmployed())->toBeTrue();
+        expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
         $this->assertDatabaseHas('employments', [
             'employable_id' => $wrestler->id,
@@ -37,6 +37,6 @@ test('it employs unemployed current wrestlers', function () {
 
     $futureWrestler->refresh();
 
-    expect($futureWrestler->isEmployed())->toBeFalse()
+    expect($futureWrestler->currentEmployment()->exists())->toBeFalse()
         ->and($futureWrestler->futureEmployment()->exists())->toBeTrue();
 });

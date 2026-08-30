@@ -15,7 +15,7 @@ beforeEach(function () {
 test('it soft deletes an unemployed referee', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
     expect($referee->trashed())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($referee);
@@ -71,7 +71,7 @@ test('it ends employment before deletion', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($employment->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);

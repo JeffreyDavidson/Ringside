@@ -35,7 +35,7 @@ class UnretireAction
                     $this->unretireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
                 }
 
-                if ($employImmediately && ! $lockedTagTeam->isEmployed() && $lockedTagTeam->currentWrestlers()->exists()) {
+                if ($employImmediately && ! $lockedTagTeam->currentEmployment()->exists() && $lockedTagTeam->currentWrestlers()->exists()) {
                     $this->employ->handle($lockedTagTeam, $effectiveDate);
                 }
             },

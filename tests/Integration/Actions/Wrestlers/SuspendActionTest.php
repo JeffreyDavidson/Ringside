@@ -15,14 +15,14 @@ beforeEach(function () {
 test('it suspends an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isSuspended())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -117,7 +117,7 @@ test('it handles multiple suspension scenarios', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($wrestler);
@@ -163,7 +163,7 @@ test('it prevents suspending retired wrestler', function () {
 test('it prevents suspending unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create(); // Unemployed by default
 
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -177,7 +177,7 @@ test('it prevents suspending an injured wrestler', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
     expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
@@ -187,5 +187,5 @@ test('it prevents suspending an injured wrestler', function () {
 
     expect($wrestler->isInjured())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 });

@@ -103,7 +103,7 @@ test('it handles database transactions correctly', function () {
 test('it maintains employment status during injury clearance', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
     expect($manager->isInjured())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($manager);
@@ -111,7 +111,7 @@ test('it maintains employment status during injury clearance', function () {
     $manager->refresh();
 
     // Should maintain employment while ending injury
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
     expect($manager->isInjured())->toBeFalse();
 
     // Employment record should remain unchanged

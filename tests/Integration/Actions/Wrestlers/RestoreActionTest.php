@@ -92,13 +92,13 @@ test('it restores wrestler without automatically restoring relationships', funct
     $wrestler->delete(); // Soft delete
 
     expect($wrestler->trashed())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     resolve(RestoreAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse(); // Should remain unemployed
+    expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Should remain unemployed
 
     // Verify wrestler is restored but relationships remain ended
     $this->assertDatabaseHas('wrestlers', [
@@ -198,7 +198,7 @@ test('it restores wrestler with complex status history', function () {
     expect($wrestler->suspensions()->count())->toBe(1);
 
     // Wrestler should be in clean unemployed state
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
     expect($wrestler->isRetired())->toBeFalse();
     expect($wrestler->isSuspended())->toBeFalse();
     expect($wrestler->isInjured())->toBeFalse();
@@ -215,7 +215,7 @@ test('it allows wrestler to be re-employed after restoration', function () {
 
     $wrestler->refresh();
     expect($wrestler->trashed())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     // After restoration, wrestler can be employed again using EmployAction
     // This test verifies the wrestler is in a valid state for future employment

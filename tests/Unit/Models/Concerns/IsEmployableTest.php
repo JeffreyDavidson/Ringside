@@ -105,13 +105,13 @@ describe('IsEmployable Trait Unit Tests', function () {
             $model = new EmploymentStateModel();
             $model->currentEmploymentExists = true;
 
-            expect($model->isEmployed())->toBeTrue();
+            expect($model->currentEmployment()->exists())->toBeTrue();
         });
 
         test('can check if model is not employed', function () {
             $model = new EmploymentStateModel();
 
-            expect($model->isEmployed())->toBeFalse();
+            expect($model->currentEmployment()->exists())->toBeFalse();
         });
 
         test('can check if model has future employment through its relationship', function () {

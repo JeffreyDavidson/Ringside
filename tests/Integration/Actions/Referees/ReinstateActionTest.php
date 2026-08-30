@@ -106,7 +106,7 @@ test('it maintains referee employment after reinstatement', function () {
     $referee = Referee::factory()->suspended()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isSuspended())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($referee);
@@ -115,7 +115,7 @@ test('it maintains referee employment after reinstatement', function () {
     $employment->refresh();
 
     // Should remain employed after reinstatement
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isSuspended())->toBeFalse();
     expect($employment->ended_at)->toBeNull();
 });

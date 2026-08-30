@@ -186,8 +186,8 @@ test('it employs the tag team and its founding members', function () {
         managers: new Collection([$manager]),
     ));
 
-    expect($tagTeam->isEmployed())->toBeTrue()
-        ->and($wrestlerA->isEmployed())->toBeTrue()
-        ->and($wrestlerB->isEmployed())->toBeTrue()
-        ->and($manager->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestlerA->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestlerB->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 });

@@ -47,7 +47,7 @@ class UpdateAction
             );
 
             if ($tagTeamData->employment_date) {
-                if (! $lockedTagTeam->isEmployed()) {
+                if (! $lockedTagTeam->currentEmployment()->exists()) {
                     $this->employAction->handle($lockedTagTeam, $tagTeamData->employment_date);
                 } else {
                     $this->employCurrentWrestlersAction->handle($lockedTagTeam, $tagTeamData->employment_date);

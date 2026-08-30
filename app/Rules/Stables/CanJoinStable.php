@@ -70,7 +70,7 @@ class CanJoinStable implements ValidationRule
             return;
         }
 
-        if (! $member->isEmployed()) {
+        if (! $member->currentEmployment()->exists()) {
             $fail('This member is not employed and cannot join the stable.');
 
             return;

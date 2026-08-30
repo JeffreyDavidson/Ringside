@@ -29,7 +29,7 @@ test('it soft deletes a tag team', function () {
 test('it deletes unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($tagTeam);
 
@@ -40,7 +40,7 @@ test('it deletes unemployed tag team', function () {
 test('it prevents deleting employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
         ->toThrow(CannotBeDeletedException::class);
@@ -141,7 +141,7 @@ test('it uses appropriate business rules for deletion', function () {
     $tagTeam = TagTeam::factory()->create();
 
     // Tag team should be in a state that allows deletion
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->isRetired())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 

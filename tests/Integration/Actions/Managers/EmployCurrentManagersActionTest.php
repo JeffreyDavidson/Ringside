@@ -33,9 +33,9 @@ test('it employs unemployed managers for each manageable roster type', function 
     $tagTeamManager->refresh();
     $futureManager->refresh();
 
-    expect($wrestlerManager->isEmployed())->toBeTrue()
-        ->and($tagTeamManager->isEmployed())->toBeTrue()
-        ->and($futureManager->isEmployed())->toBeFalse()
+    expect($wrestlerManager->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeamManager->currentEmployment()->exists())->toBeTrue()
+        ->and($futureManager->currentEmployment()->exists())->toBeFalse()
         ->and($futureManager->futureEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('employments', [

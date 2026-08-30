@@ -16,13 +16,14 @@ use Illuminate\Support\Carbon;
  */
 class CanChangeEmploymentDate implements ValidationRule
 {
-    public function __construct(private ?Model $model) {}
+    /**
+     * @param  (Model&Employable<*>)|null  $model
+     */
+    public function __construct(private readonly (Model&Employable)|null $model) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $model = $this->model;
-
-        if (! $model || ! method_exists($model, 'isEmployed')) {
+        if ($this->model === null) {
             return;
         }
 
@@ -34,16 +35,12 @@ class CanChangeEmploymentDate implements ValidationRule
 
         $targetDate = Carbon::parse($value);
 
-        if (! $model->isEmployed()) {
+        if (! $this->model->currentEmployment()->exists()) {
             return;
         }
 
-        $isEmployedOnTargetDate = $model instanceof Employable
-            ? $model->employedOn($targetDate)
-            : (method_exists($model, 'employedOn') ? $model->employedOn($targetDate) : true);
-
-        if (! $isEmployedOnTargetDate) {
-            $modelName = $this->getModelName($model);
+        if (! $this->model->employedOn($targetDate)) {
+            $modelName = $this->getModelName($this->model);
             $fail("The employment date cannot be changed while {$modelName} is currently employed.");
         }
     }

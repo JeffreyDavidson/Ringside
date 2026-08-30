@@ -25,7 +25,7 @@ final class DeletionPeriodCloser
      */
     public function close(Model&Employable&Injurable&Retirable&Suspendable $subject, Carbon $date): void
     {
-        if ($subject->isEmployed()) {
+        if ($subject->currentEmployment()->exists()) {
             $this->employmentPeriods->end($subject, $date);
         }
 

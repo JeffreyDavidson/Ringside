@@ -19,7 +19,7 @@ class EmployCurrentManagersAction
     {
         $managers = $manageable->currentManagers()
             ->get()
-            ->filter(fn (Manager $manager): bool => ! $manager->isEmployed() && ! $manager->futureEmployment()->exists());
+            ->filter(fn (Manager $manager): bool => ! $manager->currentEmployment()->exists() && ! $manager->futureEmployment()->exists());
 
         foreach ($managers as $manager) {
             $this->employManager->handle($manager, $employmentDate);

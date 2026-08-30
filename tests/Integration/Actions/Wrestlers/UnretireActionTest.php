@@ -16,13 +16,13 @@ test('it unretires a retired wrestler with employment', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     expect($wrestler->isRetired())->toBeTrue();
-    expect($wrestler->isEmployed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeTrue(); // Should be employed by default
+    expect($wrestler->currentEmployment()->exists())->toBeTrue(); // Should be employed by default
 
     // Verify retirement record was ended
     $this->assertDatabaseHas('retirements', [
@@ -48,7 +48,7 @@ test('it unretires wrestler without immediate employment', function () {
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeFalse(); // Should remain unemployed
+    expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Should remain unemployed
 
     // Verify retirement record was ended
     $this->assertDatabaseHas('retirements', [
@@ -72,7 +72,7 @@ test('it unretires wrestler with specific date', function () {
 
     $wrestler->refresh();
     expect($wrestler->isRetired())->toBeFalse();
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement was ended with specific date
     $this->assertDatabaseHas('retirements', [
@@ -123,8 +123,8 @@ test('it employs unemployed managers when wrestler is employed', function () {
     $wrestler->managers()->attach($manager2->id, ['hired_at' => now()->subDays(5)]);
 
     expect($wrestler->isRetired())->toBeTrue();
-    expect($manager1->isEmployed())->toBeFalse();
-    expect($manager2->isEmployed())->toBeTrue();
+    expect($manager1->currentEmployment()->exists())->toBeFalse();
+    expect($manager2->currentEmployment()->exists())->toBeTrue();
 
     resolve(UnretireAction::class)->handle($wrestler); // employImmediately defaults to true
 
@@ -132,9 +132,9 @@ test('it employs unemployed managers when wrestler is employed', function () {
     $manager1->refresh();
     $manager2->refresh();
 
-    expect($wrestler->isEmployed())->toBeTrue();
-    expect($manager1->isEmployed())->toBeTrue(); // Should now be employed via cascade
-    expect($manager2->isEmployed())->toBeTrue(); // Should remain employed
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
+    expect($manager1->currentEmployment()->exists())->toBeTrue(); // Should now be employed via cascade
+    expect($manager2->currentEmployment()->exists())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
     $this->assertDatabaseHas('employments', [
@@ -155,15 +155,15 @@ test('it does not employ managers when wrestler is not employed immediately', fu
     $wrestler->managers()->attach($manager->id, ['hired_at' => now()->subDays(5)]);
 
     expect($wrestler->isRetired())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($wrestler, null, false); // employImmediately = false
 
     $wrestler->refresh();
     $manager->refresh();
 
-    expect($wrestler->isEmployed())->toBeFalse();
-    expect($manager->isEmployed())->toBeFalse(); // Should remain unemployed
+    expect($wrestler->currentEmployment()->exists())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeFalse(); // Should remain unemployed
 
     // No employment records should be created
     $this->assertDatabaseMissing('employments', [

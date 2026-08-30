@@ -33,8 +33,6 @@ interface Employable
      */
     public function futureEmployment(): MorphOne;
 
-    public function isEmployed(): bool;
-
     public function isReleased(): bool;
 
     public function employedOn(DateTimeInterface $date): bool;

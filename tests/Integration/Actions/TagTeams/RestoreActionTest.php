@@ -134,7 +134,7 @@ test('it restores tag team to unemployed state', function () {
     $tagTeam = TagTeam::factory()->create();
 
     // Ensure tag team starts unemployed
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->isRetired())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 
@@ -148,7 +148,7 @@ test('it restores tag team to unemployed state', function () {
     expect($tagTeam->trashed())->toBeFalse();
 
     // Should remain in unemployed state
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->isRetired())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 });
@@ -186,7 +186,7 @@ test('it handles restoration with complex historical status', function () {
     expect($tagTeam->retirements()->count())->toBe(1);
 
     // Should be in unemployed state (no active records)
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->isRetired())->toBeFalse();
 });
 

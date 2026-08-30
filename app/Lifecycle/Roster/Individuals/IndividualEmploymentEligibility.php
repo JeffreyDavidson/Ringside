@@ -25,7 +25,7 @@ final class IndividualEmploymentEligibility
 
     public function ensureCanEmploy(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->isEmployed()) {
+        if ($individual->currentEmployment()->exists()) {
             throw CannotBeEmployedException::employed($individual);
         }
 

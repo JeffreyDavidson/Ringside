@@ -49,7 +49,7 @@ test('it creates a referee with employment when employment date is provided', fu
 
     expect($result->first_name)->toBe('Mike');
     expect($result->last_name)->toBe('Chioda');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('referees', [
         'first_name' => 'Mike',
@@ -105,7 +105,7 @@ test('it handles employment creation through EmployAction dependency injection',
     $result = resolve(CreateAction::class)->handle($data);
 
     // Verify the referee was created and employed using the correct architectural pattern
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
     expect($result->currentEmployment()->exists())->toBeTrue();
 
     $employment = $result->currentEmployment()->firstOrFail();

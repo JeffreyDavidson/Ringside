@@ -91,7 +91,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($unemployedManager)->isEmployed())->toBeTrue();
+            expect(freshModel($unemployedManager)->currentEmployment()->exists())->toBeTrue();
             // Session message verified in unit tests
             expect(true)->toBeTrue();
         });
@@ -346,7 +346,7 @@ describe('ManagersActions Integration Tests', function () {
 
             // Employ
             $component->call('employ');
-            expect(freshModel($manager)->isEmployed())->toBeTrue();
+            expect(freshModel($manager)->currentEmployment()->exists())->toBeTrue();
 
             // Injure (managers can get injured backstage, traveling, etc.)
             $component->call('injure');
@@ -371,7 +371,7 @@ describe('ManagersActions Integration Tests', function () {
             // Comeback
             $component->call('unretire');
             expect(freshModel($manager)->isRetired())->toBeFalse();
-            expect(freshModel($manager)->isEmployed())->toBeTrue();
+            expect(freshModel($manager)->currentEmployment()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
@@ -385,7 +385,7 @@ describe('ManagersActions Integration Tests', function () {
             $component = livewire(Actions::class, ['manager' => $injuredManager]);
 
             // Manager is employed but injured
-            expect($injuredManager->isEmployed())->toBeTrue();
+            expect($injuredManager->currentEmployment()->exists())->toBeTrue();
             expect($injuredManager->isInjured())->toBeTrue();
 
             // Cannot suspend injured manager without injury clearance first
@@ -411,7 +411,7 @@ describe('ManagersActions Integration Tests', function () {
             $component = livewire(Actions::class, ['manager' => $suspendedManager]);
 
             // Suspended manager still employed but cannot perform duties
-            expect($suspendedManager->isEmployed())->toBeTrue();
+            expect($suspendedManager->currentEmployment()->exists())->toBeTrue();
             expect($suspendedManager->isSuspended())->toBeTrue();
 
             // Cannot retire while suspended (must be reinstated first)

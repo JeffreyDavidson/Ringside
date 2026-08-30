@@ -150,12 +150,12 @@ test('it works with employed injured wrestler', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue();
     expect($wrestler->isInjured())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isEmployed())->toBeTrue(); // Should remain employed
+    expect($wrestler->currentEmployment()->exists())->toBeTrue(); // Should remain employed
     expect($wrestler->isInjured())->toBeFalse(); // Should no longer be injured
 });

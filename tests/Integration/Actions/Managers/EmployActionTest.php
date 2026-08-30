@@ -15,12 +15,12 @@ beforeEach(function () {
 test('it employs an unemployed manager', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeFalse();
 
     resolve(EmployAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('employments', [
         'employable_id' => $manager->id,
@@ -36,7 +36,7 @@ test('it employs manager with specific employment date', function () {
     resolve(EmployAction::class)->handle($manager, $employmentDate);
 
     $manager->refresh();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('employments', [
         'employable_id' => $manager->id,
@@ -50,7 +50,7 @@ test('it rejects employing a retired manager without changing retirement', funct
     $retirement = $manager->currentRetirement()->firstOrFail();
 
     expect($manager->isRetired())->toBeTrue();
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(EmployAction::class)->handle($manager))
         ->toThrow(CannotBeEmployedException::class);
@@ -58,7 +58,7 @@ test('it rejects employing a retired manager without changing retirement', funct
     $manager->refresh();
     $retirement->refresh();
 
-    expect($manager->isEmployed())->toBeFalse()
+    expect($manager->currentEmployment()->exists())->toBeFalse()
         ->and($manager->isRetired())->toBeTrue()
         ->and($retirement->ended_at)->toBeNull();
 
@@ -72,7 +72,7 @@ test('it employs suspended manager and ends suspension', function () {
     $manager = Manager::factory()->suspended()->create();
 
     expect($manager->isSuspended())->toBeTrue();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($manager))
         ->toThrow(Exception::class);
@@ -82,7 +82,7 @@ test('it employs injured manager and ends injury', function () {
     $manager = Manager::factory()->injured()->create();
 
     expect($manager->isInjured())->toBeTrue();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($manager))
         ->toThrow(Exception::class);
@@ -91,7 +91,7 @@ test('it employs injured manager and ends injury', function () {
 test('it prevents employing already employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($manager))
         ->toThrow(Exception::class);
@@ -100,13 +100,13 @@ test('it prevents employing already employed manager', function () {
 test('it handles database transactions correctly', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->isEmployed())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeFalse();
 
     resolve(EmployAction::class)->handle($manager);
 
     // Verify the transaction was successful
     $manager->refresh();
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
     expect($manager->status->value)->toBe('employed');
 
     // Verify employment record integrity
@@ -123,7 +123,7 @@ test('it persists the employment lifecycle', function () {
     $manager->refresh();
 
     // Should properly update both employment record and status field
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
     expect($manager->status->value)->toBe('employed');
 
     // Should create proper employment record

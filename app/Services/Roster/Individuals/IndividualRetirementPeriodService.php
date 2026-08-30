@@ -25,7 +25,7 @@ final class IndividualRetirementPeriodService
 
     public function start(Wrestler|Manager|Referee $individual, Carbon $retirementDate): void
     {
-        if ($individual->isEmployed()) {
+        if ($individual->currentEmployment()->exists()) {
             $this->employmentPeriods->end($individual, $retirementDate);
         }
 
