@@ -38,5 +38,5 @@ test('it employs unemployed current wrestlers', function () {
     $futureWrestler->refresh();
 
     expect($futureWrestler->isEmployed())->toBeFalse()
-        ->and($futureWrestler->hasFutureEmployment())->toBeTrue();
+        ->and($futureWrestler->futureEmployment()->exists())->toBeTrue();
 });

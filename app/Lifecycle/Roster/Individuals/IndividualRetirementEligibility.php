@@ -30,7 +30,7 @@ final class IndividualRetirementEligibility
             throw CannotBeRetiredException::unemployed($individual);
         }
 
-        if ($individual->hasFutureEmployment()) {
+        if ($individual->futureEmployment()->exists()) {
             throw CannotBeRetiredException::hasFutureEmployment($individual);
         }
 

@@ -25,7 +25,7 @@ final class IndividualInjuryEligibility
 
     public function ensureCanInjure(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->hasNoCurrentOrFutureEmployment()) {
+        if (! $individual->currentEmployment()->exists() && ! $individual->futureEmployment()->exists()) {
             throw CannotBeInjuredException::unemployed($individual);
         }
 
@@ -33,7 +33,7 @@ final class IndividualInjuryEligibility
             throw CannotBeInjuredException::retired($individual);
         }
 
-        if ($individual->hasFutureEmployment()) {
+        if ($individual->futureEmployment()->exists()) {
             throw CannotBeInjuredException::hasFutureEmployment($individual);
         }
 
