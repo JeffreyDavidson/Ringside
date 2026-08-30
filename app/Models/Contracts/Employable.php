@@ -28,6 +28,11 @@ interface Employable
      */
     public function currentEmployment(): MorphOne;
 
+    /**
+     * @return MorphOne<Employment, TModel>
+     */
+    public function futureEmployment(): MorphOne;
+
     public function isEmployed(): bool;
 
     public function isReleased(): bool;
