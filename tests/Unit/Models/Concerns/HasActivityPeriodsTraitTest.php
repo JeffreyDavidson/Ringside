@@ -140,18 +140,18 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
     });
 
     describe('status checking methods', function () {
-        test('hasActivityPeriods returns true when model has periods', function () {
+        test('activity periods relationship exists when model has periods', function () {
             $model = $this->model;
             ActivityPeriod::factory()->for($model, 'activeable')->create([
                 'started_at' => now()->subWeek(),
                 'ended_at' => null,
             ]);
-            expect($model->hasActivityPeriods())->toBeTrue();
+            expect($model->activityPeriods()->exists())->toBeTrue();
         });
 
-        test('hasActivityPeriods returns false when model has no periods', function () {
+        test('activity periods relationship is empty when model has no periods', function () {
             $model = $this->model;
-            expect($model->hasActivityPeriods())->toBeFalse();
+            expect($model->activityPeriods()->exists())->toBeFalse();
         });
 
         test('isCurrentlyActive returns true when model has current period', function () {

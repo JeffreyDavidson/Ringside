@@ -31,7 +31,7 @@ final class TitleRetirementService
             $lockedTitle = $this->lock($title);
             $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Retire);
 
-            if ($lockedTitle->hasActivityPeriods() && $lockedTitle->isCurrentlyActive()) {
+            if ($lockedTitle->activityPeriods()->exists() && $lockedTitle->isCurrentlyActive()) {
                 $this->endActivityPeriod->handle($lockedTitle, $operationalDate);
             }
 
