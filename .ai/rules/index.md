@@ -21,6 +21,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Exceptions/** | .ai/rules/exceptions.md |
 | tests/Feature/** | .ai/rules/feature.md |
 | tests/Integration/** | .ai/rules/integration.md |
+| app/Lifecycle/** | .ai/rules/lifecycle.md |
 | app/{Livewire,Actions,Lifecycle}/Matches/** | .ai/rules/livewire-actions-lifecycle-matches.md |
 | app/{Livewire,Actions}/Matches/** | .ai/rules/livewire-actions-matches.md |
 | app/Livewire/** | .ai/rules/livewire.md |
