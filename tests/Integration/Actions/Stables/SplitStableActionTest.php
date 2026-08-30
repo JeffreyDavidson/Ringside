@@ -80,7 +80,7 @@ describe('SplitStableAction Integration Tests', function () {
             // Verify new stable was created
             expect($newStable)->toBeInstanceOf(Stable::class);
             expect($newStable->name)->toBe($this->newStableName);
-            expect($newStable->isCurrentlyActive())->toBeTrue();
+            expect($newStable->currentActivityPeriod()->exists())->toBeTrue();
 
             // Verify new stable has transferred members
             expect($newStable->currentWrestlers()->count())->toBe($this->transferWrestlers->count());
@@ -397,7 +397,7 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify new stable has correct properties
             expect($newStable->name)->toBe($this->newStableName);
-            expect($newStable->isCurrentlyActive())->toBeTrue();
+            expect($newStable->currentActivityPeriod()->exists())->toBeTrue();
             expect($newStable->activityPeriods()->count())->toBe(1);
 
             // Verify activity period has correct start date
@@ -574,7 +574,7 @@ describe('SplitStableAction Integration Tests', function () {
             );
 
             // Verify new stable is active
-            expect($newStable->isCurrentlyActive())->toBeTrue();
+            expect($newStable->currentActivityPeriod()->exists())->toBeTrue();
 
             // Verify original stable status is appropriate
             $refreshedOriginal = freshModel($this->originalStable);
@@ -583,7 +583,7 @@ describe('SplitStableAction Integration Tests', function () {
             $totalRemainingMembers = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();
 
             if ($totalRemainingMembers > 0) {
-                expect($refreshedOriginal->isCurrentlyActive())->toBeTrue();
+                expect($refreshedOriginal->currentActivityPeriod()->exists())->toBeTrue();
             }
         });
     });

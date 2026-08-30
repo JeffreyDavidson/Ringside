@@ -14,7 +14,7 @@ class IsActive implements ValidationRule
     {
         $title = Title::find($value);
 
-        if (! $title instanceof Title || ! $title->isCurrentlyActive()) {
+        if (! $title instanceof Title || ! $title->currentActivityPeriod()->exists()) {
             $fail('This title is not active and cannot be used in matches.');
         }
     }

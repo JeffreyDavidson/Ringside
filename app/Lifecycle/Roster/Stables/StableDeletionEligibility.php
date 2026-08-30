@@ -30,7 +30,7 @@ final class StableDeletionEligibility
             throw CannotBeDeletedException::alreadyDeleted($stable);
         }
 
-        if ($stable->isCurrentlyActive()) {
+        if ($stable->currentActivityPeriod()->exists()) {
             throw CannotBeDeletedException::currentlyActive($stable);
         }
 

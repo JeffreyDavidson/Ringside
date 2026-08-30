@@ -35,7 +35,7 @@ final class StableRetirementService
 
             $this->eligibility->ensureCanRetire($lockedStable);
 
-            if ($lockedStable->isCurrentlyActive()) {
+            if ($lockedStable->currentActivityPeriod()->exists()) {
                 $this->endActivityPeriod->handle($lockedStable, $operationalDate);
             }
 

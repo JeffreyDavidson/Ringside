@@ -99,9 +99,4 @@ trait HasActivityPeriods
 
         return $relation;
     }
-
-    public function isCurrentlyActive(): bool
-    {
-        return $this->currentActivityPeriod()->exists();
-    }
 }

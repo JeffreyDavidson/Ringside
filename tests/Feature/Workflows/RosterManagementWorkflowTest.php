@@ -137,7 +137,7 @@ describe('Stable Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Stable should be active
-        expect(freshModel($stable)->isCurrentlyActive())->toBeTrue();
+        expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
 
         // When: Retiring the stable
         actingAs($admin);

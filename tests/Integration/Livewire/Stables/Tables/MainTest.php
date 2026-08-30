@@ -222,7 +222,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is unretired
-            expect(freshModel($retiredStable)->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($retiredStable)->currentActivityPeriod()->exists())->toBeTrue();
         });
 
         test('establish action integration works correctly', function () {
@@ -237,7 +237,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is established
-            expect(freshModel($unformedStable)->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($unformedStable)->currentActivityPeriod()->exists())->toBeTrue();
         });
 
         test('lifecycle actions ignore an external referrer when redirecting', function () {
@@ -309,7 +309,7 @@ describe('StablesTable Component', function () {
                 ->assertNoRedirect();
 
             // Verify stable status unchanged
-            expect(freshModel($activeStable)->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($activeStable)->currentActivityPeriod()->exists())->toBeTrue();
         });
 
         test('disband action fails for inappropriate stable status', function () {
@@ -349,7 +349,7 @@ describe('StablesTable Component', function () {
                 ->assertNoRedirect();
 
             // Verify stable status unchanged
-            expect(freshModel($activeStable)->isCurrentlyActive())->toBeTrue();
+            expect(freshModel($activeStable)->currentActivityPeriod()->exists())->toBeTrue();
         });
 
         test('actions respect stable business constraints', function () {
