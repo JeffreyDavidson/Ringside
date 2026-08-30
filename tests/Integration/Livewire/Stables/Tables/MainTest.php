@@ -323,7 +323,7 @@ describe('StablesTable Component', function () {
                 ->assertNoRedirect();
 
             // Verify stable status unchanged
-            expect(freshModel($inactiveStable)->isInactive())->toBeTrue();
+            expect(freshModel($inactiveStable)->currentActivityPeriod()->exists())->toBeFalse();
         });
 
         test('retire action fails for an already retired stable', function () {

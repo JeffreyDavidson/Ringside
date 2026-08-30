@@ -27,13 +27,6 @@ interface HasActivityPeriods
     public function isCurrentlyActive(): bool;
 
     /**
-     * Check if the model is inactive (not currently active).
-     *
-     * @return bool True if the model is not currently active
-     */
-    public function isInactive(): bool;
-
-    /**
      * Get all activity periods for this model.
      *
      * @return MorphMany<ActivityPeriod, TDeclaringModel>

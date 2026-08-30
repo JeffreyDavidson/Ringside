@@ -251,7 +251,7 @@ describe('Stable Activation Action Integration', function () {
 
             $refreshedStable = freshModel($this->retiredStable);
             expect($refreshedStable->activityPeriods()->count())->toBe($originalPeriodCount);
-            expect($refreshedStable->isInactive())->toBeTrue();
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeFalse();
         });
 
         test('unretire action preserves former members retirement state', function () {
@@ -331,7 +331,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(UnretireAction::class)->handle($stable, $unretireDate, establishImmediately: false, requireFormerMembers: false);
 
             $finalStable = freshModel($stable);
-            expect($finalStable->isInactive())->toBeTrue();
+            expect($finalStable->currentActivityPeriod()->exists())->toBeFalse();
 
             // Verify activity periods
             $activityPeriods = $finalStable->activityPeriods()->orderBy('started_at')->get();
