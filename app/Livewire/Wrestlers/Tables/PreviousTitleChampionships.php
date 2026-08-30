@@ -8,7 +8,6 @@ use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTitleChampionshipsTable;
 use App\Models\Titles\TitleChampionship;
 use Livewire\Attributes\Locked;
-use LogicException;
 
 class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
 {
@@ -25,12 +24,10 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
     /** @return TitleChampionshipBuilder<TitleChampionship> */
     public function builder(): TitleChampionshipBuilder
     {
-        if (! isset($this->wrestlerId)) {
-            throw new LogicException('A wrestler was not provided.');
-        }
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         return TitleChampionship::query()
-            ->forWrestlerId($this->wrestlerId)
+            ->forWrestlerId($wrestlerId)
             ->forPreviousHistory();
     }
 }
