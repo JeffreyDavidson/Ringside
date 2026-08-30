@@ -168,18 +168,18 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             expect($model->isCurrentlyActive())->toBeFalse();
         });
 
-        test('hasFutureActivity returns true when model has future period', function () {
+        test('future activity relationship exists when model has future period', function () {
             $model = $this->model;
             ActivityPeriod::factory()->for($model, 'activeable')->create([
                 'started_at' => now()->addWeek(),
                 'ended_at' => null,
             ]);
-            expect($model->hasFutureActivity())->toBeTrue();
+            expect($model->futureActivityPeriod()->exists())->toBeTrue();
         });
 
-        test('hasFutureActivity returns false when model has no future period', function () {
+        test('future activity relationship is empty when model has no future period', function () {
             $model = $this->model;
-            expect($model->hasFutureActivity())->toBeFalse();
+            expect($model->futureActivityPeriod()->exists())->toBeFalse();
         });
 
         test('current activity period is absent when model is inactive', function () {

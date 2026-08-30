@@ -10,7 +10,7 @@ code demonstrates a repeated need for it.
 ### Model status API boundary
 
 **Priority:** High  
-**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()` predicate has been removed in favor of the typed relationship query.
+**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()` and `hasFutureActivity()` predicates have been removed in favor of typed relationship queries.
 
 Review `IsEmployable`, `IsInjurable`, `IsSuspendable`, `IsRetirable`, and
 `HasActivityPeriods`. Their relationships and current-state accessors are used

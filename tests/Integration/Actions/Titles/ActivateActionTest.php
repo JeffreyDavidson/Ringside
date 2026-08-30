@@ -75,7 +75,7 @@ test('it activates an unactivated title at a specific datetime', function () {
     // Verify the title has activity periods but is not currently active (future activation)
     $refreshedTitle = freshModel($title);
     expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
-    expect($refreshedTitle->hasFutureActivity())->toBeTrue();
+    expect($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue();
     expect($refreshedTitle->isCurrentlyActive())->toBeFalse(); // Future date, so not currently active
 
     // Verify the debut was created with the specific datetime
@@ -98,7 +98,7 @@ test('it activates an inactive title at a specific datetime', function () {
     // Verify the title has future activity but is not currently active (future date)
     $refreshedTitle = freshModel($title);
     expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
-    expect($refreshedTitle->hasFutureActivity())->toBeTrue();
+    expect($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue();
     expect($refreshedTitle->isCurrentlyActive())->toBeFalse(); // Future date, so not currently active
     expect($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so still inactive until the period begins.
 
@@ -149,7 +149,7 @@ test('it activates a retired title at a specific datetime', function () {
     // Verify the title has future activity but is not currently active (future date) and no longer retired
     $refreshedTitle = freshModel($title);
     expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
-    expect($refreshedTitle->hasFutureActivity())->toBeTrue();
+    expect($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue();
     expect($refreshedTitle->isCurrentlyActive())->toBeFalse(); // Future date, so not currently active
     expect($refreshedTitle->isRetired())->toBeFalse();
 
@@ -177,7 +177,7 @@ test('it successfully activates a title with future activation', function () {
     $datetime = now();
 
     // Verify title has future activity initially
-    expect($title->hasFutureActivity())->toBeTrue();
+    expect($title->futureActivityPeriod()->exists())->toBeTrue();
     expect($title->isCurrentlyActive())->toBeFalse();
 
     // Execute the activation (should reinstate immediately, overriding future activation)

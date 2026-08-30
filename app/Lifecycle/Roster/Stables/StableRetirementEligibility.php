@@ -37,7 +37,7 @@ final class StableRetirementEligibility
             throw CannotBeRetiredException::alreadyRetired($stable);
         }
 
-        if (! $stable->activityPeriods()->exists() || (! $stable->isCurrentlyActive() && $stable->hasFutureActivity())) {
+        if (! $stable->activityPeriods()->exists() || (! $stable->isCurrentlyActive() && $stable->futureActivityPeriod()->exists())) {
             throw CannotBeRetiredException::notActive($stable);
         }
     }
