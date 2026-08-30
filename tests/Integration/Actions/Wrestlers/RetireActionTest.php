@@ -15,12 +15,12 @@ test('it retires an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Should no longer be employed when retired
 
     $this->assertDatabaseHas('retirements', [
@@ -38,7 +38,7 @@ test('it retires wrestler with specific retirement date', function () {
     resolve(RetireAction::class)->handle($wrestler, $retirementDate);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,
@@ -59,7 +59,7 @@ test('it persists the retirement lifecycle', function () {
 
     // Verify retirement period was created
     expect($wrestler->currentRetirement)->not()->toBeNull();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,
@@ -76,7 +76,7 @@ test('it uses the current time when no date is provided', function () {
     resolve(RetireAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,
@@ -101,12 +101,12 @@ test('it handles multiple retirement scenarios', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     // New retirement should be created
     $this->assertDatabaseHas('retirements', [
@@ -144,13 +144,13 @@ test('it ends employment when retiring', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 });
 
 test('it prevents retiring already retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     expect(fn () => resolve(RetireAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -160,7 +160,7 @@ test('it prevents retiring unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create(); // Unemployed by default
 
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     expect(fn () => resolve(RetireAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -176,7 +176,7 @@ test('it can retire suspended wrestler', function () {
     resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
     expect($wrestler->isSuspended())->toBeFalse();
 
     $this->assertDatabaseHas('retirements', [
@@ -201,7 +201,7 @@ test('it can retire injured wrestler', function () {
     resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Employment should end
 

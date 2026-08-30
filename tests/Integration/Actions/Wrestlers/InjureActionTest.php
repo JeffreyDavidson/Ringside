@@ -132,7 +132,7 @@ test('it prevents injuring already injured wrestler', function () {
 test('it prevents injuring retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     expect(fn () => resolve(InjureAction::class)->handle($wrestler))
         ->toThrow(Exception::class);

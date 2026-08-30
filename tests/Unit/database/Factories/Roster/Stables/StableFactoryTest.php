@@ -65,7 +65,7 @@ describe('StableFactory Unit Tests', function () {
             $stable = Stable::factory()->retired()->create();
 
             // Assert
-            expect($stable->isRetired())->toBeTrue();
+            expect($stable->currentRetirement()->exists())->toBeTrue();
         });
     });
 

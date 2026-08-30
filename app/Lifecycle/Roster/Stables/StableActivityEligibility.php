@@ -52,7 +52,7 @@ final class StableActivityEligibility
             throw CannotBeEstablishedException::established($stable);
         }
 
-        if ($stable->isRetired()) {
+        if ($stable->currentRetirement()->exists()) {
             throw CannotBeEstablishedException::retired($stable);
         }
 
@@ -85,7 +85,7 @@ final class StableActivityEligibility
             throw CannotBeDisbandedException::disbanded($stable);
         }
 
-        if ($stable->isRetired()) {
+        if ($stable->currentRetirement()->exists()) {
             throw CannotBeDisbandedException::retired($stable);
         }
     }
@@ -104,7 +104,7 @@ final class StableActivityEligibility
             throw CannotBeReunitedException::currentlyActive($stable);
         }
 
-        if ($stable->isRetired()) {
+        if ($stable->currentRetirement()->exists()) {
             throw CannotBeReunitedException::retired($stable);
         }
 

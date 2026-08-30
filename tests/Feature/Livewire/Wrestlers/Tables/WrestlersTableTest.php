@@ -69,7 +69,7 @@ describe('Main Component Feature Workflows', function () {
                 ->call('handleWrestlerAction', 'retire', $wrestler->id)
                 ->assertHasNoErrors();
 
-            expect(freshModel($wrestler)->isRetired())->toBeTrue();
+            expect(freshModel($wrestler)->currentRetirement()->exists())->toBeTrue();
         });
 
         test('complete wrestler deletion and restoration workflow', function () {

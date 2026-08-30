@@ -142,7 +142,7 @@ test('it ends retirement before deletion', function () {
     $referee = Referee::factory()->retired()->create();
     $retirement = $referee->currentRetirement()->firstOrFail();
 
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
     expect($retirement->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);

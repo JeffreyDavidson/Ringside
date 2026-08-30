@@ -18,12 +18,12 @@ test('it retires an employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isRetired())->toBeFalse();
+    expect($manager->currentRetirement()->exists())->toBeFalse();
 
     resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
     // Verify retirement record was created
@@ -48,7 +48,7 @@ test('it retires manager with specific retirement date', function () {
     resolve(RetireAction::class)->handle($manager, $retirementDate);
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
 
     // Verify retirement and employment ended with specific date
     $this->assertDatabaseHas('retirements', [
@@ -73,7 +73,7 @@ test('it retires suspended manager and ends suspension', function () {
     resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
     expect($manager->isSuspended())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
@@ -102,7 +102,7 @@ test('it retires injured manager and ends injury', function () {
     resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
     expect($manager->isInjured())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
@@ -171,7 +171,7 @@ test('it persists retirement and ends current relationships', function () {
 
     // Verify retirement period was created
     expect($manager->currentRetirement)->not()->toBeNull();
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
 
     expect($manager->currentWrestlers)->toHaveCount(0);
 });
@@ -179,7 +179,7 @@ test('it persists retirement and ends current relationships', function () {
 test('it prevents retiring already retired manager', function () {
     $manager = Manager::factory()->retired()->create();
 
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
 
     expect(fn () => resolve(RetireAction::class)->handle($manager))
         ->toThrow(Exception::class);
@@ -204,7 +204,7 @@ test('it handles database transactions correctly', function () {
     $manager->refresh();
 
     // Verify transaction was successful - all operations completed
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeFalse();
     expect($manager->currentWrestlers)->toHaveCount(0);
 

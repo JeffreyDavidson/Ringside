@@ -29,7 +29,7 @@ final class StableRestructuringEligibility
 
     public function ensureCanSplit(Stable $stable): void
     {
-        if ($stable->isRetired()) {
+        if ($stable->currentRetirement()->exists()) {
             throw CannotBeSplitException::retired($stable);
         }
 
@@ -62,11 +62,11 @@ final class StableRestructuringEligibility
             throw CannotBeMergedException::selfMerge($primaryStable);
         }
 
-        if ($primaryStable->isRetired()) {
+        if ($primaryStable->currentRetirement()->exists()) {
             throw CannotBeMergedException::primaryRetired($primaryStable);
         }
 
-        if ($secondaryStable->isRetired()) {
+        if ($secondaryStable->currentRetirement()->exists()) {
             throw CannotBeMergedException::secondaryRetired($secondaryStable);
         }
 
@@ -104,13 +104,13 @@ final class StableRestructuringEligibility
             fn (Wrestler $wrestler): bool => ! $wrestler->currentEmployment()->exists()
                 || $wrestler->isSuspended()
                 || $wrestler->isInjured()
-                || $wrestler->isRetired(),
+                || $wrestler->currentRetirement()->exists(),
         )->map(fn (Wrestler $wrestler): string => $wrestler->name)->all() ?? [];
 
         $unavailableTagTeams = $members->tagTeams?->filter(
             fn (TagTeam $tagTeam): bool => ! $tagTeam->currentEmployment()->exists()
                 || $tagTeam->isSuspended()
-                || $tagTeam->isRetired(),
+                || $tagTeam->currentRetirement()->exists(),
         )->map(fn (TagTeam $tagTeam): string => $tagTeam->name)->all() ?? [];
 
         return [...$unavailableWrestlers, ...$unavailableTagTeams];

@@ -143,7 +143,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be retired
-        expect(freshModel($wrestler)->isRetired())->toBeTrue();
+        expect(freshModel($wrestler)->currentRetirement()->exists())->toBeTrue();
 
         // When: Unretiring the wrestler
         actingAs($admin);
@@ -153,7 +153,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should no longer be retired
-        expect(freshModel($wrestler)->isRetired())->toBeFalse();
+        expect(freshModel($wrestler)->currentRetirement()->exists())->toBeFalse();
 
         // And: Should have employment history tracking
         expect(freshModel($wrestler)->employments()->exists())->toBeTrue();

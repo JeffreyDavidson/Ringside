@@ -17,7 +17,7 @@ final class RosterBookingEligibility
             if (
                 (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
                 || $rosterMember->isSuspended()
-                || $rosterMember->isRetired()
+                || $rosterMember->currentRetirement()->exists()
                 || $rosterMember->futureEmployment()->exists()
             ) {
                 return false;

@@ -201,7 +201,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(RetireAction::class)->handle($this->activeStable, $retireDate);
 
             $refreshedStable = freshModel($this->activeStable);
-            expect($refreshedStable->isRetired())->toBeTrue();
+            expect($refreshedStable->currentRetirement()->exists())->toBeTrue();
             expect($refreshedStable->status)->toBe(StableStatus::Retired);
 
             // Verify retirement record
@@ -220,7 +220,7 @@ describe('Stable Activation Action Integration', function () {
             resolve(RetireAction::class)->handle($disbandedStable, Carbon::now());
 
             $refreshedStable = freshModel($disbandedStable);
-            expect($refreshedStable->isRetired())->toBeTrue();
+            expect($refreshedStable->currentRetirement()->exists())->toBeTrue();
             expect($refreshedStable->status)->toBe(StableStatus::Retired);
         });
     });
@@ -273,8 +273,8 @@ describe('Stable Activation Action Integration', function () {
                 requireFormerMembers: false,
             );
 
-            expect($retiredWrestler->refresh()->isRetired())->toBeTrue()
-                ->and($retiredTagTeam->refresh()->isRetired())->toBeTrue();
+            expect($retiredWrestler->refresh()->currentRetirement()->exists())->toBeTrue()
+                ->and($retiredTagTeam->refresh()->currentRetirement()->exists())->toBeTrue();
         });
 
         test('unretire eligibility respects the former member option', function () {
@@ -324,7 +324,7 @@ describe('Stable Activation Action Integration', function () {
             // Retire
             $retireDate = Carbon::now()->subMonths(1);
             resolve(RetireAction::class)->handle($stable, $retireDate);
-            expect(freshModel($stable)->isRetired())->toBeTrue();
+            expect(freshModel($stable)->currentRetirement()->exists())->toBeTrue();
 
             // Unretire
             $unretireDate = Carbon::now();

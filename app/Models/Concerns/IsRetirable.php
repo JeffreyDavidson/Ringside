@@ -59,9 +59,4 @@ trait IsRetirable
 
         return $relation;
     }
-
-    public function isRetired(): bool
-    {
-        return $this->currentRetirement()->exists();
-    }
 }

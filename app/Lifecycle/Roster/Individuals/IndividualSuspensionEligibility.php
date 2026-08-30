@@ -34,7 +34,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeSuspendedException::released($individual);
         }
 
-        if ($individual->isRetired()) {
+        if ($individual->currentRetirement()->exists()) {
             throw CannotBeSuspendedException::retired($individual);
         }
 
@@ -80,7 +80,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeReinstatedException::hasFutureEmployment($individual);
         }
 
-        if ($individual->isRetired()) {
+        if ($individual->currentRetirement()->exists()) {
             throw CannotBeReinstatedException::retired($individual);
         }
     }

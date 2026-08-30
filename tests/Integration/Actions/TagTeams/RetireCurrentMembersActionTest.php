@@ -28,8 +28,8 @@ test('it retires eligible current wrestlers and managers', function () {
     $wrestler->refresh();
     $manager->refresh();
 
-    expect($wrestler->isRetired())->toBeTrue()
-        ->and($manager->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and($manager->currentRetirement()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,

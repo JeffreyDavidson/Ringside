@@ -253,7 +253,7 @@ test('it handles wrestler with no active relationships', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($wrestler);
 

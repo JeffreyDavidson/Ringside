@@ -147,7 +147,7 @@ describe('Stable Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Stable should be retired
-        expect(freshModel($stable)->isRetired())->toBeTrue();
+        expect(freshModel($stable)->currentRetirement()->exists())->toBeTrue();
 
         // Given: A retired stable with viable former members
         $retiredStable = Stable::factory()->retired()->create(['name' => 'Evolution']);
@@ -160,7 +160,7 @@ describe('Stable Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Stable should no longer be retired
-        expect(freshModel($retiredStable)->isRetired())->toBeFalse();
+        expect(freshModel($retiredStable)->currentRetirement()->exists())->toBeFalse();
     });
 });
 
@@ -247,7 +247,7 @@ describe('Tag Team Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Tag team should be retired
-        expect(freshModel($tagTeam)->isRetired())->toBeTrue();
+        expect(freshModel($tagTeam)->currentRetirement()->exists())->toBeTrue();
     });
 });
 

@@ -131,7 +131,7 @@ test('it prevents releasing non-employed wrestler', function () {
 test('it prevents releasing retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(ReleaseAction::class)->handle($wrestler))

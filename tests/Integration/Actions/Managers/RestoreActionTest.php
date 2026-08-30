@@ -245,6 +245,6 @@ test('it allows separate employment after restoration', function () {
     // Testing the capability without actually running EmployAction
 
     // Manager should be in a state where employment is possible
-    expect($restoredManager->isRetired())->toBeFalse();
+    expect($restoredManager->currentRetirement()->exists())->toBeFalse();
     expect($restoredManager->deleted_at)->toBeNull();
 });

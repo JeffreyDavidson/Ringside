@@ -24,7 +24,7 @@ final class TitleActivationService
         DB::transaction(function () use ($title, $activationDate): void {
             $lockedTitle = $title->refreshForUpdate();
 
-            if ($lockedTitle->isRetired()) {
+            if ($lockedTitle->currentRetirement()->exists()) {
                 $this->unretire->handle($lockedTitle, $activationDate);
             }
 

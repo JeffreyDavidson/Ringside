@@ -88,7 +88,7 @@ describe('TagTeamFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->retired()->create();
 
             // Assert
-            expect($tagTeam->isRetired())->toBeTrue();
+            expect($tagTeam->currentRetirement()->exists())->toBeTrue();
         });
 
         test('future employment aligns wrestler membership with the employment date', function () {

@@ -49,7 +49,7 @@ test('it rejects employing a retired manager without changing retirement', funct
     $manager = Manager::factory()->retired()->create();
     $retirement = $manager->currentRetirement()->firstOrFail();
 
-    expect($manager->isRetired())->toBeTrue();
+    expect($manager->currentRetirement()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(EmployAction::class)->handle($manager))
@@ -59,7 +59,7 @@ test('it rejects employing a retired manager without changing retirement', funct
     $retirement->refresh();
 
     expect($manager->currentEmployment()->exists())->toBeFalse()
-        ->and($manager->isRetired())->toBeTrue()
+        ->and($manager->currentRetirement()->exists())->toBeTrue()
         ->and($retirement->ended_at)->toBeNull();
 
     $this->assertDatabaseMissing('employments', [
