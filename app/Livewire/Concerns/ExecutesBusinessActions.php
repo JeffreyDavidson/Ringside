@@ -9,6 +9,8 @@ use Closure;
 
 trait ExecutesBusinessActions
 {
+    use DispatchesActionFeedback;
+
     /** @param Closure(): void $action */
     protected function executeBusinessAction(Closure $action, ?string $successMessage = null): bool
     {
@@ -17,15 +19,13 @@ trait ExecutesBusinessActions
         } catch (BaseBusinessException $exception) {
             $message = $exception->getMessage();
 
-            session()->flash('error', $message);
-            $this->dispatch('flash-message', type: 'error', message: $message);
+            $this->dispatchActionFailure($message);
 
             return false;
         }
 
         if ($successMessage !== null) {
-            session()->flash('status', $successMessage);
-            $this->dispatch('flash-message', type: 'status', message: $successMessage);
+            $this->dispatchActionSuccess($successMessage);
         }
 
         return true;

@@ -15,6 +15,8 @@ use InvalidArgumentException;
 
 trait ExecutesRosterActions
 {
+    use DispatchesActionFeedback;
+
     /** @param Closure(): void $action */
     protected function executeAuthorizedRosterAction(
         RosterLifecycleAction $lifecycleAction,
@@ -43,15 +45,13 @@ trait ExecutesRosterActions
             $message = __("{$entityType->translationNamespace()}.actions.{$actionName}");
 
             $this->dispatch("{$entityType->value}-updated");
-            session()->flash('status', $message);
-            $this->dispatch('flash-message', type: 'status', message: $message);
+            $this->dispatchActionSuccess($message);
 
             return true;
         } catch (BaseBusinessException $exception) {
             $message = __(RosterErrorMessageResolver::translationKey($exception, $entityType));
 
-            session()->flash('error', $message);
-            $this->dispatch('flash-message', type: 'error', message: $message);
+            $this->dispatchActionFailure($message);
 
             return false;
         }
