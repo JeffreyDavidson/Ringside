@@ -71,7 +71,7 @@ describe('RefereeFactory Unit Tests', function () {
             $referee = Referee::factory()->suspended()->create();
 
             expect($referee->isSuspended())->toBeTrue();
-            expect($referee->isEmployed())->toBeTrue();
+            expect($referee->currentEmployment()->exists())->toBeTrue();
             expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
         });
 
@@ -79,7 +79,7 @@ describe('RefereeFactory Unit Tests', function () {
             $referee = Referee::factory()->injured()->create();
 
             expect($referee->isInjured())->toBeTrue();
-            expect($referee->isEmployed())->toBeTrue();
+            expect($referee->currentEmployment()->exists())->toBeTrue();
             expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
         });
     });

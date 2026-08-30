@@ -18,7 +18,7 @@ test('it unretires a retired referee', function () {
     $retirement = $referee->currentRetirement()->firstOrFail();
 
     expect($referee->isRetired())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
     expect($retirement->ended_at)->toBeNull();
 
     resolve(UnretireAction::class)->handle($referee);
@@ -27,7 +27,7 @@ test('it unretires a retired referee', function () {
     $retirement->refresh();
 
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($retirement->ended_at)->not->toBeNull();
 
     $this->assertDatabaseHas('employments', [
@@ -48,7 +48,7 @@ test('it unretires referee with specific unretirement date', function () {
     $retirement->refresh();
 
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect(requiredDate($retirement->ended_at)->toDateTimeString())->toBe($unretiredDate->toDateTimeString());
 
     $this->assertDatabaseHas('retirements', [
@@ -67,14 +67,14 @@ test('it persists the unretirement lifecycle', function () {
     $referee = Referee::factory()->retired()->create();
 
     expect($referee->isRetired())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($referee);
 
     $referee->refresh();
 
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it uses the provided date', function () {
@@ -107,7 +107,7 @@ test('it validates referee can be unretired', function () {
 
     $referee->refresh();
     expect($referee->isRetired())->toBeFalse();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it throws exception when referee cannot be unretired', function () {
@@ -141,7 +141,7 @@ test('it preserves retirement history', function () {
 test('it restores referee employment after unretirement', function () {
     $referee = Referee::factory()->retired()->create();
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($referee);
 
@@ -173,6 +173,6 @@ test('it rolls back retirement changes when employment restoration fails', funct
     $retirement->refresh();
 
     expect($referee->isRetired())->toBeTrue();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
     expect($retirement->ended_at)->toBeNull();
 });

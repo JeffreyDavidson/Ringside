@@ -19,7 +19,7 @@ it('assigns managers to a wrestler without employing them', function () {
 
     expect($wrestler->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing($managers->modelKeys())
-        ->and($managers->every(fn (Manager $manager): bool => ! $manager->isEmployed()))
+        ->and($managers->every(fn (Manager $manager): bool => ! $manager->currentEmployment()->exists()))
         ->toBeTrue();
 
     foreach ($managers as $manager) {

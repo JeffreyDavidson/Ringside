@@ -38,13 +38,13 @@ describe('TagTeam Employment Workflows', function () {
             // Initial employ
             resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             $employed = freshModel($tagTeam);
-            expect($employed->isEmployed())->toBeTrue();
+            expect($employed->currentEmployment()->exists())->toBeTrue();
 
             // Release
             resolve(ReleaseAction::class)->handle($employed, Carbon::now());
             $released = freshModel($tagTeam);
             expect($released->isReleased())->toBeTrue();
-            expect($released->isEmployed())->toBeFalse();
+            expect($released->currentEmployment()->exists())->toBeFalse();
 
             expect(fn () => resolve(EmployAction::class)->handle($released, Carbon::now()))
                 ->toThrow(CannotBeEmployedException::class);
@@ -62,7 +62,7 @@ describe('TagTeam Employment Workflows', function () {
             resolve(EmployAction::class)->handle($tagTeam, Carbon::now());
             $afterEmployment = freshModel($tagTeam);
             expect($afterEmployment->status)->toBe(EmploymentStatus::Employed);
-            expect($afterEmployment->isEmployed())->toBeTrue();
+            expect($afterEmployment->currentEmployment()->exists())->toBeTrue();
 
             // Release tag team
             resolve(ReleaseAction::class)->handle($afterEmployment, Carbon::now());
@@ -71,7 +71,7 @@ describe('TagTeam Employment Workflows', function () {
             // Verify release status synchronization
             expect($afterRelease->status)->toBe(EmploymentStatus::Released);
             expect($afterRelease->isReleased())->toBeTrue();
-            expect($afterRelease->isEmployed())->toBeFalse();
+            expect($afterRelease->currentEmployment()->exists())->toBeFalse();
         });
 
         test('multiple employment periods with gaps workflow', function () {
@@ -99,7 +99,7 @@ describe('TagTeam Employment Workflows', function () {
             resolve(EmployAction::class)->handle($tagTeam, Carbon::now()->subMonths(1));
 
             $refreshedTagTeam = freshModel($tagTeam);
-            expect($refreshedTagTeam->isEmployed())->toBeTrue();
+            expect($refreshedTagTeam->currentEmployment()->exists())->toBeTrue();
             expect($refreshedTagTeam->employments()->count())->toBe(3);
             expect($refreshedTagTeam->previousEmployments()->count())->toBe(2);
         });
@@ -114,7 +114,7 @@ describe('TagTeam Employment Workflows', function () {
 
             // All changes should be committed together
             $refreshedTagTeam = freshModel($tagTeam);
-            expect($refreshedTagTeam->isEmployed())->toBeTrue();
+            expect($refreshedTagTeam->currentEmployment()->exists())->toBeTrue();
             expect($refreshedTagTeam->status)->toBe(EmploymentStatus::Employed);
             expect($refreshedTagTeam->currentEmployment)->not()->toBeNull();
 
@@ -132,7 +132,7 @@ describe('TagTeam Employment Workflows', function () {
             $refreshedTagTeam = freshModel($tagTeam);
 
             // Verify all state is consistent - no orphaned records
-            if ($refreshedTagTeam->isEmployed()) {
+            if ($refreshedTagTeam->currentEmployment()->exists()) {
                 expect($refreshedTagTeam->status)->toBe(EmploymentStatus::Employed);
                 expect($refreshedTagTeam->currentEmployment)->not()->toBeNull();
             }
@@ -149,7 +149,7 @@ describe('TagTeam Employment Workflows', function () {
             $refreshedTagTeam = freshModel($tagTeam);
 
             // Verify business rule compliance
-            expect($refreshedTagTeam->isEmployed())->toBeTrue();
+            expect($refreshedTagTeam->currentEmployment()->exists())->toBeTrue();
             expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($refreshedTagTeam))->toBeFalse();
         });
 
@@ -157,7 +157,7 @@ describe('TagTeam Employment Workflows', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
 
             // Unemployed tag team has limited capabilities
-            expect($tagTeam->isEmployed())->toBeFalse();
+            expect($tagTeam->currentEmployment()->exists())->toBeFalse();
             expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($tagTeam))->toBeTrue();
 
             // Employ tag team
@@ -165,7 +165,7 @@ describe('TagTeam Employment Workflows', function () {
             $employed = freshModel($tagTeam);
 
             // Employed tag team has different capabilities
-            expect($employed->isEmployed())->toBeTrue();
+            expect($employed->currentEmployment()->exists())->toBeTrue();
             expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($employed))->toBeFalse();
 
             // Release tag team
@@ -173,7 +173,7 @@ describe('TagTeam Employment Workflows', function () {
             $released = freshModel($tagTeam);
 
             // Released tag team capabilities
-            expect($released->isEmployed())->toBeFalse();
+            expect($released->currentEmployment()->exists())->toBeFalse();
             expect(resolve(TagTeamEmploymentEligibility::class)->canEmploy($released))->toBeFalse();
         });
     });

@@ -59,7 +59,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($unemployedWrestler)->isEmployed())->toBeTrue();
+            expect(freshModel($unemployedWrestler)->currentEmployment()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler successfully employed.');
             expect(true)->toBeTrue();
         });
@@ -302,7 +302,7 @@ describe('WrestlersActions Integration Tests', function () {
 
             // Employ
             $component->call('employ');
-            expect(freshModel($wrestler)->isEmployed())->toBeTrue();
+            expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
 
             // Injure
             $component->call('injure');

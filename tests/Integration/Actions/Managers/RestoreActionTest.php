@@ -97,7 +97,7 @@ test('it does not automatically restore employment relationships', function () {
     $managerId = $manager->id;
 
     // Verify manager was employed before deletion
-    expect($manager->isEmployed())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue();
 
     // Soft delete the manager
     $manager->delete();
@@ -111,7 +111,7 @@ test('it does not automatically restore employment relationships', function () {
 
     // Manager should not be automatically employed - requires separate action
     // This tests the business rule that restoration doesn't auto-employ
-    expect($restoredManager->isEmployed())->toBeFalse();
+    expect($restoredManager->currentEmployment()->exists())->toBeFalse();
 
     // Historical employment records should be preserved
     expect($restoredManager->employments()->count())->toBeGreaterThan(0);
@@ -238,7 +238,7 @@ test('it allows separate employment after restoration', function () {
 
     // Verify manager can be employed separately after restoration
     $restoredManager = Manager::findOrFail($managerId);
-    expect($restoredManager->isEmployed())->toBeFalse();
+    expect($restoredManager->currentEmployment()->exists())->toBeFalse();
 
     // This would require a separate EmployAction call
     // expect(() => resolve(EmployAction::class)->handle($restoredManager))->not()->toThrow();

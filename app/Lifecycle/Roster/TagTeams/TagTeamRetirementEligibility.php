@@ -28,7 +28,7 @@ final class TagTeamRetirementEligibility
             throw CannotBeRetiredException::alreadyRetired($tagTeam);
         }
 
-        if (! $tagTeam->isEmployed()) {
+        if (! $tagTeam->currentEmployment()->exists()) {
             throw CannotBeRetiredException::notEmployed($tagTeam);
         }
     }

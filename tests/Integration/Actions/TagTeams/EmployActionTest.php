@@ -15,12 +15,12 @@ beforeEach(function () {
 test('it employs an unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
 
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     resolve(EmployAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created
     $this->assertDatabaseHas('employments', [
@@ -38,7 +38,7 @@ test('it employs a tag team whose current wrestlers are already employed', funct
 
     resolve(EmployAction::class)->handle($tagTeam);
 
-    expect($tagTeam->refresh()->isEmployed())->toBeTrue();
+    expect($tagTeam->refresh()->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it employs tag team with specific employment date', function () {
@@ -48,7 +48,7 @@ test('it employs tag team with specific employment date', function () {
     resolve(EmployAction::class)->handle($tagTeam, $employmentDate);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment started with specific date
     $this->assertDatabaseHas('employments', [
@@ -62,7 +62,7 @@ test('it prevents employing retired tag team directly', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     expect($tagTeam->isRetired())->toBeTrue();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(EmployAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
@@ -79,7 +79,7 @@ test('it persists the employment lifecycle', function () {
 
     // Verify employment period was created
     expect($tagTeam->currentEmployment)->not()->toBeNull();
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify records show proper dates
     $this->assertDatabaseHas('employments', [
@@ -92,7 +92,7 @@ test('it persists the employment lifecycle', function () {
 test('it prevents employing already employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
@@ -106,7 +106,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam->refresh();
 
     // Verify the transaction was successful
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created
     $employment = $tagTeam->currentEmployment()->firstOrFail();
@@ -124,7 +124,7 @@ test('it creates new employment period', function () {
 
     // Should create a new employment record
     expect($tagTeam->employments()->count())->toBe($originalEmploymentCount + 1);
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // New employment should be current and active
     $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
@@ -156,7 +156,7 @@ test('it handles multiple employment history correctly', function () {
     $tagTeam->employments()->create(['started_at' => now()->subDays(20), 'ended_at' => now()->subDays(15)]);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->employments()->count())->toBe(2);
 
     resolve(EmployAction::class)->handle($tagTeam);
@@ -164,7 +164,7 @@ test('it handles multiple employment history correctly', function () {
     $tagTeam->refresh();
 
     // Should add new employment period
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
     expect($tagTeam->employments()->count())->toBe(3);
 
     // New employment should be current
@@ -202,7 +202,7 @@ test('it handles tag team with complex status history', function () {
     $tagTeam->employments()->create(['started_at' => now()->subDays(20), 'ended_at' => now()->subDays(15)]);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->isRetired())->toBeFalse();
 
     resolve(EmployAction::class)->handle($tagTeam);
@@ -210,7 +210,7 @@ test('it handles tag team with complex status history', function () {
     $tagTeam->refresh();
 
     // Should now be employed
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
     expect($tagTeam->isRetired())->toBeFalse();
 
     // Should have preserved all historical records

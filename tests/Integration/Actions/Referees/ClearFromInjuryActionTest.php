@@ -63,7 +63,7 @@ test('it persists the injury clearance lifecycle', function () {
 
     // Verify the injury period was closed consistently
     expect($referee->isInjured())->toBeFalse();
-    expect($referee->isEmployed())->toBeTrue(); // Should remain employed after injury clearance
+    expect($referee->currentEmployment()->exists())->toBeTrue(); // Should remain employed after injury clearance
 });
 
 test('it uses the provided date', function () {
@@ -105,7 +105,7 @@ test('it maintains referee employment status after injury clearance', function (
     $referee = Referee::factory()->injured()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isInjured())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($referee);
@@ -114,7 +114,7 @@ test('it maintains referee employment status after injury clearance', function (
     $employment->refresh();
 
     // Should remain employed after injury clearance
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isInjured())->toBeFalse();
     expect($employment->ended_at)->toBeNull();
 });

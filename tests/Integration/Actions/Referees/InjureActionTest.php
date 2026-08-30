@@ -15,7 +15,7 @@ beforeEach(function () {
 test('it injures an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isInjured())->toBeFalse();
 
     resolve(InjureAction::class)->handle($referee);
@@ -78,7 +78,7 @@ test('it validates referee can be injured', function () {
 test('it throws exception when referee cannot be injured', function () {
     $referee = Referee::factory()->create(); // Not employed
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(InjureAction::class)->handle($referee))
         ->toThrow(CannotBeInjuredException::class);
@@ -87,7 +87,7 @@ test('it throws exception when referee cannot be injured', function () {
 test('it prevents injuring a suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(InjureAction::class)->handle($referee))
         ->toThrow(CannotBeInjuredException::class);
@@ -96,7 +96,7 @@ test('it prevents injuring a suspended referee', function () {
 
     expect($referee->isSuspended())->toBeTrue()
         ->and($referee->isInjured())->toBeFalse()
-        ->and($referee->isEmployed())->toBeTrue();
+        ->and($referee->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it maintains transaction boundaries', function () {
@@ -121,7 +121,7 @@ test('it maintains referee employment after injury', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
     resolve(InjureAction::class)->handle($referee);
 
@@ -129,7 +129,7 @@ test('it maintains referee employment after injury', function () {
     $employment->refresh();
 
     // Should remain employed after injury
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
     expect($referee->isInjured())->toBeTrue();
     expect($employment->ended_at)->toBeNull();
 });

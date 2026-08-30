@@ -23,7 +23,7 @@ final class TagTeamEmploymentEligibility
 
     public function ensureCanEmploy(TagTeam $tagTeam): void
     {
-        if ($tagTeam->isEmployed()) {
+        if ($tagTeam->currentEmployment()->exists()) {
             throw CannotBeEmployedException::alreadyEmployed($tagTeam);
         }
 
@@ -53,7 +53,7 @@ final class TagTeamEmploymentEligibility
 
     public function ensureCanRelease(TagTeam $tagTeam): void
     {
-        if (! $tagTeam->isEmployed()) {
+        if (! $tagTeam->currentEmployment()->exists()) {
             throw CannotBeReleasedException::notEmployed($tagTeam);
         }
     }

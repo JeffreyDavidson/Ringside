@@ -52,7 +52,7 @@ function expectStatusTransition(Model&Employable $entity, EmploymentStatus $from
 function expectToBeBookable(Wrestler|Referee|TagTeam $entity): void
 {
     $entity = freshModel($entity);
-    expect($entity->isEmployed())->toBeTrue();
+    expect($entity->currentEmployment()->exists())->toBeTrue();
     expect(RosterBookingEligibility::allows($entity))->toBeTrue();
     expect($entity->currentEmployment()->exists() || $entity->futureEmployment()->exists())->toBeTrue();
 }
@@ -78,14 +78,14 @@ function expectValidEmploymentLifecycle(Model&Employable $entity): void
     $currentEmployment = $entity->currentEmployment()->first();
 
     // Verify employment record exists if employed
-    if ($entity->isEmployed()) {
+    if ($entity->currentEmployment()->exists()) {
         expect($currentEmployment)->not->toBeNull();
         expect($currentEmployment?->getAttribute('started_at'))->not->toBeNull();
         expect($currentEmployment?->getAttribute('ended_at'))->toBeNull();
     }
 
     // Verify no current employment if not employed
-    if (! $entity->isEmployed()) {
+    if (! $entity->currentEmployment()->exists()) {
         expect($currentEmployment)->toBeNull();
     }
 }

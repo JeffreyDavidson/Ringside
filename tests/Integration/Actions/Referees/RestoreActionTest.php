@@ -120,7 +120,7 @@ test('it does not automatically restore employment relationships', function () {
     // Referee should be restored but employment should remain ended
     expect($referee->trashed())->toBeFalse();
     expect($employment->ended_at)->not->toBeNull();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 });
 
 test('it preserves historical relationships', function () {
@@ -169,7 +169,7 @@ test('it allows referee to be re-employed after restoration', function () {
 
     $referee->refresh();
     expect($referee->trashed())->toBeFalse();
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     // Should be able to employ the restored referee
     $referee->employments()->create([
@@ -179,5 +179,5 @@ test('it allows referee to be re-employed after restoration', function () {
     $referee->update(['status' => EmploymentStatus::Employed]);
 
     $referee->refresh();
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 });

@@ -63,7 +63,7 @@ test('it creates a wrestler with employment when employment date is provided', f
     $result = resolve(CreateAction::class)->handle($data);
 
     expect($result->name)->toBe('The Rock');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('wrestlers', [
         'name' => 'The Rock',
@@ -151,7 +151,7 @@ test('it assigns managers without employing them when the wrestler is not employ
 
     expect($wrestler->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing($managers->modelKeys())
-        ->and($managers->every(fn (Manager $manager): bool => ! $manager->isEmployed()))
+        ->and($managers->every(fn (Manager $manager): bool => ! $manager->currentEmployment()->exists()))
         ->toBeTrue();
 });
 
@@ -169,8 +169,8 @@ test('it employs assigned managers through the wrestler employment cascade', fun
         managers: new Collection([$manager]),
     ));
 
-    expect($wrestler->isEmployed())->toBeTrue()
-        ->and($manager->isEmployed())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('employments', [
         'employable_id' => $manager->id,

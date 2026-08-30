@@ -32,7 +32,7 @@ test('it unretires retired current wrestlers and managers without employing them
         $wrestler->refresh();
 
         expect($wrestler->isRetired())->toBeFalse()
-            ->and($wrestler->isEmployed())->toBeFalse();
+            ->and($wrestler->currentEmployment()->exists())->toBeFalse();
 
         $this->assertDatabaseHas('retirements', [
             'retirable_id' => $wrestler->id,
@@ -44,7 +44,7 @@ test('it unretires retired current wrestlers and managers without employing them
     $manager->refresh();
 
     expect($manager->isRetired())->toBeFalse()
-        ->and($manager->isEmployed())->toBeFalse();
+        ->and($manager->currentEmployment()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $manager->id,

@@ -23,7 +23,7 @@ final class TagTeamSuspensionEligibility
 
     public function ensureCanSuspend(TagTeam $tagTeam): void
     {
-        if (! $tagTeam->isEmployed()) {
+        if (! $tagTeam->currentEmployment()->exists()) {
             throw CannotBeSuspendedException::notEmployed($tagTeam);
         }
 
@@ -49,7 +49,7 @@ final class TagTeamSuspensionEligibility
             throw CannotBeReinstatedException::notSuspended($tagTeam);
         }
 
-        if (! $tagTeam->isEmployed()) {
+        if (! $tagTeam->currentEmployment()->exists()) {
             throw CannotBeReinstatedException::notEmployed($tagTeam);
         }
     }

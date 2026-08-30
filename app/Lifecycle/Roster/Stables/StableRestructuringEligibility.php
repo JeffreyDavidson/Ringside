@@ -101,14 +101,14 @@ final class StableRestructuringEligibility
     private function unavailableMemberNames(StableMembershipData $members): array
     {
         $unavailableWrestlers = $members->wrestlers?->filter(
-            fn (Wrestler $wrestler): bool => ! $wrestler->isEmployed()
+            fn (Wrestler $wrestler): bool => ! $wrestler->currentEmployment()->exists()
                 || $wrestler->isSuspended()
                 || $wrestler->isInjured()
                 || $wrestler->isRetired(),
         )->map(fn (Wrestler $wrestler): string => $wrestler->name)->all() ?? [];
 
         $unavailableTagTeams = $members->tagTeams?->filter(
-            fn (TagTeam $tagTeam): bool => ! $tagTeam->isEmployed()
+            fn (TagTeam $tagTeam): bool => ! $tagTeam->currentEmployment()->exists()
                 || $tagTeam->isSuspended()
                 || $tagTeam->isRetired(),
         )->map(fn (TagTeam $tagTeam): string => $tagTeam->name)->all() ?? [];

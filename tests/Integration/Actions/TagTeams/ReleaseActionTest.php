@@ -15,13 +15,13 @@ beforeEach(function () {
 test('it releases an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue()
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
         ->and(resolve(TagTeamEmploymentEligibility::class)->canRelease($tagTeam))->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse()
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
         ->and(resolve(TagTeamEmploymentEligibility::class)->canRelease($tagTeam))->toBeFalse();
 
     // Verify employment record was ended
@@ -38,7 +38,7 @@ test('it releases tag team with specific release date', function () {
     resolve(ReleaseAction::class)->handle($tagTeam, $releaseDate);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify employment ended with specific date
     $this->assertDatabaseHas('employments', [
@@ -50,13 +50,13 @@ test('it releases tag team with specific release date', function () {
 test('it releases suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
     expect($tagTeam->isSuspended())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 
     // Verify employment ended
@@ -85,7 +85,7 @@ test('it persists the release lifecycle', function () {
 
     // Verify employment period was ended
     expect($tagTeam->currentEmployment)->toBeNull();
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify records show proper dates
     $this->assertDatabaseHas('employments', [
@@ -97,7 +97,7 @@ test('it persists the release lifecycle', function () {
 test('it prevents releasing unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(ReleaseAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
@@ -112,7 +112,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam->refresh();
 
     // Verify the transaction was successful
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify original employment record was properly ended
     $this->assertDatabaseHas('employments', [
@@ -132,7 +132,7 @@ test('it ends current employment period', function () {
 
     // Should not create new employment records, just end current one
     expect($tagTeam->employments()->count())->toBe($originalEmploymentCount);
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // All employment records should have end dates
     expect($tagTeam->employments()->whereNull('ended_at')->count())->toBe(0);
@@ -180,7 +180,7 @@ test('it handles tag team with complex employment history', function () {
     $tagTeam->employments()->create(['started_at' => now()->subDays(10), 'ended_at' => null]); // Current
 
     $tagTeam->refresh();
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
     expect($tagTeam->employments()->count())->toBe(3);
 
     resolve(ReleaseAction::class)->handle($tagTeam);
@@ -188,7 +188,7 @@ test('it handles tag team with complex employment history', function () {
     $tagTeam->refresh();
 
     // Should now be unemployed
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Should have preserved all historical records
     expect($tagTeam->employments()->count())->toBe(3);
@@ -201,14 +201,14 @@ test('it handles release with cascade to partners and managers', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     // Get current employment to verify cascade effects
-    expect($tagTeam->isEmployed())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
 
     // Verify tag team is released
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Verify employment record ended
     $this->assertDatabaseHas('employments', [
@@ -225,7 +225,7 @@ test('it ends all current relationships', function () {
     $tagTeam->refresh();
 
     // Verify the action applied the relationship cascade
-    expect($tagTeam->isEmployed())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     // Employment should be ended
     $this->assertDatabaseHas('employments', [

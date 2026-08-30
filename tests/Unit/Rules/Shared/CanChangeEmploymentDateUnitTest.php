@@ -4,38 +4,34 @@ declare(strict_types=1);
 
 use App\Models\Lifecycle\Employment;
 use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * Unit tests for CanChangeEmploymentDate validation rule.
- *
- * UNIT TEST SCOPE:
- * - Method existence checking logic (method_exists conditions)
- * - Employment status validation with mocked dependencies
- * - Date parsing and comparison logic
- * - Model name resolution strategies (name property, getDisplayName, class_basename)
- * - Error message formatting with dynamic model names
- * - Edge cases (null models, missing methods, various date formats)
- *
- * These tests verify the CanChangeEmploymentDate rule logic independently
- * of models, database, or Laravel's validation framework.
- *
- * @see CanChangeEmploymentDate
+ * Return a manager with a controlled employment period for rule tests.
  */
-describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
+function managerWithEmploymentPeriod(Carbon $startedAt, ?Carbon $endedAt = null): Manager
+{
+    $employment = Employment::factory()->started($startedAt);
+
+    if ($endedAt !== null) {
+        $employment = $employment->ended($endedAt);
+    }
+
+    return Manager::factory()->has($employment, 'employments')->create();
+}
+
+describe('CanChangeEmploymentDate validation rule', function () {
     test('rejects changing the original employment date while the model is employed', function () {
-        $employmentDate = today()->subMonth();
-        $manager = Manager::factory()
-            ->has(Employment::factory()->started($employmentDate), 'employments')
-            ->create();
+        $startedAt = today()->subMonth();
+        $manager = managerWithEmploymentPeriod($startedAt);
         $message = null;
 
         (new CanChangeEmploymentDate($manager))->validate(
             'employment_date',
-            $employmentDate->copy()->subDay(),
+            $startedAt->copy()->subDay(),
             validationFailureCallback(function (string $failure) use (&$message): void {
                 $message = $failure;
             }),
@@ -45,16 +41,10 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
     });
 
     test('rejects an invalid employment date value', function () {
-        $model = new class extends Model
-        {
-            public function isEmployed(): bool
-            {
-                return true;
-            }
-        };
+        $manager = Manager::factory()->create();
         $message = null;
 
-        (new CanChangeEmploymentDate($model))->validate(
+        (new CanChangeEmploymentDate($manager))->validate(
             'started_at',
             [],
             validationFailureCallback(function (string $failure) use (&$message): void {
@@ -65,434 +55,147 @@ describe('CanChangeEmploymentDate Validation Rule Unit Tests', function () {
         expect($message)->toBe('The employment date must be a valid date.');
     });
 
-    describe('model validation with employment methods', function () {
-        test('validation passes when model is not employed', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return false;
-                }
-            };
+    test('passes when the model is not currently employed', function () {
+        $manager = Manager::factory()->create();
+        $failed = false;
 
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
+        (new CanChangeEmploymentDate($manager))->validate(
+            'started_at',
+            now()->addWeek(),
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
 
-            // Act
-            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation fails when model is employed and employedOn returns false', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
-
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute(
-                    $key)
-                {
-                    return $key === 'name' ? 'Test Wrestler' : null;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failMessage = '';
-            $failCallback = function (string $message) use (&$failCalled, &$failMessage) {
-                $failCalled = true;
-                $failMessage = $message;
-            };
-
-            // Act
-            $rule->validate('started_at', now()->addMonth(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeTrue();
-            expect($failMessage)->toBe('The employment date cannot be changed while Test Wrestler is currently employed.');
-        });
-
-        test('validation passes when model is employed and employedOn returns true', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
-
-                public function employedOn(Carbon $date): bool
-                {
-                    return true;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Wrestler' : null;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('started_at', now()->addMonth(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation passes when model is employed but lacks employedOn method', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
+        expect($failed)->toBeFalse();
     });
 
-    describe('method existence checking logic', function () {
-        test('validation passes when model lacks isEmployed method', function () {
-            // Arrange
-            $model = new class extends Model {};
-            // Note: No isEmployed method mocked - simulates method_exists() returning false
+    test('rejects a date outside the current employment period', function () {
+        $manager = managerWithEmploymentPeriod(now()->subMonth());
+        $failed = false;
 
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
+        (new CanChangeEmploymentDate($manager))->validate(
+            'started_at',
+            now()->subMonths(2),
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
 
-            // Act
-            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
-
-        test('validation passes when no model provided', function () {
-            // Arrange
-            $rule = new CanChangeEmploymentDate(null);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-        });
+        expect($failed)->toBeTrue();
     });
 
-    describe('model name resolution strategies', function () {
-        test('uses model name property when available', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
+    test('passes a date inside the current employment period', function () {
+        $manager = managerWithEmploymentPeriod(now()->subMonth());
+        $failed = false;
 
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
+        (new CanChangeEmploymentDate($manager))->validate(
+            'started_at',
+            now()->subWeek(),
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
 
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Custom Model Name' : null;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failMessage = '';
-            $failCallback = function (string $message) use (&$failMessage) {
-                $failMessage = $message;
-            };
-
-            // Act
-            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failMessage)->toContain('Custom Model Name');
-        });
-
-        test('uses class basename when name property missing', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
-
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return null;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failMessage = '';
-            $failCallback = function (string $message) use (&$failMessage) {
-                $failMessage = $message;
-            };
-
-            // Act
-            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failMessage)->toMatch('/The employment date cannot be changed while .+ is currently employed\./');
-        });
+        expect($failed)->toBeFalse();
     });
 
-    describe('date parsing and handling', function () {
-        test('handles Carbon date instances', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
+    test('uses the model name when reporting a blocked date', function () {
+        $wrestler = Wrestler::factory()->employed()->create(['name' => 'Test Wrestler']);
+        $message = null;
 
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
+        (new CanChangeEmploymentDate($wrestler))->validate(
+            'started_at',
+            now()->subMonths(2),
+            validationFailureCallback(function (string $failure) use (&$message): void {
+                $message = $failure;
+            }),
+        );
 
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Model' : null;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('started_at', now()->addWeek(), validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeTrue();
-        });
-
-        test('handles string date values', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
-
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Model' : null;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('started_at', '2024-12-25', validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeTrue();
-        });
-
-        test('correctly passes parsed date to employedOn method', function () {
-            // Arrange
-            $targetDate = now()->addWeek();
-            $model = new class extends Model
-            {
-                public ?Carbon $receivedDate = null;
-
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
-
-                public function employedOn(Carbon $date): bool
-                {
-                    $this->receivedDate = $date;
-
-                    return true;
-                }
-            };
-
-            $rule = new CanChangeEmploymentDate($model);
-            $failCalled = false;
-            $failCallback = function (string $message) use (&$failCalled) {
-                $failCalled = true;
-            };
-
-            // Act
-            $rule->validate('started_at', $targetDate, validationFailureCallback($failCallback));
-
-            // Assert
-            expect($failCalled)->toBeFalse();
-            expect($model->receivedDate?->equalTo($targetDate))->toBeTrue();
-        });
+        expect($message)->toBe('The employment date cannot be changed while Test Wrestler is currently employed.');
     });
 
-    describe('interface compliance', function () {
-        test('rule implements ValidationRule interface', function () {
-            // Arrange
-            $rule = new CanChangeEmploymentDate(null);
+    test('uses the class basename when a model has no name attribute', function () {
+        $manager = managerWithEmploymentPeriod(now()->subMonth());
+        $message = null;
 
-            // Assert
-            expect($rule)->toBeInstanceOf(ValidationRule::class);
-        });
+        (new CanChangeEmploymentDate($manager))->validate(
+            'started_at',
+            now()->subMonths(2),
+            validationFailureCallback(function (string $failure) use (&$message): void {
+                $message = $failure;
+            }),
+        );
 
-        test('validate method signature matches interface', function () {
-            // Arrange
-            $rule = new CanChangeEmploymentDate(null);
-            $reflection = new ReflectionMethod($rule, 'validate');
-
-            // Assert
-            expect($reflection->getParameters())->toHaveCount(3);
-            expect($reflection->getParameters()[0]->getName())->toBe('attribute');
-            expect($reflection->getParameters()[1]->getName())->toBe('value');
-            expect($reflection->getParameters()[2]->getName())->toBe('fail');
-        });
+        expect($message)->toBe('The employment date cannot be changed while Manager is currently employed.');
     });
 
-    describe('error message consistency', function () {
-        test('error message format is consistent across different models', function () {
-            // Arrange
-            $model1 = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
+    test('accepts string date values supported by Carbon', function (string $value) {
+        $manager = managerWithEmploymentPeriod(now()->subMonth());
+        $failed = false;
 
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
+        (new CanChangeEmploymentDate($manager))->validate(
+            'started_at',
+            $value,
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
 
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Model One' : null;
-                }
-            };
-            $model2 = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
+        expect($failed)->toBeTrue();
+    })->with([
+        '2026-06-30',
+        '2026-06-30 00:00:00',
+    ]);
 
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
+    test('accepts Carbon date values', function () {
+        $manager = managerWithEmploymentPeriod(now()->subMonth());
+        $failed = false;
 
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Model Two' : null;
-                }
-            };
-            $messages = [];
-            $failCallback = function (string $message) use (&$messages) {
-                $messages[] = $message;
-            };
-            // Act
-            (new CanChangeEmploymentDate($model1))->validate('started_at', now(), validationFailureCallback($failCallback));
-            (new CanChangeEmploymentDate($model2))->validate('started_at', now(), validationFailureCallback($failCallback));
-            // Assert
-            expect($messages)->toHaveCount(2);
-            expect($messages[0])->toBe('The employment date cannot be changed while Model One is currently employed.');
-            expect($messages[1])->toBe('The employment date cannot be changed while Model Two is currently employed.');
-        });
-        test('attribute name does not affect validation logic', function () {
-            // Arrange
-            $model = new class extends Model
-            {
-                public function isEmployed(): bool
-                {
-                    return true;
-                }
+        (new CanChangeEmploymentDate($manager))->validate(
+            'started_at',
+            Carbon::parse('2026-06-30'),
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
 
-                public function employedOn(Carbon $date): bool
-                {
-                    return false;
-                }
-
-                public function getAttribute($key)
-                {
-                    return $key === 'name' ? 'Test Model' : null;
-                }
-            };
-            $rule = new CanChangeEmploymentDate($model);
-            $failCallCount = 0;
-            $failCallback = function () use (&$failCallCount) {
-                $failCallCount++;
-            };
-            // Act
-            $rule->validate('started_at', now(), validationFailureCallback($failCallback));
-            $rule->validate('employment_date', now(), validationFailureCallback($failCallback));
-            $rule->validate('hire_date', now(), validationFailureCallback($failCallback));
-            // Assert
-            expect($failCallCount)->toBe(3);
-        });
+        expect($failed)->toBeTrue();
     });
 
-    afterEach(function () {
-        Mockery::close();
+    test('passes when no model is provided', function () {
+        $failed = false;
+
+        (new CanChangeEmploymentDate(null))->validate(
+            'started_at',
+            now()->addWeek(),
+            validationFailureCallback(function () use (&$failed): void {
+                $failed = true;
+            }),
+        );
+
+        expect($failed)->toBeFalse();
+    });
+
+    test('implements the validation rule contract', function () {
+        expect(new CanChangeEmploymentDate(null))->toBeInstanceOf(ValidationRule::class);
+    });
+
+    test('uses the same validation behavior regardless of attribute name', function () {
+        $manager = managerWithEmploymentPeriod(now()->subMonth());
+        $failed = 0;
+        $rule = new CanChangeEmploymentDate($manager);
+
+        foreach (['started_at', 'employment_date', 'hire_date'] as $attribute) {
+            $rule->validate(
+                $attribute,
+                now()->subMonths(2),
+                validationFailureCallback(function () use (&$failed): void {
+                    $failed++;
+                }),
+            );
+        }
+
+        expect($failed)->toBe(3);
     });
 });

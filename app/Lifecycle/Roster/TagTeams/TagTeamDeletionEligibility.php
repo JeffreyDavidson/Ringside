@@ -31,7 +31,7 @@ final class TagTeamDeletionEligibility
             throw CannotBeDeletedException::stillRetired($tagTeam);
         }
 
-        if ($tagTeam->isEmployed()) {
+        if ($tagTeam->currentEmployment()->exists()) {
             throw CannotBeDeletedException::stillEmployed($tagTeam);
         }
 

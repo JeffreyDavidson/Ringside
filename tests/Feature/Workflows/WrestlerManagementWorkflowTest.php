@@ -112,7 +112,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be employed
-        expect(freshModel($wrestler)->isEmployed())->toBeTrue();
+        expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
 
         // When: Suspending the employed wrestler
         actingAs($admin);
@@ -132,7 +132,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be employed again
-        expect(freshModel($wrestler)->isEmployed())->toBeTrue();
+        expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
         expect(freshModel($wrestler)->isSuspended())->toBeFalse();
 
         // When: Retiring the wrestler
@@ -183,7 +183,7 @@ describe('Wrestler Employment Status Management Journey', function () {
 
         // Then: Wrestler should no longer be injured
         expect(freshModel($wrestler)->isInjured())->toBeFalse();
-        expect(freshModel($wrestler)->isEmployed())->toBeTrue();
+        expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
     });
 });
 

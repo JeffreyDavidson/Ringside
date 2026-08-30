@@ -53,7 +53,7 @@ class UpdateAction
             ]);
 
             // Employ wrestler if employment_date is provided and they're not already employed
-            if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->isEmployed()) {
+            if (! is_null($wrestlerData->employment_date) && ! $lockedWrestler->currentEmployment()->exists()) {
                 $this->employAction->handle($lockedWrestler, $wrestlerData->employment_date);
             }
 

@@ -41,7 +41,7 @@ test('it updates referee and employs them when employment date provided', functi
     $referee = Referee::factory()->create();
     $employmentDate = now();
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     $updateData = new RefereeData(
         first_name: 'Earl',
@@ -54,7 +54,7 @@ test('it updates referee and employs them when employment date provided', functi
     $result->refresh();
     expect($result->first_name)->toBe('Earl');
     expect($result->last_name)->toBe('Hebner');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     // Verify employment record was created via EmployAction
     $this->assertDatabaseHas('employments', [
@@ -91,7 +91,7 @@ test('it updates using the current persisted referee state', function () {
 test('it updates referee without employing when no employment date', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee->isEmployed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse();
 
     $updateData = new RefereeData(
         first_name: 'Mike',
@@ -104,7 +104,7 @@ test('it updates referee without employing when no employment date', function ()
     $result->refresh();
     expect($result->first_name)->toBe('Mike');
     expect($result->last_name)->toBe('Chioda');
-    expect($result->isEmployed())->toBeFalse();
+    expect($result->currentEmployment()->exists())->toBeFalse();
 
     // Verify no employment record was created
     $this->assertDatabaseMissing('employments', [
@@ -116,7 +116,7 @@ test('it does not re-employ already employed referee', function () {
     $referee = Referee::factory()->employed()->create();
     $originalEmployment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->isEmployed())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue();
 
     $updateData = new RefereeData(
         first_name: 'Updated',
@@ -129,7 +129,7 @@ test('it does not re-employ already employed referee', function () {
     $result->refresh();
     expect($result->first_name)->toBe('Updated');
     expect($result->last_name)->toBe('Name');
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     // Should still have only the original employment record
     expect($result->employments()->count())->toBe(1);
@@ -148,7 +148,7 @@ test('it uses the provided employment date', function () {
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     $result->refresh();
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
 
     // The provided employment date should be persisted
     $this->assertDatabaseHas('employments', [
@@ -250,7 +250,7 @@ test('it uses EmployAction for consistent employment handling', function () {
     $result = resolve(UpdateAction::class)->handle($referee, $updateData);
 
     // Verify the referee was employed using the correct architectural pattern
-    expect($result->isEmployed())->toBeTrue();
+    expect($result->currentEmployment()->exists())->toBeTrue();
     expect($result->currentEmployment()->exists())->toBeTrue();
 
     $employment = $result->currentEmployment()->firstOrFail();

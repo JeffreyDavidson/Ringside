@@ -41,7 +41,7 @@ class UpdateAction
             ]);
 
             // Handle employment using EmployAction for consistency
-            if (! is_null($managerData->employment_date) && ! $lockedManager->isEmployed()) {
+            if (! is_null($managerData->employment_date) && ! $lockedManager->currentEmployment()->exists()) {
                 $this->employAction->handle($lockedManager, $managerData->employment_date);
             }
 

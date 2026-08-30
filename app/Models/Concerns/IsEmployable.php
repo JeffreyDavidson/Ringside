@@ -81,14 +81,9 @@ trait IsEmployable
         return $relation;
     }
 
-    public function isEmployed(): bool
-    {
-        return $this->currentEmployment()->exists();
-    }
-
     public function isReleased(): bool
     {
-        return ! $this->isEmployed() && ! $this->isRetired() && $this->previousEmployments()->exists();
+        return ! $this->currentEmployment()->exists() && ! $this->isRetired() && $this->previousEmployments()->exists();
     }
 
     public function employedOn(DateTimeInterface $date): bool

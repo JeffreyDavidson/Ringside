@@ -40,7 +40,7 @@ class UpdateAction
                 'last_name' => $refereeData->last_name,
             ]);
 
-            if ($refereeData->employment_date !== null && ! $lockedReferee->isEmployed()) {
+            if ($refereeData->employment_date !== null && ! $lockedReferee->currentEmployment()->exists()) {
                 $this->employAction->handle($lockedReferee, $refereeData->employment_date);
             }
 

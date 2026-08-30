@@ -72,7 +72,7 @@ describe('TagTeamFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->employed()->create();
 
             // Assert
-            expect($tagTeam->isEmployed())->toBeTrue();
+            expect($tagTeam->currentEmployment()->exists())->toBeTrue();
         });
 
         test('unemployed state works correctly', function () {
@@ -80,7 +80,7 @@ describe('TagTeamFactory Unit Tests', function () {
             $tagTeam = TagTeam::factory()->unemployed()->create();
 
             // Assert
-            expect($tagTeam->isEmployed())->toBeFalse();
+            expect($tagTeam->currentEmployment()->exists())->toBeFalse();
         });
 
         test('retired state works correctly', function () {
