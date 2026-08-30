@@ -110,20 +110,7 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
     /** @return Attribute<TitleStatus, never> */
     protected function status(): Attribute
     {
-        return Attribute::get(fn (): TitleStatus => TitleStatusResolver::resolve(
-            isRetired: array_key_exists('status_current_retirement_exists', $this->attributes)
-                ? (bool) $this->attributes['status_current_retirement_exists']
-                : $this->isRetired(),
-            isCurrentlyActive: array_key_exists('status_current_activity_period_exists', $this->attributes)
-                ? (bool) $this->attributes['status_current_activity_period_exists']
-                : $this->isCurrentlyActive(),
-            hasFutureActivity: array_key_exists('status_future_activity_period_exists', $this->attributes)
-                ? (bool) $this->attributes['status_future_activity_period_exists']
-                : $this->hasFutureActivity(),
-            hasActivityHistory: array_key_exists('status_activity_periods_exists', $this->attributes)
-                ? (bool) $this->attributes['status_activity_periods_exists']
-                : $this->hasActivityPeriods(),
-        ));
+        return Attribute::get(fn (): TitleStatus => TitleStatusResolver::resolveFor($this));
     }
 
     /**
