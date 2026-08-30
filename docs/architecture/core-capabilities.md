@@ -41,7 +41,8 @@ Employment periods remain the authoritative persisted state. Employable models e
 relationship-backed state facts, while `EmploymentStatusResolver` reads those facts (or
 the equivalent builder projection) and maps them to the computed `EmploymentStatus`
 presented through each model's `status` attribute. Status classification remains outside
-the model's persistence relationships.
+the model's persistence relationships, and shared lifecycle readers reuse builder
+projections when status is rendered from list queries.
 
 ## Pull Capability
 

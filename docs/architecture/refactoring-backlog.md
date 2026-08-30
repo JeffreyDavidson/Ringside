@@ -10,7 +10,7 @@ code demonstrates a repeated need for it.
 ### Model status API boundary
 
 **Priority:** High  
-**Status:** In progress; employment state reads are centralized in the resolver.
+**Status:** In progress; employment and activity state reads are centralized in lifecycle readers.
 
 Review `IsEmployable`, `IsInjurable`, `IsSuspendable`, `IsRetirable`, and
 `HasActivityPeriods`. Their relationships and current-state accessors are used
