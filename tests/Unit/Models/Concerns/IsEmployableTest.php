@@ -114,25 +114,26 @@ describe('IsEmployable Trait Unit Tests', function () {
             expect($model->isEmployed())->toBeFalse();
         });
 
-        test('can check if model has future employment', function () {
+        test('can check if model has future employment through its relationship', function () {
             $modelWith = new EmploymentStateModel();
             $modelWith->futureEmploymentExists = true;
             $modelWithout = new EmploymentStateModel();
 
-            expect($modelWith->hasFutureEmployment())->toBeTrue();
-            expect($modelWithout->hasFutureEmployment())->toBeFalse();
+            expect($modelWith->futureEmployment()->exists())->toBeTrue();
+            expect($modelWithout->futureEmployment()->exists())->toBeFalse();
         });
 
-        test('detects the absence of current and future employment', function () {
+        test('detects the absence of current and future employment through relationships', function () {
             $withoutEmployment = new EmploymentStateModel();
             $currentlyEmployed = new EmploymentStateModel();
             $currentlyEmployed->currentEmploymentExists = true;
             $futureEmployment = new EmploymentStateModel();
             $futureEmployment->futureEmploymentExists = true;
 
-            expect($withoutEmployment->hasNoCurrentOrFutureEmployment())->toBeTrue()
-                ->and($currentlyEmployed->hasNoCurrentOrFutureEmployment())->toBeFalse()
-                ->and($futureEmployment->hasNoCurrentOrFutureEmployment())->toBeFalse();
+            expect($withoutEmployment->currentEmployment()->exists())->toBeFalse()
+                ->and($withoutEmployment->futureEmployment()->exists())->toBeFalse()
+                ->and($currentlyEmployed->currentEmployment()->exists())->toBeTrue()
+                ->and($futureEmployment->futureEmployment()->exists())->toBeTrue();
         });
 
         test('can check if model has employment history', function () {

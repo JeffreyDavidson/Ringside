@@ -86,16 +86,6 @@ trait IsEmployable
         return $this->currentEmployment()->exists();
     }
 
-    public function hasFutureEmployment(): bool
-    {
-        return $this->futureEmployment()->exists();
-    }
-
-    public function hasNoCurrentOrFutureEmployment(): bool
-    {
-        return ! $this->isEmployed() && ! $this->hasFutureEmployment();
-    }
-
     public function isReleased(): bool
     {
         return ! $this->isEmployed() && ! $this->isRetired() && $this->previousEmployments()->exists();

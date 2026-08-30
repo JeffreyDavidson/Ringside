@@ -15,10 +15,10 @@ final class RosterBookingEligibility
     {
         if ($rosterMember instanceof TagTeam) {
             if (
-                $rosterMember->hasNoCurrentOrFutureEmployment()
+                (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
                 || $rosterMember->isSuspended()
                 || $rosterMember->isRetired()
-                || $rosterMember->hasFutureEmployment()
+                || $rosterMember->futureEmployment()->exists()
             ) {
                 return false;
             }
@@ -32,10 +32,10 @@ final class RosterBookingEligibility
         }
 
         return ! (
-            $rosterMember->hasNoCurrentOrFutureEmployment()
+            (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
             || $rosterMember->isSuspended()
             || $rosterMember->isInjured()
-            || $rosterMember->hasFutureEmployment()
+            || $rosterMember->futureEmployment()->exists()
         );
     }
 }

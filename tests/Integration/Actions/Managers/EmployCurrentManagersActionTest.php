@@ -36,7 +36,7 @@ test('it employs unemployed managers for each manageable roster type', function 
     expect($wrestlerManager->isEmployed())->toBeTrue()
         ->and($tagTeamManager->isEmployed())->toBeTrue()
         ->and($futureManager->isEmployed())->toBeFalse()
-        ->and($futureManager->hasFutureEmployment())->toBeTrue();
+        ->and($futureManager->futureEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('employments', [
         'employable_id' => $wrestlerManager->id,

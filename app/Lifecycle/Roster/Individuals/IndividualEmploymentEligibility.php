@@ -29,7 +29,7 @@ final class IndividualEmploymentEligibility
             throw CannotBeEmployedException::employed($individual);
         }
 
-        if ($individual->hasFutureEmployment()) {
+        if ($individual->futureEmployment()->exists()) {
             throw CannotBeEmployedException::hasFutureEmployment($individual);
         }
 
@@ -51,11 +51,11 @@ final class IndividualEmploymentEligibility
 
     public function ensureCanRelease(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->hasNoCurrentOrFutureEmployment()) {
+        if (! $individual->currentEmployment()->exists() && ! $individual->futureEmployment()->exists()) {
             throw CannotBeReleasedException::unemployed($individual);
         }
 
-        if ($individual->hasFutureEmployment()) {
+        if ($individual->futureEmployment()->exists()) {
             throw CannotBeReleasedException::hasFutureEmployment($individual);
         }
 

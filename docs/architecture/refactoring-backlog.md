@@ -10,7 +10,7 @@ code demonstrates a repeated need for it.
 ### Model status API boundary
 
 **Priority:** High  
-**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()`, `hasFutureActivity()`, and `isCurrentlyActive()` predicates have been removed in favor of typed relationship queries.
+**Status:** In progress; employment and activity state reads are centralized in lifecycle readers, with projected-boolean inspection shared by both boundaries. The redundant `hasActivityPeriods()`, `hasFutureActivity()`, `isCurrentlyActive()`, `hasFutureEmployment()`, and `hasNoCurrentOrFutureEmployment()` predicates have been removed in favor of typed relationship queries.
 
 Review `IsEmployable`, `IsInjurable`, `IsSuspendable`, `IsRetirable`, and
 `HasActivityPeriods`. Their relationships and current-state accessors are used
@@ -19,8 +19,8 @@ and status resolvers already own transition decisions, so removing predicates
 incrementally would create a breaking API without a clear replacement.
 
 Next step: migrate remaining callers to resolver and relationship-backed state
-facts, then review the employment predicates for the same relationship-focused
-boundary.
+facts, then review `hasEmploymentHistory()` and `isEmployed()` for the same
+relationship-focused boundary.
 
 ### Lifecycle status consistency
 

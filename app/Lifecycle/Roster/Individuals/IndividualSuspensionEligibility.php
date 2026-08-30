@@ -38,7 +38,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeSuspendedException::retired($individual);
         }
 
-        if ($individual->hasFutureEmployment()) {
+        if ($individual->futureEmployment()->exists()) {
             throw CannotBeSuspendedException::hasFutureEmployment($individual);
         }
 
@@ -72,11 +72,11 @@ final class IndividualSuspensionEligibility
             throw CannotBeReinstatedException::available($individual);
         }
 
-        if ($individual->hasNoCurrentOrFutureEmployment()) {
+        if (! $individual->currentEmployment()->exists() && ! $individual->futureEmployment()->exists()) {
             throw CannotBeReinstatedException::unemployed($individual);
         }
 
-        if ($individual->hasFutureEmployment()) {
+        if ($individual->futureEmployment()->exists()) {
             throw CannotBeReinstatedException::hasFutureEmployment($individual);
         }
 
