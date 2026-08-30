@@ -579,14 +579,11 @@ describe('SplitStableAction Integration Tests', function () {
             // Verify original stable status is appropriate
             $refreshedOriginal = freshModel($this->originalStable);
 
-            // If original has members, should remain active; if empty, may become inactive
+            // An original stable with remaining members should remain active.
             $totalRemainingMembers = $refreshedOriginal->currentWrestlers()->count() + $refreshedOriginal->currentTagTeams()->count();
 
             if ($totalRemainingMembers > 0) {
                 expect($refreshedOriginal->isCurrentlyActive())->toBeTrue();
-            } else {
-                // Empty stable may become inactive (depends on business rules)
-                expect($refreshedOriginal->isCurrentlyActive() || $refreshedOriginal->isInactive())->toBeTrue();
             }
         });
     });

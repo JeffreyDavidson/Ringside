@@ -182,19 +182,22 @@ describe('HasActivityPeriods Trait Unit Tests', function () {
             expect($model->hasFutureActivity())->toBeFalse();
         });
 
-        test('isInactive returns true when model is not currently active', function () {
+        test('current activity period is absent when model is inactive', function () {
             $model = Title::factory()->unactivated()->create();
-            expect($model->isInactive())->toBeTrue();
+
+            expect($model->currentActivityPeriod()->exists())->toBeFalse();
         });
 
-        test('isInactive returns false when model is currently active', function () {
+        test('current activity period exists when model is active', function () {
             $model = $this->model;
             ActivityPeriod::factory()->for($model, 'activeable')->create([
                 'started_at' => now()->subWeek(),
                 'ended_at' => null,
             ]);
-            expect($model->isInactive())->toBeFalse();
+
+            expect($model->currentActivityPeriod()->exists())->toBeTrue();
         });
+
     });
 
     describe('utility methods', function () {

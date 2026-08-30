@@ -114,9 +114,4 @@ trait HasActivityPeriods
     {
         return $this->futureActivityPeriod()->exists();
     }
-
-    public function isInactive(): bool
-    {
-        return ! $this->isCurrentlyActive();
-    }
 }

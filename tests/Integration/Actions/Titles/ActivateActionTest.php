@@ -45,7 +45,7 @@ test('it activates an inactive title at the current datetime by default', functi
     // Verify title is initially inactive but has activity periods
     expect($title->isCurrentlyActive())->toBeFalse();
     expect($title->hasActivityPeriods())->toBeTrue();
-    expect($title->isInactive())->toBeTrue();
+    expect($title->currentActivityPeriod()->exists())->toBeFalse();
 
     // Execute the activation
     resolve(ActivateAction::class)->handle($title);
@@ -53,7 +53,7 @@ test('it activates an inactive title at the current datetime by default', functi
     // Verify the title is now active
     $refreshedTitle = freshModel($title);
     expect($refreshedTitle->isCurrentlyActive())->toBeTrue();
-    expect($refreshedTitle->isInactive())->toBeFalse();
+    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
 
     // Verify the reinstatement was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod()->firstOrFail();
@@ -90,7 +90,7 @@ test('it activates an inactive title at a specific datetime', function () {
     // Verify title is initially inactive but has activity periods
     expect($title->isCurrentlyActive())->toBeFalse();
     expect($title->hasActivityPeriods())->toBeTrue();
-    expect($title->isInactive())->toBeTrue();
+    expect($title->currentActivityPeriod()->exists())->toBeFalse();
 
     // Execute the activation with specific datetime
     resolve(ActivateAction::class)->handle($title, $datetime);
@@ -100,7 +100,7 @@ test('it activates an inactive title at a specific datetime', function () {
     expect($refreshedTitle->hasActivityPeriods())->toBeTrue();
     expect($refreshedTitle->hasFutureActivity())->toBeTrue();
     expect($refreshedTitle->isCurrentlyActive())->toBeFalse(); // Future date, so not currently active
-    expect($refreshedTitle->isInactive())->toBeTrue(); // isInactive() = !isCurrentlyActive(), so still inactive until future date
+    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so still inactive until the period begins.
 
     // Verify the reinstatement was created with the specific datetime
     $activityPeriod = $refreshedTitle->futureActivityPeriod()->firstOrFail();
