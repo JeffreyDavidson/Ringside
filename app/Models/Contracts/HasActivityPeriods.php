@@ -46,4 +46,11 @@ interface HasActivityPeriods
      * @return MorphOne<ActivityPeriod, TDeclaringModel>
      */
     public function currentActivityPeriod(): MorphOne;
+
+    /**
+     * Get a future activity period that has not started or ended.
+     *
+     * @return MorphOne<ActivityPeriod, TDeclaringModel>
+     */
+    public function futureActivityPeriod(): MorphOne;
 }
