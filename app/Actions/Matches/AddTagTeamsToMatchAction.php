@@ -9,15 +9,14 @@ use App\Exceptions\Scheduling\EntityNotAvailableException;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Matches\EventMatchAssignmentService;
 use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AddTagTeamsToMatchAction
 {
     public function __construct(
         protected MatchAssignmentConflictService $conflictService,
-        private readonly EventMatchAssignmentService $assignmentTransaction,
     ) {}
 
     /**
@@ -62,7 +61,8 @@ class AddTagTeamsToMatchAction
             throw InvalidMatchConfigurationException::invalidSideNumber($sideNumber);
         }
 
-        $this->assignmentTransaction->execute($eventMatch, function (EventMatch $lockedMatch) use ($requestedTagTeams, $sideNumber): void {
+        DB::transaction(function () use ($eventMatch, $requestedTagTeams, $sideNumber): void {
+            $lockedMatch = $eventMatch->refreshForUpdate();
             $this->handleWithinTransaction($lockedMatch, $requestedTagTeams, $sideNumber);
         });
     }
