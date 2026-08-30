@@ -19,8 +19,7 @@ and status resolvers already own transition decisions, so removing predicates
 incrementally would create a breaking API without a clear replacement.
 
 Next step: migrate remaining callers to resolver and relationship-backed state
-facts, then review `hasEmploymentHistory()` and `isEmployed()` for the same
-relationship-focused boundary.
+facts, then review `isEmployed()` for the same relationship-focused boundary.
 
 ### Lifecycle status consistency
 

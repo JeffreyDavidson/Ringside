@@ -91,11 +91,6 @@ trait IsEmployable
         return ! $this->isEmployed() && ! $this->isRetired() && $this->previousEmployments()->exists();
     }
 
-    public function hasEmploymentHistory(): bool
-    {
-        return $this->employments()->exists();
-    }
-
     public function employedOn(DateTimeInterface $date): bool
     {
         $query = $this->employments()->getQuery();

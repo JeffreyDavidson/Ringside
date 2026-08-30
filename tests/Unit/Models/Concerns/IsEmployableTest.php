@@ -136,13 +136,13 @@ describe('IsEmployable Trait Unit Tests', function () {
                 ->and($futureEmployment->futureEmployment()->exists())->toBeTrue();
         });
 
-        test('can check if model has employment history', function () {
+        test('can check if model has employment history through its relationship', function () {
             $modelWith = new EmploymentStateModel();
             $modelWith->employmentExists = true;
             $modelWithout = new EmploymentStateModel();
 
-            expect($modelWith->hasEmploymentHistory())->toBeTrue();
-            expect($modelWithout->hasEmploymentHistory())->toBeFalse();
+            expect($modelWith->employments()->exists())->toBeTrue();
+            expect($modelWithout->employments()->exists())->toBeFalse();
         });
     });
 

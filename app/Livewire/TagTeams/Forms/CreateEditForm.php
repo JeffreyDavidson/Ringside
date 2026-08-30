@@ -126,7 +126,7 @@ class CreateEditForm extends BaseForm
             return;
         }
 
-        if ($this->formModel->hasEmploymentHistory()) {
+        if ($this->formModel->employments()->exists()) {
             $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
         }
 

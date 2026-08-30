@@ -156,7 +156,7 @@ describe('Wrestler Employment Status Management Journey', function () {
         expect(freshModel($wrestler)->isRetired())->toBeFalse();
 
         // And: Should have employment history tracking
-        expect(freshModel($wrestler)->hasEmploymentHistory())->toBeTrue();
+        expect(freshModel($wrestler)->employments()->exists())->toBeTrue();
     });
 
     test('wrestler injury management workflow', function () {
