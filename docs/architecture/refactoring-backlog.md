@@ -33,7 +33,7 @@ typed coordinator.
 
 ### Custom Eloquent collections
 
-**Priority:** Medium  
+**Priority:** Medium
 **Status:** Candidate; do not introduce until repetition is proven.
 
 `MatchCompetitorsCollection` is the existing custom collection. Review it and
@@ -87,14 +87,63 @@ coordinating capability used by multiple operations. Lifecycle persistence and
 eligibility remain under `app/Lifecycle`; do not create generic services merely
 to wrap one Action call.
 
+### Pipelines and composable workflows
+
+**Priority:** Medium
+**Status:** Evaluated; no immediate extraction identified.
+
+Laravel's `Pipeline` is appropriate when an operation is a genuinely
+composable sequence of independently reusable stages that receive and pass a
+shared context. Ringside's current lifecycle operations are intentionally
+fixed orchestration: Actions validate and mutate one boundary, while typed
+collaborators perform specific cascades. Converting those sequences into a
+pipeline would hide domain ordering and weaken type boundaries.
+
+Revisit this pattern when a workflow gains optional or configurable stages
+that are reused across multiple entry points. Until then, keep fixed
+orchestration in typed Actions or focused workflow components and do not add a
+generic pipeline merely to remove sequential method calls.
+
 ### Jobs and queues
 
-**Priority:** Low  
+**Priority:** Low
 **Status:** Defer until asynchronous work exists.
 
 Introduce Jobs only for work that is slow, retryable, scheduled, or safely
 asynchronous. Current synchronous lifecycle orchestration should not be moved
 to queues merely to apply a pattern.
+
+When asynchronous work is introduced, review whether it belongs in a queued
+Job, a queued event listener, or `dispatchAfterResponse`. Preserve database
+consistency by dispatching after commit when a job depends on newly persisted
+state, and require idempotency, retry behavior, and failure handling for every
+queued operation.
+
+### Configuration and localization boundaries
+
+**Priority:** Low
+**Status:** Audit candidate.
+
+Move deployment- or environment-specific values into `config/` and read them
+through `config()` outside configuration files. Move user-facing and
+validation text into the existing `lang/en` groups. Do not move domain facts,
+database values, or developer-only exception diagnostics into configuration or
+translations merely to remove literals.
+
+The current scan found established translation groups and no application Jobs,
+Events, Listeners, or Notifications directories. This is an opportunity to
+audit remaining user-facing strings and operational constants, not a reason to
+create empty framework directories.
+
+### Caching and concurrency
+
+**Priority:** Low
+**Status:** Audit candidate.
+
+Review repeated expensive read paths and competing writes for an evidence-based
+cache or lock boundary. Prefer Laravel cache locks and concurrency controls
+when a real contention or repeated-query problem is measured. Do not cache
+mutable lifecycle state without an invalidation or consistency plan.
 
 ### Events and observers
 
@@ -146,8 +195,14 @@ The following Laravel sources informed this backlog:
 - [Laravel Eloquent APIs and query scopes](https://laravel.com/docs/13.x/eloquent)
 - [Laravel framework issue: custom collections and BelongsTo relations](https://github.com/laravel/framework/issues/53241)
 - [Livewire actions and server-side authorization](https://livewire.laravel.com/docs/3.x/actions)
+- [Laravel Pipelines API](https://api.laravel.com/docs/13.x/Illuminate/Support/Facades/Pipeline.html)
+- [Laravel events and queued listeners](https://laravel.com/framework/docs/events)
+- [Laravel application structure, Jobs, Events, and configuration](https://laravel.com/docs/13.x/structure)
+- [Laravel queue dispatching and after-commit behavior](https://api.laravel.com/docs/13.x/Illuminate/Contracts/Bus/QueueingDispatcher.html)
+- [Laravel cache locks and concurrency controls](https://api.laravel.com/docs/13.x/Illuminate/Support/Facades/Cache.html)
 
 These references support using Laravel-native Builders, scopes, casts,
-collections, Policies, Form Requests, and Resources where the application has
-an actual need. They do not justify adding repositories, generic service
-wrappers, event buses, or queues without a concrete use case.
+collections, Policies, Form Requests, Resources, Pipelines, Jobs, Events,
+configuration, localization, and cache controls where the application has an
+actual need. They do not justify adding repositories, generic service
+wrappers, event buses, pipelines, or queues without a concrete use case.
