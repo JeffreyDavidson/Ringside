@@ -8,8 +8,8 @@ use App\Lifecycle\Matches\MatchCompetitorRequirements;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Matches\EventMatchAssignmentService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AddCompetitorsToMatchAction
 {
@@ -17,7 +17,6 @@ class AddCompetitorsToMatchAction
         protected AddTagTeamsToMatchAction $addTagTeamsToMatchAction,
         protected AddWrestlersToMatchAction $addWrestlersToMatchAction,
         private readonly MatchCompetitorRequirements $requirements,
-        private readonly EventMatchAssignmentService $assignmentTransaction,
     ) {}
 
     /**
@@ -42,7 +41,8 @@ class AddCompetitorsToMatchAction
      */
     public function handle(EventMatch $eventMatch, Collection $competitors): void
     {
-        $this->assignmentTransaction->execute($eventMatch, function (EventMatch $lockedMatch) use ($competitors): void {
+        DB::transaction(function () use ($eventMatch, $competitors): void {
+            $lockedMatch = $eventMatch->refreshForUpdate();
             $this->handleWithinTransaction($lockedMatch, $competitors);
         });
     }
