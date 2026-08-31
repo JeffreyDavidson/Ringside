@@ -81,7 +81,7 @@ final class TagTeamRetirementEligibility
         }
 
         $unavailablePartners = $currentPartners->filter(
-            fn (Wrestler $wrestler): bool => $wrestler->isInjured(),
+            fn (Wrestler $wrestler): bool => $wrestler->currentInjury()->exists(),
         );
 
         if ($unavailablePartners->isNotEmpty()) {

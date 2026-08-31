@@ -106,7 +106,7 @@ describe('ManagerFactory Unit Tests', function () {
         test('injured state creates exactly one active employment', function () {
             $manager = Manager::factory()->injured()->create();
 
-            expect($manager->isInjured())->toBeTrue();
+            expect($manager->currentInjury()->exists())->toBeTrue();
             expect($manager->currentEmployment()->exists())->toBeTrue();
             expect($manager->employments()->whereNull('ended_at')->count())->toBe(1);
         });

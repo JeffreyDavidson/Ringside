@@ -201,7 +201,7 @@ test('it restores wrestler with complex status history', function () {
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
     expect($wrestler->currentRetirement()->exists())->toBeFalse();
     expect($wrestler->currentSuspension()->exists())->toBeFalse();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 });
 
 test('it allows wrestler to be re-employed after restoration', function () {

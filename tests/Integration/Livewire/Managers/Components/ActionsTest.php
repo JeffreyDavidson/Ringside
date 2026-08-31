@@ -145,7 +145,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($this->manager)->isInjured())->toBeTrue();
+            expect(freshModel($this->manager)->currentInjury()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Manager injury recorded.');
             expect(true)->toBeTrue();
         });
@@ -177,7 +177,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($injuredManager)->isInjured())->toBeFalse();
+            expect(freshModel($injuredManager)->currentInjury()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Manager cleared from injury.');
             expect(true)->toBeTrue();
         });
@@ -350,11 +350,11 @@ describe('ManagersActions Integration Tests', function () {
 
             // Injure (managers can get injured backstage, traveling, etc.)
             $component->call('injure');
-            expect(freshModel($manager)->isInjured())->toBeTrue();
+            expect(freshModel($manager)->currentInjury()->exists())->toBeTrue();
 
             // Clear from injury
             $component->call('clearFromInjury');
-            expect(freshModel($manager)->isInjured())->toBeFalse();
+            expect(freshModel($manager)->currentInjury()->exists())->toBeFalse();
 
             // Suspend (for misconduct, contract violations, etc.)
             $component->call('suspend');
@@ -386,7 +386,7 @@ describe('ManagersActions Integration Tests', function () {
 
             // Manager is employed but injured
             expect($injuredManager->currentEmployment()->exists())->toBeTrue();
-            expect($injuredManager->isInjured())->toBeTrue();
+            expect($injuredManager->currentInjury()->exists())->toBeTrue();
 
             // Cannot suspend injured manager without injury clearance first
             $component->call('suspend');
@@ -394,7 +394,7 @@ describe('ManagersActions Integration Tests', function () {
 
             // Can clear from injury first, then suspend
             $component->call('clearFromInjury');
-            expect(freshModel($injuredManager)->isInjured())->toBeFalse();
+            expect(freshModel($injuredManager)->currentInjury()->exists())->toBeFalse();
 
             $component->call('suspend');
             expect(freshModel($injuredManager)->currentSuspension()->exists())->toBeTrue();

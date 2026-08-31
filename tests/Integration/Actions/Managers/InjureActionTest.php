@@ -16,12 +16,12 @@ test('it injures an employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed while injured
 
     $this->assertDatabaseHas('injuries', [
@@ -39,7 +39,7 @@ test('it injures manager with specific injury date', function () {
     resolve(InjureAction::class)->handle($manager, $injuryDate);
 
     $manager->refresh();
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $manager->id,
@@ -60,7 +60,7 @@ test('it persists the injury lifecycle', function () {
 
     // Verify injury period was created
     expect($manager->currentInjury)->not()->toBeNull();
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
 
     // Verify injury record shows proper start date
     $this->assertDatabaseHas('injuries', [
@@ -74,7 +74,7 @@ test('it persists the injury lifecycle', function () {
 test('it prevents injuring already injured manager', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
 
     expect(fn () => resolve(InjureAction::class)->handle($manager))
         ->toThrow(Exception::class);
@@ -97,7 +97,7 @@ test('it handles database transactions correctly', function () {
     $manager->refresh();
 
     // Verify the transaction was successful
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
 
     // Verify injury record integrity
     $injury = $manager->currentInjury()->firstOrFail();
@@ -110,7 +110,7 @@ test('it maintains employment status during injury', function () {
     $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($manager);
 
@@ -118,7 +118,7 @@ test('it maintains employment status during injury', function () {
 
     // Should maintain employment while adding injury
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
 
     // Employment record should remain unchanged
     $employment = $manager->currentEmployment()->firstOrFail();
@@ -130,7 +130,7 @@ test('it prevents injuring a suspended manager', function () {
     $manager = Manager::factory()->suspended()->create();
 
     expect($manager->currentSuspension()->exists())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     expect(fn () => resolve(InjureAction::class)->handle($manager))
         ->toThrow(CannotBeInjuredException::class);
@@ -138,7 +138,7 @@ test('it prevents injuring a suspended manager', function () {
     $manager->refresh();
 
     expect($manager->currentSuspension()->exists())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 });
 

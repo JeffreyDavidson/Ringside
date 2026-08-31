@@ -93,14 +93,14 @@ describe('Wrestler Employment Workflows', function () {
             resolve(InjureAction::class)->handle($employed, Carbon::now());
             $injured = freshModel($wrestler);
             expect($injured->currentEmployment()->exists())->toBeTrue(); // Still employed
-            expect($injured->isInjured())->toBeTrue();
+            expect($injured->currentInjury()->exists())->toBeTrue();
             expect(RosterBookingEligibility::allows($injured))->toBeFalse(); // Not bookable when injured
 
             // Clear wrestler from injury
             resolve(ClearFromInjuryAction::class)->handle($injured, Carbon::now());
             $cleared = freshModel($wrestler);
             expect($cleared->currentEmployment()->exists())->toBeTrue();
-            expect($cleared->isInjured())->toBeFalse();
+            expect($cleared->currentInjury()->exists())->toBeFalse();
             expect(RosterBookingEligibility::allows($cleared))->toBeTrue(); // Bookable again
         });
 
@@ -173,11 +173,11 @@ describe('Wrestler Employment Workflows', function () {
             resolve(InjureAction::class)->handle($wrestler, Carbon::now()->subMonths(6));
             $injured = freshModel($wrestler);
             expect($injured->currentEmployment()->exists())->toBeTrue();
-            expect($injured->isInjured())->toBeTrue();
+            expect($injured->currentInjury()->exists())->toBeTrue();
 
             // 5. Clear from injury
             resolve(ClearFromInjuryAction::class)->handle($wrestler, Carbon::now()->subMonths(4));
-            expect(freshModel($wrestler)->isInjured())->toBeFalse();
+            expect(freshModel($wrestler)->currentInjury()->exists())->toBeFalse();
             expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
 
             // 6. Retire
@@ -244,7 +244,7 @@ describe('Wrestler Employment Workflows', function () {
             $injured = freshModel($wrestler);
             expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($injured))->toBeFalse();
             expect($injured->currentEmployment()->exists())->toBeTrue();
-            expect($injured->isInjured())->toBeTrue();
+            expect($injured->currentInjury()->exists())->toBeTrue();
 
             resolve(ClearFromInjuryAction::class)->handle($injured, Carbon::now());
             $cleared = freshModel($wrestler);
@@ -252,14 +252,14 @@ describe('Wrestler Employment Workflows', function () {
             $suspended = freshModel($wrestler);
             expect(resolve(IndividualInjuryEligibility::class)->canInjure($suspended))->toBeFalse();
             expect($suspended->currentEmployment()->exists())->toBeTrue();
-            expect($suspended->isInjured())->toBeFalse();
+            expect($suspended->currentInjury()->exists())->toBeFalse();
             expect($suspended->currentSuspension()->exists())->toBeTrue();
 
             // Reinstate, then test retired wrestler cannot be employed
             resolve(ReinstateAction::class)->handle($suspended, Carbon::now());
             $reinstated = freshModel($wrestler);
             expect($reinstated->currentSuspension()->exists())->toBeFalse();
-            expect($reinstated->isInjured())->toBeFalse();
+            expect($reinstated->currentInjury()->exists())->toBeFalse();
             expect($reinstated->currentEmployment()->exists())->toBeTrue();
 
             resolve(RetireAction::class)->handle($reinstated, Carbon::now());

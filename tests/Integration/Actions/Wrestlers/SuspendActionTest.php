@@ -178,14 +178,14 @@ test('it prevents suspending an injured wrestler', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
         ->toThrow(CannotBeSuspendedException::class);
 
     $wrestler->refresh();
 
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
     expect($wrestler->currentSuspension()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 });

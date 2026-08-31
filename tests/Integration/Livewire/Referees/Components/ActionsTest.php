@@ -145,7 +145,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($this->referee)->isInjured())->toBeTrue();
+            expect(freshModel($this->referee)->currentInjury()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Referee injury recorded.');
             expect(true)->toBeTrue();
         });
@@ -177,7 +177,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($injuredReferee)->isInjured())->toBeFalse();
+            expect(freshModel($injuredReferee)->currentInjury()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Referee cleared from injury.');
             expect(true)->toBeTrue();
         });
@@ -350,11 +350,11 @@ describe('RefereesActions Integration Tests', function () {
 
             // Injure (referee injury during match)
             $component->call('injure');
-            expect(freshModel($referee)->isInjured())->toBeTrue();
+            expect(freshModel($referee)->currentInjury()->exists())->toBeTrue();
 
             // Clear from injury
             $component->call('clearFromInjury');
-            expect(freshModel($referee)->isInjured())->toBeFalse();
+            expect(freshModel($referee)->currentInjury()->exists())->toBeFalse();
 
             // Suspend (for poor performance, missed calls, etc.)
             $component->call('suspend');
@@ -386,7 +386,7 @@ describe('RefereesActions Integration Tests', function () {
 
             // Referee is employed but injured (not available for matches)
             expect($injuredReferee->currentEmployment()->exists())->toBeTrue();
-            expect($injuredReferee->isInjured())->toBeTrue();
+            expect($injuredReferee->currentInjury()->exists())->toBeTrue();
 
             // Cannot suspend injured referee without injury clearance first
             $component->call('suspend');
@@ -395,7 +395,7 @@ describe('RefereesActions Integration Tests', function () {
 
             // Can clear from injury first, then suspend
             $component->call('clearFromInjury');
-            expect(freshModel($injuredReferee)->isInjured())->toBeFalse();
+            expect(freshModel($injuredReferee)->currentInjury()->exists())->toBeFalse();
 
             $component->call('suspend');
             expect(freshModel($injuredReferee)->currentSuspension()->exists())->toBeTrue();
@@ -453,14 +453,14 @@ describe('RefereesActions Integration Tests', function () {
 
             // Both can be injured, suspended, etc.
             $juniorComponent->call('injure');
-            expect(freshModel($juniorReferee)->isInjured())->toBeTrue();
+            expect(freshModel($juniorReferee)->currentInjury()->exists())->toBeTrue();
 
             $seniorComponent->call('suspend');
             expect(freshModel($seniorReferee)->currentSuspension()->exists())->toBeTrue();
 
             // Both can be restored to active status
             $juniorComponent->call('clearFromInjury');
-            expect(freshModel($juniorReferee)->isInjured())->toBeFalse();
+            expect(freshModel($juniorReferee)->currentInjury()->exists())->toBeFalse();
 
             $seniorComponent->call('reinstate');
             expect(freshModel($seniorReferee)->currentSuspension()->exists())->toBeFalse();

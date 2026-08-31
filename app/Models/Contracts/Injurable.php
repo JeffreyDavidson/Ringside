@@ -22,6 +22,4 @@ interface Injurable
 
     /** @return MorphOne<Injury, TModel> */
     public function currentInjury(): MorphOne;
-
-    public function isInjured(): bool;
 }

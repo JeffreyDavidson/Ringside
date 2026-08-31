@@ -65,7 +65,7 @@ describe('wrestler factory states', function () {
     test('wrestler factory can create injured wrestlers', function () {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        expect($wrestler->isInjured())->toBeTrue();
+        expect($wrestler->currentInjury()->exists())->toBeTrue();
         expect($wrestler->currentEmployment()->exists())->toBeTrue();
         expect($wrestler->employments()->whereNull('ended_at')->count())->toBe(1);
     });

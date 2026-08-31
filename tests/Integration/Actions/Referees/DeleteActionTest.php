@@ -118,7 +118,7 @@ test('it ends injury before deletion', function () {
     $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);

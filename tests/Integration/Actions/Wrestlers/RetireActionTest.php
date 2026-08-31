@@ -196,13 +196,13 @@ test('it can retire injured wrestler', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     resolve(RetireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->currentRetirement()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Employment should end
 
     $this->assertDatabaseHas('retirements', [

@@ -165,13 +165,13 @@ test('it can release injured wrestler', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Should no longer be employed
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,

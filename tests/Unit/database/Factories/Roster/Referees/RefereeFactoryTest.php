@@ -78,7 +78,7 @@ describe('RefereeFactory Unit Tests', function () {
         test('injured state creates exactly one active employment', function () {
             $referee = Referee::factory()->injured()->create();
 
-            expect($referee->isInjured())->toBeTrue();
+            expect($referee->currentInjury()->exists())->toBeTrue();
             expect($referee->currentEmployment()->exists())->toBeTrue();
             expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
         });

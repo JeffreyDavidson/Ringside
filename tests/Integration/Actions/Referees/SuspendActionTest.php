@@ -94,7 +94,7 @@ test('it prevents suspending an injured referee', function () {
 
     $referee->refresh();
 
-    expect($referee->isInjured())->toBeTrue()
+    expect($referee->currentInjury()->exists())->toBeTrue()
         ->and($referee->currentSuspension()->exists())->toBeFalse()
         ->and($referee->currentEmployment()->exists())->toBeTrue();
 });

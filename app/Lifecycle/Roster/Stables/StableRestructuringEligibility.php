@@ -103,7 +103,7 @@ final class StableRestructuringEligibility
         $unavailableWrestlers = $members->wrestlers?->filter(
             fn (Wrestler $wrestler): bool => ! $wrestler->currentEmployment()->exists()
                 || $wrestler->currentSuspension()->exists()
-                || $wrestler->isInjured()
+                || $wrestler->currentInjury()->exists()
                 || $wrestler->currentRetirement()->exists(),
         )->map(fn (Wrestler $wrestler): string => $wrestler->name)->all() ?? [];
 

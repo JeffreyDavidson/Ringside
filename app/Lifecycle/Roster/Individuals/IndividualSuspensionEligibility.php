@@ -42,7 +42,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeSuspendedException::hasFutureEmployment($individual);
         }
 
-        if ($individual->isInjured()) {
+        if ($individual->currentInjury()->exists()) {
             throw CannotBeSuspendedException::injured($individual);
         }
 
@@ -64,7 +64,7 @@ final class IndividualSuspensionEligibility
 
     public function ensureCanReinstate(Wrestler|Manager|Referee $individual): void
     {
-        if ($individual->isInjured()) {
+        if ($individual->currentInjury()->exists()) {
             throw CannotBeReinstatedException::injured($individual);
         }
 

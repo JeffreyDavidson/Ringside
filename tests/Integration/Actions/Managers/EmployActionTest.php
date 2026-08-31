@@ -81,7 +81,7 @@ test('it employs suspended manager and ends suspension', function () {
 test('it employs injured manager and ends injury', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($manager))
