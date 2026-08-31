@@ -44,16 +44,23 @@ class TitleChampionshipBuilder extends Builder
 
     public function forWrestlerId(int $wrestlerId): static
     {
-        return $this
-            ->where('champion_type', (new Wrestler())->getMorphClass())
-            ->where('champion_id', $wrestlerId);
+        return $this->forChampionId($wrestlerId, Wrestler::class);
     }
 
     public function forTagTeamId(int $tagTeamId): static
     {
-        return $this
-            ->where('champion_type', (new TagTeam())->getMorphClass())
-            ->where('champion_id', $tagTeamId);
+        return $this->forChampionId($tagTeamId, TagTeam::class);
+    }
+
+    /**
+     * @param  class-string<TagTeam|Wrestler>  $championType
+     */
+    private function forChampionId(int $championId, string $championType): static
+    {
+        $this->where('champion_type', (new $championType())->getMorphClass())
+            ->where('champion_id', $championId);
+
+        return $this;
     }
 
     public function forPreviousHistory(): static
