@@ -10,7 +10,6 @@ use App\Exceptions\Roster\Stables\CannotBeUnretiredException;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Database\Eloquent\Builder;
 
 final class StableRetirementEligibility
 {
@@ -66,7 +65,7 @@ final class StableRetirementEligibility
         $conflictingStable = Stable::query()
             ->whereName($stable->name)
             ->whereKeyNot($stable->getKey())
-            ->whereHas('activityPeriods', fn (Builder $query): Builder => $query->whereNull('ended_at'))
+            ->whereRelation('activityPeriods', 'ended_at', null)
             ->first();
 
         if ($conflictingStable) {
