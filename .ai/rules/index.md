@@ -11,6 +11,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Actions/Matches/** | .ai/rules/actions-matches.md |
 | app/Actions/** | .ai/rules/actions.md |
 | app/** | .ai/rules/app.md |
+| app/Lifecycle/Roster/Booking/** | .ai/rules/booking.md |
 | tests/Browser/** | .ai/rules/browser.md |
 | app/Builders/** | .ai/rules/builders.md |
 | app/Models/{Concerns,Contracts}/** | .ai/rules/concerns-contracts.md |

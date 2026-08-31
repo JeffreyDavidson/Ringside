@@ -13,12 +13,14 @@ use App\Models\Titles\Title;
 
 final class MatchFormDummyData
 {
+    public function __construct(private readonly RosterBookingEligibility $bookingEligibility) {}
+
     public function fill(CreateEditForm $form): void
     {
         $wrestlerIds = Wrestler::query()
             ->employed()
             ->get()
-            ->filter(fn (Wrestler $wrestler): bool => RosterBookingEligibility::allows($wrestler))
+            ->filter(fn (Wrestler $wrestler): bool => $this->bookingEligibility->allows($wrestler))
             ->shuffle()
             ->take(2)
             ->map(fn (Wrestler $wrestler): int => $wrestler->id)
@@ -27,7 +29,7 @@ final class MatchFormDummyData
         $refereeIds = Referee::query()
             ->employed()
             ->get()
-            ->filter(fn (Referee $referee): bool => RosterBookingEligibility::allows($referee))
+            ->filter(fn (Referee $referee): bool => $this->bookingEligibility->allows($referee))
             ->shuffle()
             ->take(1)
             ->map(fn (Referee $referee): int => $referee->id)

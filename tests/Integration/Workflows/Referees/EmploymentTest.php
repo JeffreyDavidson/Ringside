@@ -119,19 +119,19 @@ describe('Referee Employment Workflows', function () {
             // Verify business rule compliance
             expect($refreshedReferee->currentEmployment()->exists())->toBeTrue();
             expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($refreshedReferee))->toBeFalse(); // Already employed
-            expect(RosterBookingEligibility::allows($refreshedReferee))->toBeTrue(); // Can be booked when employed
+            expect(resolve(RosterBookingEligibility::class)->allows($refreshedReferee))->toBeTrue(); // Can be booked when employed
         });
 
         test('employment enables officiating capability', function () {
             $referee = Referee::factory()->released()->create();
 
             // Released referee should not be bookable
-            expect(RosterBookingEligibility::allows($referee))->toBeFalse();
+            expect(resolve(RosterBookingEligibility::class)->allows($referee))->toBeFalse();
 
             resolve(EmployAction::class)->handle($referee, Carbon::now());
 
             // Employed referee should be bookable
-            expect(RosterBookingEligibility::allows(freshModel($referee)))->toBeTrue();
+            expect(resolve(RosterBookingEligibility::class)->allows(freshModel($referee)))->toBeTrue();
         });
 
         test('complex multi-action employment workflows maintain data consistency', function () {

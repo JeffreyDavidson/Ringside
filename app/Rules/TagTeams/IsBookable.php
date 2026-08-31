@@ -15,7 +15,7 @@ class IsBookable implements ValidationRule
     {
         $tagTeam = TagTeam::find($value);
 
-        if (! $tagTeam instanceof TagTeam || ! RosterBookingEligibility::allows($tagTeam)) {
+        if (! $tagTeam instanceof TagTeam || ! resolve(RosterBookingEligibility::class)->allows($tagTeam)) {
             $fail('This tag team is not available for booking.');
         }
     }
