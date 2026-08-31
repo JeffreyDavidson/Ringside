@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Matches;
 
+use App\Collections\MatchCompetitorsCollection;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
@@ -44,9 +45,13 @@ final class MatchAssignmentConflictService
             ->whereBelongsTo($event)
             ->with(['competitors.competitor', 'referees', 'titles'])
             ->get();
-        $competitors = $matches->flatMap->competitors->pluck('competitor');
-        $wrestlers = $competitors->filter(fn (mixed $competitor): bool => $competitor instanceof Wrestler)->values();
-        $tagTeams = $competitors->filter(fn (mixed $competitor): bool => $competitor instanceof TagTeam)->values();
+        $competitors = new MatchCompetitorsCollection(
+            $matches
+                ->flatMap(fn (EventMatch $match): array => $match->competitors->all())
+                ->all(),
+        );
+        $wrestlers = $competitors->wrestlers();
+        $tagTeams = $competitors->tagTeams();
         $referees = $matches->flatMap->referees->unique('id')->values();
         $titles = $matches->flatMap->titles->unique('id')->values();
 
