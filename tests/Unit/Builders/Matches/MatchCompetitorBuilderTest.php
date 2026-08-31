@@ -26,7 +26,7 @@ it('filters competitor records by model type and identifiers', function () {
     ]);
 
     $records = MatchCompetitor::query()
-        ->forCompetitorIds(Wrestler::class, collect([$wrestler->id]))
+        ->forWrestlerIds(collect([$wrestler->id]))
         ->get();
 
     expect($records)->toHaveCount(1)

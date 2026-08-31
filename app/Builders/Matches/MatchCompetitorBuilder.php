@@ -19,13 +19,34 @@ use Illuminate\Support\Collection;
 class MatchCompetitorBuilder extends Builder
 {
     /**
+     * @param  Collection<int, int>  $wrestlerIds
+     */
+    public function forWrestlerIds(Collection $wrestlerIds): static
+    {
+        return $this->forCompetitorIds(Wrestler::class, $wrestlerIds);
+    }
+
+    /**
+     * @param  Collection<int, int>  $tagTeamIds
+     */
+    public function forTagTeamIds(Collection $tagTeamIds): static
+    {
+        return $this->forCompetitorIds(TagTeam::class, $tagTeamIds);
+    }
+
+    /**
      * @param  class-string<TagTeam|Wrestler>  $competitorType
      * @param  Collection<int, int>  $competitorIds
      */
-    public function forCompetitorIds(string $competitorType, Collection $competitorIds): static
+    private function forCompetitorIds(string $competitorType, Collection $competitorIds): static
     {
-        $this->where('competitor_type', (new $competitorType())->getMorphClass())
-            ->whereIn('competitor_id', $competitorIds);
+        $this->whereHasMorph(
+            'competitor',
+            $competitorType,
+            function (Builder $query) use ($competitorIds): void {
+                $query->whereKey($competitorIds);
+            },
+        );
 
         return $this;
     }
