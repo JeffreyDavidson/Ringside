@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use App\Enums\Lifecycle\LifecycleOwnerType;
+
 enum MatchType: string
 {
     case Singles = 'singles';
@@ -70,8 +72,8 @@ enum MatchType: string
             self::TagTeam, self::TornadoTagTeam, self::SixManTagTeam,
             self::EightManTagTeam, self::TenManTagTeam, self::TripleThreat,
             self::Fatal4Way, self::TwoOnOneHandicap, self::ThreeOnTwoHandicap,
-            self::Gauntlet => ['wrestler', 'tag_team'],
-            default => ['wrestler'],
+            self::Gauntlet => [LifecycleOwnerType::Wrestler->value, LifecycleOwnerType::TagTeam->value],
+            default => [LifecycleOwnerType::Wrestler->value],
         };
     }
 
@@ -115,7 +117,7 @@ enum MatchType: string
      */
     public function allowsWrestlers(): bool
     {
-        return in_array('wrestler', $this->getAllowedCompetitorTypes(), true);
+        return in_array(LifecycleOwnerType::Wrestler->value, $this->getAllowedCompetitorTypes(), true);
     }
 
     /**
@@ -123,7 +125,7 @@ enum MatchType: string
      */
     public function allowsTagTeams(): bool
     {
-        return in_array('tag_team', $this->getAllowedCompetitorTypes(), true);
+        return in_array(LifecycleOwnerType::TagTeam->value, $this->getAllowedCompetitorTypes(), true);
     }
 
     /**
