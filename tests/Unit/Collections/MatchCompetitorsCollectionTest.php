@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 it('groups competitor models by ordered side position', function () {
@@ -38,4 +39,25 @@ it('groups competitor models by ordered side position', function () {
     expect($competitorsBySide->keys()->all())->toBe([1, 2])
         ->and($competitorsBySide->get(1)?->pluck('id')->all())->toBe($partners->pluck('id')->all())
         ->and($competitorsBySide->get(2)?->pluck('id')->all())->toBe([$opponent->id]);
+});
+
+it('partitions competitor models by roster type', function () {
+    $match = EventMatch::factory()->create();
+    $side = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
+    $wrestler = Wrestler::factory()->create();
+    $tagTeam = TagTeam::factory()->create();
+
+    foreach ([$wrestler, $tagTeam] as $competitor) {
+        MatchCompetitor::factory()->create([
+            'match_id' => $match->id,
+            'match_side_id' => $side->id,
+            'competitor_type' => $competitor->getMorphClass(),
+            'competitor_id' => $competitor->id,
+        ]);
+    }
+
+    $competitors = $match->competitors()->with('competitor')->get();
+
+    expect($competitors->wrestlers()->pluck('id')->all())->toBe([$wrestler->id])
+        ->and($competitors->tagTeams()->pluck('id')->all())->toBe([$tagTeam->id]);
 });

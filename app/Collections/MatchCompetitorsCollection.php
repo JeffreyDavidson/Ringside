@@ -13,6 +13,22 @@ use Illuminate\Support\Collection as BaseCollection;
 /** @extends Collection<int, MatchCompetitor> */
 class MatchCompetitorsCollection extends Collection
 {
+    /** @return BaseCollection<int, Wrestler> */
+    public function wrestlers(): BaseCollection
+    {
+        return $this->competitorModels()
+            ->filter(fn (Wrestler|TagTeam $competitor): bool => $competitor instanceof Wrestler)
+            ->values();
+    }
+
+    /** @return BaseCollection<int, TagTeam> */
+    public function tagTeams(): BaseCollection
+    {
+        return $this->competitorModels()
+            ->filter(fn (Wrestler|TagTeam $competitor): bool => $competitor instanceof TagTeam)
+            ->values();
+    }
+
     /** @return BaseCollection<int, BaseCollection<int, Wrestler|TagTeam>> */
     public function competitorModelsBySidePosition(): BaseCollection
     {
@@ -22,5 +38,11 @@ class MatchCompetitorsCollection extends Collection
             ->map(fn (BaseCollection $competitors): BaseCollection => $competitors
                 ->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor)
                 ->values());
+    }
+
+    /** @return BaseCollection<int, Wrestler|TagTeam> */
+    private function competitorModels(): BaseCollection
+    {
+        return $this->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor);
     }
 }
