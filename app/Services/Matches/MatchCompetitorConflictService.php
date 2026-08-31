@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Matches;
 
+use App\Builders\Matches\MatchCompetitorBuilder;
 use App\Exceptions\Scheduling\SchedulingConflictException;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Closure;
 use Illuminate\Support\Collection;
 
 final class MatchCompetitorConflictService
@@ -21,7 +23,8 @@ final class MatchCompetitorConflictService
         $this->ensureCompetitorsCanBeAssigned(
             $conflictingEventIds,
             $wrestlers,
-            Wrestler::class,
+            fn (Collection $competitorIds): MatchCompetitorBuilder => MatchCompetitor::query()
+                ->forWrestlerIds($competitorIds),
             'Wrestler',
         );
     }
@@ -35,7 +38,8 @@ final class MatchCompetitorConflictService
         $this->ensureCompetitorsCanBeAssigned(
             $conflictingEventIds,
             $tagTeams,
-            TagTeam::class,
+            fn (Collection $competitorIds): MatchCompetitorBuilder => MatchCompetitor::query()
+                ->forTagTeamIds($competitorIds),
             'Tag team',
         );
     }
@@ -43,19 +47,17 @@ final class MatchCompetitorConflictService
     /**
      * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Wrestler>|Collection<int, TagTeam>  $competitors
-     * @param  class-string<Wrestler|TagTeam>  $competitorType
+     * @param  Closure(Collection<int, int>): MatchCompetitorBuilder<MatchCompetitor>  $queryForCompetitors
      */
     private function ensureCompetitorsCanBeAssigned(
         Collection $conflictingEventIds,
         Collection $competitors,
-        string $competitorType,
+        Closure $queryForCompetitors,
         string $entityType,
     ): void {
-        $conflictingCompetitor = MatchCompetitor::query()
-            ->forCompetitorIds(
-                $competitorType,
-                $competitors->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id),
-            )
+        $conflictingCompetitor = $queryForCompetitors(
+            $competitors->map(fn (Wrestler|TagTeam $competitor): int => $competitor->id),
+        )
             ->forEventIds($conflictingEventIds)
             ->first(['competitor_id']);
 
