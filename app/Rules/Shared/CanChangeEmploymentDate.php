@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Shared;
 
+use App\Builders\Lifecycle\LifecyclePeriodBuilder;
 use App\Models\Contracts\Employable;
 use Closure;
 use DateTimeInterface;
@@ -39,7 +40,10 @@ class CanChangeEmploymentDate implements ValidationRule
             return;
         }
 
-        if (! $this->model->employedOn($targetDate)) {
+        $query = $this->model->employments()->getQuery();
+        LifecyclePeriodBuilder::constrainToActiveOn($query, $targetDate);
+
+        if (! $query->exists()) {
             $modelName = $this->getModelName($this->model);
             $fail("The employment date cannot be changed while {$modelName} is currently employed.");
         }

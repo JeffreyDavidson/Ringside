@@ -6,7 +6,6 @@ namespace App\Models\Contracts;
 
 use App\Models\Concerns\IsEmployable;
 use App\Models\Lifecycle\Employment;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -32,6 +31,4 @@ interface Employable
      * @return MorphOne<Employment, TModel>
      */
     public function futureEmployment(): MorphOne;
-
-    public function employedOn(DateTimeInterface $date): bool;
 }
