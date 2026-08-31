@@ -17,6 +17,7 @@ class AddTagTeamsToMatchAction
 {
     public function __construct(
         protected MatchAssignmentConflictService $conflictService,
+        private readonly RosterBookingEligibility $bookingEligibility,
     ) {}
 
     /**
@@ -83,7 +84,7 @@ class AddTagTeamsToMatchAction
             ->get();
 
         if ($lockedTagTeams->count() !== $requestedTagTeams->count() || $lockedTagTeams->contains(
-            fn (TagTeam $tagTeam): bool => ! RosterBookingEligibility::allows($tagTeam)
+            fn (TagTeam $tagTeam): bool => ! $this->bookingEligibility->allows($tagTeam)
         )) {
             throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }

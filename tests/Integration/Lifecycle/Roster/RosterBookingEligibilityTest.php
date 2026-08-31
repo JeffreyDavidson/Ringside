@@ -10,7 +10,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 test('a tag team must satisfy its own roster state requirements', function (string $factoryState, bool $eligible) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();
 
-    expect(RosterBookingEligibility::allows($tagTeam))->toBe($eligible);
+    expect(resolve(RosterBookingEligibility::class)->allows($tagTeam))->toBe($eligible);
 })->with([
     'available' => ['bookable', true],
     'future employed' => ['withFutureEmployment', false],
@@ -27,7 +27,7 @@ test('a tag team requires at least two current wrestlers', function () {
     $tagTeam->currentWrestlers()->updateExistingPivot($wrestler, ['left_at' => now()]);
     $tagTeam->refresh();
 
-    expect(RosterBookingEligibility::allows($tagTeam))->toBeFalse();
+    expect(resolve(RosterBookingEligibility::class)->allows($tagTeam))->toBeFalse();
 });
 
 test('a roster member with future employment is not bookable', function () {
@@ -35,7 +35,7 @@ test('a roster member with future employment is not bookable', function () {
 
     expect($wrestler->status)->toBe(EmploymentStatus::FutureEmployment)
         ->and($wrestler->futureEmployment()->exists())->toBeTrue()
-        ->and(RosterBookingEligibility::allows($wrestler))->toBeFalse();
+        ->and(resolve(RosterBookingEligibility::class)->allows($wrestler))->toBeFalse();
 });
 
 test('every current tag team wrestler must be eligible', function () {
@@ -45,5 +45,5 @@ test('every current tag team wrestler must be eligible', function () {
     $wrestler->currentEmployment()->firstOrFail()->update(['ended_at' => now()]);
     $tagTeam->refresh();
 
-    expect(RosterBookingEligibility::allows($tagTeam))->toBeFalse();
+    expect(resolve(RosterBookingEligibility::class)->allows($tagTeam))->toBeFalse();
 });

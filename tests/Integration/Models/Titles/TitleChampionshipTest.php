@@ -486,7 +486,7 @@ describe('TitleChampionship Model', function () {
             $refreshedWrestler = freshModel($this->wrestler);
 
             expect($refreshedWrestler->currentInjury()->exists())->toBeTrue();
-            expect(RosterBookingEligibility::allows($refreshedWrestler))->toBeFalse();
+            expect(resolve(RosterBookingEligibility::class)->allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Injured champion may keep title or be stripped depending on promotion rules
             // For this test, assume they keep the title but can't defend it
@@ -508,7 +508,7 @@ describe('TitleChampionship Model', function () {
             $refreshedWrestler = freshModel($this->wrestler);
 
             expect($refreshedWrestler->status)->toBe(EmploymentStatus::Released);
-            expect(RosterBookingEligibility::allows($refreshedWrestler))->toBeFalse();
+            expect(resolve(RosterBookingEligibility::class)->allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Released wrestler should be stripped of championship
             $championship->refresh();

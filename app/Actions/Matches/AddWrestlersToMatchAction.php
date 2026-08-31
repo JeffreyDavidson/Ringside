@@ -18,6 +18,7 @@ class AddWrestlersToMatchAction
 {
     public function __construct(
         protected MatchAssignmentConflictService $conflictService,
+        private readonly RosterBookingEligibility $bookingEligibility,
     ) {}
 
     /**
@@ -82,7 +83,7 @@ class AddWrestlersToMatchAction
             ->get();
 
         if ($lockedWrestlers->count() !== $requestedWrestlers->count() || $lockedWrestlers->contains(
-            fn (Wrestler $wrestler): bool => ! RosterBookingEligibility::allows($wrestler)
+            fn (Wrestler $wrestler): bool => ! $this->bookingEligibility->allows($wrestler)
         )) {
             throw EntityNotAvailableException::forMatchAssignment('wrestlers');
         }

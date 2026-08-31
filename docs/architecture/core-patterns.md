@@ -60,7 +60,7 @@ single-consumer relationship traits or speculative override helpers.
 ## Factory Method Patterns
 - **Employable entities**: `employed()`, `unemployed()`, `retired()`, `released()`, `suspended()`, `injured()`
 - **Bookable fixtures**: Competitor and official factories may use `bookable()` to construct an eligible test fixture
-- **Persisted availability queries**: Roster builders use `available()` to select candidates; tag-team builders use explicit minimum-wrestler queries, and `RosterBookingEligibility` makes the final booking decision
+- **Persisted availability queries**: Roster builders use `available()` to select candidates; tag-team builders use explicit minimum-wrestler queries, and `RosterBookingEligibility` makes the final booking decision through the typed individual and tag-team booking strategies
 - **Non-bookable entities**: Managers and stables do not expose a `bookable()` factory state
 - **Activation entities**: `active()`, `inactive()`, `unactivated()`
 - **User entities**: `verified()`, `unverified()`

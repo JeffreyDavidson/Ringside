@@ -16,6 +16,7 @@ class AddRefereesToMatchAction
 {
     public function __construct(
         private readonly MatchAssignmentConflictService $conflictService,
+        private readonly RosterBookingEligibility $bookingEligibility,
     ) {}
 
     /**
@@ -81,7 +82,7 @@ class AddRefereesToMatchAction
             ->get();
 
         if ($lockedReferees->count() !== $requestedReferees->count() || $lockedReferees->contains(
-            fn (Referee $referee): bool => ! RosterBookingEligibility::allows($referee)
+            fn (Referee $referee): bool => ! $this->bookingEligibility->allows($referee)
         )) {
             throw EntityNotAvailableException::forMatchAssignment('referees');
         }

@@ -25,7 +25,8 @@ relationship-focused boundary.
 ### Lifecycle status consistency
 
 **Priority:** High  
-**Status:** Candidate.
+**Status:** In progress; roster booking now delegates type-specific decisions to
+focused strategies while preserving the shared status and relationship checks.
 
 Audit services that combine employment, injury, suspension, retirement, and
 activity checks. Keep domain-specific policies in their existing Lifecycle

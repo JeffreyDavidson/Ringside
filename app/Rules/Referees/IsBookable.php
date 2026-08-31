@@ -15,7 +15,7 @@ class IsBookable implements ValidationRule
     {
         $referee = Referee::query()->find($value);
 
-        if (! $referee instanceof Referee || ! RosterBookingEligibility::allows($referee)) {
+        if (! $referee instanceof Referee || ! resolve(RosterBookingEligibility::class)->allows($referee)) {
             $fail('This referee is not available to officiate matches.');
         }
     }
