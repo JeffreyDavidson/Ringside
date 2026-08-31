@@ -46,4 +46,39 @@ enum TitleType: string
     {
         return Relation::getMorphAlias($this->championModelClass());
     }
+
+    public function competitorInputKey(): string
+    {
+        return match ($this) {
+            self::Singles => 'wrestlers',
+            self::TagTeam => 'tag_teams',
+        };
+    }
+
+    public function opposingCompetitorInputKey(): string
+    {
+        return match ($this) {
+            self::Singles => self::TagTeam->competitorInputKey(),
+            self::TagTeam => self::Singles->competitorInputKey(),
+        };
+    }
+
+    public function competitorLabel(): string
+    {
+        return match ($this) {
+            self::Singles => 'wrestlers',
+            self::TagTeam => 'tag teams',
+        };
+    }
+
+    public static function tryFromChampionMorphClass(int|string $morphClass): ?self
+    {
+        foreach (self::cases() as $type) {
+            if ($type->championMorphClass() === $morphClass) {
+                return $type;
+            }
+        }
+
+        return null;
+    }
 }

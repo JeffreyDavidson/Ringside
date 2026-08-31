@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Rules\Titles;
 
-use App\Enums\Titles\TitleType;
 use App\Models\Titles\Title;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
@@ -39,25 +38,14 @@ class MatchesCompetitorType implements DataAwareRule, ValidationRule
             return;
         }
 
-        $expectedCompetitorKey = match ($title->type) {
-            TitleType::Singles => 'wrestlers',
-            TitleType::TagTeam => 'tag_teams',
-        };
-        $unexpectedCompetitorKey = match ($title->type) {
-            TitleType::Singles => 'tag_teams',
-            TitleType::TagTeam => 'wrestlers',
-        };
+        $expectedCompetitorKey = $title->type->competitorInputKey();
+        $unexpectedCompetitorKey = $title->type->opposingCompetitorInputKey();
 
         if ($this->hasCompetitors($expectedCompetitorKey) && ! $this->hasCompetitors($unexpectedCompetitorKey)) {
             return;
         }
 
-        $expectedCompetitor = match ($title->type) {
-            TitleType::Singles => 'wrestlers',
-            TitleType::TagTeam => 'tag teams',
-        };
-
-        $fail("The {$title->name} may only be contested by {$expectedCompetitor}.");
+        $fail("The {$title->name} may only be contested by {$title->type->competitorLabel()}.");
     }
 
     private function hasCompetitors(string $competitorKey): bool
