@@ -57,8 +57,13 @@ class TitleChampionshipBuilder extends Builder
      */
     private function forChampionId(int $championId, string $championType): static
     {
-        $this->where('champion_type', (new $championType())->getMorphClass())
-            ->where('champion_id', $championId);
+        $this->whereHasMorph(
+            'champion',
+            $championType,
+            function (Builder $query) use ($championId): void {
+                $query->whereKey($championId);
+            },
+        );
 
         return $this;
     }
