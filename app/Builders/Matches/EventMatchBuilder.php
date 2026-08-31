@@ -113,9 +113,8 @@ class EventMatchBuilder extends Builder
 
     public function forRefereeId(int $refereeId): static
     {
-        $this->whereHas('referees', function (Builder $query) use ($refereeId): void {
-            $query->whereKey($refereeId);
-        })->with('referees');
+        $this->whereRelation('referees', 'referees.id', $refereeId)
+            ->with('referees');
 
         return $this;
     }
