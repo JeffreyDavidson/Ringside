@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Rules\Titles;
 
-use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
+use App\Enums\Titles\TitleType;
 use App\Models\Titles\TitleChampionship;
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
@@ -39,11 +38,9 @@ class CurrentChampionIsCompeting implements DataAwareRule, ValidationRule
             return;
         }
 
-        $competitorKey = match ($currentChampionship->champion_type) {
-            Wrestler::query()->getModel()->getMorphClass() => 'wrestlers',
-            TagTeam::query()->getModel()->getMorphClass() => 'tag_teams',
-            default => null,
-        };
+        $competitorKey = TitleType::tryFromChampionMorphClass(
+            $currentChampionship->champion_type,
+        )?->competitorInputKey();
 
         if ($competitorKey !== null && $this->includesChampion($competitorKey, $currentChampionship->champion_id)) {
             return;
