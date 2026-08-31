@@ -6,6 +6,7 @@ namespace App\Livewire\Matches\Tables;
 
 use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Matches\Support\MatchCompetitorRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\ArrayColumn;
 use App\Livewire\Table\DataTableComponent;
@@ -60,6 +61,8 @@ class MatchesTable extends DataTableComponent
      */
     public function columns(): array
     {
+        $competitorRouteResolver = app(MatchCompetitorRouteResolver::class);
+
         return [
             Column::make(__('matches.match_type'), 'match_type')
                 ->label(fn (EventMatch $row) => $row->match_type->label())
@@ -67,12 +70,8 @@ class MatchesTable extends DataTableComponent
             Column::make(__('matches.competitors'))
                 ->label(fn (EventMatch $row): string => $row->competitors
                     ->competitorModelsBySidePosition()
-                    ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor): string {
-                        $routeName = $competitor instanceof Wrestler
-                            ? 'wrestlers.show'
-                            : 'tag-teams.show';
-
-                        return '<a href="'.route($routeName, $competitor).'">'.$competitor->name.'</a>';
+                    ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor) use ($competitorRouteResolver): string {
+                        return $competitorRouteResolver->link($competitor);
                     })->join(' & '))
                     ->join(' vs '))
                 ->html(),
@@ -92,18 +91,17 @@ class MatchesTable extends DataTableComponent
                 ->emptyValue('N/A'),
             Column::make(__('matches.result'))
                 ->label(
-                    function (EventMatch $row, Column $column): string {
+                    function (EventMatch $row, Column $column) use ($competitorRouteResolver): string {
                         if ($row->match_finish === null) {
                             return 'N/A';
                         }
 
                         if ($row->winningSide) {
                             $winners = $row->winningSide->competitors
-                                ->map(function (MatchCompetitor $competitor): string {
+                                ->map(function (MatchCompetitor $competitor) use ($competitorRouteResolver): string {
                                     $winner = $competitor->competitor;
-                                    $type = str($winner->getMorphClass())->kebab()->plural();
 
-                                    return '<a href="'.route($type.'.show', $winner->id).'">'.$winner->name.'</a>';
+                                    return $competitorRouteResolver->link($winner);
                                 })
                                 ->join(' & ');
 
