@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Matches;
 
+use App\Collections\MatchCompetitorsCollection;
 use App\Exceptions\Matches\InvalidMatchConfigurationException;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -40,8 +41,8 @@ final class MatchTitleRequirements
     /** @param Collection<int, Title> $titles */
     private function ensureCurrentChampionsCompete(EventMatch $match, Collection $titles): void
     {
-        $assignedCompetitors = $match->competitors()
-            ->get(['competitor_type', 'competitor_id']);
+        /** @var MatchCompetitorsCollection<int, MatchCompetitor> $assignedCompetitors */
+        $assignedCompetitors = $match->competitors()->get(['competitor_type', 'competitor_id']);
         $currentChampionships = TitleChampionship::query()
             ->whereIn('title_id', $titles->pluck('id'))
             ->current()
@@ -50,9 +51,9 @@ final class MatchTitleRequirements
             ->get(['id', 'title_id', 'champion_type', 'champion_id']);
 
         foreach ($currentChampionships as $championship) {
-            $championCompetes = $assignedCompetitors->contains(
-                fn (MatchCompetitor $competitor): bool => $competitor->competitor_type === $championship->champion_type
-                    && $competitor->competitor_id === $championship->champion_id,
+            $championCompetes = $assignedCompetitors->containsCompetitor(
+                $championship->champion_type,
+                $championship->champion_id,
             );
 
             if ($championCompetes) {

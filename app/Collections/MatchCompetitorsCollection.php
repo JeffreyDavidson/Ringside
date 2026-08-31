@@ -29,6 +29,15 @@ class MatchCompetitorsCollection extends Collection
             ->values();
     }
 
+    /**
+     * Determine whether a polymorphic competitor identity is present.
+     */
+    public function containsCompetitor(string $competitorType, int $competitorId): bool
+    {
+        return $this->contains(fn (MatchCompetitor $competitor): bool => $competitor->competitor_type === $competitorType
+            && $competitor->competitor_id === $competitorId);
+    }
+
     /** @return BaseCollection<int, BaseCollection<int, Wrestler|TagTeam>> */
     public function competitorModelsBySidePosition(): BaseCollection
     {
