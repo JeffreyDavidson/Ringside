@@ -96,11 +96,14 @@ class EventMatchBuilder extends Builder
      */
     private function forCompetitorId(int $competitorId, string $competitorType): static
     {
-        $competitor = new $competitorType();
-
-        $this->whereHas('competitors', function (Builder $query) use ($competitor, $competitorId): void {
-            $query->where('competitor_type', $competitor->getMorphClass())
-                ->where('competitor_id', $competitorId);
+        $this->whereHas('competitors', function (Builder $query) use ($competitorId, $competitorType): void {
+            $query->whereHasMorph(
+                'competitor',
+                $competitorType,
+                function (Builder $query) use ($competitorId): void {
+                    $query->whereKey($competitorId);
+                },
+            );
         })->with('competitors');
 
         return $this;
