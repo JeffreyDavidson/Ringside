@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Roster;
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\Roster\TagTeams\TagTeamMembershipRequirements;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
@@ -13,16 +14,12 @@ final class RosterBookingEligibility
 {
     public static function allows(Wrestler|Referee|TagTeam $rosterMember): bool
     {
-        if ($rosterMember instanceof TagTeam) {
-            if (
-                (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
-                || $rosterMember->currentSuspension()->exists()
-                || $rosterMember->currentRetirement()->exists()
-                || $rosterMember->futureEmployment()->exists()
-            ) {
-                return false;
-            }
+        if ($rosterMember->status !== EmploymentStatus::Employed
+            || $rosterMember->currentSuspension()->exists()) {
+            return false;
+        }
 
+        if ($rosterMember instanceof TagTeam) {
             $currentWrestlers = $rosterMember->currentWrestlers;
 
             return TagTeamMembershipRequirements::hasMinimumCurrentWrestlers($currentWrestlers)
@@ -31,11 +28,6 @@ final class RosterBookingEligibility
                 );
         }
 
-        return ! (
-            (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
-            || $rosterMember->currentSuspension()->exists()
-            || $rosterMember->currentInjury()->exists()
-            || $rosterMember->futureEmployment()->exists()
-        );
+        return ! $rosterMember->currentInjury()->exists();
     }
 }

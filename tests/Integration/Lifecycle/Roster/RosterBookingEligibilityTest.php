@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 
 test('a tag team must satisfy its own roster state requirements', function (string $factoryState, bool $eligible) {
     $tagTeam = TagTeam::factory()->{$factoryState}()->create();
@@ -26,6 +28,14 @@ test('a tag team requires at least two current wrestlers', function () {
     $tagTeam->refresh();
 
     expect(RosterBookingEligibility::allows($tagTeam))->toBeFalse();
+});
+
+test('a roster member with future employment is not bookable', function () {
+    $wrestler = Wrestler::factory()->withFutureEmployment()->create();
+
+    expect($wrestler->status)->toBe(EmploymentStatus::FutureEmployment)
+        ->and($wrestler->futureEmployment()->exists())->toBeTrue()
+        ->and(RosterBookingEligibility::allows($wrestler))->toBeFalse();
 });
 
 test('every current tag team wrestler must be eligible', function () {
