@@ -59,7 +59,7 @@ test('it prevents deleting retired tag team', function () {
 test('it prevents deleting suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
         ->toThrow(CannotBeDeletedException::class);
@@ -143,7 +143,7 @@ test('it uses appropriate business rules for deletion', function () {
     // Tag team should be in a state that allows deletion
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
     expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($tagTeam);
 

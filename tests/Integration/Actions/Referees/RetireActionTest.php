@@ -116,7 +116,7 @@ test('it ends suspension before retiring', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 
     resolve(RetireAction::class)->handle($referee);
@@ -125,7 +125,7 @@ test('it ends suspension before retiring', function () {
     $suspension->refresh();
 
     expect($referee->currentRetirement()->exists())->toBeTrue();
-    expect($referee->isSuspended())->toBeFalse();
+    expect($referee->currentSuspension()->exists())->toBeFalse();
     expect($suspension->ended_at)->not->toBeNull();
 });
 

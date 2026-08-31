@@ -107,14 +107,14 @@ test('it retires suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     resolve(RetireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->currentRetirement()->exists())->toBeTrue();
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Verify suspension ended
     $this->assertDatabaseHas('suspensions', [

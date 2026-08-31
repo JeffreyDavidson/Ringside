@@ -380,7 +380,7 @@ test('it transitions from retired to employed seamlessly', function () {
     // Verify starting state
     expect($tagTeam->currentRetirement()->exists())->toBeTrue();
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($tagTeam);
 
@@ -389,7 +389,7 @@ test('it transitions from retired to employed seamlessly', function () {
     // Should transition to employed state
     expect($tagTeam->currentRetirement()->exists())->toBeFalse();
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Should have active employment and no active retirement
     expect($tagTeam->currentEmployment)->not()->toBeNull();

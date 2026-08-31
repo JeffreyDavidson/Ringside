@@ -90,7 +90,7 @@ test('it ends suspension before releasing', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 
     resolve(ReleaseAction::class)->handle($referee);
@@ -99,7 +99,7 @@ test('it ends suspension before releasing', function () {
     $suspension->refresh();
 
     expect($referee->currentEmployment()->exists())->toBeFalse();
-    expect($referee->isSuspended())->toBeFalse();
+    expect($referee->currentSuspension()->exists())->toBeFalse();
     expect($suspension->ended_at)->not->toBeNull();
 });
 
@@ -132,7 +132,7 @@ test('it maintains transaction boundaries', function () {
     $suspension->refresh();
 
     expect($referee->currentEmployment()->exists())->toBeFalse();
-    expect($referee->isSuspended())->toBeFalse();
+    expect($referee->currentSuspension()->exists())->toBeFalse();
     expect($employment->ended_at)->not->toBeNull();
     expect($suspension->ended_at)->not->toBeNull();
 });

@@ -29,7 +29,7 @@ final class IndividualRetirementPeriodService
             $this->employmentPeriods->end($individual, $retirementDate);
         }
 
-        if ($individual->isSuspended()) {
+        if ($individual->currentSuspension()->exists()) {
             $this->suspensionPeriods->end($individual, $retirementDate);
         } elseif ($individual->isInjured()) {
             $this->injuryPeriods->end($individual, $retirementDate);

@@ -59,9 +59,4 @@ trait IsSuspendable
 
         return $relation;
     }
-
-    public function isSuspended(): bool
-    {
-        return $this->currentSuspension()->exists();
-    }
 }

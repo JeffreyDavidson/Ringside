@@ -30,11 +30,11 @@ describe('IsSuspendable', function () {
     test('checks current suspension state', function () {
         $model = new SuspensionStateModel();
 
-        expect($model->isSuspended())->toBeFalse();
+        expect($model->currentSuspension()->exists())->toBeFalse();
 
         $model->currentSuspensionExists = true;
 
-        expect($model->isSuspended())->toBeTrue();
+        expect($model->currentSuspension()->exists())->toBeTrue();
     });
 
     test('constrains current and previous suspension relationships', function () {

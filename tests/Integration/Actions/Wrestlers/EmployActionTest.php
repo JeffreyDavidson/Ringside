@@ -49,7 +49,7 @@ test('it employs wrestler with specific employment date', function () {
 test('it employs suspended wrestler and ends suspension', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($wrestler))

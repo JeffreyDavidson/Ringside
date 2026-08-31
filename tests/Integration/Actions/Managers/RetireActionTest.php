@@ -67,14 +67,14 @@ test('it retires manager with specific retirement date', function () {
 test('it retires suspended manager and ends suspension', function () {
     $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 
     resolve(RetireAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->currentRetirement()->exists())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
     // Verify suspension was ended

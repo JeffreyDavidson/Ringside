@@ -35,7 +35,7 @@ final class TagTeamDeletionEligibility
             throw CannotBeDeletedException::stillEmployed($tagTeam);
         }
 
-        if ($tagTeam->isSuspended()) {
+        if ($tagTeam->currentSuspension()->exists()) {
             throw CannotBeDeletedException::stillSuspended($tagTeam);
         }
     }

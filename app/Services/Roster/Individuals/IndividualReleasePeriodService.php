@@ -25,7 +25,7 @@ final class IndividualReleasePeriodService
     {
         $this->employmentPeriods->end($individual, $releaseDate, LifecycleTransitionType::Released);
 
-        if ($individual->isSuspended()) {
+        if ($individual->currentSuspension()->exists()) {
             $this->suspensionPeriods->end($individual, $releaseDate);
         } elseif ($individual->isInjured()) {
             $this->injuryPeriods->end($individual, $releaseDate);

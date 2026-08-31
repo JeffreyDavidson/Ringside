@@ -86,7 +86,7 @@ describe('Referee Employment Workflows', function () {
 
             // Verify all state changes are consistent
             expect($suspended->currentEmployment()->exists())->toBeTrue(); // Still employed
-            expect($suspended->isSuspended())->toBeTrue(); // But suspended
+            expect($suspended->currentSuspension()->exists())->toBeTrue(); // But suspended
             expect($suspended->currentEmployment)->not()->toBeNull();
             expect($suspended->currentSuspension)->not()->toBeNull();
         });
@@ -146,13 +146,13 @@ describe('Referee Employment Workflows', function () {
             resolve(SuspendAction::class)->handle($employed, Carbon::now());
             $suspended = freshModel($referee);
             expect($suspended->currentEmployment()->exists())->toBeTrue();
-            expect($suspended->isSuspended())->toBeTrue();
+            expect($suspended->currentSuspension()->exists())->toBeTrue();
 
             resolve(ReleaseAction::class)->handle($suspended, Carbon::now());
             $released = freshModel($referee);
             expect($released->isReleased())->toBeTrue();
             expect($released->currentEmployment()->exists())->toBeFalse();
-            expect($released->isSuspended())->toBeFalse();
+            expect($released->currentSuspension()->exists())->toBeFalse();
         });
     });
 

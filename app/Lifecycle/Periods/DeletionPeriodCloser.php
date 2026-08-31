@@ -33,7 +33,7 @@ final class DeletionPeriodCloser
             $this->retirementPeriods->end($subject, $date);
         }
 
-        if ($subject->isSuspended()) {
+        if ($subject->currentSuspension()->exists()) {
             $this->suspensionPeriods->end($subject, $date);
         }
 

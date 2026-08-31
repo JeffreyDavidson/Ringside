@@ -64,7 +64,7 @@ class CanJoinStable implements ValidationRule
             return;
         }
 
-        if ($member->isSuspended()) {
+        if ($member->currentSuspension()->exists()) {
             $fail('This member is suspended and cannot join the stable.');
 
             return;

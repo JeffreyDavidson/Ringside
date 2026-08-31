@@ -169,7 +169,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($this->wrestler)->isSuspended())->toBeTrue();
+            expect(freshModel($this->wrestler)->currentSuspension()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler successfully suspended.');
             expect(true)->toBeTrue();
         });
@@ -198,7 +198,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($suspendedWrestler)->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedWrestler)->currentSuspension()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Wrestler successfully reinstated.');
             expect(true)->toBeTrue();
         });
@@ -314,11 +314,11 @@ describe('WrestlersActions Integration Tests', function () {
 
             // Suspend
             $component->call('suspend');
-            expect(freshModel($wrestler)->isSuspended())->toBeTrue();
+            expect(freshModel($wrestler)->currentSuspension()->exists())->toBeTrue();
 
             // Reinstate
             $component->call('reinstate');
-            expect(freshModel($wrestler)->isSuspended())->toBeFalse();
+            expect(freshModel($wrestler)->currentSuspension()->exists())->toBeFalse();
 
             // Retire
             $component->call('retire');

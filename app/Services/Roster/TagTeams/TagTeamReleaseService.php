@@ -35,7 +35,7 @@ final class TagTeamReleaseService
             $this->eligibility->ensureCanRelease($lockedTagTeam);
             $this->employmentPeriods->end($lockedTagTeam, $releaseDate, LifecycleTransitionType::Released);
 
-            if ($lockedTagTeam->isSuspended()) {
+            if ($lockedTagTeam->currentSuspension()->exists()) {
                 $this->suspensionPeriods->end($lockedTagTeam, $releaseDate);
             }
 

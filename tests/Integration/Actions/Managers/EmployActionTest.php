@@ -71,7 +71,7 @@ test('it rejects employing a retired manager without changing retirement', funct
 test('it employs suspended manager and ends suspension', function () {
     $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($manager))

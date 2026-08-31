@@ -204,7 +204,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($this->manager)->isSuspended())->toBeTrue();
+            expect(freshModel($this->manager)->currentSuspension()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Manager successfully suspended.');
             expect(true)->toBeTrue();
         });
@@ -236,7 +236,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($suspendedManager)->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedManager)->currentSuspension()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Manager successfully reinstated.');
             expect(true)->toBeTrue();
         });
@@ -358,11 +358,11 @@ describe('ManagersActions Integration Tests', function () {
 
             // Suspend (for misconduct, contract violations, etc.)
             $component->call('suspend');
-            expect(freshModel($manager)->isSuspended())->toBeTrue();
+            expect(freshModel($manager)->currentSuspension()->exists())->toBeTrue();
 
             // Reinstate
             $component->call('reinstate');
-            expect(freshModel($manager)->isSuspended())->toBeFalse();
+            expect(freshModel($manager)->currentSuspension()->exists())->toBeFalse();
 
             // Retire
             $component->call('retire');
@@ -397,7 +397,7 @@ describe('ManagersActions Integration Tests', function () {
             expect(freshModel($injuredManager)->isInjured())->toBeFalse();
 
             $component->call('suspend');
-            expect(freshModel($injuredManager)->isSuspended())->toBeTrue();
+            expect(freshModel($injuredManager)->currentSuspension()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
@@ -412,7 +412,7 @@ describe('ManagersActions Integration Tests', function () {
 
             // Suspended manager still employed but cannot perform duties
             expect($suspendedManager->currentEmployment()->exists())->toBeTrue();
-            expect($suspendedManager->isSuspended())->toBeTrue();
+            expect($suspendedManager->currentSuspension()->exists())->toBeTrue();
 
             // Cannot retire while suspended (must be reinstated first)
             $component->call('retire');
@@ -420,7 +420,7 @@ describe('ManagersActions Integration Tests', function () {
 
             // Must reinstate first
             $component->call('reinstate');
-            expect(freshModel($suspendedManager)->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedManager)->currentSuspension()->exists())->toBeFalse();
 
             // Now can retire
             $component->call('retire');

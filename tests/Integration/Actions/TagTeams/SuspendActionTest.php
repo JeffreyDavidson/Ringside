@@ -15,13 +15,13 @@ test('it suspends an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // Verify suspension record was created
     $this->assertDatabaseHas('suspensions', [
@@ -39,7 +39,7 @@ test('it suspends tag team with specific suspension date', function () {
     resolve(SuspendAction::class)->handle($tagTeam, $suspensionDate);
 
     $tagTeam->refresh();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // Verify suspension started with specific date
     $this->assertDatabaseHas('suspensions', [
@@ -61,7 +61,7 @@ test('it persists the suspension lifecycle', function () {
 
     // Verify suspension period was created
     expect($tagTeam->currentSuspension)->not()->toBeNull();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify records show proper dates
@@ -85,7 +85,7 @@ test('it prevents suspending unemployed tag team', function () {
 test('it prevents suspending already suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);
@@ -108,7 +108,7 @@ test('it handles database transactions correctly', function () {
     $tagTeam->refresh();
 
     // Verify the transaction was successful
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify suspension record was created
@@ -127,7 +127,7 @@ test('it creates new suspension period', function () {
 
     // Should create a new suspension record
     expect($tagTeam->suspensions()->count())->toBe($originalSuspensionCount + 1);
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // New suspension should be current and active
     $currentSuspension = $tagTeam->currentSuspension()->firstOrFail();
@@ -160,7 +160,7 @@ test('it handles multiple suspension history correctly', function () {
     $tagTeam->suspensions()->create(['started_at' => now()->subDays(20), 'ended_at' => now()->subDays(15)]);
 
     $tagTeam->refresh();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
     expect($tagTeam->suspensions()->count())->toBe(2);
 
     resolve(SuspendAction::class)->handle($tagTeam);
@@ -168,7 +168,7 @@ test('it handles multiple suspension history correctly', function () {
     $tagTeam->refresh();
 
     // Should add new suspension period
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
     expect($tagTeam->suspensions()->count())->toBe(3);
 
     // New suspension should be current
@@ -188,7 +188,7 @@ test('it preserves employment status during suspension', function () {
 
     // Should remain employed but now suspended
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // Employment record should remain unchanged
     expect($tagTeam->currentEmployment()->firstOrFail()->id)->toBe($originalEmployment->id);
@@ -226,7 +226,7 @@ test('it handles tag team with complex employment history', function () {
 
     $tagTeam->refresh();
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($tagTeam);
 
@@ -234,7 +234,7 @@ test('it handles tag team with complex employment history', function () {
 
     // Should now be suspended
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // Should have preserved all historical records
     expect($tagTeam->employments()->count())->toBe(2);
@@ -253,7 +253,7 @@ test('it handles suspension with cascade effects', function () {
     $tagTeam->refresh();
 
     // Verify the action persisted the expected lifecycle state
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Suspension should be active

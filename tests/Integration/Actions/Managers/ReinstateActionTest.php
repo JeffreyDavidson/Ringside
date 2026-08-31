@@ -15,13 +15,13 @@ beforeEach(function () {
 test('it reinstates a suspended manager', function () {
     $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed after reinstatement
 
     // Verify suspension record was ended
@@ -54,7 +54,7 @@ test('it reinstates manager with specific reinstatement date', function () {
     resolve(ReinstateAction::class)->handle($manager, $reinstatementDate);
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Verify suspension was ended with specific date
     $this->assertDatabaseHas('suspensions', [
@@ -76,7 +76,7 @@ test('it persists the reinstatement lifecycle', function () {
 
     // Verify suspension period was ended
     expect($manager->currentSuspension)->toBeNull();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Verify suspension record shows proper end date
     $this->assertDatabaseHas('suspensions', [
@@ -89,7 +89,7 @@ test('it persists the reinstatement lifecycle', function () {
 test('it prevents reinstating non-suspended manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     expect(fn () => resolve(ReinstateAction::class)->handle($manager))
         ->toThrow(Exception::class);
@@ -104,7 +104,7 @@ test('it handles database transactions correctly', function () {
     $manager->refresh();
 
     // Verify the transaction was successful
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Verify original suspension record was properly ended
     $this->assertDatabaseHas('suspensions', [
@@ -123,7 +123,7 @@ test('it maintains employment status during reinstatement', function () {
     $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($manager);
 
@@ -131,7 +131,7 @@ test('it maintains employment status during reinstatement', function () {
 
     // Should maintain employment while ending suspension
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
 
     // Employment record should remain unchanged
     $employment = $manager->currentEmployment()->firstOrFail();
@@ -163,7 +163,7 @@ test('it handles multiple suspensions correctly', function () {
     $manager->suspensions()->create(['started_at' => now()->subDays(5), 'ended_at' => null]); // Current suspension
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue();
     expect($manager->suspensions()->count())->toBe(2);
 
     resolve(ReinstateAction::class)->handle($manager);
@@ -171,7 +171,7 @@ test('it handles multiple suspensions correctly', function () {
     $manager->refresh();
 
     // Should only end the current suspension, leaving historical ones intact
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
     expect($manager->suspensions()->count())->toBe(2);
     expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
 });
