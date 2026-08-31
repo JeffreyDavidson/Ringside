@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Collections\MatchCompetitorsCollection;
 use App\Data\Matches\MatchResultData;
+use App\Enums\Titles\TitleType;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Matches\EventMatch;
@@ -13,14 +15,13 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Database\Eloquent\Collection;
 
 class ApplyMatchTitleOutcomesAction
 {
     public function __construct(private readonly ChampionshipReignManager $championshipReigns) {}
 
-    /** @param Collection<int, MatchCompetitor> $competitors */
-    public function handle(EventMatch $match, MatchResultData $result, Collection $competitors): void
+    /** @param MatchCompetitorsCollection<int, MatchCompetitor> $competitors */
+    public function handle(EventMatch $match, MatchResultData $result, MatchCompetitorsCollection $competitors): void
     {
         $titleIds = $match->titles()->pluck((new Title())->qualifyColumn('id'));
 
@@ -63,13 +64,13 @@ class ApplyMatchTitleOutcomesAction
     }
 
     /**
-     * @param  Collection<int, MatchCompetitor>  $competitors
-     * @return Collection<int, MatchCompetitor>
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $competitors
+     * @return MatchCompetitorsCollection<int, MatchCompetitor>
      */
-    private function winningCompetitors(MatchResultData $result, Collection $competitors): Collection
+    private function winningCompetitors(MatchResultData $result, MatchCompetitorsCollection $competitors): MatchCompetitorsCollection
     {
         if (! $result->finish->allowsTitleChange() || $result->winningSide === null) {
-            return new Collection();
+            return new MatchCompetitorsCollection();
         }
 
         return $competitors
@@ -78,14 +79,14 @@ class ApplyMatchTitleOutcomesAction
     }
 
     /**
-     * @param  Collection<int, MatchCompetitor>  $winningCompetitors
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $winningCompetitors
      */
-    private function championForTitle(Title $title, Collection $winningCompetitors): Wrestler|TagTeam
+    private function championForTitle(Title $title, MatchCompetitorsCollection $winningCompetitors): Wrestler|TagTeam
     {
-        $eligibleCompetitors = $winningCompetitors
-            ->map(fn (MatchCompetitor $competitor): Wrestler|TagTeam => $competitor->competitor)
-            ->filter(fn (Wrestler|TagTeam $competitor): bool => $competitor instanceof ($title->type->championModelClass()))
-            ->values();
+        $eligibleCompetitors = match ($title->type) {
+            TitleType::Singles => $winningCompetitors->wrestlers(),
+            TitleType::TagTeam => $winningCompetitors->tagTeams(),
+        };
 
         if ($eligibleCompetitors->count() !== 1) {
             throw InvalidMatchOutcomeException::invalidTitleWinner($title->type);
