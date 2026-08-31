@@ -40,8 +40,13 @@ class MatchCompetitorBuilder extends Builder
      */
     private function forCompetitorIds(string $competitorType, Collection $competitorIds): static
     {
-        $this->where('competitor_type', (new $competitorType())->getMorphClass())
-            ->whereIn('competitor_id', $competitorIds);
+        $this->whereHasMorph(
+            'competitor',
+            $competitorType,
+            function (Builder $query) use ($competitorIds): void {
+                $query->whereKey($competitorIds);
+            },
+        );
 
         return $this;
     }
