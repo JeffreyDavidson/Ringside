@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Matches;
 
+use App\Collections\MatchCompetitorsCollection;
 use App\Data\Matches\MatchEliminationData;
 use App\Data\Matches\MatchResultData;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Support\ConsecutiveIntegerSequence;
-use Illuminate\Database\Eloquent\Collection;
 
 final class MatchEliminationRequirement
 {
     public function __construct(private readonly ConsecutiveIntegerSequence $sequence) {}
 
     /**
-     * @param  Collection<int, MatchCompetitor>  $competitors
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $competitors
      */
     public function ensureSatisfied(
         EventMatch $match,
         MatchResultData $result,
-        Collection $competitors,
+        MatchCompetitorsCollection $competitors,
     ): void {
         if (! $match->match_type->recordsIndividualEliminations()) {
             if ($result->eliminations->isNotEmpty()) {
@@ -77,11 +77,11 @@ final class MatchEliminationRequirement
     }
 
     /**
-     * @param  Collection<int, MatchCompetitor>  $competitorsById
+     * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $competitorsById
      */
     private function ensureParticipantsBelongToMatch(
         MatchEliminationData $elimination,
-        Collection $competitorsById,
+        MatchCompetitorsCollection $competitorsById,
     ): void {
         if (! $competitorsById->has($elimination->competitor->id)) {
             throw InvalidMatchOutcomeException::competitorFromAnotherMatch();
