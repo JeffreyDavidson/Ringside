@@ -22,12 +22,12 @@ trait HasChampionshipReigns
     /** @return MorphMany<TitleChampionship, $this> */
     public function currentChampionships(): MorphMany
     {
-        return $this->titleChampionships()->whereNull('lost_at');
+        return $this->titleChampionships()->current();
     }
 
     /** @return MorphMany<TitleChampionship, $this> */
     public function previousTitleChampionships(): MorphMany
     {
-        return $this->titleChampionships()->whereNotNull('lost_at');
+        return $this->titleChampionships()->previous();
     }
 }
