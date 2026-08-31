@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Matches;
 
 use App\Builders\Matches\MatchSideBuilder;
+use App\Collections\MatchCompetitorsCollection;
 use Database\Factories\Matches\MatchSideFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,7 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  *
  * @property-read EventMatch $match
- * @property-read Collection<int, MatchCompetitor> $competitors
+ * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  *
  * @method static MatchSideFactory factory($count = null, $state = [])
  *

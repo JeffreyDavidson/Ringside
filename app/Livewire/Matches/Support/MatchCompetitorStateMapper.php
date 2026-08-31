@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Matches\Support;
 
-use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -43,13 +42,13 @@ final class MatchCompetitorStateMapper
     {
         return [
             'wrestlers' => $side->competitors
-                ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof Wrestler)
-                ->map(fn (MatchCompetitor $competitor): int => $competitor->competitor_id)
+                ->wrestlers()
+                ->map(fn (Wrestler $wrestler): int => $wrestler->id)
                 ->values()
                 ->all(),
             'tag_teams' => $side->competitors
-                ->filter(fn (MatchCompetitor $competitor): bool => $competitor->competitor instanceof TagTeam)
-                ->map(fn (MatchCompetitor $competitor): int => $competitor->competitor_id)
+                ->tagTeams()
+                ->map(fn (TagTeam $tagTeam): int => $tagTeam->id)
                 ->values()
                 ->all(),
         ];

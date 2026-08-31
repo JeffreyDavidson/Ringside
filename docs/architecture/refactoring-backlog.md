@@ -35,7 +35,8 @@ typed coordinator.
 ### Custom Eloquent collections
 
 **Priority:** Medium
-**Status:** Candidate; do not introduce until repetition is proven.
+**Status:** In progress; `MatchCompetitorsCollection` now owns typed wrestler and
+tag-team partitions for loaded competitor entries.
 
 `MatchCompetitorsCollection` is the existing custom collection. Review it and
 other model collections for repeated domain operations such as grouping by
