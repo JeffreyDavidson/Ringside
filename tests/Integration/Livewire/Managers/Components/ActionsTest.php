@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Managers\EmployAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Managers\Components\Actions;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Users\User;
@@ -116,7 +117,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($this->manager)->isReleased())->toBeTrue();
+            expect(freshModel($this->manager)->status)->toBe(EmploymentStatus::Released);
             // Session success message verified in unit tests
             expect(true)->toBeTrue();
         });
@@ -509,7 +510,7 @@ describe('ManagersActions Integration Tests', function () {
             $component->call('release');
 
             // Manager status should reflect in fresh model
-            expect(freshModel($this->manager)->isReleased())->toBeTrue();
+            expect(freshModel($this->manager)->status)->toBe(EmploymentStatus::Released);
             expect(true)->toBeTrue();
         });
 

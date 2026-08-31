@@ -30,7 +30,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeSuspendedException::unemployed($individual);
         }
 
-        if ($individual->isReleased()) {
+        if ($individual->status === EmploymentStatus::Released) {
             throw CannotBeSuspendedException::released($individual);
         }
 

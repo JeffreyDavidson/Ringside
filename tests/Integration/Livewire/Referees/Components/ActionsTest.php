@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Referees\EmployAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Referees\Components\Actions;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Users\User;
@@ -116,7 +117,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($this->referee)->isReleased())->toBeTrue();
+            expect(freshModel($this->referee)->status)->toBe(EmploymentStatus::Released);
             // expect(session('status'))->toBe('Referee successfully released.');
             expect(true)->toBeTrue();
         });
@@ -548,7 +549,7 @@ describe('RefereesActions Integration Tests', function () {
             $component->call('release');
 
             // Referee status should reflect in fresh model
-            expect(freshModel($this->referee)->isReleased())->toBeTrue();
+            expect(freshModel($this->referee)->status)->toBe(EmploymentStatus::Released);
             expect(true)->toBeTrue();
         });
 

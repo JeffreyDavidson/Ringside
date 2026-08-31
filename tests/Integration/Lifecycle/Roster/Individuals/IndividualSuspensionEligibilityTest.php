@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\Individuals\CannotBeReinstatedException;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
 use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
@@ -47,6 +48,18 @@ describe('individual suspension eligibility', function () {
         Manager::class,
         Referee::class,
     ]);
+
+    test('treats future employment as distinct from released employment', function () {
+        $eligibility = new IndividualSuspensionEligibility();
+        $wrestler = Wrestler::factory()->released()->withFutureEmployment()->create();
+
+        expect($wrestler->status)->toBe(EmploymentStatus::FutureEmployment)
+            ->and(fn () => $eligibility->ensureCanSuspend($wrestler))
+            ->toThrow(
+                CannotBeSuspendedException::class,
+                CannotBeSuspendedException::hasFutureEmployment($wrestler)->getMessage(),
+            );
+    });
 
     test('keeps the reinstatement predicate aligned with its guard', function (string $factoryState, bool $canBeReinstated) {
         $eligibility = new IndividualSuspensionEligibility();

@@ -38,14 +38,14 @@ describe('Manager Employment Workflows', function () {
             // Release
             resolve(ReleaseAction::class)->handle($employed, Carbon::now());
             $released = freshModel($manager);
-            expect($released->isReleased())->toBeTrue();
+            expect($released->status)->toBe(EmploymentStatus::Released);
             expect($released->currentEmployment()->exists())->toBeFalse();
 
             // Re-employ
             resolve(EmployAction::class)->handle($released, Carbon::now());
             $reEmployed = freshModel($manager);
             expect($reEmployed->currentEmployment()->exists())->toBeTrue();
-            expect($reEmployed->isReleased())->toBeFalse();
+            expect($reEmployed->status)->not->toBe(EmploymentStatus::Released);
         });
     });
 
@@ -68,7 +68,6 @@ describe('Manager Employment Workflows', function () {
 
             // Verify release status synchronization
             expect($afterRelease->status)->toBe(EmploymentStatus::Released);
-            expect($afterRelease->isReleased())->toBeTrue();
             expect($afterRelease->currentEmployment()->exists())->toBeFalse();
         });
     });
@@ -150,7 +149,7 @@ describe('Manager Employment Workflows', function () {
 
             resolve(ReleaseAction::class)->handle($suspended, Carbon::now());
             $released = freshModel($manager);
-            expect($released->isReleased())->toBeTrue();
+            expect($released->status)->toBe(EmploymentStatus::Released);
             expect($released->currentEmployment()->exists())->toBeFalse();
             expect($released->currentSuspension()->exists())->toBeFalse();
         });

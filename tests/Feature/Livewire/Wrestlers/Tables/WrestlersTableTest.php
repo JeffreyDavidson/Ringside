@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
@@ -57,7 +58,7 @@ describe('Main Component Feature Workflows', function () {
                 ->assertHasNoErrors()
                 ->assertSessionMissing('error');
 
-            expect(freshModel($wrestler)->isReleased())->toBeTrue();
+            expect(freshModel($wrestler)->status)->toBe(EmploymentStatus::Released);
         });
 
         test('complete wrestler retirement workflow', function () {
