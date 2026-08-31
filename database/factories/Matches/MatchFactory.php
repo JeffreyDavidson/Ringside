@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories\Matches;
 
+use App\Enums\Lifecycle\LifecycleOwnerType;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Models\Events\Event;
@@ -27,11 +28,6 @@ use InvalidArgumentException;
 #[UseModel(EventMatch::class)]
 class MatchFactory extends Factory
 {
-    // Constants for competitor types
-    private const COMPETITOR_TYPE_WRESTLER = 'wrestler';
-
-    private const COMPETITOR_TYPE_TAG_TEAM = 'tag_team';
-
     /**
      * Define the model's default state.
      *
@@ -301,8 +297,8 @@ class MatchFactory extends Factory
         $competitorType = fake()->randomElement($allowedTypes);
 
         return match ($competitorType) {
-            self::COMPETITOR_TYPE_WRESTLER => Wrestler::factory()->create(),
-            self::COMPETITOR_TYPE_TAG_TEAM => TagTeam::factory()->create(),
+            LifecycleOwnerType::Wrestler->value => Wrestler::factory()->create(),
+            LifecycleOwnerType::TagTeam->value => TagTeam::factory()->create(),
             default => throw new InvalidArgumentException("Unknown competitor type: {$competitorType}"),
         };
     }
@@ -450,8 +446,8 @@ class MatchFactory extends Factory
         foreach ($competitors as $competitor) {
             if (is_string($competitor)) {
                 // Handle type hints or names
-                if (in_array($competitor, ['wrestler', 'tag_team'])) {
-                    $model = $competitor === 'wrestler'
+                if (in_array($competitor, [LifecycleOwnerType::Wrestler->value, LifecycleOwnerType::TagTeam->value], true)) {
+                    $model = $competitor === LifecycleOwnerType::Wrestler->value
                         ? Wrestler::factory()->create()
                         : TagTeam::factory()->create();
                 } else {
