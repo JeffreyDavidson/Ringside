@@ -263,7 +263,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($this->manager)->isRetired())->toBeTrue();
+            expect(freshModel($this->manager)->currentRetirement()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Manager successfully retired.');
             expect(true)->toBeTrue();
         });
@@ -295,7 +295,7 @@ describe('ManagersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('manager-updated');
 
-            expect(freshModel($retiredManager)->isRetired())->toBeFalse();
+            expect(freshModel($retiredManager)->currentRetirement()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Manager successfully unretired.');
             expect(true)->toBeTrue();
         });
@@ -366,11 +366,11 @@ describe('ManagersActions Integration Tests', function () {
 
             // Retire
             $component->call('retire');
-            expect(freshModel($manager)->isRetired())->toBeTrue();
+            expect(freshModel($manager)->currentRetirement()->exists())->toBeTrue();
 
             // Comeback
             $component->call('unretire');
-            expect(freshModel($manager)->isRetired())->toBeFalse();
+            expect(freshModel($manager)->currentRetirement()->exists())->toBeFalse();
             expect(freshModel($manager)->currentEmployment()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
@@ -424,7 +424,7 @@ describe('ManagersActions Integration Tests', function () {
 
             // Now can retire
             $component->call('retire');
-            expect(freshModel($suspendedManager)->isRetired())->toBeTrue();
+            expect(freshModel($suspendedManager)->currentRetirement()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
     });

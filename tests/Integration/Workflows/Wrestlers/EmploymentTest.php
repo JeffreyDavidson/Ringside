@@ -139,14 +139,14 @@ describe('Wrestler Employment Workflows', function () {
             // Retire wrestler
             resolve(RetireAction::class)->handle($employed, Carbon::now());
             $retired = freshModel($wrestler);
-            expect($retired->isRetired())->toBeTrue();
+            expect($retired->currentRetirement()->exists())->toBeTrue();
             expect($retired->currentEmployment()->exists())->toBeFalse(); // Employment ends on retirement
             expect($retired->status)->toBe(EmploymentStatus::Retired);
 
             // Unretire wrestler
             resolve(UnretireAction::class)->handle($retired, Carbon::now());
             $unretired = freshModel($wrestler);
-            expect($unretired->isRetired())->toBeFalse();
+            expect($unretired->currentRetirement()->exists())->toBeFalse();
             expect($unretired->currentEmployment()->exists())->toBeTrue();
             expect($unretired->status)->toBe(EmploymentStatus::Employed);
         });
@@ -182,13 +182,13 @@ describe('Wrestler Employment Workflows', function () {
 
             // 6. Retire
             resolve(RetireAction::class)->handle($wrestler, Carbon::now()->subMonths(2));
-            expect(freshModel($wrestler)->isRetired())->toBeTrue();
+            expect(freshModel($wrestler)->currentRetirement()->exists())->toBeTrue();
             expect(freshModel($wrestler)->currentEmployment()->exists())->toBeFalse();
 
             // 7. Unretire and employ immediately
             resolve(UnretireAction::class)->handle($wrestler, Carbon::now());
             $final = freshModel($wrestler);
-            expect($final->isRetired())->toBeFalse();
+            expect($final->currentRetirement()->exists())->toBeFalse();
             expect($final->currentEmployment()->exists())->toBeTrue();
             expect($final->status)->toBe(EmploymentStatus::Employed);
 
@@ -265,7 +265,7 @@ describe('Wrestler Employment Workflows', function () {
             resolve(RetireAction::class)->handle($reinstated, Carbon::now());
             $retired = freshModel($wrestler);
             expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($retired))->toBeFalse();
-            expect($retired->isRetired())->toBeTrue();
+            expect($retired->currentRetirement()->exists())->toBeTrue();
         });
 
         test('employment status affects all business capabilities workflow', function () {

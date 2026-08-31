@@ -112,7 +112,7 @@ test('it activates a retired title at the current datetime by default', function
     $datetime = now();
 
     // Verify title is initially retired
-    expect($title->isRetired())->toBeTrue();
+    expect($title->currentRetirement()->exists())->toBeTrue();
     expect($title->currentActivityPeriod()->exists())->toBeFalse();
     expect($title->activityPeriods()->exists())->toBeTrue();
 
@@ -122,7 +122,7 @@ test('it activates a retired title at the current datetime by default', function
     // Verify the title is now active and no longer retired
     $refreshedTitle = freshModel($title);
     expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->isRetired())->toBeFalse();
+    expect($refreshedTitle->currentRetirement()->exists())->toBeFalse();
 
     // Verify the reinstatement was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod()->firstOrFail();
@@ -139,7 +139,7 @@ test('it activates a retired title at a specific datetime', function () {
     $datetime = now()->addDays(2);
 
     // Verify title is initially retired
-    expect($title->isRetired())->toBeTrue();
+    expect($title->currentRetirement()->exists())->toBeTrue();
     expect($title->currentActivityPeriod()->exists())->toBeFalse();
     expect($title->activityPeriods()->exists())->toBeTrue();
 
@@ -151,7 +151,7 @@ test('it activates a retired title at a specific datetime', function () {
     expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
     expect($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue();
     expect($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so not currently active
-    expect($refreshedTitle->isRetired())->toBeFalse();
+    expect($refreshedTitle->currentRetirement()->exists())->toBeFalse();
 
     // Verify the reinstatement was created with the specific datetime
     $activityPeriod = $refreshedTitle->futureActivityPeriod()->firstOrFail();

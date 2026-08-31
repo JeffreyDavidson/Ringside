@@ -154,7 +154,7 @@ test('it prevents suspending already suspended wrestler', function () {
 test('it prevents suspending retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
         ->toThrow(Exception::class);

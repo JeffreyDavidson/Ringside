@@ -460,7 +460,7 @@ describe('TitleChampionship Model', function () {
             $refreshedWrestler = freshModel($this->wrestler);
             $refreshedTitle = freshModel($this->title);
 
-            expect($refreshedWrestler->isRetired())->toBeTrue();
+            expect($refreshedWrestler->currentRetirement()->exists())->toBeTrue();
 
             // Championship should be ended when wrestler retires
             $championship->refresh();
@@ -528,7 +528,7 @@ describe('TitleChampionship Model', function () {
 
             $refreshedTitle = freshModel($this->title);
 
-            expect($refreshedTitle->isRetired())->toBeTrue();
+            expect($refreshedTitle->currentRetirement()->exists())->toBeTrue();
 
             // Championship should end when title is retired
             $championship->refresh();

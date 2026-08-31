@@ -99,7 +99,7 @@ function expectValidRetirementState(Model&Retirable $entity): void
 {
     $entity->refresh();
 
-    if ($entity->isRetired()) {
+    if ($entity->currentRetirement()->exists()) {
         $currentRetirement = $entity->currentRetirement()->firstOrFail();
         expect($currentRetirement->getAttribute('started_at'))->not->toBeNull();
         expect($currentRetirement->getAttribute('ended_at'))->toBeNull();

@@ -207,7 +207,7 @@ describe('StablesTable Component', function () {
                 ->assertRedirect();
 
             // Verify stable is retired
-            expect(freshModel($activeStable)->isRetired())->toBeTrue();
+            expect(freshModel($activeStable)->currentRetirement()->exists())->toBeTrue();
         });
 
         test('unretire action integration works correctly', function () {
@@ -335,7 +335,7 @@ describe('StablesTable Component', function () {
                 ->call('retire', $retiredStable)
                 ->assertNoRedirect();
 
-            expect(freshModel($retiredStable)->isRetired())->toBeTrue();
+            expect(freshModel($retiredStable)->currentRetirement()->exists())->toBeTrue();
         });
 
         test('unretire action fails for non-retired stable', function () {

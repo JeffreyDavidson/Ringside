@@ -61,7 +61,7 @@ test('it employs tag team with specific employment date', function () {
 test('it prevents employing retired tag team directly', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
-    expect($tagTeam->isRetired())->toBeTrue();
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue();
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(EmployAction::class)->handle($tagTeam))
@@ -203,7 +203,7 @@ test('it handles tag team with complex status history', function () {
 
     $tagTeam->refresh();
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
 
     resolve(EmployAction::class)->handle($tagTeam);
 
@@ -211,7 +211,7 @@ test('it handles tag team with complex status history', function () {
 
     // Should now be employed
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isRetired())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
 
     // Should have preserved all historical records
     expect($tagTeam->employments()->count())->toBe(3); // 2 historical + 1 new

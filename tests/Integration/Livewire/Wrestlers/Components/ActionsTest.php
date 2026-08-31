@@ -225,7 +225,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($this->wrestler)->isRetired())->toBeTrue();
+            expect(freshModel($this->wrestler)->currentRetirement()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler successfully retired.');
             expect(true)->toBeTrue();
         });
@@ -254,7 +254,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($retiredWrestler)->isRetired())->toBeFalse();
+            expect(freshModel($retiredWrestler)->currentRetirement()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Wrestler successfully unretired.');
             expect(true)->toBeTrue();
         });
@@ -322,11 +322,11 @@ describe('WrestlersActions Integration Tests', function () {
 
             // Retire
             $component->call('retire');
-            expect(freshModel($wrestler)->isRetired())->toBeTrue();
+            expect(freshModel($wrestler)->currentRetirement()->exists())->toBeTrue();
 
             // Comeback
             $component->call('unretire');
-            expect(freshModel($wrestler)->isRetired())->toBeFalse();
+            expect(freshModel($wrestler)->currentRetirement()->exists())->toBeFalse();
             expect(true)->toBeTrue();
         });
 

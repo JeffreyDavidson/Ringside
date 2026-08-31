@@ -33,7 +33,7 @@ final class StableRetirementEligibility
             throw CannotBeRetiredException::deleted($stable);
         }
 
-        if ($stable->isRetired()) {
+        if ($stable->currentRetirement()->exists()) {
             throw CannotBeRetiredException::alreadyRetired($stable);
         }
 
@@ -59,7 +59,7 @@ final class StableRetirementEligibility
             throw CannotBeUnretiredException::deleted($stable);
         }
 
-        if (! $stable->isRetired()) {
+        if (! $stable->currentRetirement()->exists()) {
             throw CannotBeUnretiredException::notRetired($stable);
         }
 

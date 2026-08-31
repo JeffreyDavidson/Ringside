@@ -43,7 +43,7 @@ final class TitleLifecycleEligibility
             throw CannotBeDebutedException::alreadyDebuted($title);
         }
 
-        if ($title->isRetired()) {
+        if ($title->currentRetirement()->exists()) {
             throw CannotBeDebutedException::retired($title);
         }
     }
@@ -58,7 +58,7 @@ final class TitleLifecycleEligibility
             throw CannotBeReinstatedException::active($title);
         }
 
-        if ($title->isRetired()) {
+        if ($title->currentRetirement()->exists()) {
             throw CannotBeReinstatedException::retired($title);
         }
     }
@@ -69,14 +69,14 @@ final class TitleLifecycleEligibility
             throw CannotBePulledException::notActive($title);
         }
 
-        if ($title->isRetired()) {
+        if ($title->currentRetirement()->exists()) {
             throw CannotBePulledException::retired($title);
         }
     }
 
     private function ensureCanRetire(Title $title): void
     {
-        if ($title->isRetired()) {
+        if ($title->currentRetirement()->exists()) {
             throw CannotBeRetiredException::alreadyRetired($title);
         }
 
@@ -95,7 +95,7 @@ final class TitleLifecycleEligibility
             throw CannotBeUnretiredException::deleted($title);
         }
 
-        if (! $title->isRetired()) {
+        if (! $title->currentRetirement()->exists()) {
             throw CannotBeUnretiredException::notRetired($title);
         }
     }

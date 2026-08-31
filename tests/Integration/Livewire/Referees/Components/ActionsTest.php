@@ -263,7 +263,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($this->referee)->isRetired())->toBeTrue();
+            expect(freshModel($this->referee)->currentRetirement()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Referee successfully retired.');
             expect(true)->toBeTrue();
         });
@@ -295,7 +295,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($retiredReferee)->isRetired())->toBeFalse();
+            expect(freshModel($retiredReferee)->currentRetirement()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Referee successfully unretired.');
             expect(true)->toBeTrue();
         });
@@ -366,11 +366,11 @@ describe('RefereesActions Integration Tests', function () {
 
             // Retire
             $component->call('retire');
-            expect(freshModel($referee)->isRetired())->toBeTrue();
+            expect(freshModel($referee)->currentRetirement()->exists())->toBeTrue();
 
             // Comeback
             $component->call('unretire');
-            expect(freshModel($referee)->isRetired())->toBeFalse();
+            expect(freshModel($referee)->currentRetirement()->exists())->toBeFalse();
             expect(freshModel($referee)->currentEmployment()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
@@ -426,7 +426,7 @@ describe('RefereesActions Integration Tests', function () {
 
             // Now can retire
             $component->call('retire');
-            expect(freshModel($suspendedReferee)->isRetired())->toBeTrue();
+            expect(freshModel($suspendedReferee)->currentRetirement()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
 

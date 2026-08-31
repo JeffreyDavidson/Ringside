@@ -17,14 +17,14 @@ test('it retires an employed referee', function () {
     $employment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->isRetired())->toBeFalse();
+    expect($referee->currentRetirement()->exists())->toBeFalse();
 
     resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
     expect($referee->currentEmployment()->exists())->toBeFalse();
     expect($employment->ended_at)->not->toBeNull();
 
@@ -43,7 +43,7 @@ test('it retires referee with specific retirement date', function () {
     resolve(RetireAction::class)->handle($referee, $retirementDate);
 
     $referee->refresh();
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $referee->id,
@@ -83,7 +83,7 @@ test('it validates referee can be retired', function () {
     resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
 });
 
 test('it throws exception when referee cannot be retired', function () {
@@ -124,7 +124,7 @@ test('it ends suspension before retiring', function () {
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
     expect($referee->isSuspended())->toBeFalse();
     expect($suspension->ended_at)->not->toBeNull();
 });
@@ -141,7 +141,7 @@ test('it ends injury before retiring', function () {
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
     expect($referee->isInjured())->toBeFalse();
     expect($injury->ended_at)->not->toBeNull();
 });

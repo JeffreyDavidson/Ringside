@@ -97,7 +97,7 @@ describe('Title Retirement Actions', function () {
         $component->assertDispatched('title-updated');
 
         // Verify the title status changed
-        expect(freshModel($title)->isRetired())->toBeTrue();
+        expect(freshModel($title)->currentRetirement()->exists())->toBeTrue();
     });
 
     it('can unretire a retired title successfully', function () {
@@ -112,7 +112,7 @@ describe('Title Retirement Actions', function () {
         $component->assertDispatched('title-updated');
 
         // Verify the title is no longer retired
-        expect(freshModel($title)->isRetired())->toBeFalse();
+        expect(freshModel($title)->currentRetirement()->exists())->toBeFalse();
     });
 });
 
@@ -216,11 +216,11 @@ describe('Title Business Logic Integration', function () {
 
         // Retire the title
         $component->call('retire');
-        expect(freshModel($title)->isRetired())->toBeTrue();
+        expect(freshModel($title)->currentRetirement()->exists())->toBeTrue();
 
         // Unretire the title
         $component->call('unretire');
-        expect(freshModel($title)->isRetired())->toBeFalse();
+        expect(freshModel($title)->currentRetirement()->exists())->toBeFalse();
     });
 
     it('maintains title state consistency', function () {

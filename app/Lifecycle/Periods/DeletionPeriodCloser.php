@@ -29,7 +29,7 @@ final class DeletionPeriodCloser
             $this->employmentPeriods->end($subject, $date);
         }
 
-        if ($subject->isRetired()) {
+        if ($subject->currentRetirement()->exists()) {
             $this->retirementPeriods->end($subject, $date);
         }
 

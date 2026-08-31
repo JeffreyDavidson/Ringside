@@ -26,7 +26,7 @@ final class TitleDeletionService
 
             if ($lockedTitle->currentActivityPeriod()->exists()) {
                 $lockedTitle->activityPeriods()->whereNull('ended_at')->update(['ended_at' => $deletionDate]);
-            } elseif ($lockedTitle->isRetired()) {
+            } elseif ($lockedTitle->currentRetirement()->exists()) {
                 $lockedTitle->retirements()->whereNull('ended_at')->update(['ended_at' => $deletionDate]);
             }
 

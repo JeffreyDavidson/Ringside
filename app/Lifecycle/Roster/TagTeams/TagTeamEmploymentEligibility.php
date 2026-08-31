@@ -31,7 +31,7 @@ final class TagTeamEmploymentEligibility
             throw CannotBeEmployedException::hasFutureEmployment($tagTeam);
         }
 
-        if ($tagTeam->isRetired()) {
+        if ($tagTeam->currentRetirement()->exists()) {
             throw CannotBeEmployedException::retired($tagTeam);
         }
 

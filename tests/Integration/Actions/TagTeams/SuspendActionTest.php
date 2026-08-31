@@ -94,7 +94,7 @@ test('it prevents suspending already suspended tag team', function () {
 test('it prevents suspending retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
-    expect($tagTeam->isRetired())->toBeTrue();
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue();
 
     expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
         ->toThrow(Exception::class);

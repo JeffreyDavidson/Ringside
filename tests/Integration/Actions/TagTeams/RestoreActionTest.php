@@ -135,7 +135,7 @@ test('it restores tag team to unemployed state', function () {
 
     // Ensure tag team starts unemployed
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 
     // Delete the tag team
@@ -149,7 +149,7 @@ test('it restores tag team to unemployed state', function () {
 
     // Should remain in unemployed state
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
     expect($tagTeam->isSuspended())->toBeFalse();
 });
 
@@ -187,7 +187,7 @@ test('it handles restoration with complex historical status', function () {
 
     // Should be in unemployed state (no active records)
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->isRetired())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
 });
 
 test('it restores all tag team attributes correctly', function () {

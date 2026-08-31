@@ -30,11 +30,11 @@ describe('IsRetirable', function () {
     test('checks current retirement state', function () {
         $model = new RetirementStateModel();
 
-        expect($model->isRetired())->toBeFalse();
+        expect($model->currentRetirement()->exists())->toBeFalse();
 
         $model->currentRetirementExists = true;
 
-        expect($model->isRetired())->toBeTrue();
+        expect($model->currentRetirement()->exists())->toBeTrue();
     });
 
     test('constrains current and previous retirement relationships', function () {

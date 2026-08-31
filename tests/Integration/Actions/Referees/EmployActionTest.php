@@ -70,7 +70,7 @@ test('it rejects employing a retired referee without changing retirement', funct
     $referee = Referee::factory()->retired()->create();
     $retirement = $referee->currentRetirement()->firstOrFail();
 
-    expect($referee->isRetired())->toBeTrue();
+    expect($referee->currentRetirement()->exists())->toBeTrue();
     expect($referee->currentEmployment()->exists())->toBeFalse();
 
     expect(fn () => resolve(EmployAction::class)->handle($referee))
@@ -80,7 +80,7 @@ test('it rejects employing a retired referee without changing retirement', funct
     $retirement->refresh();
 
     expect($referee->currentEmployment()->exists())->toBeFalse()
-        ->and($referee->isRetired())->toBeTrue()
+        ->and($referee->currentRetirement()->exists())->toBeTrue()
         ->and($retirement->ended_at)->toBeNull();
 
     $this->assertDatabaseMissing('employments', [

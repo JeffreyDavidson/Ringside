@@ -121,7 +121,7 @@ test('it rejects employing a retired wrestler without changing retirement', func
     $retirement->refresh();
 
     expect($wrestler->currentEmployment()->exists())->toBeFalse()
-        ->and($wrestler->isRetired())->toBeTrue()
+        ->and($wrestler->currentRetirement()->exists())->toBeTrue()
         ->and($retirement->ended_at)->toBeNull();
 
     $this->assertDatabaseMissing('employments', [

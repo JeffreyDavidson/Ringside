@@ -138,7 +138,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertRedirectToRoute('titles.index');
 
         // Then: Title should be retired
-        expect(freshModel($title)->isRetired())->toBeTrue();
+        expect(freshModel($title)->currentRetirement()->exists())->toBeTrue();
 
         // When: Unretiring the title
         actingAs($admin);
@@ -149,7 +149,7 @@ describe('Title Lifecycle Management Workflow', function () {
             ->assertRedirectToRoute('titles.index');
 
         // Then: Title should no longer be retired
-        expect(freshModel($title)->isRetired())->toBeFalse();
+        expect(freshModel($title)->currentRetirement()->exists())->toBeFalse();
     });
 });
 

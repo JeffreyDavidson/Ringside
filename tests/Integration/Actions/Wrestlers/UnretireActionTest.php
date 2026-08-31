@@ -15,13 +15,13 @@ beforeEach(function () {
 test('it unretires a retired wrestler with employment', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue(); // Should be employed by default
 
     // Verify retirement record was ended
@@ -42,12 +42,12 @@ test('it unretires a retired wrestler with employment', function () {
 test('it unretires wrestler without immediate employment', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     resolve(UnretireAction::class)->handle($wrestler, null, false);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeFalse(); // Should remain unemployed
 
     // Verify retirement record was ended
@@ -71,7 +71,7 @@ test('it unretires wrestler with specific date', function () {
     resolve(UnretireAction::class)->handle($wrestler, $unretirementDate);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement was ended with specific date
@@ -102,7 +102,7 @@ test('it persists the unretirement lifecycle', function () {
 
     // Verify retirement period was ended
     expect($wrestler->currentRetirement)->toBeNull();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     // Verify the specific retirement record was updated
     $this->assertDatabaseHas('retirements', [
@@ -122,7 +122,7 @@ test('it employs unemployed managers when wrestler is employed', function () {
     $wrestler->managers()->attach($manager1->id, ['hired_at' => now()->subDays(10)]);
     $wrestler->managers()->attach($manager2->id, ['hired_at' => now()->subDays(5)]);
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
     expect($manager1->currentEmployment()->exists())->toBeFalse();
     expect($manager2->currentEmployment()->exists())->toBeTrue();
 
@@ -154,7 +154,7 @@ test('it does not employ managers when wrestler is not employed immediately', fu
 
     $wrestler->managers()->attach($manager->id, ['hired_at' => now()->subDays(5)]);
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($wrestler, null, false); // employImmediately = false
@@ -184,7 +184,7 @@ test('it uses the current time when no date is provided', function () {
     resolve(UnretireAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,
@@ -207,12 +207,12 @@ test('it handles multiple retirement records correctly', function () {
         'ended_at' => null, // Current retirement
     ]);
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     // Only the current retirement should be ended
     $this->assertDatabaseHas('retirements', [
@@ -235,7 +235,7 @@ test('it handles multiple retirement records correctly', function () {
 test('it prevents unretiring non-retired wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     expect(fn () => resolve(UnretireAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -268,12 +268,12 @@ test('it maintains retirement history integrity', function () {
         'ended_at' => null, // Current retirement
     ]);
 
-    expect($wrestler->isRetired())->toBeTrue();
+    expect($wrestler->currentRetirement()->exists())->toBeTrue();
 
     resolve(UnretireAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isRetired())->toBeFalse();
+    expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     // All retirement records should be preserved
     $this->assertDatabaseHas('retirements', [
