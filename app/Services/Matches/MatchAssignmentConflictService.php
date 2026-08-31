@@ -73,7 +73,7 @@ final class MatchAssignmentConflictService
     }
 
     /**
-     * @param  Collection<int, int>       $conflictingEventIds
+     * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Wrestler>  $wrestlers
      */
     public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers): void
@@ -82,7 +82,7 @@ final class MatchAssignmentConflictService
     }
 
     /**
-     * @param  Collection<int, int>      $conflictingEventIds
+     * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, TagTeam>  $tagTeams
      */
     public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams): void
