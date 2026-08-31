@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
@@ -84,7 +85,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($this->wrestler)->isReleased())->toBeTrue();
+            expect(freshModel($this->wrestler)->status)->toBe(EmploymentStatus::Released);
             // expect(session('status'))->toBe('Wrestler successfully released.');
             expect(true)->toBeTrue();
         });
@@ -433,7 +434,7 @@ describe('WrestlersActions Integration Tests', function () {
             $component->call('release');
 
             // Wrestler status should reflect in fresh model
-            expect(freshModel($this->wrestler)->isReleased())->toBeTrue();
+            expect(freshModel($this->wrestler)->status)->toBe(EmploymentStatus::Released);
             expect(true)->toBeTrue();
         });
 

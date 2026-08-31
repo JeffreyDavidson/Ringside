@@ -43,7 +43,7 @@ describe('TagTeam Employment Workflows', function () {
             // Release
             resolve(ReleaseAction::class)->handle($employed, Carbon::now());
             $released = freshModel($tagTeam);
-            expect($released->isReleased())->toBeTrue();
+            expect($released->status)->toBe(EmploymentStatus::Released);
             expect($released->currentEmployment()->exists())->toBeFalse();
 
             expect(fn () => resolve(EmployAction::class)->handle($released, Carbon::now()))
@@ -70,7 +70,6 @@ describe('TagTeam Employment Workflows', function () {
 
             // Verify release status synchronization
             expect($afterRelease->status)->toBe(EmploymentStatus::Released);
-            expect($afterRelease->isReleased())->toBeTrue();
             expect($afterRelease->currentEmployment()->exists())->toBeFalse();
         });
 

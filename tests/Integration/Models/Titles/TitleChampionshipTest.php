@@ -6,6 +6,7 @@ use App\Actions\Titles\RetireAction;
 use App\Actions\Wrestlers\InjureAction;
 use App\Actions\Wrestlers\ReleaseAction;
 use App\Actions\Wrestlers\RetireAction as WrestlerRetireAction;
+use App\Enums\Shared\EmploymentStatus;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -506,7 +507,7 @@ describe('TitleChampionship Model', function () {
 
             $refreshedWrestler = freshModel($this->wrestler);
 
-            expect($refreshedWrestler->isReleased())->toBeTrue();
+            expect($refreshedWrestler->status)->toBe(EmploymentStatus::Released);
             expect(RosterBookingEligibility::allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Released wrestler should be stripped of championship
