@@ -6,20 +6,16 @@ namespace App\Builders\Matches;
 
 use App\Models\Matches\MatchSide;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends Builder<MatchSide>
  */
 class MatchSideBuilder extends Builder
 {
-    /**
-     * @template TModel of Model
-     *
-     * @param  Builder<TModel>  $query
-     */
-    public static function constrainToPositionOrder(Builder $query): void
+    public function orderedByPosition(): static
     {
-        $query->orderBy('position');
+        $this->orderBy('position');
+
+        return $this;
     }
 }
