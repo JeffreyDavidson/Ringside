@@ -11,7 +11,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
 /**
@@ -67,9 +66,7 @@ class EventMatchBuilder extends Builder
      */
     public static function constrainToPastEvents(Builder $query): void
     {
-        $query->whereHas('event', function (Builder|Relation $query): void {
-            $query->where('date', '<', now());
-        });
+        $query->whereRelation('event', 'date', '<', now());
     }
 
     public function forCompetitor(Wrestler|TagTeam $competitor): static
