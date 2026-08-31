@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Lifecycle\Titles;
 
+use App\Collections\TitleChampionshipCollection;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Matches\EventMatch;
@@ -11,17 +12,16 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 final class ChampionshipReignManager
 {
-    /** @param Collection<int, TitleChampionship> $reigns */
+    /** @param TitleChampionshipCollection<int, TitleChampionship> $reigns */
     public function ensureMatchCanBeReconciled(
         EventMatch $match,
         Title $title,
-        Collection $reigns,
+        TitleChampionshipCollection $reigns,
     ): void {
         $reignWonAtMatch = $this->activeReignsForTitle($title, $reigns)
             ->firstWhere('won_match_id', $match->id);
@@ -31,12 +31,12 @@ final class ChampionshipReignManager
         }
     }
 
-    /** @param Collection<int, TitleChampionship> $reigns */
+    /** @param TitleChampionshipCollection<int, TitleChampionship> $reigns */
     public function reconcileMatchOutcome(
         EventMatch $match,
         Title $title,
         Wrestler|TagTeam|null $desiredChampion,
-        Collection $reigns,
+        TitleChampionshipCollection $reigns,
     ): void {
         $activeReigns = $this->activeReignsForTitle($title, $reigns);
         $reignWonAtMatch = $activeReigns->firstWhere('won_match_id', $match->id);
@@ -103,14 +103,14 @@ final class ChampionshipReignManager
     }
 
     /**
-     * @param  Collection<int, TitleChampionship>  $reigns
-     * @return Collection<int, TitleChampionship>
+     * @param  TitleChampionshipCollection<int, TitleChampionship>  $reigns
+     * @return TitleChampionshipCollection<int, TitleChampionship>
      */
-    private function activeReignsForTitle(Title $title, Collection $reigns): Collection
+    private function activeReignsForTitle(Title $title, TitleChampionshipCollection $reigns): TitleChampionshipCollection
     {
         return $reigns
-            ->where('title_id', $title->id)
-            ->filter(fn (TitleChampionship $reign): bool => $reign->deleted_at === null);
+            ->forTitleId($title->id)
+            ->active();
     }
 
     private function reignBelongsTo(

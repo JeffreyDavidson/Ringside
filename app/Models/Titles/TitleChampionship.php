@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Models\Titles;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
+use App\Collections\TitleChampionshipCollection;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Database\Factories\Titles\TitleChampionshipFactory;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -60,6 +62,7 @@ use Illuminate\Support\Carbon;
  *
  * @mixin \Eloquent
  */
+#[CollectedBy(TitleChampionshipCollection::class)]
 #[Table('titles_championships')]
 #[Fillable('title_id', 'champion_type', 'champion_id', 'won_match_id', 'lost_match_id', 'won_at', 'lost_at')]
 #[UseEloquentBuilder(TitleChampionshipBuilder::class)]

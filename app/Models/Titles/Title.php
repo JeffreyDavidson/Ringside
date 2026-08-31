@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Titles;
 
 use App\Builders\Titles\TitleBuilder;
+use App\Collections\TitleChampionshipCollection;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Lifecycle\Titles\TitleStatusResolver;
@@ -48,7 +49,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Retirement> $retirements
  * @property-read Collection<int, Retirement> $previousRetirements
  * @property-read TitleChampionship|null $currentChampionship
- * @property-read Collection<int, TitleChampionship> $championships
+ * @property-read TitleChampionshipCollection<int, TitleChampionship> $championships
  *
  * @property TitleType $type
  *
