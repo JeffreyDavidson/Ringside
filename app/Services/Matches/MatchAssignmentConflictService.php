@@ -56,11 +56,11 @@ final class MatchAssignmentConflictService
         $titles = $matches->flatMap->titles->unique('id')->values();
 
         if ($wrestlers->isNotEmpty()) {
-            $this->ensureCompetitorsCanBeAssigned($conflictingEventIds, $wrestlers, Wrestler::class, 'Wrestler');
+            $this->ensureWrestlersCanBeAssigned($conflictingEventIds, $wrestlers);
         }
 
         if ($tagTeams->isNotEmpty()) {
-            $this->ensureCompetitorsCanBeAssigned($conflictingEventIds, $tagTeams, TagTeam::class, 'Tag team');
+            $this->ensureTagTeamsCanBeAssigned($conflictingEventIds, $tagTeams);
         }
 
         if ($referees->isNotEmpty()) {
@@ -74,21 +74,20 @@ final class MatchAssignmentConflictService
 
     /**
      * @param  Collection<int, int>  $conflictingEventIds
-     * @param  Collection<int, Wrestler>|Collection<int, TagTeam>  $competitors
-     * @param  class-string<Wrestler|TagTeam>  $competitorType
+     * @param  Collection<int, Wrestler>  $wrestlers
      */
-    public function ensureCompetitorsCanBeAssigned(
-        Collection $conflictingEventIds,
-        Collection $competitors,
-        string $competitorType,
-        string $entityType,
-    ): void {
-        $this->competitorConflicts->ensureCanBeAssigned(
-            $conflictingEventIds,
-            $competitors,
-            $competitorType,
-            $entityType,
-        );
+    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers): void
+    {
+        $this->competitorConflicts->ensureWrestlersCanBeAssigned($conflictingEventIds, $wrestlers);
+    }
+
+    /**
+     * @param  Collection<int, int>  $conflictingEventIds
+     * @param  Collection<int, TagTeam>  $tagTeams
+     */
+    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams): void
+    {
+        $this->competitorConflicts->ensureTagTeamsCanBeAssigned($conflictingEventIds, $tagTeams);
     }
 
     /**

@@ -89,11 +89,9 @@ class AddTagTeamsToMatchAction
             throw EntityNotAvailableException::forMatchAssignment('tag teams');
         }
 
-        $this->conflictService->ensureCompetitorsCanBeAssigned(
+        $this->conflictService->ensureTagTeamsCanBeAssigned(
             $conflictingEventIds,
             $lockedTagTeams,
-            TagTeam::class,
-            'Tag team',
         );
         $side = $lockedMatch->sides()->firstOrCreate(['position' => $sideNumber]);
 

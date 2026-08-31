@@ -14,10 +14,38 @@ final class MatchCompetitorConflictService
 {
     /**
      * @param  Collection<int, int>  $conflictingEventIds
+     * @param  Collection<int, Wrestler>  $wrestlers
+     */
+    public function ensureWrestlersCanBeAssigned(Collection $conflictingEventIds, Collection $wrestlers): void
+    {
+        $this->ensureCompetitorsCanBeAssigned(
+            $conflictingEventIds,
+            $wrestlers,
+            Wrestler::class,
+            'Wrestler',
+        );
+    }
+
+    /**
+     * @param  Collection<int, int>  $conflictingEventIds
+     * @param  Collection<int, TagTeam>  $tagTeams
+     */
+    public function ensureTagTeamsCanBeAssigned(Collection $conflictingEventIds, Collection $tagTeams): void
+    {
+        $this->ensureCompetitorsCanBeAssigned(
+            $conflictingEventIds,
+            $tagTeams,
+            TagTeam::class,
+            'Tag team',
+        );
+    }
+
+    /**
+     * @param  Collection<int, int>  $conflictingEventIds
      * @param  Collection<int, Wrestler>|Collection<int, TagTeam>  $competitors
      * @param  class-string<Wrestler|TagTeam>  $competitorType
      */
-    public function ensureCanBeAssigned(
+    private function ensureCompetitorsCanBeAssigned(
         Collection $conflictingEventIds,
         Collection $competitors,
         string $competitorType,
