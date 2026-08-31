@@ -103,7 +103,7 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
     public function currentChampionship(): HasOne
     {
         return $this->hasOne(TitleChampionship::class)
-            ->whereNull('lost_at')
+            ->current()
             ->latest('won_at');
     }
 
