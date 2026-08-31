@@ -15,13 +15,13 @@ beforeEach(function () {
 test('it reinstates a suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     // Verify suspension record was ended
@@ -60,7 +60,7 @@ test('it reinstates wrestler with specific reinstatement date', function () {
     resolve(ReinstateAction::class)->handle($wrestler, $reinstatementDate);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     // Verify suspension was ended with specific date
     $this->assertDatabaseHas('suspensions', [
@@ -83,7 +83,7 @@ test('it persists the reinstatement lifecycle', function () {
 
     // Verify suspension period was ended
     expect($wrestler->currentSuspension)->toBeNull();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     // Verify the specific suspension record was updated
     $this->assertDatabaseHas('suspensions', [
@@ -101,7 +101,7 @@ test('it uses the current time when no date is provided', function () {
     resolve(ReinstateAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -127,12 +127,12 @@ test('it handles multiple suspension records correctly', function () {
         'notes' => 'Current suspension',
     ]);
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     // Only current suspension should be ended
     $this->assertDatabaseHas('suspensions', [
@@ -152,7 +152,7 @@ test('it handles multiple suspension records correctly', function () {
 test('it prevents reinstating an available wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
     expect($wrestler->isInjured())->toBeFalse();
 
     expect(fn () => resolve(ReinstateAction::class)->handle($wrestler))
@@ -179,13 +179,13 @@ test('it can reinstate suspended wrestler who is also employed', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->currentEmployment()->exists())->toBeTrue(); // Should remain employed
-    expect($wrestler->isSuspended())->toBeFalse(); // Should no longer be suspended
+    expect($wrestler->currentSuspension()->exists())->toBeFalse(); // Should no longer be suspended
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -198,7 +198,7 @@ test('it maintains status integrity after reinstatement', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
     // Verify initial state
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->currentRetirement()->exists())->toBeFalse();
@@ -208,7 +208,7 @@ test('it maintains status integrity after reinstatement', function () {
     $wrestler->refresh();
 
     // After reinstatement, wrestler should be active under the same employment.
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->currentRetirement()->exists())->toBeFalse();

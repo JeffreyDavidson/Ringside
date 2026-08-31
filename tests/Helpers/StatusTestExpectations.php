@@ -135,7 +135,7 @@ function expectValidSuspensionState(Model&Suspendable $entity): void
 {
     $entity->refresh();
 
-    if ($entity->isSuspended()) {
+    if ($entity->currentSuspension()->exists()) {
         $currentSuspension = $entity->currentSuspension()->firstOrFail();
         expect($currentSuspension->getAttribute('started_at'))->not->toBeNull();
         expect($currentSuspension->getAttribute('ended_at'))->toBeNull();

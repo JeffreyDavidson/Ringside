@@ -37,7 +37,7 @@ final class IndividualInjuryEligibility
             throw CannotBeInjuredException::hasFutureEmployment($individual);
         }
 
-        if ($individual->isSuspended()) {
+        if ($individual->currentSuspension()->exists()) {
             throw CannotBeInjuredException::suspended($individual);
         }
 

@@ -169,7 +169,7 @@ test('it prevents retiring unemployed wrestler', function () {
 test('it can retire suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     // Suspended wrestlers can be retired (career-ending situation)
@@ -177,7 +177,7 @@ test('it can retire suspended wrestler', function () {
 
     $wrestler->refresh();
     expect($wrestler->currentRetirement()->exists())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $wrestler->id,

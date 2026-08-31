@@ -46,7 +46,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeSuspendedException::injured($individual);
         }
 
-        if ($individual->isSuspended()) {
+        if ($individual->currentSuspension()->exists()) {
             throw CannotBeSuspendedException::suspended($individual);
         }
     }
@@ -68,7 +68,7 @@ final class IndividualSuspensionEligibility
             throw CannotBeReinstatedException::injured($individual);
         }
 
-        if (! $individual->isSuspended()) {
+        if (! $individual->currentSuspension()->exists()) {
             throw CannotBeReinstatedException::available($individual);
         }
 

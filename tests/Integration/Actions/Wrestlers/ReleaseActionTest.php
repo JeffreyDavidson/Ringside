@@ -141,14 +141,14 @@ test('it prevents releasing retired wrestler', function () {
 test('it can release suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,

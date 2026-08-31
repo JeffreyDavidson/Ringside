@@ -31,7 +31,7 @@ test('it suspends eligible current wrestlers and managers', function () {
     foreach ($wrestlers as $wrestler) {
         $wrestler->refresh();
 
-        expect($wrestler->isSuspended())->toBeTrue();
+        expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
         $transition = $wrestler->lifecycleTransitions()
             ->where('dimension', LifecycleDimension::Suspension)
@@ -50,7 +50,7 @@ test('it suspends eligible current wrestlers and managers', function () {
     $manager->refresh();
     $alreadySuspendedManager->refresh();
 
-    expect($manager->isSuspended())->toBeTrue()
+    expect($manager->currentSuspension()->exists())->toBeTrue()
         ->and($alreadySuspendedManager->suspensions()->count())->toBe($existingSuspensionCount);
 
     $managerTransition = $manager->lifecycleTransitions()

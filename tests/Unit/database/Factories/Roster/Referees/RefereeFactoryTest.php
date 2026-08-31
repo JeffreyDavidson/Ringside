@@ -70,7 +70,7 @@ describe('RefereeFactory Unit Tests', function () {
         test('suspended state creates exactly one active employment', function () {
             $referee = Referee::factory()->suspended()->create();
 
-            expect($referee->isSuspended())->toBeTrue();
+            expect($referee->currentSuspension()->exists())->toBeTrue();
             expect($referee->currentEmployment()->exists())->toBeTrue();
             expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
         });

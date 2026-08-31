@@ -16,7 +16,7 @@ final class RosterBookingEligibility
         if ($rosterMember instanceof TagTeam) {
             if (
                 (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
-                || $rosterMember->isSuspended()
+                || $rosterMember->currentSuspension()->exists()
                 || $rosterMember->currentRetirement()->exists()
                 || $rosterMember->futureEmployment()->exists()
             ) {
@@ -33,7 +33,7 @@ final class RosterBookingEligibility
 
         return ! (
             (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
-            || $rosterMember->isSuspended()
+            || $rosterMember->currentSuspension()->exists()
             || $rosterMember->isInjured()
             || $rosterMember->futureEmployment()->exists()
         );

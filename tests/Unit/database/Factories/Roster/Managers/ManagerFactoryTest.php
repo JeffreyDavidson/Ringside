@@ -98,7 +98,7 @@ describe('ManagerFactory Unit Tests', function () {
         test('suspended state creates exactly one active employment', function () {
             $manager = Manager::factory()->suspended()->create();
 
-            expect($manager->isSuspended())->toBeTrue();
+            expect($manager->currentSuspension()->exists())->toBeTrue();
             expect($manager->currentEmployment()->exists())->toBeTrue();
             expect($manager->employments()->whereNull('ended_at')->count())->toBe(1);
         });

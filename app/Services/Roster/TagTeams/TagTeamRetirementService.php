@@ -41,7 +41,7 @@ final class TagTeamRetirementService
                 $this->employmentPeriods->end($lockedTagTeam, $retirementDate);
             }
 
-            if ($lockedTagTeam->isSuspended()) {
+            if ($lockedTagTeam->currentSuspension()->exists()) {
                 $this->suspensionPeriods->end($lockedTagTeam, $retirementDate);
             }
 

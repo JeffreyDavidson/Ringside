@@ -80,7 +80,7 @@ describe('Manager Assignment Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Manager should be suspended
-        expect(freshModel($manager)->isSuspended())->toBeTrue();
+        expect(freshModel($manager)->currentSuspension()->exists())->toBeTrue();
 
         // When: Reinstating manager
         actingAs($admin);
@@ -91,7 +91,7 @@ describe('Manager Assignment Workflow', function () {
 
         // Then: Manager should be employed again
         expect(freshModel($manager)->currentEmployment()->exists())->toBeTrue();
-        expect(freshModel($manager)->isSuspended())->toBeFalse();
+        expect(freshModel($manager)->currentSuspension()->exists())->toBeFalse();
     });
 });
 
@@ -226,7 +226,7 @@ describe('Tag Team Formation and Management Workflow', function () {
             ->assertHasNoErrors();
 
         // Then: Tag team should be suspended
-        expect(freshModel($tagTeam)->isSuspended())->toBeTrue();
+        expect(freshModel($tagTeam)->currentSuspension()->exists())->toBeTrue();
 
         // When: Reinstating tag team
         actingAs($admin);
@@ -237,7 +237,7 @@ describe('Tag Team Formation and Management Workflow', function () {
 
         // Then: Tag team should be employed again
         expect(freshModel($tagTeam)->currentEmployment()->exists())->toBeTrue();
-        expect(freshModel($tagTeam)->isSuspended())->toBeFalse();
+        expect(freshModel($tagTeam)->currentSuspension()->exists())->toBeFalse();
 
         // When: Retiring tag team
         actingAs($admin);

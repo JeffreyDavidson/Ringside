@@ -22,6 +22,4 @@ interface Suspendable
 
     /** @return MorphOne<Suspension, TModel> */
     public function currentSuspension(): MorphOne;
-
-    public function isSuspended(): bool;
 }

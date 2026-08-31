@@ -16,12 +16,12 @@ test('it suspends an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
@@ -39,7 +39,7 @@ test('it suspends wrestler with specific suspension date', function () {
     resolve(SuspendAction::class)->handle($wrestler, $suspensionDate);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -55,7 +55,7 @@ test('it suspends a wrestler without suspension notes', function () {
     resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -76,7 +76,7 @@ test('it persists the suspension lifecycle', function () {
 
     // Verify suspension period was created
     expect($wrestler->currentSuspension)->not()->toBeNull();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -93,7 +93,7 @@ test('it uses the current time when no date is provided', function () {
     resolve(SuspendAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -118,12 +118,12 @@ test('it handles multiple suspension scenarios', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     // New suspension should be created
     $this->assertDatabaseHas('suspensions', [
@@ -145,7 +145,7 @@ test('it handles multiple suspension scenarios', function () {
 test('it prevents suspending already suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
 
     expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -186,6 +186,6 @@ test('it prevents suspending an injured wrestler', function () {
     $wrestler->refresh();
 
     expect($wrestler->isInjured())->toBeTrue();
-    expect($wrestler->isSuspended())->toBeFalse();
+    expect($wrestler->currentSuspension()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 });

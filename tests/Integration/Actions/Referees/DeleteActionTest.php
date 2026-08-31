@@ -94,7 +94,7 @@ test('it ends suspension before deletion', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);

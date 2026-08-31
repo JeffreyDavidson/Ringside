@@ -150,7 +150,7 @@ test('it prevents injuring unemployed wrestler', function () {
 test('it prevents injuring a suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(InjureAction::class)->handle($wrestler))
@@ -158,7 +158,7 @@ test('it prevents injuring a suspended wrestler', function () {
 
     $wrestler->refresh();
 
-    expect($wrestler->isSuspended())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->isInjured())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 });

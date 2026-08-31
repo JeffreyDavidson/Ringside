@@ -204,7 +204,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($this->referee)->isSuspended())->toBeTrue();
+            expect(freshModel($this->referee)->currentSuspension()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Referee successfully suspended.');
             expect(true)->toBeTrue();
         });
@@ -236,7 +236,7 @@ describe('RefereesActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('referee-updated');
 
-            expect(freshModel($suspendedReferee)->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedReferee)->currentSuspension()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Referee successfully reinstated.');
             expect(true)->toBeTrue();
         });
@@ -358,11 +358,11 @@ describe('RefereesActions Integration Tests', function () {
 
             // Suspend (for poor performance, missed calls, etc.)
             $component->call('suspend');
-            expect(freshModel($referee)->isSuspended())->toBeTrue();
+            expect(freshModel($referee)->currentSuspension()->exists())->toBeTrue();
 
             // Reinstate (after retraining)
             $component->call('reinstate');
-            expect(freshModel($referee)->isSuspended())->toBeFalse();
+            expect(freshModel($referee)->currentSuspension()->exists())->toBeFalse();
 
             // Retire
             $component->call('retire');
@@ -398,7 +398,7 @@ describe('RefereesActions Integration Tests', function () {
             expect(freshModel($injuredReferee)->isInjured())->toBeFalse();
 
             $component->call('suspend');
-            expect(freshModel($injuredReferee)->isSuspended())->toBeTrue();
+            expect(freshModel($injuredReferee)->currentSuspension()->exists())->toBeTrue();
             expect(true)->toBeTrue();
         });
 
@@ -413,7 +413,7 @@ describe('RefereesActions Integration Tests', function () {
 
             // Suspended referee still employed but cannot officiate
             expect($suspendedReferee->currentEmployment()->exists())->toBeTrue();
-            expect($suspendedReferee->isSuspended())->toBeTrue();
+            expect($suspendedReferee->currentSuspension()->exists())->toBeTrue();
 
             // Cannot retire while suspended (must be reinstated first)
             $component->call('retire');
@@ -422,7 +422,7 @@ describe('RefereesActions Integration Tests', function () {
 
             // Must reinstate first
             $component->call('reinstate');
-            expect(freshModel($suspendedReferee)->isSuspended())->toBeFalse();
+            expect(freshModel($suspendedReferee)->currentSuspension()->exists())->toBeFalse();
 
             // Now can retire
             $component->call('retire');
@@ -456,14 +456,14 @@ describe('RefereesActions Integration Tests', function () {
             expect(freshModel($juniorReferee)->isInjured())->toBeTrue();
 
             $seniorComponent->call('suspend');
-            expect(freshModel($seniorReferee)->isSuspended())->toBeTrue();
+            expect(freshModel($seniorReferee)->currentSuspension()->exists())->toBeTrue();
 
             // Both can be restored to active status
             $juniorComponent->call('clearFromInjury');
             expect(freshModel($juniorReferee)->isInjured())->toBeFalse();
 
             $seniorComponent->call('reinstate');
-            expect(freshModel($seniorReferee)->isSuspended())->toBeFalse();
+            expect(freshModel($seniorReferee)->currentSuspension()->exists())->toBeFalse();
             expect(true)->toBeTrue();
         });
     });

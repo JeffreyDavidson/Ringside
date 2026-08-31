@@ -52,14 +52,14 @@ test('it releases manager with specific release date', function () {
 test('it releases suspended manager and ends suspension', function () {
     $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isReleased())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
     // Verify suspension was ended
@@ -187,7 +187,7 @@ test('it handles database transactions correctly', function () {
     // Verify transaction was successful - all operations completed
     expect($manager->isReleased())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeFalse();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
     expect($manager->currentWrestlers)->toHaveCount(0);
 
     // Verify all database changes are consistent
@@ -285,7 +285,7 @@ test('it handles complex status combinations', function () {
     $manager->suspensions()->create(['started_at' => now()->subDays(2), 'ended_at' => null]); // Current
 
     $manager->refresh();
-    expect($manager->isSuspended())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($manager);
@@ -294,7 +294,7 @@ test('it handles complex status combinations', function () {
 
     // Should handle complex status properly
     expect($manager->isReleased())->toBeTrue();
-    expect($manager->isSuspended())->toBeFalse();
+    expect($manager->currentSuspension()->exists())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
     // Should end only the current suspension

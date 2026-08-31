@@ -51,13 +51,13 @@ test('it releases suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->isSuspended())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->isSuspended())->toBeFalse();
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Verify employment ended
     $this->assertDatabaseHas('employments', [

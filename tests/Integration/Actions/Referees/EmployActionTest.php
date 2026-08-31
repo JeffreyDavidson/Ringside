@@ -49,7 +49,7 @@ test('it employs referee with specific employment date', function () {
 test('it prevents re-employing suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
 
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
     expect($referee->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($referee))
@@ -117,7 +117,7 @@ test('it prevents re-employing suspended referee without changing records', func
     $suspension->refresh();
 
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
     expect($suspension->ended_at)->toBeNull();
 });
 

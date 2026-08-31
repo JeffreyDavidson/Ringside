@@ -16,12 +16,12 @@ test('it suspends an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->isSuspended())->toBeFalse();
+    expect($referee->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $referee->id,
@@ -38,7 +38,7 @@ test('it suspends referee with specific suspension date', function () {
     resolve(SuspendAction::class)->handle($referee, $suspensionDate);
 
     $referee->refresh();
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $referee->id,
@@ -72,7 +72,7 @@ test('it validates referee can be suspended', function () {
     resolve(SuspendAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
 });
 
 test('it throws exception when referee cannot be suspended', function () {
@@ -95,7 +95,7 @@ test('it prevents suspending an injured referee', function () {
     $referee->refresh();
 
     expect($referee->isInjured())->toBeTrue()
-        ->and($referee->isSuspended())->toBeFalse()
+        ->and($referee->currentSuspension()->exists())->toBeFalse()
         ->and($referee->currentEmployment()->exists())->toBeTrue();
 });
 
@@ -112,7 +112,7 @@ test('it maintains referee employment after suspension', function () {
 
     // Should remain employed after suspension
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->isSuspended())->toBeTrue();
+    expect($referee->currentSuspension()->exists())->toBeTrue();
     expect($employment->ended_at)->toBeNull();
 });
 
