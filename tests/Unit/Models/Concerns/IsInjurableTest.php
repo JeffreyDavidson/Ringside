@@ -30,11 +30,11 @@ describe('IsInjurable', function () {
     test('checks current injury state', function () {
         $model = new InjuryStateModel();
 
-        expect($model->isInjured())->toBeFalse();
+        expect($model->currentInjury()->exists())->toBeFalse();
 
         $model->currentInjuryExists = true;
 
-        expect($model->isInjured())->toBeTrue();
+        expect($model->currentInjury()->exists())->toBeTrue();
     });
 
     test('constrains current and previous injury relationships', function () {

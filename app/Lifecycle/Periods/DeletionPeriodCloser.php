@@ -37,7 +37,7 @@ final class DeletionPeriodCloser
             $this->suspensionPeriods->end($subject, $date);
         }
 
-        if ($subject->isInjured()) {
+        if ($subject->currentInjury()->exists()) {
             $this->injuryPeriods->end($subject, $date);
         }
     }

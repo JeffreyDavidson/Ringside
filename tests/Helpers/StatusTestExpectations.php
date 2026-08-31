@@ -117,7 +117,7 @@ function expectValidInjuryState(Model&Injurable $entity): void
 {
     $entity->refresh();
 
-    if ($entity->isInjured()) {
+    if ($entity->currentInjury()->exists()) {
         $currentInjury = $entity->currentInjury()->firstOrFail();
         expect($currentInjury->getAttribute('started_at'))->not->toBeNull();
         expect($currentInjury->getAttribute('ended_at'))->toBeNull();

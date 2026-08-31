@@ -107,7 +107,7 @@ test('it ends injury before releasing', function () {
     $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
     expect($injury->ended_at)->toBeNull();
 
     resolve(ReleaseAction::class)->handle($referee);
@@ -116,7 +116,7 @@ test('it ends injury before releasing', function () {
     $injury->refresh();
 
     expect($referee->currentEmployment()->exists())->toBeFalse();
-    expect($referee->isInjured())->toBeFalse();
+    expect($referee->currentInjury()->exists())->toBeFalse();
     expect($injury->ended_at)->not->toBeNull();
 });
 

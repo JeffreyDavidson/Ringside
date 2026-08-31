@@ -484,7 +484,7 @@ describe('TitleChampionship Model', function () {
 
             $refreshedWrestler = freshModel($this->wrestler);
 
-            expect($refreshedWrestler->isInjured())->toBeTrue();
+            expect($refreshedWrestler->currentInjury()->exists())->toBeTrue();
             expect(RosterBookingEligibility::allows($refreshedWrestler))->toBeFalse();
 
             // Business rule: Injured champion may keep title or be stripped depending on promotion rules

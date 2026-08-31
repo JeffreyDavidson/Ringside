@@ -41,7 +41,7 @@ test('it prevents reinstating an injured referee', function () {
         ->toThrow(CannotBeReinstatedException::class);
 
     $referee->refresh();
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
     $this->assertDatabaseHas('injuries', [
         'id' => $injuryId,
         'ended_at' => null,

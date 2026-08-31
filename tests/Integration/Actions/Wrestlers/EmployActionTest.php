@@ -59,7 +59,7 @@ test('it employs suspended wrestler and ends suspension', function () {
 test('it employs injured wrestler and ends injury', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($wrestler))

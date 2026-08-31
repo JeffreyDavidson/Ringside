@@ -40,7 +40,7 @@ test('it prevents reinstating an injured manager', function () {
         ->toThrow(CannotBeReinstatedException::class);
 
     $manager->refresh();
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
     $this->assertDatabaseHas('injuries', [
         'id' => $injuryId,
         'ended_at' => null,

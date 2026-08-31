@@ -41,7 +41,7 @@ final class IndividualInjuryEligibility
             throw CannotBeInjuredException::suspended($individual);
         }
 
-        if ($individual->isInjured()) {
+        if ($individual->currentInjury()->exists()) {
             throw CannotBeInjuredException::injured($individual);
         }
     }
@@ -59,7 +59,7 @@ final class IndividualInjuryEligibility
 
     public function ensureCanBeClearedFromInjury(Wrestler|Manager|Referee $individual): void
     {
-        if (! $individual->isInjured()) {
+        if (! $individual->currentInjury()->exists()) {
             throw CannotBeClearedFromInjuryException::notInjured($individual);
         }
     }

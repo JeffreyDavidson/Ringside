@@ -113,7 +113,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($this->wrestler)->isInjured())->toBeTrue();
+            expect(freshModel($this->wrestler)->currentInjury()->exists())->toBeTrue();
             // expect(session('status'))->toBe('Wrestler injury recorded.');
             expect(true)->toBeTrue();
         });
@@ -142,7 +142,7 @@ describe('WrestlersActions Integration Tests', function () {
                 ->assertHasNoErrors()
                 ->assertDispatched('wrestler-updated');
 
-            expect(freshModel($injuredWrestler)->isInjured())->toBeFalse();
+            expect(freshModel($injuredWrestler)->currentInjury()->exists())->toBeFalse();
             // expect(session('status'))->toBe('Wrestler cleared from injury.');
             expect(true)->toBeTrue();
         });
@@ -306,11 +306,11 @@ describe('WrestlersActions Integration Tests', function () {
 
             // Injure
             $component->call('injure');
-            expect(freshModel($wrestler)->isInjured())->toBeTrue();
+            expect(freshModel($wrestler)->currentInjury()->exists())->toBeTrue();
 
             // Clear from injury
             $component->call('clearFromInjury');
-            expect(freshModel($wrestler)->isInjured())->toBeFalse();
+            expect(freshModel($wrestler)->currentInjury()->exists())->toBeFalse();
 
             // Suspend
             $component->call('suspend');
@@ -348,7 +348,7 @@ describe('WrestlersActions Integration Tests', function () {
 
             // Can clear from injury injured wrestler
             $component->call('clearFromInjury');
-            expect(freshModel($injuredWrestler)->isInjured())->toBeFalse();
+            expect(freshModel($injuredWrestler)->currentInjury()->exists())->toBeFalse();
             expect(true)->toBeTrue();
         });
     });

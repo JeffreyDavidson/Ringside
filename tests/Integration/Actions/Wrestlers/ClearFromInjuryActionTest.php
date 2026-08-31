@@ -14,12 +14,12 @@ beforeEach(function () {
 test('it clears an injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     // Verify injury record was ended
     $this->assertDatabaseHas('injuries', [
@@ -36,7 +36,7 @@ test('it clears wrestler from injury with specific recovery date', function () {
     resolve(ClearFromInjuryAction::class)->handle($wrestler, $recoveryDate);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     // Verify injury was ended with specific date
     $this->assertDatabaseHas('injuries', [
@@ -58,7 +58,7 @@ test('it persists the injury clearance lifecycle', function () {
 
     // Verify injury period was ended
     expect($wrestler->currentInjury)->toBeNull();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     // Verify the specific injury record was updated
     $this->assertDatabaseHas('injuries', [
@@ -76,7 +76,7 @@ test('it uses the current time when no date is provided', function () {
     resolve(ClearFromInjuryAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $wrestler->id,
@@ -99,12 +99,12 @@ test('it handles multiple injury records correctly', function () {
         'ended_at' => null, // Current injury
     ]);
 
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     // Only the current injury should be ended
     $this->assertDatabaseHas('injuries', [
@@ -126,7 +126,7 @@ test('it handles multiple injury records correctly', function () {
 test('it prevents clearing non-injured wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     expect(fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -136,7 +136,7 @@ test('it prevents clearing retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     expect($wrestler->currentRetirement()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     expect(fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -151,11 +151,11 @@ test('it works with employed injured wrestler', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($wrestler);
 
     $wrestler->refresh();
     expect($wrestler->currentEmployment()->exists())->toBeTrue(); // Should remain employed
-    expect($wrestler->isInjured())->toBeFalse(); // Should no longer be injured
+    expect($wrestler->currentInjury()->exists())->toBeFalse(); // Should no longer be injured
 });

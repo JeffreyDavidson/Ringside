@@ -26,7 +26,7 @@ class IsNotInjured implements ValidationRule
             return;
         }
 
-        if ($wrestler->isInjured()) {
+        if ($wrestler->currentInjury()->exists()) {
             $fail("{$wrestler->name} is injured and cannot join the stable.");
         }
     }

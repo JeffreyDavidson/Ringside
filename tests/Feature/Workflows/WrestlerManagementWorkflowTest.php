@@ -172,7 +172,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should be injured
-        expect(freshModel($wrestler)->isInjured())->toBeTrue();
+        expect(freshModel($wrestler)->currentInjury()->exists())->toBeTrue();
 
         // When: Healing the wrestler from injury
         actingAs($admin);
@@ -182,7 +182,7 @@ describe('Wrestler Employment Status Management Journey', function () {
             ->assertHasNoErrors();
 
         // Then: Wrestler should no longer be injured
-        expect(freshModel($wrestler)->isInjured())->toBeFalse();
+        expect(freshModel($wrestler)->currentInjury()->exists())->toBeFalse();
         expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
     });
 });

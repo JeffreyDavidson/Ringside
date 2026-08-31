@@ -79,14 +79,14 @@ test('it releases suspended manager and ends suspension', function () {
 test('it releases injured manager and ends injury', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($manager);
 
     $manager->refresh();
     expect($manager->isReleased())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeFalse();
 
     // Verify injury was ended

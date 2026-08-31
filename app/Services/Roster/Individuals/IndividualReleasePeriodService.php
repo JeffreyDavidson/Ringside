@@ -27,7 +27,7 @@ final class IndividualReleasePeriodService
 
         if ($individual->currentSuspension()->exists()) {
             $this->suspensionPeriods->end($individual, $releaseDate);
-        } elseif ($individual->isInjured()) {
+        } elseif ($individual->currentInjury()->exists()) {
             $this->injuryPeriods->end($individual, $releaseDate);
         }
     }

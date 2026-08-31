@@ -34,7 +34,7 @@ final class RosterBookingEligibility
         return ! (
             (! $rosterMember->currentEmployment()->exists() && ! $rosterMember->futureEmployment()->exists())
             || $rosterMember->currentSuspension()->exists()
-            || $rosterMember->isInjured()
+            || $rosterMember->currentInjury()->exists()
             || $rosterMember->futureEmployment()->exists()
         );
     }

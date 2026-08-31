@@ -28,7 +28,7 @@ class CanJoinTagTeam implements ValidationRule
             return;
         }
 
-        if ($wrestler->currentSuspension()->exists() || $wrestler->isInjured()) {
+        if ($wrestler->currentSuspension()->exists() || $wrestler->currentInjury()->exists()) {
             $fail('This wrestler cannot join the tag team.');
 
             return;

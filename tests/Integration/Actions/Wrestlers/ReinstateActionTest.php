@@ -36,7 +36,7 @@ test('it prevents reinstating an injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
     $injuryId = $wrestler->currentInjury()->firstOrFail()->id;
 
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(ReinstateAction::class)->handle($wrestler))
@@ -44,7 +44,7 @@ test('it prevents reinstating an injured wrestler', function () {
 
     $wrestler->refresh();
 
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('injuries', [
@@ -153,7 +153,7 @@ test('it prevents reinstating an available wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentSuspension()->exists())->toBeFalse();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     expect(fn () => resolve(ReinstateAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -200,7 +200,7 @@ test('it maintains status integrity after reinstatement', function () {
     // Verify initial state
     expect($wrestler->currentSuspension()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
     expect($wrestler->currentRetirement()->exists())->toBeFalse();
 
     resolve(ReinstateAction::class)->handle($wrestler);
@@ -210,6 +210,6 @@ test('it maintains status integrity after reinstatement', function () {
     // After reinstatement, wrestler should be active under the same employment.
     expect($wrestler->currentSuspension()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
     expect($wrestler->currentRetirement()->exists())->toBeFalse();
 });

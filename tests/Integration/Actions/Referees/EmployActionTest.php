@@ -59,7 +59,7 @@ test('it prevents re-employing suspended referee', function () {
 test('it prevents re-employing injured referee', function () {
     $referee = Referee::factory()->injured()->create();
 
-    expect($referee->isInjured())->toBeTrue();
+    expect($referee->currentInjury()->exists())->toBeTrue();
     expect($referee->currentEmployment()->exists())->toBeTrue();
 
     expect(fn () => resolve(EmployAction::class)->handle($referee))

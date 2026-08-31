@@ -59,9 +59,4 @@ trait IsInjurable
 
         return $relation;
     }
-
-    public function isInjured(): bool
-    {
-        return $this->currentInjury()->exists();
-    }
 }

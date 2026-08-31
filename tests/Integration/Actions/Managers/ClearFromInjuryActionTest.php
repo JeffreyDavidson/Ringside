@@ -14,12 +14,12 @@ beforeEach(function () {
 test('it clears an injured manager', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     // Verify injury record was ended
     $this->assertDatabaseHas('injuries', [
@@ -36,7 +36,7 @@ test('it clears manager from injury with specific recovery date', function () {
     resolve(ClearFromInjuryAction::class)->handle($manager, $recoveryDate);
 
     $manager->refresh();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     // Verify injury was ended with specific date
     $this->assertDatabaseHas('injuries', [
@@ -58,7 +58,7 @@ test('it persists the injury clearance lifecycle', function () {
 
     // Verify injury period was ended
     expect($manager->currentInjury)->toBeNull();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     // Verify injury record shows proper end date
     $this->assertDatabaseHas('injuries', [
@@ -71,7 +71,7 @@ test('it persists the injury clearance lifecycle', function () {
 test('it prevents clearing non-injured manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     expect(fn () => resolve(ClearFromInjuryAction::class)->handle($manager))
         ->toThrow(Exception::class);
@@ -86,7 +86,7 @@ test('it handles database transactions correctly', function () {
     $manager->refresh();
 
     // Verify the transaction was successful
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     // Verify original injury record was properly ended
     $this->assertDatabaseHas('injuries', [
@@ -104,7 +104,7 @@ test('it maintains employment status during injury clearance', function () {
     $manager = Manager::factory()->injured()->create();
 
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($manager);
 
@@ -112,7 +112,7 @@ test('it maintains employment status during injury clearance', function () {
 
     // Should maintain employment while ending injury
     expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->isInjured())->toBeFalse();
+    expect($manager->currentInjury()->exists())->toBeFalse();
 
     // Employment record should remain unchanged
     $employment = $manager->currentEmployment()->firstOrFail();

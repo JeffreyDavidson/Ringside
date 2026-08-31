@@ -16,12 +16,12 @@ test('it injures an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
     expect($wrestler->currentEmployment()->exists())->toBeTrue(); // Should remain employed while injured
 
     $this->assertDatabaseHas('injuries', [
@@ -39,7 +39,7 @@ test('it injures wrestler with specific injury date', function () {
     resolve(InjureAction::class)->handle($wrestler, $injuryDate);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $wrestler->id,
@@ -60,7 +60,7 @@ test('it persists the injury lifecycle', function () {
 
     // Verify injury period was created
     expect($wrestler->currentInjury)->not()->toBeNull();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $wrestler->id,
@@ -77,7 +77,7 @@ test('it uses the current time when no date is provided', function () {
     resolve(InjureAction::class)->handle($wrestler, null);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $wrestler->id,
@@ -96,12 +96,12 @@ test('it handles multiple injury scenarios', function () {
     ]);
 
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     // New injury should be created
     $this->assertDatabaseHas('injuries', [
@@ -123,7 +123,7 @@ test('it handles multiple injury scenarios', function () {
 test('it prevents injuring already injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     expect(fn () => resolve(InjureAction::class)->handle($wrestler))
         ->toThrow(Exception::class);
@@ -159,7 +159,7 @@ test('it prevents injuring a suspended wrestler', function () {
     $wrestler->refresh();
 
     expect($wrestler->currentSuspension()->exists())->toBeTrue();
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 });
 
@@ -177,12 +177,12 @@ test('it maintains injury history integrity', function () {
         'ended_at' => now()->subDays(20),
     ]);
 
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     // All injury records should be preserved
     $this->assertDatabaseHas('injuries', [
@@ -216,14 +216,14 @@ test('it allows re-injury after injury clearance', function () {
         'ended_at' => now()->subDays(10), // Cleared from injury 10 days ago
     ]);
 
-    expect($wrestler->isInjured())->toBeFalse();
+    expect($wrestler->currentInjury()->exists())->toBeFalse();
     expect($wrestler->currentEmployment()->exists())->toBeTrue();
 
     // Should be able to get injured again
     resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->isInjured())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue();
 
     // Should have 2 injury records now
     expect($wrestler->injuries()->count())->toBe(2);

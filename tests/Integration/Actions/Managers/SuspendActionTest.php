@@ -129,7 +129,7 @@ test('it maintains employment status during suspension', function () {
 test('it prevents suspending an injured manager', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
     expect($manager->currentSuspension()->exists())->toBeFalse();
 
     expect(fn () => resolve(SuspendAction::class)->handle($manager))
@@ -137,7 +137,7 @@ test('it prevents suspending an injured manager', function () {
 
     $manager->refresh();
 
-    expect($manager->isInjured())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue();
     expect($manager->currentSuspension()->exists())->toBeFalse();
     expect($manager->currentEmployment()->exists())->toBeTrue();
 });
