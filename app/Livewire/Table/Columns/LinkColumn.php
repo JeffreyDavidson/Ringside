@@ -36,7 +36,7 @@ class LinkColumn extends Column
             return (string) $title;
         }
 
-        return '<a href="'.e($location).'">'.e($title).'</a>';
+        return static::linkHtml($title, $location);
     }
 
     public function isHtml(): bool

@@ -34,3 +34,17 @@ test('array columns resolve and format items with focused callbacks', function (
 
     expect($column->resolveValue($row))->toBe('FIRST | SECOND');
 });
+
+test('array columns render escaped links from title and location callbacks', function () {
+    $row = collect(['<script>alert(1)</script>']);
+
+    $column = ArrayColumn::make('Items')
+        ->data(fn (Collection $row): Collection => $row)
+        ->link(
+            title: fn (string $item): string => $item,
+            location: fn (string $item): string => '/items/'.rawurlencode($item),
+        );
+
+    expect($column->resolveValue($row))
+        ->toBe('<a href="/items/%3Cscript%3Ealert%281%29%3C%2Fscript%3E">&lt;script&gt;alert(1)&lt;/script&gt;</a>');
+});
