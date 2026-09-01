@@ -39,13 +39,13 @@ class Actions extends Component
     /**
      * Employ a title.
      */
-    public function debut(): void
+    public function debut(DebutAction $debutAction): void
     {
         Gate::authorize('debut', $this->title);
 
         if ($this->executeBusinessAction(
-            function (): void {
-                resolve(DebutAction::class)->handle($this->title);
+            function () use ($debutAction): void {
+                $debutAction->handle($this->title);
             },
             __('titles.actions.debuted'),
         )) {
@@ -56,13 +56,13 @@ class Actions extends Component
     /**
      * Retire a title.
      */
-    public function retire(): void
+    public function retire(RetireAction $retireAction): void
     {
         Gate::authorize('retire', $this->title);
 
         if ($this->executeBusinessAction(
-            function (): void {
-                resolve(RetireAction::class)->handle($this->title);
+            function () use ($retireAction): void {
+                $retireAction->handle($this->title);
             },
             __('titles.actions.retired'),
         )) {
@@ -73,13 +73,13 @@ class Actions extends Component
     /**
      * Unretire a title.
      */
-    public function unretire(): void
+    public function unretire(UnretireAction $unretireAction): void
     {
         Gate::authorize('unretire', $this->title);
 
         if ($this->executeBusinessAction(
-            function (): void {
-                resolve(UnretireAction::class)->handle($this->title);
+            function () use ($unretireAction): void {
+                $unretireAction->handle($this->title);
             },
             __('titles.actions.unretired'),
         )) {
@@ -90,13 +90,13 @@ class Actions extends Component
     /**
      * Pull a title.
      */
-    public function deactivate(): void
+    public function deactivate(PullAction $pullAction): void
     {
         Gate::authorize('pull', $this->title);
 
         if ($this->executeBusinessAction(
-            function (): void {
-                resolve(PullAction::class)->handle($this->title);
+            function () use ($pullAction): void {
+                $pullAction->handle($this->title);
             },
             __('titles.actions.pulled'),
         )) {
@@ -107,13 +107,13 @@ class Actions extends Component
     /**
      * Reinstate a title.
      */
-    public function reinstate(): void
+    public function reinstate(ReinstateAction $reinstateAction): void
     {
         Gate::authorize('reinstate', $this->title);
 
         if ($this->executeBusinessAction(
-            function (): void {
-                resolve(ReinstateAction::class)->handle($this->title);
+            function () use ($reinstateAction): void {
+                $reinstateAction->handle($this->title);
             },
             __('titles.actions.reinstated'),
         )) {
@@ -124,13 +124,13 @@ class Actions extends Component
     /**
      * Restore a deleted title.
      */
-    public function restore(): void
+    public function restore(RestoreAction $restoreAction): void
     {
         Gate::authorize('restore', $this->title);
 
         if ($this->executeBusinessAction(
-            function (): void {
-                resolve(RestoreAction::class)->handle($this->title);
+            function () use ($restoreAction): void {
+                $restoreAction->handle($this->title);
             },
             __('titles.actions.restored'),
         )) {
