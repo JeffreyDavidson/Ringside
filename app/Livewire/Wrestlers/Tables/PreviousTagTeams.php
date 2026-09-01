@@ -82,7 +82,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     {
         $partner = $this->getPartner($row);
 
-        return $partner ? route('wrestlers.show', $partner) : '#';
+        return $partner ? $this->routeResolver->urlFor($partner) : '#';
     }
 
     /**

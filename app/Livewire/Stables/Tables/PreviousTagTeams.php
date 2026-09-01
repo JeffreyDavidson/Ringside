@@ -6,6 +6,7 @@ namespace App\Livewire\Stables\Tables;
 
 use App\Builders\Roster\StableMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -24,6 +25,13 @@ class PreviousTagTeams extends DataTableComponent
 
     #[Locked]
     public ?int $stableId;
+
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
+    {
+        $this->routeResolver = $routeResolver;
+    }
 
     /** @return StableMembershipBuilder<StableTagTeam> */
     public function builder(): StableMembershipBuilder
@@ -44,7 +52,7 @@ class PreviousTagTeams extends DataTableComponent
         return [
             LinkColumn::make(__('tag-teams.name'))
                 ->title(fn (StableTagTeam $row) => $row->tagTeam->name ?? 'Unknown')
-                ->location(fn (StableTagTeam $row): string => $row->tagTeam ? route('tag-teams.show', $row->tagTeam) : '#'),
+                ->location(fn (StableTagTeam $row): string => $row->tagTeam ? $this->routeResolver->urlFor($row->tagTeam) : '#'),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('stables.date_left'), 'left_at')
