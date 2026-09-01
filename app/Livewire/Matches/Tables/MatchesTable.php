@@ -21,6 +21,8 @@ class MatchesTable extends DataTableComponent
 {
     use ShowTableTrait;
 
+    protected MatchTableFormatter $matchTableFormatter;
+
     protected string $databaseTableName = 'events_matches';
 
     protected string $resourceName = 'matches';
@@ -30,6 +32,11 @@ class MatchesTable extends DataTableComponent
      */
     #[Locked]
     public ?int $eventId = null;
+
+    public function boot(MatchTableFormatter $matchTableFormatter): void
+    {
+        $this->matchTableFormatter = $matchTableFormatter;
+    }
 
     /**
      * @return EventMatchBuilder<EventMatch>
@@ -57,14 +64,12 @@ class MatchesTable extends DataTableComponent
      */
     public function columns(): array
     {
-        $matchTableFormatter = app(MatchTableFormatter::class);
-
         return [
             Column::make(__('matches.match_type'), 'match_type')
                 ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
             Column::make(__('matches.competitors'))
-                ->label(fn (EventMatch $row): string => $matchTableFormatter->competitorLinks($row))
+                ->label(fn (EventMatch $row): string => $this->matchTableFormatter->competitorLinks($row))
                 ->html(),
             ArrayColumn::make(__('matches.referees'))
                 ->data(fn (EventMatch $row) => $row->referees)
@@ -83,7 +88,7 @@ class MatchesTable extends DataTableComponent
                 ->separator(', ')
                 ->emptyValue('N/A'),
             Column::make(__('matches.result'))
-                ->label(fn (EventMatch $row): string => $matchTableFormatter->result($row))
+                ->label(fn (EventMatch $row): string => $this->matchTableFormatter->result($row))
                 ->html(),
             Column::make(__('core.actions'))
                 ->view('components.matches.table-result-action')
