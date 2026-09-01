@@ -58,26 +58,26 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(Venue $venue): void
+    public function delete(Venue $venue, DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $venue);
 
-        $this->executeBusinessAction(function () use ($venue): void {
-            resolve(DeleteAction::class)->handle($venue);
+        $this->executeBusinessAction(function () use ($deleteAction, $venue): void {
+            $deleteAction->handle($venue);
         }, __('venues.actions.deleted'));
     }
 
     /**
      * Restore a deleted venue.
      */
-    public function restore(int $venueId): void
+    public function restore(int $venueId, RestoreAction $restoreAction): void
     {
         $venue = Venue::onlyTrashed()->findOrFail($venueId);
 
         Gate::authorize('restore', $venue);
 
-        if ($this->executeBusinessAction(function () use ($venue): void {
-            resolve(RestoreAction::class)->handle($venue);
+        if ($this->executeBusinessAction(function () use ($restoreAction, $venue): void {
+            $restoreAction->handle($venue);
         }, __('venues.actions.restored'))) {
             $this->redirectRoute('venues.index');
         }
