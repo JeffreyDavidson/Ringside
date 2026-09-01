@@ -31,6 +31,13 @@ class PreviousTitleChampionships extends DataTableComponent
     #[Locked]
     public ?int $titleId;
 
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
+    {
+        $this->routeResolver = $routeResolver;
+    }
+
     protected function configure(): void
     {
         Gate::authorize('viewAny', Title::class);
@@ -52,18 +59,16 @@ class PreviousTitleChampionships extends DataTableComponent
      */
     public function columns(): array
     {
-        $routeResolver = app(RosterResourceRouteResolver::class);
-
         return [
             LinkColumn::make(__('championships.new_champion'))
                 ->title(fn (TitleChampionship $row): string => $row->champion->name)
-                ->location(fn (TitleChampionship $row): string => $routeResolver->urlFor($row->champion)),
+                ->location(fn (TitleChampionship $row): string => $this->routeResolver->urlFor($row->champion)),
             LinkColumn::make(__('championships.previous_champion'))
                 ->title(fn (TitleChampionship $row): string => $row->previousChampionship?->champion->name ?? 'N/A')
-                ->location(function (TitleChampionship $row) use ($routeResolver): ?string {
+                ->location(function (TitleChampionship $row): ?string {
                     $champion = $row->previousChampionship?->champion;
 
-                    return $champion === null ? null : $routeResolver->urlFor($champion);
+                    return $champion === null ? null : $this->routeResolver->urlFor($champion);
                 }),
             Column::make(__('championships.dates_held'))
                 ->label(fn (TitleChampionship $row): string => $this->datesHeld($row)),
