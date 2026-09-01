@@ -6,6 +6,7 @@ namespace App\Livewire\TagTeams\Tables;
 
 use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -24,6 +25,13 @@ class PreviousWrestlers extends DataTableComponent
 
     #[Locked]
     public ?int $tagTeamId;
+
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
+    {
+        $this->routeResolver = $routeResolver;
+    }
 
     /** @return TagTeamMembershipBuilder<TagTeamWrestler> */
     public function builder(): TagTeamMembershipBuilder
@@ -44,7 +52,7 @@ class PreviousWrestlers extends DataTableComponent
         return [
             LinkColumn::make(__('wrestlers.name'))
                 ->title(fn (TagTeamWrestler $row) => $row->wrestler->name ?? 'Unknown')
-                ->location(fn (TagTeamWrestler $row): string => $row->wrestler ? route('wrestlers.show', $row->wrestler) : '#'),
+                ->location(fn (TagTeamWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#'),
             DateColumn::make(__('tag-teams.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('tag-teams.date_left'), 'left_at')

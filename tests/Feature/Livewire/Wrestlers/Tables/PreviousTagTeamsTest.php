@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Wrestlers\Tables\PreviousTagTeams;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
@@ -107,7 +108,9 @@ describe('PreviousTagTeamsTable Rendering', function () {
             'left_at' => null,
         ]);
 
-        $table = tap(app(PreviousTagTeams::class), fn (PreviousTagTeams $component) => $component->wrestlerId = $this->wrestler->id);
+        $table = app(PreviousTagTeams::class);
+        $table->wrestlerId = $this->wrestler->id;
+        $table->boot(app(RosterResourceRouteResolver::class));
         $membership = $table->builder()->firstOrFail();
 
         DB::flushQueryLog();

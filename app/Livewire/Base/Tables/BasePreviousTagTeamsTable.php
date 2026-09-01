@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Base\Tables;
 
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
@@ -21,6 +22,13 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
     protected string $resourceName = 'tag teams';
 
     protected string $databaseTableName;
+
+    protected RosterResourceRouteResolver $routeResolver;
+
+    public function boot(RosterResourceRouteResolver $routeResolver): void
+    {
+        $this->routeResolver = $routeResolver;
+    }
 
     /**
      * Get the partner wrestler name for the given tag team relationship.
@@ -42,7 +50,7 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
                 ->title(fn (TagTeamWrestler $row): string => $this->tagTeamName($row))
                 ->location(fn (TagTeamWrestler $row): ?string => $row->tagTeam === null
                     ? null
-                    : route('tag-teams.show', $row->tagTeam)),
+                    : $this->routeResolver->urlFor($row->tagTeam)),
             LinkColumn::make(__('tag-teams.partner'))
                 ->title(fn (TagTeamWrestler $row): string => $this->getPartnerName($row))
                 ->location(fn (TagTeamWrestler $row): string => $this->getPartnerRoute($row)),
