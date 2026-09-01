@@ -16,7 +16,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
-use LogicException;
 
 /** @extends BaseTable<EventMatch> */
 class Main extends BaseTable
@@ -69,7 +68,7 @@ class Main extends BaseTable
                 ->label(fn (EventMatch $row): string => $row->competitors
                     ->competitorModelsBySidePosition()
                     ->map(fn (Collection $side): string => $side
-                        ->map(fn (mixed $competitor): string => $this->competitorName($competitor))
+                        ->map(fn (Wrestler|TagTeam $competitor): string => $competitor->name)
                         ->join(' & '))
                     ->join(' vs ')),
             Column::make(__('event-matches.result'))
@@ -98,13 +97,5 @@ class Main extends BaseTable
         $this->executeBusinessAction(function () use ($eventMatch): void {
             resolve(DeleteAction::class)->handle($eventMatch);
         }, __('matches.actions.deleted'));
-    }
-
-    private function competitorName(mixed $competitor): string
-    {
-        return match (true) {
-            $competitor instanceof Wrestler, $competitor instanceof TagTeam => $competitor->name,
-            default => throw new LogicException('Match competitors must be Wrestlers or Tag Teams.'),
-        };
     }
 }
