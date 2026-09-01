@@ -90,12 +90,12 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(EventMatch $eventMatch): void
+    public function delete(EventMatch $eventMatch, DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $eventMatch);
 
-        $this->executeBusinessAction(function () use ($eventMatch): void {
-            resolve(DeleteAction::class)->handle($eventMatch);
+        $this->executeBusinessAction(function () use ($deleteAction, $eventMatch): void {
+            $deleteAction->handle($eventMatch);
         }, __('matches.actions.deleted'));
     }
 }
