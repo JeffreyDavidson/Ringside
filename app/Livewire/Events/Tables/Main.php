@@ -134,26 +134,26 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(Event $event): void
+    public function delete(Event $event, DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $event);
 
-        $this->executeBusinessAction(function () use ($event): void {
-            resolve(DeleteAction::class)->handle($event);
+        $this->executeBusinessAction(function () use ($deleteAction, $event): void {
+            $deleteAction->handle($event);
         }, __('events.actions.deleted'));
     }
 
     /**
      * Restore a deleted scheduled event.
      */
-    public function restore(int $eventId): void
+    public function restore(int $eventId, RestoreAction $restoreAction): void
     {
         $event = Event::onlyTrashed()->findOrFail($eventId);
 
         Gate::authorize('restore', $event);
 
-        if ($this->executeBusinessAction(function () use ($event): void {
-            resolve(RestoreAction::class)->handle($event);
+        if ($this->executeBusinessAction(function () use ($event, $restoreAction): void {
+            $restoreAction->handle($event);
         }, __('events.actions.restored'))) {
             $this->redirectRoute('events.index');
         }
