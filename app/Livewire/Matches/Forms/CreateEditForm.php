@@ -26,6 +26,8 @@ use LogicException;
 /** @extends BaseForm<EventMatch> */
 class CreateEditForm extends BaseForm
 {
+    private MatchCompetitorStateMapper $competitorStateMapper;
+
     public ?string $preview = '';
 
     public ?MatchType $matchType = null;
@@ -40,6 +42,11 @@ class CreateEditForm extends BaseForm
 
     /** @var array<int> */
     public array $titles = [];
+
+    public function boot(MatchCompetitorStateMapper $competitorStateMapper): void
+    {
+        $this->competitorStateMapper = $competitorStateMapper;
+    }
 
     public function resetCompetitorsFor(MatchType $matchType): void
     {
@@ -71,7 +78,7 @@ class CreateEditForm extends BaseForm
         $sides = $this->formModel->sides()
             ->with('competitors.competitor')
             ->get();
-        $this->competitors = app(MatchCompetitorStateMapper::class)->fromSides(
+        $this->competitors = $this->competitorStateMapper->fromSides(
             $sides,
             $this->requiredMatchType()->usesIndividualCompetitorSides(),
         );
