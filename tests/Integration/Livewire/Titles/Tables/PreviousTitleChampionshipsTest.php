@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Titles\Tables\PreviousTitleChampionships;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
@@ -17,7 +18,10 @@ test('displays championship reign length from its dates', function () {
         'lost_at' => '2025-01-11',
     ]);
 
-    $reignLengthColumn = (new PreviousTitleChampionships())->columns()[3];
+    $table = new PreviousTitleChampionships();
+    $table->boot(app(RosterResourceRouteResolver::class));
+
+    $reignLengthColumn = $table->columns()[3];
 
     expect($reignLengthColumn->resolveValue($championship))->toBe('10');
 });
