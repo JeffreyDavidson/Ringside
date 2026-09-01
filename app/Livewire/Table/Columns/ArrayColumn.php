@@ -6,6 +6,7 @@ namespace App\Livewire\Table\Columns;
 
 use App\Livewire\Table\Column;
 use Closure;
+use LogicException;
 
 class ArrayColumn extends Column
 {
@@ -29,6 +30,22 @@ class ArrayColumn extends Column
         $this->outputFormatCallback = $callback;
 
         return $this;
+    }
+
+    public function link(Closure $title, Closure $location): static
+    {
+        return $this->outputFormat(
+            function (mixed $item) use ($title, $location): string {
+                $linkTitle = $title($item);
+                $linkLocation = $location($item);
+
+                if (! is_string($linkTitle) || ! is_string($linkLocation)) {
+                    throw new LogicException('Array column link callbacks must return strings.');
+                }
+
+                return static::linkHtml($linkTitle, $linkLocation);
+            }
+        );
     }
 
     public function separator(string $separator): static

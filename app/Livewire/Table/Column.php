@@ -126,6 +126,11 @@ class Column
         return $this->isHtml;
     }
 
+    protected static function linkHtml(string $title, string $location): string
+    {
+        return '<a href="'.e($location).'">'.e($title).'</a>';
+    }
+
     /**
      * Resolve the display value for a given row.
      */

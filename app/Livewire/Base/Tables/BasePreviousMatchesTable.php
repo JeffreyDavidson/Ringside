@@ -54,9 +54,10 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 ->emptyValue('N/A'),
             ArrayColumn::make(__('event-matches.referees'))
                 ->data(fn (EventMatch $row) => $row->referees)
-                ->outputFormat(function (Referee $value): string {
-                    return '<a href="'.route('referees.show', $value->id).'">'.$value->full_name.'</a>';
-                })
+                ->link(
+                    title: fn (Referee $value): string => $value->full_name,
+                    location: fn (Referee $value): string => route('referees.show', $value->id),
+                )
                 ->separator(', ')
                 ->emptyValue('N/A'),
             Column::make(__('event-matches.competitors'))
@@ -69,7 +70,10 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
                 ->html(),
             ArrayColumn::make(__('event-matches.titles'))
                 ->data(fn (EventMatch $row) => $row->titles)
-                ->outputFormat(fn (Title $value): string => '<a href="'.route('titles.show', $value->id).'">'.$value->name.'</a>')
+                ->link(
+                    title: fn (Title $value): string => $value->name,
+                    location: fn (Title $value): string => route('titles.show', $value->id),
+                )
                 ->separator('<br />')
                 ->emptyValue('N/A'),
             Column::make(__('event-matches.result'))
