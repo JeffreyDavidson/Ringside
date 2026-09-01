@@ -6,17 +6,13 @@ namespace App\Livewire\Matches\Tables;
 
 use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
-use App\Livewire\Matches\Support\MatchCompetitorRouteResolver;
+use App\Livewire\Matches\Support\MatchTableFormatter;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\ArrayColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Matches\EventMatch;
-use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\Referees\Referee;
-use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -61,19 +57,14 @@ class MatchesTable extends DataTableComponent
      */
     public function columns(): array
     {
-        $competitorRouteResolver = app(MatchCompetitorRouteResolver::class);
+        $matchTableFormatter = app(MatchTableFormatter::class);
 
         return [
             Column::make(__('matches.match_type'), 'match_type')
                 ->label(fn (EventMatch $row) => $row->match_type->label())
                 ->searchable(),
             Column::make(__('matches.competitors'))
-                ->label(fn (EventMatch $row): string => $row->competitors
-                    ->competitorModelsBySidePosition()
-                    ->map(fn (Collection $side): string => $side->map(function (Wrestler|TagTeam $competitor) use ($competitorRouteResolver): string {
-                        return $competitorRouteResolver->link($competitor);
-                    })->join(' & '))
-                    ->join(' vs '))
+                ->label(fn (EventMatch $row): string => $matchTableFormatter->competitorLinks($row))
                 ->html(),
             ArrayColumn::make(__('matches.referees'))
                 ->data(fn (EventMatch $row) => $row->referees)
@@ -92,27 +83,8 @@ class MatchesTable extends DataTableComponent
                 ->separator(', ')
                 ->emptyValue('N/A'),
             Column::make(__('matches.result'))
-                ->label(
-                    function (EventMatch $row, Column $column) use ($competitorRouteResolver): string {
-                        if ($row->match_finish === null) {
-                            return 'N/A';
-                        }
-
-                        if ($row->winningSide) {
-                            $winners = $row->winningSide->competitors
-                                ->map(function (MatchCompetitor $competitor) use ($competitorRouteResolver): string {
-                                    $winner = $competitor->competitor;
-
-                                    return $competitorRouteResolver->link($winner);
-                                })
-                                ->join(' & ');
-
-                            return $winners.' by '.$row->match_finish->label();
-                        }
-
-                        return $row->match_finish->label();
-                    }
-                )->html(),
+                ->label(fn (EventMatch $row): string => $matchTableFormatter->result($row))
+                ->html(),
             Column::make(__('core.actions'))
                 ->view('components.matches.table-result-action')
                 ->html(),
