@@ -6,11 +6,10 @@ namespace App\Livewire\Titles\Tables;
 
 use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
+use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
-use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
@@ -53,26 +52,24 @@ class PreviousTitleChampionships extends DataTableComponent
      */
     public function columns(): array
     {
+        $routeResolver = app(RosterResourceRouteResolver::class);
+
         return [
             LinkColumn::make(__('championships.new_champion'))
                 ->title(fn (TitleChampionship $row): string => $row->champion->name)
-                ->location(fn (TitleChampionship $row): string => $this->championLocation($row->champion)),
+                ->location(fn (TitleChampionship $row): string => $routeResolver->urlFor($row->champion)),
             LinkColumn::make(__('championships.previous_champion'))
                 ->title(fn (TitleChampionship $row): string => $row->previousChampionship?->champion->name ?? 'N/A')
-                ->location(fn (TitleChampionship $row): ?string => $this->previousChampionLocation($row)),
+                ->location(function (TitleChampionship $row) use ($routeResolver): ?string {
+                    $champion = $row->previousChampionship?->champion;
+
+                    return $champion === null ? null : $routeResolver->urlFor($champion);
+                }),
             Column::make(__('championships.dates_held'))
                 ->label(fn (TitleChampionship $row): string => $this->datesHeld($row)),
             Column::make(__('championships.days_held'))
                 ->label(fn (TitleChampionship $row): int => TitleChampionshipQuery::reignLengthInDays($row)),
         ];
-    }
-
-    private function championLocation(Wrestler|TagTeam $champion): string
-    {
-        return match (true) {
-            $champion instanceof Wrestler => route('wrestlers.show', $champion),
-            $champion instanceof TagTeam => route('tag-teams.show', $champion),
-        };
     }
 
     private function datesHeld(TitleChampionship $championship): string
@@ -81,12 +78,5 @@ class PreviousTitleChampionships extends DataTableComponent
         $lostAt = $championship->lost_at?->toDateString();
 
         return $lostAt === null ? $wonAt : "{$wonAt} - {$lostAt}";
-    }
-
-    private function previousChampionLocation(TitleChampionship $championship): ?string
-    {
-        $champion = $championship->previousChampionship?->champion;
-
-        return $champion === null ? null : $this->championLocation($champion);
     }
 }

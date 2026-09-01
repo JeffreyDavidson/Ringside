@@ -28,3 +28,6 @@ Implement dummy-data population by assigning directly to the concrete Livewire f
 
 ## Use deterministic internal redirects
 Redirect Livewire actions with redirectRoute() to a named internal route. Do not derive redirect destinations from Referer or other request headers because clients control those values.
+
+## Share roster resource route resolution
+Use RosterResourceRouteResolver for Wrestler and TagTeam resource URLs shared by tables. Keep MatchCompetitorRouteResolver responsible only for escaped match-link markup.
