@@ -18,9 +18,59 @@ permissions:
     contents: read
 
 jobs:
+    dependency-validation:
+        name: Dependency validation
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Validate Composer configuration
+              run: composer validate --strict --no-check-publish
+
+            - name: Verify Composer platform requirements
+              run: composer check-platform-reqs --no-dev
+
+            - name: Verify PHP 8.5 compatibility
+              run: composer why-not php 8.5 --locked
+
+            - name: Audit Composer dependencies
+              run: composer audit --locked --format=plain
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24
+
+            - name: Resolve npm cache directory
+              id: npm-cache
+              shell: bash
+              run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+            - name: Restore npm cache
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.npm-cache.outputs.directory }}
+                  key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      npm-${{ runner.os }}-node-24-
+
+            - name: Install npm dependencies
+              run: npm ci --ignore-scripts --no-fund
+
+            - name: Audit npm dependencies
+              run: npm audit --audit-level=high
+
     lint:
         name: PHP and Blade formatting
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         timeout-minutes: 20
 
         steps:
@@ -35,8 +85,20 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v7
               with:
-                  node-version: 22
-                  cache: npm
+                  node-version: 24
+
+            - name: Resolve npm cache directory
+              id: npm-cache
+              shell: bash
+              run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+            - name: Restore npm cache
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.npm-cache.outputs.directory }}
+                  key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      npm-${{ runner.os }}-node-24-
 
             - name: Install Blade formatter dependencies
               run: npm ci --ignore-scripts --no-audit --no-fund
@@ -46,7 +108,7 @@ jobs:
 
     rector:
         name: Rector
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         timeout-minutes: 20
 
         steps:
@@ -63,7 +125,7 @@ jobs:
 
     static-analysis:
         name: PHPStan static analysis
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         timeout-minutes: 20
 
         steps:
@@ -80,7 +142,7 @@ jobs:
 
     type-coverage:
         name: Pest type coverage
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         timeout-minutes: 20
 
         steps:
@@ -101,10 +163,10 @@ jobs:
             - name: Check Pest type coverage
               run: composer test:type-coverage
 
-    application-tests:
-        name: CI - PHP-8.4 - Laravel-13.*
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
-        timeout-minutes: 20
+    frontend-verification:
+        name: Frontend verification
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
 
         steps:
             - name: Checkout repository
@@ -115,19 +177,77 @@ jobs:
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24
+
+            - name: Resolve npm cache directory
+              id: npm-cache
+              shell: bash
+              run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+            - name: Restore npm cache
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.npm-cache.outputs.directory }}
+                  key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      npm-${{ runner.os }}-node-24-
+
+            - name: Install frontend dependencies
+              run: npm ci --ignore-scripts --no-audit --no-fund
+
+            - name: Run frontend lint
+              run: npm run lint
+
+            - name: Build frontend assets
+              run: npm run build
+
+    application-tests:
+        name: CI - PHP-8.4 - Laravel-13.*
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+        permissions:
+            actions: read
+            contents: read
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v7
+
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  coverage: pcov
+
             - name: Prepare Laravel
               run: |
                   cp .env.testing .env
                   php artisan key:generate
                   php artisan config:cache
 
-            - name: Run application tests
-              run: php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite "Feature","Integration","Unit" --no-coverage --parallel
+            - name: Run impacted application tests with full-suite fallback
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  set +e
+                  php -d memory_limit=4G ./vendor/bin/pest --ci --tia --baselined --filtered --testsuite "Feature","Integration","Unit" --no-coverage --parallel
+                  tia_status=$?
+                  set -e
+
+                  if [ "$tia_status" -eq 0 ]; then
+                    exit 0
+                  fi
+
+                  echo "::warning::Pest TIA was unavailable or failed validation; running the full application test suite."
+                  php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite "Feature","Integration","Unit" --no-coverage --parallel
 
     browser-tests:
         name: Browser Tests
-        needs: [lint, rector, static-analysis, type-coverage, application-tests]
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         timeout-minutes: 20
 
         steps:
@@ -142,14 +262,26 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v7
               with:
-                  node-version: 22
-                  cache: npm
+                  node-version: 24
+
+            - name: Resolve npm cache directory
+              id: npm-cache
+              shell: bash
+              run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+            - name: Restore npm cache
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.npm-cache.outputs.directory }}
+                  key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      npm-${{ runner.os }}-node-24-
 
             - name: Install frontend dependencies
               run: npm ci --ignore-scripts --no-audit --no-fund
 
-            - name: Install Chromium
-              run: npx playwright install chromium
+            - name: Install Chromium and Linux dependencies
+              run: npx playwright install --with-deps chromium
 
             - name: Build frontend assets
               run: npm run build
@@ -162,3 +294,12 @@ jobs:
 
             - name: Run browser tests
               run: php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser --parallel
+
+            - name: Upload browser failure screenshots
+              if: failure()
+              uses: actions/upload-artifact@v7
+              with:
+                  name: pest-browser-screenshots
+                  path: tests/Browser/Screenshots
+                  if-no-files-found: ignore
+                  retention-days: 7
