@@ -172,6 +172,11 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v7
 
+            - name: Setup PHP and Composer
+              uses: ./.github/actions/setup-php-composer
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
             - name: Setup Node.js
               uses: actions/setup-node@v7
               with:
