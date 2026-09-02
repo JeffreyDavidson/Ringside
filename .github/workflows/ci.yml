@@ -36,7 +36,6 @@ jobs:
               uses: actions/setup-node@v7
               with:
                   node-version: 22
-                  cache: npm
 
             - name: Install Blade formatter dependencies
               run: npm ci --ignore-scripts --no-audit --no-fund
@@ -143,7 +142,6 @@ jobs:
               uses: actions/setup-node@v7
               with:
                   node-version: 22
-                  cache: npm
 
             - name: Install frontend dependencies
               run: npm ci --ignore-scripts --no-audit --no-fund
