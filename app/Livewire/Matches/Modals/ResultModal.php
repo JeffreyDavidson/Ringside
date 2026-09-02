@@ -32,7 +32,7 @@ class ResultModal extends ModalComponent
         $this->form->fillFrom($this->match);
     }
 
-    public function save(): void
+    public function save(RecordResultAction $recordResultAction): void
     {
         $match = $this->match;
         Gate::authorize('update', $match);
@@ -40,7 +40,7 @@ class ResultModal extends ModalComponent
         $this->form->validateFor($match);
 
         try {
-            resolve(RecordResultAction::class)->handle(
+            $recordResultAction->handle(
                 $match,
                 $this->form->toData($match),
             );
