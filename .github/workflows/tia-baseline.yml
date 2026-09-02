@@ -18,7 +18,7 @@ permissions:
 jobs:
     baseline:
         name: Test Dependency Graph
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         timeout-minutes: 30
 
         steps:
@@ -31,6 +31,7 @@ jobs:
               uses: ./.github/actions/setup-php-composer
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
+                  coverage: pcov
 
             - name: Prepare Laravel
               run: |
@@ -42,11 +43,16 @@ jobs:
               run: php --ri pcov
 
             - name: Record test dependency graph
-              run: php -d memory_limit=4G ./vendor/bin/pest --ci --tia --fresh --coverage
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --tia --fresh --coverage --parallel --testsuite "Feature","Integration","Unit"
 
             - name: Resolve TIA baseline path
               id: baseline
-              run: echo "path=$(vendor/bin/pest --baseline)" >> "$GITHUB_OUTPUT"
+              shell: bash
+              run: |
+                  baseline_path="$(vendor/bin/pest --baseline)"
+                  test -d "$baseline_path"
+                  test -n "$(find "$baseline_path" -type f -print -quit)"
+                  echo "path=$baseline_path" >> "$GITHUB_OUTPUT"
 
             - name: Upload TIA baseline
               uses: actions/upload-artifact@v7

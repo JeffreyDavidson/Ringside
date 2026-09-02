@@ -6,28 +6,36 @@ inputs:
         description: GitHub token used by Composer for API authentication.
         required: true
     php-version:
-        description: Homebrew PHP version to use.
+        description: PHP version to use.
         required: false
-        default: '8.4'
+        default: '8.5'
+    coverage:
+        description: Coverage driver to install. Leave empty for routine jobs.
+        required: false
+        default: none
+    extensions:
+        description: PHP extensions required by the application.
+        required: false
+        default: bcmath, curl, dom, fileinfo, intl, mbstring, pdo_sqlite, xml, zip
 
 runs:
     using: composite
     steps:
-        - name: Configure PHP
-          shell: bash
-          run: |
-              php_bin_dir="$(brew --prefix php@${{ inputs.php-version }})/bin"
-              echo "$php_bin_dir" >> "$GITHUB_PATH"
-              "$php_bin_dir/php" -v
+        - name: Setup PHP and Composer
+          uses: shivammathur/setup-php@v2
+          with:
+              php-version: ${{ inputs.php-version }}
+              extensions: ${{ inputs.extensions }}
+              coverage: ${{ inputs.coverage }}
+              tools: composer:2
+              ini-values: memory_limit=4G
+              github-token: ${{ inputs.github-token }}
 
-        - name: Install Composer
+        - name: Verify PHP and Composer
           shell: bash
           run: |
-              mkdir -p "$RUNNER_TEMP/composer-bin"
-              curl --fail --show-error --silent https://getcomposer.org/installer --output "$RUNNER_TEMP/composer-setup.php"
-              php "$RUNNER_TEMP/composer-setup.php" --install-dir="$RUNNER_TEMP/composer-bin" --filename=composer
-              echo "$RUNNER_TEMP/composer-bin" >> "$GITHUB_PATH"
-              "$RUNNER_TEMP/composer-bin/composer" --version
+              php --version
+              composer --version
 
         - name: Resolve Composer cache directory
           id: composer-cache
@@ -38,9 +46,9 @@ runs:
           uses: actions/cache@v6
           with:
               path: ${{ steps.composer-cache.outputs.directory }}
-              key: composer-${{ runner.os }}-php-${{ inputs.php-version }}-${{ hashFiles('composer.lock') }}
+              key: composer-${{ runner.os }}-php-${{ inputs.php-version }}-composer-2-${{ hashFiles('composer.lock') }}
               restore-keys: |
-                  composer-${{ runner.os }}-php-${{ inputs.php-version }}-
+                  composer-${{ runner.os }}-php-${{ inputs.php-version }}-composer-2-
 
         - name: Install Composer dependencies
           shell: bash
