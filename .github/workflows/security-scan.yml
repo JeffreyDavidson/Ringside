@@ -21,7 +21,7 @@ permissions:
 jobs:
     ward:
         name: Ward (Advisory)
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         continue-on-error: true
         timeout-minutes: 15
 
