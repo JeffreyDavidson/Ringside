@@ -73,7 +73,7 @@ jobs:
               run: npm run build
 
             - name: Record test dependency graph
-              run: php -d memory_limit=4G ./vendor/bin/pest --ci --tia --fresh --coverage --parallel
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --tia --fresh --parallel
 
             - name: Resolve TIA baseline path
               id: baseline
