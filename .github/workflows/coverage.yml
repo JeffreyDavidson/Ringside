@@ -13,7 +13,7 @@ permissions:
 jobs:
     coverage:
         name: PCOV Coverage
-        runs-on: [self-hosted, macOS, ARM64, mac-studio-ringside]
+        runs-on: ubuntu-latest
         timeout-minutes: 30
 
         steps:
@@ -24,6 +24,7 @@ jobs:
               uses: ./.github/actions/setup-php-composer
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
+                  coverage: pcov
 
             - name: Prepare Laravel
               run: |
@@ -35,11 +36,20 @@ jobs:
               run: php --ri pcov
 
             - name: Generate coverage report
-              run: php -d memory_limit=4G ./vendor/bin/pest --parallel --strict-coverage --coverage-clover coverage.xml --testsuite "Feature","Integration","Unit"
+              run: php -d memory_limit=4G ./vendor/bin/pest --parallel --strict-coverage --coverage --min=44 --coverage-clover coverage.xml --testsuite "Feature","Integration","Unit"
+
+            - name: Upload coverage artifact
+              uses: actions/upload-artifact@v7
+              with:
+                  name: pest-coverage-report
+                  path: coverage.xml
+                  if-no-files-found: error
+                  retention-days: 14
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v7
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   files: coverage.xml
+                  fail_ci_if_error: true
                   verbose: true
