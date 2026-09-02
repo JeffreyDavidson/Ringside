@@ -25,6 +25,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Roster\TagTeams\TagTeam;
+use Closure;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 
@@ -92,66 +93,67 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(TagTeam $tagTeam): void
+    public function delete(TagTeam $tagTeam, DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $tagTeam);
 
-        $this->executeBusinessAction(function () use ($tagTeam): void {
-            resolve(DeleteAction::class)->handle($tagTeam);
+        $this->executeBusinessAction(function () use ($deleteAction, $tagTeam): void {
+            $deleteAction->handle($tagTeam);
         }, __('tag-teams.actions.deleted'));
     }
 
-    public function employ(TagTeam $tagTeam): void
+    public function employ(TagTeam $tagTeam, EmployAction $employAction): void
     {
-        $this->executeTagTeamAction(RosterLifecycleAction::Employ, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Employ, $tagTeam->id, fn (TagTeam $tagTeam) => $employAction->handle($tagTeam));
     }
 
-    public function reinstate(TagTeam $tagTeam): void
+    public function reinstate(TagTeam $tagTeam, ReinstateAction $reinstateAction): void
     {
-        $this->executeTagTeamAction(RosterLifecycleAction::Reinstate, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Reinstate, $tagTeam->id, fn (TagTeam $tagTeam) => $reinstateAction->handle($tagTeam));
     }
 
-    public function release(TagTeam $tagTeam): void
+    public function release(TagTeam $tagTeam, ReleaseAction $releaseAction): void
     {
-        $this->executeTagTeamAction(RosterLifecycleAction::Release, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Release, $tagTeam->id, fn (TagTeam $tagTeam) => $releaseAction->handle($tagTeam));
     }
 
-    public function restore(int $tagTeamId): void
+    public function restore(int $tagTeamId, RestoreAction $restoreAction): void
     {
-        if ($this->executeTagTeamAction(RosterLifecycleAction::Restore, $tagTeamId)) {
+        if ($this->executeTagTeamAction(RosterLifecycleAction::Restore, $tagTeamId, fn (TagTeam $tagTeam) => $restoreAction->handle($tagTeam))) {
             $this->redirectRoute('tag-teams.index');
         }
     }
 
-    public function retire(TagTeam $tagTeam): void
+    public function retire(TagTeam $tagTeam, RetireAction $retireAction): void
     {
-        $this->executeTagTeamAction(RosterLifecycleAction::Retire, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Retire, $tagTeam->id, fn (TagTeam $tagTeam) => $retireAction->handle($tagTeam));
     }
 
-    public function suspend(TagTeam $tagTeam): void
+    public function suspend(TagTeam $tagTeam, SuspendAction $suspendAction): void
     {
-        $this->executeTagTeamAction(RosterLifecycleAction::Suspend, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Suspend, $tagTeam->id, fn (TagTeam $tagTeam) => $suspendAction->handle($tagTeam));
     }
 
-    public function unretire(TagTeam $tagTeam): void
+    public function unretire(TagTeam $tagTeam, UnretireAction $unretireAction): void
     {
-        $this->executeTagTeamAction(RosterLifecycleAction::Unretire, $tagTeam->id);
+        $this->executeTagTeamAction(RosterLifecycleAction::Unretire, $tagTeam->id, fn (TagTeam $tagTeam) => $unretireAction->handle($tagTeam));
     }
 
-    private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId): bool
+    /** @param Closure(TagTeam): void $action */
+    private function executeTagTeamAction(RosterLifecycleAction $lifecycleAction, int $tagTeamId, Closure $action): bool
     {
         $tagTeam = $lifecycleAction->usesTrashedModel()
             ? TagTeam::onlyTrashed()->findOrFail($tagTeamId)
             : TagTeam::query()->findOrFail($tagTeamId);
 
         return match ($lifecycleAction) {
-            RosterLifecycleAction::Employ => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(EmployAction::class)->handle($tagTeam)),
-            RosterLifecycleAction::Release => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(ReleaseAction::class)->handle($tagTeam)),
-            RosterLifecycleAction::Suspend => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(SuspendAction::class)->handle($tagTeam)),
-            RosterLifecycleAction::Reinstate => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(ReinstateAction::class)->handle($tagTeam)),
-            RosterLifecycleAction::Retire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(RetireAction::class)->handle($tagTeam)),
-            RosterLifecycleAction::Unretire => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(UnretireAction::class)->handle($tagTeam)),
-            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => resolve(RestoreAction::class)->handle($tagTeam)),
+            RosterLifecycleAction::Employ,
+            RosterLifecycleAction::Release,
+            RosterLifecycleAction::Suspend,
+            RosterLifecycleAction::Reinstate,
+            RosterLifecycleAction::Retire,
+            RosterLifecycleAction::Unretire,
+            RosterLifecycleAction::Restore => $this->executeAuthorizedRosterAction($lifecycleAction, RosterEntityType::TagTeam, $tagTeam, fn () => $action($tagTeam)),
             default => throw new InvalidArgumentException("{$lifecycleAction->value} is not a tag team lifecycle action."),
         };
     }
