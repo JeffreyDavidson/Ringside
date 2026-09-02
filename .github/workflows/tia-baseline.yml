@@ -45,8 +45,35 @@ jobs:
             - name: Verify PCOV
               run: php --ri pcov
 
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24
+
+            - name: Resolve npm cache directory
+              id: npm-cache
+              shell: bash
+              run: echo "directory=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+            - name: Restore npm cache
+              uses: actions/cache@v6
+              with:
+                  path: ${{ steps.npm-cache.outputs.directory }}
+                  key: npm-${{ runner.os }}-node-24-${{ hashFiles('package-lock.json') }}
+                  restore-keys: |
+                      npm-${{ runner.os }}-node-24-
+
+            - name: Install frontend dependencies
+              run: npm ci --ignore-scripts --no-audit --no-fund
+
+            - name: Install Chromium and Linux dependencies
+              run: npx playwright install --with-deps chromium
+
+            - name: Build frontend assets
+              run: npm run build
+
             - name: Record test dependency graph
-              run: php -d memory_limit=4G ./vendor/bin/pest --ci --tia --fresh --coverage --parallel --testsuite "Feature","Integration","Unit"
+              run: php -d memory_limit=4G ./vendor/bin/pest --ci --tia --fresh --coverage --parallel
 
             - name: Resolve TIA baseline path
               id: baseline
