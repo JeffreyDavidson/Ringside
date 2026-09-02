@@ -15,6 +15,10 @@ use function Pest\Laravel\withoutVite;
 
 pest()->tia()->baselined();
 
+pest()->tia()->watch([
+    'phpunit.application.xml' => 'tests',
+]);
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
