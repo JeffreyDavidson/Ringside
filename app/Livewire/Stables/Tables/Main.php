@@ -92,24 +92,24 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(Stable $stable): void
+    public function delete(Stable $stable, DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $stable);
 
-        $this->executeBusinessAction(function () use ($stable): void {
-            resolve(DeleteAction::class)->handle($stable);
+        $this->executeBusinessAction(function () use ($deleteAction, $stable): void {
+            $deleteAction->handle($stable);
         }, __('stables.actions.deleted'));
     }
 
     /**
      * Establish a stable.
      */
-    public function establish(Stable $stable): void
+    public function establish(Stable $stable, EstablishAction $establishAction): void
     {
         Gate::authorize('establish', $stable);
 
-        if ($this->executeBusinessAction(function () use ($stable): void {
-            resolve(EstablishAction::class)->handle($stable);
+        if ($this->executeBusinessAction(function () use ($establishAction, $stable): void {
+            $establishAction->handle($stable);
         })) {
             $this->redirectRoute('stables.index');
         }
@@ -118,12 +118,12 @@ class Main extends BaseTable
     /**
      * Disband a stable.
      */
-    public function disband(Stable $stable): void
+    public function disband(Stable $stable, DisbandAction $disbandAction): void
     {
         Gate::authorize('disband', $stable);
 
-        if ($this->executeBusinessAction(function () use ($stable): void {
-            resolve(DisbandAction::class)->handle($stable);
+        if ($this->executeBusinessAction(function () use ($disbandAction, $stable): void {
+            $disbandAction->handle($stable);
         })) {
             $this->redirectRoute('stables.index');
         }
@@ -132,14 +132,14 @@ class Main extends BaseTable
     /**
      * Restore a stable.
      */
-    public function restore(int $stableId): void
+    public function restore(int $stableId, RestoreAction $restoreAction): void
     {
         $stable = Stable::onlyTrashed()->findOrFail($stableId);
 
         Gate::authorize('restore', $stable);
 
-        if ($this->executeBusinessAction(function () use ($stable): void {
-            resolve(RestoreAction::class)->handle($stable);
+        if ($this->executeBusinessAction(function () use ($restoreAction, $stable): void {
+            $restoreAction->handle($stable);
         })) {
             $this->redirectRoute('stables.index');
         }
@@ -148,12 +148,12 @@ class Main extends BaseTable
     /**
      * Retire a stable.
      */
-    public function retire(Stable $stable): void
+    public function retire(Stable $stable, RetireAction $retireAction): void
     {
         Gate::authorize('retire', $stable);
 
-        if ($this->executeBusinessAction(function () use ($stable): void {
-            resolve(RetireAction::class)->handle($stable);
+        if ($this->executeBusinessAction(function () use ($retireAction, $stable): void {
+            $retireAction->handle($stable);
         })) {
             $this->redirectRoute('stables.index');
         }
@@ -162,12 +162,12 @@ class Main extends BaseTable
     /**
      * Unretire a stable.
      */
-    public function unretire(Stable $stable): void
+    public function unretire(Stable $stable, UnretireAction $unretireAction): void
     {
         Gate::authorize('unretire', $stable);
 
-        if ($this->executeBusinessAction(function () use ($stable): void {
-            resolve(UnretireAction::class)->handle($stable);
+        if ($this->executeBusinessAction(function () use ($unretireAction, $stable): void {
+            $unretireAction->handle($stable);
         })) {
             $this->redirectRoute('stables.index');
         }
