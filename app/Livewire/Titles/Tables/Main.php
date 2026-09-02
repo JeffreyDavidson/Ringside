@@ -98,78 +98,78 @@ class Main extends BaseTable
         ];
     }
 
-    public function delete(Title $title): void
+    public function delete(Title $title, DeleteAction $deleteAction): void
     {
         Gate::authorize('delete', $title);
 
-        $this->executeBusinessAction(function () use ($title): void {
-            resolve(DeleteAction::class)->handle($title);
+        $this->executeBusinessAction(function () use ($deleteAction, $title): void {
+            $deleteAction->handle($title);
         }, __('titles.actions.deleted'));
     }
 
-    public function debut(Title $title): void
+    public function debut(Title $title, DebutAction $debutAction): void
     {
         Gate::authorize('debut', $title);
 
-        if ($this->executeBusinessAction(function () use ($title): void {
-            resolve(DebutAction::class)->handle($title);
+        if ($this->executeBusinessAction(function () use ($debutAction, $title): void {
+            $debutAction->handle($title);
         })) {
             $this->redirectRoute('titles.index');
         }
     }
 
-    public function putOnHold(Title $title): void
+    public function putOnHold(Title $title, PullAction $pullAction): void
     {
         Gate::authorize('pull', $title);
 
-        if ($this->executeBusinessAction(function () use ($title): void {
-            resolve(PullAction::class)->handle($title);
+        if ($this->executeBusinessAction(function () use ($pullAction, $title): void {
+            $pullAction->handle($title);
         })) {
             $this->redirectRoute('titles.index');
         }
     }
 
-    public function restore(int $titleId): void
+    public function restore(int $titleId, RestoreAction $restoreAction): void
     {
         $title = Title::onlyTrashed()->findOrFail($titleId);
 
         Gate::authorize('restore', $title);
 
-        if ($this->executeBusinessAction(function () use ($title): void {
-            resolve(RestoreAction::class)->handle($title);
+        if ($this->executeBusinessAction(function () use ($restoreAction, $title): void {
+            $restoreAction->handle($title);
         })) {
             $this->redirectRoute('titles.index');
         }
     }
 
-    public function retire(Title $title): void
+    public function retire(Title $title, RetireAction $retireAction): void
     {
         Gate::authorize('retire', $title);
 
-        if ($this->executeBusinessAction(function () use ($title): void {
-            resolve(RetireAction::class)->handle($title);
+        if ($this->executeBusinessAction(function () use ($retireAction, $title): void {
+            $retireAction->handle($title);
         })) {
             $this->redirectRoute('titles.index');
         }
     }
 
-    public function unretire(Title $title): void
+    public function unretire(Title $title, UnretireAction $unretireAction): void
     {
         Gate::authorize('unretire', $title);
 
-        if ($this->executeBusinessAction(function () use ($title): void {
-            resolve(UnretireAction::class)->handle($title);
+        if ($this->executeBusinessAction(function () use ($unretireAction, $title): void {
+            $unretireAction->handle($title);
         })) {
             $this->redirectRoute('titles.index');
         }
     }
 
-    public function reinstate(Title $title): void
+    public function reinstate(Title $title, ReinstateAction $reinstateAction): void
     {
         Gate::authorize('reinstate', $title);
 
-        if ($this->executeBusinessAction(function () use ($title): void {
-            resolve(ReinstateAction::class)->handle($title);
+        if ($this->executeBusinessAction(function () use ($reinstateAction, $title): void {
+            $reinstateAction->handle($title);
         })) {
             $this->redirectRoute('titles.index');
         }
