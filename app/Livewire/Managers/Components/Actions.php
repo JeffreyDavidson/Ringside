@@ -31,49 +31,49 @@ class Actions extends Component
         $this->manager = $manager;
     }
 
-    public function employ(): void
+    public function employ(EmployAction $employAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Employ, RosterEntityType::Manager, $this->manager, fn () => resolve(EmployAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Employ, RosterEntityType::Manager, $this->manager, fn () => $employAction->handle($this->manager));
     }
 
-    public function release(): void
+    public function release(ReleaseAction $releaseAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Release, RosterEntityType::Manager, $this->manager, fn () => resolve(ReleaseAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Release, RosterEntityType::Manager, $this->manager, fn () => $releaseAction->handle($this->manager));
     }
 
-    public function retire(): void
+    public function retire(RetireAction $retireAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Retire, RosterEntityType::Manager, $this->manager, fn () => resolve(RetireAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Retire, RosterEntityType::Manager, $this->manager, fn () => $retireAction->handle($this->manager));
     }
 
-    public function unretire(): void
+    public function unretire(UnretireAction $unretireAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Unretire, RosterEntityType::Manager, $this->manager, fn () => resolve(UnretireAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Unretire, RosterEntityType::Manager, $this->manager, fn () => $unretireAction->handle($this->manager));
     }
 
-    public function suspend(): void
+    public function suspend(SuspendAction $suspendAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Suspend, RosterEntityType::Manager, $this->manager, fn () => resolve(SuspendAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Suspend, RosterEntityType::Manager, $this->manager, fn () => $suspendAction->handle($this->manager));
     }
 
-    public function reinstate(): void
+    public function reinstate(ReinstateAction $reinstateAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Reinstate, RosterEntityType::Manager, $this->manager, fn () => resolve(ReinstateAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Reinstate, RosterEntityType::Manager, $this->manager, fn () => $reinstateAction->handle($this->manager));
     }
 
-    public function injure(): void
+    public function injure(InjureAction $injureAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Injure, RosterEntityType::Manager, $this->manager, fn () => resolve(InjureAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Injure, RosterEntityType::Manager, $this->manager, fn () => $injureAction->handle($this->manager));
     }
 
-    public function clearFromInjury(): void
+    public function clearFromInjury(ClearFromInjuryAction $clearFromInjuryAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::ClearFromInjury, RosterEntityType::Manager, $this->manager, fn () => resolve(ClearFromInjuryAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::ClearFromInjury, RosterEntityType::Manager, $this->manager, fn () => $clearFromInjuryAction->handle($this->manager));
     }
 
-    public function restore(): void
+    public function restore(RestoreAction $restoreAction): void
     {
-        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Manager, $this->manager, fn () => resolve(RestoreAction::class)->handle($this->manager));
+        $this->executeAuthorizedRosterAction(RosterLifecycleAction::Restore, RosterEntityType::Manager, $this->manager, fn () => $restoreAction->handle($this->manager));
     }
 
     public function render(): View
