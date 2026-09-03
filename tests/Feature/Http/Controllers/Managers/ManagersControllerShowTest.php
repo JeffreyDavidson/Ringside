@@ -68,6 +68,32 @@ describe('Managers Controller', function () {
     /**
      * @see ManagersController::show()
      */
+    test('an administrator can view managers in every lifecycle state', function () {
+        // Arrange
+        $administrator = administrator();
+        $managers = [
+            Manager::factory()->employed()->create(),
+            Manager::factory()->injured()->create(),
+            Manager::factory()->retired()->create(),
+            Manager::factory()->suspended()->create(),
+        ];
+
+        // Act
+        $responses = [];
+        foreach ($managers as $manager) {
+            $responses[] = actingAs($administrator)
+                ->get(route('managers.show', $manager));
+        }
+
+        // Assert
+        foreach ($responses as $response) {
+            $response->assertSuccessful();
+        }
+    });
+
+    /**
+     * @see ManagersController::show()
+     */
     test('returns 404 when manager does not exist', function () {
         actingAs(administrator())
             ->get(action([ManagersController::class, 'show'], 999999))

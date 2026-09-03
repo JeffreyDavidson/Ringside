@@ -61,6 +61,32 @@ describe('Referees Controller', function () {
     /**
      * @see RefereesController::show()
      */
+    test('an administrator can view referees in every lifecycle state', function () {
+        // Arrange
+        $administrator = administrator();
+        $referees = [
+            Referee::factory()->bookable()->create(),
+            Referee::factory()->injured()->create(),
+            Referee::factory()->retired()->create(),
+            Referee::factory()->suspended()->create(),
+        ];
+
+        // Act
+        $responses = [];
+        foreach ($referees as $referee) {
+            $responses[] = actingAs($administrator)
+                ->get(route('referees.show', $referee));
+        }
+
+        // Assert
+        foreach ($responses as $response) {
+            $response->assertSuccessful();
+        }
+    });
+
+    /**
+     * @see RefereesController::show()
+     */
     test('returns 404 when referee does not exist', function () {
         actingAs(administrator())
             ->get(action([RefereesController::class, 'show'], 999999))
