@@ -8,7 +8,6 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -66,7 +65,7 @@ test('renders the title championship history from reign relationships and dates'
         ->wonOn('2024-06-01')
         ->lostOn('2025-01-01')
         ->create();
-    actingAs(User::factory()->administrator()->create());
+    actingAs(administrator());
 
     livewire(PreviousTitleChampionships::class, ['titleId' => $title->id])
         ->assertSee('First Champion')

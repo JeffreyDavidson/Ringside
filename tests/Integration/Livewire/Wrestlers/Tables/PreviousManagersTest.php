@@ -6,14 +6,13 @@ use App\Livewire\Wrestlers\Tables\PreviousManagers;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
-use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
 
     $this->wrestler = Wrestler::factory()->create([

@@ -21,7 +21,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
     $this->event = Event::factory()->create();
 });

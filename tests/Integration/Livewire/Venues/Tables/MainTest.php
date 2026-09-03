@@ -32,7 +32,7 @@ use function Pest\Livewire\livewire;
  */
 describe('VenuesTable Integration Tests', function () {
     beforeEach(function () {
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
         $this->basicUser = User::factory()->create();
 
         // Create test venues with various characteristics

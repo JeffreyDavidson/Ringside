@@ -24,7 +24,7 @@ use function Pest\Livewire\livewire;
  * @group tables
  */
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
 });
 

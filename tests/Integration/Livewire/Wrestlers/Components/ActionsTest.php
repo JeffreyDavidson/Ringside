@@ -25,7 +25,7 @@ use function Spatie\PestPluginTestTime\testTime;
 describe('WrestlersActions Integration Tests', function () {
     beforeEach(function () {
         testTime()->freeze();
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
         $this->wrestler = Wrestler::factory()->employed()->create(['name' => 'Test Wrestler']);
     });
 

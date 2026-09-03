@@ -29,7 +29,7 @@ use function Pest\Livewire\livewire;
  */
 describe('EventsTable Component Integration', function () {
     beforeEach(function () {
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
         $this->venue = Venue::factory()->create(['name' => 'Test Arena']);
     });
 

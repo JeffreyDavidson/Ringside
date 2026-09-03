@@ -34,7 +34,7 @@ use function Spatie\PestPluginTestTime\testTime;
 describe('ManagersActions Integration Tests', function () {
     beforeEach(function () {
         testTime()->freeze();
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
         $this->manager = Manager::factory()->employed()->create([
             'first_name' => 'Test',
             'last_name' => 'Manager',

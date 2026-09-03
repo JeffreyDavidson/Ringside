@@ -6,14 +6,13 @@ use App\Livewire\TagTeams\Tables\PreviousWrestlers;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
 
     $this->tagTeam = TagTeam::factory()->create([
