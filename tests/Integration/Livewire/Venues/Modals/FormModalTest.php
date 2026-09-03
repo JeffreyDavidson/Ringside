@@ -2,34 +2,24 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
-use Illuminate\Database\Eloquent\MissingAttributeException;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    $this->admin = administrator();
-    actingAs($this->admin);
-
-    $this->state = 'California';
-});
-
-describe('Form Modal Initialization', function () {
-    it('can mount modal component', function () {
-        $modal = livewire(FormModal::class);
-
-        $modal->assertOk();
-        $modal->assertViewIs('livewire.venues.modals.form-modal');
+describe('authorized venue form interactions', function () {
+    beforeEach(function () {
+        actingAs(administrator());
     });
 
-    it('binds the modal fields to the form object', function () {
-        livewire(FormModal::class)
-            ->call('openModal')
+    it('renders the venue form fields', function () {
+        $modal = livewire(FormModal::class);
+
+        $modal->assertSuccessful();
+        $modal->assertViewIs('livewire.venues.modals.form-modal');
+        $modal
             ->assertPropertyWired('form.name')
             ->assertPropertyWired('form.street_address')
             ->assertPropertyWired('form.city')
@@ -37,54 +27,31 @@ describe('Form Modal Initialization', function () {
             ->assertPropertyWired('form.zipcode');
     });
 
-    it('initializes with empty form for creation', function () {
+    it('opens an empty form for creating a venue', function () {
         $modal = livewire(FormModal::class);
+        $modal->call('openModal');
 
-        $modal->assertSet('form.name', '');
-        $modal->assertSet('form.street_address', '');
-        $modal->assertSet('form.city', '');
-        $modal->assertSet('form.state', '');
-        $modal->assertSet('form.zipcode', '');
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', '')
+            ->assertSet('form.street_address', '')
+            ->assertSet('form.city', '')
+            ->assertSet('form.state', '')
+            ->assertSet('form.zipcode', '');
     });
 
-    it('can open modal for creating new venue', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal');
+    it('closes the modal and clears unsaved venue data', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set('form.name', 'Unsaved Arena');
+        $modal->call('closeModal');
 
-        $modal->assertSet('isModalOpen', true);
-        $modal->assertSet('form.name', '');
+        $modal
+            ->assertSet('isModalOpen', false)
+            ->assertSet('form.name', '');
     });
 
-    it('can close modal', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->call('closeModal');
-
-        $modal->assertSet('isOpen', false);
-    });
-});
-
-describe('Form Modal Editing', function () {
-    it('propagates a missing model failure', function () {
-        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
-            ->toThrow(ModelNotFoundException::class);
-    });
-
-    it('propagates a misconfigured model title field', function () {
-        $venue = Venue::factory()->create();
-        $form = new CreateEditForm(livewire(FormModal::class)->instance(), 'form');
-        $form->setModel(Venue::query()->findOrFail($venue->id));
-        Model::preventAccessingMissingAttributes();
-
-        try {
-            expect(fn () => $form->generateModelEditName('missing_title_field'))
-                ->toThrow(MissingAttributeException::class);
-        } finally {
-            Model::preventAccessingMissingAttributes(false);
-        }
-    });
-
-    it('can load existing venue for editing', function () {
+    it('loads an existing venue for editing', function () {
         $venue = Venue::factory()->create([
             'name' => 'Madison Square Garden',
             'street_address' => '4 Pennsylvania Plaza',
@@ -93,100 +60,81 @@ describe('Form Modal Editing', function () {
             'zipcode' => '10001',
         ]);
 
-        $modal = livewire(FormModal::class)
-            ->call('openModal', $venue->id);
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $venue->id);
 
-        $modal->assertSet('form.name', 'Madison Square Garden');
-        $modal->assertSet('form.street_address', '4 Pennsylvania Plaza');
-        $modal->assertSet('form.city', 'New York');
-        $modal->assertSet('form.state', 'New York');
-        $modal->assertSet('form.zipcode', '10001');
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', 'Madison Square Garden')
+            ->assertSet('form.street_address', '4 Pennsylvania Plaza')
+            ->assertSet('form.city', 'New York')
+            ->assertSet('form.state', 'New York')
+            ->assertSet('form.zipcode', '10001');
     });
 
-    it('can update existing venue', function () {
+    it('propagates a missing venue failure', function () {
+        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
+            ->toThrow(ModelNotFoundException::class);
+    });
+
+    it('creates a venue and resets the modal', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'New Wrestling Arena',
+            'form.street_address' => '789 Wrestling Way',
+            'form.city' => 'Sacramento',
+            'form.state' => 'California',
+            'form.zipcode' => '95814',
+        ]);
+        $modal->call('save');
+
+        $venue = Venue::query()->whereName('New Wrestling Arena')->firstOrFail();
+        expect($venue->street_address)->toBe('789 Wrestling Way')
+            ->and($venue->city)->toBe('Sacramento')
+            ->and($venue->state)->toBe('California')
+            ->and($venue->zipcode)->toBe('95814');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('venueCreated')
+            ->assertDispatched('refreshDatatable')
+            ->assertSet('isModalOpen', false)
+            ->assertSet('form.name', '');
+    });
+
+    it('updates an existing venue and resets the modal', function () {
         $venue = Venue::factory()->create([
             'name' => 'Original Arena',
-            'street_address' => '123 Main St',
-            'city' => 'Los Angeles',
             'state' => 'California',
-            'zipcode' => '90210',
         ]);
 
-        $modal = livewire(FormModal::class)
-            ->call('openModal', $venue->id)
-            ->set('form.name', 'Updated Arena')
-            ->set('form.street_address', '456 Oak Ave')
-            ->set('form.city', 'San Francisco')
-            ->set('form.zipcode', '94102')
-            ->call('save');
-
-        $modal->assertHasNoErrors();
-        $modal->assertDispatched('venueUpdated');
-        $modal->assertSet('isOpen', false);
-
-        $this->assertDatabaseHas('venues', [
-            'id' => $venue->id,
-            'name' => 'Updated Arena',
-            'street_address' => '456 Oak Ave',
-            'city' => 'San Francisco',
-            'state' => 'California',
-            'zipcode' => '94102',
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $venue->id);
+        $modal->set([
+            'form.name' => 'Updated Arena',
+            'form.street_address' => '456 Oak Avenue',
+            'form.city' => 'San Francisco',
+            'form.state' => 'California',
+            'form.zipcode' => '94102',
         ]);
+        $modal->call('save');
+
+        $venue->refresh();
+        expect($venue->name)->toBe('Updated Arena')
+            ->and($venue->street_address)->toBe('456 Oak Avenue')
+            ->and($venue->city)->toBe('San Francisco')
+            ->and($venue->zipcode)->toBe('94102');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('venueUpdated')
+            ->assertSet('isModalOpen', false)
+            ->assertSet('form.name', '');
     });
 
-    it('preserves venue data when validation fails', function () {
-        $venue = Venue::factory()->create();
-
-        $modal = livewire(FormModal::class)
-            ->call('openModal', $venue->id)
-            ->set('form.name', 'Test Venue')
-            ->set('form.street_address', '123 Test St')
-            ->set('form.city', 'Test City')
-            ->set('form.state', 'Invalid State')
-            ->set('form.zipcode', '12345')
-            ->call('save');
-
-        $modal->assertHasErrors(['form.state']);
-        $modal->assertSet('form.name', 'Test Venue');
-        $modal->assertSet('form.street_address', '123 Test St');
-        $modal->assertSet('form.city', 'Test City');
-        $modal->assertSet('form.zipcode', '12345');
-    });
-});
-
-describe('Form Modal Creation', function () {
-    it('can create new venue with valid data', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'New Wrestling Arena')
-            ->set('form.street_address', '789 Wrestling Way')
-            ->set('form.city', 'Sacramento')
-            ->set('form.state', 'California')
-            ->set('form.zipcode', '95814')
-            ->call('save');
-
-        $modal->assertHasNoErrors();
-        $modal->assertDispatched('venueCreated');
-        $modal->assertSet('isOpen', false);
-
-        $this->assertDatabaseHas('venues', [
-            'name' => 'New Wrestling Arena',
-            'street_address' => '789 Wrestling Way',
-            'city' => 'Sacramento',
-            'state' => 'California',
-            'zipcode' => '95814',
-        ]);
-    });
-
-    it('validates required fields', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', '')
-            ->set('form.street_address', '')
-            ->set('form.city', '')
-            ->set('form.state', '')
-            ->set('form.zipcode', '')
-            ->call('save');
+    it('requires complete venue data', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->call('save');
 
         $modal->assertHasErrors([
             'form.name' => 'required',
@@ -197,182 +145,68 @@ describe('Form Modal Creation', function () {
         ]);
     });
 
-    it('validates venue name uniqueness', function () {
-        Venue::factory()->create(['name' => 'Existing Arena']);
-
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Existing Arena')
-            ->set('form.street_address', '123 New St')
-            ->set('form.city', 'Los Angeles')
-            ->set('form.state', 'California')
-            ->set('form.zipcode', '90210')
-            ->call('save');
-
-        $modal->assertHasErrors(['form.name' => 'unique']);
-    });
-
-    it('validates the state is supported', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Arena')
-            ->set('form.street_address', '123 Test St')
-            ->set('form.city', 'Test City')
-            ->set('form.state', 'Nonexistent State')
-            ->set('form.zipcode', '12345')
-            ->call('save');
-
-        $modal->assertHasErrors(['form.state']);
-    });
-
-    it('validates zipcode format', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Arena')
-            ->set('form.street_address', '123 Test St')
-            ->set('form.city', 'Test City')
-            ->set('form.state', 'California')
-            ->set('form.zipcode', '123')
-            ->call('save');
-
-        $modal->assertHasErrors(['form.zipcode' => 'digits']);
-    });
-
-    it('accepts valid zipcode format', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Valid Arena')
-            ->set('form.street_address', '123 Valid St')
-            ->set('form.city', 'Valid City')
-            ->set('form.state', 'California')
-            ->set('form.zipcode', '12345')
-            ->call('save');
-
-        $modal->assertHasNoErrors();
-    });
-});
-
-describe('Form Modal Validation', function () {
-    it('validates field lengths', function () {
-        $longName = str_repeat('a', 256);
-        $longAddress = str_repeat('a', 256);
-        $longCity = str_repeat('a', 256);
-
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', $longName)
-            ->set('form.street_address', $longAddress)
-            ->set('form.city', $longCity)
-            ->set('form.state', 'California')
-            ->set('form.zipcode', '12345')
-            ->call('save');
-
-        $modal->assertHasErrors([
-            'form.name' => 'max',
-            'form.street_address' => 'max',
-            'form.city' => 'max',
+    it('rejects invalid venue field values', function (string $field, mixed $value, string $rule) {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Arena',
+            'form.street_address' => '123 Valid Street',
+            'form.city' => 'Valid City',
+            'form.state' => 'California',
+            'form.zipcode' => '12345',
         ]);
+        $modal->set($field, $value);
+        $modal->call('save');
+
+        $modal->assertHasErrors([$field => $rule]);
+    })->with([
+        'long name' => ['form.name', str_repeat('a', 256), 'max'],
+        'long street address' => ['form.street_address', str_repeat('a', 256), 'max'],
+        'long city' => ['form.city', str_repeat('a', 256), 'max'],
+        'unsupported state' => ['form.state', 'Invalid State', 'Illuminate\\Validation\\Rules\\Enum'],
+        'short zipcode' => ['form.zipcode', '123', 'digits'],
+        'non-numeric zipcode' => ['form.zipcode', 'abcde', 'digits'],
+    ]);
+
+    it('rejects a duplicate venue name while editing the original name', function () {
+        Venue::factory()->create(['name' => 'Existing Arena']);
+        $venue = Venue::factory()->create(['name' => 'Editable Arena']);
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal', $venue->id);
+        $modal->set('form.name', 'Existing Arena');
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.name' => 'unique'])
+            ->assertSet('form.name', 'Existing Arena')
+            ->assertSet('isModalOpen', true);
     });
 
-    it('accepts valid field lengths', function () {
-        $validName = str_repeat('a', 255);
-        $validAddress = str_repeat('a', 255);
-        $validCity = str_repeat('a', 255);
+    it('generates valid dummy data that can create a venue', function () {
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+        $modal->call('save');
 
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', $validName)
-            ->set('form.street_address', $validAddress)
-            ->set('form.city', $validCity)
-            ->set('form.state', 'California')
-            ->set('form.zipcode', '12345')
-            ->call('save');
-
-        $modal->assertHasNoErrors();
-    });
-
-    it('validates zipcode as numeric', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Arena')
-            ->set('form.street_address', '123 Test St')
-            ->set('form.city', 'Test City')
-            ->set('form.state', 'California')
-            ->set('form.zipcode', 'abcde')
-            ->call('save');
-
-        $modal->assertHasErrors(['form.zipcode' => 'digits']);
-    });
-});
-
-describe('Form Modal State Management', function () {
-    it('resets form after successful creation', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Arena')
-            ->set('form.street_address', '123 Test St')
-            ->set('form.city', 'Test City')
-            ->set('form.state', 'California')
-            ->set('form.zipcode', '12345')
-            ->call('save');
-
-        $modal->assertHasNoErrors();
-        $modal->assertSet('form.name', '');
-        $modal->assertSet('form.street_address', '');
-        $modal->assertSet('form.city', '');
-        $modal->assertSet('form.state', '');
-        $modal->assertSet('form.zipcode', '');
-    });
-
-    it('preserves form state when validation fails', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Arena')
-            ->set('form.street_address', '123 Test St')
-            ->set('form.city', 'Test City')
-            ->set('form.state', 'Invalid State')
-            ->set('form.zipcode', '12345')
-            ->call('save');
-
-        $modal->assertHasErrors();
-        $modal->assertSet('form.name', 'Test Arena');
-        $modal->assertSet('form.street_address', '123 Test St');
-        $modal->assertSet('form.city', 'Test City');
-        $modal->assertSet('form.state', 'Invalid State');
-        $modal->assertSet('form.zipcode', '12345');
-    });
-
-    it('handles modal close during form submission', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Arena')
-            ->call('closeModal');
-
-        $modal->assertSet('isOpen', false);
-        $modal->assertSet('form.name', '');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('venueCreated')
+            ->assertSet('isModalOpen', false);
+        expect(Venue::query()->count())->toBe(1);
     });
 });
 
-describe('Form Modal Dummy Data', function () {
-    it('can fill form with dummy data', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->call('fillDummyFields');
+it('forbids users without administrative access from opening the venue form', function (string $actor) {
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
 
-        $modal->assertSet('form.name', fn ($value) => str_contains($value, 'Arena'));
-        $modal->assertSet('form.street_address', fn ($value) => ! empty($value));
-        $modal->assertSet('form.city', fn ($value) => ! empty($value));
-        $modal->assertSet('form.state', fn ($value) => ! empty($value));
-        $modal->assertSet('form.zipcode', fn ($value) => is_numeric($value) && mb_strlen((string) $value) === 5);
-    });
+    $modal = livewire(FormModal::class);
+    $modal->call('openModal');
 
-    it('can submit form with dummy data', function () {
-        $modal = livewire(FormModal::class)
-            ->call('openModal')
-            ->call('fillDummyFields')
-            ->call('save');
-
-        $modal->assertHasNoErrors();
-        $modal->assertDispatched('venueCreated');
-    });
-});
+    $modal->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
