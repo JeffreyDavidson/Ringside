@@ -17,7 +17,6 @@ use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;

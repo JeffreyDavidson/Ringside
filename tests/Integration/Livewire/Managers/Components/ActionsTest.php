@@ -8,7 +8,6 @@ use App\Livewire\Managers\Components\Actions;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Users\User;
 use JMac\Testing\Double;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
