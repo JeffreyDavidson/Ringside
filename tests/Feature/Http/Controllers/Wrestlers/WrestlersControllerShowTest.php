@@ -28,7 +28,7 @@ describe('Wrestlers Controller', function () {
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([WrestlersController::class, 'show'], $this->wrestler))
+            ->get(route('wrestlers.show', $this->wrestler))
             ->assertOk()
             ->assertViewIs('wrestlers.show')
             ->assertViewHas('wrestler', $this->wrestler)
@@ -44,7 +44,7 @@ describe('Wrestlers Controller', function () {
      */
     test('show loads only the relationships rendered by the wrestler summary', function () {
         actingAs(administrator())
-            ->get(action([WrestlersController::class, 'show'], $this->wrestler))
+            ->get(route('wrestlers.show', $this->wrestler))
             ->assertOk()
             ->assertViewHas('wrestler', fn (Wrestler $wrestler): bool => count($wrestler->getRelations()) === 4
                 && $wrestler->relationLoaded('currentManagers')
@@ -58,7 +58,7 @@ describe('Wrestlers Controller', function () {
      */
     test('a basic user cannot view wrestler profiles', function () {
         actingAs(basicUser())
-            ->get(action([WrestlersController::class, 'show'], $this->wrestler))
+            ->get(route('wrestlers.show', $this->wrestler))
             ->assertForbidden();
     });
 
@@ -66,7 +66,7 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::show()
      */
     test('a guest cannot view a wrestler profile', function () {
-        get(action([WrestlersController::class, 'show'], $this->wrestler))
+        get(route('wrestlers.show', $this->wrestler))
             ->assertRedirect(route('login'));
     });
 
@@ -75,7 +75,7 @@ describe('Wrestlers Controller', function () {
      */
     test('returns 404 when wrestler does not exist', function () {
         actingAs(administrator())
-            ->get(action([WrestlersController::class, 'show'], 999999))
+            ->get(route('wrestlers.show', 999999))
             ->assertNotFound();
     });
 });

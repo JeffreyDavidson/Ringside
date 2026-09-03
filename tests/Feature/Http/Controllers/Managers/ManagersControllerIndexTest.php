@@ -19,7 +19,7 @@ describe('Managers Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([ManagersController::class, 'index']))
+            ->get(route('managers.index'))
             ->assertOk()
             ->assertViewIs('managers.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('Managers Controller', function () {
      */
     test('a basic user cannot view managers index page', function () {
         actingAs(basicUser())
-            ->get(action([ManagersController::class, 'index']))
+            ->get(route('managers.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('Managers Controller', function () {
      * @see ManagersController::index()
      */
     test('a guest cannot view managers index page', function () {
-        get(action([ManagersController::class, 'index']))
+        get(route('managers.index'))
             ->assertRedirect(route('login'));
     });
 });

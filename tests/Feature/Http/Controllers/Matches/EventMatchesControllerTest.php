@@ -21,7 +21,7 @@ describe('Event Matches Controller', function () {
         $event = Event::factory()->create();
 
         actingAs(administrator())
-            ->get(action([EventMatchesController::class, 'index'], $event))
+            ->get(route('events.matches.index', $event))
             ->assertOk()
             ->assertViewIs('matches.index')
             ->assertViewHas('event', $event);
@@ -34,7 +34,7 @@ describe('Event Matches Controller', function () {
         $event = Event::factory()->create();
 
         actingAs(basicUser())
-            ->get(action([EventMatchesController::class, 'index'], $event))
+            ->get(route('events.matches.index', $event))
             ->assertForbidden();
     });
 
@@ -44,7 +44,7 @@ describe('Event Matches Controller', function () {
     test('guest cannot view event matches', function () {
         $event = Event::factory()->create();
 
-        get(action([EventMatchesController::class, 'index'], $event))
+        get(route('events.matches.index', $event))
             ->assertRedirect('/login');
     });
 });

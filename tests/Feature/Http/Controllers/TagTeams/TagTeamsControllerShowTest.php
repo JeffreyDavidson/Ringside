@@ -28,7 +28,7 @@ describe('TagTeams Controller', function () {
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
+            ->get(route('tag-teams.show', $this->tagTeam))
             ->assertOk()
             ->assertViewIs('tag-teams.show')
             ->assertViewHas('tagTeam', $this->tagTeam)
@@ -44,7 +44,7 @@ describe('TagTeams Controller', function () {
      */
     test('show loads only the relationships rendered by the tag team summary', function () {
         actingAs(administrator())
-            ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
+            ->get(route('tag-teams.show', $this->tagTeam))
             ->assertOk()
             ->assertViewHas('tagTeam', fn (TagTeam $tagTeam): bool => count($tagTeam->getRelations()) === 3
                 && $tagTeam->relationLoaded('currentManagers')
@@ -57,7 +57,7 @@ describe('TagTeams Controller', function () {
      */
     test('a basic user cannot view tag team profiles', function () {
         actingAs(basicUser())
-            ->get(action([TagTeamsController::class, 'show'], $this->tagTeam))
+            ->get(route('tag-teams.show', $this->tagTeam))
             ->assertForbidden();
     });
 
@@ -67,7 +67,7 @@ describe('TagTeams Controller', function () {
     test('a guest cannot view a tag team profile', function () {
         $tagTeam = TagTeam::factory()->create();
 
-        get(action([TagTeamsController::class, 'show'], $tagTeam))
+        get(route('tag-teams.show', $tagTeam))
             ->assertRedirect(route('login'));
     });
 
@@ -76,7 +76,7 @@ describe('TagTeams Controller', function () {
      */
     test('returns 404 when tag team does not exist', function () {
         actingAs(administrator())
-            ->get(action([TagTeamsController::class, 'show'], 999999))
+            ->get(route('tag-teams.show', 999999))
             ->assertNotFound();
     });
 });

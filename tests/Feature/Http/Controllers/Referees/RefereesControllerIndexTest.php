@@ -19,7 +19,7 @@ describe('Referees Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([RefereesController::class, 'index']))
+            ->get(route('referees.index'))
             ->assertOk()
             ->assertViewIs('referees.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('Referees Controller', function () {
      */
     test('a basic user cannot view referees index page', function () {
         actingAs(basicUser())
-            ->get(action([RefereesController::class, 'index']))
+            ->get(route('referees.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('Referees Controller', function () {
      * @see RefereesController::index()
      */
     test('a guest cannot view referees index page', function () {
-        get(action([RefereesController::class, 'index']))
+        get(route('referees.index'))
             ->assertRedirect(route('login'));
     });
 });

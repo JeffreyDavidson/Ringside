@@ -27,7 +27,7 @@ describe('Stables Controller', function () {
      */
     test('show returns a view', function () {
         $response = actingAs(administrator())
-            ->get(action([StablesController::class, 'show'], $this->stable));
+            ->get(route('stables.show', $this->stable));
 
         $response->assertOk();
         $response->assertViewIs('stables.show')
@@ -48,7 +48,7 @@ describe('Stables Controller', function () {
             ->create();
 
         actingAs(administrator())
-            ->get(action([StablesController::class, 'show'], $this->stable))
+            ->get(route('stables.show', $this->stable))
             ->assertOk()
             ->assertSee($startedAt->toDateString())
             ->assertViewHas('stable', fn (Stable $stable): bool => count($stable->getRelations()) === 3
@@ -62,7 +62,7 @@ describe('Stables Controller', function () {
      */
     test('a basic user cannot view stable profiles', function () {
         actingAs(basicUser())
-            ->get(action([StablesController::class, 'show'], $this->stable))
+            ->get(route('stables.show', $this->stable))
             ->assertForbidden();
     });
 
@@ -70,7 +70,7 @@ describe('Stables Controller', function () {
      * @see StablesController::show()
      */
     test('a guest cannot view a stable profile', function () {
-        get(action([StablesController::class, 'show'], $this->stable))
+        get(route('stables.show', $this->stable))
             ->assertRedirect(route('login'));
     });
 
@@ -79,7 +79,7 @@ describe('Stables Controller', function () {
      */
     test('returns 404 when stable does not exist', function () {
         actingAs(administrator())
-            ->get(action([StablesController::class, 'show'], 999999))
+            ->get(route('stables.show', 999999))
             ->assertNotFound();
     });
 
@@ -99,7 +99,7 @@ describe('Stables Controller', function () {
 
         // Assert
         foreach ($stables as $stable) {
-            $this->get(action([StablesController::class, 'show'], $stable))
+            $this->get(route('stables.show', $stable))
                 ->assertOk();
         }
     });

@@ -23,7 +23,7 @@ describe('Users Controller', function () {
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([UsersController::class, 'show'], $this->user))
+            ->get(route('users.show', $this->user))
             ->assertOk()
             ->assertViewIs('users.show')
             ->assertViewHas('user', $this->user);
@@ -34,7 +34,7 @@ describe('Users Controller', function () {
      */
     test('a basic user can view their user profile', function () {
         actingAs($user = basicUser())
-            ->get(action([UsersController::class, 'show'], $user))
+            ->get(route('users.show', $user))
             ->assertForbidden();
     });
 
@@ -45,7 +45,7 @@ describe('Users Controller', function () {
         $otherUser = User::factory()->create();
 
         actingAs(basicUser())
-            ->get(action([UsersController::class, 'show'], $otherUser))
+            ->get(route('users.show', $otherUser))
             ->assertForbidden();
     });
 
@@ -53,7 +53,7 @@ describe('Users Controller', function () {
      * @see UsersController::show()
      */
     test('a guest cannot view a user profile', function () {
-        get(action([UsersController::class, 'show'], $this->user))
+        get(route('users.show', $this->user))
             ->assertRedirect(route('login'));
     });
 
@@ -62,7 +62,7 @@ describe('Users Controller', function () {
      */
     test('returns 404 when user does not exist', function () {
         actingAs(administrator())
-            ->get(action([UsersController::class, 'show'], 999999))
+            ->get(route('users.show', 999999))
             ->assertNotFound();
     });
 });
