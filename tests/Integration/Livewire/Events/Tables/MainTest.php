@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\EventStatus;
-use App\Livewire\Events\Tables\EventsTable;
 use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
@@ -11,536 +10,197 @@ use App\Models\Events\Venue;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-/**
- * Integration tests for EventsTable Livewire component.
- *
- * INTEGRATION TEST SCOPE:
- * - Component rendering with real database relationships
- * - Livewire property updates and form interactions
- * - Business action integration with real models
- * - Query building and filtering functionality
- * - Component state management with database
- * - Authorization integration with Gate facade
- *
- * These tests verify that the EventsTable component works correctly
- * with actual database relationships and complex event scenarios
- * including scheduling, venue associations, and filtering.
- */
-describe('EventsTable Component Integration', function () {
-    beforeEach(function () {
-        $this->admin = administrator();
-        $this->venue = Venue::factory()->create(['name' => 'Test Arena']);
-    });
-
-    describe('component rendering and data display', function () {
-        test('renders events table with complete data relationships', function () {
-            $scheduledEvent = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'WrestleMania']);
-            $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Draft Event']);
-            $pastEvent = Event::factory()->past()->atVenue($this->venue)->create(['name' => 'Royal Rumble']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee($scheduledEvent->name)
-                ->assertSee($unscheduledEvent->name)
-                ->assertSee($pastEvent->name)
-                ->assertSee('WrestleMania')
-                ->assertSee('Draft Event')
-                ->assertSee('Royal Rumble');
-        });
-
-        test('displays event scheduling status information correctly', function () {
-            $scheduledEvent = Event::factory()->scheduled()->create(['name' => 'Scheduled Event']);
-            $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
-            $pastEvent = Event::factory()->past()->create(['name' => 'Past Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Scheduled Event')
-                ->assertSee('Unscheduled Event')
-                ->assertSee('Past Event');
-        });
-
-        test('loads event venue relationships for display', function () {
-            $event = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'Venue Event']);
-
-            // Verify venue relationship exists
-            expect($event->venue)->not()->toBeNull();
-            expect($event->venue()->firstOrFail()->name)->toBe('Test Arena');
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Venue Event')
-                ->assertSee('Test Arena');
-        });
-
-        test('displays events with date information', function () {
-            $futureEvent = Event::factory()->scheduled()->create(['name' => 'Future Event']);
-            $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'No Date Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Future Event')
-                ->assertSee('No Date Event')
-                ->assertSee('No Date Set'); // For unscheduled events
-        });
-
-        test('displays events with venue links', function () {
-            $eventWithVenue = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'Venue Event']);
-            $eventWithoutVenue = Event::factory()->scheduled()->create(['name' => 'No Venue Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Venue Event')
-                ->assertSee('No Venue Event')
-                ->assertSee('Test Arena')
-                ->assertSee('No Venue');
-        });
-    });
-
-    describe('filtering and search functionality', function () {
-        test('search functionality filters events correctly', function () {
-            $wrestleMania = Event::factory()->scheduled()->create(['name' => 'WrestleMania 40']);
-            $summerSlam = Event::factory()->scheduled()->create(['name' => 'SummerSlam 2024']);
-            $royalRumble = Event::factory()->scheduled()->create(['name' => 'Royal Rumble']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            // Test search for "WrestleMania"
-            $component->set('search', 'WrestleMania')
-                ->assertSee('WrestleMania 40')
-                ->assertDontSee('SummerSlam 2024')
-                ->assertDontSee('Royal Rumble');
-
-            // Test search for "Summer"
-            $component->set('search', 'Summer')
-                ->assertSee('SummerSlam 2024')
-                ->assertDontSee('WrestleMania 40')
-                ->assertDontSee('Royal Rumble');
-        });
-
-        test('scheduling status filter works correctly', function () {
-            $scheduledEvent = Event::factory()->scheduled()->create(['name' => 'Scheduled Event']);
-            $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
-            $pastEvent = Event::factory()->past()->create(['name' => 'Past Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            // Initially should see all events
-            $component->assertSee('Scheduled Event')
-                ->assertSee('Unscheduled Event')
-                ->assertSee('Past Event');
-
-            $component->set('filterValues.status', EventStatus::Scheduled->value)
-                ->assertSee('Scheduled Event')
-                ->assertDontSee('Unscheduled Event')
-                ->assertDontSee('Past Event');
-
-            $component->set('filterValues.status', EventStatus::Past->value)
-                ->assertDontSee('Scheduled Event')
-                ->assertDontSee('Unscheduled Event')
-                ->assertSee('Past Event');
-
-            $component->set('filterValues.status', EventStatus::Unscheduled->value)
-                ->assertDontSee('Scheduled Event')
-                ->assertSee('Unscheduled Event')
-                ->assertDontSee('Past Event');
-        });
-
-        test('venue filter functionality', function () {
-            $venue1 = Venue::factory()->create(['name' => 'Venue One']);
-            $venue2 = Venue::factory()->create(['name' => 'Venue Two']);
-
-            $event1 = Event::factory()->scheduled()->atVenue($venue1)->create(['name' => 'Event at Venue One']);
-            $event2 = Event::factory()->scheduled()->atVenue($venue2)->create(['name' => 'Event at Venue Two']);
-            $event3 = Event::factory()->scheduled()->create(['name' => 'Event with No Venue']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Event at Venue One')
-                ->assertSee('Event at Venue Two')
-                ->assertSee('Event with No Venue');
-
-            $component->set('filterValues.venue', (string) $venue1->id)
-                ->assertSee('Event at Venue One')
-                ->assertDontSee('Event at Venue Two')
-                ->assertDontSee('Event with No Venue');
-        });
-
-        test('date range filter functionality', function () {
-            Event::factory()->scheduledOn('2024-05-31 23:59:59')->create(['name' => 'Before Range Event']);
-            Event::factory()->scheduledOn('2024-06-15 19:00:00')->create(['name' => 'Within Range Event']);
-            Event::factory()->scheduledOn('2024-06-30 23:59:59')->create(['name' => 'End Date Event']);
-            Event::factory()->scheduledOn('2024-07-01 00:00:00')->create(['name' => 'After Range Event']);
-
-            actingAs($this->admin);
-
-            livewire(Main::class)
-                ->set('filterValues.event_dates', [
-                    'minDate' => '2024-06-01',
-                    'maxDate' => '2024-06-30',
-                ])
-                ->assertDontSee('Before Range Event')
-                ->assertSee('Within Range Event')
-                ->assertSee('End Date Event')
-                ->assertDontSee('After Range Event');
-        });
-    });
-
-    describe('event business actions integration', function () {
-        test('delete action integration works correctly', function () {
-            $event = Event::factory()->unscheduled()->create(['name' => 'Deletable Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('delete', $event)
-                ->assertHasNoErrors();
-
-            // Verify event is soft deleted
-            expect(Event::find($event->id))->toBeNull();
-            expect(Event::onlyTrashed()->find($event->id))->not()->toBeNull();
-        });
-
-        test('restore action integration works correctly', function () {
-            $deletedEvent = Event::factory()->trashed()->create(['name' => 'Deleted Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('restore', $deletedEvent->id)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('events.index');
-
-            // Verify event is restored
-            expect(Event::find($deletedEvent->id))->not()->toBeNull();
-            expect(freshModel($deletedEvent)->deleted_at)->toBeNull();
-        });
-    });
-
-    describe('business rule enforcement', function () {
-        test('delete action works for appropriate event status', function () {
-            $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('delete', $unscheduledEvent)
-                ->assertHasNoErrors();
-
-            // Verify event status unchanged after invalid operation
-            expect(Event::find($unscheduledEvent->id))->toBeNull();
-        });
-
-        test('restore action works for deleted events', function () {
-            $deletedEvent = Event::factory()->trashed()->create(['name' => 'Deleted Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('restore', $deletedEvent->id)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('events.index');
-
-            expect(Event::find($deletedEvent->id))->not()->toBeNull();
-        });
-
-    });
-
-    describe('authorization integration', function () {
-        test('component requires proper authorization for access', function () {
-            $basicUser = basicUser();
-
-            actingAs($basicUser);
-
-            livewire(Main::class)
-                ->assertForbidden();
-        });
-
-        test('guest users cannot access component', function () {
-            livewire(Main::class)
-                ->assertForbidden();
-        });
-
-        test('admin can perform all event actions', function () {
-            $event = Event::factory()->unscheduled()->create();
-            $deletedEvent = Event::factory()->trashed()->create();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            // All actions should be available to admin
-            $component->call('delete', $event)->assertHasNoErrors();
-            $component->call('restore', $deletedEvent->id)->assertHasNoErrors();
-        });
-    });
-
-    describe('query optimization and performance', function () {
-        test('component loads efficiently with many events', function () {
-            Event::factory()->count(20)->scheduled()->create();
-            Event::factory()->count(10)->unscheduled()->create();
-            Event::factory()->count(5)->past()->create();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk();
-        });
-
-        test('eager loading relationships works correctly', function () {
-            $event = Event::factory()->scheduled()->atVenue($this->venue)->create(['name' => 'Test Event']);
-
-            // Ensure venue relationship exists for eager loading test
-            expect($event->venue)->not()->toBeNull();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Test Event')
-                ->assertSee('Test Arena');
-        });
-
-        test('component handles large datasets efficiently', function () {
-            // Create events with various statuses and relationships
-            Event::factory()->count(15)->scheduled()->create();
-            Event::factory()->count(10)->unscheduled()->create();
-            Event::factory()->count(5)->past()->create();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk();
-
-            // Verify component loads without performance issues
-            // Simply verify we created the expected number of events
-            expect(Event::count())->toBe(30);
-
-            // Verify component renders successfully with large dataset
-            $component->assertSuccessful();
-        });
-    });
-
-    describe('complex event scenarios', function () {
-        test('displays events with venue history correctly', function () {
-            $venue1 = Venue::factory()->create(['name' => 'Original Venue']);
-            $venue2 = Venue::factory()->create(['name' => 'New Venue']);
-
-            $event = Event::factory()->scheduled()->atVenue($venue1)->create(['name' => 'Venue Change Event']);
-
-            // Simulate venue change by updating the event
-            $event->update(['venue_id' => $venue2->id]);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Venue Change Event')
-                ->assertSee('New Venue');
-        });
-
-        test('handles events with scheduling changes correctly', function () {
-            $event = Event::factory()->unscheduled()->create(['name' => 'Scheduling Event']);
-
-            // Simulate scheduling the event
-            $event->update(['date' => now()->addMonths(2)]);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Scheduling Event');
-        });
-
-        test('displays events with multiple date transitions', function () {
-            $event = Event::factory()->scheduled()->create(['name' => 'Date Change Event']);
-
-            // Verify event is originally scheduled
-            expect($event->status)->toBe(EventStatus::Scheduled);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Date Change Event');
-        });
-
-        test('handles events with venue and date combinations', function () {
-            $venue = Venue::factory()->create(['name' => 'Complex Venue']);
-
-            // Event with both date and venue
-            $completeEvent = Event::factory()->scheduled()->atVenue($venue)->create(['name' => 'Complete Event']);
-
-            // Event with date but no venue
-            $dateOnlyEvent = Event::factory()->scheduled()->create(['name' => 'Date Only Event']);
-
-            // Event with neither date nor venue
-            $draftEvent = Event::factory()->unscheduled()->create(['name' => 'Draft Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Complete Event')
-                ->assertSee('Date Only Event')
-                ->assertSee('Draft Event')
-                ->assertSee('Complex Venue')
-                ->assertSee('No Venue');
-        });
-    });
-
-    describe('component state management', function () {
-        test('component maintains state through action calls', function () {
-            $event = Event::factory()->unscheduled()->create(['name' => 'State Test Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            // Perform action and verify component state updates
-            $component->call('delete', $event)
-                ->assertHasNoErrors();
-
-            // Component should reflect the change after refresh
-            actingAs($this->admin);
-
-            $refreshComponent = livewire(Main::class);
-
-            $refreshComponent->assertOk()
-                ->assertDontSee('State Test Event');
-        });
-
-        test('component handles concurrent state changes gracefully', function () {
-            $event1 = Event::factory()->unscheduled()->create(['name' => 'Event One']);
-            $event2 = Event::factory()->unscheduled()->create(['name' => 'Event Two']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            // Perform multiple actions
-            $component->call('delete', $event1)
-                ->assertHasNoErrors();
-
-            $component->call('delete', $event2)
-                ->assertHasNoErrors();
-
-            // Both should be successful
-            expect(Event::find($event1->id))->toBeNull();
-            expect(Event::find($event2->id))->toBeNull();
-        });
-    });
-
-    describe('component sorting and ordering', function () {
-        test('events are ordered correctly by scheduling status', function () {
-            $scheduledEvent = Event::factory()->scheduled()->create(['name' => 'Scheduled Event']);
-            $unscheduledEvent = Event::factory()->unscheduled()->create(['name' => 'Unscheduled Event']);
-            $pastEvent = Event::factory()->past()->create(['name' => 'Past Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            // All events should be visible in the correct order
-            $component->assertOk()
-                ->assertSee('Scheduled Event')
-                ->assertSee('Unscheduled Event')
-                ->assertSee('Past Event');
-        });
-
-        test('venue associations are displayed in correct context', function () {
-            $venue = Venue::factory()->create(['name' => 'Sorting Venue']);
-
-            $eventWithVenue = Event::factory()->scheduled()->atVenue($venue)->create(['name' => 'Venue Event']);
-            $eventWithoutVenue = Event::factory()->scheduled()->create(['name' => 'No Venue Event']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Venue Event')
-                ->assertSee('No Venue Event')
-                ->assertSee('Sorting Venue')
-                ->assertSee('No Venue');
-        });
-    });
-
-    describe('component filtering edge cases', function () {
-        test('filtering works with special characters in event names', function () {
-            $specialEvent = Event::factory()->scheduled()->create(['name' => 'Event: The "Ultimate" Test']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'Ultimate')
-                ->assertSee('Event: The "Ultimate" Test');
-        });
-
-        test('filtering works with international characters', function () {
-            $internationalEvent = Event::factory()->scheduled()->create(['name' => 'Wrestle Mania']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'Wrestle')
-                ->assertSee('Wrestle Mania');
-        });
-
-        test('filtering handles empty search correctly', function () {
-            $event1 = Event::factory()->scheduled()->create(['name' => 'Event One']);
-            $event2 = Event::factory()->scheduled()->create(['name' => 'Event Two']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            // Empty search should show all events
-            $component->set('search', '')
-                ->assertSee('Event One')
-                ->assertSee('Event Two');
-        });
-    });
+it('renders event scheduling details for administrators', function () {
+    $venue = Venue::factory()->create(['name' => 'Madison Square Garden']);
+    $scheduledDate = now()->addDay()->hour(19);
+    Event::factory()->atVenue($venue)->create([
+        'name' => 'Future Showcase',
+        'date' => $scheduledDate,
+    ]);
+    Event::factory()->past()->atVenue($venue)->create([
+        'name' => 'Past Showcase',
+    ]);
+    Event::factory()->unscheduled()->create([
+        'name' => 'Draft Showcase',
+    ]);
+    $deletedEvent = Event::factory()->unscheduled()->create([
+        'name' => 'Deleted Showcase',
+    ]);
+    $deletedEvent->delete();
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+
+    $table
+        ->assertSuccessful()
+        ->assertSee('Future Showcase')
+        ->assertSee('Past Showcase')
+        ->assertSee('Draft Showcase')
+        ->assertSee($scheduledDate->format('Y-m-d'))
+        ->assertSee('No Date Set')
+        ->assertSee($venue->name)
+        ->assertSee('No Venue')
+        ->assertDontSee('Deleted Showcase');
 });
 
-it('provides translated event action messages', function (string $action, string $message) {
-    expect(__("events.actions.{$action}"))->toBe($message);
+it('forbids users without administrative access', function (string $actor) {
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
+
+    $table = livewire(Main::class);
+
+    $table->assertForbidden();
 })->with([
-    'deleted' => ['deleted', 'Event successfully deleted.'],
-    'restored' => ['restored', 'Event successfully restored.'],
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
 ]);
+
+it('searches events by name', function () {
+    Event::factory()->unscheduled()->create(['name' => 'Summer Spectacular']);
+    Event::factory()->unscheduled()->create(['name' => 'Winter Warfare']);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->set('search', 'Summer');
+
+    $table
+        ->assertSee('Summer Spectacular')
+        ->assertDontSee('Winter Warfare');
+});
+
+it('filters events by scheduling status', function (
+    EventStatus $status,
+    string $visibleEvent,
+    array $hiddenEvents,
+) {
+    Event::factory()->past()->create(['name' => 'Past Showcase']);
+    Event::factory()->scheduled()->create(['name' => 'Scheduled Showcase']);
+    Event::factory()->unscheduled()->create(['name' => 'Draft Showcase']);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->set('filterValues.status', $status->value);
+
+    $table->assertSee($visibleEvent);
+    foreach ($hiddenEvents as $hiddenEvent) {
+        $table->assertDontSee($hiddenEvent);
+    }
+})->with([
+    'past' => [EventStatus::Past, 'Past Showcase', ['Scheduled Showcase', 'Draft Showcase']],
+    'scheduled' => [EventStatus::Scheduled, 'Scheduled Showcase', ['Past Showcase', 'Draft Showcase']],
+    'unscheduled' => [EventStatus::Unscheduled, 'Draft Showcase', ['Past Showcase', 'Scheduled Showcase']],
+]);
+
+it('filters events by venue', function () {
+    $selectedVenue = Venue::factory()->create(['name' => 'Selected Arena']);
+    $otherVenue = Venue::factory()->create(['name' => 'Other Arena']);
+    Event::factory()->scheduled()->atVenue($selectedVenue)->create([
+        'name' => 'Selected Venue Event',
+    ]);
+    Event::factory()->scheduled()->atVenue($otherVenue)->create([
+        'name' => 'Other Venue Event',
+    ]);
+    Event::factory()->scheduled()->create([
+        'name' => 'No Venue Event',
+    ]);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->set('filterValues.venue', (string) $selectedVenue->id);
+
+    $table
+        ->assertSee('Selected Venue Event')
+        ->assertDontSee('Other Venue Event')
+        ->assertDontSee('No Venue Event');
+});
+
+it('filters events within an inclusive date range', function () {
+    Event::factory()->scheduledOn('2026-05-31 23:59:59')->create(['name' => 'Before Range']);
+    Event::factory()->scheduledOn('2026-06-01 00:00:00')->create(['name' => 'Range Start']);
+    Event::factory()->scheduledOn('2026-06-15 19:00:00')->create(['name' => 'Within Range']);
+    Event::factory()->scheduledOn('2026-06-30 23:59:59')->create(['name' => 'Range End']);
+    Event::factory()->scheduledOn('2026-07-01 00:00:00')->create(['name' => 'After Range']);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->set('filterValues.event_dates', [
+        'minDate' => '2026-06-01',
+        'maxDate' => '2026-06-30',
+    ]);
+
+    $table
+        ->assertDontSee('Before Range')
+        ->assertSee('Range Start')
+        ->assertSee('Within Range')
+        ->assertSee('Range End')
+        ->assertDontSee('After Range');
+});
+
+it('orders dated events newest first and unscheduled events last', function () {
+    Event::factory()->create([
+        'name' => 'Later Event',
+        'date' => now()->addDays(3),
+    ]);
+    Event::factory()->create([
+        'name' => 'Earlier Event',
+        'date' => now()->addDay(),
+    ]);
+    Event::factory()->unscheduled()->create([
+        'name' => 'Unscheduled Event',
+    ]);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+
+    $table->assertSeeInOrder([
+        'Later Event',
+        'Earlier Event',
+        'Unscheduled Event',
+    ]);
+});
+
+it('soft deletes an event and reports success', function () {
+    $event = Event::factory()->unscheduled()->create();
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->call('delete', $event);
+
+    $table
+        ->assertHasNoErrors()
+        ->assertDispatched(
+            'flash-message',
+            type: 'status',
+            message: __('events.actions.deleted'),
+        );
+    $this->assertSoftDeleted($event);
+});
+
+it('restores an event and reports success', function () {
+    $event = Event::factory()->trashed()->create();
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->call('restore', $event->id);
+
+    $table
+        ->assertHasNoErrors()
+        ->assertDispatched(
+            'flash-message',
+            type: 'status',
+            message: __('events.actions.restored'),
+        )
+        ->assertRedirectToRoute('events.index');
+    $this->assertNotSoftDeleted($event);
+});
+
+it('renders an empty state when there are no events', function () {
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+
+    $table
+        ->assertSuccessful()
+        ->assertSee('No records found.');
+});
