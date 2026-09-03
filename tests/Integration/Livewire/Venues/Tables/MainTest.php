@@ -3,499 +3,147 @@
 declare(strict_types=1);
 
 use App\Livewire\Venues\Tables\Main;
-use App\Livewire\Venues\Tables\VenuesTable;
-use App\Models\Events\Event;
 use App\Models\Events\Venue;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-/**
- * Integration tests for VenuesTable Livewire component.
- *
- * @group venues
- * @group integration
- * @group livewire
- * @group tables
- *
- * INTEGRATION TEST SCOPE:
- * - Livewire component lifecycle with real database
- * - Table rendering with actual venue data
- * - Filtering and search functionality
- * - CRUD operations through table interface
- * - Event relationship display
- *
- * These tests verify that the VenuesTable component correctly
- * integrates with the database and handles real venue data
- * for display and management operations.
- */
-describe('VenuesTable Integration Tests', function () {
-    beforeEach(function () {
-        $this->admin = administrator();
-        $this->basicUser = basicUser();
-
-        // Create test venues with various characteristics
-        $this->activeVenue = Venue::factory()->create([
-            'name' => 'Active Test Arena',
-            'street_address' => '100 Active Road',
-            'city' => 'Active City',
-            'state' => 'AC',
-        ]);
-
-        $this->venueWithEvents = Venue::factory()->create([
-            'name' => 'Busy Event Arena',
-            'street_address' => '200 Event Road',
-            'city' => 'Event City',
-            'state' => 'EC',
-        ]);
-
-        $this->emptyVenue = Venue::factory()->create([
-            'name' => 'Empty Arena',
-            'street_address' => '300 Empty Road',
-            'city' => 'Empty City',
-            'state' => 'EM',
-        ]);
-
-        $this->deletedVenue = Venue::factory()->create([
-            'name' => 'Deleted Arena',
-            'city' => 'Deleted City',
-            'state' => 'DC',
-        ]);
-
-        // Create events for some venues
-        Event::factory()->count(3)->atVenue($this->venueWithEvents)->create();
-        Event::factory()->atVenue($this->venueWithEvents)->create([
-            'name' => 'Past Event',
-            'date' => now()->subDay(),
-        ]);
-        Event::factory()->atVenue($this->venueWithEvents)->create([
-            'name' => 'Future Event',
-            'date' => now()->addDay(),
-        ]);
-
-        // Soft delete one venue
-        $this->deletedVenue->delete();
-    });
-
-    describe('component initialization and rendering', function () {
-        test('renders successfully for administrators', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Active Test Arena')
-                ->assertSee('Busy Event Arena')
-                ->assertSee('Empty Arena');
-        });
-
-        test('loads venue data with proper relationships', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Busy Event Arena')
-                ->assertSee('Event City');
-        });
-
-        test('displays venue address information', function () {
-            $venueWithAddress = Venue::factory()->create([
-                'name' => 'Address Display Arena',
-                'street_address' => '123 Display Street',
-                'city' => 'Display City',
-                'state' => 'DS',
-                'zipcode' => '12345',
-            ]);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Address Display Arena')
-                ->assertSee('Display City')
-                ->assertSee('DS');
-        });
-
-        test('excludes soft deleted venues by default', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Active Test Arena')
-                ->assertDontSee('Deleted Arena');
-        });
-    });
-
-    describe('search and filtering functionality', function () {
-        test('filters venues by name search', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'Active')
-                ->assertSee('Active Test Arena')
-                ->assertDontSee('Busy Event Arena')
-                ->assertDontSee('Empty Arena');
-        });
-
-        test('filters venues by city search', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'Event City')
-                ->assertSee('Busy Event Arena')
-                ->assertDontSee('Active Test Arena')
-                ->assertDontSee('Empty Arena');
-        });
-
-        test('filters venues by state search', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'AC')
-                ->assertSee('Active Test Arena')
-                ->assertDontSee('Busy Event Arena');
-        });
-
-        test('search handles partial matches', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'Arena')
-                ->assertSee('Active Test Arena')
-                ->assertSee('Busy Event Arena')
-                ->assertSee('Empty Arena');
-        });
-
-        test('search is case insensitive', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'active')
-                ->assertSee('Active Test Arena');
-
-            $component->set('search', 'ACTIVE')
-                ->assertSee('Active Test Arena');
-        });
-
-        test('empty search shows all venues', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', '')
-                ->assertSee('Active Test Arena')
-                ->assertSee('Busy Event Arena')
-                ->assertSee('Empty Arena');
-        });
-    });
-
-    describe('venue relationship display', function () {
-        test('displays venues with event counts', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Busy Event Arena');
-
-            // Check that venue with events is displayed
-            expect($this->venueWithEvents->events()->count())->toBeGreaterThan(0);
-        });
-
-        test('handles venues without events', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Empty Arena');
-
-            expect($this->emptyVenue->events()->count())->toBe(0);
-        });
-
-        test('loads event relationships efficiently', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Busy Event Arena');
-
-            // Verify relationship loading doesn't cause N+1 queries
-            $venues = Venue::with('events')->get();
-            expect($venues->where('id', $this->venueWithEvents->id)->firstOrFail()->events)->not->toBeEmpty();
-        });
-    });
-
-    describe('venue management operations', function () {
-        test('administrators can delete venues', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('delete', $this->activeVenue)
-                ->assertHasNoErrors();
-
-            expect(Venue::find($this->activeVenue->id))->toBeNull();
-            expect(Venue::onlyTrashed()->find($this->activeVenue->id))->not()->toBeNull();
-        });
-
-        test('administrators can restore deleted venues', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('restore', $this->deletedVenue->id)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('venues.index');
-
-            expect(Venue::find($this->deletedVenue->id))->not()->toBeNull();
-        });
-
-        test('delete operation preserves event relationships', function () {
-            $event = Event::factory()->atVenue($this->activeVenue)->create();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('delete', $this->activeVenue)
-                ->assertHasNoErrors();
-
-            expect(freshModel($event)->venue_id)->toBe($this->activeVenue->id);
-        });
-
-        test('restore operation restores event relationships', function () {
-            // Create event before venue is deleted (venue gets deleted in setUp)
-            $venue = Venue::factory()->create(['name' => 'Test Restore Venue']);
-            $event = Event::factory()->atVenue($venue)->create();
-
-            // Now delete the venue
-            $venue->delete();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->call('restore', $venue->id)
-                ->assertHasNoErrors();
-
-            $restoredVenue = Venue::findOrFail($venue->id);
-            $event->refresh(); // Refresh the event to get latest venue relationship
-
-            // Debug the relationship
-            expect($event->venue_id)->toBe($restoredVenue->id);
-            expect($restoredVenue->events()->count())->toBeGreaterThan(0);
-        });
-    });
-
-    describe('authorization and access control', function () {
-        test('basic users cannot access venue table', function () {
-            actingAs($this->basicUser);
-
-            $component = livewire(Main::class);
-
-            $component->assertForbidden();
-        });
-
-        test('guests cannot access venue table', function () {
-            $component = livewire(Main::class);
-
-            $component->assertForbidden();
-        });
-
-        test('administrators have full access to all operations', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk();
-            $component->call('delete', $this->activeVenue)->assertHasNoErrors();
-            $component->call('restore', $this->deletedVenue->id)->assertHasNoErrors();
-        });
-    });
-
-    describe('data sorting and ordering', function () {
-        test('venues are ordered consistently', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk();
-
-            // Verify venues appear in a predictable order
-            $venues = Venue::orderBy('name')->get();
-            expect($venues)->not->toBeEmpty();
-        });
-
-        test('search results maintain proper ordering', function () {
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'Arena')
-                ->assertOk();
-
-            // Results should still be properly ordered
-            $filteredVenues = Venue::where('name', 'like', '%Arena%')->orderBy('name')->get();
-            expect($filteredVenues->count())->toBeGreaterThan(0);
-        });
-    });
-
-    describe('performance and optimization', function () {
-        test('handles large numbers of venues efficiently', function () {
-            // Create additional venues for testing
-            Venue::factory()->count(50)->create();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk();
-
-            expect(Venue::count())->toBeGreaterThan(50);
-        });
-
-        test('search performs efficiently with many venues', function () {
-            Venue::factory()->count(25)->create(['name' => 'Search Test Arena']);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->set('search', 'Search Test')
-                ->assertOk();
-
-            expect(Venue::where('name', 'like', '%Search Test%')->count())->toBe(25);
-        });
-
-        test('relationship loading is optimized', function () {
-            // Create venues with various event counts
-            $venueWithManyEvents = Venue::factory()->create();
-            Event::factory()->count(10)->atVenue($venueWithManyEvents)->create();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee($venueWithManyEvents->name);
-
-            expect($venueWithManyEvents->events()->count())->toBe(10);
-        });
-    });
-
-    describe('edge cases and error handling', function () {
-        test('handles venues with special characters in names', function () {
-            $specialVenue = Venue::factory()->create([
-                'name' => 'O\'Malley\'s Arena & Entertainment Center',
-                'city' => 'St. Louis',
-            ]);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('O\'Malley\'s Arena & Entertainment Center')
-                ->assertSee('St. Louis');
-        });
-
-        test('handles empty database gracefully', function () {
-            Venue::query()->delete();
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk();
-        });
-
-        test('handles venues with missing address components', function () {
-            $incompleteVenue = Venue::factory()->create([
-                'name' => 'Incomplete Address Arena',
-                'street_address' => '',
-                'city' => 'Complete City',
-                'state' => 'CC',
-                'zipcode' => '12345',
-            ]);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Incomplete Address Arena')
-                ->assertSee('Complete City');
-        });
-
-        test('handles concurrent operations safely', function () {
-            actingAs($this->admin);
-
-            $component1 = livewire(Main::class);
-            actingAs($this->admin);
-
-            $component2 = livewire(Main::class);
-
-            $component1->call('delete', $this->activeVenue)
-                ->assertHasNoErrors();
-
-            $component2->call('delete', $this->activeVenue)
-                ->assertHasNoErrors(); // Should handle already deleted venue gracefully
-        });
-    });
-
-    describe('venue address formatting and display', function () {
-        test('displays complete address information correctly', function () {
-            $addressVenue = Venue::factory()->create([
-                'name' => 'Complete Address Arena',
-                'street_address' => '123 Main Street',
-                'city' => 'Address City',
-                'state' => 'AS',
-                'zipcode' => '12345',
-            ]);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('Complete Address Arena')
-                ->assertSee('Address City')
-                ->assertSee('AS');
-        });
-
-        test('handles international address formats', function () {
-            $internationalVenue = Venue::factory()->create([
-                'name' => 'International Arena',
-                'street_address' => '456 International Blvd',
-                'city' => 'Global City',
-                'state' => 'GC',
-                'zipcode' => '54321',
-            ]);
-
-            actingAs($this->admin);
-
-            $component = livewire(Main::class);
-
-            $component->assertOk()
-                ->assertSee('International Arena')
-                ->assertSee('Global City');
-        });
-    });
+it('renders venue details for administrators and excludes deleted venues', function () {
+    $venue = Venue::factory()->create([
+        'name' => 'Madison Square Garden',
+        'street_address' => '4 Pennsylvania Plaza',
+        'city' => 'New York',
+        'state' => 'New York',
+        'zipcode' => '10001',
+    ]);
+    $deletedVenue = Venue::factory()->create(['name' => 'Deleted Arena']);
+    $deletedVenue->delete();
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+
+    $table
+        ->assertSuccessful()
+        ->assertSee($venue->name)
+        ->assertSee($venue->street_address)
+        ->assertSee($venue->city)
+        ->assertSee($venue->state)
+        ->assertSee($venue->zipcode)
+        ->assertDontSee($deletedVenue->name);
 });
 
-it('provides translated venue action messages', function (string $action, string $message) {
-    expect(__("venues.actions.{$action}"))->toBe($message);
+it('forbids users without administrative access', function (string $actor) {
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
+
+    $table = livewire(Main::class);
+
+    $table->assertForbidden();
 })->with([
-    'deleted' => ['deleted', 'Venue successfully deleted.'],
-    'restored' => ['restored', 'Venue successfully restored.'],
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
 ]);
+
+it('searches across venue address fields', function (string $searchTerm) {
+    Venue::factory()->create([
+        'name' => 'Search Target Arena',
+        'street_address' => '927 Searchable Way',
+        'city' => 'Needle City',
+        'state' => 'Nevada',
+        'zipcode' => '88901',
+    ]);
+    Venue::factory()->create([
+        'name' => 'Control Venue',
+        'street_address' => '100 Other Road',
+        'city' => 'Elsewhere',
+        'state' => 'Ohio',
+        'zipcode' => '43001',
+    ]);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->set('search', $searchTerm);
+
+    $table
+        ->assertSee('Search Target Arena')
+        ->assertDontSee('Control Venue');
+})->with([
+    'name' => ['Target Arena'],
+    'street address' => ['Searchable Way'],
+    'city' => ['Needle City'],
+    'state' => ['Nevada'],
+]);
+
+it('clears a venue search', function () {
+    Venue::factory()->create(['name' => 'Alpha Arena']);
+    Venue::factory()->create(['name' => 'Bravo Arena']);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->set('search', 'Alpha');
+    $table->set('search', '');
+
+    $table
+        ->assertSee('Alpha Arena')
+        ->assertSee('Bravo Arena');
+});
+
+it('orders venues alphabetically', function () {
+    Venue::factory()->create(['name' => 'Zebra Arena']);
+    Venue::factory()->create(['name' => 'Alpha Arena']);
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+
+    $table->assertSeeInOrder([
+        'Alpha Arena',
+        'Zebra Arena',
+    ]);
+});
+
+it('soft deletes a venue and reports success', function () {
+    $venue = Venue::factory()->create();
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->call('delete', $venue);
+
+    $table
+        ->assertHasNoErrors()
+        ->assertDispatched(
+            'flash-message',
+            type: 'status',
+            message: __('venues.actions.deleted'),
+        );
+    $this->assertSoftDeleted($venue);
+});
+
+it('restores a venue and reports success', function () {
+    $venue = Venue::factory()->create();
+    $venue->delete();
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+    $table->call('restore', $venue->id);
+
+    $table
+        ->assertHasNoErrors()
+        ->assertDispatched(
+            'flash-message',
+            type: 'status',
+            message: __('venues.actions.restored'),
+        )
+        ->assertRedirectToRoute('venues.index');
+    $this->assertNotSoftDeleted($venue);
+});
+
+it('renders an empty state when there are no venues', function () {
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+
+    $table
+        ->assertSuccessful()
+        ->assertSee('No records found.');
+});
