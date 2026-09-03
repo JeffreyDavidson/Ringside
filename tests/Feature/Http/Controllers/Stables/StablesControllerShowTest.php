@@ -82,4 +82,25 @@ describe('Stables Controller', function () {
             ->get(action([StablesController::class, 'show'], 999999))
             ->assertNotFound();
     });
+
+    /**
+     * @see StablesController::show()
+     */
+    test('administrators can view stable profiles in every lifecycle state', function () {
+        // Arrange
+        $stables = [
+            Stable::factory()->active()->create(),
+            Stable::factory()->inactive()->create(),
+            Stable::factory()->retired()->create(),
+        ];
+
+        // Act
+        actingAs(administrator());
+
+        // Assert
+        foreach ($stables as $stable) {
+            $this->get(action([StablesController::class, 'show'], $stable))
+                ->assertOk();
+        }
+    });
 });
