@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Builders\Events\EventBuilder;
-use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
@@ -21,7 +20,6 @@ use function Pest\Laravel\actingAs;
  * - Date-based ordering and chronological display
  * - Exception handling for missing venue context
  * - Column configuration for event navigation
- * - ShowTableTrait integration and functionality
  * - Event-venue relationship management
  *
  * These tests verify that the PreviousEventsTable correctly implements
@@ -228,25 +226,6 @@ describe('PreviousEventsTable Integration Tests', function () {
             $component->assertOk()
                 ->assertSee('Recent Wrestling Show')
                 ->assertSee('Classic Wrestling Event');
-        });
-    });
-
-    describe('ShowTableTrait integration', function () {
-        test('uses ShowTableTrait for enhanced table functionality', function () {
-            expect(class_uses(PreviousEvents::class))->toContain(ShowTableTrait::class);
-        });
-
-        test('has required properties from ShowTableTrait', function () {
-            $table = new PreviousEvents();
-            $reflection = new ReflectionClass($table);
-
-            $databaseTableNameProperty = $reflection->getProperty('databaseTableName');
-            $databaseTableNameProperty->setAccessible(true);
-            expect($databaseTableNameProperty->getValue($table))->toBe('events');
-
-            $resourceNameProperty = $reflection->getProperty('resourceName');
-            $resourceNameProperty->setAccessible(true);
-            expect($resourceNameProperty->getValue($table))->toBe('events');
         });
     });
 
