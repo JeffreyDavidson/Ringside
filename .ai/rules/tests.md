@@ -13,3 +13,6 @@ Use JMac\Testing\Double::for() for doubles of application collaborators. Bind co
 
 ## Organize tests by behavior and AAA phases
 Keep each test file focused on one subject, group related behavior with describe blocks, and make Arrange, Act, and Assert phases explicit. Keep each Act call on its own line.
+
+## Keep test suites aligned to application boundaries
+Feature tests cover HTTP endpoints and authorization; Integration tests cover database, framework, component, and multi-action domain behavior; Unit tests remain framework- and database-free; Browser tests cover real user journeys in Pest Browser. Place each test beside the application boundary it exercises.
