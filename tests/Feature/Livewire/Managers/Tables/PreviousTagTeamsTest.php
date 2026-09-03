@@ -9,8 +9,10 @@ use App\Models\Roster\TagTeams\TagTeamManager;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\actingAs;
+
 beforeEach(function () {
-    $this->actingAs(User::factory()->administrator()->create());
+    actingAs(User::factory()->administrator()->create());
 });
 
 it('renders previous tag teams without lazy loading each relationship', function () {

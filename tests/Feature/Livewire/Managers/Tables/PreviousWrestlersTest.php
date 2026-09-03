@@ -9,8 +9,10 @@ use App\Models\Roster\Wrestlers\WrestlerManager;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\actingAs;
+
 beforeEach(function () {
-    $this->actingAs(User::factory()->administrator()->create());
+    actingAs(User::factory()->administrator()->create());
 });
 
 it('renders previous wrestlers without lazy loading each relationship', function () {

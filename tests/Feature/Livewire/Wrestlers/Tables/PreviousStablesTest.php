@@ -7,12 +7,13 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Collection;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
     $this->wrestler = Wrestler::factory()->create();
-    $this->actingAs($this->admin);
+    actingAs($this->admin);
 });
 
 describe('PreviousStablesTable Configuration', function () {

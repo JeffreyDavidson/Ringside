@@ -7,10 +7,11 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->administrator()->create());
+    actingAs(User::factory()->administrator()->create());
 });
 
 it('requires a tag team', function () {
