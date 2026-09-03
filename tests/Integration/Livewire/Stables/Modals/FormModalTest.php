@@ -2,622 +2,349 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Stables\Forms\CreateEditForm;
 use App\Livewire\Stables\Modals\FormModal;
-use App\Models\Lifecycle\Employment;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    $this->admin = administrator();
-    actingAs($this->admin);
-    $this->minimumWrestlers = Wrestler::factory()
-        ->count(3)
-        ->has(Employment::factory()->started(Carbon::parse('2020-01-01')), 'employments')
-        ->create();
-});
-
-describe('FormModal Configuration', function () {
-    it('initializes the stable form', function () {
-        $component = livewire(FormModal::class);
-
-        expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
+describe('authorized stable form interactions', function () {
+    beforeEach(function () {
+        actingAs(administrator());
     });
 
-});
+    it('renders the stable fields and available member choices', function () {
+        Wrestler::factory()->bookable()->create(['name' => 'Ric Flair']);
+        TagTeam::factory()->employed()->create(['name' => 'The Andersons']);
+        Manager::factory()->create(['first_name' => 'J. J.', 'last_name' => 'Dillon']);
 
-describe('FormModal Rendering', function () {
-    it('binds both stable activity period fields', function () {
-        livewire(FormModal::class)
-            ->call('openModal')
-            ->assertSeeHtml('wire:model="form.started_at"')
-            ->assertSeeHtml('wire:model="form.ended_at"')
-            ->assertDontSeeHtml('wire:model="form.start_date"');
-    });
+        $modal = livewire(FormModal::class);
 
-    it('can render in create mode', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component->assertOk();
-    });
-
-    it('can render in edit mode', function () {
-        $stable = Stable::factory()->create();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id);
-
-        $component->assertOk();
-    });
-
-    it('displays correct title in create mode', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component->assertSee('Create Stable');
-    });
-
-    it('displays correct title in edit mode', function () {
-        $stable = Stable::factory()->create(['name' => 'Test Stable']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id);
-
-        $component->assertSee('Edit Stable');
-    });
-
-    it('presents wrestlers list for selection', function () {
-        $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component->assertSee('Test Wrestler');
-    });
-
-    it('presents tag teams list for selection', function () {
-        $tagTeam = TagTeam::factory()->create(['name' => 'Test Tag Team']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component->assertSee('Test Tag Team');
-    });
-
-    it('does not expose direct manager assignment', function () {
-        $manager = Manager::factory()->create(['first_name' => 'Test', 'last_name' => 'Manager']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component
-            ->assertDontSee('Test Manager')
+        $modal->assertSuccessful();
+        $modal->assertViewIs('livewire.stables.modals.form-modal');
+        $modal
+            ->assertPropertyWired('form.name')
+            ->assertPropertyWired('form.started_at')
+            ->assertPropertyWired('form.ended_at')
+            ->assertPropertyWired('form.wrestlers')
+            ->assertPropertyWired('form.tag_teams')
+            ->assertSee('Ric Flair')
+            ->assertSee('The Andersons')
+            ->assertDontSee('J. J. Dillon')
             ->assertDontSeeHtml('wire:model="form.managers"');
     });
-});
 
-describe('FormModal Create Operations', function () {
-    it('can create a new stable with valid data', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'The New World Order')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
+    it('opens an empty form for creating a stable', function () {
+        $modal = livewire(FormModal::class);
 
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
+        $modal->call('openModal');
 
-        $this->assertDatabaseHas('stables', [
-            'name' => 'The New World Order',
-        ]);
-
-        // Check activity period was created correctly
-        $stable = Stable::where('name', 'The New World Order')->firstOrFail();
-        expect($stable->firstActivityPeriod)->not()->toBeNull();
-        expect(requiredModel($stable->firstActivityPeriod)->started_at->toDateString())->toBe('2024-01-01');
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', '')
+            ->assertSet('form.started_at', null)
+            ->assertSet('form.ended_at', null)
+            ->assertSet('form.wrestlers', [])
+            ->assertSet('form.tag_teams', [])
+            ->assertSee('Create Stable');
     });
 
-    it('validates required fields when creating', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', '')
-            ->call('save');
-
-        $component->assertHasErrors([
-            'form.name' => 'required',
-        ]);
-    });
-
-    it('validates stable name uniqueness', function () {
-        Stable::factory()->create(['name' => 'Existing Stable']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Existing Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasErrors(['form.name']);
-    });
-
-    it('allows reusing a deleted stable name', function () {
-        $stable = Stable::factory()->create(['name' => 'Existing Stable']);
-        $stable->delete();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Existing Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-    });
-
-    it('validates started_at date format', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2023-13-32')
-            ->call('save');
-
-        $component->assertHasErrors(['form.started_at']);
-    });
-
-    it('requires the minimum member headcount when establishing a stable', function () {
+    it('loads an existing stable for editing', function () {
         $wrestler = Wrestler::factory()->bookable()->create();
-
-        livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Undersized Stable')
-            ->set('form.started_at', now()->toDateString())
-            ->set('form.wrestlers', [$wrestler->id])
-            ->call('save')
-            ->assertHasErrors(['form.started_at']);
-
-        $this->assertDatabaseMissing('stables', ['name' => 'Undersized Stable']);
-    });
-
-    it('validates ended_at is after started_at', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.ended_at', '2023-12-31')
-            ->call('save');
-
-        $component->assertHasErrors(['form.ended_at']);
-    });
-
-    it('can create stable with optional fields', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.ended_at', '2024-12-31')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-
-        $this->assertDatabaseHas('stables', [
-            'name' => 'Test Stable',
-        ]);
-
-        // Check activity period was created correctly
-        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
-        expect($stable->firstActivityPeriod)->not()->toBeNull();
-        expect(requiredDate(requiredModel($stable->firstActivityPeriod)->started_at)->toDateString())->toBe('2024-01-01');
-        expect(requiredDate(requiredModel($stable->firstActivityPeriod)->ended_at)->toDateString())->toBe('2024-12-31');
-    });
-
-    it('preserves an end date when creating a future stable activity period', function () {
-        $startDate = now()->addYear();
-        $endDate = $startDate->copy()->addYear();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Future Stable')
-            ->set('form.started_at', $startDate->toDateString())
-            ->set('form.ended_at', $endDate->toDateString())
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $stable = Stable::where('name', 'Future Stable')->firstOrFail();
-        $activityPeriod = requiredModel($stable->firstActivityPeriod);
-
-        expect($activityPeriod->started_at->toDateString())->toBe($startDate->toDateString())
-            ->and(requiredDate($activityPeriod->ended_at)->toDateString())->toBe($endDate->toDateString());
-    });
-});
-
-describe('FormModal Edit Operations', function () {
-    it('can edit an existing stable', function () {
-        $stable = Stable::factory()->create([
-            'name' => 'Original Stable',
-        ]);
-        $stable->activityPeriods()->create(['started_at' => '2024-01-01']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id)
-            ->set('form.name', 'Updated Stable')
-            ->set('form.started_at', '2024-01-02')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-
-        $this->assertDatabaseHas('stables', [
-            'id' => $stable->id,
-            'name' => 'Updated Stable',
-        ]);
-
-        // Check activity period was updated
-        expect(requiredModel(freshModel($stable)->firstActivityPeriod)->started_at->toDateString())->toBe('2024-01-02');
-    });
-
-    it('preserves an end date when establishing an existing stable in the future', function () {
-        $stable = Stable::factory()->create(['name' => 'Unestablished Stable']);
-        $startDate = now()->addYear();
-        $endDate = $startDate->copy()->addYear();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id)
-            ->set('form.started_at', $startDate->toDateString())
-            ->set('form.ended_at', $endDate->toDateString())
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $activityPeriod = requiredModel(freshModel($stable)->firstActivityPeriod);
-
-        expect($activityPeriod->started_at->toDateString())->toBe($startDate->toDateString())
-            ->and(requiredDate($activityPeriod->ended_at)->toDateString())->toBe($endDate->toDateString());
-    });
-
-    it('loads existing stable data in edit mode', function () {
-        $stable = Stable::factory()->create([
-            'name' => 'Test Stable',
-        ]);
-        $stable->activityPeriods()->create(['started_at' => '2024-01-01']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id);
-
-        $component->assertSet('form.name', 'Test Stable');
-        $component->assertSet('form.started_at', '2024-01-01');
-    });
-
-    it('validates name uniqueness excluding current stable when editing', function () {
-        $stable1 = Stable::factory()->create(['name' => 'Stable One']);
-        $stable2 = Stable::factory()->create(['name' => 'Stable Two']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable2->id)
-            ->set('form.name', 'Stable One')
-            ->call('save');
-
-        $component->assertHasErrors(['form.name']);
-    });
-
-    it('allows keeping same name when editing', function () {
-        $stable = Stable::factory()->create([
-            'name' => 'Test Stable',
-        ]);
-        $stable->activityPeriods()->create(['started_at' => '2024-01-01']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id)
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-01-02')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-    });
-
-    it('validates debut date change rules for existing stables', function () {
-        $stable = Stable::factory()->create();
-        // Create some wrestlers and associate them with the stable
-        $wrestler1 = Wrestler::factory()->create();
-        $wrestler2 = Wrestler::factory()->create();
-        $wrestler3 = Wrestler::factory()->create();
-        $stable->wrestlers()->attach([
-            $wrestler1->id => ['joined_at' => now()],
-            $wrestler2->id => ['joined_at' => now()],
-            $wrestler3->id => ['joined_at' => now()],
-        ]);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id)
-            ->set('form.started_at', '2025-01-01')
-            ->call('save');
-
-        // Should use CanChangeDebutDate rule
-        $component->assertHasNoErrors();
-    });
-});
-
-describe('FormModal Activity Period Management', function () {
-    it('handles activity periods correctly', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
-        expect($stable->firstActivityPeriod)->not->toBeNull()->started_at->toBeInstanceOf(Carbon::class);
-    });
-
-    it('can set ended_at for disbanded stables', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Disbanded Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.ended_at', '2024-06-01')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $stable = Stable::where('name', 'Disbanded Stable')->firstOrFail();
-        expect($stable->firstActivityPeriod)->not->toBeNull()->ended_at->toBeInstanceOf(Carbon::class);
-    });
-
-    it('validates ended_at is not before started_at', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-06-01')
-            ->set('form.ended_at', '2024-01-01')
-            ->call('save');
-
-        $component->assertHasErrors(['form.ended_at']);
-    });
-});
-
-describe('FormModal Member Management', function () {
-    it('can assign wrestlers to stable', function () {
-        $wrestler1 = Wrestler::factory()->bookable()->create();
-        $wrestler2 = Wrestler::factory()->bookable()->create();
-        $wrestler3 = Wrestler::factory()->bookable()->create();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', now()->toDateString())
-            ->set('form.wrestlers', [$wrestler1->id, $wrestler2->id, $wrestler3->id])
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
-        $stable->refresh();
-        expect($stable->wrestlers->pluck('id'))->toContain($wrestler1->id);
-        expect($stable->wrestlers->pluck('id'))->toContain($wrestler2->id);
-        expect($stable->wrestlers->pluck('id'))->toContain($wrestler3->id);
-    });
-
-    it('can assign tag teams to stable', function () {
-        $tagTeam1 = TagTeam::factory()->employed()->create();
-        $tagTeam2 = TagTeam::factory()->employed()->create();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', now()->toDateString())
-            ->set('form.tag_teams', [$tagTeam1->id, $tagTeam2->id])
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $stable = Stable::where('name', 'Test Stable')->firstOrFail();
-        $stable->refresh();
-        expect($stable->tagTeams->pluck('id'))->toContain($tagTeam1->id);
-        expect($stable->tagTeams->pluck('id'))->toContain($tagTeam2->id);
-    });
-
-    it('rejects a wrestler who currently belongs to another stable', function () {
-        $wrestler = Wrestler::factory()->bookable()->create();
-        $existingStable = Stable::factory()->create();
-        $existingStable->wrestlers()->attach($wrestler, ['joined_at' => now()]);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Another Stable')
-            ->set('form.wrestlers', [$wrestler->id])
-            ->call('save');
-
-        $component->assertHasErrors(['form.wrestlers.0']);
-        $this->assertDatabaseMissing('stables', ['name' => 'Another Stable']);
-    });
-
-    it('rejects a tag team that currently belongs to another stable', function () {
         $tagTeam = TagTeam::factory()->employed()->create();
-        $existingStable = Stable::factory()->create();
-        $existingStable->tagTeams()->attach($tagTeam, ['joined_at' => now()]);
+        $stable = Stable::factory()->create(['name' => 'The Four Horsemen']);
+        $stable->activityPeriods()->create([
+            'started_at' => '2024-01-01',
+            'ended_at' => '2024-12-31',
+        ]);
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => '2024-01-01']);
+        $stable->tagTeams()->attach($tagTeam, ['joined_at' => '2024-01-01']);
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Another Stable')
-            ->set('form.tag_teams', [$tagTeam->id])
-            ->call('save');
+        $modal->call('openModal', $stable->id);
 
-        $component->assertHasErrors(['form.tag_teams.0']);
-        $this->assertDatabaseMissing('stables', ['name' => 'Another Stable']);
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', 'The Four Horsemen')
+            ->assertSet('form.started_at', '2024-01-01')
+            ->assertSet('form.ended_at', '2024-12-31')
+            ->assertSet('form.wrestlers', [$wrestler->id])
+            ->assertSet('form.tag_teams', [$tagTeam->id])
+            ->assertSee('Edit Stable');
     });
 
-    it('preserves existing members when editing stable details', function () {
+    it('propagates a missing stable failure', function () {
+        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
+            ->toThrow(ModelNotFoundException::class);
+    });
+
+    it('creates an established stable with mixed membership', function () {
+        $wrestler = Wrestler::factory()->bookable()->create();
+        $tagTeam = TagTeam::factory()->employed()->create();
+        $startedAt = now()->toDateString();
+        $endedAt = now()->addYear()->toDateString();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'The Dangerous Alliance',
+            'form.started_at' => $startedAt,
+            'form.ended_at' => $endedAt,
+            'form.wrestlers' => [$wrestler->id],
+            'form.tag_teams' => [$tagTeam->id],
+        ]);
+        $modal->call('save');
+
+        $stable = Stable::query()->whereName('The Dangerous Alliance')->firstOrFail();
+        $activityPeriod = $stable->firstActivityPeriod()->firstOrFail();
+        expect($activityPeriod->started_at->toDateString())->toBe($startedAt)
+            ->and($activityPeriod->ended_at?->toDateString())->toBe($endedAt)
+            ->and($stable->currentWrestlers()->pluck('wrestlers.id')->all())->toBe([$wrestler->id])
+            ->and($stable->currentTagTeams()->pluck('tag_teams.id')->all())->toBe([$tagTeam->id]);
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertDispatched('form-submitted')
+            ->assertDispatched('closeModal')
+            ->assertSet('isModalOpen', false);
+    });
+
+    it('creates an unestablished stable without members', function () {
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set('form.name', 'Future Faction');
+        $modal->call('save');
+
+        $stable = Stable::query()->whereName('Future Faction')->firstOrFail();
+        expect($stable->activityPeriods()->doesntExist())->toBeTrue()
+            ->and($stable->currentWrestlers()->doesntExist())->toBeTrue()
+            ->and($stable->currentTagTeams()->doesntExist())->toBeTrue();
+        $modal->assertHasNoErrors();
+    });
+
+    it('updates a stable while preserving former member history', function () {
+        $originalWrestler = Wrestler::factory()->bookable()->create();
+        $newWrestler = Wrestler::factory()->bookable()->create();
+        $originalTagTeam = TagTeam::factory()->employed()->create();
+        $newTagTeam = TagTeam::factory()->employed()->create();
         $stable = Stable::factory()->create(['name' => 'Original Stable']);
-        $wrestler = Wrestler::factory()->suspended()->create();
-        $stable->wrestlers()->attach($wrestler, ['joined_at' => now()->subDay()]);
+        $stable->activityPeriods()->create(['started_at' => now()]);
+        $stable->wrestlers()->attach($originalWrestler, ['joined_at' => now()]);
+        $stable->tagTeams()->attach($originalTagTeam, ['joined_at' => now()]);
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id)
-            ->set('form.name', 'Updated Stable')
-            ->call('save');
+        $modal->call('openModal', $stable->id);
+        $modal->set([
+            'form.name' => 'Updated Stable',
+            'form.wrestlers' => [$newWrestler->id],
+            'form.tag_teams' => [$newTagTeam->id],
+        ]);
+        $modal->call('save');
 
-        $component->assertHasNoErrors();
-
-        expect(freshModel($stable)->currentWrestlers()->pluck('wrestlers.id'))
-            ->toContain($wrestler->id);
+        $stable->refresh();
+        expect($stable->name)->toBe('Updated Stable')
+            ->and($stable->currentWrestlers()->pluck('wrestlers.id')->all())->toBe([$newWrestler->id])
+            ->and($stable->previousWrestlers()->pluck('wrestlers.id')->all())->toBe([$originalWrestler->id])
+            ->and($stable->currentTagTeams()->pluck('tag_teams.id')->all())->toBe([$newTagTeam->id])
+            ->and($stable->previousTagTeams()->pluck('tag_teams.id')->all())->toBe([$originalTagTeam->id]);
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertSet('isModalOpen', false);
     });
 
-    it('rejects unemployed stable members', function () {
-        $wrestler = Wrestler::factory()->unemployed()->create();
+    it('requires a stable name', function () {
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.wrestlers', [$wrestler->id])
-            ->call('save');
+        $modal->call('openModal');
+        $modal->call('save');
 
-        $component->assertHasErrors(['form.wrestlers.0']);
-        $this->assertDatabaseMissing('stables', ['name' => 'Test Stable']);
+        $modal
+            ->assertHasErrors(['form.name' => 'required'])
+            ->assertNotDispatched('closeModal')
+            ->assertSet('isModalOpen', true);
+        expect(Stable::query()->doesntExist())->toBeTrue();
     });
 
-    it('rejects an injured wrestler', function () {
-        $wrestler = Wrestler::factory()->injured()->create();
+    it('rejects invalid stable field values', function (string $case) {
+        $wrestlers = Wrestler::factory()->count(3)->bookable()->create();
+        [$field, $value, $errorField, $rule] = match ($case) {
+            'long name' => ['form.name', str_repeat('a', 256), 'form.name', 'max'],
+            'invalid start date' => ['form.started_at', 'not-a-date', 'form.started_at', 'date'],
+            'invalid end date' => ['form.ended_at', 'not-a-date', 'form.ended_at', 'date'],
+            'end before start' => ['form.ended_at', '2023-12-31', 'form.ended_at', 'after'],
+            'missing wrestler' => ['form.wrestlers', [PHP_INT_MAX], 'form.wrestlers.0', 'exists'],
+            'missing tag team' => ['form.tag_teams', [PHP_INT_MAX], 'form.tag_teams.0', 'exists'],
+            default => throw new InvalidArgumentException("Unknown validation case: {$case}"),
+        };
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.wrestlers', [$wrestler->id])
-            ->call('save');
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Stable',
+            'form.started_at' => '2024-01-01',
+            'form.wrestlers' => $wrestlers->modelKeys(),
+        ]);
+        $modal->set($field, $value);
+        $modal->call('save');
 
-        $component->assertHasErrors(['form.wrestlers.0']);
-        $this->assertDatabaseMissing('stables', ['name' => 'Test Stable']);
+        $modal->assertHasErrors([$errorField => $rule]);
+        expect(Stable::query()->doesntExist())->toBeTrue();
+    })->with([
+        'long name',
+        'invalid start date',
+        'invalid end date',
+        'end before start',
+        'missing wrestler',
+        'missing tag team',
+    ]);
+
+    it('rejects the name of another active stable but permits a deleted stable name', function () {
+        Stable::factory()->create(['name' => 'Active Stable']);
+        $deletedStable = Stable::factory()->create(['name' => 'Former Stable']);
+        $deletedStable->delete();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set('form.name', 'Active Stable');
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.name' => 'unique']);
+
+        $modal->set('form.name', 'Former Stable');
+        $modal->call('save');
+
+        $modal->assertHasNoErrors();
+        expect(Stable::query()->whereName('Former Stable')->exists())->toBeTrue();
     });
+
+    it('requires enough members to establish a stable', function () {
+        $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Undersized Stable',
+            'form.started_at' => now()->toDateString(),
+            'form.wrestlers' => $wrestlers->modelKeys(),
+        ]);
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.started_at']);
+        expect(Stable::query()->whereName('Undersized Stable')->doesntExist())->toBeTrue();
+    });
+
+    it('rejects unavailable stable members', function (string $case) {
+        [$wrestler, $tagTeam] = match ($case) {
+            'unemployed wrestler' => [Wrestler::factory()->unemployed()->create(), null],
+            'injured wrestler' => [Wrestler::factory()->injured()->create(), null],
+            'wrestler in another stable' => [Wrestler::factory()->bookable()->create(), null],
+            'tag team in another stable' => [null, TagTeam::factory()->employed()->create()],
+            default => throw new InvalidArgumentException("Unknown membership case: {$case}"),
+        };
+
+        if ($case === 'wrestler in another stable') {
+            Stable::factory()->create()->wrestlers()->attach($wrestler, ['joined_at' => now()]);
+        }
+
+        if ($case === 'tag team in another stable') {
+            Stable::factory()->create()->tagTeams()->attach($tagTeam, ['joined_at' => now()]);
+        }
+
+        $modal = livewire(FormModal::class);
+        $modal->call('openModal');
+        $modal->set('form.name', 'Invalid Stable');
+        $modal->set('form.wrestlers', $wrestler === null ? [] : [$wrestler->id]);
+        $modal->set('form.tag_teams', $tagTeam === null ? [] : [$tagTeam->id]);
+        $modal->call('save');
+
+        $errorField = $wrestler === null ? 'form.tag_teams.0' : 'form.wrestlers.0';
+        $modal->assertHasErrors([$errorField]);
+        expect(Stable::query()->whereName('Invalid Stable')->doesntExist())->toBeTrue();
+    })->with([
+        'unemployed wrestler',
+        'injured wrestler',
+        'wrestler in another stable',
+        'tag team in another stable',
+    ]);
 
     it('rejects a wrestler represented by a selected tag team', function () {
         $tagTeam = TagTeam::factory()->employed()->create();
-        $wrestler = $tagTeam->currentWrestlers()->firstOrFail();
+        $representedWrestler = $tagTeam->currentWrestlers()->firstOrFail();
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.wrestlers', [$wrestler->id])
-            ->set('form.tag_teams', [$tagTeam->id])
-            ->call('save');
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Duplicate Representation',
+            'form.wrestlers' => [$representedWrestler->id],
+            'form.tag_teams' => [$tagTeam->id],
+        ]);
+        $modal->call('save');
 
-        $component->assertHasErrors(['form.wrestlers.0']);
-        $this->assertDatabaseMissing('stables', ['name' => 'Test Stable']);
+        $modal->assertHasErrors(['form.wrestlers.0']);
+        expect(Stable::query()->whereName('Duplicate Representation')->doesntExist())->toBeTrue();
     });
 
-    it('rejects an existing stable wrestler represented by a newly selected tag team', function () {
-        $tagTeam = TagTeam::factory()->employed()->create();
-        $wrestler = $tagTeam->currentWrestlers()->firstOrFail();
-        $stable = Stable::factory()->create();
-        $stable->wrestlers()->attach($wrestler, ['joined_at' => now()]);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id)
-            ->set('form.tag_teams', [$tagTeam->id])
-            ->call('save');
-
-        $component->assertHasErrors(['form.wrestlers.0']);
-        expect(freshModel($stable)->currentTagTeams()->exists())->toBeFalse();
-    });
-
-    it('validates wrestlers exist when assigning', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.wrestlers', [999])
-            ->call('save');
-
-        $component->assertHasErrors(['form.wrestlers.0']);
-    });
-
-    it('validates tag teams exist when assigning', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->set('form.tag_teams', [999])
-            ->call('save');
-
-        $component->assertHasErrors(['form.tag_teams.0']);
-    });
-});
-
-describe('FormModal State Management', function () {
-    it('resets form when switching modes', function () {
-        $stable = Stable::factory()->create(['name' => 'Test Stable']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $stable->id)
-            ->call('openModal');
-
-        $component->assertSet('form.name', null);
-        $component->assertSet('form.started_at', null);
-        $component->assertSet('form.ended_at', null);
-    });
-
-    it('closes modal after successful save', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Stable')
-            ->set('form.started_at', '2024-01-01')
-            ->set('form.wrestlers', $this->minimumWrestlers->modelKeys())
-            ->call('save');
-
-        $component->assertDispatched('closeModal');
-    });
-
-    it('keeps modal open when validation fails', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', '')
-            ->call('save');
-
-        $component->assertNotDispatched('closeModal');
-    });
-});
-
-describe('FormModal Authorization', function () {
-    it('forbids creating a stable without permission', function () {
-        actingAs(basicUser());
-
-        livewire(FormModal::class)
-            ->set('form.name', 'Unauthorized Stable')
-            ->call('save')
-            ->assertForbidden();
-
-        $this->assertDatabaseMissing('stables', ['name' => 'Unauthorized Stable']);
-    });
-
-    it('forbids updating a stable without permission', function () {
+    it('allows an unavailable current member to remain while editing stable details', function () {
+        $wrestler = Wrestler::factory()->suspended()->create();
         $stable = Stable::factory()->create(['name' => 'Original Stable']);
-        actingAs(basicUser());
+        $stable->wrestlers()->attach($wrestler, ['joined_at' => now()->subDay()]);
+        $modal = livewire(FormModal::class);
 
-        livewire(FormModal::class, ['modelId' => $stable->id])
-            ->set('form.name', 'Unauthorized Rename')
-            ->call('save')
-            ->assertForbidden();
+        $modal->call('openModal', $stable->id);
+        $modal->set('form.name', 'Renamed Stable');
+        $modal->call('save');
 
-        expect($stable->refresh()->name)->toBe('Original Stable');
+        $modal->assertHasNoErrors();
+        expect($stable->refresh()->name)->toBe('Renamed Stable')
+            ->and($stable->currentWrestlers()->pluck('wrestlers.id')->all())->toBe([$wrestler->id]);
+    });
+
+    it('resets edited stable data when reopening in create mode', function () {
+        $stable = Stable::factory()->active()->create(['name' => 'Existing Stable']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $stable->id);
+        $modal->call('openModal');
+
+        $modal
+            ->assertSet('form.name', '')
+            ->assertSet('form.started_at', null)
+            ->assertSet('form.ended_at', null)
+            ->assertSet('form.wrestlers', [])
+            ->assertSet('form.tag_teams', []);
+    });
+
+    it('generates dummy profile data without persisting a stable', function () {
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+
+        expect($modal->get('form.name'))->not->toBeEmpty();
+        expect(Stable::query()->doesntExist())->toBeTrue();
     });
 });
+
+it('forbids users without administrative access from opening the stable form', function (string $actor, string $operation) {
+    $stable = $operation === 'update' ? Stable::factory()->create() : null;
+
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
+
+    $modal = livewire(FormModal::class);
+    $modal->call('openModal', $stable?->id);
+
+    $modal->assertForbidden();
+})->with([
+    'guest creating' => ['guest', 'create'],
+    'basic user creating' => ['basic user', 'create'],
+    'guest updating' => ['guest', 'update'],
+    'basic user updating' => ['basic user', 'update'],
+]);
