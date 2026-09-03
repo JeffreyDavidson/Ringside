@@ -26,7 +26,7 @@ describe('User Role Integration Tests', function () {
 
     beforeEach(function () {
         $this->administrator = administrator();
-        $this->basicUser = User::factory()->create(['role' => Role::Basic]);
+        $this->basicUser = basicUser();
         $this->unverifiedUser = User::factory()->unverified()->create();
     });
 
@@ -66,8 +66,8 @@ describe('User Role Integration Tests', function () {
         test('role system works consistently across user instances', function () {
             $user1 = administrator();
             $user2 = administrator();
-            $user3 = User::factory()->create(['role' => Role::Basic]);
-            $user4 = User::factory()->create(['role' => Role::Basic]);
+            $user3 = basicUser();
+            $user4 = basicUser();
 
             // All administrators should have same permissions
             expect($user1->role->isAdministrator())->toBeTrue();
@@ -105,7 +105,7 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role changes are reflected immediately in authorization', function () {
-            $user = User::factory()->create(['role' => Role::Basic]);
+            $user = basicUser();
 
             // Initially basic user should be denied
             expect($user->role->isAdministrator())->toBeFalse();
@@ -167,7 +167,7 @@ describe('User Role Integration Tests', function () {
 
     describe('role management workflows', function () {
         test('role promotion workflow maintains consistency', function () {
-            $user = User::factory()->create(['role' => Role::Basic]);
+            $user = basicUser();
 
             // Verify initial state
             expect($user->role)->toBe(Role::Basic);
@@ -234,7 +234,7 @@ describe('User Role Integration Tests', function () {
 
     describe('security and edge cases', function () {
         test('role system prevents privilege escalation', function () {
-            $basicUser = User::factory()->create(['role' => Role::Basic]);
+            $basicUser = basicUser();
 
             actingAs($basicUser);
 
