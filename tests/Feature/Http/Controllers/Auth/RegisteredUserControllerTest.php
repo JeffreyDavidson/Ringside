@@ -9,19 +9,31 @@ use Illuminate\Support\Facades\Hash;
 use function Pest\Laravel\assertAuthenticatedAs;
 
 test('registration screen can be rendered', function () {
-    $this->get(route('register'))
-        ->assertSuccessful();
+    // Arrange
+    $registrationUrl = route('register');
+
+    // Act
+    $response = $this->get($registrationUrl);
+
+    // Assert
+    $response->assertSuccessful();
 });
 
 test('a user can register with their account details', function () {
-    $this->post(route('register'), [
+    // Arrange
+    $registrationData = [
         'first_name' => 'Jeffrey',
         'last_name' => 'Davidson',
         'email' => 'jeffrey@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
-    ])->assertRedirect(route('dashboard'));
+    ];
 
+    // Act
+    $response = $this->post(route('register'), $registrationData);
+
+    // Assert
+    $response->assertRedirect(route('dashboard'));
     $user = User::query()->where('email', 'jeffrey@example.com')->firstOrFail();
 
     expect($user)
@@ -34,14 +46,21 @@ test('a user can register with their account details', function () {
 });
 
 test('registration requires valid account details', function () {
-    $this->from(route('register'))
-        ->post(route('register'), [
-            'first_name' => '',
-            'last_name' => '',
-            'email' => 'not-an-email',
-            'password' => 'secret',
-            'password_confirmation' => 'different-secret',
-        ])
+    // Arrange
+    $registrationData = [
+        'first_name' => '',
+        'last_name' => '',
+        'email' => 'not-an-email',
+        'password' => 'secret',
+        'password_confirmation' => 'different-secret',
+    ];
+
+    // Act
+    $response = $this->from(route('register'))
+        ->post(route('register'), $registrationData);
+
+    // Assert
+    $response
         ->assertRedirect(route('register'))
         ->assertSessionHasErrors(['first_name', 'last_name', 'email', 'password'])
         ->assertSessionHasInput('email')
