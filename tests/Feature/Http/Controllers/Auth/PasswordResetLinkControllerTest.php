@@ -7,25 +7,41 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 
 test('password reset link screen can be rendered', function () {
-    $this->get(route('password.request'))
-        ->assertSuccessful();
+    // Arrange
+    $passwordResetUrl = route('password.request');
+
+    // Act
+    $response = $this->get($passwordResetUrl);
+
+    // Assert
+    $response->assertSuccessful();
 });
 
 test('password reset link requires a valid email address', function () {
-    $this->from(route('password.request'))
-        ->post(route('password.email'), ['email' => 'not-an-email'])
+    // Arrange
+    $invalidData = ['email' => 'not-an-email'];
+
+    // Act
+    $response = $this->from(route('password.request'))
+        ->post(route('password.email'), $invalidData);
+
+    // Assert
+    $response
         ->assertRedirect(route('password.request'))
         ->assertSessionHasErrors('email')
         ->assertSessionHasInput('email');
 });
 
 test('password reset link can be requested', function () {
+    // Arrange
     Notification::fake();
-
     $user = User::factory()->create();
+    $requestData = ['email' => $user->email];
 
-    $this->post(route('password.email'), ['email' => $user->email])
-        ->assertSessionHasNoErrors();
+    // Act
+    $response = $this->post(route('password.email'), $requestData);
 
+    // Assert
+    $response->assertSessionHasNoErrors();
     Notification::assertSentTo($user, ResetPassword::class);
 });
