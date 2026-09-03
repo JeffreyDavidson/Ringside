@@ -17,10 +17,17 @@ describe('Venues Controller', function () {
     /**
      * @see VenuesController::index()
      */
-    test('index returns a view', function () {
-        actingAs(administrator())
-            ->get(action([VenuesController::class, 'index']))
-            ->assertOk()
+    test('an administrator can view the venues index page', function () {
+        // Arrange
+        $administrator = administrator();
+
+        // Act
+        $response = actingAs($administrator)
+            ->get(route('venues.index'));
+
+        // Assert
+        $response
+            ->assertSuccessful()
             ->assertViewIs('venues.index')
             ->assertSeeLivewire(Main::class);
     });
@@ -28,17 +35,27 @@ describe('Venues Controller', function () {
     /**
      * @see VenuesController::index()
      */
-    test('a basic user cannot view venues index page', function () {
-        actingAs(basicUser())
-            ->get(action([VenuesController::class, 'index']))
-            ->assertForbidden();
+    test('a basic user cannot view the venues index page', function () {
+        // Arrange
+        $basicUser = basicUser();
+
+        // Act
+        $response = actingAs($basicUser)
+            ->get(route('venues.index'));
+
+        // Assert
+        $response->assertForbidden();
     });
 
     /**
      * @see VenuesController::index()
      */
-    test('a guest cannot view venues index page', function () {
-        get(action([VenuesController::class, 'index']))
+    test('a guest is redirected before reaching the venues index authorization policy', function () {
+        // Act
+        $response = get(route('venues.index'));
+
+        // Assert
+        $response
             ->assertRedirect(route('login'));
     });
 });
