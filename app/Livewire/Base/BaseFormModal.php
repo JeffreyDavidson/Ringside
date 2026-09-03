@@ -21,9 +21,6 @@ abstract class BaseFormModal extends BaseModal
 {
     use GeneratesDummyData;
 
-    /** @return class-string<TModel> */
-    abstract protected function getModelClass(): string;
-
     public bool $isModalOpen = false;
 
     protected ?string $createdEventName = null;
@@ -123,10 +120,12 @@ abstract class BaseFormModal extends BaseModal
 
     public function mount(int|string|null $modelId = null): void
     {
-        $this->modelClass = $this->getModelClass();
-
-        $this->modelForm = $this->form;
-
         parent::mount($modelId);
+    }
+
+    /** @return TForm */
+    protected function getModelForm(): BaseForm
+    {
+        return $this->form;
     }
 }

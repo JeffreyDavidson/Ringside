@@ -17,52 +17,67 @@ abstract class BaseModal extends ModalComponent
     /** @var TModelType|null */
     protected ?Model $model = null;
 
-    /** @var TModelForm */
-    protected BaseForm $modelForm;
-
-    /** @var class-string<TModelType> */
-    protected string $modelClass;
-
     protected string $modelTitleField = 'name';
+
+    /** @return class-string<TModelType> */
+    abstract protected function getModelClass(): string;
+
+    /** @return TModelForm */
+    abstract protected function getModelForm(): BaseForm;
 
     public function mount(int|string|null $modelId = null): void
     {
+        $modelForm = $this->getModelForm();
+
         if ($modelId === null) {
             $this->model = null;
-            $this->modelForm->reset();
+            $modelForm->reset();
 
             return;
         }
 
         $id = is_numeric($modelId) ? (int) $modelId : $modelId;
-        $modelClass = $this->modelClass;
-        $model = $modelClass::query()->findOrFail($id);
+        $this->model = $this->findModel($id);
+        $modelForm->setModel($this->model);
+    }
+
+    public function getModalTitle(): string
+    {
+        $modelForm = $this->getModelForm();
+
+        if ($modelForm->modelId !== null) {
+            $model = $this->findModel($modelForm->modelId);
+            $value = $model->{$this->modelTitleField};
+
+            return 'Edit '.(string) ($value ?? 'Unknown');
+        }
+
+        return 'Add '.class_basename($this->getModelClass());
+    }
+
+    public function clear(): void
+    {
+        $modelForm = $this->getModelForm();
+
+        if ($modelForm->modelId !== null) {
+            $modelForm->setModel($this->findModel($modelForm->modelId));
+
+            return;
+        }
+
+        $modelForm->reset();
+    }
+
+    /** @return TModelType */
+    private function findModel(int|string $modelId): Model
+    {
+        $modelClass = $this->getModelClass();
+        $model = $modelClass::query()->findOrFail($modelId);
 
         if (! $model instanceof $modelClass) {
             throw new LogicException("Expected an instance of {$modelClass}.");
         }
 
-        $this->model = $model;
-        $this->modelForm->setModel($this->model);
-    }
-
-    public function getModalTitle(): string
-    {
-        if ($this->model !== null) {
-            return 'Edit '.$this->modelForm->generateModelEditName($this->modelTitleField);
-        }
-
-        return 'Add '.(isset($this->modelClass) ? class_basename($this->modelClass) : 'Record');
-    }
-
-    public function clear(): void
-    {
-        if ($this->model !== null) {
-            $this->modelForm->setModel($this->model);
-
-            return;
-        }
-
-        $this->modelForm->reset();
+        return $model;
     }
 }
