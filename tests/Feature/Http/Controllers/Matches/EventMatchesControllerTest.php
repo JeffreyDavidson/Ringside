@@ -45,6 +45,6 @@ describe('Event Matches Controller', function () {
         $event = Event::factory()->create();
 
         get(route('events.matches.index', $event))
-            ->assertRedirect('/login');
+            ->assertRedirect(route('login'));
     });
 });

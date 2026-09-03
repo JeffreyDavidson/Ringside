@@ -6,7 +6,6 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -22,7 +21,6 @@ use function Pest\Livewire\livewire;
  * - Error handling and user feedback workflows
  *
  * NOTE: This file focuses on component-level feature testing.
- * For authorization testing, see: /tests/Feature/Authorization/WrestlerAuthorizationTest.php
  * For integration testing, see: /tests/Integration/Livewire/Wrestlers/Tables/WrestlersTableIntegrationTest.php
  * For business logic testing, see: /tests/Unit/Actions/Wrestlers/WrestlerBusinessLogicTest.php
  */
