@@ -6,6 +6,7 @@ use App\Livewire\Referees\Modals\FormModal;
 use App\Livewire\Referees\RefereeForm;
 use App\Models\Roster\Referees\Referee;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 /**
@@ -29,7 +30,7 @@ use function Pest\Livewire\livewire;
  * @see RefereeForm
  */
 beforeEach(function () {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 });
 
 describe('Referees FormModal Tests', function () {

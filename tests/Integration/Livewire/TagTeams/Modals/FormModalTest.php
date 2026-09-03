@@ -7,6 +7,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 /**
@@ -30,7 +31,7 @@ use function Pest\Livewire\livewire;
  * @see Form
  */
 beforeEach(function () {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 });
 
 describe('TagTeams FormModal Tests', function () {
