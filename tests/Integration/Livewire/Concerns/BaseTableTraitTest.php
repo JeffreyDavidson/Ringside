@@ -2,16 +2,29 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Concerns\BaseTableTrait;
-use App\Livewire\Concerns\Columns\HasActionColumn;
+use App\Livewire\Venues\Tables\Main;
 
-test('base table behavior composes the action column concern', function () {
-    expect(class_uses(BaseTableTrait::class))
-        ->toContain(HasActionColumn::class);
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
+it('configures an index table for its resource', function () {
+    actingAs(administrator());
+
+    $table = livewire(Main::class);
+
+    $table
+        ->assertSuccessful()
+        ->assertSeeHtml('placeholder="Search venues"')
+        ->assertSee('Venues')
+        ->assertSee('Add Venue')
+        ->assertSee(__('core.actions'));
 });
 
-test('base table behavior supplies additional columns through the protected extension point', function () {
-    $method = (new ReflectionClass(BaseTableTrait::class))->getMethod('additionalColumns');
+it('restricts index table pagination to the shared options', function () {
+    actingAs(administrator());
+    $table = livewire(Main::class);
 
-    expect($method->isProtected())->toBeTrue();
+    $table->set('perPage', 999);
+
+    $table->assertSet('perPage', 5);
 });
