@@ -6,655 +6,340 @@ use App\Livewire\TagTeams\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-/**
- * Integration tests for TagTeams FormModal component functionality.
- *
- * INTEGRATION TEST SCOPE:
- * - Modal state management and lifecycle
- * - Form rendering and field validation
- * - Create and edit functionality with database integration
- * - Tag team-specific business rules and constraints
- * - Wrestler relationship handling and validation
- * - Manager relationship handling and synchronization
- * - Form submission and data persistence
- * - Validation error handling and display
- * - Employment date integration
- *
- * These tests verify the complete form modal workflow including
- * modal behavior, form validation, relationship management, and database operations.
- *
- * @see FormModal
- * @see Form
- */
-beforeEach(function () {
-    actingAs(administrator());
-});
-
-describe('TagTeams FormModal Tests', function () {
-    describe('modal rendering and state management', function () {
-        test('modal opens and closes correctly', function () {
-            livewire(FormModal::class)
-                ->assertSet('isModalOpen', false)
-                ->call('openModal')
-                ->assertSet('isModalOpen', true)
-                ->call('closeModal')
-                ->assertSet('isModalOpen', false);
-        });
-
-        test('modal renders with correct form fields', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->assertPropertyWired('form.name')
-                ->assertPropertyWired('form.signature_move')
-                ->assertPropertyWired('form.wrestlerA')
-                ->assertPropertyWired('form.wrestlerB')
-                ->assertPropertyWired('form.managers')
-                ->assertPropertyWired('form.employment_date');
-        });
-
-        test('modal shows correct title for create mode', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal');
-
-            $component->assertSee('Add TagTeam');
-        });
-
-        test('modal shows correct title for edit mode', function () {
-            $tagTeam = TagTeam::factory()->create(['name' => 'Test Tag Team']);
-
-            $component = livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id);
-
-            $component->assertSee('Edit Test Tag Team');
-        });
-
-        test('provides wrestlers list for form options', function () {
-            $wrestlers = Wrestler::factory()->count(5)->create();
-
-            $component = livewire(FormModal::class)
-                ->call('openModal');
-
-            $wrestlerOptions = app(FormModal::class)->getWrestlers();
-
-            expect($wrestlerOptions)->toHaveCount(5);
-            expect(array_key_first($wrestlerOptions))->toBe($wrestlers->firstOrFail()->id);
-        });
+describe('authorized tag team form interactions', function () {
+    beforeEach(function () {
+        actingAs(administrator());
     });
 
-    describe('form validation rules enforcement', function () {
-        test('validates required fields', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', '')
-                ->set('form.wrestlerA', null)
-                ->set('form.wrestlerB', null)
-                ->call('submitForm')
-                ->assertHasErrors([
-                    'form.name' => 'required',
-                    'form.wrestlerA' => 'required',
-                    'form.wrestlerB' => 'required',
-                ]);
-        });
+    it('renders the tag team fields and available choices', function () {
+        Wrestler::factory()->create(['name' => 'Ricky Morton']);
+        Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
 
-        test('validates field length constraints', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', str_repeat('A', 256))
-                ->set('form.signature_move', str_repeat('C', 256))
-                ->call('submitForm')
-                ->assertHasErrors([
-                    'form.name' => 'max',
-                    'form.signature_move' => 'max',
-                ]);
-        });
+        $modal = livewire(FormModal::class);
 
-        test('validates tag team name uniqueness', function () {
-            $existingTagTeam = TagTeam::factory()->create(['name' => 'Existing Team']);
-
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Existing Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->call('submitForm')
-                ->assertHasErrors(['form.name' => 'unique']);
-        });
-
-        test('validates signature move uniqueness when provided', function () {
-            $existingTagTeam = TagTeam::factory()->create(['signature_move' => 'Double Slam']);
-
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'New Team')
-                ->set('form.signature_move', 'Double Slam')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->call('submitForm')
-                ->assertHasErrors(['form.signature_move' => 'unique']);
-        });
-
-        test('validates wrestlers exist in database', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Test Team')
-                ->set('form.wrestlerA', 9999) // Non-existent wrestler
-                ->set('form.wrestlerB', 9998) // Non-existent wrestler
-                ->call('submitForm')
-                ->assertHasErrors([
-                    'form.wrestlerA' => 'exists',
-                    'form.wrestlerB' => 'exists',
-                ]);
-        });
-
-        test('validates wrestlers are different', function () {
-            $wrestler = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Test Team')
-                ->set('form.wrestlerA', $wrestler->id)
-                ->set('form.wrestlerB', $wrestler->id) // Same wrestler
-                ->call('submitForm')
-                ->assertHasErrors(['form.wrestlerB' => 'different']);
-        });
-
-        test('validates wrestlers are not active members of another tag team', function () {
-            $unavailableWrestler = Wrestler::factory()->onCurrentTagTeam()->create();
-            $availableWrestler = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Test Team')
-                ->set('form.wrestlerA', $unavailableWrestler->id)
-                ->set('form.wrestlerB', $availableWrestler->id)
-                ->call('submitForm')
-                ->assertHasErrors(['form.wrestlerA']);
-        });
-
-        test('validates injured wrestlers cannot join a tag team', function () {
-            $injuredWrestler = Wrestler::factory()->injured()->create();
-            $availableWrestler = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Test Team')
-                ->set('form.wrestlerA', $injuredWrestler->id)
-                ->set('form.wrestlerB', $availableWrestler->id)
-                ->call('submitForm')
-                ->assertHasErrors(['form.wrestlerA']);
-        });
-
-        test('validates suspended wrestlers cannot join a tag team', function () {
-            $suspendedWrestler = Wrestler::factory()->suspended()->create();
-            $availableWrestler = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Test Team')
-                ->set('form.wrestlerA', $suspendedWrestler->id)
-                ->set('form.wrestlerB', $availableWrestler->id)
-                ->call('submitForm')
-                ->assertHasErrors(['form.wrestlerA']);
-        });
-
-        test('validates managers exist when provided', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->set('form.managers', [9999]) // Non-existent manager
-                ->call('submitForm')
-                ->assertHasErrors(['form.managers.0' => 'exists']);
-        });
-
-        test('validates employment date format', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->set('form.employment_date', 'invalid-date-format')
-                ->call('submitForm');
-
-            $component->assertHasErrors(['form.employment_date']);
-        });
+        $modal->assertSuccessful();
+        $modal->assertViewIs('livewire.tag-teams.modals.form-modal');
+        $modal
+            ->assertPropertyWired('form.name')
+            ->assertPropertyWired('form.signature_move')
+            ->assertPropertyWired('form.wrestlerA')
+            ->assertPropertyWired('form.wrestlerB')
+            ->assertPropertyWired('form.managers')
+            ->assertPropertyWired('form.employment_date')
+            ->assertSee('Ricky Morton')
+            ->assertSee('Bobby Heenan');
     });
 
-    describe('create functionality', function () {
-        test('creates new tag team with valid data', function () {
-            $wrestlerA = Wrestler::factory()->create(['name' => 'Wrestler A']);
-            $wrestlerB = Wrestler::factory()->create(['name' => 'Wrestler B']);
-            $manager = Manager::factory()->create();
+    it('opens an empty form for creating a tag team', function () {
+        $modal = livewire(FormModal::class);
 
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'New Tag Team')
-                ->set('form.signature_move', 'Team Finisher')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->set('form.managers', [$manager->id])
-                ->set('form.employment_date', '2024-01-15')
-                ->call('submitForm');
+        $modal->call('openModal');
 
-            $component->assertHasNoErrors();
-            $component->assertSet('isModalOpen', false);
-
-            expect(TagTeam::where('name', 'New Tag Team')->exists())->toBeTrue();
-
-            $tagTeam = TagTeam::where('name', 'New Tag Team')->firstOrFail();
-            expect($tagTeam->signature_move)->toBe('Team Finisher');
-            expect($tagTeam->currentWrestlers)->toHaveCount(2);
-            expect($tagTeam->currentWrestlers->pluck('id')->toArray())->toContain($wrestlerA->id);
-            expect($tagTeam->currentWrestlers->pluck('id')->toArray())->toContain($wrestlerB->id);
-            expect($tagTeam->currentManagers)->toHaveCount(1);
-            expect($tagTeam->currentManagers->firstOrFail()->id)->toBe($manager->id);
-        });
-
-        test('creates tag team without optional fields', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Simple Tag Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->call('submitForm')
-                ->assertHasNoErrors();
-
-            $tagTeam = TagTeam::where('name', 'Simple Tag Team')->firstOrFail();
-            expect($tagTeam->signature_move)->toBeNull();
-            expect($tagTeam->currentManagers)->toHaveCount(0);
-            expect($tagTeam->firstEmployment)->toBeNull();
-        });
-
-        test('dispatches form-submitted event on successful creation', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Event Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->call('submitForm')
-                ->assertDispatched('form-submitted');
-        });
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', '')
+            ->assertSet('form.signature_move', '')
+            ->assertSet('form.wrestlerA', null)
+            ->assertSet('form.wrestlerB', null)
+            ->assertSet('form.managers', [])
+            ->assertSet('form.employment_date', '')
+            ->assertSee('Add TagTeam');
     });
 
-    describe('edit functionality', function () {
-        test('loads existing tag team data for editing', function () {
-            $wrestlerA = Wrestler::factory()->create(['name' => 'First Wrestler']);
-            $wrestlerB = Wrestler::factory()->create(['name' => 'Second Wrestler']);
-            $manager = Manager::factory()->create();
+    it('loads an existing tag team for editing', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $wrestlerA = $wrestlers->firstOrFail();
+        $wrestlerB = $wrestlers->skip(1)->firstOrFail();
+        $manager = Manager::factory()->create();
+        $tagTeam = TagTeam::factory()->create([
+            'name' => 'The Midnight Express',
+            'signature_move' => 'Veg-O-Matic',
+        ]);
+        $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
+        $tagTeam->managers()->attach($manager, ['hired_at' => now()->subYear()]);
+        $tagTeam->employments()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
 
-            $tagTeam = TagTeam::factory()->create([
-                'name' => 'Edit Test Team',
-                'signature_move' => 'Original Move',
-            ]);
+        $modal->call('openModal', $tagTeam->id);
 
-            // Set up relationships
-            $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
-            $tagTeam->managers()->sync([$manager->id => ['hired_at' => now()]]);
-
-            $component = livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id);
-
-            $component->assertSet('form.name', 'Edit Test Team')
-                ->assertSet('form.signature_move', 'Original Move')
-                ->assertSet('form.wrestlerA', $wrestlerA->id)
-                ->assertSet('form.wrestlerB', $wrestlerB->id);
-
-            expect($component->get('form.managers'))->toContain($manager->id);
-        });
-
-        test('updates existing tag team with valid changes', function () {
-            $originalWrestlerA = Wrestler::factory()->create();
-            $originalWrestlerB = Wrestler::factory()->create();
-            $newWrestlerA = Wrestler::factory()->create();
-            $newWrestlerB = Wrestler::factory()->create();
-            $manager = Manager::factory()->create();
-
-            $tagTeam = TagTeam::factory()->create([
-                'name' => 'Original Team Name',
-                'signature_move' => 'Original Move',
-            ]);
-
-            $tagTeam->wrestlers()->sync([$originalWrestlerA->id, $originalWrestlerB->id]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id)
-                ->set('form.name', 'Updated Team Name')
-                ->set('form.signature_move', 'New Team Finisher')
-                ->set('form.wrestlerA', $newWrestlerA->id)
-                ->set('form.wrestlerB', $newWrestlerB->id)
-                ->set('form.managers', [$manager->id])
-                ->call('submitForm')
-                ->assertHasNoErrors();
-
-            $tagTeam->refresh();
-            expect($tagTeam->name)->toBe('Updated Team Name');
-            expect($tagTeam->signature_move)->toBe('New Team Finisher');
-            expect($tagTeam->currentWrestlers->pluck('id')->toArray())->toEqual([$newWrestlerA->id, $newWrestlerB->id]);
-            expect($tagTeam->currentManagers->firstOrFail()->id)->toBe($manager->id);
-        });
-
-        test('allows name uniqueness bypass for same tag team', function () {
-            $wrestler1 = Wrestler::factory()->create();
-            $wrestler2 = Wrestler::factory()->create();
-            $tagTeam = TagTeam::factory()->create(['name' => 'Unique Team Name']);
-
-            livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id)
-                ->set('form.name', 'Unique Team Name') // Same name should be allowed
-                ->set('form.wrestlerA', $wrestler1->id)
-                ->set('form.wrestlerB', $wrestler2->id)
-                ->call('submitForm')
-                ->assertHasNoErrors();
-        });
-
-        test('handles employment date loading from existing employment', function () {
-            $tagTeam = TagTeam::factory()
-                ->hasEmployments(1, ['started_at' => '2023-06-15'])
-                ->create();
-
-            $component = livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id);
-
-            $component->assertSet('form.employment_date', '2023-06-15');
-        });
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', 'The Midnight Express')
+            ->assertSet('form.signature_move', 'Veg-O-Matic')
+            ->assertSet('form.wrestlerA', $wrestlerA->id)
+            ->assertSet('form.wrestlerB', $wrestlerB->id)
+            ->assertSet('form.managers', [$manager->id])
+            ->assertSet('form.employment_date', '2024-01-15')
+            ->assertSee('Edit The Midnight Express');
     });
 
-    describe('wrestler relationship management', function () {
-        test('synchronizes wrestler relationships on create', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Relationship Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->call('submitForm')
-                ->assertHasNoErrors();
-
-            $tagTeam = TagTeam::where('name', 'Relationship Test Team')->firstOrFail();
-            expect($tagTeam->wrestlers)->toHaveCount(2);
-            expect($tagTeam->wrestlers->pluck('id')->sort()->values()->toArray())
-                ->toEqual(collect([$wrestlerA->id, $wrestlerB->id])->sort()->values()->toArray());
-        });
-
-        test('updates wrestler relationships on edit', function () {
-            $originalWrestlerA = Wrestler::factory()->create();
-            $originalWrestlerB = Wrestler::factory()->create();
-            $newWrestlerA = Wrestler::factory()->create();
-            $newWrestlerB = Wrestler::factory()->create();
-
-            $tagTeam = TagTeam::factory()->create(['name' => 'Update Test Team']);
-            $tagTeam->wrestlers()->sync([$originalWrestlerA->id, $originalWrestlerB->id]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id)
-                ->set('form.wrestlerA', $newWrestlerA->id)
-                ->set('form.wrestlerB', $newWrestlerB->id)
-                ->call('submitForm')
-                ->assertHasNoErrors();
-
-            $tagTeam->refresh();
-            expect($tagTeam->currentWrestlers->pluck('id')->sort()->values()->toArray())
-                ->toEqual(collect([$newWrestlerA->id, $newWrestlerB->id])->sort()->values()->toArray());
-        });
-
-        test('preserves previous wrestler relationships when updating', function () {
-            $originalWrestlerA = Wrestler::factory()->create();
-            $originalWrestlerB = Wrestler::factory()->create();
-            $newWrestlerA = Wrestler::factory()->create();
-            $newWrestlerB = Wrestler::factory()->create();
-
-            $tagTeam = TagTeam::factory()->create();
-            $tagTeam->wrestlers()->attach([$originalWrestlerA->id, $originalWrestlerB->id], [
-                'joined_at' => now()->subYear(),
-            ]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id)
-                ->set('form.wrestlerA', $newWrestlerA->id)
-                ->set('form.wrestlerB', $newWrestlerB->id)
-                ->call('submitForm');
-
-            $tagTeam->refresh();
-
-            expect($tagTeam->currentWrestlers->pluck('id'))
-                ->toContain($newWrestlerA->id, $newWrestlerB->id)
-                ->not->toContain($originalWrestlerA->id, $originalWrestlerB->id)
-                ->and($tagTeam->previousWrestlers->pluck('id'))
-                ->toContain($originalWrestlerA->id, $originalWrestlerB->id);
-        });
+    it('propagates a missing tag team failure', function () {
+        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
+            ->toThrow(ModelNotFoundException::class);
     });
 
-    describe('manager relationship management', function () {
-        test('synchronizes manager relationships on create', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-            $manager1 = Manager::factory()->create();
-            $manager2 = Manager::factory()->create();
+    it('creates a tag team with its complete roster configuration', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $wrestlerA = $wrestlers->firstOrFail();
+        $wrestlerB = $wrestlers->skip(1)->firstOrFail();
+        $manager = Manager::factory()->create();
+        $modal = livewire(FormModal::class);
 
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Manager Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->set('form.managers', [$manager1->id, $manager2->id])
-                ->call('submitForm')
-                ->assertHasNoErrors();
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'The Road Warriors',
+            'form.signature_move' => 'Doomsday Device',
+            'form.wrestlerA' => $wrestlerA->id,
+            'form.wrestlerB' => $wrestlerB->id,
+            'form.managers' => [$manager->id],
+            'form.employment_date' => '2024-02-01',
+        ]);
+        $modal->call('save');
 
-            $tagTeam = TagTeam::where('name', 'Manager Test Team')->firstOrFail();
-            expect($tagTeam->managers)->toHaveCount(2);
-            expect($tagTeam->managers->pluck('id')->sort()->values()->toArray())
-                ->toEqual(collect([$manager1->id, $manager2->id])->sort()->values()->toArray());
-        });
-
-        test('preserves previous manager relationships when updating', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-            $previousManager = Manager::factory()->create();
-            $newManager = Manager::factory()->create();
-            $tagTeam = TagTeam::factory()->create();
-            $tagTeam->wrestlers()->attach([$wrestlerA->id, $wrestlerB->id], [
-                'joined_at' => now()->subYear(),
-            ]);
-            $tagTeam->managers()->attach($previousManager->id, [
-                'hired_at' => now()->subYear(),
-            ]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id)
-                ->set('form.managers', [$newManager->id])
-                ->call('submitForm')
-                ->assertHasNoErrors();
-
-            $tagTeam->refresh();
-
-            expect($tagTeam->currentManagers->pluck('id'))
-                ->toContain($newManager->id)
-                ->not->toContain($previousManager->id)
-                ->and($tagTeam->previousManagers->pluck('id'))
-                ->toContain($previousManager->id);
-        });
-
-        test('updates manager relationships on edit', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-            $originalManager = Manager::factory()->create();
-            $newManager = Manager::factory()->create();
-
-            $tagTeam = TagTeam::factory()->create();
-            $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
-            $tagTeam->managers()->sync([$originalManager->id => ['hired_at' => now()]]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id)
-                ->set('form.managers', [$newManager->id])
-                ->call('submitForm')
-                ->assertHasNoErrors();
-
-            $tagTeam->refresh();
-            expect($tagTeam->currentManagers->pluck('id')->toArray())->toEqual([$newManager->id]);
-            expect($tagTeam->previousManagers->pluck('id')->toArray())->toContain($originalManager->id);
-        });
-
-        test('handles empty manager array correctly', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-            $manager = Manager::factory()->create();
-
-            $tagTeam = TagTeam::factory()->create();
-            $tagTeam->wrestlers()->sync([$wrestlerA->id, $wrestlerB->id]);
-            $tagTeam->managers()->sync([$manager->id => ['hired_at' => now()]]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $tagTeam->id)
-                ->set('form.managers', []) // Remove all managers
-                ->call('submitForm')
-                ->assertHasNoErrors();
-
-            $tagTeam->refresh();
-            expect($tagTeam->currentManagers)->toHaveCount(0)
-                ->and($tagTeam->previousManagers)->toHaveCount(1);
-        });
+        $tagTeam = TagTeam::query()->whereName('The Road Warriors')->firstOrFail();
+        expect($tagTeam->signature_move)->toBe('Doomsday Device')
+            ->and($tagTeam->currentWrestlers()->pluck('wrestlers.id')->sort()->values()->all())
+            ->toBe($wrestlers->modelKeys())
+            ->and($tagTeam->currentManagers()->pluck('managers.id')->all())->toBe([$manager->id])
+            ->and($tagTeam->firstEmployment?->started_at?->toDateString())->toBe('2024-02-01');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertDispatched('form-submitted')
+            ->assertDispatched('closeModal')
+            ->assertSet('isModalOpen', false);
     });
 
-    describe('form submission and error handling', function () {
-        test('prevents submission with validation errors', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', '') // Invalid: required
-                ->call('submitForm');
+    it('creates a tag team without optional profile or employment data', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $wrestlerA = $wrestlers->firstOrFail();
+        $wrestlerB = $wrestlers->skip(1)->firstOrFail();
+        $modal = livewire(FormModal::class);
 
-            $component->assertHasErrors();
-            $component->assertSet('isModalOpen', true); // Modal stays open on errors
-            expect(TagTeam::count())->toBe(0); // No tag team created
-        });
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'The Rockers',
+            'form.wrestlerA' => $wrestlerA->id,
+            'form.wrestlerB' => $wrestlerB->id,
+        ]);
+        $modal->call('save');
 
-        test('closes modal on successful form submission', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Success Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->call('submitForm')
-                ->assertSet('isModalOpen', false);
-        });
-
-        test('maintains form state on validation errors', function () {
-            $wrestlerA = Wrestler::factory()->create();
-
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', '') // Will cause error
-                ->set('form.signature_move', 'Valid Move')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->call('submitForm');
-
-            // Valid fields should be preserved
-            $component->assertSet('form.signature_move', 'Valid Move')
-                ->assertSet('form.wrestlerA', $wrestlerA->id);
-        });
+        $tagTeam = TagTeam::query()->whereName('The Rockers')->firstOrFail();
+        expect($tagTeam->signature_move)->toBeNull()
+            ->and($tagTeam->currentManagers()->exists())->toBeFalse()
+            ->and($tagTeam->firstEmployment)->toBeNull();
+        $modal->assertHasNoErrors();
     });
 
-    describe('dummy data functionality', function () {
-        test('can fill dummy fields for development workflow', function () {
-            // Create wrestlers for dummy data to use
-            Wrestler::factory()->count(5)->create();
+    it('updates a tag team while preserving former roster relationships', function () {
+        $originalWrestlers = Wrestler::factory()->count(2)->create();
+        $newWrestlers = Wrestler::factory()->count(2)->create();
+        $newWrestlerA = $newWrestlers->firstOrFail();
+        $newWrestlerB = $newWrestlers->skip(1)->firstOrFail();
+        $originalManager = Manager::factory()->create();
+        $newManager = Manager::factory()->create();
+        $tagTeam = TagTeam::factory()->create(['name' => 'Original Team', 'signature_move' => 'Original Move']);
+        $tagTeam->wrestlers()->attach($originalWrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
+        $tagTeam->managers()->attach($originalManager, ['hired_at' => now()->subYear()]);
+        $modal = livewire(FormModal::class);
 
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->call('fillDummyFields');
+        $modal->call('openModal', $tagTeam->id);
+        $modal->set([
+            'form.name' => 'Updated Team',
+            'form.signature_move' => 'Updated Move',
+            'form.wrestlerA' => $newWrestlerA->id,
+            'form.wrestlerB' => $newWrestlerB->id,
+            'form.managers' => [$newManager->id],
+        ]);
+        $modal->call('save');
 
-            // All required fields should be populated
-            expect($component->get('form.name'))->not->toBeEmpty();
-            expect($component->get('form.wrestlerA'))->not()->toBeNull();
-            expect($component->get('form.wrestlerB'))->not()->toBeNull();
-        });
-
-        test('dummy data uses different wrestlers', function () {
-            // Create enough wrestlers for dummy data
-            Wrestler::factory()->count(5)->create();
-
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->call('fillDummyFields');
-
-            $wrestlerA = $component->get('form.wrestlerA');
-            $wrestlerB = $component->get('form.wrestlerB');
-
-            expect($wrestlerA)->not->toBe($wrestlerB);
-        });
-
-        test('dummy data does not persist additional wrestlers', function () {
-            Wrestler::factory()->count(5)->create();
-
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->call('fillDummyFields');
-
-            expect(Wrestler::query()->count())->toBe(5);
-        });
+        $tagTeam->refresh();
+        expect($tagTeam->name)->toBe('Updated Team')
+            ->and($tagTeam->signature_move)->toBe('Updated Move')
+            ->and($tagTeam->currentWrestlers()->pluck('wrestlers.id')->sort()->values()->all())
+            ->toBe($newWrestlers->modelKeys())
+            ->and($tagTeam->previousWrestlers()->pluck('wrestlers.id')->sort()->values()->all())
+            ->toBe($originalWrestlers->modelKeys())
+            ->and($tagTeam->currentManagers()->pluck('managers.id')->all())->toBe([$newManager->id])
+            ->and($tagTeam->previousManagers()->pluck('managers.id')->all())->toBe([$originalManager->id]);
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertSet('isModalOpen', false);
     });
 
-    describe('integration with employment system', function () {
-        test('creates employment record when employment date provided', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
+    it('requires a name and two wrestlers', function () {
+        $modal = livewire(FormModal::class);
 
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'Employment Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->set('form.employment_date', '2024-01-01')
-                ->call('submitForm')
-                ->assertHasNoErrors();
+        $modal->call('openModal');
+        $modal->call('save');
 
-            $tagTeam = TagTeam::where('name', 'Employment Test Team')->firstOrFail();
-            expect($tagTeam->firstEmployment)->not()->toBeNull();
-            expect(requiredDate(requiredModel($tagTeam->firstEmployment)->started_at)->toDateString())->toBe('2024-01-01');
-        });
+        $modal
+            ->assertHasErrors([
+                'form.name' => 'required',
+                'form.wrestlerA' => 'required',
+                'form.wrestlerB' => 'required',
+            ])
+            ->assertNotDispatched('closeModal')
+            ->assertSet('isModalOpen', true);
+        expect(TagTeam::query()->doesntExist())->toBeTrue();
+    });
 
-        test('does not create employment record when date not provided', function () {
-            $wrestlerA = Wrestler::factory()->create();
-            $wrestlerB = Wrestler::factory()->create();
+    it('rejects invalid tag team field values', function (string $case) {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $wrestlerA = $wrestlers->firstOrFail();
+        $wrestlerB = $wrestlers->skip(1)->firstOrFail();
+        [$field, $value, $errorField, $rule] = match ($case) {
+            'long name' => ['form.name', str_repeat('a', 256), 'form.name', 'max'],
+            'long signature move' => ['form.signature_move', str_repeat('a', 256), 'form.signature_move', 'max'],
+            'missing first wrestler' => ['form.wrestlerA', PHP_INT_MAX, 'form.wrestlerA', 'exists'],
+            'missing second wrestler' => ['form.wrestlerB', PHP_INT_MAX, 'form.wrestlerB', 'exists'],
+            'same wrestler twice' => ['form.wrestlerB', $wrestlerA->id, 'form.wrestlerB', 'different'],
+            'missing manager' => ['form.managers', [PHP_INT_MAX], 'form.managers.0', 'exists'],
+            'invalid employment date' => ['form.employment_date', 'not-a-date', 'form.employment_date', 'date'],
+            default => throw new InvalidArgumentException("Unknown validation case: {$case}"),
+        };
+        $modal = livewire(FormModal::class);
 
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.name', 'No Employment Test Team')
-                ->set('form.wrestlerA', $wrestlerA->id)
-                ->set('form.wrestlerB', $wrestlerB->id)
-                ->call('submitForm')
-                ->assertHasNoErrors();
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Team',
+            'form.wrestlerA' => $wrestlerA->id,
+            'form.wrestlerB' => $wrestlerB->id,
+        ]);
+        $modal->set($field, $value);
+        $modal->call('save');
 
-            $tagTeam = TagTeam::where('name', 'No Employment Test Team')->firstOrFail();
-            expect($tagTeam->firstEmployment)->toBeNull();
-        });
+        $modal->assertHasErrors([$errorField => $rule]);
+        expect(TagTeam::query()->doesntExist())->toBeTrue();
+    })->with([
+        'long name',
+        'long signature move',
+        'missing first wrestler',
+        'missing second wrestler',
+        'same wrestler twice',
+        'missing manager',
+        'invalid employment date',
+    ]);
+
+    it('rejects a name or signature move used by another tag team', function (string $field) {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $wrestlerA = $wrestlers->firstOrFail();
+        $wrestlerB = $wrestlers->skip(1)->firstOrFail();
+        TagTeam::factory()->create(['name' => 'Existing Team', 'signature_move' => 'Existing Move']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'New Team',
+            'form.signature_move' => 'New Move',
+            'form.wrestlerA' => $wrestlerA->id,
+            'form.wrestlerB' => $wrestlerB->id,
+        ]);
+        $modal->set($field, $field === 'form.name' ? 'Existing Team' : 'Existing Move');
+        $modal->call('save');
+
+        $modal->assertHasErrors([$field => 'unique']);
+        expect(TagTeam::query()->whereName('New Team')->doesntExist())->toBeTrue();
+    })->with([
+        'name' => 'form.name',
+        'signature move' => 'form.signature_move',
+    ]);
+
+    it('rejects a wrestler who is unavailable for tag team membership', function (string $state) {
+        $unavailableWrestler = match ($state) {
+            'current tag team' => Wrestler::factory()->onCurrentTagTeam()->create(),
+            'injured' => Wrestler::factory()->injured()->create(),
+            'suspended' => Wrestler::factory()->suspended()->create(),
+            default => throw new InvalidArgumentException("Unknown wrestler state: {$state}"),
+        };
+        $availableWrestler = Wrestler::factory()->create();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Invalid Team',
+            'form.wrestlerA' => $unavailableWrestler->id,
+            'form.wrestlerB' => $availableWrestler->id,
+        ]);
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.wrestlerA']);
+        expect(TagTeam::query()->whereName('Invalid Team')->doesntExist())->toBeTrue();
+    })->with(['current tag team', 'injured', 'suspended']);
+
+    it('allows current members to remain on the tag team being edited', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $tagTeam = TagTeam::factory()->create(['name' => 'The Hart Foundation']);
+        $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()->subYear()]);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $tagTeam->id);
+        $modal->set('form.signature_move', 'Hart Attack');
+        $modal->call('save');
+
+        $modal->assertHasNoErrors();
+        expect($tagTeam->refresh()->signature_move)->toBe('Hart Attack')
+            ->and($tagTeam->currentWrestlers()->pluck('wrestlers.id')->sort()->values()->all())
+            ->toBe($wrestlers->modelKeys());
+    });
+
+    it('resets edited tag team data when reopening in create mode', function () {
+        $wrestlers = Wrestler::factory()->count(2)->create();
+        $manager = Manager::factory()->create();
+        $tagTeam = TagTeam::factory()->create(['name' => 'Existing Team', 'signature_move' => 'Existing Move']);
+        $tagTeam->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => now()]);
+        $tagTeam->managers()->attach($manager, ['hired_at' => now()]);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $tagTeam->id);
+        $modal->call('openModal');
+
+        $modal
+            ->assertSet('form.name', '')
+            ->assertSet('form.signature_move', '')
+            ->assertSet('form.wrestlerA', null)
+            ->assertSet('form.wrestlerB', null)
+            ->assertSet('form.managers', [])
+            ->assertSet('form.employment_date', '');
+    });
+
+    it('generates valid dummy data that can create a tag team', function () {
+        Wrestler::factory()->count(5)->create();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+        $modal->call('save');
+
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('form-submitted')
+            ->assertSet('isModalOpen', false);
+        expect(TagTeam::query()->count())->toBe(1)
+            ->and(Wrestler::query()->count())->toBe(5);
     });
 });
+
+it('forbids users without administrative access from opening the tag team form', function (string $actor, string $operation) {
+    $tagTeam = $operation === 'update' ? TagTeam::factory()->create() : null;
+
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
+
+    $modal = livewire(FormModal::class);
+    $modal->call('openModal', $tagTeam?->id);
+
+    $modal->assertForbidden();
+})->with([
+    'guest creating' => ['guest', 'create'],
+    'basic user creating' => ['basic user', 'create'],
+    'guest updating' => ['guest', 'update'],
+    'basic user updating' => ['basic user', 'update'],
+]);
