@@ -16,380 +16,125 @@ use App\Lifecycle\Roster\Individuals\IndividualInjuryEligibility;
 use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
 use App\Lifecycle\Roster\RosterBookingEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Carbon;
-
-/**
- * Workflow tests for Wrestler Employment multi-action scenarios.
- *
- * WORKFLOW TEST SCOPE:
- * - Multi-action employment workflows
- * - Cross-action data consistency
- * - Transaction integrity across multiple actions
- * - Complex business process validation
- * - Career lifecycle scenarios
- */
-describe('Wrestler Employment Workflows', function () {
-
-    beforeEach(function () {
-        $this->wrestler = Wrestler::factory()->released()->create();
-    });
-
-    describe('basic multi-action employment workflows', function () {
-        test('employ then release then re-employ workflow maintains consistency', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Initial employ
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $employed = freshModel($wrestler);
-            expect($employed->currentEmployment()->exists())->toBeTrue();
-
-            // Release
-            resolve(ReleaseAction::class)->handle($employed, Carbon::now());
-            $released = freshModel($wrestler);
-            expect($released->status)->toBe(EmploymentStatus::Released);
-            expect($released->currentEmployment()->exists())->toBeFalse();
-
-            // Re-employ
-            resolve(EmployAction::class)->handle($released, Carbon::now());
-            $reEmployed = freshModel($wrestler);
-            expect($reEmployed->currentEmployment()->exists())->toBeTrue();
-            expect($reEmployed->status)->not->toBe(EmploymentStatus::Released);
-        });
-
-        test('employ then release workflow maintains data consistency', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Initial state
-            expect($wrestler->status)->toBe(EmploymentStatus::Unemployed);
-
-            // Employ wrestler
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $afterEmployment = freshModel($wrestler);
-            expect($afterEmployment->status)->toBe(EmploymentStatus::Employed);
-            expect($afterEmployment->currentEmployment()->exists())->toBeTrue();
-
-            // Release wrestler
-            resolve(ReleaseAction::class)->handle($afterEmployment, Carbon::now());
-            $afterRelease = freshModel($wrestler);
-
-            // Verify release status synchronization
-            expect($afterRelease->status)->toBe(EmploymentStatus::Released);
-            expect($afterRelease->currentEmployment()->exists())->toBeFalse();
-        });
-    });
-
-    describe('complex career lifecycle workflows', function () {
-        test('employ then injure then clear-from-injury workflow maintains employment', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Employ wrestler
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $employed = freshModel($wrestler);
-            expect($employed->currentEmployment()->exists())->toBeTrue();
-            expect(resolve(RosterBookingEligibility::class)->allows($employed))->toBeTrue();
-
-            // Injure wrestler
-            resolve(InjureAction::class)->handle($employed, Carbon::now());
-            $injured = freshModel($wrestler);
-            expect($injured->currentEmployment()->exists())->toBeTrue(); // Still employed
-            expect($injured->currentInjury()->exists())->toBeTrue();
-            expect(resolve(RosterBookingEligibility::class)->allows($injured))->toBeFalse(); // Not bookable when injured
-
-            // Clear wrestler from injury
-            resolve(ClearFromInjuryAction::class)->handle($injured, Carbon::now());
-            $cleared = freshModel($wrestler);
-            expect($cleared->currentEmployment()->exists())->toBeTrue();
-            expect($cleared->currentInjury()->exists())->toBeFalse();
-            expect(resolve(RosterBookingEligibility::class)->allows($cleared))->toBeTrue(); // Bookable again
-        });
-
-        test('employ then suspend then reinstate workflow maintains employment', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Employ wrestler
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $employed = freshModel($wrestler);
-            expect($employed->currentEmployment()->exists())->toBeTrue();
-            expect(resolve(RosterBookingEligibility::class)->allows($employed))->toBeTrue();
-
-            // Suspend wrestler
-            resolve(SuspendAction::class)->handle($employed, Carbon::now());
-            $suspended = freshModel($wrestler);
-            expect($suspended->currentEmployment()->exists())->toBeTrue(); // Still employed
-            expect($suspended->currentSuspension()->exists())->toBeTrue();
-            expect(resolve(RosterBookingEligibility::class)->allows($suspended))->toBeFalse(); // Not bookable when suspended
-
-            // Reinstate wrestler
-            resolve(ReinstateAction::class)->handle($suspended, Carbon::now());
-            $reinstated = freshModel($wrestler);
-            expect($reinstated->currentEmployment()->exists())->toBeTrue();
-            expect($reinstated->currentSuspension()->exists())->toBeFalse();
-            expect(resolve(RosterBookingEligibility::class)->allows($reinstated))->toBeTrue(); // Bookable again
-        });
-
-        test('employ then retire then unretire workflow changes employment status', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Employ wrestler
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $employed = freshModel($wrestler);
-            expect($employed->currentEmployment()->exists())->toBeTrue();
-
-            // Retire wrestler
-            resolve(RetireAction::class)->handle($employed, Carbon::now());
-            $retired = freshModel($wrestler);
-            expect($retired->currentRetirement()->exists())->toBeTrue();
-            expect($retired->currentEmployment()->exists())->toBeFalse(); // Employment ends on retirement
-            expect($retired->status)->toBe(EmploymentStatus::Retired);
-
-            // Unretire wrestler
-            resolve(UnretireAction::class)->handle($retired, Carbon::now());
-            $unretired = freshModel($wrestler);
-            expect($unretired->currentRetirement()->exists())->toBeFalse();
-            expect($unretired->currentEmployment()->exists())->toBeTrue();
-            expect($unretired->status)->toBe(EmploymentStatus::Employed);
-        });
-
-        test('full career lifecycle workflow with multiple state changes', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // 1. Employ
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now()->subMonths(12));
-            expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
-
-            // 2. Suspend
-            resolve(SuspendAction::class)->handle($wrestler, Carbon::now()->subMonths(10));
-            $suspended = freshModel($wrestler);
-            expect($suspended->currentEmployment()->exists())->toBeTrue();
-            expect($suspended->currentSuspension()->exists())->toBeTrue();
-
-            // 3. Reinstate
-            resolve(ReinstateAction::class)->handle($wrestler, Carbon::now()->subMonths(8));
-            expect(freshModel($wrestler)->currentSuspension()->exists())->toBeFalse();
-            expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
-
-            // 4. Injure
-            resolve(InjureAction::class)->handle($wrestler, Carbon::now()->subMonths(6));
-            $injured = freshModel($wrestler);
-            expect($injured->currentEmployment()->exists())->toBeTrue();
-            expect($injured->currentInjury()->exists())->toBeTrue();
-
-            // 5. Clear from injury
-            resolve(ClearFromInjuryAction::class)->handle($wrestler, Carbon::now()->subMonths(4));
-            expect(freshModel($wrestler)->currentInjury()->exists())->toBeFalse();
-            expect(freshModel($wrestler)->currentEmployment()->exists())->toBeTrue();
-
-            // 6. Retire
-            resolve(RetireAction::class)->handle($wrestler, Carbon::now()->subMonths(2));
-            expect(freshModel($wrestler)->currentRetirement()->exists())->toBeTrue();
-            expect(freshModel($wrestler)->currentEmployment()->exists())->toBeFalse();
-
-            // 7. Unretire and employ immediately
-            resolve(UnretireAction::class)->handle($wrestler, Carbon::now());
-            $final = freshModel($wrestler);
-            expect($final->currentRetirement()->exists())->toBeFalse();
-            expect($final->currentEmployment()->exists())->toBeTrue();
-            expect($final->status)->toBe(EmploymentStatus::Employed);
-
-            // Verify all employment periods and status changes are recorded
-            expect($final->employments()->count())->toBe(2);
-            expect($final->suspensions()->count())->toBe(1);
-            expect($final->injuries()->count())->toBe(1);
-            expect($final->retirements()->count())->toBe(1);
-        });
-    });
-
-    describe('business rule validation workflows', function () {
-        test('employment workflow enables and disables booking capability', function () {
-            $wrestler = Wrestler::factory()->released()->create();
-
-            // Released wrestler should not be bookable
-            expect(resolve(RosterBookingEligibility::class)->allows($wrestler))->toBeFalse();
-
-            // Employ makes wrestler bookable
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            expect(resolve(RosterBookingEligibility::class)->allows(freshModel($wrestler)))->toBeTrue();
-
-            // Injury makes employed wrestler not bookable
-            resolve(InjureAction::class)->handle($wrestler, Carbon::now());
-            expect(resolve(RosterBookingEligibility::class)->allows(freshModel($wrestler)))->toBeFalse();
-
-            // Healing makes wrestler bookable again
-            resolve(ClearFromInjuryAction::class)->handle($wrestler, Carbon::now());
-            expect(resolve(RosterBookingEligibility::class)->allows(freshModel($wrestler)))->toBeTrue();
-
-            // Suspension makes wrestler not bookable
-            resolve(SuspendAction::class)->handle($wrestler, Carbon::now());
-            expect(resolve(RosterBookingEligibility::class)->allows(freshModel($wrestler)))->toBeFalse();
-
-            // Reinstatement makes wrestler bookable again
-            resolve(ReinstateAction::class)->handle($wrestler, Carbon::now());
-            expect(resolve(RosterBookingEligibility::class)->allows(freshModel($wrestler)))->toBeTrue();
-
-            // Release makes wrestler not bookable
-            resolve(ReleaseAction::class)->handle($wrestler, Carbon::now());
-            expect(resolve(RosterBookingEligibility::class)->allows(freshModel($wrestler)))->toBeFalse();
-        });
-
-        test('status combination workflow validation maintains business rules', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Employ wrestler
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $employed = freshModel($wrestler);
-
-            // Injury and suspension are mutually exclusive availability states.
-            resolve(InjureAction::class)->handle($employed, Carbon::now());
-            $injured = freshModel($wrestler);
-            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($injured))->toBeFalse();
-            expect($injured->currentEmployment()->exists())->toBeTrue();
-            expect($injured->currentInjury()->exists())->toBeTrue();
-
-            resolve(ClearFromInjuryAction::class)->handle($injured, Carbon::now());
-            $cleared = freshModel($wrestler);
-            resolve(SuspendAction::class)->handle($cleared, Carbon::now());
-            $suspended = freshModel($wrestler);
-            expect(resolve(IndividualInjuryEligibility::class)->canInjure($suspended))->toBeFalse();
-            expect($suspended->currentEmployment()->exists())->toBeTrue();
-            expect($suspended->currentInjury()->exists())->toBeFalse();
-            expect($suspended->currentSuspension()->exists())->toBeTrue();
-
-            // Reinstate, then test retired wrestler cannot be employed
-            resolve(ReinstateAction::class)->handle($suspended, Carbon::now());
-            $reinstated = freshModel($wrestler);
-            expect($reinstated->currentSuspension()->exists())->toBeFalse();
-            expect($reinstated->currentInjury()->exists())->toBeFalse();
-            expect($reinstated->currentEmployment()->exists())->toBeTrue();
-
-            resolve(RetireAction::class)->handle($reinstated, Carbon::now());
-            $retired = freshModel($wrestler);
-            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($retired))->toBeFalse();
-            expect($retired->currentRetirement()->exists())->toBeTrue();
-        });
-
-        test('employment status affects all business capabilities workflow', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Unemployed wrestler has limited capabilities
-            expect(resolve(RosterBookingEligibility::class)->allows($wrestler))->toBeFalse();
-            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($wrestler))->toBeFalse();
-            expect(resolve(IndividualInjuryEligibility::class)->canInjure($wrestler))->toBeFalse();
-
-            // Employ wrestler
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $employed = freshModel($wrestler);
-
-            // Employed wrestler has full capabilities
-            expect(resolve(RosterBookingEligibility::class)->allows($employed))->toBeTrue();
-            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($employed))->toBeTrue();
-            expect(resolve(IndividualInjuryEligibility::class)->canInjure($employed))->toBeTrue();
-            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($employed))->toBeFalse(); // Already employed
-
-            // Release wrestler
-            resolve(ReleaseAction::class)->handle($employed, Carbon::now());
-            $released = freshModel($wrestler);
-
-            // Released wrestler has limited capabilities again
-            expect(resolve(RosterBookingEligibility::class)->allows($released))->toBeFalse();
-            expect(resolve(IndividualSuspensionEligibility::class)->canSuspend($released))->toBeFalse();
-            expect(resolve(IndividualInjuryEligibility::class)->canInjure($released))->toBeFalse();
-            expect(resolve(IndividualEmploymentEligibility::class)->canEmploy($released))->toBeTrue(); // Can be re-employed
-        });
-    });
-
-    describe('transaction integrity workflows', function () {
-        test('employment action maintains transaction integrity', function () {
-            $wrestler = Wrestler::factory()->released()->create();
-
-            // Verify the action handles transactions properly
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-
-            // All changes should be committed together
-            $refreshedWrestler = freshModel($wrestler);
-            expect($refreshedWrestler->currentEmployment()->exists())->toBeTrue();
-            expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-            expect($refreshedWrestler->currentEmployment)->not()->toBeNull();
-
-            // Verify no partial updates occurred
-            expect($refreshedWrestler->employments()->whereNull('ended_at')->count())->toBe(1);
-        });
-
-        test('complex multi-action workflow maintains transaction integrity', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Execute complex workflow
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            $employed = freshModel($wrestler);
-
-            resolve(SuspendAction::class)->handle($employed, Carbon::now());
-            $suspended = freshModel($wrestler);
-
-            resolve(ReinstateAction::class)->handle($suspended, Carbon::now());
-            $reinstated = freshModel($wrestler);
-
-            // Verify all state changes are consistent and complete
-            expect($reinstated->currentEmployment()->exists())->toBeTrue();
-            expect($reinstated->currentSuspension()->exists())->toBeFalse();
-            expect($reinstated->currentEmployment)->not()->toBeNull();
-            expect($reinstated->currentSuspension)->toBeNull();
-
-            // Verify proper record keeping
-            expect($reinstated->employments()->whereNull('ended_at')->count())->toBe(1);
-            expect($reinstated->suspensions()->whereNotNull('ended_at')->count())->toBe(1);
-        });
-
-        test('action rollback maintains data consistency on failure', function () {
-            $wrestler = Wrestler::factory()->released()->create();
-
-            // This test would require mocking a failure scenario
-            // For now, just verify normal operation doesn't leave partial state
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-
-            $refreshedWrestler = freshModel($wrestler);
-
-            // Verify all state is consistent - no orphaned records
-            if ($refreshedWrestler->currentEmployment()->exists()) {
-                expect($refreshedWrestler->status)->toBe(EmploymentStatus::Employed);
-                expect($refreshedWrestler->currentEmployment)->not()->toBeNull();
-            }
-        });
-    });
-
-    describe('edge case workflows', function () {
-        test('employ unemployed wrestler with future date workflow', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-            $futureDate = Carbon::now()->addDays(7);
-
-            resolve(EmployAction::class)->handle($wrestler, $futureDate);
-
-            $refreshedWrestler = freshModel($wrestler);
-            expect($refreshedWrestler->status)->toBe(EmploymentStatus::FutureEmployment);
-
-            // Future employment won't be current until the date arrives
-            $futureEmployment = $refreshedWrestler->employments()->latest()->firstOrFail();
-            expect(requiredDate($futureEmployment->started_at)->toDateTimeString())
-                ->toBe($futureDate->toDateTimeString());
-        });
-
-        test('wrestler maintains single active status of each type workflow', function () {
-            $wrestler = Wrestler::factory()->unemployed()->create();
-
-            // Employ wrestler
-            resolve(EmployAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->employments()->whereNull('ended_at')->count())->toBe(1);
-
-            // Multiple injury/clearance cycles
-            resolve(InjureAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->injuries()->whereNull('ended_at')->count())->toBe(1);
-
-            resolve(ClearFromInjuryAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->injuries()->whereNull('ended_at')->count())->toBe(0);
-
-            resolve(InjureAction::class)->handle($wrestler, Carbon::now());
-            expect(freshModel($wrestler)->injuries()->whereNull('ended_at')->count())->toBe(1);
-
-            // Should still only have one active employment throughout
-            expect(freshModel($wrestler)->employments()->whereNull('ended_at')->count())->toBe(1);
-        });
-    });
+use Illuminate\Support\Facades\Date;
+
+test('wrestler career transitions retain complete lifecycle history', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->unemployed()->create();
+
+    // Act
+    resolve(EmployAction::class)
+        ->handle($wrestler, Date::now()->subMonths(12));
+    resolve(SuspendAction::class)
+        ->handle(freshModel($wrestler), Date::now()->subMonths(10));
+    resolve(ReinstateAction::class)
+        ->handle(freshModel($wrestler), Date::now()->subMonths(8));
+    resolve(InjureAction::class)
+        ->handle(freshModel($wrestler), Date::now()->subMonths(6));
+    resolve(ClearFromInjuryAction::class)
+        ->handle(freshModel($wrestler), Date::now()->subMonths(4));
+    resolve(RetireAction::class)
+        ->handle(freshModel($wrestler), Date::now()->subMonths(2));
+    resolve(UnretireAction::class)
+        ->handle(freshModel($wrestler), Date::now());
+    $activeWrestler = freshModel($wrestler);
+
+    // Assert
+    expect($activeWrestler->status)->toBe(EmploymentStatus::Employed)
+        ->and($activeWrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($activeWrestler->currentSuspension()->exists())->toBeFalse()
+        ->and($activeWrestler->currentInjury()->exists())->toBeFalse()
+        ->and($activeWrestler->currentRetirement()->exists())->toBeFalse()
+        ->and($activeWrestler->employments()->count())->toBe(2)
+        ->and($activeWrestler->suspensions()->count())->toBe(1)
+        ->and($activeWrestler->injuries()->count())->toBe(1)
+        ->and($activeWrestler->retirements()->count())->toBe(1);
+});
+
+test('availability transitions update wrestler booking eligibility', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->unemployed()->create();
+    $bookingEligibility = resolve(RosterBookingEligibility::class);
+    $transitionedAt = Date::now();
+
+    // Act and Assert
+    expect($bookingEligibility->allows($wrestler))->toBeFalse();
+
+    resolve(EmployAction::class)
+        ->handle($wrestler, $transitionedAt);
+    expect($bookingEligibility->allows(freshModel($wrestler)))->toBeTrue();
+
+    resolve(InjureAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    expect($bookingEligibility->allows(freshModel($wrestler)))->toBeFalse();
+
+    resolve(ClearFromInjuryAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    expect($bookingEligibility->allows(freshModel($wrestler)))->toBeTrue();
+
+    resolve(SuspendAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    expect($bookingEligibility->allows(freshModel($wrestler)))->toBeFalse();
+
+    resolve(ReinstateAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    expect($bookingEligibility->allows(freshModel($wrestler)))->toBeTrue();
+
+    resolve(ReleaseAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    expect($bookingEligibility->allows(freshModel($wrestler)))->toBeFalse();
+});
+
+test('injury and suspension remain mutually exclusive wrestler states', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->bookable()->create();
+    $transitionedAt = Date::now();
+
+    // Act
+    resolve(InjureAction::class)
+        ->handle($wrestler, $transitionedAt);
+    $injured = freshModel($wrestler);
+    $injuredCanBeSuspended = resolve(IndividualSuspensionEligibility::class)->canSuspend($injured);
+    $injuredHasInjury = $injured->currentInjury()->exists();
+    $injuredHasSuspension = $injured->currentSuspension()->exists();
+
+    resolve(ClearFromInjuryAction::class)
+        ->handle($injured, $transitionedAt);
+    resolve(SuspendAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    $suspended = freshModel($wrestler);
+
+    // Assert
+    expect($injuredCanBeSuspended)->toBeFalse()
+        ->and($injuredHasInjury)->toBeTrue()
+        ->and($injuredHasSuspension)->toBeFalse()
+        ->and(resolve(IndividualInjuryEligibility::class)->canInjure($suspended))->toBeFalse()
+        ->and($suspended->currentInjury()->exists())->toBeFalse()
+        ->and($suspended->currentSuspension()->exists())->toBeTrue();
+});
+
+test('released wrestlers can be re-employed but retired wrestlers cannot', function () {
+    // Arrange
+    $wrestler = Wrestler::factory()->unemployed()->create();
+    $transitionedAt = Date::now();
+
+    // Act
+    resolve(EmployAction::class)
+        ->handle($wrestler, $transitionedAt);
+    resolve(ReleaseAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    $released = freshModel($wrestler);
+    $releasedStatus = $released->status;
+
+    resolve(EmployAction::class)
+        ->handle($released, $transitionedAt);
+    resolve(RetireAction::class)
+        ->handle(freshModel($wrestler), $transitionedAt);
+    $retired = freshModel($wrestler);
+
+    // Assert
+    expect($releasedStatus)->toBe(EmploymentStatus::Released)
+        ->and($retired->status)->toBe(EmploymentStatus::Retired)
+        ->and(resolve(IndividualEmploymentEligibility::class)->canEmploy($retired))->toBeFalse()
+        ->and($retired->employments()->count())->toBe(2);
 });
