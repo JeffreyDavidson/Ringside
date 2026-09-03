@@ -6,13 +6,12 @@ use App\Livewire\Managers\Tables\PreviousWrestlers;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
-use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
-    actingAs(User::factory()->administrator()->create());
+    actingAs(administrator());
 });
 
 it('renders previous wrestlers without lazy loading each relationship', function () {

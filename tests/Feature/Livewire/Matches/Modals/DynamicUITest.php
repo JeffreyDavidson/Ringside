@@ -5,14 +5,13 @@ declare(strict_types=1);
 use App\Enums\MatchType;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
-use App\Models\Users\User;
 use Livewire\Attributes\Locked;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
     $this->event = Event::factory()->create();
 });

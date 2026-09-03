@@ -6,13 +6,12 @@ use App\Livewire\Managers\Tables\PreviousTagTeams;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
-use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
-    actingAs(User::factory()->administrator()->create());
+    actingAs(administrator());
 });
 
 it('renders previous tag teams without lazy loading each relationship', function () {

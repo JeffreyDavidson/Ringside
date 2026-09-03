@@ -5,14 +5,13 @@ declare(strict_types=1);
 use App\Actions\Wrestlers\EmployAction;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     $this->wrestler = Wrestler::factory()->create();
     actingAs($this->admin);
 });

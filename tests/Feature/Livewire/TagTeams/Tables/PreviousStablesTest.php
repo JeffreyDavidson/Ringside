@@ -5,13 +5,12 @@ declare(strict_types=1);
 use App\Livewire\TagTeams\Tables\PreviousStables;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    actingAs(User::factory()->administrator()->create());
+    actingAs(administrator());
 });
 
 it('requires a tag team', function () {
