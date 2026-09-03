@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Referees\Tables\Main;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Users\User;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -33,8 +32,11 @@ describe('Referee Authorization', function () {
 
     describe('HTTP endpoint authorization', function () {
         test('admin can access referees index', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            $response = $this->actingAs($admin)
                 ->get(route('referees.index'));
 
             // Assert
@@ -44,8 +46,11 @@ describe('Referee Authorization', function () {
         });
 
         test('basic user cannot access referees index', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->basicUser)
+            // Arrange
+            $basicUser = $this->basicUser;
+
+            // Act
+            $response = $this->actingAs($basicUser)
                 ->get(route('referees.index'));
 
             // Assert
@@ -61,20 +66,28 @@ describe('Referee Authorization', function () {
         });
 
         test('admin can view referee details', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
-                ->get(route('referees.show', $this->referee));
+            // Arrange
+            $admin = $this->admin;
+            $referee = $this->referee;
+
+            // Act
+            $response = $this->actingAs($admin)
+                ->get(route('referees.show', $referee));
 
             // Assert
             $response->assertOk()
                 ->assertViewIs('referees.show')
-                ->assertSee($this->referee->full_name);
+                ->assertSee($referee->full_name);
         });
 
         test('basic user cannot view referee details', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->basicUser)
-                ->get(route('referees.show', $this->referee));
+            // Arrange
+            $basicUser = $this->basicUser;
+            $referee = $this->referee;
+
+            // Act
+            $response = $this->actingAs($basicUser)
+                ->get(route('referees.show', $referee));
 
             // Assert
             $response->assertForbidden();
@@ -89,8 +102,11 @@ describe('Referee Authorization', function () {
         });
 
         test('returns 404 when referee does not exist', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            $response = $this->actingAs($admin)
                 ->get(route('referees.show', 999999));
 
             // Assert
@@ -100,8 +116,11 @@ describe('Referee Authorization', function () {
 
     describe('Livewire component authorization', function () {
         test('admin can access referees table component', function () {
-            // Arrange & Act
-            actingAs($this->admin);
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            actingAs($admin);
 
             $component = livewire(Main::class);
 
@@ -111,8 +130,11 @@ describe('Referee Authorization', function () {
         });
 
         test('basic user cannot access referees table component', function () {
-            // Arrange & Act
-            actingAs($this->basicUser);
+            // Arrange
+            $basicUser = $this->basicUser;
+
+            // Act
+            actingAs($basicUser);
 
             $component = livewire(Main::class);
 

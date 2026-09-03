@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Venues\Tables\Main;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -32,8 +31,11 @@ describe('Venue Authorization', function () {
 
     describe('HTTP endpoint authorization', function () {
         test('admin can access venues index', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            $response = $this->actingAs($admin)
                 ->get(route('venues.index'));
 
             // Assert
@@ -43,8 +45,11 @@ describe('Venue Authorization', function () {
         });
 
         test('basic user cannot access venues index', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->basicUser)
+            // Arrange
+            $basicUser = $this->basicUser;
+
+            // Act
+            $response = $this->actingAs($basicUser)
                 ->get(route('venues.index'));
 
             // Assert
@@ -60,9 +65,13 @@ describe('Venue Authorization', function () {
         });
 
         test('admin can view venue details', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
-                ->get(route('venues.show', $this->venue));
+            // Arrange
+            $admin = $this->admin;
+            $venue = $this->venue;
+
+            // Act
+            $response = $this->actingAs($admin)
+                ->get(route('venues.show', $venue));
 
             // Assert
             $response->assertOk()
@@ -70,9 +79,13 @@ describe('Venue Authorization', function () {
         });
 
         test('basic user cannot view venue details', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->basicUser)
-                ->get(route('venues.show', $this->venue));
+            // Arrange
+            $basicUser = $this->basicUser;
+            $venue = $this->venue;
+
+            // Act
+            $response = $this->actingAs($basicUser)
+                ->get(route('venues.show', $venue));
 
             // Assert
             $response->assertForbidden();
@@ -87,8 +100,11 @@ describe('Venue Authorization', function () {
         });
 
         test('returns 404 when venue does not exist', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            $response = $this->actingAs($admin)
                 ->get(route('venues.show', 999999));
 
             // Assert
@@ -98,8 +114,11 @@ describe('Venue Authorization', function () {
 
     describe('Livewire component authorization', function () {
         test('admin can access venues table component', function () {
-            // Arrange & Act
-            actingAs($this->admin);
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            actingAs($admin);
 
             $component = livewire(Main::class);
 
@@ -108,8 +127,11 @@ describe('Venue Authorization', function () {
         });
 
         test('basic user cannot access venues table component', function () {
-            // Arrange & Act
-            actingAs($this->basicUser);
+            // Arrange
+            $basicUser = $this->basicUser;
+
+            // Act
+            actingAs($basicUser);
 
             $component = livewire(Main::class);
 

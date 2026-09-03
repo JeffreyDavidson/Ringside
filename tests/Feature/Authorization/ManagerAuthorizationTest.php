@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Managers\Tables\Main;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Users\User;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -33,8 +32,11 @@ describe('Manager Authorization', function () {
 
     describe('HTTP endpoint authorization', function () {
         test('admin can access managers index', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            $response = $this->actingAs($admin)
                 ->get(route('managers.index'));
 
             // Assert
@@ -44,8 +46,11 @@ describe('Manager Authorization', function () {
         });
 
         test('basic user cannot access managers index', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->basicUser)
+            // Arrange
+            $basicUser = $this->basicUser;
+
+            // Act
+            $response = $this->actingAs($basicUser)
                 ->get(route('managers.index'));
 
             // Assert
@@ -61,20 +66,28 @@ describe('Manager Authorization', function () {
         });
 
         test('admin can view manager details', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
-                ->get(route('managers.show', $this->manager));
+            // Arrange
+            $admin = $this->admin;
+            $manager = $this->manager;
+
+            // Act
+            $response = $this->actingAs($admin)
+                ->get(route('managers.show', $manager));
 
             // Assert
             $response->assertOk()
                 ->assertViewIs('managers.show')
-                ->assertSee($this->manager->full_name);
+                ->assertSee($manager->full_name);
         });
 
         test('basic user cannot view manager details', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->basicUser)
-                ->get(route('managers.show', $this->manager));
+            // Arrange
+            $basicUser = $this->basicUser;
+            $manager = $this->manager;
+
+            // Act
+            $response = $this->actingAs($basicUser)
+                ->get(route('managers.show', $manager));
 
             // Assert
             $response->assertForbidden();
@@ -89,8 +102,11 @@ describe('Manager Authorization', function () {
         });
 
         test('returns 404 when manager does not exist', function () {
-            // Arrange & Act
-            $response = $this->actingAs($this->admin)
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            $response = $this->actingAs($admin)
                 ->get(route('managers.show', 999999));
 
             // Assert
@@ -100,8 +116,11 @@ describe('Manager Authorization', function () {
 
     describe('Livewire component authorization', function () {
         test('admin can access managers table component', function () {
-            // Arrange & Act
-            actingAs($this->admin);
+            // Arrange
+            $admin = $this->admin;
+
+            // Act
+            actingAs($admin);
 
             $component = livewire(Main::class);
 
@@ -111,8 +130,11 @@ describe('Manager Authorization', function () {
         });
 
         test('basic user cannot access managers table component', function () {
-            // Arrange & Act
-            actingAs($this->basicUser);
+            // Arrange
+            $basicUser = $this->basicUser;
+
+            // Act
+            actingAs($basicUser);
 
             $component = livewire(Main::class);
 
