@@ -12,6 +12,8 @@ use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
+
 /**
  * Integration tests for PreviousEventsTable component query building and functionality.
  *
@@ -70,7 +72,7 @@ describe('PreviousEventsTable Integration Tests', function () {
 
     describe('component initialization and venue filtering', function () {
         test('renders successfully with venue ID set', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
@@ -87,7 +89,7 @@ describe('PreviousEventsTable Integration Tests', function () {
         });
 
         test('filters events by specific venue only', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
@@ -140,7 +142,7 @@ describe('PreviousEventsTable Integration Tests', function () {
 
     describe('date-based ordering and chronological display', function () {
         test('displays events in descending chronological order', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
@@ -158,7 +160,7 @@ describe('PreviousEventsTable Integration Tests', function () {
         });
 
         test('includes both past and future events in chronological order', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
@@ -195,7 +197,7 @@ describe('PreviousEventsTable Integration Tests', function () {
         });
 
         test('date column uses consistent Y-m-d format', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
@@ -220,7 +222,7 @@ describe('PreviousEventsTable Integration Tests', function () {
         });
 
         test('displays clickable event names for navigation', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
@@ -253,7 +255,7 @@ describe('PreviousEventsTable Integration Tests', function () {
         test('handles venue with no events gracefully', function () {
             $emptyVenue = Venue::factory()->create(['name' => 'Empty Venue']);
 
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $emptyVenue->id]);
 
@@ -268,7 +270,7 @@ describe('PreviousEventsTable Integration Tests', function () {
         });
 
         test('handles invalid venue ID gracefully', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => 999999]);
 
@@ -290,7 +292,7 @@ describe('PreviousEventsTable Integration Tests', function () {
         });
 
         test('preserves event-venue relationships in display', function () {
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 
@@ -326,7 +328,7 @@ describe('PreviousEventsTable Integration Tests', function () {
                 'date' => now()->subDays(random_int(1, 365)),
             ]);
 
-            \Pest\Laravel\actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = \Pest\Livewire\livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
 

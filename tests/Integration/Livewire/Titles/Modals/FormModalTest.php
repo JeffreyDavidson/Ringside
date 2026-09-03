@@ -8,11 +8,12 @@ use App\Models\Titles\Title;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
+    actingAs($this->admin);
 });
 
 describe('FormModal Configuration', function () {
@@ -278,7 +279,7 @@ describe('FormModal Authorization', function () {
 
     it('requires administrator privileges', function () {
         $user = User::factory()->create();
-        $this->actingAs($user);
+        actingAs($user);
 
         $component = livewire(FormModal::class)
             ->call('openModal');

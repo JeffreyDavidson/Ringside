@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Managers\Modals\FormModal;
 use App\Models\Roster\Managers\Manager;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 /**
@@ -27,7 +28,7 @@ use function Pest\Livewire\livewire;
  * @see Form
  */
 beforeEach(function () {
-    $this->actingAs(administrator());
+    actingAs(administrator());
 });
 
 describe('Managers FormModal Tests', function () {
@@ -487,7 +488,7 @@ describe('Managers FormModal Tests', function () {
 
 describe('submission authorization', function () {
     test('rejects an unauthorized create submission', function () {
-        $this->actingAs(basicUser());
+        actingAs(basicUser());
 
         livewire(FormModal::class)
             ->set('form.first_name', 'Unauthorized')
@@ -511,7 +512,7 @@ describe('submission authorization', function () {
             ->call('openModal', $manager->id)
             ->set('form.first_name', 'Unauthorized');
 
-        $this->actingAs(basicUser());
+        actingAs(basicUser());
 
         $component
             ->call('submitForm')

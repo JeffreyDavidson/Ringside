@@ -12,10 +12,11 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->actingAs(User::factory()->administrator()->create());
+    actingAs(User::factory()->administrator()->create());
 });
 
 /**
@@ -161,7 +162,7 @@ it('reuses the computed match across result option consumers', function () {
 
 it('requires an administrator to record a result', function () {
     [$match] = matchWithResultCompetitors();
-    $this->actingAs(User::factory()->create());
+    actingAs(User::factory()->create());
 
     livewire(ResultModal::class, ['matchId' => $match->id])
         ->set('form.finish', MatchFinish::TimeLimitDraw->value)

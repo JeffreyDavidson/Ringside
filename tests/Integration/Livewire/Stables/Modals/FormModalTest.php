@@ -12,11 +12,12 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
+    actingAs($this->admin);
     $this->minimumWrestlers = Wrestler::factory()
         ->count(3)
         ->has(Employment::factory()->started(Carbon::parse('2020-01-01')), 'employments')
@@ -607,7 +608,7 @@ describe('FormModal State Management', function () {
 
 describe('FormModal Authorization', function () {
     it('forbids creating a stable without permission', function () {
-        $this->actingAs(User::factory()->create());
+        actingAs(User::factory()->create());
 
         livewire(FormModal::class)
             ->set('form.name', 'Unauthorized Stable')
@@ -619,7 +620,7 @@ describe('FormModal Authorization', function () {
 
     it('forbids updating a stable without permission', function () {
         $stable = Stable::factory()->create(['name' => 'Original Stable']);
-        $this->actingAs(User::factory()->create());
+        actingAs(User::factory()->create());
 
         livewire(FormModal::class, ['modelId' => $stable->id])
             ->set('form.name', 'Unauthorized Rename')

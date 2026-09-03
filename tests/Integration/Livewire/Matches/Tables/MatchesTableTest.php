@@ -14,6 +14,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Users\User;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 /**
@@ -24,7 +25,7 @@ use function Pest\Livewire\livewire;
  */
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
+    actingAs($this->admin);
 });
 
 function attachTableCompetitor(EventMatch $match, Wrestler|TagTeam $competitor, int $position): void
@@ -390,7 +391,7 @@ describe('MatchesTable Authorization', function () {
     it('requires administrator privileges', function () {
         $event = Event::factory()->create();
         $user = User::factory()->create();
-        $this->actingAs($user);
+        actingAs($user);
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertForbidden();

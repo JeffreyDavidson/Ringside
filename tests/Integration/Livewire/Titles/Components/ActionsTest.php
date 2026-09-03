@@ -27,7 +27,7 @@ use function Pest\Livewire\livewire;
  */
 beforeEach(function () {
     $this->admin = User::factory()->administrator()->create();
-    $this->actingAs($this->admin);
+    actingAs($this->admin);
 
     $this->title = Title::factory()->create([
         'name' => 'Test Championship Title',

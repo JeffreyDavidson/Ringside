@@ -35,7 +35,7 @@ describe('RefereesTable Component', function () {
 
     beforeEach(function () {
         $this->user = administrator();
-        $this->actingAs($this->user);
+        actingAs($this->user);
     });
 
     describe('component rendering integration', function () {
