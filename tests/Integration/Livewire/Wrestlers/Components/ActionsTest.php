@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Actions\Wrestlers\EmployAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Roster\Wrestlers\Wrestler;
+use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
 use function Spatie\PestPluginTestTime\testTime;
@@ -45,6 +47,21 @@ describe('WrestlersActions Integration Tests', function () {
             \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler])
                 ->assertOk();
             expect(true)->toBeTrue();
+        });
+
+        test('unexpected action failures propagate', function () {
+            $unemployedWrestler = Wrestler::factory()->unemployed()->create();
+            $employAction = Double::for(EmployAction::class);
+            $employAction->expects('handle')
+                ->throws(new LogicException('Unexpected employment failure.'));
+            app()->instance(EmployAction::class, $employAction);
+            actingAs($this->admin);
+            $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $unemployedWrestler]);
+
+            expect(fn () => $component->call('employ'))
+                ->toThrow(LogicException::class, 'Unexpected employment failure.');
+
+            $employAction->verify();
         });
     });
 

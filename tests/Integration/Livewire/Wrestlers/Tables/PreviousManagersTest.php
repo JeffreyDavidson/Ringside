@@ -153,6 +153,18 @@ describe('Previous Managers Table Configuration', function () {
         $table->assertSet('databaseTableName', 'wrestlers_managers');
         expect(true)->toBeTrue();
     })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
+
+    it('defines the manager history columns', function () {
+        $fields = collect(app(PreviousManagers::class)->columns())
+            ->map->getField()
+            ->all();
+
+        expect($fields)->toBe([
+            'manager.full_name',
+            'hired_at',
+            'fired_at',
+        ]);
+    })->group('wrestlers', 'integration', 'livewire', 'tables', 'configuration');
 });
 
 describe('Previous Managers Table Filtering', function () {
