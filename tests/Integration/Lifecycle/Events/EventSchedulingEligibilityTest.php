@@ -24,14 +24,10 @@ test('it permits retaining the date of a past event', function () {
     $event = Event::factory()->make(['date' => $date]);
 
     EventSchedulingEligibility::ensureDateCanChange($event, $date->clone());
-
-    expect(true)->toBeTrue();
-});
+})->throwsNoExceptions();
 
 test('it permits changing the date of a future event', function () {
     $event = Event::factory()->make(['date' => now()->addWeek()]);
 
     EventSchedulingEligibility::ensureDateCanChange($event, now()->addWeeks(2));
-
-    expect(true)->toBeTrue();
-});
+})->throwsNoExceptions();
