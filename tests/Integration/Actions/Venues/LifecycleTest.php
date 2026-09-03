@@ -10,7 +10,8 @@ use App\Data\Events\VenueData;
 use App\Exceptions\Events\CannotBeRestoredException;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use App\Models\Users\User;
+
+use function Pest\Laravel\actingAs;
 
 /**
  * Integration tests for Venue CRUD actions with database operations.
@@ -28,8 +29,8 @@ use App\Models\Users\User;
  */
 describe('Venue Action Integration Tests', function () {
     beforeEach(function () {
-        $this->admin = User::factory()->administrator()->create();
-        $this->actingAs($this->admin);
+        $this->admin = administrator();
+        actingAs($this->admin);
     });
 
     describe('venue creation integration', function () {

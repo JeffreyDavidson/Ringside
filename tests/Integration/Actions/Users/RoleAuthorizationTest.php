@@ -25,7 +25,7 @@ use function Pest\Laravel\actingAs;
 describe('User Role Integration Tests', function () {
 
     beforeEach(function () {
-        $this->administrator = User::factory()->administrator()->create();
+        $this->administrator = administrator();
         $this->basicUser = User::factory()->create(['role' => Role::Basic]);
         $this->unverifiedUser = User::factory()->unverified()->create();
     });
@@ -64,8 +64,8 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system works consistently across user instances', function () {
-            $user1 = User::factory()->administrator()->create();
-            $user2 = User::factory()->administrator()->create();
+            $user1 = administrator();
+            $user2 = administrator();
             $user3 = User::factory()->create(['role' => Role::Basic]);
             $user4 = User::factory()->create(['role' => Role::Basic]);
 
@@ -190,7 +190,7 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role demotion workflow maintains consistency', function () {
-            $user = User::factory()->administrator()->create();
+            $user = administrator();
 
             // Verify initial administrator state
             expect($user->role)->toBe(Role::Administrator);
@@ -266,8 +266,8 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system handles concurrent access correctly', function () {
-            $admin1 = User::factory()->administrator()->create();
-            $admin2 = User::factory()->administrator()->create();
+            $admin1 = administrator();
+            $admin2 = administrator();
 
             // Multiple administrators should be able to operate simultaneously
             expect(Gate::forUser($admin1)->allows('create', User::class))->toBeTrue();
@@ -282,7 +282,7 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system maintains consistency after user deletion and restoration', function () {
-            $admin = User::factory()->administrator()->create();
+            $admin = administrator();
 
             // Verify initial state
             expect($admin->role->isAdministrator())->toBeTrue();

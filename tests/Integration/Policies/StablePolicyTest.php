@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Gate;
 describe('StablePolicy Integration Tests', function () {
     beforeEach(function () {
         $this->policy = new StablePolicy();
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
         $this->basicUser = User::factory()->create();
         $this->stable = Stable::factory()->active()->create();
     });

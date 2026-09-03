@@ -215,7 +215,7 @@ describe('UserPolicy business context', function () {
     });
 
     test('policy works with different user roles', function () {
-        $adminUser = User::factory()->administrator()->create();
+        $adminUser = administrator();
         $basicUser = User::factory()->create();
 
         // Both user types should follow same authorization rules
