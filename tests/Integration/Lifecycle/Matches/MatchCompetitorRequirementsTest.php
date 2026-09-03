@@ -44,11 +44,11 @@ it('accepts mixed competitors that satisfy a multi-person tag composition', func
     $firstWrestler = Wrestler::factory()->bookable()->create();
     $secondWrestler = Wrestler::factory()->bookable()->create();
 
-    resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
         ['tag_teams' => [$firstTagTeam], 'wrestlers' => [$firstWrestler]],
         ['tag_teams' => [$secondTagTeam], 'wrestlers' => [$secondWrestler]],
-    ]));
-})->throwsNoExceptions();
+    ])))->not->toThrow(InvalidMatchConfigurationException::class);
+});
 
 it('rejects an incorrect multi-person tag composition', function () {
     $match = EventMatch::factory()->withMatchType(MatchType::SixManTagTeam)->create();
@@ -69,11 +69,11 @@ it('accepts a handicap composition in either side order', function () {
     $tagTeam = TagTeam::factory()->bookable()->create();
     $wrestler = Wrestler::factory()->bookable()->create();
 
-    resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
+    expect(fn () => resolve(MatchCompetitorRequirements::class)->ensureSatisfied($match, collect([
         ['tag_teams' => [$tagTeam]],
         ['wrestlers' => [$wrestler]],
-    ]));
-})->throwsNoExceptions();
+    ])))->not->toThrow(InvalidMatchConfigurationException::class);
+});
 
 it('rejects multiple competitor entries on an independently competing side', function () {
     $match = EventMatch::factory()->withMatchType(MatchType::TripleThreat)->create();
