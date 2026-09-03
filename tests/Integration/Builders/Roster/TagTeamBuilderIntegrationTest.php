@@ -6,9 +6,9 @@ use App\Builders\Roster\TagTeamBuilder;
 use App\Models\Roster\TagTeams\TagTeam;
 
 /**
- * Unit tests for TagTeamQueryBuilder query scopes and methods.
+ * Integration tests for TagTeamQueryBuilder query scopes and methods.
  *
- * UNIT TEST SCOPE:
+ * INTEGRATION TEST SCOPE:
  * - Builder class structure and scope functionality
  * - Employment status filtering scopes (available, futureEmployed, unemployed, released)
  * - Status-based filtering scopes (suspended, retired)
@@ -21,7 +21,7 @@ use App\Models\Roster\TagTeams\TagTeam;
  *
  * @see TagTeamBuilder
  */
-describe('TagTeamQueryBuilder Unit Tests', function () {
+describe('TagTeamQueryBuilder Integration Tests', function () {
     beforeEach(function () {
         // Create tag teams in all possible states for comprehensive scope testing
         $this->futureEmployedTagTeam = TagTeam::factory()->withFutureEmployment()->create();

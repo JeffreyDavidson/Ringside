@@ -15,6 +15,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | tests/Browser/** | .ai/rules/browser.md |
 | app/Builders/** | .ai/rules/builders.md |
 | app/Models/{Concerns,Contracts}/** | .ai/rules/concerns-contracts.md |
+| config/mail.php | .ai/rules/config.md |
 | app/Http/Controllers/** | .ai/rules/controllers.md |
 | app/Data/** | .ai/rules/data.md |
 | app/Enums/** | .ai/rules/enums.md |

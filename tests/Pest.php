@@ -32,7 +32,7 @@ pest()->tia()->watch([
 
 pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Browser');
 
-pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Integration', 'Unit');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Integration');
 
 pest()
     ->beforeEach(function () {
@@ -41,7 +41,7 @@ pest()
     ->afterEach(function () {
         Relation::requireMorphMap();
     })
-    ->in('Unit/Models/Concerns');
+    ->in('Integration/Models/Concerns');
 
 pest()
     ->extend(TestCase::class)

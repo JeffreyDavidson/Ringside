@@ -16,6 +16,7 @@
         "livewire-development",
         "pest-testing",
         "tailwindcss-development",
-        "debug-using-debugbar"
+        "debug-using-debugbar",
+        "pest-plugin-agent"
     ]
 }
