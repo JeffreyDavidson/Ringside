@@ -6,9 +6,9 @@ use App\Builders\Events\EventBuilder;
 use App\Models\Events\Event;
 
 /**
- * Unit tests for EventQueryBuilder query scopes and methods.
+ * Integration tests for EventQueryBuilder query scopes and methods.
  *
- * UNIT TEST SCOPE:
+ * INTEGRATION TEST SCOPE:
  * - Builder class structure and scope functionality
  * - Event timing filtering scopes (scheduled, unscheduled, past)
  * - Query scope accuracy and entity isolation
@@ -18,7 +18,7 @@ use App\Models\Events\Event;
  *
  * @see EventBuilder
  */
-describe('EventQueryBuilder Unit Tests', function () {
+describe('EventQueryBuilder Integration Tests', function () {
     beforeEach(function () {
         // Create events in all possible states for comprehensive scope testing
         $this->scheduledEvent = Event::factory()->scheduled()->create();

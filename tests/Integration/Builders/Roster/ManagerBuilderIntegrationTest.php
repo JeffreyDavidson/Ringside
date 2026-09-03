@@ -6,9 +6,9 @@ use App\Builders\Roster\ManagerBuilder;
 use App\Models\Roster\Managers\Manager;
 
 /**
- * Unit tests for ManagerQueryBuilder query scopes and methods.
+ * Integration tests for ManagerQueryBuilder query scopes and methods.
  *
- * UNIT TEST SCOPE:
+ * INTEGRATION TEST SCOPE:
  * - Builder class structure and scope functionality
  * - Employment status filtering scopes (available, futureEmployed, unemployed, released)
  * - Individual roster member status scopes (suspended, retired, injured)
@@ -20,7 +20,7 @@ use App\Models\Roster\Managers\Manager;
  *
  * @see ManagerBuilder
  */
-describe('ManagerQueryBuilder Unit Tests', function () {
+describe('ManagerQueryBuilder Integration Tests', function () {
     beforeEach(function () {
         // Create managers in all possible states for comprehensive scope testing
         $this->futureEmployedManager = Manager::factory()->withFutureEmployment()->create();

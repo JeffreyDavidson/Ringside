@@ -43,7 +43,7 @@ Ringside has a large and valuable Pest test suite, but it is not yet aligned wit
 
 - `composer.json` declares Pest, Pest Browser, Larastan, Pint, Rector, type coverage, PHP 8.4.
 - `phpunit.xml` defines suites: `Feature`, `Unit`, `Browser`, `Integration`.
-- `phpunit.dusk.xml` exists for browser suite with `APP_URL=http://ringside.test`.
+- Browser tests use Pest Browser through the `Browser` PHPUnit suite; Laravel Dusk is not installed.
 - `.github/workflows/ci.yml` runs Feature, Integration, Unit, and PHPStan against Laravel 13 after INF-62 / PR #633.
 - `.github/workflows/run-tests-pcov-pull.yml` runs Feature/Integration/Unit with coverage against Laravel 13 after INF-62 / PR #633.
 - `composer test` runs type coverage, Rector dry-run, Pint test, PHPStan, and Pest with coverage.
@@ -180,13 +180,13 @@ Files:
 
 - `tests/Browser/DashboardTest.php`
 - `tests/Browser/LoginTest.php`
-- `tests/Browser/ExampleTest.php`
+- `tests/Browser/ExampleTest.php` (the login smoke test)
 
 Gaps:
 
 - `ExampleTest.php` asserts default Laravel content at `/` and should be removed or replaced.
 - No browser coverage for critical Livewire/JS workflows: creating/editing roster members, event/match booking modal behavior, dynamic match type UI, title management, table filtering/search/action dropdowns, or onboarding/login-to-dashboard journey beyond basics.
-- Browser suite is not included in the main GitHub CI workflows seen during audit.
+- Browser tests run in the main GitHub CI workflow through Pest Browser.
 
 ### 6. Architecture tests
 
@@ -287,7 +287,7 @@ High-value Ringside candidates:
 2. **Groups are documented as mandatory but rarely used.** Only 19 group calls across ~4,410 tests.
 3. **Some tests assert implementation structure more than behavior.** Trait/interface/fillable checks are useful as architecture/structural guards, but they should not crowd out behavior tests.
 4. **Generic exceptions appear in business-rule tests.** Many action tests assert `Exception::class` instead of domain-specific exceptions, reducing regression precision.
-5. **Default/scaffold tests remain.** `tests/Browser/ExampleTest.php` should be removed/replaced.
+5. **Browser tests must remain application-specific.** `tests/Browser/ExampleTest.php` is retained as a login smoke test rather than a framework scaffold.
 6. **Feature/Integration boundaries are fuzzy.** Livewire component interactions often live in Feature when they are closer to Integration.
 7. **Architecture tests are partially stale.** Some rules likely encode a previous architecture and may produce false confidence or false failures.
 8. **Naming drift hurts navigation.** Examples: `*UnitTest.php`, lowercase `tests/Unit/database`, lifecycle catch-all files, and tests that cover multiple production classes without clear per-class mirrors.

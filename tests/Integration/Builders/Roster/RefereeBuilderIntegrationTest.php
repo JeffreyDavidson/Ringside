@@ -6,9 +6,9 @@ use App\Builders\Roster\RefereeBuilder;
 use App\Models\Roster\Referees\Referee;
 
 /**
- * Unit tests for RefereeQueryBuilder query scopes and methods.
+ * Integration tests for RefereeQueryBuilder query scopes and methods.
  *
- * UNIT TEST SCOPE:
+ * INTEGRATION TEST SCOPE:
  * - Builder class structure and scope functionality
  * - Employment status filtering scopes (available, futureEmployed, unemployed, released)
  * - Individual roster member status scopes (suspended, retired, injured)
@@ -20,7 +20,7 @@ use App\Models\Roster\Referees\Referee;
  *
  * @see RefereeBuilder
  */
-describe('RefereeQueryBuilder Unit Tests', function () {
+describe('RefereeQueryBuilder Integration Tests', function () {
     beforeEach(function () {
         // Create referees in all possible states for comprehensive scope testing
         $this->futureEmployedReferee = Referee::factory()->withFutureEmployment()->create();

@@ -6,9 +6,9 @@ use App\Builders\Roster\StableBuilder;
 use App\Models\Roster\Stables\Stable;
 
 /**
- * Unit tests for StableQueryBuilder query scopes and methods.
+ * Integration tests for StableQueryBuilder query scopes and methods.
  *
- * UNIT TEST SCOPE:
+ * INTEGRATION TEST SCOPE:
  * - Builder class structure and scope functionality
  * - Activity period filtering scopes (active, inactive, unactivated, withFutureActivation)
  * - Status-based filtering scopes (retired)
@@ -20,7 +20,7 @@ use App\Models\Roster\Stables\Stable;
  *
  * @see StableBuilder
  */
-describe('StableQueryBuilder Unit Tests', function () {
+describe('StableQueryBuilder Integration Tests', function () {
     beforeEach(function () {
         // Create stables in all possible states for comprehensive scope testing
         $this->activeStable = Stable::factory()->active()->create();
