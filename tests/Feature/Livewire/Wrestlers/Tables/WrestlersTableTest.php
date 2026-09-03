@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Tables\Main;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -28,7 +27,7 @@ describe('Main Component Feature Workflows', function () {
 
     beforeEach(function () {
         $this->wrestler = Wrestler::factory()->create();
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
     });
 
     describe('wrestler management workflows', function () {

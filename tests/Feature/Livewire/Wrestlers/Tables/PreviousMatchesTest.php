@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousMatches;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 use Illuminate\Support\Collection;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     $this->wrestler = Wrestler::factory()->create();
-    $this->actingAs($this->admin);
+    actingAs($this->admin);
 });
 
 describe('PreviousMatchesTable Configuration', function () {

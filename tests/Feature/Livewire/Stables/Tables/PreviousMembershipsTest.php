@@ -9,13 +9,12 @@ use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    actingAs(User::factory()->administrator()->create());
+    actingAs(administrator());
 
     $this->stable = Stable::factory()->create();
 });
