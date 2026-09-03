@@ -49,14 +49,16 @@ it('accepts a decisive outcome with a populated winning side', function () {
     $match = EventMatch::factory()->create();
     [$winningSide] = createOutcomeCompetitor($match, 1);
 
-    ensureOutcomeRequirements($match, MatchFinish::Pinfall, $winningSide);
-})->throwsNoExceptions();
+    expect(fn () => ensureOutcomeRequirements($match, MatchFinish::Pinfall, $winningSide))
+        ->not->toThrow(InvalidMatchOutcomeException::class);
+});
 
 it('accepts a no-outcome finish without a winning side', function () {
     $match = EventMatch::factory()->create();
 
-    ensureOutcomeRequirements($match, MatchFinish::NoDecision, null);
-})->throwsNoExceptions();
+    expect(fn () => ensureOutcomeRequirements($match, MatchFinish::NoDecision, null))
+        ->not->toThrow(InvalidMatchOutcomeException::class);
+});
 
 it('requires a winning side for a decisive finish', function () {
     $match = EventMatch::factory()->create();
@@ -92,21 +94,21 @@ it('accepts complete elimination history', function () {
     [, $secondEliminated] = createOutcomeCompetitor($match, 2);
     [$winningSide, $winner] = createOutcomeCompetitor($match, 3);
 
-    ensureOutcomeRequirements($match, MatchFinish::Stipulation, $winningSide, [
+    expect(fn () => ensureOutcomeRequirements($match, MatchFinish::Stipulation, $winningSide, [
         new MatchEliminationData($firstEliminated, 1, $winner),
         new MatchEliminationData($secondEliminated, 2, $winner),
-    ]);
-})->throwsNoExceptions();
+    ]))->not->toThrow(InvalidMatchOutcomeException::class);
+});
 
 it('accepts partial elimination history for a no-outcome finish', function () {
     $match = EventMatch::factory()->create(['match_type' => MatchType::BattleRoyal]);
     [, $eliminated] = createOutcomeCompetitor($match, 1);
     [, $eliminator] = createOutcomeCompetitor($match, 2);
 
-    ensureOutcomeRequirements($match, MatchFinish::NoDecision, null, [
+    expect(fn () => ensureOutcomeRequirements($match, MatchFinish::NoDecision, null, [
         new MatchEliminationData($eliminated, 1, $eliminator),
-    ]);
-})->throwsNoExceptions();
+    ]))->not->toThrow(InvalidMatchOutcomeException::class);
+});
 
 it('rejects elimination metadata for a match type that does not record it', function () {
     $match = EventMatch::factory()->create();

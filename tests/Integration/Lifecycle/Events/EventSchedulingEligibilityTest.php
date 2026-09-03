@@ -23,11 +23,13 @@ test('it permits retaining the date of a past event', function () {
     $date = now()->subWeek();
     $event = Event::factory()->make(['date' => $date]);
 
-    EventSchedulingEligibility::ensureDateCanChange($event, $date->clone());
-})->throwsNoExceptions();
+    expect(fn () => EventSchedulingEligibility::ensureDateCanChange($event, $date->clone()))
+        ->not->toThrow(CannotBeRescheduledException::class);
+});
 
 test('it permits changing the date of a future event', function () {
     $event = Event::factory()->make(['date' => now()->addWeek()]);
 
-    EventSchedulingEligibility::ensureDateCanChange($event, now()->addWeeks(2));
-})->throwsNoExceptions();
+    expect(fn () => EventSchedulingEligibility::ensureDateCanChange($event, now()->addWeeks(2)))
+        ->not->toThrow(CannotBeRescheduledException::class);
+});
