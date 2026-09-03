@@ -7,7 +7,6 @@ use App\Livewire\Venues\Tables\VenuesTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Models\Users\User;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -81,7 +80,7 @@ describe('VenuesTable Integration Tests', function () {
 
     describe('component initialization and rendering', function () {
         test('renders successfully for administrators', function () {
-            Livewire::actingAs($this->admin);
+            actingAs($this->admin);
 
             $component = livewire(Main::class);
 
