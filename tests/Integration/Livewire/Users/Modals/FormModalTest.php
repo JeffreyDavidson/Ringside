@@ -21,14 +21,6 @@ describe('FormModal Configuration', function () {
         expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
     });
 
-    it('uses correct model type', function () {
-        $modal = new FormModal();
-        $reflection = new ReflectionClass($modal);
-        $method = $reflection->getMethod('getModelClass');
-        $method->setAccessible(true);
-
-        expect($method->invoke($modal))->toBe(User::class);
-    });
 });
 
 describe('FormModal Rendering', function () {

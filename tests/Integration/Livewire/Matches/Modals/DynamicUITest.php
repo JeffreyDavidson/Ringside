@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Enums\MatchType;
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Events\Event;
-use Livewire\Attributes\Locked;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -18,9 +18,11 @@ beforeEach(function () {
 
 describe('Dynamic Match Type UI', function () {
     it('locks the event context against client-side changes', function () {
-        $eventId = new ReflectionProperty(FormModal::class, 'eventId');
+        $otherEvent = Event::factory()->create();
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
-        expect($eventId->getAttributes(Locked::class))->toHaveCount(1);
+        expect(fn () => $component->set('eventId', $otherEvent->id))
+            ->toThrow(CannotUpdateLockedPropertyException::class);
     });
 
     it('shows helper text when no match type is selected', function () {

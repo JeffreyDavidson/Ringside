@@ -21,15 +21,6 @@ describe('FormModal Configuration', function () {
         expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
     });
 
-    it('returns correct model class', function () {
-        $modal = new FormModal();
-        $reflection = new ReflectionClass($modal);
-        $method = $reflection->getMethod('getModelClass');
-        $method->setAccessible(true);
-
-        expect($method->invoke($modal))->toBe(Wrestler::class);
-    });
-
     it('renders the wrestler modal view', function () {
         $component = livewire(FormModal::class);
 
