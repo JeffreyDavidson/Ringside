@@ -25,7 +25,7 @@ describe('Titles Controller', function () {
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([TitlesController::class, 'show'], $this->title))
+            ->get(route('titles.show', $this->title))
             ->assertOk()
             ->assertViewIs('titles.show')
             ->assertViewHas('title', $this->title)
@@ -43,7 +43,7 @@ describe('Titles Controller', function () {
             ->create();
 
         actingAs(administrator())
-            ->get(action([TitlesController::class, 'show'], $this->title))
+            ->get(route('titles.show', $this->title))
             ->assertOk()
             ->assertSee($startedAt->toDateString())
             ->assertViewHas('title', fn (Title $title): bool => count($title->getRelations()) === 1
@@ -55,7 +55,7 @@ describe('Titles Controller', function () {
      */
     test('a basic user cannot view a title', function () {
         actingAs(basicUser())
-            ->get(action([TitlesController::class, 'show'], $this->title))
+            ->get(route('titles.show', $this->title))
             ->assertForbidden();
     });
 
@@ -63,7 +63,7 @@ describe('Titles Controller', function () {
      * @see TitlesController::show()
      */
     test('a guest cannot view a title', function () {
-        get(action([TitlesController::class, 'show'], $this->title))
+        get(route('titles.show', $this->title))
             ->assertRedirect(route('login'));
     });
 
@@ -72,7 +72,7 @@ describe('Titles Controller', function () {
      */
     test('returns 404 when title does not exist', function () {
         actingAs(administrator())
-            ->get(action([TitlesController::class, 'show'], 999999))
+            ->get(route('titles.show', 999999))
             ->assertNotFound();
     });
 });

@@ -19,7 +19,7 @@ describe('Events Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([EventsController::class, 'index']))
+            ->get(route('events.index'))
             ->assertOk()
             ->assertViewIs('events.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('Events Controller', function () {
      */
     test('a basic user cannot view events index page', function () {
         actingAs(basicUser())
-            ->get(action([EventsController::class, 'index']))
+            ->get(route('events.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('Events Controller', function () {
      * @see EventsController::index()
      */
     test('a guest cannot view events index page', function () {
-        get(action([EventsController::class, 'index']))
+        get(route('events.index'))
             ->assertRedirect(route('login'));
     });
 });

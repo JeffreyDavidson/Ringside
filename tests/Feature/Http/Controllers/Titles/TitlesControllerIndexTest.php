@@ -19,7 +19,7 @@ describe('Titles Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([TitlesController::class, 'index']))
+            ->get(route('titles.index'))
             ->assertOk()
             ->assertViewIs('titles.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('Titles Controller', function () {
      */
     test('a basic user cannot view titles index page', function () {
         actingAs(basicUser())
-            ->get(action([TitlesController::class, 'index']))
+            ->get(route('titles.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('Titles Controller', function () {
      * @see TitlesController::index()
      */
     test('a guest cannot view titles index page', function () {
-        get(action([TitlesController::class, 'index']))
+        get(route('titles.index'))
             ->assertRedirect(route('login'));
     });
 });

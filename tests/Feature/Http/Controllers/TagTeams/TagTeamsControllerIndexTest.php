@@ -19,7 +19,7 @@ describe('TagTeams Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([TagTeamsController::class, 'index']))
+            ->get(route('tag-teams.index'))
             ->assertOk()
             ->assertViewIs('tag-teams.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('TagTeams Controller', function () {
      */
     test('a basic user cannot view tag teams index page', function () {
         actingAs(basicUser())
-            ->get(action([TagTeamsController::class, 'index']))
+            ->get(route('tag-teams.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('TagTeams Controller', function () {
      * @see TagTeamsController::index()
      */
     test('a guest cannot view tag teams index page', function () {
-        get(action([TagTeamsController::class, 'index']))
+        get(route('tag-teams.index'))
             ->assertRedirect(route('login'));
     });
 });

@@ -127,6 +127,14 @@ test('authorization coverage is colocated with its endpoint or component', funct
     expect($authorizationTests)->toBeEmpty();
 });
 
+test('controller endpoint tests visit named routes', function () {
+    foreach (File::allFiles(base_path('tests/Feature/Http/Controllers')) as $file) {
+        $source = File::get($file->getPathname());
+
+        expect($source)->not->toContain('action([');
+    }
+});
+
 test('application does not expose an API route surface', function () {
     $apiRoutes = collect(Route::getRoutes()->getRoutes())
         ->filter(fn (IlluminateRoute $route): bool => str_starts_with($route->uri(), 'api/'));

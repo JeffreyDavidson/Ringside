@@ -24,7 +24,7 @@ describe('Venues Controller', function () {
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([VenuesController::class, 'show'], $this->venue))
+            ->get(route('venues.show', $this->venue))
             ->assertOk()
             ->assertViewIs('venues.show')
             ->assertViewHas('venue', $this->venue)
@@ -36,7 +36,7 @@ describe('Venues Controller', function () {
      */
     test('a basic user cannot view a venue', function () {
         actingAs(basicUser())
-            ->get(action([VenuesController::class, 'show'], $this->venue))
+            ->get(route('venues.show', $this->venue))
             ->assertForbidden();
     });
 
@@ -44,7 +44,7 @@ describe('Venues Controller', function () {
      * @see VenuesController::show()
      */
     test('a guest cannot view a venue', function () {
-        get(action([VenuesController::class, 'show'], $this->venue))
+        get(route('venues.show', $this->venue))
             ->assertRedirect(route('login'));
     });
 
@@ -53,7 +53,7 @@ describe('Venues Controller', function () {
      */
     test('returns 404 when venue does not exist', function () {
         actingAs(administrator())
-            ->get(action([VenuesController::class, 'show'], 999999))
+            ->get(route('venues.show', 999999))
             ->assertNotFound();
     });
 });

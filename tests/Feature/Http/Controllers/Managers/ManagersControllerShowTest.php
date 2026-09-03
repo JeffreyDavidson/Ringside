@@ -26,7 +26,7 @@ describe('Managers Controller', function () {
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([ManagersController::class, 'show'], $this->manager))
+            ->get(route('managers.show', $this->manager))
             ->assertOk()
             ->assertViewIs('managers.show')
             ->assertViewHas('manager', $this->manager)
@@ -40,7 +40,7 @@ describe('Managers Controller', function () {
      */
     test('show loads only the relationships rendered by the manager summary', function () {
         actingAs(administrator())
-            ->get(action([ManagersController::class, 'show'], $this->manager))
+            ->get(route('managers.show', $this->manager))
             ->assertOk()
             ->assertViewHas('manager', fn (Manager $manager): bool => count($manager->getRelations()) === 3
                 && $manager->relationLoaded('currentTagTeams')
@@ -53,7 +53,7 @@ describe('Managers Controller', function () {
      */
     test('a basic user cannot view manager profiles', function () {
         actingAs(basicUser())
-            ->get(action([ManagersController::class, 'show'], $this->manager))
+            ->get(route('managers.show', $this->manager))
             ->assertForbidden();
     });
 
@@ -61,7 +61,7 @@ describe('Managers Controller', function () {
      * @see ManagersController::show()
      */
     test('a guest cannot view a manager profile', function () {
-        get(action([ManagersController::class, 'show'], $this->manager))
+        get(route('managers.show', $this->manager))
             ->assertRedirect(route('login'));
     });
 
@@ -96,7 +96,7 @@ describe('Managers Controller', function () {
      */
     test('returns 404 when manager does not exist', function () {
         actingAs(administrator())
-            ->get(action([ManagersController::class, 'show'], 999999))
+            ->get(route('managers.show', 999999))
             ->assertNotFound();
     });
 });

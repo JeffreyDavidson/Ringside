@@ -19,7 +19,7 @@ describe('Stables Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([StablesController::class, 'index']))
+            ->get(route('stables.index'))
             ->assertOk()
             ->assertViewIs('stables.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('Stables Controller', function () {
      */
     test('a basic user cannot view stables index page', function () {
         actingAs(basicUser())
-            ->get(action([StablesController::class, 'index']))
+            ->get(route('stables.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('Stables Controller', function () {
      * @see StablesController::index()
      */
     test('a guest cannot view stables index page', function () {
-        get(action([StablesController::class, 'index']))
+        get(route('stables.index'))
             ->assertRedirect(route('login'));
     });
 });

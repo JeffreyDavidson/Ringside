@@ -25,7 +25,7 @@ describe('Events Controller', function () {
      */
     test('show returns a view', function () {
         actingAs(administrator())
-            ->get(action([EventsController::class, 'show'], $this->event))
+            ->get(route('events.show', $this->event))
             ->assertViewIs('events.show')
             ->assertViewHas('event', $this->event)
             ->assertSeeLivewire(MatchesTable::class);
@@ -38,7 +38,7 @@ describe('Events Controller', function () {
         EventMatch::factory()->for($this->event)->create();
 
         actingAs(administrator())
-            ->get(action([EventsController::class, 'show'], $this->event))
+            ->get(route('events.show', $this->event))
             ->assertOk()
             ->assertViewHas('event', fn (Event $event): bool => $event->relationLoaded('venue')
                 && ! $event->relationLoaded('matches'));
@@ -49,7 +49,7 @@ describe('Events Controller', function () {
      */
     test('a basic user cannot view an event profile', function () {
         actingAs(basicUser())
-            ->get(action([EventsController::class, 'show'], $this->event))
+            ->get(route('events.show', $this->event))
             ->assertForbidden();
     });
 
@@ -57,7 +57,7 @@ describe('Events Controller', function () {
      * @see EventsController::show()
      */
     test('a guest cannot view an event profile', function () {
-        get(action([EventsController::class, 'show'], $this->event))
+        get(route('events.show', $this->event))
             ->assertRedirect(route('login'));
     });
 
@@ -66,7 +66,7 @@ describe('Events Controller', function () {
      */
     test('returns 404 when event does not exist', function () {
         actingAs(administrator())
-            ->get(action([EventsController::class, 'show'], 999999))
+            ->get(route('events.show', 999999))
             ->assertNotFound();
     });
 });

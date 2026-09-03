@@ -19,7 +19,7 @@ describe('Users Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([UsersController::class, 'index']))
+            ->get(route('users.index'))
             ->assertOk()
             ->assertViewIs('users.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('Users Controller', function () {
      */
     test('a basic user cannot view Users index page', function () {
         actingAs(basicUser())
-            ->get(action([UsersController::class, 'index']))
+            ->get(route('users.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('Users Controller', function () {
      * @see UsersController::index()
      */
     test('a guest cannot view users index page', function () {
-        get(action([UsersController::class, 'index']))
+        get(route('users.index'))
             ->assertRedirect(route('login'));
     });
 });

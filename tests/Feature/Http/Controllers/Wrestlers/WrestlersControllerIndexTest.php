@@ -19,7 +19,7 @@ describe('Wrestlers Controller', function () {
      */
     test('index returns a view', function () {
         actingAs(administrator())
-            ->get(action([WrestlersController::class, 'index']))
+            ->get(route('wrestlers.index'))
             ->assertOk()
             ->assertViewIs('wrestlers.index')
             ->assertSeeLivewire(Main::class);
@@ -30,7 +30,7 @@ describe('Wrestlers Controller', function () {
      */
     test('a basic user cannot view wrestlers index page', function () {
         actingAs(basicUser())
-            ->get(action([WrestlersController::class, 'index']))
+            ->get(route('wrestlers.index'))
             ->assertForbidden();
     });
 
@@ -38,7 +38,7 @@ describe('Wrestlers Controller', function () {
      * @see WrestlersController::index()
      */
     test('a guest cannot view wrestlers index page', function () {
-        get(action([WrestlersController::class, 'index']))
+        get(route('wrestlers.index'))
             ->assertRedirect(route('login'));
     });
 });
