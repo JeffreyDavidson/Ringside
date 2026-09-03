@@ -41,11 +41,21 @@ describe('GeneratesDummyData', function () {
         }
     });
 
-    test('requires a typed population hook', function () {
-        $method = new ReflectionMethod(GeneratesDummyData::class, 'populateDummyData');
+    test('allows each component to define its own generated values', function () {
+        $component = new class
+        {
+            use GeneratesDummyData;
 
-        expect($method->isAbstract())->toBeTrue()
-            ->and($method->isProtected())->toBeTrue()
-            ->and(reflectionReturnTypeName($method))->toBe('void');
+            public ?string $generatedAt = null;
+
+            protected function populateDummyData(): void
+            {
+                $this->generatedAt = 'generated';
+            }
+        };
+
+        $component->fillDummyFields();
+
+        expect($component->generatedAt)->toBe('generated');
     });
 });

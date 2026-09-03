@@ -2,120 +2,42 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Base\BaseFormModal;
-use App\Livewire\Base\BaseModal;
-use App\Livewire\Concerns\GeneratesDummyData;
-use Livewire\Component;
-use Tests\Integration\Livewire\Base\BaseFormModalTest;
+use App\Livewire\Events\Modals\FormModal;
 
-/**
- * Integration tests for BaseFormModal abstract class structure.
- *
- * INTEGRATION TEST SCOPE:
- * - Class inheritance and hierarchy
- * - Trait integration verification
- * - Abstract method existence and signatures
- * - Property visibility and types
- * - Class constants and configuration
- *
- * @see BaseFormModal
- * @see BaseFormModalTest
- */
-describe('BaseFormModal Integration Tests', function () {
-    describe('class structure and inheritance', function () {
-        test('extends BaseModal class', function () {
-            expect(BaseFormModal::class)->toExtend(BaseModal::class);
-        });
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-        test('extends Livewire Component', function () {
-            expect(BaseFormModal::class)->toExtend(Component::class);
-        });
-    });
+beforeEach(function () {
+    actingAs(administrator());
+});
 
-    describe('trait integration', function () {
-        test('uses GeneratesDummyData trait', function () {
-            expect(class_uses(BaseFormModal::class))->toContain(GeneratesDummyData::class);
-        });
-    });
+it('manages the shared modal lifecycle', function () {
+    $modal = livewire(FormModal::class);
 
-    describe('abstract methods', function () {
-        test('has required abstract methods', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
+    $modal
+        ->assertSet('isModalOpen', false)
+        ->call('openModal')
+        ->assertSet('isModalOpen', true)
+        ->call('closeModal')
+        ->assertSet('isModalOpen', false);
+});
 
-            expect($reflection->isAbstract())->toBeTrue();
+it('completes the shared form submission workflow', function () {
+    $modal = livewire(FormModal::class)
+        ->call('openModal')
+        ->set('form.name', 'Shared Modal Event')
+        ->set('form.venue_id', null);
 
-            $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
-            $abstractMethodNames = array_map(fn ($method) => $method->getName(), $abstractMethods);
+    $modal->call('save');
 
-            expect($abstractMethodNames)->toContain('getModelClass');
-        });
-    });
+    $modal
+        ->assertHasNoErrors()
+        ->assertSet('isModalOpen', false)
+        ->assertDispatched('refreshDatatable')
+        ->assertDispatched('closeModal')
+        ->assertDispatched('form-submitted');
 
-    describe('method signatures', function () {
-        test('abstract methods have correct signatures', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
-
-            // getModelClass method
-            $getModelClass = $reflection->getMethod('getModelClass');
-            expect($getModelClass->isAbstract())->toBeTrue();
-            expect($getModelClass->isProtected())->toBeTrue();
-            expect(reflectionReturnTypeName($getModelClass))->toBe('string');
-
-        });
-    });
-
-    describe('template method pattern', function () {
-        test('class is designed as template method pattern', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
-
-            // Should be abstract (template)
-            expect($reflection->isAbstract())->toBeTrue();
-
-            // Should have abstract methods for child configuration
-            $abstractMethods = $reflection->getMethods(ReflectionMethod::IS_ABSTRACT);
-            expect($abstractMethods)->not->toBeEmpty();
-
-            // Should have concrete methods for common functionality
-            $concreteMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
-            $concreteMethodNames = array_map(fn ($method) => $method->getName(), $concreteMethods);
-            expect($concreteMethodNames)->toContain('mount');
-        });
-    });
-
-    describe('class constants', function () {
-        test('has no class-specific constants', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
-            $constants = $reflection->getConstants();
-
-            // Filter out inherited constants
-            $classConstants = array_filter($constants, function ($value, $key) use ($reflection) {
-                $constant = $reflection->getReflectionConstant($key);
-
-                return $constant && $constant->getDeclaringClass()->getName() === BaseFormModal::class;
-            }, ARRAY_FILTER_USE_BOTH);
-
-            expect($classConstants)->toBeEmpty();
-        });
-    });
-
-    describe('namespace and naming', function () {
-        test('uses correct namespace', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
-            expect($reflection->getNamespaceName())->toBe('App\\Livewire\\Base');
-        });
-
-        test('follows base class naming convention', function () {
-            $reflection = new ReflectionClass(BaseFormModal::class);
-            expect($reflection->getShortName())->toBe('BaseFormModal');
-            expect($reflection->getName())->toBe(BaseFormModal::class);
-        });
-    });
-
-    describe('composition over inheritance', function () {
-        test('uses traits for specialized functionality', function () {
-            $traits = class_uses_recursive(BaseFormModal::class);
-
-            expect($traits)->toContain(GeneratesDummyData::class);
-        });
-    });
+    $this->assertDatabaseHas('events', [
+        'name' => 'Shared Modal Event',
+    ]);
 });
