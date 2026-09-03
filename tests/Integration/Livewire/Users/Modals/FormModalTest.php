@@ -333,7 +333,7 @@ describe('FormModal Role Management', function () {
     });
 
     it('can update user role when editing', function () {
-        $user = User::factory()->basicUser()->create();
+        $user = basicUser();
 
         $component = livewire(FormModal::class)
             ->call('openModal', $user->id)

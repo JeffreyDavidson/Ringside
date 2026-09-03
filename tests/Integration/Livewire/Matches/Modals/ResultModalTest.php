@@ -9,7 +9,6 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
@@ -162,7 +161,7 @@ it('reuses the computed match across result option consumers', function () {
 
 it('requires an administrator to record a result', function () {
     [$match] = matchWithResultCompetitors();
-    actingAs(User::factory()->create());
+    actingAs(basicUser());
 
     livewire(ResultModal::class, ['matchId' => $match->id])
         ->set('form.finish', MatchFinish::TimeLimitDraw->value)

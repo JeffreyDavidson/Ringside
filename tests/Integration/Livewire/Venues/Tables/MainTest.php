@@ -6,7 +6,6 @@ use App\Livewire\Venues\Tables\Main;
 use App\Livewire\Venues\Tables\VenuesTable;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -33,7 +32,7 @@ use function Pest\Livewire\livewire;
 describe('VenuesTable Integration Tests', function () {
     beforeEach(function () {
         $this->admin = administrator();
-        $this->basicUser = User::factory()->create();
+        $this->basicUser = basicUser();
 
         // Create test venues with various characteristics
         $this->activeVenue = Venue::factory()->create([

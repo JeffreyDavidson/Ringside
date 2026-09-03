@@ -12,7 +12,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -390,8 +389,8 @@ describe('MatchesTable Authorization', function () {
 
     it('requires administrator privileges', function () {
         $event = Event::factory()->create();
-        $user = User::factory()->create();
-        actingAs($user);
+        $basicUser = basicUser();
+        actingAs($basicUser);
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertForbidden();

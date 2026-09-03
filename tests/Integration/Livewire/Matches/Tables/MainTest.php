@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Matches\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -69,7 +68,7 @@ describe('Matches Main Table Component Integration', function () {
 
     describe('authorization integration', function () {
         test('component requires proper authorization for access', function () {
-            $basicUser = User::factory()->create();
+            $basicUser = basicUser();
 
             actingAs($basicUser);
 

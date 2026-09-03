@@ -6,7 +6,6 @@ use App\Livewire\Events\Forms\CreateEditForm;
 use App\Livewire\Events\Modals\FormModal;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
@@ -410,8 +409,8 @@ describe('FormModal Authorization', function () {
     });
 
     it('requires administrator privileges', function () {
-        $user = User::factory()->create();
-        actingAs($user);
+        $basicUser = basicUser();
+        actingAs($basicUser);
 
         $component = livewire(FormModal::class)
             ->call('openModal');
