@@ -48,9 +48,7 @@ it('accepts mixed competitors that satisfy a multi-person tag composition', func
         ['tag_teams' => [$firstTagTeam], 'wrestlers' => [$firstWrestler]],
         ['tag_teams' => [$secondTagTeam], 'wrestlers' => [$secondWrestler]],
     ]));
-
-    expect(true)->toBeTrue();
-});
+})->throwsNoExceptions();
 
 it('rejects an incorrect multi-person tag composition', function () {
     $match = EventMatch::factory()->withMatchType(MatchType::SixManTagTeam)->create();
@@ -75,9 +73,7 @@ it('accepts a handicap composition in either side order', function () {
         ['tag_teams' => [$tagTeam]],
         ['wrestlers' => [$wrestler]],
     ]));
-
-    expect(true)->toBeTrue();
-});
+})->throwsNoExceptions();
 
 it('rejects multiple competitor entries on an independently competing side', function () {
     $match = EventMatch::factory()->withMatchType(MatchType::TripleThreat)->create();

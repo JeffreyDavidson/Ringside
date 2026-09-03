@@ -46,10 +46,6 @@ describe('RefereesTable Component', function () {
             $retiredReferee = Referee::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Referee']);
             $suspendedReferee = Referee::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Referee']);
 
-            // Create match relationships
-            $event = Event::factory()->create(['name' => 'Test Event']);
-            $match = EventMatch::factory()->for($event, 'event')->create();
-
             $component = livewire(Main::class);
 
             $component
@@ -57,7 +53,8 @@ describe('RefereesTable Component', function () {
                 ->assertSee($injuredReferee->full_name)
                 ->assertSee($retiredReferee->full_name)
                 ->assertSee($suspendedReferee->full_name);
-            expect(true)->toBeTrue();
+
+            expect($component->html())->toContain($employedReferee->full_name);
         });
 
         test('displays correct status badges for different referee states', function () {
