@@ -8,7 +8,6 @@ use App\Livewire\Users\Tables\Main;
 use App\Livewire\Users\Tables\UsersTable;
 use App\Models\Users\User;
 use Illuminate\Support\Collection;
-use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
