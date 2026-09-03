@@ -3,402 +3,257 @@
 declare(strict_types=1);
 
 use App\Livewire\Referees\Modals\FormModal;
-use App\Livewire\Referees\RefereeForm;
 use App\Models\Roster\Referees\Referee;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-/**
- * Integration tests for Referees FormModal component functionality.
- *
- * INTEGRATION TEST SCOPE:
- * - Modal state management and lifecycle
- * - Form rendering and field validation
- * - Create and edit functionality with database integration
- * - Referee-specific business rules and constraints
- * - Form submission and data persistence
- * - Validation error handling and display
- * - Employment date integration
- * - Name field validation and combination
- *
- * These tests verify the complete form modal workflow including
- * modal behavior, form validation, and database operations.
- * Note: Referees use a different base modal structure than other entities.
- *
- * @see FormModal
- * @see RefereeForm
- */
-beforeEach(function () {
-    actingAs(administrator());
-});
-
-describe('Referees FormModal Tests', function () {
-    describe('modal rendering and state management', function () {
-        test('modal opens and closes correctly', function () {
-            livewire(FormModal::class)
-                ->assertSet('isModalOpen', false)
-                ->call('openModal')
-                ->assertSet('isModalOpen', true)
-                ->call('closeModal')
-                ->assertSet('isModalOpen', false);
-        });
-
-        test('modal renders with correct form fields', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->assertPropertyWired('form.first_name')
-                ->assertPropertyWired('form.last_name')
-                ->assertPropertyWired('form.employment_date');
-        });
-
-        test('modal shows correct title for create mode', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal');
-
-            $component->assertSee('Add Referee');
-        });
-
-        test('modal shows correct title for edit mode', function () {
-            $referee = Referee::factory()->create([
-                'first_name' => 'John',
-                'last_name' => 'Smith',
-            ]);
-
-            $component = livewire(FormModal::class)
-                ->call('openModal', $referee->id);
-
-            $component->assertSee('Edit John Smith');
-        });
+describe('authorized referee form interactions', function () {
+    beforeEach(function () {
+        actingAs(administrator());
     });
 
-    describe('form validation rules enforcement', function () {
-        test('validates required fields', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', '')
-                ->set('form.last_name', '')
-                ->call('save')
-                ->assertHasErrors([
-                    'form.first_name' => 'required',
-                    'form.last_name' => 'required',
-                ]);
-        });
+    it('renders the referee form fields', function () {
+        $modal = livewire(FormModal::class);
 
-        test('validates field length constraints', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', str_repeat('A', 256))
-                ->set('form.last_name', str_repeat('B', 256))
-                ->call('save')
-                ->assertHasErrors([
-                    'form.first_name' => 'max',
-                    'form.last_name' => 'max',
-                ]);
-        });
-
-        // NOTE: Date validation test disabled due to Carbon auto-casting issue
-        // The Carbon|string|null union type causes automatic parsing that throws
-        // InvalidFormatException before validation rules can be applied
-        // This test has been temporarily disabled - date validation works in practice
-
-        test('accepts valid name combinations', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'John')
-                ->set('form.last_name', 'Doe')
-                ->call('save')
-                ->assertHasNoErrors();
-
-            expect(Referee::where('first_name', 'John')->where('last_name', 'Doe')->exists())->toBeTrue();
-        });
+        $modal->assertSuccessful();
+        $modal->assertViewIs('livewire.referees.modals.form-modal');
+        $modal
+            ->assertPropertyWired('form.first_name')
+            ->assertPropertyWired('form.last_name')
+            ->assertPropertyWired('form.employment_date');
     });
 
-    describe('create functionality', function () {
-        test('creates new referee with valid data', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'Mike')
-                ->set('form.last_name', 'Johnson')
-                ->set('form.employment_date', '2024-01-15')
-                ->call('save');
+    it('opens an empty form for creating a referee', function () {
+        $modal = livewire(FormModal::class);
 
-            $component->assertHasNoErrors();
-            $component->assertSet('isModalOpen', false);
+        $modal->call('openModal');
 
-            expect(Referee::where('first_name', 'Mike')->where('last_name', 'Johnson')->exists())->toBeTrue();
-
-            $referee = Referee::where('first_name', 'Mike')->where('last_name', 'Johnson')->firstOrFail();
-            expect($referee->first_name)->toBe('Mike');
-            expect($referee->last_name)->toBe('Johnson');
-        });
-
-        test('creates referee without optional start date', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'Simple')
-                ->set('form.last_name', 'Referee')
-                ->call('save')
-                ->assertHasNoErrors();
-
-            $referee = Referee::where('first_name', 'Simple')->where('last_name', 'Referee')->firstOrFail();
-            expect($referee->firstEmployment)->toBeNull();
-        });
-
-        test('dispatches refreshDatatable event on successful creation', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'Event')
-                ->set('form.last_name', 'Test')
-                ->call('save')
-                ->assertDispatched('refreshDatatable');
-        });
-
-        test('closes modal after successful creation', function () {
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'Close')
-                ->set('form.last_name', 'Test')
-                ->call('save')
-                ->assertSet('isModalOpen', false);
-        });
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.first_name', '')
+            ->assertSet('form.last_name', '')
+            ->assertSet('form.employment_date', null)
+            ->assertSee('Add Referee');
     });
 
-    describe('edit functionality', function () {
-        test('loads existing referee data for editing', function () {
-            $referee = Referee::factory()->create([
-                'first_name' => 'Edit',
-                'last_name' => 'Test',
-            ]);
+    it('loads an existing referee for editing', function () {
+        $referee = Referee::factory()->create([
+            'first_name' => 'Earl',
+            'last_name' => 'Hebner',
+        ]);
+        $referee->employments()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
 
-            $component = livewire(FormModal::class)
-                ->call('openModal', $referee->id);
+        $modal->call('openModal', $referee->id);
 
-            $component->assertSet('form.first_name', 'Edit')
-                ->assertSet('form.last_name', 'Test');
-        });
-
-        test('updates existing referee with valid changes', function () {
-            $referee = Referee::factory()->create([
-                'first_name' => 'Original',
-                'last_name' => 'Name',
-            ]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $referee->id)
-                ->set('form.first_name', 'Updated')
-                ->set('form.last_name', 'Referee')
-                ->call('save')
-                ->assertHasNoErrors();
-
-            $referee->refresh();
-            expect($referee->first_name)->toBe('Updated');
-            expect($referee->last_name)->toBe('Referee');
-        });
-
-        test('handles start date loading from existing employment', function () {
-            $referee = Referee::factory()
-                ->hasEmployments(1, ['started_at' => '2023-06-15'])
-                ->create();
-
-            $component = livewire(FormModal::class)
-                ->call('openModal', $referee->id);
-
-            $component->assertSet('form.employment_date', '2023-06-15');
-        });
-
-        test('maintains other data when updating specific fields', function () {
-            $referee = Referee::factory()->create([
-                'first_name' => 'Keep',
-                'last_name' => 'Original',
-            ]);
-
-            livewire(FormModal::class)
-                ->call('openModal', $referee->id)
-                ->set('form.first_name', 'Updated')
-                // Don't change last_name
-                ->call('save')
-                ->assertHasNoErrors();
-
-            $referee->refresh();
-            expect($referee->first_name)->toBe('Updated');
-            expect($referee->last_name)->toBe('Original'); // Should remain unchanged
-        });
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.first_name', 'Earl')
+            ->assertSet('form.last_name', 'Hebner')
+            ->assertSet('form.employment_date', '2024-01-15')
+            ->assertSee('Edit Earl Hebner');
     });
 
-    describe('form submission and error handling', function () {
-        test('prevents submission with validation errors', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', '') // Invalid: required
-                ->call('save');
-
-            $component->assertHasErrors();
-            $component->assertSet('isModalOpen', true); // Modal stays open on errors
-            expect(Referee::count())->toBe(0); // No referee created
-        });
-
-        test('maintains form state on validation errors', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', '') // Will cause error
-                ->set('form.last_name', 'Valid Name')
-                ->call('save');
-
-            // Valid fields should be preserved
-            $component->assertSet('form.last_name', 'Valid Name');
-        });
-
-        test('handles database constraint violations gracefully', function () {
-            // Create scenario where validation passes but database operation might fail
-            $referee = Referee::factory()->create([
-                'first_name' => 'Test',
-                'last_name' => 'Constraint',
-            ]);
-
-            // This should work normally since there are no unique constraints on referee names
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'Test')
-                ->set('form.last_name', 'Constraint')
-                ->call('save')
-                ->assertHasNoErrors();
-
-            // Two referees with same name should be allowed
-            expect(Referee::where('first_name', 'Test')->where('last_name', 'Constraint')->count())->toBe(2);
-        });
+    it('propagates a missing referee failure', function () {
+        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
+            ->toThrow(ModelNotFoundException::class);
     });
 
-    describe('dummy data functionality', function () {
-        test('can fill dummy fields for development workflow', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->call('fillDummyFields');
+    it('creates an employed referee', function () {
+        $modal = livewire(FormModal::class);
 
-            // All required fields should be populated
-            expect($component->get('form.first_name'))->not->toBeEmpty();
-            expect($component->get('form.last_name'))->not->toBeEmpty();
-        });
+        $modal->call('openModal');
+        $modal->set([
+            'form.first_name' => 'Mike',
+            'form.last_name' => 'Chioda',
+            'form.employment_date' => '2024-02-01',
+        ]);
+        $modal->call('save');
 
-        test('dummy data generates realistic referee names', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->call('fillDummyFields');
-
-            $firstName = $component->get('form.first_name');
-            $lastName = $component->get('form.last_name');
-
-            // Names should be strings and not empty
-            expect($firstName)->toBeString();
-            expect($lastName)->toBeString();
-            expect(mb_strlen($firstName))->toBeGreaterThan(0);
-            expect(mb_strlen($lastName))->toBeGreaterThan(0);
-
-            // Should not be placeholder text
-            expect($firstName)->not->toContain('Faker');
-            expect($lastName)->not->toContain('Test');
-        });
-
-        test('dummy start date has reasonable format', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->call('fillDummyFields');
-
-            $startDate = $component->get('form.employment_date');
-
-            // Start date might be null or a valid date string
-            if ($startDate !== null && $startDate !== '') {
-                expect($startDate)->toMatch('/^\d{4}-\d{2}-\d{2}/'); // YYYY-MM-DD format
-            }
-
-            // Always verify the component executed successfully
-            expect($startDate === null || is_string($startDate))->toBeTrue();
-        });
+        $referee = Referee::query()
+            ->where('first_name', 'Mike')
+            ->where('last_name', 'Chioda')
+            ->firstOrFail();
+        expect($referee->firstEmployment?->started_at?->toDateString())->toBe('2024-02-01');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertDispatched('form-submitted')
+            ->assertDispatched('closeModal')
+            ->assertSet('isModalOpen', false);
     });
 
-    describe('clear functionality', function () {
-        test('clears form when called without model', function () {
-            $component = livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'Test')
-                ->set('form.last_name', 'Clear')
-                ->call('clear');
+    it('creates a referee without optional employment data', function () {
+        $modal = livewire(FormModal::class);
 
-            // Form should be reset to empty values
-            expect($component->get('form.first_name'))->toBe('');
-            expect($component->get('form.last_name'))->toBe('');
-            expect($component->get('form.employment_date'))->toBe('');
-        });
+        $modal->call('openModal');
+        $modal->set([
+            'form.first_name' => 'Charles',
+            'form.last_name' => 'Robinson',
+        ]);
+        $modal->call('save');
 
-        test('resets form to original model data when editing', function () {
-            $referee = Referee::factory()->create([
-                'first_name' => 'Original',
-                'last_name' => 'Data',
-            ]);
-
-            $component = livewire(FormModal::class)
-                ->call('openModal', $referee->id)
-                ->set('form.first_name', 'Changed')
-                ->set('form.last_name', 'Values')
-                ->call('clear');
-
-            // Should reset to original model data
-            $component->assertSet('form.first_name', 'Original')
-                ->assertSet('form.last_name', 'Data');
-        });
+        $referee = Referee::query()
+            ->where('first_name', 'Charles')
+            ->where('last_name', 'Robinson')
+            ->firstOrFail();
+        expect($referee->firstEmployment)->toBeNull();
+        $modal->assertHasNoErrors();
     });
 
-    describe('modal title generation', function () {
-        test('generates correct full name for title', function () {
-            $referee = Referee::factory()->create([
-                'first_name' => 'John',
-                'last_name' => 'Doe',
-            ]);
+    it('updates a referee without replacing current employment', function () {
+        $referee = Referee::factory()->create([
+            'first_name' => 'Nick',
+            'last_name' => 'Patrick',
+        ]);
+        $employment = $referee->employments()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
 
-            $component = livewire(FormModal::class)
-                ->call('openModal', $referee->id);
+        $modal->call('openModal', $referee->id);
+        $modal->set([
+            'form.first_name' => 'Nicholas',
+            'form.last_name' => 'Patrick',
+        ]);
+        $modal->call('save');
 
-            $component->assertSee('Edit John Doe');
-        });
-
-        test('handles single names correctly', function () {
-            $referee = Referee::factory()->create([
-                'first_name' => 'Cher',
-                'last_name' => '',
-            ]);
-
-            $component = livewire(FormModal::class)
-                ->call('openModal', $referee->id);
-
-            $component->assertSee('Edit Cher');
-        });
+        $referee->refresh();
+        expect($referee->first_name)->toBe('Nicholas')
+            ->and($referee->last_name)->toBe('Patrick')
+            ->and($referee->employments()->count())->toBe(1)
+            ->and($referee->currentEmployment()->firstOrFail()->is($employment))->toBeTrue();
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertSet('isModalOpen', false);
     });
 
-    describe('integration with employment system', function () {
-        test('handles employment date creation through form store method', function () {
-            // Note: The RefereeForm has a custom store method that doesn't handle employment
-            // This test documents the current behavior
-            livewire(FormModal::class)
-                ->call('openModal')
-                ->set('form.first_name', 'Employment')
-                ->set('form.last_name', 'Test')
-                ->set('form.employment_date', '2024-01-01')
-                ->call('save')
-                ->assertHasNoErrors();
+    it('requires both referee names', function () {
+        $modal = livewire(FormModal::class);
 
-            $referee = Referee::where('first_name', 'Employment')->where('last_name', 'Test')->firstOrFail();
-            // Note: Employment creation is not handled by the current RefereeForm implementation
-        });
+        $modal->call('openModal');
+        $modal->call('save');
 
-        test('loads employment date for editing when available', function () {
-            $referee = Referee::factory()
-                ->hasEmployments(1, ['started_at' => '2023-12-01'])
-                ->create();
+        $modal
+            ->assertHasErrors([
+                'form.first_name' => 'required',
+                'form.last_name' => 'required',
+            ])
+            ->assertNotDispatched('closeModal')
+            ->assertSet('isModalOpen', true);
+        expect(Referee::query()->doesntExist())->toBeTrue();
+    });
 
-            $component = livewire(FormModal::class)
-                ->call('openModal', $referee->id);
+    it('rejects invalid referee field values', function (string $case) {
+        [$field, $value, $rule] = match ($case) {
+            'long first name' => ['form.first_name', str_repeat('a', 256), 'max'],
+            'long last name' => ['form.last_name', str_repeat('a', 256), 'max'],
+            'invalid employment date' => ['form.employment_date', 'not-a-date', 'date'],
+            default => throw new InvalidArgumentException("Unknown validation case: {$case}"),
+        };
+        $modal = livewire(FormModal::class);
 
-            $component->assertSet('form.employment_date', '2023-12-01');
-        });
+        $modal->call('openModal');
+        $modal->set([
+            'form.first_name' => 'Valid',
+            'form.last_name' => 'Referee',
+        ]);
+        $modal->set($field, $value);
+        $modal->call('save');
+
+        $modal->assertHasErrors([$field => $rule]);
+        expect(Referee::query()->doesntExist())->toBeTrue();
+    })->with([
+        'long first name',
+        'long last name',
+        'invalid employment date',
+    ]);
+
+    it('clears entered values when creating a referee', function () {
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.first_name' => 'Entered',
+            'form.last_name' => 'Name',
+            'form.employment_date' => '2024-01-15',
+        ]);
+        $modal->call('clear');
+
+        $modal
+            ->assertSet('form.first_name', '')
+            ->assertSet('form.last_name', '')
+            ->assertSet('form.employment_date', '');
+    });
+
+    it('restores original values when clearing an edited referee', function () {
+        $referee = Referee::factory()->create([
+            'first_name' => 'Original',
+            'last_name' => 'Referee',
+        ]);
+        $referee->employments()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $referee->id);
+        $modal->set([
+            'form.first_name' => 'Changed',
+            'form.last_name' => 'Name',
+            'form.employment_date' => '2024-02-01',
+        ]);
+        $modal->call('clear');
+
+        $modal
+            ->assertSet('form.first_name', 'Original')
+            ->assertSet('form.last_name', 'Referee')
+            ->assertSet('form.employment_date', '2024-01-15');
+    });
+
+    it('resets edited referee data when reopening in create mode', function () {
+        $referee = Referee::factory()->employed()->create([
+            'first_name' => 'Existing',
+            'last_name' => 'Referee',
+        ]);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $referee->id);
+        $modal->call('openModal');
+
+        $modal
+            ->assertSet('form.first_name', '')
+            ->assertSet('form.last_name', '')
+            ->assertSet('form.employment_date', null);
+    });
+
+    it('generates valid dummy data that can create a referee', function () {
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+        $modal->call('save');
+
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('form-submitted')
+            ->assertSet('isModalOpen', false);
+        expect(Referee::query()->count())->toBe(1);
     });
 });
+
+it('forbids users without administrative access from opening the referee form', function (string $actor, string $operation) {
+    $referee = $operation === 'update' ? Referee::factory()->create() : null;
+
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
+
+    $modal = livewire(FormModal::class);
+    $modal->call('openModal', $referee?->id);
+
+    $modal->assertForbidden();
+})->with([
+    'guest creating' => ['guest', 'create'],
+    'basic user creating' => ['basic user', 'create'],
+    'guest updating' => ['guest', 'update'],
+    'basic user updating' => ['basic user', 'update'],
+]);
