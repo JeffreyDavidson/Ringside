@@ -59,6 +59,21 @@ test('direct Livewire component tests remain in the Integration suite', function
     expect($misplacedLivewireTests)->toBeEmpty();
 });
 
+test('Feature tests remain aligned to HTTP and architecture boundaries', function (): void {
+    // Arrange
+    $featureWorkflowsDirectory = base_path('tests/Feature/Workflows');
+
+    // Act
+    $misplacedWorkflowTests = is_dir($featureWorkflowsDirectory)
+        ? iterator_to_array(
+            Finder::create()->files()->in($featureWorkflowsDirectory)->name('*.php'),
+        )
+        : [];
+
+    // Assert
+    expect($misplacedWorkflowTests)->toBeEmpty();
+});
+
 test('the obsolete Laravel Dusk configuration is not present', function (): void {
     expect(file_exists(base_path('phpunit.dusk.xml')))->toBeFalse();
 });
