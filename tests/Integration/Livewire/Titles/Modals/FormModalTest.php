@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Titles\Forms\CreateEditForm;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
-use App\Models\Users\User;
 use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
@@ -278,8 +277,8 @@ describe('FormModal Authorization', function () {
     });
 
     it('requires administrator privileges', function () {
-        $user = User::factory()->create();
-        actingAs($user);
+        $basicUser = basicUser();
+        actingAs($basicUser);
 
         $component = livewire(FormModal::class)
             ->call('openModal');

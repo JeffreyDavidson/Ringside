@@ -6,7 +6,6 @@ use App\Actions\Managers\EmployAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Managers\Components\Actions;
 use App\Models\Roster\Managers\Manager;
-use App\Models\Users\User;
 use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
@@ -431,9 +430,9 @@ describe('ManagersActions Integration Tests', function () {
 
     describe('authorization integration', function () {
         test('unauthorized user cannot perform actions', function () {
-            $guest = User::factory()->create(); // Non-admin user
+            $basicUser = basicUser();
 
-            actingAs($guest);
+            actingAs($basicUser);
 
             $component = livewire(Actions::class, ['manager' => $this->manager]);
 

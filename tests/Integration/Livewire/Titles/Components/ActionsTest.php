@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -162,12 +161,12 @@ describe('Title Restoration Actions', function () {
 
 describe('Title Actions Authorization', function () {
     it('enforces authorization for all actions', function () {
-        $user = User::factory()->create(); // Non-admin user
+        $basicUser = basicUser();
 
         $actions = ['debut', 'retire', 'unretire', 'deactivate', 'reinstate', 'restore'];
 
         foreach ($actions as $method) {
-            actingAs($user);
+            actingAs($basicUser);
 
             $component = livewire(Actions::class, ['title' => $this->title]);
 
@@ -190,9 +189,9 @@ describe('Title Actions Event Dispatching', function () {
     });
 
     it('does not dispatch events on failed actions', function () {
-        $user = User::factory()->create(); // Non-admin user
+        $basicUser = basicUser();
 
-        actingAs($user);
+        actingAs($basicUser);
 
         $component = livewire(Actions::class, ['title' => $this->title]);
 

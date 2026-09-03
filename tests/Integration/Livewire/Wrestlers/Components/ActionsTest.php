@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Spatie\PestPluginTestTime\testTime;
@@ -357,9 +356,9 @@ describe('WrestlersActions Integration Tests', function () {
 
     describe('authorization integration', function () {
         test('unauthorized user cannot perform actions', function () {
-            $guest = User::factory()->create(); // Non-admin user
+            $basicUser = basicUser();
 
-            actingAs($guest);
+            actingAs($basicUser);
 
             $component = \Pest\Livewire\livewire(Actions::class, ['wrestler' => $this->wrestler]);
 

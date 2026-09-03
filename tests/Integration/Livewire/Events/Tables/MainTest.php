@@ -7,7 +7,6 @@ use App\Livewire\Events\Tables\EventsTable;
 use App\Livewire\Events\Tables\Main;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -275,7 +274,7 @@ describe('EventsTable Component Integration', function () {
 
     describe('authorization integration', function () {
         test('component requires proper authorization for access', function () {
-            $basicUser = User::factory()->create();
+            $basicUser = basicUser();
 
             actingAs($basicUser);
 

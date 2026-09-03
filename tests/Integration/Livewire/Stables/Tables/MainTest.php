@@ -9,7 +9,6 @@ use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -369,7 +368,7 @@ describe('StablesTable Component', function () {
 
     describe('authorization integration', function () {
         test('component requires proper authorization for access', function () {
-            $basicUser = User::factory()->create();
+            $basicUser = basicUser();
 
             actingAs($basicUser);
 

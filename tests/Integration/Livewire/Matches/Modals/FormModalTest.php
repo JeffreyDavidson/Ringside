@@ -15,7 +15,6 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -707,8 +706,8 @@ describe('FormModal Authorization', function () {
     });
 
     it('requires administrator privileges', function () {
-        $user = User::factory()->create();
-        actingAs($user);
+        $basicUser = basicUser();
+        actingAs($basicUser);
 
         $component = livewire(FormModal::class, ['eventId' => $this->event->id])
             ->call('openModal');

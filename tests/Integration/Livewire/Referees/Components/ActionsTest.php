@@ -6,7 +6,6 @@ use App\Actions\Referees\EmployAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Referees\Components\Actions;
 use App\Models\Roster\Referees\Referee;
-use App\Models\Users\User;
 use JMac\Testing\Double;
 
 use function Pest\Laravel\actingAs;
@@ -470,9 +469,9 @@ describe('RefereesActions Integration Tests', function () {
 
     describe('authorization integration', function () {
         test('unauthorized user cannot perform actions', function () {
-            $guest = User::factory()->create(); // Non-admin user
+            $basicUser = basicUser();
 
-            actingAs($guest);
+            actingAs($basicUser);
 
             $component = livewire(Actions::class, ['referee' => $this->referee]);
 
