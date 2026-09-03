@@ -26,7 +26,7 @@ use function Pest\Livewire\livewire;
  * - Event dispatching and state management
  */
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
 
     $this->title = Title::factory()->create([

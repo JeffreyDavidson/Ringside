@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Venues\Forms\CreateEditForm;
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
-use App\Models\Users\User;
 use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,7 +13,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
 
     $this->state = 'California';

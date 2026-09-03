@@ -5,13 +5,12 @@ declare(strict_types=1);
 use App\Livewire\Wrestlers\Forms\CreateEditForm;
 use App\Livewire\Wrestlers\Modals\FormModal;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Models\Users\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 beforeEach(function () {
-    $this->admin = User::factory()->administrator()->create();
+    $this->admin = administrator();
     actingAs($this->admin);
 });
 

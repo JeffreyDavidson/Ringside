@@ -31,7 +31,7 @@ use function Pest\Livewire\livewire;
  */
 describe('StablesTable Component', function () {
     beforeEach(function () {
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
     });
 
     describe('component rendering and data display', function () {

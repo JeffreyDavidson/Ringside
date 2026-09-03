@@ -18,7 +18,7 @@ use function Pest\Livewire\livewire;
  */
 describe('Matches Main Table Component Integration', function () {
     beforeEach(function () {
-        $this->admin = User::factory()->administrator()->create();
+        $this->admin = administrator();
         $this->event = Event::factory()->scheduled()->create(['name' => 'Test Event']);
     });
 
