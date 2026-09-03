@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Models\Roster\Stables\Stable;
-use App\Models\Users\User;
 use App\Policies\StablePolicy;
 use Illuminate\Support\Facades\Gate;
 
@@ -26,8 +25,8 @@ use Illuminate\Support\Facades\Gate;
 describe('StablePolicy Integration Tests', function () {
     beforeEach(function () {
         $this->policy = new StablePolicy();
-        $this->admin = User::factory()->administrator()->create();
-        $this->basicUser = User::factory()->create();
+        $this->admin = administrator();
+        $this->basicUser = basicUser();
         $this->stable = Stable::factory()->active()->create();
     });
 

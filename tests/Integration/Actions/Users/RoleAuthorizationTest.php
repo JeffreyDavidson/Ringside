@@ -25,8 +25,8 @@ use function Pest\Laravel\actingAs;
 describe('User Role Integration Tests', function () {
 
     beforeEach(function () {
-        $this->administrator = User::factory()->administrator()->create();
-        $this->basicUser = User::factory()->create(['role' => Role::Basic]);
+        $this->administrator = administrator();
+        $this->basicUser = basicUser();
         $this->unverifiedUser = User::factory()->unverified()->create();
     });
 
@@ -64,10 +64,10 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system works consistently across user instances', function () {
-            $user1 = User::factory()->administrator()->create();
-            $user2 = User::factory()->administrator()->create();
-            $user3 = User::factory()->create(['role' => Role::Basic]);
-            $user4 = User::factory()->create(['role' => Role::Basic]);
+            $user1 = administrator();
+            $user2 = administrator();
+            $user3 = basicUser();
+            $user4 = basicUser();
 
             // All administrators should have same permissions
             expect($user1->role->isAdministrator())->toBeTrue();
@@ -105,7 +105,7 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role changes are reflected immediately in authorization', function () {
-            $user = User::factory()->create(['role' => Role::Basic]);
+            $user = basicUser();
 
             // Initially basic user should be denied
             expect($user->role->isAdministrator())->toBeFalse();
@@ -167,7 +167,7 @@ describe('User Role Integration Tests', function () {
 
     describe('role management workflows', function () {
         test('role promotion workflow maintains consistency', function () {
-            $user = User::factory()->create(['role' => Role::Basic]);
+            $user = basicUser();
 
             // Verify initial state
             expect($user->role)->toBe(Role::Basic);
@@ -190,7 +190,7 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role demotion workflow maintains consistency', function () {
-            $user = User::factory()->administrator()->create();
+            $user = administrator();
 
             // Verify initial administrator state
             expect($user->role)->toBe(Role::Administrator);
@@ -234,7 +234,7 @@ describe('User Role Integration Tests', function () {
 
     describe('security and edge cases', function () {
         test('role system prevents privilege escalation', function () {
-            $basicUser = User::factory()->create(['role' => Role::Basic]);
+            $basicUser = basicUser();
 
             actingAs($basicUser);
 
@@ -266,8 +266,8 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system handles concurrent access correctly', function () {
-            $admin1 = User::factory()->administrator()->create();
-            $admin2 = User::factory()->administrator()->create();
+            $admin1 = administrator();
+            $admin2 = administrator();
 
             // Multiple administrators should be able to operate simultaneously
             expect(Gate::forUser($admin1)->allows('create', User::class))->toBeTrue();
@@ -282,7 +282,7 @@ describe('User Role Integration Tests', function () {
         });
 
         test('role system maintains consistency after user deletion and restoration', function () {
-            $admin = User::factory()->administrator()->create();
+            $admin = administrator();
 
             // Verify initial state
             expect($admin->role->isAdministrator())->toBeTrue();

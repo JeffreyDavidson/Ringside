@@ -215,8 +215,8 @@ describe('UserPolicy business context', function () {
     });
 
     test('policy works with different user roles', function () {
-        $adminUser = User::factory()->administrator()->create();
-        $basicUser = User::factory()->create();
+        $adminUser = administrator();
+        $basicUser = basicUser();
 
         // Both user types should follow same authorization rules
         expect(Gate::forUser(administrator())->allows('view', $adminUser))->toBeTrue();
