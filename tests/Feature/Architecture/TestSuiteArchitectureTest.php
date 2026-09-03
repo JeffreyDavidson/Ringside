@@ -44,6 +44,21 @@ test('Pest Browser tests remain isolated in the Browser suite', function (): voi
     expect($misplacedBrowserTests)->toBeEmpty();
 });
 
+test('direct Livewire component tests remain in the Integration suite', function (): void {
+    // Arrange
+    $featureLivewireDirectory = base_path('tests/Feature/Livewire');
+
+    // Act
+    $misplacedLivewireTests = is_dir($featureLivewireDirectory)
+        ? iterator_to_array(
+            Finder::create()->files()->in($featureLivewireDirectory)->name('*.php'),
+        )
+        : [];
+
+    // Assert
+    expect($misplacedLivewireTests)->toBeEmpty();
+});
+
 test('the obsolete Laravel Dusk configuration is not present', function (): void {
     expect(file_exists(base_path('phpunit.dusk.xml')))->toBeFalse();
 });
