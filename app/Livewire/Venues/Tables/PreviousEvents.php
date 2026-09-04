@@ -11,6 +11,8 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Events\Event;
+use App\Models\Events\Venue;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<Event> */
@@ -35,6 +37,13 @@ class PreviousEvents extends DataTableComponent
         return Event::query()
             ->forVenueId($venueId)
             ->latestDatedFirst();
+    }
+
+    protected function configure(): void
+    {
+        $venueId = $this->requireContextId($this->venueId ?? null, 'venue');
+
+        Gate::authorize('view', Venue::query()->findOrFail($venueId));
     }
 
     /**
