@@ -8,6 +8,8 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -74,3 +76,40 @@ test('renders the title championship history from reign relationships and dates'
         ->assertSeeHtml(route('tag-teams.show', $newChampion))
         ->assertSee('2024-06-01 - 2025-01-01');
 });
+
+it('authorizes the selected title instance', function () {
+    $title = Title::factory()->create();
+    $authorizedTitle = null;
+
+    Gate::before(function ($user, string $ability, array $arguments) use (&$authorizedTitle): ?bool {
+        if ($ability !== 'view' || ! ($arguments[0] ?? null) instanceof Title) {
+            return null;
+        }
+
+        $authorizedTitle = $arguments[0];
+
+        return true;
+    });
+    actingAs(basicUser());
+
+    livewire(PreviousTitleChampionships::class, ['titleId' => $title->id])
+        ->assertSuccessful();
+
+    expect($authorizedTitle?->is($title))->toBeTrue();
+});
+
+it('forbids users without access to the title', function (string $actor) {
+    $title = Title::factory()->create();
+
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    livewire(PreviousTitleChampionships::class, ['titleId' => $title->id])
+        ->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
