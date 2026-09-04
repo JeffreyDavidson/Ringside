@@ -15,6 +15,7 @@ use App\Rules\Stables\CanJoinStable;
 use App\Rules\Stables\HasMinimumMembers;
 use App\Rules\Wrestlers\IsNotInjured;
 use App\Rules\Wrestlers\NotRepresentedBySelectedTagTeam;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use LogicException;
@@ -110,16 +111,12 @@ class CreateEditForm extends BaseForm
      *
      * @see StableData::$start_date For activity period input
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        if (! $this->formModel instanceof Stable) {
-            return;
-        }
-
-        $this->started_at = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
-        $this->ended_at = $this->formModel->firstActivityPeriod?->ended_at?->toDateString();
-        $this->wrestlers = $this->formModel->currentWrestlers->modelKeys();
-        $this->tag_teams = $this->formModel->currentTagTeams->modelKeys();
+        $this->started_at = $model->firstActivityPeriod?->started_at?->toDateString();
+        $this->ended_at = $model->firstActivityPeriod?->ended_at?->toDateString();
+        $this->wrestlers = $model->currentWrestlers->modelKeys();
+        $this->tag_teams = $model->currentTagTeams->modelKeys();
     }
 
     public function toData(): StableData

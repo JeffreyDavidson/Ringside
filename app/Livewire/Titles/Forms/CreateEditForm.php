@@ -9,6 +9,7 @@ use App\Enums\Titles\TitleType;
 use App\Livewire\Base\BaseForm;
 use App\Models\Titles\Title;
 use App\Rules\Shared\CanChangeDebutDate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -87,13 +88,9 @@ class CreateEditForm extends BaseForm
      *
      * @see TitleData::$debut_date For activity period input
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        if (! $this->formModel instanceof Title) {
-            return;
-        }
-
-        $this->start_date = $this->formModel->firstActivityPeriod?->started_at?->toDateString();
+        $this->start_date = $model->firstActivityPeriod?->started_at?->toDateString();
     }
 
     /**

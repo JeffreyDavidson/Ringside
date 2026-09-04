@@ -29,14 +29,17 @@ it('tracks whether a form is creating or editing a model', function () {
         ->and($form->street_address)->toBe('4 Pennsylvania Plaza')
         ->and($form->city)->toBe('New York')
         ->and($form->state)->toBe('New York')
-        ->and($form->zipcode)->toBe('10001')
-        ->and($form->generateModelEditName('name'))->toBe('Madison Square Garden');
+        ->and($form->zipcode)->toBe('10001');
 });
 
-it('returns a fallback edit name when no model is selected', function () {
+it('returns to creating state when its model is cleared', function () {
     $form = new CreateEditForm(Double::for(Component::class), 'form');
+    $venue = Venue::factory()->create();
 
-    $name = $form->generateModelEditName('name');
+    $form->setModel($venue);
+    $form->setModel(null);
 
-    expect($name)->toBe('Unknown');
+    expect($form->modelId)->toBeNull()
+        ->and($form->isCreating())->toBeTrue()
+        ->and($form->isEditing())->toBeFalse();
 });

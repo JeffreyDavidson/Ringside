@@ -8,6 +8,7 @@ use App\Data\Users\UserData;
 use App\Enums\Users\Role;
 use App\Livewire\Base\BaseForm;
 use App\Models\Users\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
 /**
@@ -101,7 +102,7 @@ class CreateEditForm extends BaseForm
      * - Password fields are never populated during edit operations
      * - Sensitive data loading follows security best practices
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
         $this->password = '';
         $this->password_confirmation = '';

@@ -19,6 +19,7 @@ use App\Rules\Referees\IsBookable as RefereeIsBookable;
 use App\Rules\Titles\CurrentChampionIsCompeting;
 use App\Rules\Titles\IsActive;
 use App\Rules\Titles\MatchesCompetitorType;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use LogicException;
@@ -60,22 +61,18 @@ class CreateEditForm extends BaseForm
         ]);
     }
 
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        if (! $this->formModel instanceof EventMatch) {
-            return;
-        }
+        $this->matchType = $model->match_type;
+        $this->matchStipulationId = $model->match_stipulation_id;
 
-        $this->matchType = $this->formModel->match_type;
-        $this->matchStipulationId = $this->formModel->match_stipulation_id;
-
-        $this->referees = $this->formModel->referees
+        $this->referees = $model->referees
             ->map(fn (Referee $referee): int => $referee->id)
             ->all();
-        $this->titles = $this->formModel->titles
+        $this->titles = $model->titles
             ->map(fn (Title $title): int => $title->id)
             ->all();
-        $sides = $this->formModel->sides()
+        $sides = $model->sides()
             ->with('competitors.competitor')
             ->get();
         $this->competitors = $this->competitorStateMapper->fromSides(

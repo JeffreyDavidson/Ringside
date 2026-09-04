@@ -94,8 +94,6 @@ class CreateEditForm extends BaseForm
      */
     public int|string|null $zipcode = '';
 
-    public function loadExtraData(): void {}
-
     /**
      * Prepare venue data for model storage.
      *
