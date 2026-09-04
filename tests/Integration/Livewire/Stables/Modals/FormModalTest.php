@@ -66,6 +66,7 @@ describe('authorized stable form interactions', function () {
         $modal = livewire(FormModal::class);
 
         $modal->call('openModal', $stable->id);
+        $modal->set('form.name', 'The Four Horsemen');
 
         $modal
             ->assertSet('isModalOpen', true)

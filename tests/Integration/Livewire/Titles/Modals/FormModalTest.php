@@ -47,6 +47,7 @@ describe('authorized title form interactions', function () {
         $modal = livewire(FormModal::class);
 
         $modal->call('openModal', $title->id);
+        $modal->set('form.name', 'World Championship Title');
 
         $modal
             ->assertSet('isModalOpen', true)

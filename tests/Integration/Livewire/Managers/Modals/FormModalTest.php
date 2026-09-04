@@ -47,6 +47,7 @@ describe('authorized manager form interactions', function () {
         $modal = livewire(FormModal::class);
 
         $modal->call('openModal', $manager->id);
+        $modal->set('form.first_name', 'Bobby');
 
         $modal
             ->assertSet('isModalOpen', true)

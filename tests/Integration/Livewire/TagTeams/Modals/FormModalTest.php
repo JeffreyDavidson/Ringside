@@ -66,6 +66,7 @@ describe('authorized tag team form interactions', function () {
         $modal = livewire(FormModal::class);
 
         $modal->call('openModal', $tagTeam->id);
+        $modal->set('form.name', 'The Midnight Express');
 
         $modal
             ->assertSet('isModalOpen', true)

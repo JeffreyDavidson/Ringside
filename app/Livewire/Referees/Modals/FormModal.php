@@ -16,12 +16,7 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    /**
-     * Store original model data for resetting purposes
-     *
-     * @var array{first_name: string, last_name: string, employment_date: string}|null
-     */
-    public ?array $originalModelData = null;
+    protected string $modelTitleField = 'full_name';
 
     public CreateEditForm $form;
 
@@ -55,45 +50,6 @@ class FormModal extends BaseFormModal
     protected function createForm(): void
     {
         $this->createAction->handle($this->form->toData());
-    }
-
-    public function mount(int|string|null $modelId = null): void
-    {
-        parent::mount($modelId);
-
-        $this->modelTitleField = 'full_name';
-    }
-
-    public function openModal(int|string|null $modelId = null): void
-    {
-        parent::openModal($modelId);
-
-        if (isset($this->model)) {
-            $this->originalModelData = [
-                'first_name' => $this->model->first_name,
-                'last_name' => $this->model->last_name,
-                'employment_date' => $this->model->firstEmployment?->started_at?->toDateString() ?? '',
-            ];
-        } else {
-            $this->originalModelData = null;
-        }
-    }
-
-    public function clear(): void
-    {
-        if ($this->originalModelData) {
-            $this->form->first_name = $this->originalModelData['first_name'];
-            $this->form->last_name = $this->originalModelData['last_name'];
-            $this->form->employment_date = $this->originalModelData['employment_date'];
-            $this->form->resetErrorBag();
-            $this->form->resetValidation();
-        } else {
-            $this->form->first_name = '';
-            $this->form->last_name = '';
-            $this->form->employment_date = '';
-            $this->form->resetErrorBag();
-            $this->form->resetValidation();
-        }
     }
 
     public function render(): View
