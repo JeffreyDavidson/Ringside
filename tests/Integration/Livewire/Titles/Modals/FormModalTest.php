@@ -2,279 +2,267 @@
 
 declare(strict_types=1);
 
-use App\Livewire\Titles\Forms\CreateEditForm;
+use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Modals\FormModal;
 use App\Models\Titles\Title;
-use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    $this->admin = administrator();
-    actingAs($this->admin);
-});
-
-describe('FormModal Configuration', function () {
-    it('initializes the title form', function () {
-        $component = livewire(FormModal::class);
-
-        expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
+describe('authorized title form interactions', function () {
+    beforeEach(function () {
+        actingAs(administrator());
     });
 
-});
+    it('renders the title fields and type choices', function () {
+        $modal = livewire(FormModal::class);
 
-describe('FormModal Rendering', function () {
-    it('renders the required title type selector', function () {
-        livewire(FormModal::class)
-            ->call('openModal')
-            ->assertSeeHtml('wire:model="form.type"')
-            ->assertSee('Singles')
-            ->assertSee('Tag Team');
+        $modal->assertSuccessful();
+        $modal->assertViewIs('livewire.titles.modals.form-modal');
+        $modal
+            ->assertPropertyWired('form.name')
+            ->assertPropertyWired('form.type')
+            ->assertPropertyWired('form.start_date')
+            ->assertSee(TitleType::Singles->label())
+            ->assertSee(TitleType::TagTeam->label());
     });
 
-    it('can render in create mode', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal');
+    it('opens an empty form for creating a title', function () {
+        $modal = livewire(FormModal::class);
 
-        $component->assertOk();
+        $modal->call('openModal');
+
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', '')
+            ->assertSet('form.type', '')
+            ->assertSet('form.start_date', '')
+            ->assertSee('Create Title');
     });
 
-    it('can render in edit mode', function () {
-        $title = Title::factory()->create();
+    it('loads an existing title for editing', function () {
+        $title = Title::factory()->singles()->create(['name' => 'World Championship Title']);
+        $title->activityPeriods()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title->id);
+        $modal->call('openModal', $title->id);
 
-        $component->assertOk();
+        $modal
+            ->assertSet('isModalOpen', true)
+            ->assertSet('form.name', 'World Championship Title')
+            ->assertSet('form.type', TitleType::Singles->value)
+            ->assertSet('form.start_date', '2024-01-15')
+            ->assertSee('Edit Title');
     });
 
-    it('displays correct title in create mode', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component->assertSee('Create Title');
+    it('propagates a missing title failure', function () {
+        expect(fn () => livewire(FormModal::class)->call('openModal', PHP_INT_MAX))
+            ->toThrow(ModelNotFoundException::class);
     });
 
-    it('displays correct title in edit mode', function () {
-        $title = Title::factory()->create(['name' => 'Test Championship Title']);
+    it('creates and debuts a singles title', function () {
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title->id);
-
-        $component->assertSee('Edit Title');
-    });
-});
-
-describe('FormModal Create Operations', function () {
-    it('can create a new title with valid data', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'New Championship Title')
-            ->set('form.type', 'singles')
-            ->set('form.start_date', '2024-01-01')
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-
-        $this->assertDatabaseHas('titles', [
-            'name' => 'New Championship Title',
-            'type' => 'singles',
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'World Championship Title',
+            'form.type' => TitleType::Singles->value,
+            'form.start_date' => '2024-02-01',
         ]);
+        $modal->call('save');
+
+        $title = Title::query()->whereName('World Championship Title')->firstOrFail();
+        expect($title->type)->toBe(TitleType::Singles)
+            ->and($title->firstActivityPeriod?->started_at->toDateString())->toBe('2024-02-01');
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertDispatched('form-submitted')
+            ->assertDispatched('closeModal')
+            ->assertSet('isModalOpen', false);
     });
 
-    it('validates required fields when creating', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', '')
-            ->set('form.type', '')
-            ->call('save');
+    it('creates an undebuted tag team title', function () {
+        $modal = livewire(FormModal::class);
 
-        $component->assertHasErrors([
-            'form.name' => 'required',
-            'form.type' => 'required',
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'World Tag Team Titles',
+            'form.type' => TitleType::TagTeam->value,
         ]);
+        $modal->call('save');
+
+        $title = Title::query()->whereName('World Tag Team Titles')->firstOrFail();
+        expect($title->type)->toBe(TitleType::TagTeam)
+            ->and($title->activityPeriods()->doesntExist())->toBeTrue();
+        $modal->assertHasNoErrors();
     });
 
-    it('validates title name uniqueness', function () {
-        Title::factory()->create(['name' => 'Existing Championship Title']);
+    it('updates a title while preserving its existing activity period', function () {
+        $title = Title::factory()->singles()->create(['name' => 'Original Championship Title']);
+        $activityPeriod = $title->activityPeriods()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
 
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Existing Championship Title')
-            ->set('form.type', 'singles')
-            ->set('form.start_date', '2024-01-01')
-            ->call('save');
+        $modal->call('openModal', $title->id);
+        $modal->set([
+            'form.name' => 'Updated Tag Team Titles',
+            'form.type' => TitleType::TagTeam->value,
+        ]);
+        $modal->call('save');
 
-        $component->assertHasErrors(['form.name']);
+        $title->refresh();
+        expect($title->name)->toBe('Updated Tag Team Titles')
+            ->and($title->type)->toBe(TitleType::TagTeam)
+            ->and($title->activityPeriods()->count())->toBe(1)
+            ->and($title->currentActivityPeriod()->firstOrFail()->is($activityPeriod))->toBeTrue();
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertSet('isModalOpen', false);
     });
 
-    it('validates title type enum values', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Championship Title')
-            ->set('form.type', 'InvalidType')
-            ->call('save');
+    it('requires a title name and type', function () {
+        $modal = livewire(FormModal::class);
 
-        $component->assertHasErrors(['form.type']);
+        $modal->call('openModal');
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors([
+                'form.name' => 'required',
+                'form.type' => 'required',
+            ])
+            ->assertNotDispatched('closeModal')
+            ->assertSet('isModalOpen', true);
+        expect(Title::query()->doesntExist())->toBeTrue();
     });
 
-    it('validates start_date date format', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'Test Championship Title')
-            ->set('form.type', 'singles')
-            ->set('form.start_date', '2023-13-32')
-            ->call('save');
+    it('rejects invalid title field values', function (string $case) {
+        [$field, $value, $rule] = match ($case) {
+            'long name' => ['form.name', str_repeat('a', 256).' Title', 'max'],
+            'invalid suffix' => ['form.name', 'World Championship', 'ends_with'],
+            'invalid type' => ['form.type', 'trios', null],
+            'invalid debut date' => ['form.start_date', 'not-a-date', 'date'],
+            default => throw new InvalidArgumentException("Unknown validation case: {$case}"),
+        };
+        $modal = livewire(FormModal::class);
 
-        $component->assertHasErrors(['form.start_date']);
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Valid Championship Title',
+            'form.type' => TitleType::Singles->value,
+        ]);
+        $modal->set($field, $value);
+        $modal->call('save');
+
+        if ($rule === null) {
+            $modal->assertHasErrors([$field]);
+        } else {
+            $modal->assertHasErrors([$field => $rule]);
+        }
+        expect(Title::query()->doesntExist())->toBeTrue();
+    })->with([
+        'long name',
+        'invalid suffix',
+        'invalid type',
+        'invalid debut date',
+    ]);
+
+    it('rejects a title name already used by another title', function () {
+        Title::factory()->singles()->create(['name' => 'Existing Championship Title']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->set([
+            'form.name' => 'Existing Championship Title',
+            'form.type' => TitleType::Singles->value,
+        ]);
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.name' => 'unique']);
+        expect(Title::query()->count())->toBe(1);
+    });
+
+    it('allows a title to retain its current name', function () {
+        $title = Title::factory()->singles()->create(['name' => 'Current Championship Title']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $title->id);
+        $modal->call('save');
+
+        $modal->assertHasNoErrors();
+        expect($title->refresh()->name)->toBe('Current Championship Title');
+    });
+
+    it('rejects another title name while editing', function () {
+        Title::factory()->singles()->create(['name' => 'Existing Championship Title']);
+        $title = Title::factory()->singles()->create(['name' => 'Current Championship Title']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $title->id);
+        $modal->set('form.name', 'Existing Championship Title');
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.name' => 'unique']);
+        expect($title->refresh()->name)->toBe('Current Championship Title');
+    });
+
+    it('prevents changing the debut date of an active title', function () {
+        $title = Title::factory()->singles()->create(['name' => 'Active Championship Title']);
+        $title->activityPeriods()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $title->id);
+        $modal->set('form.start_date', '2024-02-01');
+        $modal->call('save');
+
+        $modal->assertHasErrors(['form.start_date']);
+        expect($title->firstActivityPeriod?->started_at->toDateString())->toBe('2024-01-15');
+    });
+
+    it('resets edited title data when reopening in create mode', function () {
+        $title = Title::factory()->active()->create();
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $title->id);
+        $modal->call('openModal');
+
+        $modal
+            ->assertSet('form.name', '')
+            ->assertSet('form.type', '')
+            ->assertSet('form.start_date', '');
+    });
+
+    it('generates valid dummy data that can create a title', function () {
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal');
+        $modal->call('fillDummyFields');
+        $modal->call('save');
+
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('form-submitted')
+            ->assertSet('isModalOpen', false);
+        expect(Title::query()->count())->toBe(1);
     });
 });
 
-describe('FormModal Edit Operations', function () {
-    it('can edit an existing title', function () {
-        $title = Title::factory()->create([
-            'name' => 'Original Championship Title',
-            'type' => 'singles',
-        ]);
+it('forbids users without administrative access from opening the title form', function (string $actor, string $operation) {
+    $title = $operation === 'update' ? Title::factory()->create() : null;
 
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title->id)
-            ->set('form.name', 'Updated Championship Title')
-            ->set('form.type', 'tag-team')
-            ->call('save');
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
 
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
+    $modal = livewire(FormModal::class);
+    $modal->call('openModal', $title?->id);
 
-        $this->assertDatabaseHas('titles', [
-            'id' => $title->id,
-            'name' => 'Updated Championship Title',
-            'type' => 'tag-team',
-        ]);
-    });
-
-    it('loads existing title data in edit mode', function () {
-        $title = Title::factory()->create([
-            'name' => 'Test Championship Title',
-            'type' => 'singles',
-        ]);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title->id);
-
-        $component->assertSet('form.name', 'Test Championship Title');
-        $component->assertSet('form.type', 'singles');
-    });
-
-    it('validates uniqueness excluding current title when editing', function () {
-        $title1 = Title::factory()->create(['name' => 'Championship One Title']);
-        $title2 = Title::factory()->create(['name' => 'Championship Two Title']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title2->id)
-            ->set('form.name', 'Championship One Title')
-            ->call('save');
-
-        $component->assertHasErrors(['form.name']);
-    });
-
-    it('allows keeping same name when editing', function () {
-        $title = Title::factory()->create([
-            'name' => 'Test Championship Title',
-            'type' => 'singles',
-        ]);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title->id)
-            ->set('form.name', 'Test Championship Title')
-            ->set('form.type', 'tag-team')
-            ->call('save');
-
-        $component->assertHasNoErrors();
-        $component->assertDispatched('form-submitted');
-    });
-});
-
-describe('FormModal State Management', function () {
-    it('resets form when switching modes', function () {
-        $title = Title::factory()->create(['name' => 'Test Championship Title']);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title->id)
-            ->call('openModal');
-
-        $component->assertSet('form.name', null);
-        $component->assertSet('form.type', null);
-    });
-
-    it('closes modal after successful save', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'New Championship Title')
-            ->set('form.type', 'singles')
-            ->set('form.start_date', '2024-01-01')
-            ->call('save');
-
-        $component->assertDispatched('closeModal');
-    });
-
-    it('keeps modal open when validation fails', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', '')
-            ->call('save');
-
-        $component->assertNotDispatched('closeModal');
-    });
-});
-
-describe('FormModal Business Logic', function () {
-    it('handles title activation periods correctly', function () {
-        $component = livewire(FormModal::class)
-            ->call('openModal')
-            ->set('form.name', 'New Championship Title')
-            ->set('form.type', 'singles')
-            ->set('form.start_date', '2024-01-01')
-            ->call('save');
-
-        $component->assertHasNoErrors();
-
-        $title = Title::with('activityPeriods')->where('name', 'New Championship Title')->firstOrFail();
-        expect($title->firstActivityPeriod?->started_at)->toBeInstanceOf(Carbon::class);
-    });
-
-    it('validates debut date change rules', function () {
-        $title = Title::factory()->withActivationPeriod()->create();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal', $title->id)
-            ->set('form.start_date', '2025-01-01')
-            ->call('save');
-
-        // Should validate debut date change rules
-        $component->assertHasNoErrors();
-    });
-});
-
-describe('FormModal Authorization', function () {
-    it('requires authentication', function () {
-        auth()->logout();
-
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component->assertForbidden();
-    });
-
-    it('requires administrator privileges', function () {
-        $basicUser = basicUser();
-        actingAs($basicUser);
-
-        $component = livewire(FormModal::class)
-            ->call('openModal');
-
-        $component->assertForbidden();
-    });
-});
+    $modal->assertForbidden();
+})->with([
+    'guest creating' => ['guest', 'create'],
+    'basic user creating' => ['basic user', 'create'],
+    'guest updating' => ['guest', 'update'],
+    'basic user updating' => ['basic user', 'update'],
+]);
