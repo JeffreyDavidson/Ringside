@@ -40,7 +40,9 @@ class PreviousTitleChampionships extends DataTableComponent
 
     protected function configure(): void
     {
-        Gate::authorize('viewAny', Title::class);
+        $titleId = $this->requireContextId($this->titleId ?? null, 'title');
+
+        Gate::authorize('view', Title::query()->findOrFail($titleId));
     }
 
     /** @return TitleChampionshipBuilder<TitleChampionship> */
