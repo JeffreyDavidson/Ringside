@@ -31,6 +31,8 @@ class PreviousMatches extends BasePreviousMatchesTable
 
     protected function configure(): void
     {
+        parent::configure();
+
         $refereeId = $this->requireContextId($this->refereeId ?? null, 'referee');
 
         Gate::authorize('view', Referee::query()->findOrFail($refereeId));

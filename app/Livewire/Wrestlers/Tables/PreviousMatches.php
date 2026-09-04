@@ -31,6 +31,8 @@ class PreviousMatches extends BasePreviousMatchesTable
 
     protected function configure(): void
     {
+        parent::configure();
+
         $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
 
         Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));

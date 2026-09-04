@@ -7,6 +7,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -130,6 +131,20 @@ describe('Previous Wrestlers Table Component', function () {
         $table->assertSee('No records found.');
     });
 });
+
+it('forbids users without access to the tag team', function (string $actor) {
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    livewire(PreviousWrestlers::class, ['tagTeamId' => $this->tagTeam->id])
+        ->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
 
 describe('Previous Wrestlers Table Columns', function () {
     it('displays wrestler name with link', function () {

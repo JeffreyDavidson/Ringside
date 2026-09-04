@@ -31,6 +31,8 @@ class PreviousMatches extends BasePreviousMatchesTable
 
     protected function configure(): void
     {
+        parent::configure();
+
         $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
