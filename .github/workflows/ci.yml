@@ -66,7 +66,20 @@ jobs:
               run: npm ci --ignore-scripts --no-fund
 
             - name: Audit npm dependencies
-              run: npm audit --audit-level=high
+              shell: bash
+              run: |
+                  for attempt in 1 2 3; do
+                      if timeout 90s npm audit --audit-level=high --fetch-timeout=30000 --fetch-retries=1; then
+                          exit 0
+                      fi
+
+                      if [ "$attempt" -eq 3 ]; then
+                          exit 1
+                      fi
+
+                      echo "::warning::npm audit attempt $attempt failed; retrying after a short delay."
+                      sleep "$((attempt * 10))"
+                  done
 
     lint:
         name: PHP and Blade formatting
