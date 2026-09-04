@@ -11,6 +11,7 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Filter;
 use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Users\User;
+use Illuminate\Support\Facades\Gate;
 
 /** @extends BaseTable<User> */
 class Main extends BaseTable
@@ -29,6 +30,11 @@ class Main extends BaseTable
         return User::query()
             ->select('*')
             ->oldest('last_name');
+    }
+
+    protected function configure(): void
+    {
+        Gate::authorize('viewAny', User::class);
     }
 
     /** @return array<Column> */
