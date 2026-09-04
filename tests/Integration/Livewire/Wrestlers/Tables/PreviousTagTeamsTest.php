@@ -8,6 +8,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
@@ -133,4 +134,19 @@ describe('PreviousTagTeamsTable Authorization', function () {
 
         $component->assertSuccessful();
     });
+
+    it('forbids users without access to the wrestler', function (string $actor) {
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
+
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+
+        $component->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
+    ]);
 });

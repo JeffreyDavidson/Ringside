@@ -8,6 +8,7 @@ use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Base\Tables\BasePreviousTagTeamsTable;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /**
@@ -60,6 +61,10 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      */
     protected function configure(): void
     {
+        $wrestlerId = $this->requireContextId($this->wrestlerId ?? null, 'wrestler');
+
+        Gate::authorize('view', Wrestler::query()->findOrFail($wrestlerId));
+
         $this->addAdditionalSelects([
             'tag_teams_wrestlers.tag_team_id',
         ]);

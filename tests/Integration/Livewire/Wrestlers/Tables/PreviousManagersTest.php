@@ -6,6 +6,7 @@ use App\Livewire\Wrestlers\Tables\PreviousManagers;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
@@ -177,3 +178,19 @@ it('defines the manager history table configuration', function (): void {
             'fired_at',
         ]);
 });
+
+it('forbids users without access to the wrestler', function (string $actor): void {
+    $wrestler = Wrestler::factory()->create();
+
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    livewire(PreviousManagers::class, ['wrestlerId' => $wrestler->id])
+        ->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
