@@ -7,6 +7,7 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -73,3 +74,19 @@ it('renders for an administrator', function () {
     livewire(PreviousStables::class, ['managerId' => $manager->id])
         ->assertSuccessful();
 });
+
+it('forbids users without access to the manager', function (string $actor) {
+    $manager = Manager::factory()->create();
+
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    livewire(PreviousStables::class, ['managerId' => $manager->id])
+        ->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);

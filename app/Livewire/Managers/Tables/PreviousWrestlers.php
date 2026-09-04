@@ -9,7 +9,9 @@ use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\WrestlerManager;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<WrestlerManager> */
@@ -37,6 +39,10 @@ class PreviousWrestlers extends DataTableComponent
 
     protected function configure(): void
     {
+        $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
+
+        Gate::authorize('view', Manager::query()->findOrFail($managerId));
+
         $this->addAdditionalSelects([
             'wrestlers_managers.wrestler_id as wrestler_id',
         ]);
