@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Venues\Tables\PreviousEvents;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -12,6 +13,23 @@ use function Pest\Livewire\livewire;
 beforeEach(function () {
     actingAs(administrator());
 });
+
+it('forbids users without access to the venue', function (string $actor) {
+    $venue = Venue::factory()->create();
+
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    $table = livewire(PreviousEvents::class, ['venueId' => $venue->id]);
+
+    $table->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
 
 it('requires venue context', function () {
     expect(fn () => (new PreviousEvents())->builder())
