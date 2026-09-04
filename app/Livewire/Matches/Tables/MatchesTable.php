@@ -10,6 +10,7 @@ use App\Livewire\Matches\Support\MatchTableFormatter;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\ArrayColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Titles\Title;
@@ -52,7 +53,9 @@ class MatchesTable extends DataTableComponent
 
     protected function configure(): void
     {
-        Gate::authorize('viewAny', EventMatch::class);
+        $eventId = $this->requireContextId($this->eventId, 'event');
+
+        Gate::authorize('view', Event::query()->findOrFail($eventId));
 
         $this->addAdditionalSelects([
             'events_matches.event_id',
