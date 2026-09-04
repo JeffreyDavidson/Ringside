@@ -8,6 +8,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -111,4 +112,19 @@ describe('PreviousTitleChampionshipsTable Authorization', function () {
 
         $component->assertSuccessful();
     });
+
+    it('forbids users without access to the wrestler', function (string $actor) {
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
+
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+
+        $component->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
+    ]);
 });

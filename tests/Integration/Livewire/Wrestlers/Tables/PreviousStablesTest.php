@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Wrestlers\Tables\PreviousStables;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -85,4 +86,19 @@ describe('PreviousStablesTable Authorization', function () {
 
         $component->assertSuccessful();
     });
+
+    it('forbids users without access to the wrestler', function (string $actor) {
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
+
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+
+        $component->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
+    ]);
 });
