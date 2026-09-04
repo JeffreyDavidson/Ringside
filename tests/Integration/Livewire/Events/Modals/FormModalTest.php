@@ -54,6 +54,7 @@ describe('authorized event form interactions', function () {
 
         $modal = livewire(FormModal::class);
         $modal->call('openModal', $event->id);
+        $modal->set('form.name', 'Summer Showcase');
 
         $modal
             ->assertSet('isModalOpen', true)

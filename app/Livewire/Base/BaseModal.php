@@ -14,9 +14,6 @@ use LogicException;
  */
 abstract class BaseModal extends ModalComponent
 {
-    /** @var TModelType|null */
-    protected ?Model $model = null;
-
     protected string $modelTitleField = 'name';
 
     /** @return class-string<TModelType> */
@@ -30,15 +27,13 @@ abstract class BaseModal extends ModalComponent
         $modelForm = $this->getModelForm();
 
         if ($modelId === null) {
-            $this->model = null;
             $modelForm->reset();
 
             return;
         }
 
         $id = is_numeric($modelId) ? (int) $modelId : $modelId;
-        $this->model = $this->findModel($id);
-        $modelForm->setModel($this->model);
+        $modelForm->setModel($this->findModel($id));
     }
 
     public function getModalTitle(): string

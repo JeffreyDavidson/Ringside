@@ -47,6 +47,7 @@ describe('authorized referee form interactions', function () {
         $modal = livewire(FormModal::class);
 
         $modal->call('openModal', $referee->id);
+        $modal->set('form.first_name', 'Earl');
 
         $modal
             ->assertSet('isModalOpen', true)

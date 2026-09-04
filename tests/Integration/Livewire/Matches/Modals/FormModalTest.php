@@ -86,6 +86,7 @@ describe('authorized match form interactions', function () {
         $modal = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
         $modal->call('openModal', $match->id);
+        $modal->set('form.preview', 'Original preview.');
 
         $modal
             ->assertSet('form.matchType', MatchType::TagTeam)

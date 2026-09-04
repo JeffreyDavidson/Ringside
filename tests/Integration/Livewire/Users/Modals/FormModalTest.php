@@ -56,6 +56,7 @@ describe('authorized user form interactions', function () {
         $modal = livewire(FormModal::class);
 
         $modal->call('openModal', $user->id);
+        $modal->set('form.first_name', 'Jane');
 
         $modal
             ->assertSet('isModalOpen', true)

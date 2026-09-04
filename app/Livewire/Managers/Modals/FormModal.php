@@ -16,12 +16,7 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
-    public function mount(int|string|null $modelId = null): void
-    {
-        parent::mount($modelId);
-
-        $this->modelTitleField = 'full_name';
-    }
+    protected string $modelTitleField = 'full_name';
 
     public CreateEditForm $form;
 

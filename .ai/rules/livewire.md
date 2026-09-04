@@ -31,3 +31,6 @@ Redirect Livewire actions with redirectRoute() to a named internal route. Do not
 
 ## Share roster resource route resolution
 Use RosterResourceRouteResolver for Wrestler and TagTeam resource URLs shared by tables. Keep MatchCompetitorRouteResolver responsible only for escaped match-link markup.
+
+## Resolve models from locked identifiers
+Livewire preserves public state between requests, not protected model properties. Keep the model identifier on the form as a locked public property and resolve the current Eloquent model from it whenever validation, authorization, modal titles, or submission behavior needs model context. Do not use protected model instances as cross-request state.

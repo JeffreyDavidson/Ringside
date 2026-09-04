@@ -62,6 +62,7 @@ describe('authorized venue form interactions', function () {
 
         $modal = livewire(FormModal::class);
         $modal->call('openModal', $venue->id);
+        $modal->set('form.name', 'Madison Square Garden');
 
         $modal
             ->assertSet('isModalOpen', true)
@@ -69,7 +70,8 @@ describe('authorized venue form interactions', function () {
             ->assertSet('form.street_address', '4 Pennsylvania Plaza')
             ->assertSet('form.city', 'New York')
             ->assertSet('form.state', 'New York')
-            ->assertSet('form.zipcode', '10001');
+            ->assertSet('form.zipcode', '10001')
+            ->assertSee('Edit Venue');
     });
 
     it('propagates a missing venue failure', function () {

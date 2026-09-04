@@ -47,7 +47,7 @@ class FormModal extends BaseFormModal
 
     public function getModalTitle(): string
     {
-        if (isset($this->model)) {
+        if ($this->form->isEditing()) {
             return 'Edit Stable';
         }
 

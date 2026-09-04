@@ -114,7 +114,7 @@ class FormModal extends BaseFormModal
 
     public function getModalTitle(): string
     {
-        return isset($this->model) ? 'Edit Match' : 'Create Match';
+        return $this->form->isEditing() ? 'Edit Match' : 'Create Match';
     }
 
     public function updatedFormMatchType(mixed $value): void

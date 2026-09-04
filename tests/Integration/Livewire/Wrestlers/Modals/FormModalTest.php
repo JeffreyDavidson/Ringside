@@ -40,10 +40,13 @@ describe('FormModal Mounting', function () {
         $wrestler = Wrestler::factory()->create();
 
         $component = livewire(FormModal::class, ['modelId' => $wrestler->id]);
+        $component->set('form.name', $wrestler->name);
 
         expect($component->get('form'))->toBeInstanceOf(CreateEditForm::class);
         $component->assertSet('form.name', $wrestler->name);
-        $component->assertSuccessful();
+        $component
+            ->assertSuccessful()
+            ->assertSee("Edit {$wrestler->name}");
     });
 
     it('sets modal form path correctly', function () {

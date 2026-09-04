@@ -50,10 +50,6 @@ abstract class BaseFormModal extends BaseModal
     {
         $wasCreating = $this->form->isCreating();
 
-        if ($this->model !== null) {
-            $this->form->setModel($this->model);
-        }
-
         $this->authorizeFormAccess();
 
         if (! $this->storeForm()) {
@@ -116,11 +112,6 @@ abstract class BaseFormModal extends BaseModal
         }
 
         Gate::authorize('update', $modelClass::query()->findOrFail($this->form->modelId));
-    }
-
-    public function mount(int|string|null $modelId = null): void
-    {
-        parent::mount($modelId);
     }
 
     /** @return TForm */
