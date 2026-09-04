@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
 use App\Livewire\Titles\Tables\Main;
-use App\Livewire\Titles\Tables\TitlesTable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -14,21 +13,6 @@ use App\Models\Titles\TitleChampionship;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-/**
- * Integration tests for TitlesTable Livewire component.
- *
- * @group titles
- * @group integration
- * @group livewire
- * @group tables
- *
- * INTEGRATION TEST SCOPE:
- * - Component rendering with complex data relationships
- * - Filtering and search functionality integration
- * - Action dropdown integration
- * - Status display integration
- * - Real database interaction with relationships
- */
 describe('TitlesTable Component', function () {
 
     beforeEach(function () {
@@ -38,12 +22,10 @@ describe('TitlesTable Component', function () {
 
     describe('component rendering integration', function () {
         test('renders titles table with complete data relationships', function () {
-            // Create titles with different statuses and relationships
             $activeTitle = Title::factory()->active()->singles()->create(['name' => 'World Championship']);
             $retiredTitle = Title::factory()->retired()->tagTeam()->create(['name' => 'Tag Team Titles']);
             $undebutedTitle = Title::factory()->create(['name' => 'Intercontinental Title']);
 
-            // Create championships for titles
             $wrestler = Wrestler::factory()->bookable()->create(['name' => 'John Cena']);
             $tagTeam = TagTeam::factory()->bookable()->create(['name' => 'The Hardy Boyz']);
 
@@ -65,8 +47,8 @@ describe('TitlesTable Component', function () {
                 ->assertSee($activeTitle->name)
                 ->assertSee($retiredTitle->name)
                 ->assertSee($undebutedTitle->name)
-                ->assertSee($wrestler->name) // Champion name should be visible
-                ->assertSee($tagTeam->name); // Tag team champion should be visible
+                ->assertSee($wrestler->name)
+                ->assertSee($tagTeam->name);
         });
 
         test('displays correct status badges for different title states', function () {
@@ -82,9 +64,7 @@ describe('TitlesTable Component', function () {
                 ->assertSee('Inactive Title')
                 ->assertSee('Undebuted Title')
                 ->assertSee('Retired Title')
-                ->assertSee('Retired')
-                // Status indicators should be present (exact text may vary)
-                ->assertSeeHtml('class'); // Status classes should be rendered
+                ->assertSee('Retired');
         });
     });
 
@@ -96,14 +76,12 @@ describe('TitlesTable Component', function () {
 
             $component = livewire(Main::class);
 
-            // Test search functionality
             $component
                 ->set('search', 'World')
                 ->assertSee('World Heavyweight Championship')
                 ->assertDontSee('Intercontinental Title')
                 ->assertDontSee('United States Championship');
 
-            // Test clearing search
             $component
                 ->set('search', '')
                 ->assertSee('World Heavyweight Championship')
@@ -150,31 +128,6 @@ describe('TitlesTable Component', function () {
     });
 
     describe('action integration', function () {
-        test('action dropdown displays appropriate actions for title states', function () {
-            $activeTitle = Title::factory()->active()->create(['name' => 'Active Title']);
-            $retiredTitle = Title::factory()->retired()->create(['name' => 'Retired Title']);
-
-            $component = livewire(Main::class);
-
-            // Component should render without errors
-            $component->assertOk();
-
-            // Actions should be available (specific actions depend on component implementation)
-            $component->assertSee($activeTitle->name);
-            $component->assertSee($retiredTitle->name);
-        });
-
-        test('component integrates with authorization policies', function () {
-            $title = Title::factory()->create(['name' => 'Test Title']);
-
-            // Test as administrator (should see all actions)
-            actingAs($this->user);
-
-            $component = livewire(Main::class);
-            $component->assertOk();
-            $component->assertSee($title->name);
-        });
-
         test('failed debut remains on the titles table', function () {
             $title = Title::factory()->active()->create();
 
@@ -221,7 +174,6 @@ describe('TitlesTable Component', function () {
             $title = Title::factory()->active()->create(['name' => 'World Championship']);
             $wrestler = Wrestler::factory()->bookable()->create(['name' => 'Current Champion']);
 
-            // Create current championship
             TitleChampionship::factory()
                 ->for($title, 'title')
                 ->for($wrestler, 'champion')
@@ -238,13 +190,11 @@ describe('TitlesTable Component', function () {
         test('handles vacant titles correctly', function () {
             $vacantTitle = Title::factory()->active()->create(['name' => 'Vacant Championship']);
 
-            // No championship created - title should be vacant
-
             $component = livewire(Main::class);
 
             $component
                 ->assertSee('Vacant Championship')
-                ->assertSee('Vacant'); // Should indicate vacancy
+                ->assertSee('Vacant');
         });
 
         test('displays championship history integration', function () {
@@ -252,7 +202,6 @@ describe('TitlesTable Component', function () {
             $wrestler1 = Wrestler::factory()->create(['name' => 'Former Champion']);
             $wrestler2 = Wrestler::factory()->create(['name' => 'Current Champion']);
 
-            // Create championship history
             TitleChampionship::factory()
                 ->for($title, 'title')
                 ->for($wrestler1, 'champion')
@@ -270,38 +219,12 @@ describe('TitlesTable Component', function () {
             $component
                 ->assertSee('Historical Title')
                 ->assertSee('Current Champion')
-                ->assertDontSee('Former Champion'); // Former champion shouldn't show in main table
+                ->assertDontSee('Former Champion');
         });
     });
 
-    describe('performance and data loading integration', function () {
-        test('component handles large datasets efficiently', function () {
-            // Create multiple titles with various relationships
-            Title::factory()->count(20)->create();
-
-            // Add some championships
-            $titles = Title::factory()->count(5)->active()->create();
-            $wrestlers = Wrestler::factory()->count(5)->create();
-
-            foreach ($titles as $index => $title) {
-                TitleChampionship::factory()
-                    ->for($title, 'title')
-                    ->for($wrestlers->slice($index)->firstOrFail(), 'champion')
-                    ->current()
-                    ->create();
-            }
-
-            $component = livewire(Main::class);
-
-            // Component should render efficiently
-            $component->assertOk();
-
-            // Should not have N+1 query issues (would require query monitoring in real implementation)
-            $titles = app(Main::class)->builder()->get();
-            expect($titles)->not->toBeEmpty();
-        });
-
-        test('component eager loads necessary relationships', function () {
+    describe('data loading integration', function () {
+        test('builder eager loads the current champion relationship', function () {
             $title = Title::factory()->active()->create(['name' => 'Championship Title']);
             $wrestler = Wrestler::factory()->create(['name' => 'Champion Wrestler']);
 
@@ -311,12 +234,10 @@ describe('TitlesTable Component', function () {
                 ->current()
                 ->create();
 
-            $component = livewire(Main::class);
+            $loadedTitle = app(Main::class)->builder()->findOrFail($title->id);
 
-            $component
-                ->assertOk()
-                ->assertSee('Championship Title')
-                ->assertSee('Champion Wrestler');
+            expect($loadedTitle->relationLoaded('currentChampionship'))->toBeTrue()
+                ->and($loadedTitle->currentChampionship?->relationLoaded('champion'))->toBeTrue();
         });
     });
 
@@ -327,10 +248,8 @@ describe('TitlesTable Component', function () {
             $component = livewire(Main::class);
             $component->assertSee('Original Name');
 
-            // Update title name
             $title->update(['name' => 'Updated Name']);
 
-            // Refresh component
             $component->call('$refresh');
             $component->assertSee('Updated Name');
             $component->assertDontSee('Original Name');
@@ -341,16 +260,14 @@ describe('TitlesTable Component', function () {
             $wrestler = Wrestler::factory()->create(['name' => 'New Champion']);
 
             $component = livewire(Main::class);
-            $component->assertSee('Vacant'); // Initially vacant
+            $component->assertSee('Vacant');
 
-            // Create championship
             TitleChampionship::factory()
                 ->for($title, 'title')
                 ->for($wrestler, 'champion')
                 ->current()
                 ->create();
 
-            // Refresh component
             $component->call('$refresh');
             $component->assertSee('New Champion');
         });
