@@ -12,6 +12,8 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -379,9 +381,30 @@ describe('MatchesTable Event Integration', function () {
 });
 
 describe('MatchesTable Authorization', function () {
+    it('authorizes the selected event instance', function () {
+        $event = Event::factory()->create();
+        $authorizedEvent = null;
+
+        Gate::before(function ($user, string $ability, array $arguments) use (&$authorizedEvent): ?bool {
+            if ($ability !== 'view' || ! ($arguments[0] ?? null) instanceof Event) {
+                return null;
+            }
+
+            $authorizedEvent = $arguments[0];
+
+            return true;
+        });
+        actingAs(basicUser());
+
+        livewire(MatchesTable::class, ['eventId' => $event->id])
+            ->assertSuccessful();
+
+        expect($authorizedEvent?->is($event))->toBeTrue();
+    });
+
     it('requires authentication', function () {
         $event = Event::factory()->create();
-        auth()->logout();
+        Auth::logout();
 
         livewire(MatchesTable::class, ['eventId' => $event->id])
             ->assertForbidden();
