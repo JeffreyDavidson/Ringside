@@ -8,7 +8,9 @@ use App\Builders\Roster\ManagerBuilder;
 use App\Livewire\Base\Tables\BasePreviousManagersTable;
 use App\Livewire\Table\Column;
 use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Stables\Stable;
 use App\Queries\Roster\StableManagerHistoryQuery;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends BasePreviousManagersTable<Manager> */
@@ -42,5 +44,12 @@ class PreviousManagers extends BasePreviousManagersTable
             Column::make(__('managers.status'), 'status')
                 ->label(fn (Manager $manager) => $manager->status->label()),
         ];
+    }
+
+    protected function configure(): void
+    {
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
+
+        Gate::authorize('view', Stable::query()->findOrFail($stableId));
     }
 }

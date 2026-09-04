@@ -11,7 +11,9 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<StableTagTeam> */
@@ -62,6 +64,10 @@ class PreviousTagTeams extends DataTableComponent
 
     protected function configure(): void
     {
+        $stableId = $this->requireContextId($this->stableId ?? null, 'stable');
+
+        Gate::authorize('view', Stable::query()->findOrFail($stableId));
+
         $this->addAdditionalSelects([
             'stables_tag_teams.tag_team_id',
             'stables_tag_teams.stable_id',
