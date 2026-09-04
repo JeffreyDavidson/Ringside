@@ -12,6 +12,19 @@ use Illuminate\Support\Collection;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
+it('forbids users without administrative access', function (string $actor) {
+    if ($actor === 'basic user') {
+        actingAs(basicUser());
+    }
+
+    $table = livewire(Main::class);
+
+    $table->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
+
 /**
  * Integration tests for UsersTable Livewire component.
  *
