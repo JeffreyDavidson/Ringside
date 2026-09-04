@@ -134,6 +134,18 @@ describe('FormModal Form Integration', function () {
         expect($wrestler->hometown)->toBe('Updated City');
         $component->assertSuccessful();
     });
+
+    it('rejects changing an active wrestler employment date', function () {
+        $wrestler = Wrestler::factory()->create();
+        $wrestler->employments()->create(['started_at' => '2024-01-15']);
+        $component = livewire(FormModal::class);
+
+        $component->call('openModal', $wrestler->id);
+        $component->set('form.employment_date', '2024-01-01');
+        $component->call('submitForm');
+
+        $component->assertHasErrors(['form.employment_date']);
+    });
 });
 
 describe('FormModal Dummy Data', function () {

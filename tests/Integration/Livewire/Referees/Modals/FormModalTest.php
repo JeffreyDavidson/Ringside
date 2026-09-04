@@ -129,6 +129,20 @@ describe('authorized referee form interactions', function () {
             ->assertSet('isModalOpen', false);
     });
 
+    it('rejects changing an active referee employment date', function () {
+        $referee = Referee::factory()->create();
+        $referee->employments()->create(['started_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $referee->id);
+        $modal->set('form.employment_date', '2024-01-01');
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.employment_date'])
+            ->assertSet('isModalOpen', true);
+    });
+
     it('requires both referee names', function () {
         $modal = livewire(FormModal::class);
 

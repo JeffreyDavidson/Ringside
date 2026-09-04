@@ -197,6 +197,8 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
+        $wrestler = $this->isEditing() ? $this->wrestler() : null;
+
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('wrestlers', 'name')->ignore($this->modelId)],
             'hometown' => ['required', 'string', 'max:255'],
@@ -204,7 +206,7 @@ class CreateEditForm extends BaseForm
             'height_inches' => ['required', 'integer', 'max:11'],
             'weight' => ['required', 'integer', 'digits:3'],
             'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('wrestlers', 'signature_move')->ignore($this->modelId)],
-            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],
+            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($wrestler)],
         ];
     }
 
