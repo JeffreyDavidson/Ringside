@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\TagTeams\Tables\PreviousStables;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -49,3 +50,19 @@ it('renders for an administrator', function () {
     livewire(PreviousStables::class, ['tagTeamId' => $tagTeam->id])
         ->assertSuccessful();
 });
+
+it('forbids users without access to the tag team', function (string $actor) {
+    $tagTeam = TagTeam::factory()->create();
+
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    livewire(PreviousStables::class, ['tagTeamId' => $tagTeam->id])
+        ->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);

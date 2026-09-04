@@ -6,9 +6,11 @@ use App\Livewire\TagTeams\Tables\PreviousManagers;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     actingAs(administrator());
@@ -36,3 +38,19 @@ it('renders previous managers without lazy loading each relationship', function 
         ->and($assignment->relationLoaded('manager'))->toBeTrue()
         ->and(DB::getQueryLog())->toBeEmpty();
 });
+
+it('forbids users without access to the tag team', function (string $actor) {
+    $tagTeam = TagTeam::factory()->create();
+
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    livewire(PreviousManagers::class, ['tagTeamId' => $tagTeam->id])
+        ->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);

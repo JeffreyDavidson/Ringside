@@ -11,7 +11,9 @@ use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
 /** @extends DataTableComponent<TagTeamWrestler> */
@@ -62,6 +64,10 @@ class PreviousWrestlers extends DataTableComponent
 
     protected function configure(): void
     {
+        $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
+
+        Gate::authorize('view', TagTeam::query()->findOrFail($tagTeamId));
+
         $this->addAdditionalSelects([
             'tag_teams_wrestlers.wrestler_id',
             'tag_teams_wrestlers.tag_team_id',
