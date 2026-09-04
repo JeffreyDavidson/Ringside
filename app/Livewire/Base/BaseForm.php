@@ -14,16 +14,12 @@ use LogicException;
  */
 abstract class BaseForm extends Form
 {
-    /** @var TModel|null */
-    protected ?Model $formModel = null;
-
     #[Locked]
     public int|string|null $modelId = null;
 
     /** @param TModel|null $formModel */
     public function setModel(?Model $formModel): void
     {
-        $this->formModel = $formModel;
         $modelId = $formModel?->getKey();
 
         if (! is_int($modelId) && ! is_string($modelId) && $modelId !== null) {
@@ -34,9 +30,8 @@ abstract class BaseForm extends Form
 
         if ($formModel !== null) {
             $this->fill($formModel->getAttributes());
+            $this->loadModelData($formModel);
         }
-
-        $this->loadExtraData();
     }
 
     public function isCreating(): bool
@@ -49,18 +44,8 @@ abstract class BaseForm extends Form
         return $this->modelId !== null;
     }
 
-    public function generateModelEditName(string $fieldName): string
-    {
-        if ($this->formModel === null) {
-            return 'Unknown';
-        }
-
-        $value = $this->formModel->{$fieldName};
-
-        return (string) ($value ?? 'Unknown');
-    }
-
-    protected function loadExtraData(): void {}
+    /** @param TModel $model */
+    protected function loadModelData(Model $model): void {}
 
     /** @return array<string, array<int, mixed>> */
     abstract protected function rules(): array;

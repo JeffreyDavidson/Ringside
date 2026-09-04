@@ -10,6 +10,7 @@ use App\Livewire\Concerns\Data\PresentsVenuesList;
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
 use App\Rules\Events\DateCanBeChanged;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -26,11 +27,9 @@ class CreateEditForm extends BaseForm
 
     public ?string $preview = '';
 
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        if (isset($this->formModel->venue_id)) {
-            $this->venue_id = $this->formModel->venue_id;
-        }
+        $this->venue_id = $model->venue_id;
     }
 
     public function toData(): EventData

@@ -11,6 +11,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\Rules\Wrestlers\CanJoinTagTeam;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -120,21 +121,17 @@ class CreateEditForm extends BaseForm
      * - Loads current wrestler assignments
      * - Handles relationship changes and updates
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        if (! $this->formModel instanceof TagTeam) {
-            return;
+        if ($model->employments()->exists()) {
+            $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
         }
 
-        if ($this->formModel->employments()->exists()) {
-            $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
-        }
-
-        $currentWrestlers = $this->formModel->currentWrestlers;
+        $currentWrestlers = $model->currentWrestlers;
         $this->wrestlerA = $currentWrestlers->first()?->id;
         $this->wrestlerB = $currentWrestlers->skip(1)->first()?->id;
 
-        $this->managers = $this->formModel->currentManagers
+        $this->managers = $model->currentManagers
             ->map(fn (Manager $manager): int => $manager->id)
             ->all();
     }

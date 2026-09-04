@@ -8,6 +8,7 @@ use App\Data\Referees\RefereeData;
 use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Referees\Referee;
 use App\Rules\Shared\CanChangeEmploymentDate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
@@ -88,13 +89,9 @@ class CreateEditForm extends BaseForm
      *
      * @see RefereeData::$employment_date For employment date handling
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        if (! $this->formModel instanceof Referee) {
-            return;
-        }
-
-        $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
+        $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
     }
 
     /**

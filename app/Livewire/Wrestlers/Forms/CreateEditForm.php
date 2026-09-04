@@ -9,6 +9,7 @@ use App\Livewire\Base\BaseForm;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Rules\Shared\CanChangeEmploymentDate;
 use App\ValueObjects\Height;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
@@ -133,15 +134,11 @@ class CreateEditForm extends BaseForm
      * @see WrestlerData::$employment_date For employment date handling
      * @see Height::toInches() For height conversion calculations
      */
-    public function loadExtraData(): void
+    protected function loadModelData(Model $model): void
     {
-        if (! $this->formModel) {
-            return;
-        }
+        $this->employment_date = $model->firstEmployment?->started_at?->toDateString();
 
-        $this->employment_date = $this->formModel->firstEmployment?->started_at?->toDateString();
-
-        $height = $this->formModel->height;
+        $height = $model->height;
         $this->height_feet = (int) floor($height->toInches() / 12);
         $this->height_inches = $height->toInches() % 12;
     }
