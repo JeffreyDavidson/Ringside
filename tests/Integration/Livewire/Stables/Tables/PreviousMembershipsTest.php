@@ -9,6 +9,7 @@ use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -90,3 +91,19 @@ test('previous tag teams renders typed membership history for one stable', funct
         ->assertDontSee($currentTagTeam->name)
         ->assertDontSee($otherStableTagTeam->name);
 });
+
+it('forbids users without access to the stable', function (string $componentClass, string $actor) {
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    livewire($componentClass, ['stableId' => $this->stable->id])
+        ->assertForbidden();
+})->with([
+    'previous wrestlers as guest' => [PreviousWrestlers::class, 'guest'],
+    'previous wrestlers as basic user' => [PreviousWrestlers::class, 'basic user'],
+    'previous tag teams as guest' => [PreviousTagTeams::class, 'guest'],
+    'previous tag teams as basic user' => [PreviousTagTeams::class, 'basic user'],
+]);
