@@ -179,6 +179,7 @@ class CreateEditForm extends BaseForm
     {
         $stableStartDate = $this->parseStartDate();
         $members = $this->selectedMembers();
+        $stable = $this->isEditing() ? $this->stable() : null;
 
         $rules = [
             'name' => [
@@ -190,7 +191,7 @@ class CreateEditForm extends BaseForm
             'started_at' => [
                 'nullable',
                 'date',
-                new CanChangeDebutDate($this->formModel),
+                new CanChangeDebutDate($stable),
                 new HasMinimumMembers(
                     $members->wrestlers ?? collect(),
                     $members->tagTeams ?? collect(),

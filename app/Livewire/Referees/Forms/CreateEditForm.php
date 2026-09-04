@@ -139,10 +139,12 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
+        $referee = $this->isEditing() ? $this->referee() : null;
+
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],
+            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($referee)],
         ];
     }
 

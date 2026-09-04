@@ -158,6 +158,22 @@ describe('authorized stable form interactions', function () {
             ->assertSet('isModalOpen', false);
     });
 
+    it('rejects changing an active stable start date', function () {
+        $wrestlers = Wrestler::factory()->count(2)->bookable()->create();
+        $stable = Stable::factory()->create();
+        $stable->activityPeriods()->create(['started_at' => '2024-01-15']);
+        $stable->wrestlers()->attach($wrestlers->modelKeys(), ['joined_at' => '2024-01-15']);
+        $modal = livewire(FormModal::class);
+
+        $modal->call('openModal', $stable->id);
+        $modal->set('form.started_at', '2024-02-01');
+        $modal->call('save');
+
+        $modal
+            ->assertHasErrors(['form.started_at'])
+            ->assertSet('isModalOpen', true);
+    });
+
     it('requires a stable name', function () {
         $modal = livewire(FormModal::class);
 

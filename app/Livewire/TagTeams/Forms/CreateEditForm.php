@@ -198,6 +198,8 @@ class CreateEditForm extends BaseForm
      */
     protected function rules(): array
     {
+        $tagTeam = $this->isEditing() ? $this->tagTeam() : null;
+
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('tag_teams', 'name')->ignore($this->modelId)],
             'signature_move' => ['nullable', 'string', 'max:255', Rule::unique('tag_teams', 'signature_move')->ignore($this->modelId)],
@@ -205,7 +207,7 @@ class CreateEditForm extends BaseForm
             'wrestlerB' => ['bail', 'required', 'integer', 'exists:wrestlers,id', 'different:wrestlerA', new CanJoinTagTeam($this->modelId)],
             'managers' => ['array'],
             'managers.*' => ['integer', 'exists:managers,id'],
-            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($this->formModel)],
+            'employment_date' => ['nullable', 'date', new CanChangeEmploymentDate($tagTeam)],
         ];
     }
 
