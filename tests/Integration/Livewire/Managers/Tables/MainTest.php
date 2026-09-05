@@ -2,208 +2,164 @@
 
 declare(strict_types=1);
 
-use App\Actions\Managers\EmployAction;
 use App\Enums\Shared\EmploymentStatus;
 use App\Livewire\Managers\Tables\Main;
 use App\Models\Roster\Managers\Manager;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-describe('ManagersTable Component', function () {
-
-    beforeEach(function () {
-        $this->user = administrator();
-        actingAs($this->user);
-    });
-
-    describe('component rendering integration', function () {
-        test('renders managers table with complete data relationships', function () {
-            Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Aaaaaa']);
-            Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Aaaaab']);
-            Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Aaaaac']);
-            Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Aaaaad']);
-
-            $component = livewire(Main::class);
-
-            $component
-                ->assertSee('Active Aaaaaa')
-                ->assertSee('Injured Aaaaab')
-                ->assertSee('Retired Aaaaac')
-                ->assertSee('Suspended Aaaaad');
-        })->group('managers', 'tables', 'rendering', 'integration');
-
-        test('displays correct status badges for different manager states', function () {
-            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
-            $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
-            $retiredManager = Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager']);
-            $releasedManager = Manager::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Manager']);
-
-            $component = livewire(Main::class);
-
-            $component
-                ->assertSee('Employed Manager')
-                ->assertSee('Injured Manager')
-                ->assertSee('Suspended Manager')
-                ->assertSee('Retired Manager')
-                ->assertSee('Released Manager');
-        })->group('managers', 'tables', 'status', 'badges');
-    });
-
-    describe('filtering and search integration', function () {
-        test('search functionality filters managers correctly', function () {
-            Manager::factory()->create(['first_name' => 'Paul', 'last_name' => 'Bearer']);
-            Manager::factory()->create(['first_name' => 'Jimmy', 'last_name' => 'Hart']);
-            Manager::factory()->create(['first_name' => 'Bobby', 'last_name' => 'Heenan']);
-
-            $component = livewire(Main::class);
-
-            $component
-                ->set('search', 'Paul')
-                ->assertSee('Paul Bearer')
-                ->assertDontSee('Jimmy Hart')
-                ->assertDontSee('Bobby Heenan');
-
-            $component
-                ->set('search', '')
-                ->assertSee('Paul Bearer')
-                ->assertSee('Jimmy Hart')
-                ->assertSee('Bobby Heenan');
-        });
-
-        test('status filter functionality works with real data', function () {
-            $managers = [
-                EmploymentStatus::Employed->value => Manager::factory()->employed()->create(['first_name' => 'Employed', 'last_name' => 'Manager'])->refresh(),
-                EmploymentStatus::Released->value => Manager::factory()->released()->create(['first_name' => 'Released', 'last_name' => 'Manager'])->refresh(),
-                EmploymentStatus::Unemployed->value => Manager::factory()->unemployed()->create(['first_name' => 'Unemployed', 'last_name' => 'Manager'])->refresh(),
-                EmploymentStatus::Retired->value => Manager::factory()->retired()->create(['first_name' => 'Retired', 'last_name' => 'Manager'])->refresh(),
-            ];
-
-            foreach ($managers as $status => $visibleManager) {
-                $component = livewire(Main::class)
-                    ->set('filterValues.status', $status)
-                    ->assertSee($visibleManager->full_name);
-
-                foreach ($managers as $otherStatus => $hiddenManager) {
-                    if ($otherStatus !== $status) {
-                        $component->assertDontSee($hiddenManager->full_name);
-                    }
-                }
-            }
-        });
-
-        test('future employment filter returns only managers awaiting employment', function () {
-            $futureManager = Manager::factory()->withFutureEmployment()
-                ->create([
-                    'first_name' => 'Future',
-                    'last_name' => 'Manager',
-                ])
-                ->refresh();
-            Manager::factory()->employed()->create([
-                'first_name' => 'Employed',
-                'last_name' => 'Manager',
-            ]);
-
-            livewire(Main::class)
-                ->set('filterValues.status', 'future_employment')
-                ->assertSee($futureManager->full_name)
-                ->assertDontSee('Employed Manager');
-        });
-    });
-
-    describe('action integration', function () {
-        test('restores a deleted manager and redirects to the index', function () {
-            $deletedManager = Manager::factory()->trashed()->create([
-                'first_name' => 'Deleted',
-                'last_name' => 'Manager',
-            ]);
-
-            livewire(Main::class)
-                ->call('restore', $deletedManager->id)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('managers.index');
-
-            expect(Manager::find($deletedManager->id))->not->toBeNull();
-        });
-    });
-
-    describe('employment status integration', function () {
-        test('displays current employment status correctly', function () {
-            $employedManager = Manager::factory()->employed()->create(['first_name' => 'Currently', 'last_name' => 'Employed']);
-            $unemployedManager = Manager::factory()->unemployed()->create(['first_name' => 'Currently', 'last_name' => 'Unemployed']);
-
-            $component = livewire(Main::class);
-
-            $component
-                ->assertSee('Currently Employed')
-                ->assertSee('Currently Unemployed');
-        });
-
-    });
-
-    describe('injury and suspension integration', function () {
-        test('displays injury status correctly', function () {
-            $healthyManager = Manager::factory()->employed()->create(['first_name' => 'Healthy', 'last_name' => 'Manager']);
-            $injuredManager = Manager::factory()->injured()->create(['first_name' => 'Injured', 'last_name' => 'Manager']);
-
-            $component = livewire(Main::class);
-
-            $component
-                ->assertSee('Healthy Manager')
-                ->assertSee('Injured Manager');
-        });
-
-        test('displays suspension status correctly', function () {
-            $activeManager = Manager::factory()->employed()->create(['first_name' => 'Active', 'last_name' => 'Manager']);
-            $suspendedManager = Manager::factory()->suspended()->create(['first_name' => 'Suspended', 'last_name' => 'Manager']);
-
-            $component = livewire(Main::class);
-
-            $component
-                ->assertSee('Active Manager')
-                ->assertSee('Suspended Manager');
-        });
-
-    });
-
-    describe('data loading integration', function () {
-        test('builder loads the first employment and current employment state', function () {
-            $manager = Manager::factory()->employed()->create(['first_name' => 'Relationship', 'last_name' => 'Manager']);
-
-            $loadedManager = app(Main::class)->builder()->findOrFail($manager->id);
-
-            expect($loadedManager->relationLoaded('firstEmployment'))->toBeTrue()
-                ->and($loadedManager->status)->toBe(EmploymentStatus::Employed);
-        });
-    });
-
-    describe('real-time updates integration', function () {
-        test('component updates when manager data changes', function () {
-            $manager = Manager::factory()->create(['first_name' => 'Original', 'last_name' => 'Manager']);
-
-            $component = livewire(Main::class);
-            $component->assertSee('Original Manager');
-
-            $manager->update(['first_name' => 'Updated', 'last_name' => 'Manager']);
-
-            $component->call('$refresh');
-            $component->assertSee('Updated Manager');
-            $component->assertDontSee('Original Manager');
-        });
-
-        test('component reflects employment status changes', function () {
-            $manager = Manager::factory()->unemployed()->create(['first_name' => 'Employment', 'last_name' => 'Manager']);
-
-            $component = livewire(Main::class);
-            $component->assertSee('Unemployed');
-
-            resolve(EmployAction::class)->handle($manager, now());
-
-            $component->call('$refresh');
-            $component
-                ->assertSee('Employment Manager')
-                ->assertSee('Employed');
-        });
-    });
+beforeEach(function (): void {
+    actingAs(administrator());
 });
+
+it('renders the configured table controls and manager attributes', function (): void {
+    // Arrange
+    Manager::factory()->employed()->create([
+        'first_name' => 'Bobby',
+        'last_name' => 'Heenan',
+    ]);
+
+    // Act
+    $component = livewire(Main::class);
+
+    // Assert
+    $component
+        ->assertSuccessful()
+        ->assertSee('Add Manager')
+        ->assertSeeHtml('placeholder="Search managers"')
+        ->assertSee('Bobby Heenan')
+        ->assertSee(EmploymentStatus::Employed->label());
+});
+
+it('filters managers by name and clears the search', function (): void {
+    // Arrange
+    Manager::factory()->create(['first_name' => 'Paul', 'last_name' => 'Bearer']);
+    Manager::factory()->create(['first_name' => 'Jimmy', 'last_name' => 'Hart']);
+    $component = livewire(Main::class);
+
+    // Act
+    $component->set('search', 'Paul');
+
+    // Assert
+    $component
+        ->assertSee('Paul Bearer')
+        ->assertDontSee('Jimmy Hart');
+
+    // Act
+    $component->set('search', '');
+
+    // Assert
+    $component
+        ->assertSee('Paul Bearer')
+        ->assertSee('Jimmy Hart');
+});
+
+it('filters managers by employment status', function (EmploymentStatus $status): void {
+    // Arrange
+    $visibleManager = match ($status) {
+        EmploymentStatus::Employed => Manager::factory()->employed()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
+        EmploymentStatus::Released => Manager::factory()->released()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
+        EmploymentStatus::Unemployed => Manager::factory()->unemployed()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
+        EmploymentStatus::Retired => Manager::factory()->retired()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
+        EmploymentStatus::FutureEmployment => Manager::factory()->withFutureEmployment()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
+    };
+    $hiddenManager = $status === EmploymentStatus::Employed
+        ? Manager::factory()->released()->create(['first_name' => 'Hidden', 'last_name' => 'Manager'])
+        : Manager::factory()->employed()->create(['first_name' => 'Hidden', 'last_name' => 'Manager']);
+    $component = livewire(Main::class);
+
+    // Act
+    $component->set('filterValues.status', $status->value);
+
+    // Assert
+    $component
+        ->assertSee($visibleManager->full_name)
+        ->assertDontSee($hiddenManager->full_name);
+})->with(EmploymentStatus::cases());
+
+it('loads the employment state used by the table', function (): void {
+    // Arrange
+    $manager = Manager::factory()->employed()->create();
+
+    // Act
+    $loadedManager = app(Main::class)->builder()->findOrFail($manager->id);
+
+    // Assert
+    expect($loadedManager->relationLoaded('firstEmployment'))->toBeTrue()
+        ->and($loadedManager->status)->toBe(EmploymentStatus::Employed);
+});
+
+it('renders updated manager data after a refresh', function (): void {
+    // Arrange
+    $manager = Manager::factory()->create([
+        'first_name' => 'Original',
+        'last_name' => 'Manager',
+    ]);
+    $component = livewire(Main::class);
+    $component->assertSee('Original Manager');
+    $manager->update(['first_name' => 'Updated']);
+
+    // Act
+    $component->call('$refresh');
+
+    // Assert
+    $component
+        ->assertSee('Updated Manager')
+        ->assertDontSee('Original Manager');
+});
+
+it('employs an unemployed manager while preserving table state', function (): void {
+    // Arrange
+    $manager = Manager::factory()->unemployed()->create([
+        'first_name' => 'Employment',
+        'last_name' => 'Manager',
+    ]);
+    $component = livewire(Main::class)
+        ->set('search', 'Employment')
+        ->set('filterValues.status', EmploymentStatus::Unemployed->value);
+
+    // Act
+    $component->call('employ', $manager);
+
+    // Assert
+    $component
+        ->assertSet('search', 'Employment')
+        ->assertSet('filterValues.status', EmploymentStatus::Unemployed->value)
+        ->assertHasNoErrors();
+    expect(freshModel($manager)->status)->toBe(EmploymentStatus::Employed);
+});
+
+it('restores a deleted manager and redirects to the index', function (): void {
+    // Arrange
+    $manager = Manager::factory()->trashed()->create();
+    $component = livewire(Main::class);
+
+    // Act
+    $component->call('restore', $manager->id);
+
+    // Assert
+    $component
+        ->assertHasNoErrors()
+        ->assertRedirectToRoute('managers.index');
+    expect(Manager::find($manager->id))->not->toBeNull();
+});
+
+it('forbids users without manager access', function (string $actor): void {
+    // Arrange
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    // Act
+    $component = livewire(Main::class);
+
+    // Assert
+    $component->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
