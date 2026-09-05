@@ -5,8 +5,9 @@ declare(strict_types=1);
 use App\Livewire\Concerns\GeneratesDummyData;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-describe('GeneratesDummyData', function () {
-    test('delegates population to the typed component implementation', function () {
+describe('dummy data generation', function (): void {
+    it('delegates population to the typed component implementation', function (): void {
+        // Arrange
         $component = new class
         {
             use GeneratesDummyData;
@@ -19,12 +20,15 @@ describe('GeneratesDummyData', function () {
             }
         };
 
+        // Act
         $component->fillDummyFields();
 
+        // Assert
         expect($component->name)->toBe('Test Name');
     });
 
-    test('rejects dummy data requests outside local and testing environments', function () {
+    it('rejects requests outside local and testing environments', function (): void {
+        // Arrange
         $component = new class
         {
             use GeneratesDummyData;
@@ -34,6 +38,7 @@ describe('GeneratesDummyData', function () {
 
         app()->detectEnvironment(fn (): string => 'production');
 
+        // Act / Assert
         try {
             expect(fn () => $component->fillDummyFields())->toThrow(NotFoundHttpException::class);
         } finally {
@@ -41,7 +46,8 @@ describe('GeneratesDummyData', function () {
         }
     });
 
-    test('allows each component to define its own generated values', function () {
+    it('allows each component to define its own generated values', function (): void {
+        // Arrange
         $component = new class
         {
             use GeneratesDummyData;
@@ -54,8 +60,54 @@ describe('GeneratesDummyData', function () {
             }
         };
 
+        // Act
         $component->fillDummyFields();
 
+        // Assert
         expect($component->generatedAt)->toBe('generated');
+    });
+
+    it('omits optional employment dates when generation is disabled', function (): void {
+        // Arrange
+        $component = new class
+        {
+            use GeneratesDummyData;
+
+            public function employmentDate(): ?string
+            {
+                return $this->generateOptionalEmploymentDate(0.0);
+            }
+
+            protected function populateDummyData(): void {}
+        };
+
+        // Act
+        $employmentDate = $component->employmentDate();
+
+        // Assert
+        expect($employmentDate)->toBeNull();
+    });
+
+    it('formats generated employment dates for date inputs', function (): void {
+        // Arrange
+        $component = new class
+        {
+            use GeneratesDummyData;
+
+            public function employmentDate(): ?string
+            {
+                return $this->generateOptionalEmploymentDate(1.0);
+            }
+
+            protected function populateDummyData(): void {}
+        };
+
+        // Act
+        $employmentDate = $component->employmentDate();
+
+        // Assert
+        expect($employmentDate)
+            ->toBeString()
+            ->toMatch('/^\d{4}-\d{2}-\d{2}$/');
     });
 });
