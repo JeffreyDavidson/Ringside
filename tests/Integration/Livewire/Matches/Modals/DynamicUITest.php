@@ -10,92 +10,94 @@ use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyExceptio
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    $this->admin = administrator();
-    actingAs($this->admin);
+beforeEach(function (): void {
+    actingAs(administrator());
     $this->event = Event::factory()->create();
 });
 
-describe('Dynamic Match Type UI', function () {
-    it('locks the event context against client-side changes', function () {
+describe('dynamic match type UI', function (): void {
+    it('locks the event context against client-side changes', function (): void {
+        // Arrange
         $otherEvent = Event::factory()->create();
         $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
+        // Act / Assert
         expect(fn () => $component->set('eventId', $otherEvent->id))
             ->toThrow(CannotUpdateLockedPropertyException::class);
     });
 
-    it('shows helper text when no match type is selected', function () {
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal');
+    it('shows helper text when no match type is selected', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
+        // Act
+        $component->call('openModal');
+
+        // Assert
         $component->assertSee('Select a match type to configure competitors');
     });
 
-    it('dynamically updates UI for Singles match', function () {
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal')
-            ->set('form.matchType', MatchType::Singles);
+    it('renders the competitor controls for :dataset matches', function (
+        MatchType $matchType,
+        array $visibleText,
+        array $hiddenText,
+    ): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
-        $component->assertSee('Competitor 1');
-        $component->assertSee('Competitor 2');
-        $component->assertDontSee('Competitor 3');
-        $component->assertDontSee('Team A');
-    });
+        // Act
+        $component->call('openModal');
+        $component->set('form.matchType', $matchType);
 
-    it('dynamically updates UI for Tag Team match', function () {
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal')
-            ->set('form.matchType', MatchType::TagTeam);
+        // Assert
+        foreach ($visibleText as $text) {
+            $component->assertSee($text);
+        }
 
-        $component->assertSee('Team A');
-        $component->assertSee('Team B');
-        $component->assertDontSee('Competitor 1');
-    });
+        foreach ($hiddenText as $text) {
+            $component->assertDontSee($text);
+        }
+    })->with([
+        'singles' => [
+            MatchType::Singles,
+            ['Competitor 1', 'Competitor 2'],
+            ['Competitor 3', 'Team A'],
+        ],
+        'tag team' => [
+            MatchType::TagTeam,
+            ['Team A', 'Team B'],
+            ['Competitor 1'],
+        ],
+        'triple threat' => [
+            MatchType::TripleThreat,
+            ['Competitor 1', 'Competitor 2', 'Competitor 3'],
+            ['Competitor 4', 'Team A'],
+        ],
+        'fatal four way' => [
+            MatchType::Fatal4Way,
+            ['Competitor 1', 'Competitor 2', 'Competitor 3', 'Competitor 4'],
+            ['Team A'],
+        ],
+        'battle royal' => [
+            MatchType::BattleRoyal,
+            ['Competitors (Select Multiple)', 'Select all wrestlers participating in this match'],
+            ['Competitor 1', 'Team A'],
+        ],
+    ]);
 
-    it('dynamically updates UI for Triple Threat match', function () {
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal')
-            ->set('form.matchType', MatchType::TripleThreat);
+    it('clears competitor data when the match type changes', function (): void {
+        // Arrange
+        $component = livewire(FormModal::class, ['eventId' => $this->event->id]);
 
-        $component->assertSee('Competitor 1');
-        $component->assertSee('Competitor 2');
-        $component->assertSee('Competitor 3');
-        $component->assertDontSee('Competitor 4');
-        $component->assertDontSee('Team A');
-    });
+        // Act
+        $component->call('openModal');
+        $component->set('form.matchType', MatchType::Singles);
+        $component->set('form.competitors.0.wrestlers', [123]);
+        $component->set('form.matchType', MatchType::TagTeam);
 
-    it('dynamically updates UI for Fatal Four Way match', function () {
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal')
-            ->set('form.matchType', MatchType::Fatal4Way);
-
-        $component->assertSee('Competitor 1');
-        $component->assertSee('Competitor 2');
-        $component->assertSee('Competitor 3');
-        $component->assertSee('Competitor 4');
-        $component->assertDontSee('Team A');
-    });
-
-    it('dynamically updates UI for Battle Royal match', function () {
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal')
-            ->set('form.matchType', MatchType::BattleRoyal);
-
-        $component->assertSee('Competitors (Select Multiple)');
-        $component->assertSee('Select all wrestlers participating in this match');
-        $component->assertDontSee('Competitor 1');
-        $component->assertDontSee('Team A');
-    });
-
-    it('clears competitor data when match type changes', function () {
-        $component = livewire(FormModal::class, ['eventId' => $this->event->id])
-            ->call('openModal')
-            ->set('form.matchType', MatchType::Singles)
-            ->set('form.matchType', MatchType::TagTeam);
-
-        // Verify competitors were reinitialized for tag team (2 sides)
-        $component->assertSet('form.competitors.0', ['wrestlers' => [], 'tag_teams' => []])
+        // Assert
+        $component
+            ->assertSet('form.competitors.0', ['wrestlers' => [], 'tag_teams' => []])
             ->assertSet('form.competitors.1', ['wrestlers' => [], 'tag_teams' => []]);
     });
 });
