@@ -7,243 +7,279 @@ use App\Livewire\Stables\Tables\Main;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-describe('StablesTable Component', function () {
-    beforeEach(function () {
-        $this->administrator = administrator();
-        actingAs($this->administrator);
-    });
+beforeEach(function (): void {
+    actingAs(administrator());
+});
 
-    describe('component rendering and data display', function () {
-        test('renders the configured table header and search prompt', function () {
-            livewire(Main::class)
-                ->assertSee('Add Stable')
-                ->assertSeeHtml('placeholder="Search stables"');
-        });
+it('renders the configured table controls and stable attributes', function (): void {
+    // Arrange
+    Stable::factory()->active()->create(['name' => 'The Four Horsemen']);
 
-        test('renders stables with different lifecycle states', function () {
-            Stable::factory()->active()->create(['name' => 'The Four Horsemen']);
-            Stable::factory()->retired()->create(['name' => 'D-Generation X']);
-            Stable::factory()->inactive()->create(['name' => 'The New World Order']);
+    // Act
+    $component = livewire(Main::class);
 
-            $component = livewire(Main::class);
+    // Assert
+    $component
+        ->assertSuccessful()
+        ->assertSee('Add Stable')
+        ->assertSeeHtml('placeholder="Search stables"')
+        ->assertSee('The Four Horsemen')
+        ->assertSee(StableStatus::Active->label());
+});
 
-            $component
-                ->assertSee('The Four Horsemen')
-                ->assertSee('D-Generation X')
-                ->assertSee('The New World Order');
-        });
-    });
+it('filters stables by name and clears the search', function (): void {
+    // Arrange
+    Stable::factory()->active()->create(['name' => 'The Four Horsemen']);
+    Stable::factory()->active()->create(['name' => 'New World Order']);
+    $component = livewire(Main::class);
 
-    describe('filtering and search functionality', function () {
-        test('search functionality filters stables correctly', function () {
-            Stable::factory()->active()->create(['name' => 'The Four Horsemen']);
-            Stable::factory()->active()->create(['name' => 'New World Order']);
-            Stable::factory()->active()->create(['name' => 'D-Generation X']);
+    // Act
+    $component->set('search', 'Horsemen');
 
-            $component = livewire(Main::class);
+    // Assert
+    $component
+        ->assertSee('The Four Horsemen')
+        ->assertDontSee('New World Order');
 
-            $component
-                ->set('search', 'Horsemen')
-                ->assertSee('The Four Horsemen')
-                ->assertDontSee('New World Order')
-                ->assertDontSee('D-Generation X');
+    // Act
+    $component->set('search', '');
 
-            $component
-                ->set('search', 'New')
-                ->assertSee('New World Order')
-                ->assertDontSee('The Four Horsemen')
-                ->assertDontSee('D-Generation X');
-        });
+    // Assert
+    $component
+        ->assertSee('The Four Horsemen')
+        ->assertSee('New World Order');
+});
 
-        test('status filter works correctly', function () {
-            $stables = [
-                StableStatus::Unformed->value => Stable::factory()->unactivated()->create(['name' => 'Unformed Stable']),
-                StableStatus::PendingEstablishment->value => Stable::factory()
-                    ->has(
-                        ActivityPeriod::factory()
-                            ->started(now()->subDays(4))
-                            ->ended(now()->subDays(2)),
-                        'activityPeriods',
-                    )
-                    ->has(ActivityPeriod::factory()->started(now()->addDays(2)), 'activityPeriods')
-                    ->create(['name' => 'Pending Stable']),
-                StableStatus::Active->value => Stable::factory()->active()->create(['name' => 'Active Stable']),
-                StableStatus::Inactive->value => Stable::factory()->disbanded()->create(['name' => 'Inactive Stable']),
-                StableStatus::Retired->value => Stable::factory()->retired()->create(['name' => 'Retired Stable']),
-            ];
+it('filters stables by status', function (StableStatus $status): void {
+    // Arrange
+    $visibleStable = match ($status) {
+        StableStatus::Unformed => Stable::factory()->unactivated()->create(['name' => 'Matching Stable']),
+        StableStatus::PendingEstablishment => Stable::factory()
+            ->has(
+                ActivityPeriod::factory()
+                    ->started(Date::now()->subDays(4))
+                    ->ended(Date::now()->subDays(2)),
+                'activityPeriods',
+            )
+            ->has(ActivityPeriod::factory()->started(Date::now()->addDays(2)), 'activityPeriods')
+            ->create(['name' => 'Matching Stable']),
+        StableStatus::Active => Stable::factory()->active()->create(['name' => 'Matching Stable']),
+        StableStatus::Inactive => Stable::factory()->disbanded()->create(['name' => 'Matching Stable']),
+        StableStatus::Retired => Stable::factory()->retired()->create(['name' => 'Matching Stable']),
+    };
+    $hiddenStable = $status === StableStatus::Active
+        ? Stable::factory()->inactive()->create(['name' => 'Hidden Stable'])
+        : Stable::factory()->active()->create(['name' => 'Hidden Stable']);
+    $component = livewire(Main::class);
 
-            foreach ($stables as $status => $visibleStable) {
-                $component = livewire(Main::class)
-                    ->set('filterValues.status', $status)
-                    ->assertSee($visibleStable->name);
+    // Act
+    $component->set('filterValues.status', $status->value);
 
-                foreach ($stables as $otherStatus => $hiddenStable) {
-                    if ($otherStatus !== $status) {
-                        $component->assertDontSee($hiddenStable->name);
-                    }
-                }
-            }
-        });
-    });
+    // Assert
+    $component
+        ->assertSee($visibleStable->name)
+        ->assertDontSee($hiddenStable->name);
+})->with(StableStatus::cases());
 
-    describe('stable business actions integration', function () {
-        test('disbands an active stable', function () {
-            $stable = Stable::factory()->active()->create(['name' => 'Active Stable']);
+it('disbands an active stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->active()->create();
+    $component = livewire(Main::class);
 
-            livewire(Main::class)
-                ->call('disband', $stable)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('stables.index');
+    // Act
+    $component->call('disband', $stable);
 
-            expect(freshModel($stable)->status)->toBe(StableStatus::Inactive);
-        });
+    // Assert
+    $component
+        ->assertHasNoErrors()
+        ->assertRedirectToRoute('stables.index');
+    expect(freshModel($stable)->status)->toBe(StableStatus::Inactive);
+});
 
-        test('retires an active stable', function () {
-            $stable = Stable::factory()->active()->create(['name' => 'Active Stable']);
+it('retires an active stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->active()->create();
+    $component = livewire(Main::class);
 
-            livewire(Main::class)
-                ->call('retire', $stable)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('stables.index');
+    // Act
+    $component->call('retire', $stable);
 
-            expect(freshModel($stable)->currentRetirement()->exists())->toBeTrue();
-        });
+    // Assert
+    $component
+        ->assertHasNoErrors()
+        ->assertRedirectToRoute('stables.index');
+    expect(freshModel($stable)->currentRetirement()->exists())->toBeTrue();
+});
 
-        test('unretires a retired stable', function () {
-            $stable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
+it('unretires a retired stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->retired()->create();
+    $component = livewire(Main::class);
 
-            livewire(Main::class)
-                ->call('unretire', $stable)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('stables.index');
+    // Act
+    $component->call('unretire', $stable);
 
-            expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
-        });
+    // Assert
+    $component
+        ->assertHasNoErrors()
+        ->assertRedirectToRoute('stables.index');
+    expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
+});
 
-        test('establishes an unformed stable', function () {
-            $stable = Stable::factory()->withEmployedDefaultMembers()->unactivated()->create(['name' => 'Unformed Stable']);
+it('establishes an unformed stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->withEmployedDefaultMembers()->unactivated()->create();
+    $component = livewire(Main::class);
 
-            livewire(Main::class)
-                ->call('establish', $stable)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('stables.index');
+    // Act
+    $component->call('establish', $stable);
 
-            expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
-        });
+    // Assert
+    $component
+        ->assertHasNoErrors()
+        ->assertRedirectToRoute('stables.index');
+    expect(freshModel($stable)->currentActivityPeriod()->exists())->toBeTrue();
+});
 
-        test('lifecycle actions ignore an external referrer when redirecting', function () {
-            $stable = Stable::factory()->withEmployedDefaultMembers()->unactivated()->create(['name' => 'Unformed Stable']);
-            request()->headers->set('Referer', 'https://attacker.example');
+it('ignores an external referrer when redirecting after a lifecycle action', function (): void {
+    // Arrange
+    $stable = Stable::factory()->withEmployedDefaultMembers()->unactivated()->create();
+    request()->headers->set('Referer', 'https://attacker.example');
+    $component = livewire(Main::class);
 
-            livewire(Main::class)
-                ->call('establish', $stable)
-                ->assertRedirectToRoute('stables.index');
-        });
+    // Act
+    $component->call('establish', $stable);
 
-        test('restores a deleted stable', function () {
-            $stable = Stable::factory()->retired()->trashed()->create(['name' => 'Deleted Stable']);
+    // Assert
+    $component->assertRedirectToRoute('stables.index');
+});
 
-            livewire(Main::class)
-                ->call('restore', $stable->id)
-                ->assertHasNoErrors()
-                ->assertRedirectToRoute('stables.index');
+it('restores a deleted stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->retired()->trashed()->create();
+    $component = livewire(Main::class);
 
-            expect(Stable::find($stable->id))->not->toBeNull();
-        });
+    // Act
+    $component->call('restore', $stable->id);
 
-        test('remains on the table when a stable cannot be restored', function () {
-            Stable::factory()->create(['name' => 'Existing Stable']);
-            $stable = Stable::factory()->trashed()->create(['name' => 'Existing Stable']);
+    // Assert
+    $component
+        ->assertHasNoErrors()
+        ->assertRedirectToRoute('stables.index');
+    expect(Stable::find($stable->id))->not->toBeNull();
+});
 
-            livewire(Main::class)
-                ->call('restore', $stable->id)
-                ->assertNoRedirect();
+it('remains on the table when a stable cannot be restored', function (): void {
+    // Arrange
+    Stable::factory()->create(['name' => 'Existing Stable']);
+    $stable = Stable::factory()->trashed()->create(['name' => 'Existing Stable']);
+    $component = livewire(Main::class);
 
-            expect(Stable::onlyTrashed()->find($stable->id))->not->toBeNull();
-        });
+    // Act
+    $component->call('restore', $stable->id);
 
-        test('soft deletes an inactive stable', function () {
-            $stable = Stable::factory()->inactive()->create(['name' => 'Test Stable']);
+    // Assert
+    $component->assertNoRedirect();
+    expect(Stable::onlyTrashed()->find($stable->id))->not->toBeNull();
+});
 
-            livewire(Main::class)
-                ->call('delete', $stable)
-                ->assertHasNoErrors();
+it('soft deletes an inactive stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->inactive()->create();
+    $component = livewire(Main::class);
 
-            expect(Stable::find($stable->id))->toBeNull()
-                ->and(Stable::onlyTrashed()->find($stable->id))->not->toBeNull();
-        });
-    });
+    // Act
+    $component->call('delete', $stable);
 
-    describe('business rule enforcement', function () {
-        test('does not establish an active stable', function () {
-            $stable = Stable::factory()->active()->create(['name' => 'Active Stable']);
+    // Assert
+    $component->assertHasNoErrors();
+    expect(Stable::find($stable->id))->toBeNull()
+        ->and(Stable::onlyTrashed()->find($stable->id))->not->toBeNull();
+});
 
-            livewire(Main::class)
-                ->call('establish', $stable)
-                ->assertNoRedirect();
+it('does not establish an active stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->active()->create();
+    $component = livewire(Main::class);
 
-            expect(freshModel($stable)->status)->toBe(StableStatus::Active);
-        });
+    // Act
+    $component->call('establish', $stable);
 
-        test('does not disband an inactive stable', function () {
-            $stable = Stable::factory()->inactive()->create(['name' => 'Inactive Stable']);
+    // Assert
+    $component->assertNoRedirect();
+    expect(freshModel($stable)->status)->toBe(StableStatus::Active);
+});
 
-            livewire(Main::class)
-                ->call('disband', $stable)
-                ->assertNoRedirect();
+it('does not disband an inactive stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->inactive()->create();
+    $component = livewire(Main::class);
 
-            expect(freshModel($stable)->status)->toBe(StableStatus::Inactive);
-        });
+    // Act
+    $component->call('disband', $stable);
 
-        test('does not retire an already retired stable', function () {
-            $stable = Stable::factory()->retired()->create(['name' => 'Retired Stable']);
+    // Assert
+    $component->assertNoRedirect();
+    expect(freshModel($stable)->status)->toBe(StableStatus::Inactive);
+});
 
-            livewire(Main::class)
-                ->call('retire', $stable)
-                ->assertNoRedirect();
+it('does not retire an already retired stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->retired()->create();
+    $component = livewire(Main::class);
 
-            expect(freshModel($stable)->status)->toBe(StableStatus::Retired);
-        });
+    // Act
+    $component->call('retire', $stable);
 
-        test('does not unretire an active stable', function () {
-            $stable = Stable::factory()->active()->create(['name' => 'Active Stable']);
+    // Assert
+    $component->assertNoRedirect();
+    expect(freshModel($stable)->status)->toBe(StableStatus::Retired);
+});
 
-            livewire(Main::class)
-                ->call('unretire', $stable)
-                ->assertNoRedirect();
+it('does not unretire an active stable', function (): void {
+    // Arrange
+    $stable = Stable::factory()->active()->create();
+    $component = livewire(Main::class);
 
-            expect(freshModel($stable)->status)->toBe(StableStatus::Active);
-        });
-    });
+    // Act
+    $component->call('unretire', $stable);
 
-    describe('authorization integration', function () {
-        test('forbids a basic user from viewing the component', function () {
-            actingAs(basicUser());
+    // Assert
+    $component->assertNoRedirect();
+    expect(freshModel($stable)->status)->toBe(StableStatus::Active);
+});
 
-            livewire(Main::class)
-                ->assertForbidden();
-        });
+it('forbids users without stable access', function (string $actor): void {
+    // Arrange
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
 
-        test('forbids a guest from viewing the component', function () {
-            Auth::logout();
+    // Act
+    $component = livewire(Main::class);
 
-            livewire(Main::class)
-                ->assertForbidden();
-        });
-    });
+    // Assert
+    $component->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
 
-    describe('data loading integration', function () {
-        test('builder loads the first activity period and current activity state', function () {
-            $stable = Stable::factory()->active()->create(['name' => 'Relationship Stable']);
+it('loads the activity state used by the table', function (): void {
+    // Arrange
+    $stable = Stable::factory()->active()->create();
 
-            $loadedStable = app(Main::class)->builder()->findOrFail($stable->id);
+    // Act
+    $loadedStable = app(Main::class)->builder()->findOrFail($stable->id);
 
-            expect($loadedStable->relationLoaded('firstActivityPeriod'))->toBeTrue()
-                ->and($loadedStable->status)->toBe(StableStatus::Active);
-        });
-    });
+    // Assert
+    expect($loadedStable->relationLoaded('firstActivityPeriod'))->toBeTrue()
+        ->and($loadedStable->status)->toBe(StableStatus::Active);
 });
