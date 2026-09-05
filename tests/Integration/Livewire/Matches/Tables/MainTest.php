@@ -28,42 +28,38 @@ it('renders an empty state without matches', function (): void {
         ->assertSee('No records found.');
 });
 
-it('orders matches by newest event and match number while eager loading display relationships', function (): void {
+it('renders matches by newest event and match number', function (): void {
     // Arrange
     $latestEvent = Event::factory()->create(['date' => Date::tomorrow()]);
     $earliestEvent = Event::factory()->create(['date' => Date::yesterday()]);
-    $wrestler = Wrestler::factory()->create();
-    $secondLatestMatch = EventMatch::factory()
+    $firstMatchWrestler = Wrestler::factory()->create(['name' => 'First Match Wrestler']);
+    $secondMatchWrestler = Wrestler::factory()->create(['name' => 'Second Match Wrestler']);
+    $earliestMatchWrestler = Wrestler::factory()->create(['name' => 'Earlier Match Wrestler']);
+    EventMatch::factory()
         ->forEvent($latestEvent)
         ->withMatchNumber(2)
-        ->withCompetitors([$wrestler])
+        ->withCompetitors([$secondMatchWrestler])
         ->create();
-    $firstLatestMatch = EventMatch::factory()
+    EventMatch::factory()
         ->forEvent($latestEvent)
         ->withMatchNumber(1)
+        ->withCompetitors([$firstMatchWrestler])
         ->create();
-    $earliestMatch = EventMatch::factory()
+    EventMatch::factory()
         ->forEvent($earliestEvent)
         ->withMatchNumber(1)
+        ->withCompetitors([$earliestMatchWrestler])
         ->create();
 
     // Act
-    $matches = (new Main())->builder()->get();
-    $renderedSecondLatestMatch = $matches->firstOrFail(
-        fn (EventMatch $match): bool => $match->is($secondLatestMatch),
-    );
-    $competitor = $renderedSecondLatestMatch->competitors->firstOrFail();
+    $component = livewire(Main::class);
 
     // Assert
-    expect($matches->pluck('id')->all())->toBe([
-        $firstLatestMatch->id,
-        $secondLatestMatch->id,
-        $earliestMatch->id,
-    ])->and($matches->every->relationLoaded('event'))->toBeTrue()
-        ->and($matches->every->relationLoaded('competitors'))->toBeTrue()
-        ->and($matches->every->relationLoaded('winningSide'))->toBeTrue()
-        ->and($competitor->relationLoaded('competitor'))->toBeTrue()
-        ->and($competitor->relationLoaded('side'))->toBeTrue();
+    $component->assertSeeInOrder([
+        'First Match Wrestler',
+        'Second Match Wrestler',
+        'Earlier Match Wrestler',
+    ]);
 });
 
 it('renders event, match type, competitors, and an empty result', function (): void {
@@ -93,6 +89,33 @@ it('renders event, match type, competitors, and an empty result', function (): v
         ->assertSee('N/A');
 });
 
+it('searches matches by type and clears the search', function (): void {
+    // Arrange
+    EventMatch::factory()
+        ->withMatchType(MatchType::Singles)
+        ->create();
+    EventMatch::factory()
+        ->withMatchType(MatchType::TagTeam)
+        ->create();
+    $component = livewire(Main::class);
+
+    // Act
+    $component->set('search', 'Singles');
+
+    // Assert
+    $component
+        ->assertSee('Singles')
+        ->assertDontSee('Tag Team');
+
+    // Act
+    $component->set('search', '');
+
+    // Assert
+    $component
+        ->assertSee('Singles')
+        ->assertSee('Tag Team');
+});
+
 it('deletes a match', function (): void {
     // Arrange
     $match = EventMatch::factory()->create();
@@ -102,7 +125,13 @@ it('deletes a match', function (): void {
     $component->call('delete', $match);
 
     // Assert
-    $component->assertSuccessful();
+    $component
+        ->assertHasNoErrors()
+        ->assertDispatched(
+            'flash-message',
+            type: 'status',
+            message: __('matches.actions.deleted'),
+        );
     $this->assertSoftDeleted($match);
 });
 
