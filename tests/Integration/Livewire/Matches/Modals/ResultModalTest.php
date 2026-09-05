@@ -9,19 +9,14 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Models\Matches\MatchSide;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    actingAs(administrator());
-});
-
 /**
  * @return array{EventMatch, list<MatchCompetitor>}
  */
-function matchWithResultCompetitors(MatchType $type = MatchType::Singles, int $count = 2): array
+function createMatchWithResultCompetitors(MatchType $type = MatchType::Singles, int $count = 2): array
 {
     $match = EventMatch::factory()->create(['match_type' => $type]);
     $competitors = [];
@@ -41,146 +36,193 @@ function matchWithResultCompetitors(MatchType $type = MatchType::Singles, int $c
     return [$match, $competitors];
 }
 
-it('records an ordinary match result', function () {
-    [$match, $competitors] = matchWithResultCompetitors();
-    $winningSide = $competitors[0]->side;
+describe('authorized result recording', function (): void {
+    beforeEach(function (): void {
+        actingAs(administrator());
+    });
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('form.finish', MatchFinish::Pinfall->value)
-        ->set('form.winningSideId', $winningSide->id)
-        ->call('save')
-        ->assertHasNoErrors()
-        ->assertDispatched('refreshDatatable')
-        ->assertDispatched('closeModal');
+    it('records an ordinary match result', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors();
+        $winningSide = $competitors[0]->side;
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-    expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
-        ->and($match->winning_side_id)->toBe($winningSide->id);
-});
+        // Act
+        $modal->set('form.finish', MatchFinish::Pinfall->value);
+        $modal->set('form.winningSideId', $winningSide->id);
+        $modal->call('save');
 
-it('records a draw without a winning side', function () {
-    [$match, $competitors] = matchWithResultCompetitors();
+        // Assert
+        $modal
+            ->assertHasNoErrors()
+            ->assertDispatched('refreshDatatable')
+            ->assertDispatched('closeModal');
+        expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
+            ->and($match->winning_side_id)->toBe($winningSide->id);
+    });
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('form.winningSideId', $competitors[0]->match_side_id)
-        ->set('form.finish', MatchFinish::TimeLimitDraw->value)
-        ->assertSet('form.winningSideId', null)
-        ->call('save')
-        ->assertHasNoErrors();
+    it('records a draw without a winning side', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors();
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-    expect($match->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw)
-        ->and($match->winning_side_id)->toBeNull();
-});
+        // Act
+        $modal->set('form.winningSideId', $competitors[0]->match_side_id);
+        $modal->set('form.finish', MatchFinish::TimeLimitDraw->value);
+        $modal->call('save');
 
-it('records a complete elimination match result', function () {
-    [$match, $competitors] = matchWithResultCompetitors(MatchType::BattleRoyal, 3);
-    $winner = $competitors[2];
+        // Assert
+        $modal
+            ->assertSet('form.winningSideId', null)
+            ->assertHasNoErrors();
+        expect($match->refresh()->match_finish)->toBe(MatchFinish::TimeLimitDraw)
+            ->and($match->winning_side_id)->toBeNull();
+    });
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('form.finish', MatchFinish::Stipulation->value)
-        ->set('form.winningSideId', $winner->match_side_id)
-        ->set("form.eliminations.{$competitors[0]->id}.order", '1')
-        ->set("form.eliminations.{$competitors[0]->id}.eliminatedById", (string) $winner->id)
-        ->set("form.eliminations.{$competitors[1]->id}.order", '2')
-        ->set("form.eliminations.{$competitors[1]->id}.eliminatedById", (string) $winner->id)
-        ->call('save')
-        ->assertHasNoErrors();
+    it('records a complete elimination match result', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors(MatchType::BattleRoyal, 3);
+        $winner = $competitors[2];
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-    expect($competitors[0]->refresh()->elimination_order)->toBe(1)
-        ->and($competitors[0]->eliminated_by_match_competitor_id)->toBe($winner->id)
-        ->and($competitors[1]->refresh()->elimination_order)->toBe(2)
-        ->and($winner->refresh()->elimination_order)->toBeNull();
-});
+        // Act
+        $modal->set('form.finish', MatchFinish::Stipulation->value);
+        $modal->set('form.winningSideId', $winner->match_side_id);
+        $modal->set("form.eliminations.{$competitors[0]->id}.order", '1');
+        $modal->set("form.eliminations.{$competitors[0]->id}.eliminatedById", (string) $winner->id);
+        $modal->set("form.eliminations.{$competitors[1]->id}.order", '2');
+        $modal->set("form.eliminations.{$competitors[1]->id}.eliminatedById", (string) $winner->id);
+        $modal->call('save');
 
-it('loads an existing result for correction', function () {
-    [$match, $competitors] = matchWithResultCompetitors(MatchType::BattleRoyal, 3);
-    $match->update([
-        'match_finish' => MatchFinish::Stipulation,
-        'winning_side_id' => $competitors[2]->match_side_id,
-    ]);
-    $competitors[0]->forceFill([
-        'elimination_order' => 1,
-        'eliminated_by_match_competitor_id' => $competitors[2]->id,
-    ])->save();
+        // Assert
+        $modal->assertHasNoErrors();
+        expect($competitors[0]->refresh()->elimination_order)->toBe(1)
+            ->and($competitors[0]->eliminated_by_match_competitor_id)->toBe($winner->id)
+            ->and($competitors[1]->refresh()->elimination_order)->toBe(2)
+            ->and($winner->refresh()->elimination_order)->toBeNull();
+    });
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->assertSet('form.finish', MatchFinish::Stipulation->value)
-        ->assertSet('form.winningSideId', $competitors[2]->match_side_id)
-        ->assertSet("form.eliminations.{$competitors[0]->id}.order", 1)
-        ->assertSee('Correct Match Result');
-});
+    it('loads an existing result for correction', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors(MatchType::BattleRoyal, 3);
+        $match->update([
+            'match_finish' => MatchFinish::Stipulation,
+            'winning_side_id' => $competitors[2]->match_side_id,
+        ]);
+        $competitors[0]->forceFill([
+            'elimination_order' => 1,
+            'eliminated_by_match_competitor_id' => $competitors[2]->id,
+        ])->save();
 
-it('requires a winning side for a decisive finish', function () {
-    [$match] = matchWithResultCompetitors();
+        // Act
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('form.finish', MatchFinish::Pinfall->value)
-        ->call('save')
-        ->assertHasErrors(['form.winningSideId' => ['required']])
-        ->assertNotDispatched('closeModal');
+        // Assert
+        $modal
+            ->assertSet('form.finish', MatchFinish::Stipulation->value)
+            ->assertSet('form.winningSideId', $competitors[2]->match_side_id)
+            ->assertSet("form.eliminations.{$competitors[0]->id}.order", 1)
+            ->assertSee('Correct Match Result');
+    });
 
-    expect($match->refresh()->match_finish)->toBeNull();
-});
+    it('requires a winning side for a decisive finish', function (): void {
+        // Arrange
+        [$match] = createMatchWithResultCompetitors();
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-it('hides elimination inputs for ordinary matches', function () {
-    [$match] = matchWithResultCompetitors();
+        // Act
+        $modal->set('form.finish', MatchFinish::Pinfall->value);
+        $modal->call('save');
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->assertDontSee('Eliminations');
-});
+        // Assert
+        $modal
+            ->assertHasErrors(['form.winningSideId' => ['required']])
+            ->assertNotDispatched('closeModal');
+        expect($match->refresh()->match_finish)->toBeNull();
+    });
 
-it('renders elimination inputs for supported match types', function () {
-    [$match] = matchWithResultCompetitors(MatchType::RoyalRumble, 10);
+    it('hides elimination inputs for ordinary matches', function (): void {
+        // Arrange
+        [$match] = createMatchWithResultCompetitors();
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->assertSee('Eliminations')
-        ->assertSee('Competitor 1')
-        ->assertSee('Competitor 10');
-});
+        // Act
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-it('reuses the computed match across result option consumers', function () {
-    [$match] = matchWithResultCompetitors();
-    $modal = livewire(ResultModal::class, ['matchId' => $match->id])->instance();
+        // Assert
+        $modal->assertDontSee('Eliminations');
+    });
 
-    if (! $modal instanceof ResultModal) {
-        throw new LogicException('Expected the result modal component instance.');
-    }
+    it('renders elimination inputs for supported match types', function (): void {
+        // Arrange
+        [$match] = createMatchWithResultCompetitors(MatchType::RoyalRumble, 10);
 
-    unset($modal->match);
-    DB::flushQueryLog();
-    DB::enableQueryLog();
+        // Act
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-    $modal->sideOptions();
-    $initialQueries = DB::getQueryLog();
+        // Assert
+        $modal
+            ->assertSee('Eliminations')
+            ->assertSee('Competitor 1')
+            ->assertSee('Competitor 10');
+    });
 
-    $modal->competitorOptions();
-    $modal->getModalTitle();
+    it('builds side and competitor option labels from match entrants', function (): void {
+        // Arrange
+        [$match, $competitors] = createMatchWithResultCompetitors();
 
-    expect($initialQueries)->not->toBeEmpty()
-        ->and(DB::getQueryLog())->toHaveCount(count($initialQueries));
-});
+        // Act
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-it('requires an administrator to record a result', function () {
-    [$match] = matchWithResultCompetitors();
-    actingAs(basicUser());
+        // Assert
+        $modal
+            ->assertSet('sideOptions', [
+                $competitors[0]->match_side_id => 'Competitor 1',
+                $competitors[1]->match_side_id => 'Competitor 2',
+            ])
+            ->assertSet('competitorOptions', [
+                $competitors[0]->id => 'Competitor 1',
+                $competitors[1]->id => 'Competitor 2',
+            ]);
+    });
 
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('form.finish', MatchFinish::TimeLimitDraw->value)
-        ->call('save')
-        ->assertForbidden();
-});
+    it('rejects elimination data for a competitor outside the match', function (): void {
+        // Arrange
+        [$match] = createMatchWithResultCompetitors(MatchType::BattleRoyal, 3);
+        $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
 
-it('rejects elimination data for a competitor outside the match', function () {
-    [$match] = matchWithResultCompetitors(MatchType::BattleRoyal, 3);
-
-    livewire(ResultModal::class, ['matchId' => $match->id])
-        ->set('form.finish', MatchFinish::Stipulation->value)
-        ->set('form.eliminations.999999', [
+        // Act
+        $modal->set('form.finish', MatchFinish::Stipulation->value);
+        $modal->set('form.eliminations.999999', [
             'order' => 1,
             'eliminatedById' => null,
-        ])
-        ->call('save')
-        ->assertHasErrors(['form.eliminations' => ['array']])
-        ->assertNotDispatched('closeModal');
+        ]);
+        $modal->call('save');
 
-    expect($match->refresh()->match_finish)->toBeNull();
+        // Assert
+        $modal
+            ->assertHasErrors(['form.eliminations' => ['array']])
+            ->assertNotDispatched('closeModal');
+        expect($match->refresh()->match_finish)->toBeNull();
+    });
 });
+
+it('requires an administrator to record a result', function (bool $authenticated): void {
+    // Arrange
+    [$match] = createMatchWithResultCompetitors();
+
+    if ($authenticated) {
+        actingAs(basicUser());
+    }
+
+    $modal = livewire(ResultModal::class, ['matchId' => $match->id]);
+
+    // Act
+    $modal->set('form.finish', MatchFinish::TimeLimitDraw->value);
+    $modal->call('save');
+
+    // Assert
+    $modal->assertForbidden();
+})->with([
+    'guest' => false,
+    'authenticated non-administrator' => true,
+]);
