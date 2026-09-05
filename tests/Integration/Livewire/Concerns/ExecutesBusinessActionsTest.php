@@ -5,34 +5,33 @@ declare(strict_types=1);
 use App\Exceptions\BaseBusinessException;
 use App\Livewire\Concerns\ExecutesBusinessActions;
 
-test('it flashes the provided message after a successful business action', function (): void {
-    $component = new class
-    {
-        use ExecutesBusinessActions;
-
-        /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
-        public array $dispatchedEvents = [];
-
-        public function execute(): bool
+describe('business action execution', function (): void {
+    it('flashes the provided message after a successful action', function (): void {
+        // Arrange
+        $component = new class
         {
-            return $this->executeBusinessAction(
-                static function (): void {},
-                'The action succeeded.',
-            );
-        }
+            use ExecutesBusinessActions;
 
-        public function dispatch(string $event, mixed ...$parameters): void
-        {
-            $this->dispatchedEvents[] = [
-                'event' => $event,
-                'parameters' => $parameters,
-            ];
-        }
-    };
+            /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
+            public array $dispatchedEvents = [];
 
-    expect($component->execute())->toBeTrue()
-        ->and(session('status'))->toBe('The action succeeded.')
-        ->and($component->dispatchedEvents)->toBe([
+            public function execute(): bool
+            {
+                return $this->executeBusinessAction(
+                    static function (): void {},
+                    'The action succeeded.',
+                );
+            }
+
+            public function dispatch(string $event, mixed ...$parameters): void
+            {
+                $this->dispatchedEvents[] = [
+                    'event' => $event,
+                    'parameters' => $parameters,
+                ];
+            }
+        };
+        $expectedEvents = [
             [
                 'event' => 'flash-message',
                 'parameters' => [
@@ -40,36 +39,42 @@ test('it flashes the provided message after a successful business action', funct
                     'message' => 'The action succeeded.',
                 ],
             ],
-        ]);
-});
+        ];
 
-test('it flashes and dispatches business action failures', function (): void {
-    $component = new class
-    {
-        use ExecutesBusinessActions;
+        // Act
+        $succeeded = $component->execute();
 
-        /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
-        public array $dispatchedEvents = [];
+        // Assert
+        expect($succeeded)->toBeTrue()
+            ->and(session('status'))->toBe('The action succeeded.')
+            ->and($component->dispatchedEvents)->toBe($expectedEvents);
+    });
 
-        public function execute(): bool
+    it('flashes and dispatches action failures', function (): void {
+        // Arrange
+        $component = new class
         {
-            return $this->executeBusinessAction(static function (): void {
-                throw new class('The action failed.') extends BaseBusinessException {};
-            });
-        }
+            use ExecutesBusinessActions;
 
-        public function dispatch(string $event, mixed ...$parameters): void
-        {
-            $this->dispatchedEvents[] = [
-                'event' => $event,
-                'parameters' => $parameters,
-            ];
-        }
-    };
+            /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
+            public array $dispatchedEvents = [];
 
-    expect($component->execute())->toBeFalse()
-        ->and(session('error'))->toBe('The action failed.')
-        ->and($component->dispatchedEvents)->toBe([
+            public function execute(): bool
+            {
+                return $this->executeBusinessAction(static function (): void {
+                    throw new class('The action failed.') extends BaseBusinessException {};
+                });
+            }
+
+            public function dispatch(string $event, mixed ...$parameters): void
+            {
+                $this->dispatchedEvents[] = [
+                    'event' => $event,
+                    'parameters' => $parameters,
+                ];
+            }
+        };
+        $expectedEvents = [
             [
                 'event' => 'flash-message',
                 'parameters' => [
@@ -77,5 +82,14 @@ test('it flashes and dispatches business action failures', function (): void {
                     'message' => 'The action failed.',
                 ],
             ],
-        ]);
+        ];
+
+        // Act
+        $succeeded = $component->execute();
+
+        // Assert
+        expect($succeeded)->toBeFalse()
+            ->and(session('error'))->toBe('The action failed.')
+            ->and($component->dispatchedEvents)->toBe($expectedEvents);
+    });
 });
