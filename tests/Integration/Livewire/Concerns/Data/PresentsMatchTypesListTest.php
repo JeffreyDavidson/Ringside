@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Livewire\Matches\Modals\FormModal;
 
-it('returns match types keyed by their stored values', function () {
+it('returns match types keyed by their stored values', function (): void {
     // Arrange
     $modal = app(FormModal::class);
 
