@@ -10,36 +10,35 @@ use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use Illuminate\Database\Eloquent\Model;
 
-test('it flashes successful roster actions under the standard status key', function (): void {
-    $component = new class
-    {
-        use ExecutesRosterActions;
-
-        /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
-        public array $dispatchedEvents = [];
-
-        public function execute(): bool
+describe('roster action execution', function (): void {
+    it('flashes successful actions under the standard status key', function (): void {
+        // Arrange
+        $component = new class
         {
-            return $this->executeRosterAction(
-                'employed',
-                RosterEntityType::Wrestler,
-                static function (): void {},
-            );
-        }
+            use ExecutesRosterActions;
 
-        public function dispatch(string $event, mixed ...$parameters): void
-        {
-            $this->dispatchedEvents[] = [
-                'event' => $event,
-                'parameters' => $parameters,
-            ];
-        }
-    };
+            /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
+            public array $dispatchedEvents = [];
 
-    expect($component->execute())->toBeTrue()
-        ->and(session('status'))->toBe('Wrestler has been hired.')
-        ->and(session('success'))->toBeNull()
-        ->and($component->dispatchedEvents)->toBe([
+            public function execute(): bool
+            {
+                return $this->executeRosterAction(
+                    'employed',
+                    RosterEntityType::Wrestler,
+                    static function (): void {},
+                );
+            }
+
+            public function dispatch(string $event, mixed ...$parameters): void
+            {
+                $this->dispatchedEvents[] = [
+                    'event' => $event,
+                    'parameters' => $parameters,
+                ];
+            }
+        };
+
+        $expectedEvents = [
             [
                 'event' => 'wrestler-updated',
                 'parameters' => [],
@@ -51,63 +50,74 @@ test('it flashes successful roster actions under the standard status key', funct
                     'message' => 'Wrestler has been hired.',
                 ],
             ],
-        ]);
-});
+        ];
 
-test('it rejects lifecycle actions unsupported by the roster entity', function (): void {
-    $component = new class
-    {
-        use ExecutesRosterActions;
+        // Act
+        $succeeded = $component->execute();
 
-        public function execute(RosterLifecycleAction $action, RosterEntityType $entityType, Model $model): void
+        // Assert
+        expect($succeeded)->toBeTrue()
+            ->and(session('status'))->toBe('Wrestler has been hired.')
+            ->and(session('success'))->toBeNull()
+            ->and($component->dispatchedEvents)->toBe($expectedEvents);
+    });
+
+    it('rejects lifecycle actions unsupported by the roster entity', function (): void {
+        // Arrange
+        $component = new class
         {
-            $this->executeAuthorizedRosterAction($action, $entityType, $model, static function (): void {
-                throw new RuntimeException('The unsupported action should not execute.');
-            });
-        }
-    };
+            use ExecutesRosterActions;
 
-    expect(fn () => $component->execute(RosterLifecycleAction::Injure, RosterEntityType::TagTeam, new TagTeam()))
-        ->toThrow(InvalidArgumentException::class, 'injure is not a tag-team lifecycle action.');
-});
+            public function execute(RosterLifecycleAction $action, RosterEntityType $entityType, Model $model): void
+            {
+                $this->executeAuthorizedRosterAction($action, $entityType, $model, static function (): void {
+                    throw new RuntimeException('The unsupported action should not execute.');
+                });
+            }
+        };
 
-test('it translates roster failures without dispatching an update', function (): void {
-    // Arrange
-    $manager = Manager::factory()->employed()->create();
-    $component = new class($manager)
-    {
-        use ExecutesRosterActions;
+        $execute = fn () => $component->execute(
+            RosterLifecycleAction::Injure,
+            RosterEntityType::TagTeam,
+            new TagTeam(),
+        );
 
-        /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
-        public array $dispatchedEvents = [];
+        // Act / Assert
+        expect($execute)
+            ->toThrow(InvalidArgumentException::class, 'injure is not a tag-team lifecycle action.');
+    });
 
-        public function __construct(private readonly Manager $manager) {}
-
-        public function execute(): bool
+    it('translates failures without dispatching an update', function (): void {
+        // Arrange
+        $manager = Manager::factory()->employed()->create();
+        $component = new class($manager)
         {
-            return $this->executeRosterAction(
-                'employed',
-                RosterEntityType::Manager,
-                fn (): never => throw CannotBeEmployedException::employed($this->manager),
-            );
-        }
+            use ExecutesRosterActions;
 
-        public function dispatch(string $event, mixed ...$parameters): void
-        {
-            $this->dispatchedEvents[] = [
-                'event' => $event,
-                'parameters' => $parameters,
-            ];
-        }
-    };
+            /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
+            public array $dispatchedEvents = [];
 
-    // Act
-    $succeeded = $component->execute();
+            public function __construct(private readonly Manager $manager) {}
 
-    // Assert
-    expect($succeeded)->toBeFalse()
-        ->and(session('error'))->toBe('This manager is already hired.')
-        ->and($component->dispatchedEvents)->toBe([
+            public function execute(): bool
+            {
+                return $this->executeRosterAction(
+                    'employed',
+                    RosterEntityType::Manager,
+                    fn (): never => throw CannotBeEmployedException::employed($this->manager),
+                );
+            }
+
+            public function dispatch(string $event, mixed ...$parameters): void
+            {
+                $this->dispatchedEvents[] = [
+                    'event' => $event,
+                    'parameters' => $parameters,
+                ];
+            }
+        };
+
+        $expectedEvents = [
             [
                 'event' => 'flash-message',
                 'parameters' => [
@@ -115,5 +125,14 @@ test('it translates roster failures without dispatching an update', function ():
                     'message' => 'This manager is already hired.',
                 ],
             ],
-        ]);
+        ];
+
+        // Act
+        $succeeded = $component->execute();
+
+        // Assert
+        expect($succeeded)->toBeFalse()
+            ->and(session('error'))->toBe('This manager is already hired.')
+            ->and($component->dispatchedEvents)->toBe($expectedEvents);
+    });
 });
