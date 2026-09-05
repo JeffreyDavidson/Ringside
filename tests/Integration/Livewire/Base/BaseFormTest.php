@@ -7,7 +7,21 @@ use App\Models\Events\Venue;
 use JMac\Testing\Double;
 use Livewire\Component;
 
-it('tracks whether a form is creating or editing a model', function () {
+it('starts in creating state', function (): void {
+    // Arrange
+    $form = new CreateEditForm(Double::for(Component::class), 'form');
+
+    // Act
+    $isCreating = $form->isCreating();
+    $isEditing = $form->isEditing();
+
+    // Assert
+    expect($isCreating)->toBeTrue()
+        ->and($isEditing)->toBeFalse();
+});
+
+it('loads a persisted model into editing state', function (): void {
+    // Arrange
     $form = new CreateEditForm(Double::for(Component::class), 'form');
     $venue = Venue::factory()->create([
         'name' => 'Madison Square Garden',
@@ -17,11 +31,10 @@ it('tracks whether a form is creating or editing a model', function () {
         'zipcode' => '10001',
     ]);
 
-    expect($form->isCreating())->toBeTrue()
-        ->and($form->isEditing())->toBeFalse();
-
+    // Act
     $form->setModel($venue);
 
+    // Assert
     expect($form->isCreating())->toBeFalse()
         ->and($form->isEditing())->toBeTrue()
         ->and($form->modelId)->toBe($venue->id)
@@ -32,13 +45,16 @@ it('tracks whether a form is creating or editing a model', function () {
         ->and($form->zipcode)->toBe('10001');
 });
 
-it('returns to creating state when its model is cleared', function () {
+it('returns to creating state when its model is cleared', function (): void {
+    // Arrange
     $form = new CreateEditForm(Double::for(Component::class), 'form');
     $venue = Venue::factory()->create();
-
     $form->setModel($venue);
+
+    // Act
     $form->setModel(null);
 
+    // Assert
     expect($form->modelId)->toBeNull()
         ->and($form->isCreating())->toBeTrue()
         ->and($form->isEditing())->toBeFalse();
