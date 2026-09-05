@@ -58,16 +58,18 @@ it('filters managers by name and clears the search', function (): void {
 
 it('filters managers by employment status', function (EmploymentStatus $status): void {
     // Arrange
-    $visibleManager = match ($status) {
-        EmploymentStatus::Employed => Manager::factory()->employed()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
-        EmploymentStatus::Released => Manager::factory()->released()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
-        EmploymentStatus::Unemployed => Manager::factory()->unemployed()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
-        EmploymentStatus::Retired => Manager::factory()->retired()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
-        EmploymentStatus::FutureEmployment => Manager::factory()->withFutureEmployment()->create(['first_name' => 'Matching', 'last_name' => 'Manager']),
+    $visibleManagerFactory = match ($status) {
+        EmploymentStatus::Employed => Manager::factory()->employed(),
+        EmploymentStatus::Released => Manager::factory()->released(),
+        EmploymentStatus::Unemployed => Manager::factory()->unemployed(),
+        EmploymentStatus::Retired => Manager::factory()->retired(),
+        EmploymentStatus::FutureEmployment => Manager::factory()->withFutureEmployment(),
     };
-    $hiddenManager = $status === EmploymentStatus::Employed
-        ? Manager::factory()->released()->create(['first_name' => 'Hidden', 'last_name' => 'Manager'])
-        : Manager::factory()->employed()->create(['first_name' => 'Hidden', 'last_name' => 'Manager']);
+    $hiddenManagerFactory = $status === EmploymentStatus::Employed
+        ? Manager::factory()->released()
+        : Manager::factory()->employed();
+    $visibleManagerFactory->create(['first_name' => 'Matching', 'last_name' => 'Manager']);
+    $hiddenManagerFactory->create(['first_name' => 'Hidden', 'last_name' => 'Manager']);
     $component = livewire(Main::class);
 
     // Act
@@ -75,8 +77,8 @@ it('filters managers by employment status', function (EmploymentStatus $status):
 
     // Assert
     $component
-        ->assertSee($visibleManager->full_name)
-        ->assertDontSee($hiddenManager->full_name);
+        ->assertSee('Matching Manager')
+        ->assertDontSee('Hidden Manager');
 })->with(EmploymentStatus::cases());
 
 it('loads the employment state used by the table', function (): void {
