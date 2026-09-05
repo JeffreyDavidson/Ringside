@@ -58,16 +58,18 @@ it('filters referees by name and clears the search', function (): void {
 
 it('filters referees by employment status', function (EmploymentStatus $status): void {
     // Arrange
-    $visibleReferee = match ($status) {
-        EmploymentStatus::Employed => Referee::factory()->employed()->create(['first_name' => 'Matching', 'last_name' => 'Referee']),
-        EmploymentStatus::Released => Referee::factory()->released()->create(['first_name' => 'Matching', 'last_name' => 'Referee']),
-        EmploymentStatus::Unemployed => Referee::factory()->unemployed()->create(['first_name' => 'Matching', 'last_name' => 'Referee']),
-        EmploymentStatus::Retired => Referee::factory()->retired()->create(['first_name' => 'Matching', 'last_name' => 'Referee']),
-        EmploymentStatus::FutureEmployment => Referee::factory()->withFutureEmployment()->create(['first_name' => 'Matching', 'last_name' => 'Referee']),
+    $visibleRefereeFactory = match ($status) {
+        EmploymentStatus::Employed => Referee::factory()->employed(),
+        EmploymentStatus::Released => Referee::factory()->released(),
+        EmploymentStatus::Unemployed => Referee::factory()->unemployed(),
+        EmploymentStatus::Retired => Referee::factory()->retired(),
+        EmploymentStatus::FutureEmployment => Referee::factory()->withFutureEmployment(),
     };
-    $hiddenReferee = $status === EmploymentStatus::Employed
-        ? Referee::factory()->released()->create(['first_name' => 'Hidden', 'last_name' => 'Referee'])
-        : Referee::factory()->employed()->create(['first_name' => 'Hidden', 'last_name' => 'Referee']);
+    $hiddenRefereeFactory = $status === EmploymentStatus::Employed
+        ? Referee::factory()->released()
+        : Referee::factory()->employed();
+    $visibleRefereeFactory->create(['first_name' => 'Matching', 'last_name' => 'Referee']);
+    $hiddenRefereeFactory->create(['first_name' => 'Hidden', 'last_name' => 'Referee']);
     $component = livewire(Main::class);
 
     // Act
@@ -75,8 +77,8 @@ it('filters referees by employment status', function (EmploymentStatus $status):
 
     // Assert
     $component
-        ->assertSee($visibleReferee->full_name)
-        ->assertDontSee($hiddenReferee->full_name);
+        ->assertSee('Matching Referee')
+        ->assertDontSee('Hidden Referee');
 })->with(EmploymentStatus::cases());
 
 it('loads the employment state used by the table', function (): void {
