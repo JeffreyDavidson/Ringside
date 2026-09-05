@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Stables\Modals\FormModal;
 use App\Models\Roster\TagTeams\TagTeam;
 
-it('returns tag teams keyed by their identifiers', function () {
+it('returns tag teams keyed by their identifiers', function (): void {
     // Arrange
     $tagTeam = TagTeam::factory()->create(['name' => 'The Example Team']);
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Matches\Modals\FormModal;
 use App\Models\Roster\Referees\Referee;
 
-it('returns referees keyed by their identifiers', function () {
+it('returns referees keyed by their identifiers', function (): void {
     // Arrange
     $referee = Referee::factory()->create([
         'first_name' => 'Earl',
