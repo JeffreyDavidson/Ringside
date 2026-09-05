@@ -13,6 +13,17 @@ beforeEach(function () {
     actingAs(administrator());
 });
 
+it('returns titles keyed by their identifiers', function () {
+    // Arrange
+    $title = Title::factory()->create(['name' => 'World Title']);
+
+    // Act
+    $titles = app(FormModal::class)->getTitles();
+
+    // Assert
+    expect($titles)->toBe([$title->id => $title->name]);
+});
+
 it('presents titles keyed by their identifiers', function () {
     $event = Event::factory()->create();
     $title = Title::factory()->singles()->create([
