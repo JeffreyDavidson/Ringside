@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 use App\Livewire\Venues\Tables\Main;
 use App\Models\Events\Venue;
+use Illuminate\Support\Facades\Auth;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-it('renders venue details for administrators and excludes deleted venues', function () {
-    $venue = Venue::factory()->create([
+beforeEach(function (): void {
+    actingAs(administrator());
+});
+
+it('renders venue details and excludes deleted venues', function (): void {
+    // Arrange
+    Venue::factory()->create([
         'name' => 'Madison Square Garden',
         'street_address' => '4 Pennsylvania Plaza',
         'city' => 'New York',
@@ -18,34 +24,22 @@ it('renders venue details for administrators and excludes deleted venues', funct
     ]);
     $deletedVenue = Venue::factory()->create(['name' => 'Deleted Arena']);
     $deletedVenue->delete();
-    actingAs(administrator());
 
-    $table = livewire(Main::class);
+    // Act
+    $component = livewire(Main::class);
 
-    $table
+    // Assert
+    $component
         ->assertSuccessful()
-        ->assertSee($venue->name)
-        ->assertSee($venue->street_address)
-        ->assertSee($venue->city)
-        ->assertSee($venue->state)
-        ->assertSee($venue->zipcode)
-        ->assertDontSee($deletedVenue->name);
+        ->assertSee('Madison Square Garden')
+        ->assertSee('4 Pennsylvania Plaza')
+        ->assertSee('New York')
+        ->assertSee('10001')
+        ->assertDontSee('Deleted Arena');
 });
 
-it('forbids users without administrative access', function (string $actor) {
-    if ($actor === 'basic user') {
-        actingAs(basicUser());
-    }
-
-    $table = livewire(Main::class);
-
-    $table->assertForbidden();
-})->with([
-    'guest' => ['guest'],
-    'basic user' => ['basic user'],
-]);
-
-it('searches across venue address fields', function (string $searchTerm) {
+it('searches across venue name and address fields', function (string $searchTerm): void {
+    // Arrange
     Venue::factory()->create([
         'name' => 'Search Target Arena',
         'street_address' => '927 Searchable Way',
@@ -60,12 +54,13 @@ it('searches across venue address fields', function (string $searchTerm) {
         'state' => 'Ohio',
         'zipcode' => '43001',
     ]);
-    actingAs(administrator());
+    $component = livewire(Main::class);
 
-    $table = livewire(Main::class);
-    $table->set('search', $searchTerm);
+    // Act
+    $component->set('search', $searchTerm);
 
-    $table
+    // Assert
+    $component
         ->assertSee('Search Target Arena')
         ->assertDontSee('Control Venue');
 })->with([
@@ -75,41 +70,54 @@ it('searches across venue address fields', function (string $searchTerm) {
     'state' => ['Nevada'],
 ]);
 
-it('clears a venue search', function () {
+it('clears a venue search', function (): void {
+    // Arrange
     Venue::factory()->create(['name' => 'Alpha Arena']);
     Venue::factory()->create(['name' => 'Bravo Arena']);
-    actingAs(administrator());
+    $component = livewire(Main::class);
 
-    $table = livewire(Main::class);
-    $table->set('search', 'Alpha');
-    $table->set('search', '');
+    // Act
+    $component->set('search', 'Alpha');
 
-    $table
+    // Assert
+    $component
+        ->assertSee('Alpha Arena')
+        ->assertDontSee('Bravo Arena');
+
+    // Act
+    $component->set('search', '');
+
+    // Assert
+    $component
         ->assertSee('Alpha Arena')
         ->assertSee('Bravo Arena');
 });
 
-it('orders venues alphabetically', function () {
+it('orders venues alphabetically', function (): void {
+    // Arrange
     Venue::factory()->create(['name' => 'Zebra Arena']);
     Venue::factory()->create(['name' => 'Alpha Arena']);
-    actingAs(administrator());
 
-    $table = livewire(Main::class);
+    // Act
+    $component = livewire(Main::class);
 
-    $table->assertSeeInOrder([
+    // Assert
+    $component->assertSeeInOrder([
         'Alpha Arena',
         'Zebra Arena',
     ]);
 });
 
-it('soft deletes a venue and reports success', function () {
+it('soft deletes a venue and reports success', function (): void {
+    // Arrange
     $venue = Venue::factory()->create();
-    actingAs(administrator());
+    $component = livewire(Main::class);
 
-    $table = livewire(Main::class);
-    $table->call('delete', $venue);
+    // Act
+    $component->call('delete', $venue);
 
-    $table
+    // Assert
+    $component
         ->assertHasNoErrors()
         ->assertDispatched(
             'flash-message',
@@ -119,15 +127,16 @@ it('soft deletes a venue and reports success', function () {
     $this->assertSoftDeleted($venue);
 });
 
-it('restores a venue and reports success', function () {
-    $venue = Venue::factory()->create();
-    $venue->delete();
-    actingAs(administrator());
+it('restores a venue and reports success', function (): void {
+    // Arrange
+    $venue = Venue::factory()->trashed()->create();
+    $component = livewire(Main::class);
 
-    $table = livewire(Main::class);
-    $table->call('restore', $venue->id);
+    // Act
+    $component->call('restore', $venue->id);
 
-    $table
+    // Assert
+    $component
         ->assertHasNoErrors()
         ->assertDispatched(
             'flash-message',
@@ -138,12 +147,30 @@ it('restores a venue and reports success', function () {
     $this->assertNotSoftDeleted($venue);
 });
 
-it('renders an empty state when there are no venues', function () {
-    actingAs(administrator());
+it('renders an empty state when there are no venues', function (): void {
+    // Act
+    $component = livewire(Main::class);
 
-    $table = livewire(Main::class);
-
-    $table
+    // Assert
+    $component
         ->assertSuccessful()
         ->assertSee('No records found.');
 });
+
+it('forbids users without administrative access', function (string $actor): void {
+    // Arrange
+    if ($actor === 'guest') {
+        Auth::logout();
+    } else {
+        actingAs(basicUser());
+    }
+
+    // Act
+    $component = livewire(Main::class);
+
+    // Assert
+    $component->assertForbidden();
+})->with([
+    'guest' => ['guest'],
+    'basic user' => ['basic user'],
+]);
