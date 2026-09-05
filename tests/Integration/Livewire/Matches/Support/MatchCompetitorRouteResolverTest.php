@@ -6,23 +6,43 @@ use App\Livewire\Matches\Support\MatchCompetitorRouteResolver;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-it('links wrestlers to their resource route', function () {
-    $wrestler = Wrestler::factory()->make(['id' => 1]);
+describe('match competitor resource links', function (): void {
+    it('links wrestlers to their resource route', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->make(['id' => 1]);
+        $resolver = app(MatchCompetitorRouteResolver::class);
 
-    expect(app(MatchCompetitorRouteResolver::class)->link($wrestler))
-        ->toBe('<a href="'.route('wrestlers.show', $wrestler).'">'.$wrestler->name.'</a>');
-});
+        // Act
+        $link = $resolver->link($wrestler);
 
-it('links tag teams to their resource route', function () {
-    $tagTeam = TagTeam::factory()->make(['id' => 1]);
+        // Assert
+        expect($link)
+            ->toBe('<a href="'.route('wrestlers.show', $wrestler).'">'.$wrestler->name.'</a>');
+    });
 
-    expect(app(MatchCompetitorRouteResolver::class)->link($tagTeam))
-        ->toBe('<a href="'.route('tag-teams.show', $tagTeam).'">'.$tagTeam->name.'</a>');
-});
+    it('links tag teams to their resource route', function (): void {
+        // Arrange
+        $tagTeam = TagTeam::factory()->make(['id' => 1]);
+        $resolver = app(MatchCompetitorRouteResolver::class);
 
-it('escapes competitor names in generated links', function () {
-    $wrestler = Wrestler::factory()->make(['id' => 1, 'name' => '<script>alert(1)</script>']);
+        // Act
+        $link = $resolver->link($tagTeam);
 
-    expect(app(MatchCompetitorRouteResolver::class)->link($wrestler))
-        ->toBe('<a href="'.route('wrestlers.show', $wrestler).'">&lt;script&gt;alert(1)&lt;/script&gt;</a>');
+        // Assert
+        expect($link)
+            ->toBe('<a href="'.route('tag-teams.show', $tagTeam).'">'.$tagTeam->name.'</a>');
+    });
+
+    it('escapes competitor names in generated links', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->make(['id' => 1, 'name' => '<script>alert(1)</script>']);
+        $resolver = app(MatchCompetitorRouteResolver::class);
+
+        // Act
+        $link = $resolver->link($wrestler);
+
+        // Assert
+        expect($link)
+            ->toBe('<a href="'.route('wrestlers.show', $wrestler).'">&lt;script&gt;alert(1)&lt;/script&gt;</a>');
+    });
 });
