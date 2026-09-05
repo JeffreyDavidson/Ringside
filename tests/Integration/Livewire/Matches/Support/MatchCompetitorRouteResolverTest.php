@@ -17,7 +17,7 @@ describe('match competitor resource links', function (): void {
 
         // Assert
         expect($link)
-            ->toBe('<a href="'.route('wrestlers.show', $wrestler).'">'.$wrestler->name.'</a>');
+            ->toBe('<a href="'.route('wrestlers.show', $wrestler).'">'.e($wrestler->name).'</a>');
     });
 
     it('links tag teams to their resource route', function (): void {
@@ -30,7 +30,7 @@ describe('match competitor resource links', function (): void {
 
         // Assert
         expect($link)
-            ->toBe('<a href="'.route('tag-teams.show', $tagTeam).'">'.$tagTeam->name.'</a>');
+            ->toBe('<a href="'.route('tag-teams.show', $tagTeam).'">'.e($tagTeam->name).'</a>');
     });
 
     it('escapes competitor names in generated links', function (): void {
