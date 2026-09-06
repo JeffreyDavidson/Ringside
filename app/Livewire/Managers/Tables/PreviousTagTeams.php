@@ -11,6 +11,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeamManager;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -35,9 +36,10 @@ class PreviousTagTeams extends DataTableComponent
         $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
         return TagTeamManager::query()
+            ->with('tagTeam')
+            ->whereHas('tagTeam')
             ->forManagerId($managerId)
-            ->forHistory()
-            ->with('tagTeam');
+            ->forHistory();
     }
 
     protected function configure(): void
@@ -57,7 +59,16 @@ class PreviousTagTeams extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('tag-teams.name'), 'tagTeam.name'),
+            Column::make(__('tag-teams.name'), 'tagTeam.name')
+                ->searchable(function (ManagerAssignmentBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'tagTeam',
+                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('managers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('managers.date_fired'), 'fired_at')
