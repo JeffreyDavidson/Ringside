@@ -13,6 +13,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -54,7 +55,16 @@ class PreviousTagTeams extends DataTableComponent
         return [
             LinkColumn::make(__('tag-teams.name'))
                 ->title(fn (StableTagTeam $row) => $row->tagTeam->name ?? 'Unknown')
-                ->location(fn (StableTagTeam $row): string => $row->tagTeam ? $this->routeResolver->urlFor($row->tagTeam) : '#'),
+                ->location(fn (StableTagTeam $row): string => $row->tagTeam ? $this->routeResolver->urlFor($row->tagTeam) : '#')
+                ->searchable(function (StableMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'tagTeam',
+                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('stables.date_left'), 'left_at')
