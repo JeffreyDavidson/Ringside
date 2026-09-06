@@ -13,6 +13,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableWrestler;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -54,7 +55,16 @@ class PreviousWrestlers extends DataTableComponent
         return [
             LinkColumn::make(__('wrestlers.name'))
                 ->title(fn (StableWrestler $row) => $row->wrestler->name ?? 'Unknown')
-                ->location(fn (StableWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#'),
+                ->location(fn (StableWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#')
+                ->searchable(function (StableMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'wrestler',
+                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('stables.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('stables.date_left'), 'left_at')
