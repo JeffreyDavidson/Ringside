@@ -6,16 +6,22 @@ use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-it('resolves a wrestler resource URL', function () {
-    $wrestler = Wrestler::factory()->make(['id' => 1]);
+it('resolves a :dataset resource URL', function (Wrestler|TagTeam $rosterMember, string $routeName): void {
+    // Arrange
+    $resolver = app(RosterResourceRouteResolver::class);
 
-    expect(app(RosterResourceRouteResolver::class)->urlFor($wrestler))
-        ->toBe(route('wrestlers.show', $wrestler));
-});
+    // Act
+    $url = $resolver->urlFor($rosterMember);
 
-it('resolves a tag team resource URL', function () {
-    $tagTeam = TagTeam::factory()->make(['id' => 1]);
-
-    expect(app(RosterResourceRouteResolver::class)->urlFor($tagTeam))
-        ->toBe(route('tag-teams.show', $tagTeam));
-});
+    // Assert
+    expect($url)->toBe(route($routeName, $rosterMember));
+})->with([
+    'wrestler' => [
+        fn (): Wrestler => Wrestler::factory()->make(['id' => 1]),
+        'wrestlers.show',
+    ],
+    'tag team' => [
+        fn (): TagTeam => TagTeam::factory()->make(['id' => 1]),
+        'tag-teams.show',
+    ],
+]);
