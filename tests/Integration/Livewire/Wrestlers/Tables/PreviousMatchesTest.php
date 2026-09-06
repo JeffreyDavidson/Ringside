@@ -3,94 +3,153 @@
 declare(strict_types=1);
 
 use App\Livewire\Wrestlers\Tables\PreviousMatches;
+use App\Models\Events\Event;
+use App\Models\Matches\EventMatch;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Date;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-beforeEach(function () {
-    $this->admin = administrator();
+beforeEach(function (): void {
     $this->wrestler = Wrestler::factory()->create();
-    actingAs($this->admin);
+    actingAs(administrator());
 });
 
 describe('PreviousMatchesTable Configuration', function () {
-    it('requires wrestler id to be set', function () {
+    it('requires wrestler id to be set', function (): void {
+        // Act & Assert
         expect(fn () => (new PreviousMatches())->builder())
             ->toThrow(LogicException::class, 'A wrestler was not provided.');
     });
 
-    it('can set wrestler id', function () {
+    it('can set wrestler id', function (): void {
+        // Act
         $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
 
+        // Assert
         $component->assertSet('wrestlerId', $this->wrestler->id);
     });
 
-    it('queries the event matches table', function () {
-        $table = app(PreviousMatches::class);
-        $table->wrestlerId = $this->wrestler->id;
+    it('renders the match history search control', function (): void {
+        // Act
+        $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
 
-        expect($table->builder()->getModel()->getTable())->toBe('events_matches');
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSeeHtml('placeholder="Search matches"');
     });
 });
 
 describe('PreviousMatchesTable Query Building', function () {
-    it('builds query correctly with wrestler id', function () {
-        $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
+    it('returns past matches featuring the wrestler', function (): void {
+        // Arrange
+        $pastEvent = Event::factory()->create(['date' => Date::parse('2024-01-15')]);
+        $pastMatch = EventMatch::factory()
+            ->forEvent($pastEvent)
+            ->withCompetitors([$this->wrestler, Wrestler::factory()->create()])
+            ->create();
 
-        $builder = tap(app(PreviousMatches::class), fn (PreviousMatches $table) => $table->wrestlerId = $this->wrestler->id)->builder();
+        // Act
+        $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
+            $table->wrestlerId = $this->wrestler->id;
+        })->builder()->get();
 
-        // Test that the query includes competitor filtering
-        expect($builder->toSql())->toContain('events_matches_competitors');
-        expect($builder->getBindings())->toContain($this->wrestler->id);
+        // Assert
+        expect($matches->modelKeys())->toBe([$pastMatch->id]);
     });
 
-    it('filters by wrestler id correctly', function () {
-        $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
+    it('excludes past matches featuring another wrestler', function (): void {
+        // Arrange
+        $otherMatch = EventMatch::factory()
+            ->for(Event::factory()->past())
+            ->withCompetitors(Wrestler::factory()->count(2)->create()->all())
+            ->create();
 
-        $results = tap(app(PreviousMatches::class), fn (PreviousMatches $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
+        // Act
+        $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
+            $table->wrestlerId = $this->wrestler->id;
+        })->builder()->get();
 
-        // Since we don't have match data set up, this should be empty
-        // but the query should execute without error
-        expect($results)->toBeInstanceOf(Collection::class);
+        // Assert
+        expect($matches->modelKeys())->not->toContain($otherMatch->id);
+    });
+
+    it('excludes future matches featuring the wrestler', function (): void {
+        // Arrange
+        $futureMatch = EventMatch::factory()
+            ->for(Event::factory()->future())
+            ->withCompetitors([$this->wrestler, Wrestler::factory()->create()])
+            ->create();
+
+        // Act
+        $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
+            $table->wrestlerId = $this->wrestler->id;
+        })->builder()->get();
+
+        // Assert
+        expect($matches->modelKeys())->not->toContain($futureMatch->id);
     });
 });
 
 describe('PreviousMatchesTable Rendering', function () {
-    it('can render with wrestler id set', function () {
+    it('renders a previous match event', function (): void {
+        // Arrange
+        $event = Event::factory()->create([
+            'name' => 'Historic Wrestler Event',
+            'date' => Date::parse('2024-01-15'),
+        ]);
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withCompetitors([$this->wrestler, Wrestler::factory()->create()])
+            ->create();
+
+        // Act
         $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $component->assertSuccessful();
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('Historic Wrestler Event')
+            ->assertSee('2024-01-15')
+            ->assertSeeHtml(route('events.show', $event))
+            ->assertSeeHtml(route('wrestlers.show', $this->wrestler));
     });
 
-    it('can render with no matches', function () {
+    it('renders when the wrestler has no previous matches', function (): void {
+        // Act
         $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
 
-        $results = tap(app(PreviousMatches::class), fn (PreviousMatches $table) => $table->wrestlerId = $this->wrestler->id)->builder()->get();
-        expect($results)->toHaveCount(0);
-
-        $component->assertSuccessful();
+        // Assert
+        $component
+            ->assertSuccessful()
+            ->assertSee('No records found.');
     });
 });
 
 describe('PreviousMatchesTable Authorization', function () {
-    it('allows access to administrators', function () {
+    it('allows access to administrators', function (): void {
+        // Act
         $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
 
+        // Assert
         $component->assertSuccessful();
     });
 
-    it('forbids users without access to the wrestler', function (string $actor) {
+    it('forbids users without access to the wrestler', function (string $actor): void {
+        // Arrange
         if ($actor === 'guest') {
             Auth::logout();
         } else {
             actingAs(basicUser());
         }
 
+        // Act
         $component = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
 
+        // Assert
         $component->assertForbidden();
     })->with([
         'guest' => ['guest'],
