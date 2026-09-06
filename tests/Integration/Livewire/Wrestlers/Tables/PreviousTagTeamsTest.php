@@ -101,6 +101,28 @@ describe('PreviousTagTeamsTable Rendering', function () {
             ->assertSeeHtml('placeholder="Search tag teams"');
     });
 
+    it('searches previous tag teams by name', function (): void {
+        // Arrange
+        foreach (['Historic Partners', 'Former Alliance'] as $offset => $name) {
+            $tagTeam = TagTeam::factory()->create(['name' => $name]);
+            TagTeamWrestler::factory()->create([
+                'tag_team_id' => $tagTeam->id,
+                'wrestler_id' => $this->wrestler->id,
+                'joined_at' => Date::now()->subMonths($offset + 3),
+                'left_at' => Date::now()->subMonths($offset + 1),
+            ]);
+        }
+
+        // Act
+        $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
+        $component->set('search', 'Historic');
+
+        // Assert
+        $component
+            ->assertSee('Historic Partners')
+            ->assertDontSee('Former Alliance');
+    });
+
     it('renders when the wrestler has no previous tag team memberships', function (): void {
         // Act
         $component = livewire(PreviousTagTeams::class, ['wrestlerId' => $this->wrestler->id]);
