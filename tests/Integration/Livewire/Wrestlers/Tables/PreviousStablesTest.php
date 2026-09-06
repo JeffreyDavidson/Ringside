@@ -117,6 +117,26 @@ describe('PreviousStablesTable Rendering', function () {
             ->assertSeeHtml('placeholder="Search stables"');
     });
 
+    it('searches previous stables by name', function (): void {
+        // Arrange
+        foreach (['Historic Stable', 'Former Stable'] as $offset => $name) {
+            $stable = Stable::factory()->create(['name' => $name]);
+            $stable->wrestlers()->attach($this->wrestler, [
+                'joined_at' => Date::now()->subMonths($offset + 3),
+                'left_at' => Date::now()->subMonths($offset + 1),
+            ]);
+        }
+
+        // Act
+        $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
+        $component->set('search', 'Historic');
+
+        // Assert
+        $component
+            ->assertSee('Historic Stable')
+            ->assertDontSee('Former Stable');
+    });
+
     it('renders when the wrestler has no previous stable memberships', function (): void {
         // Act
         $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
