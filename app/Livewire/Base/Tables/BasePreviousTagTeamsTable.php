@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base\Tables;
 
+use App\Builders\Roster\TagTeamMembershipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
@@ -11,6 +12,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @extends DataTableComponent<TagTeamWrestler>
@@ -50,7 +52,16 @@ abstract class BasePreviousTagTeamsTable extends DataTableComponent
                 ->title(fn (TagTeamWrestler $row): string => $this->tagTeamName($row))
                 ->location(fn (TagTeamWrestler $row): ?string => $row->tagTeam === null
                     ? null
-                    : $this->routeResolver->urlFor($row->tagTeam)),
+                    : $this->routeResolver->urlFor($row->tagTeam))
+                ->searchable(function (TagTeamMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'tagTeam',
+                        fn (Builder $tagTeamQuery) => $tagTeamQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             LinkColumn::make(__('tag-teams.partner'))
                 ->title(fn (TagTeamWrestler $row): string => $this->getPartnerName($row))
                 ->location(fn (TagTeamWrestler $row): string => $this->getPartnerRoute($row)),
