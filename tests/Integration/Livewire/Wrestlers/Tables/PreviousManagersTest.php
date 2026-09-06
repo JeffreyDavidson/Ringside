@@ -107,6 +107,36 @@ it('renders previous manager names and assignment dates', function (): void {
         ->assertDontSee('Current Manager');
 });
 
+it('searches previous managers by name', function (): void {
+    // Arrange
+    $wrestler = Wrestler::factory()->create();
+    $historicManager = Manager::factory()->create([
+        'first_name' => 'Historic',
+        'last_name' => 'Manager',
+    ]);
+    $formerManager = Manager::factory()->create([
+        'first_name' => 'Former',
+        'last_name' => 'Advisor',
+    ]);
+    foreach ([$historicManager, $formerManager] as $offset => $manager) {
+        WrestlerManager::query()->create([
+            'wrestler_id' => $wrestler->id,
+            'manager_id' => $manager->id,
+            'hired_at' => Date::now()->subMonths($offset + 3),
+            'fired_at' => Date::now()->subMonths($offset + 1),
+        ]);
+    }
+
+    // Act
+    $component = livewire(PreviousManagers::class, ['wrestlerId' => $wrestler->id]);
+    $component->set('search', 'Historic');
+
+    // Assert
+    $component
+        ->assertSee('Historic Manager')
+        ->assertDontSee('Former Advisor');
+});
+
 it('keeps separate historical assignments for a returning manager', function (): void {
     // Arrange
     $wrestler = Wrestler::factory()->create();
