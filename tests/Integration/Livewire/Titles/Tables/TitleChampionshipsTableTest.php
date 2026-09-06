@@ -5,13 +5,18 @@ declare(strict_types=1);
 use App\Livewire\Titles\Tables\TitleChampionshipsTable;
 use App\Models\Titles\TitleChampionship;
 
-test('displays championship reign length from its dates', function () {
+it('displays championship reign length from its dates', function (): void {
+    // Arrange
     $championship = new TitleChampionship([
         'won_at' => '2025-01-01',
         'lost_at' => '2025-01-11',
     ]);
+    $table = new TitleChampionshipsTable();
 
-    $reignLengthColumn = (new TitleChampionshipsTable())->columns()[3];
+    // Act
+    $columns = $table->columns();
+    $reignLength = $columns[3]->resolveValue($championship);
 
-    expect($reignLengthColumn->resolveValue($championship))->toBe('10');
+    // Assert
+    expect($reignLength)->toBe('10');
 });
