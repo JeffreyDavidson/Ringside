@@ -28,9 +28,10 @@ class PreviousManagers extends BasePreviousManagersTable
         $tagTeamId = $this->requireContextId($this->tagTeamId ?? null, 'tag team');
 
         return TagTeamManager::query()
+            ->with('manager')
+            ->whereHas('manager')
             ->forTagTeamId($tagTeamId)
-            ->forHistory()
-            ->with('manager');
+            ->forHistory();
     }
 
     protected function configure(): void

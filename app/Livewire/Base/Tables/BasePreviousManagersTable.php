@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base\Tables;
 
+use App\Builders\Roster\ManagerAssignmentBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -30,7 +32,22 @@ abstract class BasePreviousManagersTable extends DataTableComponent
     {
         return [
             Column::make(__('managers.name'), 'manager.full_name')
-                ->searchable(),
+                ->searchable(function (ManagerAssignmentBuilder $builder, string $searchTerm): void {
+                    $trimmedTerm = mb_trim($searchTerm);
+
+                    $builder->whereHas(
+                        'manager',
+                        function (Builder $managerQuery) use ($trimmedTerm): void {
+                            $managerQuery->where(function (Builder $nameQuery) use ($trimmedTerm): void {
+                                $nameQuery
+                                    ->whereLike('first_name', $trimmedTerm)
+                                    ->orWhereLike('last_name', $trimmedTerm)
+                                    ->orWhereLike('first_name', $trimmedTerm.' %')
+                                    ->orWhereLike('last_name', $trimmedTerm.' %');
+                            });
+                        },
+                    );
+                }),
             DateColumn::make(__('managers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('managers.date_fired'), 'fired_at')
