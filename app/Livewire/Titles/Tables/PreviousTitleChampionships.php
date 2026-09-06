@@ -10,9 +10,12 @@ use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
 use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
+use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -64,7 +67,17 @@ class PreviousTitleChampionships extends DataTableComponent
         return [
             LinkColumn::make(__('championships.new_champion'))
                 ->title(fn (TitleChampionship $row): string => $row->champion->name)
-                ->location(fn (TitleChampionship $row): string => $this->routeResolver->urlFor($row->champion)),
+                ->location(fn (TitleChampionship $row): string => $this->routeResolver->urlFor($row->champion))
+                ->searchable(function (TitleChampionshipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHasMorph(
+                        'champion',
+                        [Wrestler::class, TagTeam::class],
+                        fn (Builder $championQuery) => $championQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             LinkColumn::make(__('championships.previous_champion'))
                 ->title(fn (TitleChampionship $row): string => $row->previousChampionship?->champion->name ?? 'N/A')
                 ->location(function (TitleChampionship $row): ?string {
