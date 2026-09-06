@@ -103,6 +103,42 @@ describe('PreviousTitleChampionships rendering', function (): void {
             ->assertSee('2024-06-01 - 2025-01-01');
     });
 
+    it('searches previous championships by wrestler and tag team champion names', function (
+        string $search,
+        string $visibleChampion,
+        string $visibleDates,
+        string $hiddenDates,
+    ): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Historic Wrestler']);
+        $tagTeam = TagTeam::factory()->create(['name' => 'Legendary Tag Team']);
+        TitleChampionship::factory()
+            ->for($this->title)
+            ->forWrestler($wrestler)
+            ->wonOn('2023-01-01')
+            ->lostOn('2023-05-01')
+            ->create();
+        TitleChampionship::factory()
+            ->for($this->title)
+            ->forTagTeam($tagTeam)
+            ->wonOn('2024-06-01')
+            ->lostOn('2025-01-01')
+            ->create();
+
+        // Act
+        $table = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
+        $table->set('search', $search);
+
+        // Assert
+        $table
+            ->assertSee($visibleChampion)
+            ->assertSee($visibleDates)
+            ->assertDontSee($hiddenDates);
+    })->with([
+        'wrestler champion' => ['Historic', 'Historic Wrestler', '2023-01-01 - 2023-05-01', '2024-06-01 - 2025-01-01'],
+        'tag team champion' => ['Legendary', 'Legendary Tag Team', '2024-06-01 - 2025-01-01', '2023-01-01 - 2023-05-01'],
+    ]);
+
     it('renders an empty state when the title has no previous championships', function (): void {
         // Act
         $table = livewire(PreviousTitleChampionships::class, ['titleId' => $this->title->id]);
