@@ -17,109 +17,130 @@ beforeEach(function (): void {
     actingAs(administrator());
 });
 
-it('requires a tag team', function (): void {
-    // Act & Assert
-    expect(fn () => (new PreviousMatches())->builder())
-        ->toThrow(LogicException::class, 'A tag team was not provided.');
+describe('PreviousMatches configuration', function (): void {
+    it('requires a tag team', function (): void {
+        // Act & Assert
+        expect(fn () => (new PreviousMatches())->builder())
+            ->toThrow(LogicException::class, 'A tag team was not provided.');
+    });
 });
 
-it('returns past matches featuring the tag team', function (): void {
-    // Arrange
-    $pastEvent = Event::factory()->create(['date' => Date::parse('2024-01-15')]);
-    $pastMatch = EventMatch::factory()
-        ->forEvent($pastEvent)
-        ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
-        ->create();
-
-    // Act
-    $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
+describe('PreviousMatches query', function (): void {
+    it('returns only past matches for the requested tag team in newest-first order', function (): void {
+        // Arrange
+        $olderMatch = EventMatch::factory()
+            ->for(Event::factory()->create(['date' => Date::now()->subYears(2)]))
+            ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
+            ->create();
+        $recentMatch = EventMatch::factory()
+            ->for(Event::factory()->create(['date' => Date::now()->subYear()]))
+            ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
+            ->create();
+        EventMatch::factory()
+            ->for(Event::factory()->future())
+            ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
+            ->create();
+        EventMatch::factory()
+            ->for(Event::factory()->past())
+            ->withCompetitors(TagTeam::factory()->count(2)->create()->all())
+            ->create();
+        $table = new PreviousMatches();
         $table->tagTeamId = $this->tagTeam->id;
-    })->builder()->get();
 
-    // Assert
-    expect($matches->modelKeys())->toBe([$pastMatch->id]);
+        // Act
+        $matches = $table->builder()->get();
+
+        // Assert
+        expect($matches->modelKeys())->toBe([
+            $recentMatch->id,
+            $olderMatch->id,
+        ])->and($matches->every->relationLoaded('event'))->toBeTrue()
+            ->and($matches->every->relationLoaded('competitors'))->toBeTrue();
+    });
 });
 
-it('excludes past matches featuring another tag team', function (): void {
-    // Arrange
-    $otherMatch = EventMatch::factory()
-        ->for(Event::factory()->past())
-        ->withCompetitors(TagTeam::factory()->count(2)->create()->all())
-        ->create();
+describe('PreviousMatches rendering', function (): void {
+    it('renders tag team match history with event details, links, and search control', function (): void {
+        // Arrange
+        $event = Event::factory()->create([
+            'name' => 'Historic Tag Team Event',
+            'date' => Date::parse('2024-01-15'),
+        ]);
+        EventMatch::factory()
+            ->forEvent($event)
+            ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
+            ->create();
 
-    // Act
-    $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
-        $table->tagTeamId = $this->tagTeam->id;
-    })->builder()->get();
+        // Act
+        $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
 
-    // Assert
-    expect($matches->modelKeys())->not->toContain($otherMatch->id);
+        // Assert
+        $table
+            ->assertSuccessful()
+            ->assertSeeHtml('placeholder="Search matches"')
+            ->assertSee('Historic Tag Team Event')
+            ->assertSee('2024-01-15')
+            ->assertSeeHtml(route('events.show', $event))
+            ->assertSeeHtml(route('tag-teams.show', $this->tagTeam));
+    });
+
+    it('searches previous matches by event name', function (): void {
+        // Arrange
+        foreach (['Historic Tag Team Event', 'Former Tag Team Event'] as $name) {
+            EventMatch::factory()
+                ->for(Event::factory()->create([
+                    'name' => $name,
+                    'date' => Date::now()->subMonth(),
+                ]))
+                ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
+                ->create();
+        }
+
+        // Act
+        $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
+        $table->set('search', 'Historic');
+
+        // Assert
+        $table
+            ->assertSee('Historic Tag Team Event')
+            ->assertDontSee('Former Tag Team Event');
+    });
+
+    it('renders an empty state when the tag team has no previous matches', function (): void {
+        // Act
+        $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
+
+        // Assert
+        $table
+            ->assertSuccessful()
+            ->assertSee('No records found.');
+    });
 });
 
-it('excludes future matches featuring the tag team', function (): void {
-    // Arrange
-    $futureMatch = EventMatch::factory()
-        ->for(Event::factory()->future())
-        ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
-        ->create();
+describe('PreviousMatches authorization', function (): void {
+    it('allows administrators to view tag team match history', function (): void {
+        // Act
+        $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
 
-    // Act
-    $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
-        $table->tagTeamId = $this->tagTeam->id;
-    })->builder()->get();
+        // Assert
+        $table->assertSuccessful();
+    });
 
-    // Assert
-    expect($matches->modelKeys())->not->toContain($futureMatch->id);
-});
+    it('forbids users without access to the tag team', function (string $actor): void {
+        // Arrange
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
 
-it('renders tag team match history for administrators', function (): void {
-    // Arrange
-    $event = Event::factory()->create([
-        'name' => 'Historic Tag Team Event',
-        'date' => Date::parse('2024-01-15'),
+        // Act
+        $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
+
+        // Assert
+        $table->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
     ]);
-    EventMatch::factory()
-        ->forEvent($event)
-        ->withCompetitors([$this->tagTeam, TagTeam::factory()->create()])
-        ->create();
-
-    // Act
-    $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
-
-    // Assert
-    $table
-        ->assertSuccessful()
-        ->assertSeeHtml('placeholder="Search matches"')
-        ->assertSee('Historic Tag Team Event')
-        ->assertSee('2024-01-15')
-        ->assertSeeHtml(route('events.show', $event))
-        ->assertSeeHtml(route('tag-teams.show', $this->tagTeam));
 });
-
-it('renders when the tag team has no previous matches', function (): void {
-    // Act
-    $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
-
-    // Assert
-    $table
-        ->assertSuccessful()
-        ->assertSee('No records found.');
-});
-
-it('forbids users without access to the tag team', function (string $actor): void {
-    // Arrange
-    if ($actor === 'guest') {
-        Auth::logout();
-    } else {
-        actingAs(basicUser());
-    }
-
-    // Act
-    $table = livewire(PreviousMatches::class, ['tagTeamId' => $this->tagTeam->id]);
-
-    // Assert
-    $table->assertForbidden();
-})->with([
-    'guest' => ['guest'],
-    'basic user' => ['basic user'],
-]);
