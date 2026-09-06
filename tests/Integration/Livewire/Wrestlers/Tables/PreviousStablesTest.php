@@ -31,12 +31,25 @@ describe('PreviousStablesTable Configuration', function () {
         $component->assertSet('wrestlerId', $this->wrestler->id);
     });
 
-    it('uses the stable membership table', function (): void {
+    it('uses stable identifiers for rendered rows', function (): void {
+        // Arrange
+        $formerStable = Stable::factory()->create();
+        $otherStable = Stable::factory()->create();
+        $otherWrestler = Wrestler::factory()->create();
+        $otherStable->wrestlers()->attach($otherWrestler, [
+            'joined_at' => Date::parse('2023-01-01'),
+            'left_at' => Date::parse('2023-06-01'),
+        ]);
+        $formerStable->wrestlers()->attach($this->wrestler, [
+            'joined_at' => Date::parse('2024-01-01'),
+            'left_at' => Date::parse('2024-06-01'),
+        ]);
+
         // Act
         $component = livewire(PreviousStables::class, ['wrestlerId' => $this->wrestler->id]);
 
         // Assert
-        $component->assertSet('databaseTableName', 'stables_wrestlers');
+        $component->assertSeeHtml('wire:key="row-'.$formerStable->id.'"');
     });
 });
 

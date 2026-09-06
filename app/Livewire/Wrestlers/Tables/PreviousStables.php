@@ -20,7 +20,7 @@ class PreviousStables extends BasePreviousStablesTable
     #[Locked]
     public ?int $wrestlerId;
 
-    public string $databaseTableName = 'stables_wrestlers';
+    protected string $databaseTableName = 'stables';
 
     /**
      * @return StableBuilder<Stable>
