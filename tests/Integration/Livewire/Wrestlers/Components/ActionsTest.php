@@ -19,65 +19,67 @@ use JMac\Testing\DoubleInterface;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-test('it renders with the wrestler mounted', function (): void {
-    // Arrange
-    $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
+describe('wrestler actions component', function (): void {
+    test('it renders with the wrestler mounted', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create(['name' => 'Test Wrestler']);
 
-    actingAs(administrator());
+        actingAs(administrator());
 
-    // Act
-    $component = livewire(Actions::class, ['wrestler' => $wrestler]);
+        // Act
+        $component = livewire(Actions::class, ['wrestler' => $wrestler]);
 
-    // Assert
-    $component->assertOk();
-    expect($component->get('wrestler'))->toEqual($wrestler);
-});
+        // Assert
+        $component->assertOk();
+        expect($component->get('wrestler'))->toEqual($wrestler);
+    });
 
-test('it delegates lifecycle actions and dispatches wrestler feedback', function (
-    string $method,
-    string $actionClass,
-    DoubleInterface $action,
-    string $message,
-): void {
-    // Arrange
-    $wrestler = Wrestler::factory()->create();
-    $action->expects('handle');
-    app()->instance($actionClass, $action);
+    test('it delegates lifecycle actions and dispatches wrestler feedback', function (
+        string $method,
+        string $actionClass,
+        DoubleInterface $action,
+        string $message,
+    ): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->create();
+        $action->expects('handle');
+        app()->instance($actionClass, $action);
 
-    actingAs(administrator());
-    $component = livewire(Actions::class, ['wrestler' => $wrestler]);
+        actingAs(administrator());
+        $component = livewire(Actions::class, ['wrestler' => $wrestler]);
 
-    // Act
-    $component->call($method);
+        // Act
+        $component->call($method);
 
-    // Assert
-    $component
-        ->assertDispatched('wrestler-updated')
-        ->assertDispatched('flash-message', type: 'status', message: $message);
-    $action->verify();
-})->with([
-    'employ' => ['employ', EmployAction::class, Double::for(EmployAction::class), 'Wrestler has been hired.'],
-    'release' => ['release', ReleaseAction::class, Double::for(ReleaseAction::class), 'Contract has been terminated.'],
-    'retire' => ['retire', RetireAction::class, Double::for(RetireAction::class), 'Wrestler has been retired.'],
-    'unretire' => ['unretire', UnretireAction::class, Double::for(UnretireAction::class), 'Wrestler has been brought out of retirement.'],
-    'suspend' => ['suspend', SuspendAction::class, Double::for(SuspendAction::class), 'Wrestler has been suspended.'],
-    'reinstate' => ['reinstate', ReinstateAction::class, Double::for(ReinstateAction::class), 'Wrestler has been reinstated.'],
-    'injure' => ['injure', InjureAction::class, Double::for(InjureAction::class), 'Injury has been recorded.'],
-    'clear from injury' => ['clearFromInjury', ClearFromInjuryAction::class, Double::for(ClearFromInjuryAction::class), 'Wrestler has been cleared from injury.'],
-    'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Wrestler has been restored.'],
-]);
+        // Assert
+        $component
+            ->assertDispatched('wrestler-updated')
+            ->assertDispatched('flash-message', type: 'status', message: $message);
+        $action->verify();
+    })->with([
+        'employ' => ['employ', EmployAction::class, Double::for(EmployAction::class), 'Wrestler has been hired.'],
+        'release' => ['release', ReleaseAction::class, Double::for(ReleaseAction::class), 'Contract has been terminated.'],
+        'retire' => ['retire', RetireAction::class, Double::for(RetireAction::class), 'Wrestler has been retired.'],
+        'unretire' => ['unretire', UnretireAction::class, Double::for(UnretireAction::class), 'Wrestler has been brought out of retirement.'],
+        'suspend' => ['suspend', SuspendAction::class, Double::for(SuspendAction::class), 'Wrestler has been suspended.'],
+        'reinstate' => ['reinstate', ReinstateAction::class, Double::for(ReinstateAction::class), 'Wrestler has been reinstated.'],
+        'injure' => ['injure', InjureAction::class, Double::for(InjureAction::class), 'Injury has been recorded.'],
+        'clear from injury' => ['clearFromInjury', ClearFromInjuryAction::class, Double::for(ClearFromInjuryAction::class), 'Wrestler has been cleared from injury.'],
+        'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Wrestler has been restored.'],
+    ]);
 
-test('it forbids lifecycle actions for unauthorized users', function (): void {
-    // Arrange
-    $wrestler = Wrestler::factory()->unemployed()->create();
+    test('it forbids lifecycle actions for unauthorized users', function (): void {
+        // Arrange
+        $wrestler = Wrestler::factory()->unemployed()->create();
 
-    actingAs(basicUser());
-    $component = livewire(Actions::class, ['wrestler' => $wrestler]);
+        actingAs(basicUser());
+        $component = livewire(Actions::class, ['wrestler' => $wrestler]);
 
-    // Act
-    $component->call('employ');
+        // Act
+        $component->call('employ');
 
-    // Assert
-    $component->assertForbidden();
-    expect($wrestler->currentEmployment()->exists())->toBeFalse();
+        // Assert
+        $component->assertForbidden();
+        expect($wrestler->currentEmployment()->exists())->toBeFalse();
+    });
 });
