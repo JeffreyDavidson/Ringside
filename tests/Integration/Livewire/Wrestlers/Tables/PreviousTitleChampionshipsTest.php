@@ -134,6 +134,28 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
             ->assertSeeHtml('placeholder="Search title championships"');
     });
 
+    it('searches previous championships by title name', function (): void {
+        // Arrange
+        foreach (['Historic Singles Title', 'Former Singles Title'] as $offset => $name) {
+            $title = Title::factory()->singles()->create(['name' => $name]);
+            TitleChampionship::factory()
+                ->for($title)
+                ->forWrestler($this->wrestler)
+                ->wonOn(now()->subMonths($offset + 3)->toDateString())
+                ->lostOn(now()->subMonths($offset + 1)->toDateString())
+                ->create();
+        }
+
+        // Act
+        $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
+        $component->set('search', 'Historic');
+
+        // Assert
+        $component
+            ->assertSee('Historic Singles Title')
+            ->assertDontSee('Former Singles Title');
+    });
+
     it('renders when the wrestler has no championship history', function (): void {
         // Act
         $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
