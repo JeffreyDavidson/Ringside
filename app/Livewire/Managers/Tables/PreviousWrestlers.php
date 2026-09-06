@@ -11,6 +11,7 @@ use App\Livewire\Table\Columns\DateColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Wrestlers\WrestlerManager;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -32,9 +33,10 @@ class PreviousWrestlers extends DataTableComponent
         $managerId = $this->requireContextId($this->managerId ?? null, 'manager');
 
         return WrestlerManager::query()
+            ->with('wrestler')
+            ->whereHas('wrestler')
             ->forManagerId($managerId)
-            ->forHistory()
-            ->with('wrestler');
+            ->forHistory();
     }
 
     protected function configure(): void
@@ -54,7 +56,16 @@ class PreviousWrestlers extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make(__('wrestlers.name'), 'wrestler.name'),
+            Column::make(__('wrestlers.name'), 'wrestler.name')
+                ->searchable(function (ManagerAssignmentBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'wrestler',
+                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('wrestlers.date_hired'), 'hired_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('wrestlers.date_left'), 'fired_at')
