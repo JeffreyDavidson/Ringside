@@ -17,108 +17,131 @@ beforeEach(function (): void {
     actingAs(administrator());
 });
 
-it('requires a referee', function (): void {
-    // Act & Assert
-    expect(fn () => (new PreviousMatches())->builder())
-        ->toThrow(LogicException::class, 'A referee was not provided.');
+describe('PreviousMatches configuration', function (): void {
+    it('requires a referee', function (): void {
+        // Act & Assert
+        expect(fn () => (new PreviousMatches())->builder())
+            ->toThrow(LogicException::class, 'A referee was not provided.');
+    });
 });
 
-it('returns past matches officiated by the referee', function (): void {
-    // Arrange
-    $pastMatch = EventMatch::factory()
-        ->for(Event::factory()->past())
-        ->create();
-    $pastMatch->referees()->attach($this->referee);
-
-    // Act
-    $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
+describe('PreviousMatches query', function (): void {
+    it('returns only past matches for the requested referee in newest-first order', function (): void {
+        // Arrange
+        $otherReferee = Referee::factory()->create();
+        $olderMatch = EventMatch::factory()
+            ->for(Event::factory()->create(['date' => Date::now()->subYears(2)]))
+            ->create();
+        $olderMatch->referees()->attach($this->referee);
+        $recentMatch = EventMatch::factory()
+            ->for(Event::factory()->create(['date' => Date::now()->subYear()]))
+            ->create();
+        $recentMatch->referees()->attach($this->referee);
+        $futureMatch = EventMatch::factory()
+            ->for(Event::factory()->future())
+            ->create();
+        $futureMatch->referees()->attach($this->referee);
+        $otherMatch = EventMatch::factory()
+            ->for(Event::factory()->past())
+            ->create();
+        $otherMatch->referees()->attach($otherReferee);
+        $table = new PreviousMatches();
         $table->refereeId = $this->referee->id;
-    })->builder()->get();
 
-    // Assert
-    expect($matches->modelKeys())->toBe([$pastMatch->id]);
+        // Act
+        $matches = $table->builder()->get();
+
+        // Assert
+        expect($matches->modelKeys())->toBe([
+            $recentMatch->id,
+            $olderMatch->id,
+        ])->and($matches->every->relationLoaded('event'))->toBeTrue()
+            ->and($matches->every->relationLoaded('referees'))->toBeTrue();
+    });
 });
 
-it('excludes past matches officiated by another referee', function (): void {
-    // Arrange
-    $otherMatch = EventMatch::factory()
-        ->for(Event::factory()->past())
-        ->create();
-    $otherMatch->referees()->attach(Referee::factory()->create());
+describe('PreviousMatches rendering', function (): void {
+    it('renders referee match history with event details, links, and search control', function (): void {
+        // Arrange
+        $event = Event::factory()->create([
+            'name' => 'Historic Referee Event',
+            'date' => Date::parse('2024-01-15'),
+        ]);
+        $match = EventMatch::factory()
+            ->forEvent($event)
+            ->create();
+        $match->referees()->attach($this->referee);
 
-    // Act
-    $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
-        $table->refereeId = $this->referee->id;
-    })->builder()->get();
+        // Act
+        $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
 
-    // Assert
-    expect($matches->modelKeys())->not->toContain($otherMatch->id);
+        // Assert
+        $table
+            ->assertSuccessful()
+            ->assertSeeHtml('placeholder="Search matches"')
+            ->assertSee('Historic Referee Event')
+            ->assertSee('2024-01-15')
+            ->assertSeeHtml(route('events.show', $event))
+            ->assertSeeHtml(route('referees.show', $this->referee));
+    });
+
+    it('searches previous matches by event name', function (): void {
+        // Arrange
+        foreach (['Historic Referee Event', 'Former Referee Event'] as $name) {
+            $match = EventMatch::factory()
+                ->for(Event::factory()->create([
+                    'name' => $name,
+                    'date' => Date::now()->subMonth(),
+                ]))
+                ->create();
+            $match->referees()->attach($this->referee);
+        }
+
+        // Act
+        $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
+        $table->set('search', 'Historic');
+
+        // Assert
+        $table
+            ->assertSee('Historic Referee Event')
+            ->assertDontSee('Former Referee Event');
+    });
+
+    it('renders an empty state when the referee has no previous matches', function (): void {
+        // Act
+        $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
+
+        // Assert
+        $table
+            ->assertSuccessful()
+            ->assertSee('No records found.');
+    });
 });
 
-it('excludes future matches officiated by the referee', function (): void {
-    // Arrange
-    $futureMatch = EventMatch::factory()
-        ->for(Event::factory()->future())
-        ->create();
-    $futureMatch->referees()->attach($this->referee);
+describe('PreviousMatches authorization', function (): void {
+    it('allows administrators to view referee match history', function (): void {
+        // Act
+        $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
 
-    // Act
-    $matches = tap(app(PreviousMatches::class), function (PreviousMatches $table): void {
-        $table->refereeId = $this->referee->id;
-    })->builder()->get();
+        // Assert
+        $table->assertSuccessful();
+    });
 
-    // Assert
-    expect($matches->modelKeys())->not->toContain($futureMatch->id);
-});
+    it('forbids users without access to the referee', function (string $actor): void {
+        // Arrange
+        if ($actor === 'guest') {
+            Auth::logout();
+        } else {
+            actingAs(basicUser());
+        }
 
-it('renders referee match history for administrators', function (): void {
-    // Arrange
-    $event = Event::factory()->create([
-        'name' => 'Historic Referee Event',
-        'date' => Date::parse('2024-01-15'),
+        // Act
+        $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
+
+        // Assert
+        $table->assertForbidden();
+    })->with([
+        'guest' => ['guest'],
+        'basic user' => ['basic user'],
     ]);
-    $match = EventMatch::factory()
-        ->forEvent($event)
-        ->create();
-    $match->referees()->attach($this->referee);
-
-    // Act
-    $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
-
-    // Assert
-    $table
-        ->assertSuccessful()
-        ->assertSeeHtml('placeholder="Search matches"')
-        ->assertSee('Historic Referee Event')
-        ->assertSee('2024-01-15')
-        ->assertSeeHtml(route('events.show', $event))
-        ->assertSeeHtml(route('referees.show', $this->referee));
 });
-
-it('renders when the referee has no previous matches', function (): void {
-    // Act
-    $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
-
-    // Assert
-    $table
-        ->assertSuccessful()
-        ->assertSee('No records found.');
-});
-
-it('forbids users without access to the referee', function (string $actor): void {
-    // Arrange
-    if ($actor === 'guest') {
-        Auth::logout();
-    } else {
-        actingAs(basicUser());
-    }
-
-    // Act
-    $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
-
-    // Assert
-    $table->assertForbidden();
-})->with([
-    'guest' => ['guest'],
-    'basic user' => ['basic user'],
-]);

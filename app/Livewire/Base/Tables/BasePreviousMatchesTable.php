@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base\Tables;
 
+use App\Builders\Matches\EventMatchBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Matches\Support\MatchTableFormatter;
 use App\Livewire\Table\Column;
@@ -14,6 +15,7 @@ use App\Livewire\Table\DataTableComponent;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Titles\Title;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @extends DataTableComponent<EventMatch>
@@ -47,6 +49,15 @@ abstract class BasePreviousMatchesTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('events.name'), 'event.name')
+                ->searchable(function (EventMatchBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'event',
+                        fn (Builder $eventQuery) => $eventQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                })
                 ->title(fn (EventMatch $row) => $row->event->name)
                 ->location(fn (EventMatch $row): string => route('events.show', $row->event)),
             DateColumn::make(__('events.date'), 'event.date')
