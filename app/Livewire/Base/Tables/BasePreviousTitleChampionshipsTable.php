@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Base\Tables;
 
+use App\Builders\Titles\TitleChampionshipBuilder;
 use App\Livewire\Concerns\ShowTableTrait;
 use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Livewire\Table\Column;
@@ -12,6 +13,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Titles\TitleChampionship;
 use App\Queries\Titles\TitleChampionshipQuery;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @extends DataTableComponent<TitleChampionship>
@@ -47,6 +49,15 @@ abstract class BasePreviousTitleChampionshipsTable extends DataTableComponent
     {
         return [
             LinkColumn::make(__('titles.name'))
+                ->searchable(function (TitleChampionshipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'title',
+                        fn (Builder $titleQuery) => $titleQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                })
                 ->title(fn (TitleChampionship $row): string => $this->titleName($row))
                 ->location(fn (TitleChampionship $row): ?string => $row->title === null
                     ? null
