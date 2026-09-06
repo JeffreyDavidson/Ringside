@@ -13,6 +13,7 @@ use App\Livewire\Table\Columns\LinkColumn;
 use App\Livewire\Table\DataTableComponent;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -54,7 +55,16 @@ class PreviousWrestlers extends DataTableComponent
         return [
             LinkColumn::make(__('wrestlers.name'))
                 ->title(fn (TagTeamWrestler $row) => $row->wrestler->name ?? 'Unknown')
-                ->location(fn (TagTeamWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#'),
+                ->location(fn (TagTeamWrestler $row): string => $row->wrestler ? $this->routeResolver->urlFor($row->wrestler) : '#')
+                ->searchable(function (TagTeamMembershipBuilder $builder, string $searchTerm): void {
+                    $builder->whereHas(
+                        'wrestler',
+                        fn (Builder $wrestlerQuery) => $wrestlerQuery->whereLike(
+                            'name',
+                            '%'.mb_trim($searchTerm).'%',
+                        ),
+                    );
+                }),
             DateColumn::make(__('tag-teams.date_joined'), 'joined_at')
                 ->outputFormat('Y-m-d'),
             DateColumn::make(__('tag-teams.date_left'), 'left_at')
