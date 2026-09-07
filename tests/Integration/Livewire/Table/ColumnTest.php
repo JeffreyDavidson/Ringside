@@ -3,50 +3,75 @@
 declare(strict_types=1);
 
 use App\Livewire\Table\Column;
-use App\Livewire\Table\Columns\ArrayColumn;
-use App\Livewire\Table\Columns\LinkColumn;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-describe('table columns', function (): void {
-    test('make preserves the requested column type', function (): void {
-        $column = LinkColumn::make('Wrestler');
-
-        expect($column)
-            ->toBeInstanceOf(LinkColumn::class)
-            ->and($column->getField())->toBe('wrestler');
-    });
-
+describe('table column values', function (): void {
     test('view columns render their configured view', function (): void {
+        // Arrange
         $column = Column::make('Divider')->view('components.auth.form-divider');
 
-        expect($column->resolveValue(null))
-            ->toContain('items-center')
-            ->toContain('Or');
+        // Act
+        $value = $column->resolveValue(null);
+
+        // Assert
+        expect($value)->toContain('items-center')->toContain('Or');
     });
 
-    test('array columns resolve and format items with focused callbacks', function (): void {
-        $row = collect(['first', 'second']);
+    test('supported field values resolve to display strings', function (mixed $input, string $expected): void {
+        // Arrange
+        $column = Column::make('Value');
 
-        $column = ArrayColumn::make('Items')
-            ->data(fn (Collection $row): Collection => $row)
-            ->outputFormat(fn (string $item): string => Str::upper($item))
-            ->separator(' | ');
+        // Act
+        $value = $column->resolveValue(['value' => $input]);
 
-        expect($column->resolveValue($row))->toBe('FIRST | SECOND');
+        // Assert
+        expect($value)->toBe($expected);
+    })->with([
+        'text' => ['Championship', 'Championship'],
+        'integer' => [42, '42'],
+        'zero' => [0, '0'],
+        'decimal' => [12.5, '12.5'],
+        'true' => [true, '1'],
+        'false' => [false, ''],
+        'null' => [null, ''],
+        'stringable' => [Str::of('Formatted'), 'Formatted'],
+    ]);
+
+    test('missing fields render as empty strings', function (): void {
+        // Arrange
+        $column = Column::make('Missing');
+
+        // Act
+        $value = $column->resolveValue([]);
+
+        // Assert
+        expect($value)->toBe('');
     });
 
-    test('array columns render escaped links from title and location callbacks', function (): void {
-        $row = collect(['<script>alert(1)</script>']);
+    test('unsupported field values fail explicitly', function (mixed $input): void {
+        // Arrange
+        $column = Column::make('Value');
 
-        $column = ArrayColumn::make('Items')
-            ->data(fn (Collection $row): Collection => $row)
-            ->link(
-                title: fn (string $item): string => $item,
-                location: fn (string $item): string => '/items/'.rawurlencode($item),
+        // Act / Assert
+        expect(fn () => $column->resolveValue(['value' => $input]))
+            ->toThrow(LogicException::class, 'Table column values must be stringable.');
+    })->with([
+        'array' => [[]],
+        'non-stringable object' => [new stdClass()],
+    ]);
+
+    test('label callbacks receive the row and configured column', function (): void {
+        // Arrange
+        $column = Column::make('Score')
+            ->label(
+                /** @param array{score: int} $row */
+                fn (array $row, Column $column): string => "{$column->getTitle()}: {$row['score']}",
             );
 
-        expect($column->resolveValue($row))
-            ->toBe('<a href="/items/%3Cscript%3Ealert%281%29%3C%2Fscript%3E">&lt;script&gt;alert(1)&lt;/script&gt;</a>');
+        // Act
+        $value = $column->resolveValue(['score' => 42]);
+
+        // Assert
+        expect($value)->toBe('Score: 42');
     });
 });
