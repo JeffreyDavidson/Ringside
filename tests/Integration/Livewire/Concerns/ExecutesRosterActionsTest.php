@@ -135,4 +135,35 @@ describe('roster action execution', function (): void {
             ->and(session('error'))->toBe('This manager is already hired.')
             ->and($component->dispatchedEvents)->toBe($expectedEvents);
     });
+
+    it('propagates unexpected failures without emitting feedback', function (Throwable $exception): void {
+        // Arrange
+        $component = new class
+        {
+            use ExecutesRosterActions;
+
+            /** @var list<string> */
+            public array $dispatchedEvents = [];
+
+            public function execute(Throwable $exception): bool
+            {
+                return $this->executeRosterAction('employed', RosterEntityType::Manager, fn (): never => throw $exception);
+            }
+
+            public function dispatch(string $event, mixed ...$parameters): void
+            {
+                $this->dispatchedEvents[] = $event;
+            }
+        };
+
+        // Act / Assert
+        expect(fn () => $component->execute($exception))->toThrow($exception);
+
+        expect($component->dispatchedEvents)->toBeEmpty()
+            ->and(session()->has('status'))->toBeFalse()
+            ->and(session()->has('error'))->toBeFalse();
+    })->with([
+        'programming failure' => [new LogicException('Unexpected action state.')],
+        'runtime failure' => [new RuntimeException('Action dependency failed.')],
+    ]);
 });
