@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Livewire\Table;
 
+use App\Enums\Users\Role;
 use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 
@@ -150,5 +151,70 @@ describe('data table pagination', function (): void {
             ->assertSet('paginators.page', 1)
             ->assertSee('Member 5')
             ->assertDontSee('Member 0');
+    });
+});
+
+describe('data table filtering', function (): void {
+    test('filters combine with search and sorting', function (): void {
+        // Arrange
+        User::factory()->administrator()->create(['first_name' => 'Matching Zulu']);
+        User::factory()->administrator()->create(['first_name' => 'Matching Alpha']);
+        User::factory()->administrator()->create(['first_name' => 'Unrelated Administrator']);
+        User::factory()->basicUser()->create(['first_name' => 'Matching Basic']);
+        $component = livewire(TestDataTableComponent::class);
+
+        // Act
+        $component->set('search', 'Matching');
+        $component->set('filterValues.role', Role::Administrator->value);
+        $component->call('sort', 'first_name');
+
+        // Assert
+        $component
+            ->assertSeeInOrder(['Matching Alpha', 'Matching Zulu'])
+            ->assertDontSee('Matching Basic')
+            ->assertDontSee('Unrelated Administrator');
+    });
+
+    test('changing a filter returns to the first page of matching rows', function (): void {
+        // Arrange
+        User::factory()->basicUser()->count(5)->sequence(
+            fn (Sequence $sequence): array => ['first_name' => "Basic {$sequence->index}"],
+        )->create();
+        User::factory()->administrator()->create(['first_name' => 'Zulu Administrator']);
+        $component = livewire(TestDataTableComponent::class);
+        $component->call('sort', 'first_name');
+        $component->set('perPage', 5);
+        $component->call('setPage', 2);
+        $component->assertSet('paginators.page', 2);
+
+        // Act
+        $component->set('filterValues.role', Role::Administrator->value);
+
+        // Assert
+        $component
+            ->assertSet('paginators.page', 1)
+            ->assertSee('Zulu Administrator')
+            ->assertDontSee('Basic 0');
+    });
+
+    test('clearing a filter restores matching rows without clearing the search', function (): void {
+        // Arrange
+        User::factory()->administrator()->create(['first_name' => 'Matching Administrator']);
+        User::factory()->basicUser()->create(['first_name' => 'Matching Basic']);
+        User::factory()->basicUser()->create(['first_name' => 'Unrelated Basic']);
+        $component = livewire(TestDataTableComponent::class);
+        $component->set('search', 'Matching');
+        $component->set('filterValues.role', Role::Administrator->value);
+        $component->assertDontSee('Matching Basic');
+
+        // Act
+        $component->set('filterValues.role', '');
+
+        // Assert
+        $component
+            ->assertSet('search', 'Matching')
+            ->assertSee('Matching Administrator')
+            ->assertSee('Matching Basic')
+            ->assertDontSee('Unrelated Basic');
     });
 });
