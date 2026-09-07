@@ -26,7 +26,7 @@ class TestDataTableComponent extends DataTableComponent
     {
         return [
             Column::make('Name', 'first_name')->sortable()->searchable(),
-            Column::make('Email', 'email'),
+            Column::make('Email', 'email')->searchable(),
         ];
     }
 
