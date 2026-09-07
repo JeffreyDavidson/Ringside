@@ -15,6 +15,7 @@ use App\Livewire\Wrestlers\Components\Actions;
 use App\Models\Roster\Wrestlers\Wrestler;
 use JMac\Testing\Double;
 use JMac\Testing\DoubleInterface;
+use JMac\Testing\Matching\Argument;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -42,7 +43,9 @@ describe('wrestler actions component', function (): void {
     ): void {
         // Arrange
         $wrestler = Wrestler::factory()->create();
-        $action->expects('handle');
+        $action->expects('handle')->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Wrestler && $actual->is($wrestler)),
+        );
         app()->instance($actionClass, $action);
 
         actingAs(administrator());

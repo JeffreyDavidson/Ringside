@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\TagTeams\DeleteAction;
 use App\Actions\TagTeams\EmployAction;
 use App\Actions\TagTeams\ReinstateAction;
 use App\Actions\TagTeams\ReleaseAction;
@@ -13,6 +14,7 @@ use App\Livewire\TagTeams\Components\Actions;
 use App\Models\Roster\TagTeams\TagTeam;
 use JMac\Testing\Double;
 use JMac\Testing\DoubleInterface;
+use JMac\Testing\Matching\Argument;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -40,7 +42,9 @@ describe('tag team actions component', function (): void {
     ): void {
         // Arrange
         $tagTeam = TagTeam::factory()->create();
-        $action->expects('handle');
+        $action->expects('handle')->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof TagTeam && $actual->is($tagTeam)),
+        );
         app()->instance($actionClass, $action);
 
         actingAs(administrator());
@@ -61,6 +65,7 @@ describe('tag team actions component', function (): void {
         'unretire' => ['unretire', UnretireAction::class, Double::for(UnretireAction::class), 'Tag team has been brought out of retirement.'],
         'suspend' => ['suspend', SuspendAction::class, Double::for(SuspendAction::class), 'Tag team has been suspended.'],
         'reinstate' => ['reinstate', ReinstateAction::class, Double::for(ReinstateAction::class), 'Tag team has been reinstated.'],
+        'delete' => ['delete', DeleteAction::class, Double::for(DeleteAction::class), 'Tag team has been deleted.'],
         'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Tag team has been restored.'],
     ]);
 
