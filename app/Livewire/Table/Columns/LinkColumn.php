@@ -33,7 +33,7 @@ class LinkColumn extends Column
         $location = $this->locationCallback ? ($this->locationCallback)($row) : '';
 
         if ($location === '' || $location === null) {
-            return (string) $title;
+            return e((string) $title);
         }
 
         return static::linkHtml($title, $location);
