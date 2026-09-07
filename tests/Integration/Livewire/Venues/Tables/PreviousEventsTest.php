@@ -84,6 +84,12 @@ describe('PreviousEvents rendering', function (): void {
         Event::factory()->atVenue($this->venue)->create([
             'name' => 'Winter Warfare',
         ]);
+        Event::factory()->atVenue(Venue::factory()->create())->create([
+            'name' => 'Summer Elsewhere',
+        ]);
+        Event::factory()->atVenue($this->venue)->trashed()->create([
+            'name' => 'Summer Deleted',
+        ]);
 
         // Act
         $table = livewire(PreviousEvents::class, ['venueId' => $this->venue->id]);
@@ -92,7 +98,27 @@ describe('PreviousEvents rendering', function (): void {
         // Assert
         $table
             ->assertSee('Summer Spectacular')
-            ->assertDontSee('Winter Warfare');
+            ->assertDontSee('Winter Warfare')
+            ->assertDontSee('Summer Elsewhere')
+            ->assertDontSee('Summer Deleted');
+
+        // Act
+        $table->set('search', 'Elsewhere');
+
+        // Assert
+        $table
+            ->assertSee('No records found.')
+            ->assertDontSee('Summer Elsewhere');
+
+        // Act
+        $table->set('search', '');
+
+        // Assert
+        $table
+            ->assertSee('Summer Spectacular')
+            ->assertSee('Winter Warfare')
+            ->assertDontSee('Summer Elsewhere')
+            ->assertDontSee('Summer Deleted');
     });
 
     it('renders an empty state when the venue has no events', function (): void {
