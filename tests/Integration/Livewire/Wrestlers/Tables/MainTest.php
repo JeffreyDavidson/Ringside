@@ -177,3 +177,39 @@ describe('wrestlers table', function (): void {
         'basic user' => ['basic user'],
     ]);
 });
+
+describe('wrestlers table metadata', function (): void {
+    it('counts derived employment statuses through the table status filter', function (): void {
+        // Arrange
+        Wrestler::factory()->employed()->create();
+        Wrestler::factory()->released()->create();
+        Wrestler::factory()->unemployed()->create();
+
+        Wrestler::factory()->employed()->trashed()->create();
+
+        $table = new Main();
+
+        // Act
+        $metadata = $table->metadata();
+
+        // Assert
+        $statuses = collect($metadata['statuses'])->keyBy('value');
+
+        expect($metadata['total'])->toBe(3)
+            ->and($statuses['employed'])->toBe([
+                'value' => 'employed',
+                'label' => 'Employed',
+                'count' => 1,
+            ])
+            ->and($statuses['released'])->toBe([
+                'value' => 'released',
+                'label' => 'Released',
+                'count' => 1,
+            ])
+            ->and($statuses['unemployed'])->toBe([
+                'value' => 'unemployed',
+                'label' => 'Unemployed',
+                'count' => 1,
+            ]);
+    });
+});
