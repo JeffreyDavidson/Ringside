@@ -63,6 +63,59 @@ describe('name search', function () {
             ->and($matches->firstOrFail()->is($referee))->toBeTrue();
     });
 
+    it('keeps name alternatives within an existing record constraint', function (string $search): void {
+        // Arrange
+        $manager = Manager::factory()->create([
+            'first_name' => 'John Paul',
+            'last_name' => 'Smith Jones',
+        ]);
+        Manager::factory()->create([
+            'first_name' => 'John Paul',
+            'last_name' => 'Smith Jones',
+        ]);
+
+        // Act
+        $query = Manager::query();
+        $query->whereKey($manager->id);
+        $query->whereNameMatches($search);
+        $matches = $query->get();
+
+        // Assert
+        expect($matches->modelKeys())->toBe([$manager->id]);
+    })->with([
+        'exact first name' => 'John Paul',
+        'exact last name' => 'Smith Jones',
+        'full name' => 'John Paul Smith Jones',
+        'first-name word prefix' => 'John',
+        'last-name word prefix' => 'Smith',
+    ]);
+
+    it('excludes deleted managers from name matches', function (string $search): void {
+        // Arrange
+        $manager = Manager::factory()->create([
+            'first_name' => 'John Paul',
+            'last_name' => 'Smith Jones',
+        ]);
+        Manager::factory()->trashed()->create([
+            'first_name' => 'John Paul',
+            'last_name' => 'Smith Jones',
+        ]);
+
+        // Act
+        $query = Manager::query();
+        $query->whereNameMatches($search);
+        $matches = $query->get();
+
+        // Assert
+        expect($matches->modelKeys())->toBe([$manager->id]);
+    })->with([
+        'exact first name' => 'John Paul',
+        'exact last name' => 'Smith Jones',
+        'full name' => 'John Paul Smith Jones',
+        'first-name word prefix' => 'John',
+        'last-name word prefix' => 'Smith',
+    ]);
+
     it('does not expose first and last name search on wrestler builders', function () {
         expect(method_exists(Wrestler::query(), 'whereNameMatches'))->toBeFalse();
     });
