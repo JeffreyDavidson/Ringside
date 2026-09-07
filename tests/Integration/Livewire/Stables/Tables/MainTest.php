@@ -285,3 +285,46 @@ describe('stables table', function (): void {
             ->and($loadedStable->status)->toBe(StableStatus::Active);
     });
 });
+
+describe('stables table metadata', function (): void {
+    it('uses every stable status as a metadata and filter value', function (): void {
+        // Arrange
+        Stable::factory()->active()->create();
+        Stable::factory()->retired()->create();
+        Stable::factory()->withFutureActivation()->create();
+
+        Stable::factory()->active()->trashed()->create();
+
+        $table = new Main();
+
+        // Act
+        $metadata = $table->metadata();
+
+        // Assert
+        $statuses = collect($metadata['statuses'])->keyBy('value');
+
+        expect($metadata['total'])->toBe(3);
+
+        expect($statuses->keys()->all())->toBe(
+            array_map(
+                static fn (StableStatus $status): string => $status->value,
+                StableStatus::cases(),
+            ),
+        )
+            ->and($statuses->get(StableStatus::Active->value))->toBe([
+                'value' => StableStatus::Active->value,
+                'label' => StableStatus::Active->label(),
+                'count' => 1,
+            ])
+            ->and($statuses->get(StableStatus::PendingEstablishment->value))->toBe([
+                'value' => StableStatus::PendingEstablishment->value,
+                'label' => StableStatus::PendingEstablishment->label(),
+                'count' => 1,
+            ])
+            ->and($statuses->get(StableStatus::Retired->value))->toBe([
+                'value' => StableStatus::Retired->value,
+                'label' => StableStatus::Retired->label(),
+                'count' => 1,
+            ]);
+    });
+});

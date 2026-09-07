@@ -258,3 +258,46 @@ describe('titles table', function (): void {
         'basic user' => ['basic user'],
     ]);
 });
+
+describe('titles table metadata', function (): void {
+    it('uses every title status as a metadata and filter value', function (): void {
+        // Arrange
+        Title::factory()->active()->create();
+        Title::factory()->retired()->create();
+        Title::factory()->withFutureDebut()->create();
+
+        Title::factory()->active()->trashed()->create();
+
+        $table = new Main();
+
+        // Act
+        $metadata = $table->metadata();
+
+        // Assert
+        $statuses = collect($metadata['statuses'])->keyBy('value');
+
+        expect($metadata['total'])->toBe(3);
+
+        expect($statuses->keys()->all())->toBe(
+            array_map(
+                static fn (TitleStatus $status): string => $status->value,
+                TitleStatus::cases(),
+            ),
+        )
+            ->and($statuses->get(TitleStatus::Active->value))->toBe([
+                'value' => TitleStatus::Active->value,
+                'label' => TitleStatus::Active->label(),
+                'count' => 1,
+            ])
+            ->and($statuses->get(TitleStatus::PendingDebut->value))->toBe([
+                'value' => TitleStatus::PendingDebut->value,
+                'label' => TitleStatus::PendingDebut->label(),
+                'count' => 1,
+            ])
+            ->and($statuses->get(TitleStatus::Retired->value))->toBe([
+                'value' => TitleStatus::Retired->value,
+                'label' => TitleStatus::Retired->label(),
+                'count' => 1,
+            ]);
+    });
+});
