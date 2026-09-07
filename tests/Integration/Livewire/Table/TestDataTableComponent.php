@@ -22,7 +22,7 @@ class TestDataTableComponent extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('Name', 'name')->sortable(),
+            Column::make('Name', 'first_name')->sortable()->searchable(),
             Column::make('Email', 'email'),
         ];
     }
