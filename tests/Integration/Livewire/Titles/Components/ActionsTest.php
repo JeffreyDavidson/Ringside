@@ -12,6 +12,7 @@ use App\Livewire\Titles\Components\Actions;
 use App\Models\Titles\Title;
 use JMac\Testing\Double;
 use JMac\Testing\DoubleInterface;
+use JMac\Testing\Matching\Argument;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -41,7 +42,9 @@ describe('title actions component', function (): void {
     ): void {
         // Arrange
         $title = Title::factory()->create();
-        $action->expects('handle');
+        $action->expects('handle')->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Title && $actual->is($title)),
+        );
         app()->instance($actionClass, $action);
 
         actingAs(administrator());

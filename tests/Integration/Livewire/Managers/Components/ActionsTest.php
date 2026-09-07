@@ -14,6 +14,7 @@ use App\Livewire\Managers\Components\Actions;
 use App\Models\Roster\Managers\Manager;
 use JMac\Testing\Double;
 use JMac\Testing\DoubleInterface;
+use JMac\Testing\Matching\Argument;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -44,7 +45,9 @@ describe('manager actions component', function (): void {
     ): void {
         // Arrange
         $manager = Manager::factory()->create();
-        $action->expects('handle');
+        $action->expects('handle')->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Manager && $actual->is($manager)),
+        );
         app()->instance($actionClass, $action);
 
         actingAs(administrator());

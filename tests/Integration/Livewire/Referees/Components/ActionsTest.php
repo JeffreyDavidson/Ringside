@@ -15,6 +15,7 @@ use App\Livewire\Referees\Components\Actions;
 use App\Models\Roster\Referees\Referee;
 use JMac\Testing\Double;
 use JMac\Testing\DoubleInterface;
+use JMac\Testing\Matching\Argument;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -45,7 +46,9 @@ describe('referee actions component', function (): void {
     ): void {
         // Arrange
         $referee = Referee::factory()->create();
-        $action->expects('handle');
+        $action->expects('handle')->with(
+            Argument::satisfies(fn (mixed $actual): bool => $actual instanceof Referee && $actual->is($referee)),
+        );
         app()->instance($actionClass, $action);
 
         actingAs(administrator());
