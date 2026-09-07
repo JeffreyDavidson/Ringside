@@ -108,7 +108,7 @@ describe('wrestler previous managers table', function (): void {
             ->assertDontSee('Current Manager');
     });
 
-    it('searches previous managers by name', function (): void {
+    it('searches previous managers by name', function (string $search, string $visibleManager, string $hiddenManager): void {
         // Arrange
         $wrestler = Wrestler::factory()->create();
         $historicManager = Manager::factory()->create([
@@ -130,13 +130,17 @@ describe('wrestler previous managers table', function (): void {
 
         // Act
         $component = livewire(PreviousManagers::class, ['wrestlerId' => $wrestler->id]);
-        $component->set('search', 'Historic');
+        $component->set('search', $search);
 
         // Assert
         $component
-            ->assertSee('Historic Manager')
-            ->assertDontSee('Former Advisor');
-    });
+            ->assertSee($visibleManager)
+            ->assertDontSee($hiddenManager);
+    })->with([
+        'first name' => ['Historic', 'Historic Manager', 'Former Advisor'],
+        'last name' => ['Advisor', 'Former Advisor', 'Historic Manager'],
+        'full name' => ['Historic Manager', 'Historic Manager', 'Former Advisor'],
+    ]);
 
     it('keeps separate historical assignments for a returning manager', function (): void {
         // Arrange
