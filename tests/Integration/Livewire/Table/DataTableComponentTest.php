@@ -155,6 +155,43 @@ describe('data table pagination', function (): void {
 });
 
 describe('data table filtering', function (): void {
+    test('matches either searchable column without bypassing the selected filter', function (): void {
+        // Arrange
+        User::factory()->administrator()->create([
+            'first_name' => 'Needle Administrator',
+            'email' => 'name-match@example.com',
+        ]);
+        User::factory()->administrator()->create([
+            'first_name' => 'Email Administrator',
+            'email' => 'needle-admin@example.com',
+        ]);
+        User::factory()->basicUser()->create([
+            'first_name' => 'Needle Basic',
+            'email' => 'basic-name@example.com',
+        ]);
+        User::factory()->basicUser()->create([
+            'first_name' => 'Email Basic',
+            'email' => 'needle-basic@example.com',
+        ]);
+        User::factory()->administrator()->create([
+            'first_name' => 'Unrelated Administrator',
+            'email' => 'unrelated@example.com',
+        ]);
+        $component = livewire(TestDataTableComponent::class);
+
+        // Act
+        $component->set('filterValues.role', Role::Administrator->value);
+        $component->set('search', 'needle');
+
+        // Assert
+        $component
+            ->assertSee('Needle Administrator')
+            ->assertSee('Email Administrator')
+            ->assertDontSee('Needle Basic')
+            ->assertDontSee('Email Basic')
+            ->assertDontSee('Unrelated Administrator');
+    });
+
     test('filters combine with search and sorting', function (): void {
         // Arrange
         User::factory()->administrator()->create(['first_name' => 'Matching Zulu']);
