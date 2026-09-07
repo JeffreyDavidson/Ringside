@@ -97,14 +97,31 @@ describe('PreviousMatches rendering', function (): void {
             $match->referees()->attach($this->referee);
         }
 
+        EventMatch::factory()
+            ->forEvent(Event::factory()->create([
+                'name' => 'Historic Unrelated Event',
+                'date' => Date::now()->subMonth(),
+            ]))
+            ->create();
+        $deletedMatch = EventMatch::factory()
+            ->forEvent(Event::factory()->create([
+                'name' => 'Historic Deleted Event',
+                'date' => Date::now()->subMonth(),
+            ]))
+            ->trashed()
+            ->create();
+        $deletedMatch->referees()->attach($this->referee);
+
         // Act
         $table = livewire(PreviousMatches::class, ['refereeId' => $this->referee->id]);
-        $table->set('search', 'Historic');
+        $table->set('search', '  Historic  ');
 
         // Assert
         $table
             ->assertSee('Historic Referee Event')
-            ->assertDontSee('Former Referee Event');
+            ->assertDontSee('Former Referee Event')
+            ->assertDontSee('Historic Unrelated Event')
+            ->assertDontSee('Historic Deleted Event');
     });
 
     it('renders an empty state when the referee has no previous matches', function (): void {
