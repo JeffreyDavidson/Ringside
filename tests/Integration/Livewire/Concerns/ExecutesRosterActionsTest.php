@@ -17,6 +17,8 @@ describe('roster action execution', function (): void {
         {
             use ExecutesRosterActions;
 
+            public int $actionCalls = 0;
+
             /** @var list<array{event: string, parameters: array<array-key, mixed>}> */
             public array $dispatchedEvents = [];
 
@@ -25,7 +27,9 @@ describe('roster action execution', function (): void {
                 return $this->executeRosterAction(
                     'employed',
                     RosterEntityType::Wrestler,
-                    static function (): void {},
+                    function (): void {
+                        $this->actionCalls++;
+                    },
                 );
             }
 
@@ -57,7 +61,9 @@ describe('roster action execution', function (): void {
 
         // Assert
         expect($succeeded)->toBeTrue()
+            ->and($component->actionCalls)->toBe(1)
             ->and(session('status'))->toBe('Wrestler has been hired.')
+            ->and(session()->has('error'))->toBeFalse()
             ->and(session('success'))->toBeNull()
             ->and($component->dispatchedEvents)->toBe($expectedEvents);
     });
@@ -133,6 +139,7 @@ describe('roster action execution', function (): void {
         // Assert
         expect($succeeded)->toBeFalse()
             ->and(session('error'))->toBe('This manager is already hired.')
+            ->and(session()->has('status'))->toBeFalse()
             ->and($component->dispatchedEvents)->toBe($expectedEvents);
     });
 
