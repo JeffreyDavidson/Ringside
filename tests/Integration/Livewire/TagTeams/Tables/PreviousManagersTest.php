@@ -185,7 +185,7 @@ describe('PreviousManagers rendering', function (): void {
             ->assertDontSee('Current Manager');
     });
 
-    it('searches previous managers by name', function (): void {
+    it('searches previous managers by name', function (string $search, string $visibleManager, string $hiddenManager): void {
         // Arrange
         $historicManager = Manager::factory()->create([
             'first_name' => 'Historic',
@@ -206,13 +206,17 @@ describe('PreviousManagers rendering', function (): void {
 
         // Act
         $table = livewire(PreviousManagers::class, ['tagTeamId' => $this->tagTeam->id]);
-        $table->set('search', 'Historic');
+        $table->set('search', $search);
 
         // Assert
         $table
-            ->assertSee('Historic Manager')
-            ->assertDontSee('Former Advisor');
-    });
+            ->assertSee($visibleManager)
+            ->assertDontSee($hiddenManager);
+    })->with([
+        'first name' => ['Historic', 'Historic Manager', 'Former Advisor'],
+        'last name' => ['Advisor', 'Former Advisor', 'Historic Manager'],
+        'full name' => ['Historic Manager', 'Historic Manager', 'Former Advisor'],
+    ]);
 
     it('renders an empty state when the tag team has no previous managers', function (): void {
         // Act
