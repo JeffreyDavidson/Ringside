@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Titles\Title;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Date;
 
 describe('TitleBuilder Query Scopes', function () {
     beforeEach(function () {
@@ -71,21 +72,35 @@ describe('TitleBuilder Query Scopes', function () {
         });
     });
 
-    describe('scope performance and optimization', function () {
-        test('undebuted scope uses efficient exists query', function () {
-            $query = Title::query()->undebuted();
-            $sql = $query->toSql();
+    describe('activity history filtering', function () {
+        test('undebuted scope excludes deleted titles and every title with activity history', function () {
+            // Arrange
+            Title::factory()->undebuted()->trashed()->create();
 
-            expect($sql)->toContain('not exists');
-            expect($sql)->toContain('activity_periods');
+            // Act
+            $query = Title::query();
+            $query->undebuted();
+            $titles = $query->get();
+
+            // Assert
+            expect($titles->modelKeys())->toBe([$this->undebutedTitle->id]);
         });
 
-        test('active scope uses exists query for performance', function () {
-            $query = Title::query()->active();
-            $sql = $query->toSql();
+        test('active scope returns a reactivated title once despite previous activity periods', function () {
+            // Arrange
+            ActivityPeriod::factory()
+                ->for($this->activeTitle, 'activeable')
+                ->started(Date::now()->subMonths(2))
+                ->ended(Date::now()->subMonth())
+                ->create();
 
-            expect($sql)->toContain('exists');
-            expect($sql)->toContain('activity_periods');
+            // Act
+            $query = Title::query();
+            $query->active();
+            $titles = $query->get();
+
+            // Assert
+            expect($titles->modelKeys())->toBe([$this->activeTitle->id]);
         });
 
     });
@@ -121,16 +136,24 @@ describe('TitleBuilder Query Scopes', function () {
         });
 
         test('scopes maintain query builder functionality', function () {
-            $query = Title::query()
-                ->active()
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->limit(10);
+            // Arrange
+            Title::factory()->singles()->active()->create(['name' => 'Zonal Title']);
+            $nationalTitle = Title::factory()->singles()->active()->create(['name' => 'National Title']);
+            Title::factory()->singles()->active()->trashed()->create(['name' => 'A Deleted Title']);
 
-            expect($query)->toBeInstanceOf(Builder::class);
-            expect($query->toSql())->toContain('select');
-            expect($query->toSql())->toContain('order by');
-            expect($query->toSql())->toContain('limit');
+            // Act
+            $query = Title::query();
+            $query->active();
+            $query->select(['id', 'name']);
+            $query->orderBy('name');
+            $query->limit(2);
+            $titles = $query->get();
+
+            // Assert
+            expect($titles->modelKeys())->toBe([$this->activeTitle->id, $nationalTitle->id])
+                ->and($titles->pluck('name')->all())->toBe(['Active Title', 'National Title'])
+                ->and($titles->firstOrFail()->getAttributes())->toHaveKeys(['id', 'name'])
+                ->toHaveCount(2);
         });
     });
 });
