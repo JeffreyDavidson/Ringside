@@ -20,8 +20,11 @@ use App\Exceptions\Roster\TagTeams\CannotBeRetiredException as TagTeamCannotBeRe
 use App\Exceptions\Roster\TagTeams\CannotBeSuspendedException as TagTeamCannotBeSuspendedException;
 use App\Exceptions\Roster\TagTeams\CannotBeUnretiredException as TagTeamCannotBeUnretiredException;
 use App\Livewire\Support\RosterErrorMessageResolver;
+use App\Models\Roster\Managers\Manager;
+use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Lang;
 
 describe('roster error messages', function (): void {
     test('it maps roster failures from stable reasons instead of message text', function (): void {
@@ -51,7 +54,8 @@ describe('roster error messages', function (): void {
         $translationKey = RosterErrorMessageResolver::translationKey($exception, $entityType);
 
         // Assert
-        expect($translationKey)->toBe($expectedKey);
+        expect($translationKey)->toBe($expectedKey)
+            ->and(Lang::has($translationKey, 'en', false))->toBeTrue();
     })->with([
         'wrestlers.errors.already_employed' => [
             fn (): BaseBusinessException => CannotBeEmployedException::employed(new Wrestler(['name' => 'Test Wrestler'])),
@@ -59,14 +63,34 @@ describe('roster error messages', function (): void {
             'wrestlers.errors.already_employed',
         ],
         'managers.errors.not_employed_suspend' => [
-            fn (): BaseBusinessException => CannotBeSuspendedException::unemployed(new Wrestler(['name' => 'Test Wrestler'])),
+            fn (): BaseBusinessException => CannotBeSuspendedException::unemployed(Manager::factory()->make()),
             RosterEntityType::Manager,
             'managers.errors.not_employed_suspend',
         ],
+        'wrestlers.errors.cannot_suspend' => [
+            fn (): BaseBusinessException => CannotBeSuspendedException::unemployed(Wrestler::factory()->make()),
+            RosterEntityType::Wrestler,
+            'wrestlers.errors.cannot_suspend',
+        ],
+        'referees.errors.cannot_suspend_unemployed' => [
+            fn (): BaseBusinessException => CannotBeSuspendedException::unemployed(Referee::factory()->make()),
+            RosterEntityType::Referee,
+            'referees.errors.cannot_suspend_unemployed',
+        ],
         'referees.errors.cannot_injure_unemployed' => [
-            fn (): BaseBusinessException => CannotBeInjuredException::unemployed(new Wrestler(['name' => 'Test Wrestler'])),
+            fn (): BaseBusinessException => CannotBeInjuredException::unemployed(Referee::factory()->make()),
             RosterEntityType::Referee,
             'referees.errors.cannot_injure_unemployed',
+        ],
+        'wrestlers.errors.cannot_injure' => [
+            fn (): BaseBusinessException => CannotBeInjuredException::unemployed(Wrestler::factory()->make()),
+            RosterEntityType::Wrestler,
+            'wrestlers.errors.cannot_injure',
+        ],
+        'managers.errors.not_employed_injure' => [
+            fn (): BaseBusinessException => CannotBeInjuredException::unemployed(Manager::factory()->make()),
+            RosterEntityType::Manager,
+            'managers.errors.not_employed_injure',
         ],
         'wrestlers.errors.not_injured' => [
             fn (): BaseBusinessException => CannotBeClearedFromInjuryException::notInjured(new Wrestler(['name' => 'Test Wrestler'])),
@@ -130,7 +154,8 @@ describe('roster error messages', function (): void {
         $translationKey = RosterErrorMessageResolver::translationKey($exception, $entityType);
 
         // Assert
-        expect($translationKey)->toBe($expectedKey);
+        expect($translationKey)->toBe($expectedKey)
+            ->and(Lang::has($translationKey, 'en', false))->toBeTrue();
     })->with([
         'tag-teams.errors.already_employed' => [
             fn (): BaseBusinessException => TagTeamCannotBeEmployedException::alreadyEmployed(new TagTeam(['name' => 'Test TagTeam'])),
