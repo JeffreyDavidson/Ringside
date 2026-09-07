@@ -6,7 +6,7 @@ use App\Livewire\Concerns\GeneratesDummyData;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 describe('dummy data generation', function (): void {
-    it('delegates population to the typed component implementation', function (): void {
+    it('delegates population in permitted environments', function (string $environment): void {
         // Arrange
         $component = new class
         {
@@ -20,31 +20,53 @@ describe('dummy data generation', function (): void {
             }
         };
 
-        // Act
-        $component->fillDummyFields();
+        $originalEnvironment = app()->environment();
+        app()->detectEnvironment(fn (): string => $environment);
 
-        // Assert
-        expect($component->name)->toBe('Test Name');
-    });
+        try {
+            // Act
+            $component->fillDummyFields();
 
-    it('rejects requests outside local and testing environments', function (): void {
+            // Assert
+            expect($component->name)->toBe('Test Name');
+        } finally {
+            app()->detectEnvironment(fn (): string => $originalEnvironment);
+        }
+    })->with([
+        'local development' => ['local'],
+        'automated testing' => ['testing'],
+    ]);
+
+    it('rejects requests without populating fields in other environments', function (string $environment): void {
         // Arrange
         $component = new class
         {
             use GeneratesDummyData;
 
-            protected function populateDummyData(): void {}
+            public string $name = 'Original Name';
+
+            protected function populateDummyData(): void
+            {
+                $this->name = 'Generated Name';
+            }
         };
 
-        app()->detectEnvironment(fn (): string => 'production');
+        $originalEnvironment = app()->environment();
+        app()->detectEnvironment(fn (): string => $environment);
 
-        // Act / Assert
         try {
+            // Act / Assert
             expect(fn () => $component->fillDummyFields())->toThrow(NotFoundHttpException::class);
+
+            expect($component->name)->toBe('Original Name');
         } finally {
-            app()->detectEnvironment(fn (): string => 'testing');
+            app()->detectEnvironment(fn (): string => $originalEnvironment);
         }
-    });
+    })->with([
+        'production' => ['production'],
+        'staging' => ['staging'],
+        'preview' => ['preview'],
+    ]);
 
     it('allows each component to define its own generated values', function (): void {
         // Arrange
@@ -109,5 +131,31 @@ describe('dummy data generation', function (): void {
         expect($employmentDate)
             ->toBeString()
             ->toMatch('/^\d{4}-\d{2}-\d{2}$/');
+    });
+
+    it('honors the supplied start-date format and generation bounds', function (): void {
+        // Arrange
+        $component = new class
+        {
+            use GeneratesDummyData;
+
+            public function startDate(): ?string
+            {
+                return $this->generateOptionalStartDate(
+                    format: 'd/m/Y H:i:s',
+                    probability: 1.0,
+                    minPeriod: '2020-02-03 12:34:56',
+                    maxPeriod: '2020-02-03 12:34:56',
+                );
+            }
+
+            protected function populateDummyData(): void {}
+        };
+
+        // Act
+        $startDate = $component->startDate();
+
+        // Assert
+        expect($startDate)->toBe('03/02/2020 12:34:56');
     });
 });
