@@ -96,14 +96,31 @@ describe('PreviousMatches rendering', function (): void {
                 ->create();
         }
 
+        EventMatch::factory()
+            ->forEvent(Event::factory()->create([
+                'name' => 'Historic Unrelated Event',
+                'date' => Date::now()->subMonth(),
+            ]))
+            ->create();
+        EventMatch::factory()
+            ->forEvent(Event::factory()->create([
+                'name' => 'Historic Deleted Event',
+                'date' => Date::now()->subMonth(),
+            ]))
+            ->withCompetitors([$this->wrestler, Wrestler::factory()->create()])
+            ->trashed()
+            ->create();
+
         // Act
         $table = livewire(PreviousMatches::class, ['wrestlerId' => $this->wrestler->id]);
-        $table->set('search', 'Historic');
+        $table->set('search', '  Historic  ');
 
         // Assert
         $table
             ->assertSee('Historic Wrestler Event')
-            ->assertDontSee('Former Wrestler Event');
+            ->assertDontSee('Former Wrestler Event')
+            ->assertDontSee('Historic Unrelated Event')
+            ->assertDontSee('Historic Deleted Event');
     });
 
     it('renders an empty state when the wrestler has no previous matches', function (): void {
