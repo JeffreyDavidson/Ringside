@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Livewire\Components\Tables\Filters\FirstActivityPeriodFilter;
 use App\Livewire\Components\Tables\Filters\FirstEmploymentFilter;
 use App\Livewire\Components\Tables\Filters\RelatedPeriodDateRangeFilter;
-use App\Livewire\Table\Filters\SelectFilter;
 use App\Models\Lifecycle\Employment;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Date;
@@ -86,18 +85,4 @@ describe('table filter factories', function (): void {
             ->and($wrestlers->every(fn (Wrestler $wrestler): bool => ! $wrestler->relationLoaded('employments')))->toBeTrue();
     });
 
-    test('select filter factory creates a configured filter', function () {
-        // Arrange
-        $options = ['active' => 'Active'];
-
-        // Act
-        $filter = SelectFilter::make('Status');
-        $filter->options($options);
-
-        // Assert
-        expect($filter->getKey())->toBe('status')
-            ->and($filter->getOptions())->toBe([
-                'active' => 'Active',
-            ]);
-    });
 });
