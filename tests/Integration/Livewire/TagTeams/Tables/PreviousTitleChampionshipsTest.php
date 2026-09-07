@@ -111,6 +111,19 @@ describe('PreviousTitleChampionships rendering', function (): void {
                 ->create();
         }
 
+        TitleChampionship::factory()
+            ->for(Title::factory()->tagTeam()->create(['name' => 'Historic Unrelated Tag Team Titles']))
+            ->forTagTeam()
+            ->wonOn('2020-01-01')
+            ->lostOn('2021-01-01')
+            ->create();
+        TitleChampionship::factory()
+            ->for(Title::factory()->tagTeam()->create(['name' => 'Historic Current Tag Team Titles']))
+            ->forTagTeam($this->tagTeam)
+            ->wonOn('2025-01-01')
+            ->current()
+            ->create();
+
         // Act
         $component = livewire(PreviousTitleChampionships::class, ['tagTeamId' => $this->tagTeam->id]);
         $component->set('search', 'Historic');
@@ -118,7 +131,9 @@ describe('PreviousTitleChampionships rendering', function (): void {
         // Assert
         $component
             ->assertSee('Historic Tag Team Titles')
-            ->assertDontSee('Former Tag Team Titles');
+            ->assertDontSee('Former Tag Team Titles')
+            ->assertDontSee('Historic Unrelated Tag Team Titles')
+            ->assertDontSee('Historic Current Tag Team Titles');
     });
 
     it('renders an empty state when the tag team has no previous championships', function (): void {

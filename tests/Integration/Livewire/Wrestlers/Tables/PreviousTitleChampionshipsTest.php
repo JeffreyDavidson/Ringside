@@ -146,6 +146,19 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
                 ->create();
         }
 
+        TitleChampionship::factory()
+            ->for(Title::factory()->singles()->create(['name' => 'Historic Unrelated Singles Title']))
+            ->forWrestler()
+            ->wonOn('2020-01-01')
+            ->lostOn('2021-01-01')
+            ->create();
+        TitleChampionship::factory()
+            ->for(Title::factory()->singles()->create(['name' => 'Historic Current Singles Title']))
+            ->forWrestler($this->wrestler)
+            ->wonOn('2025-01-01')
+            ->current()
+            ->create();
+
         // Act
         $component = livewire(PreviousTitleChampionships::class, ['wrestlerId' => $this->wrestler->id]);
         $component->set('search', 'Historic');
@@ -153,7 +166,9 @@ describe('PreviousTitleChampionshipsTable Rendering', function () {
         // Assert
         $component
             ->assertSee('Historic Singles Title')
-            ->assertDontSee('Former Singles Title');
+            ->assertDontSee('Former Singles Title')
+            ->assertDontSee('Historic Unrelated Singles Title')
+            ->assertDontSee('Historic Current Singles Title');
     });
 
     it('renders when the wrestler has no championship history', function (): void {
