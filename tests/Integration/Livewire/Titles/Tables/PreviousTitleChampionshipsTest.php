@@ -113,6 +113,18 @@ describe('PreviousTitleChampionships rendering', function (): void {
         $wrestler = Wrestler::factory()->create(['name' => 'Historic Wrestler']);
         $tagTeam = TagTeam::factory()->create(['name' => 'Legendary Tag Team']);
         TitleChampionship::factory()
+            ->for(Title::factory()->singles())
+            ->forWrestler($wrestler)
+            ->wonOn('2022-02-01')
+            ->lostOn('2022-03-01')
+            ->create();
+        TitleChampionship::factory()
+            ->for(Title::factory()->tagTeam())
+            ->forTagTeam($tagTeam)
+            ->wonOn('2022-04-01')
+            ->lostOn('2022-05-01')
+            ->create();
+        TitleChampionship::factory()
             ->for($this->title)
             ->forWrestler($wrestler)
             ->wonOn('2023-01-01')
@@ -133,7 +145,9 @@ describe('PreviousTitleChampionships rendering', function (): void {
         $table
             ->assertSee($visibleChampion)
             ->assertSee($visibleDates)
-            ->assertDontSee($hiddenDates);
+            ->assertDontSee($hiddenDates)
+            ->assertDontSee('2022-02-01 - 2022-03-01')
+            ->assertDontSee('2022-04-01 - 2022-05-01');
     })->with([
         'wrestler champion' => ['Historic', 'Historic Wrestler', '2023-01-01 - 2023-05-01', '2024-06-01 - 2025-01-01'],
         'tag team champion' => ['Legendary', 'Legendary Tag Team', '2024-06-01 - 2025-01-01', '2023-01-01 - 2023-05-01'],
