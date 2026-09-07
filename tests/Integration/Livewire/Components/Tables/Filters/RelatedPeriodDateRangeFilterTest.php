@@ -10,6 +10,32 @@ use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Facades\Date;
 
 describe('related period date range filtering', function (): void {
+    test('multiple histories require one overlapping period and return each wrestler once', function (): void {
+        // Arrange
+        $matching = Wrestler::factory()
+            ->has(Employment::factory()->count(2)->sequence(
+                ['started_at' => '2024-06-01', 'ended_at' => '2024-06-10'],
+                ['started_at' => '2024-06-20', 'ended_at' => '2024-06-30'],
+            ), 'employments')
+            ->create();
+        Wrestler::factory()
+            ->has(Employment::factory()->count(2)->sequence(
+                ['started_at' => '2024-05-01', 'ended_at' => '2024-05-31'],
+                ['started_at' => '2024-07-01', 'ended_at' => null],
+            ), 'employments')
+            ->create();
+        $filter = FirstEmploymentFilter::make('Employment Period')
+            ->setFields('employments', 'employments.started_at', 'employments.ended_at');
+        $query = Wrestler::query();
+
+        // Act
+        $filter->apply($query, ['minDate' => '2024-06-01', 'maxDate' => '2024-06-30']);
+        $wrestlers = $query->get();
+
+        // Assert
+        expect($wrestlers->modelKeys())->toBe([$matching->id]);
+    });
+
     test('related period filter factories preserve their requested types', function (RelatedPeriodDateRangeFilter $filter, string $filterClass, string $key): void {
         // Act
         $configuredFilter = $filter->setFields('periods', 'periods.started_at', 'periods.ended_at');
