@@ -86,7 +86,7 @@ describe('manager actions component', function (): void {
         expect($manager->currentSuspension()->exists())->toBeFalse();
     });
 
-    test('it forbids lifecycle actions for unauthorized users', function (): void {
+    test('it forbids lifecycle actions for unauthorized users without success feedback', function (string $method): void {
         // Arrange
         $manager = Manager::factory()->unemployed()->create();
 
@@ -94,10 +94,24 @@ describe('manager actions component', function (): void {
         $component = livewire(Actions::class, ['manager' => $manager]);
 
         // Act
-        $component->call('employ');
+        $component->call($method);
 
         // Assert
         $component->assertForbidden();
+        $component
+            ->assertNotDispatched('manager-updated')
+            ->assertNotDispatched('flash-message');
+        expect(session()->has('status'))->toBeFalse();
         expect($manager->currentEmployment()->exists())->toBeFalse();
-    });
+    })->with([
+        'employ',
+        'release',
+        'retire',
+        'unretire',
+        'suspend',
+        'reinstate',
+        'injure',
+        'clearFromInjury',
+        'restore',
+    ]);
 });
