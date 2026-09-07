@@ -3,7 +3,47 @@
 declare(strict_types=1);
 
 use App\Livewire\Table\Column;
+use App\Models\Users\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+
+describe('table column search', function (): void {
+    test('default search matches a substring of the configured field', function (): void {
+        // Arrange
+        $matching = User::factory()->create(['first_name' => 'Clara', 'email' => 'match@example.com']);
+        User::factory()->create(['first_name' => 'Other', 'email' => 'clara@example.com']);
+        $query = (new User())->newQuery();
+        $column = Column::make('Name', 'first_name')->searchable();
+
+        // Act
+        $column->applySearch($query, 'lar');
+        $matches = $query->get();
+
+        // Assert
+        expect($matches->modelKeys())->toBe([$matching->id]);
+    });
+
+    test('custom search replaces the default field constraint', function (): void {
+        // Arrange
+        $matching = User::factory()->create(['first_name' => 'Chosen', 'email' => 'target@example.com']);
+        User::factory()->create(['first_name' => 'Other', 'email' => 'prefix-target@example.com']);
+        User::factory()->create(['first_name' => 'target@example.com', 'email' => 'other@example.com']);
+        $query = (new User())->newQuery();
+        $column = Column::make('Name', 'first_name')->searchable(
+            /** @param Builder<User> $query */
+            function (Builder $query, string $term): void {
+                $query->where('email', $term);
+            },
+        );
+
+        // Act
+        $column->applySearch($query, 'target@example.com');
+        $matches = $query->get();
+
+        // Assert
+        expect($matches->modelKeys())->toBe([$matching->id]);
+    });
+});
 
 describe('table column values', function (): void {
     test('view columns render their configured view', function (): void {
