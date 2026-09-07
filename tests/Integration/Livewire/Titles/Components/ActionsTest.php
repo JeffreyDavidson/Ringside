@@ -64,7 +64,7 @@ describe('title actions component', function (): void {
         'restore' => ['restore', RestoreAction::class, Double::for(RestoreAction::class), 'Title successfully restored.'],
     ]);
 
-    test('it forbids lifecycle actions for unauthorized users', function (): void {
+    test('it forbids lifecycle actions for unauthorized users without success feedback', function (string $method): void {
         // Arrange
         $title = Title::factory()->undebuted()->create();
 
@@ -72,10 +72,21 @@ describe('title actions component', function (): void {
         $component = livewire(Actions::class, ['title' => $title]);
 
         // Act
-        $component->call('debut');
+        $component->call($method);
 
         // Assert
         $component->assertForbidden();
+        $component
+            ->assertNotDispatched('title-updated')
+            ->assertNotDispatched('flash-message');
+        expect(session()->has('status'))->toBeFalse();
         expect($title->currentActivityPeriod()->exists())->toBeFalse();
-    });
+    })->with([
+        'debut',
+        'retire',
+        'unretire',
+        'deactivate',
+        'reinstate',
+        'restore',
+    ]);
 });
