@@ -8,16 +8,23 @@ use App\Models\Titles\Title;
 use App\Models\Titles\TitleChampionship;
 
 it('filters current and previous championships', function () {
+    // Arrange
     $currentChampionship = TitleChampionship::factory()->current()->create();
     $previousChampionship = TitleChampionship::factory()->ended()->create();
+    TitleChampionship::factory()->current()->trashed()->create();
+    TitleChampionship::factory()->ended()->trashed()->create();
 
-    $currentChampionships = TitleChampionship::query()->current()->get();
-    $previousChampionships = TitleChampionship::query()->previous()->get();
+    // Act
+    $currentQuery = TitleChampionship::query();
+    $currentQuery->current();
+    $currentChampionships = $currentQuery->get();
+    $previousQuery = TitleChampionship::query();
+    $previousQuery->previous();
+    $previousChampionships = $previousQuery->get();
 
-    expect($currentChampionships)->toHaveCount(1)
-        ->and($currentChampionships->firstOrFail()->is($currentChampionship))->toBeTrue()
-        ->and($previousChampionships)->toHaveCount(1)
-        ->and($previousChampionships->firstOrFail()->is($previousChampionship))->toBeTrue();
+    // Assert
+    expect($currentChampionships->modelKeys())->toBe([$currentChampionship->id])
+        ->and($previousChampionships->modelKeys())->toBe([$previousChampionship->id]);
 });
 
 it('filters championships by supported champion type', function () {
