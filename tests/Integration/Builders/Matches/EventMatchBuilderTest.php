@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\MatchFinish;
 use App\Models\Events\Event;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
@@ -95,7 +96,11 @@ it('retrieves match history with its display relationships eager loaded and orde
     $olderMatch = EventMatch::factory()->forEvent($olderEvent)->create();
     $match = EventMatch::factory()->forEvent($pastEvent)->create();
     EventMatch::factory()->forEvent($scheduledEvent)->create();
-    MatchCompetitor::factory()->for($match, 'eventMatch')->for($wrestler, 'competitor')->create();
+    $winningCompetitor = MatchCompetitor::factory()->for($match, 'eventMatch')->for($wrestler, 'competitor')->create();
+    $match->update([
+        'match_finish' => MatchFinish::Pinfall,
+        'winning_side_id' => $winningCompetitor->match_side_id,
+    ]);
 
     // Act
     $query = EventMatch::query();
@@ -115,6 +120,14 @@ it('retrieves match history with its display relationships eager loaded and orde
     expect($competitor->relationLoaded('competitor'))->toBeTrue()
         ->and($competitor->relationLoaded('side'))->toBeTrue()
         ->and($competitor->competitor->is($wrestler))->toBeTrue();
+
+    $winningSide = $history->firstOrFail()->winningSide;
+
+    expect($winningSide?->id)->toBe($winningCompetitor->match_side_id)
+        ->and($winningSide?->relationLoaded('competitors'))->toBeTrue()
+        ->and($winningSide?->competitors->modelKeys())->toBe([$winningCompetitor->id])
+        ->and($winningSide?->competitors->firstOrFail()->relationLoaded('competitor'))->toBeTrue()
+        ->and($winningSide?->competitors->firstOrFail()->competitor->is($wrestler))->toBeTrue();
 });
 
 it('retrieves matches for a competitor and eager loads competitors', function () {
