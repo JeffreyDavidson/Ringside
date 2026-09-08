@@ -86,20 +86,35 @@ it('retrieves matches for past events and eager loads their events', function ()
 });
 
 it('retrieves match history with its display relationships eager loaded and ordered', function () {
+    // Arrange
+    $this->freezeSecond();
     $pastEvent = Event::factory()->past()->create();
+    $olderEvent = Event::factory()->create(['date' => Date::now()->subDays(2)]);
+    $scheduledEvent = Event::factory()->scheduled()->create();
     $wrestler = Wrestler::factory()->create();
+    $olderMatch = EventMatch::factory()->forEvent($olderEvent)->create();
     $match = EventMatch::factory()->forEvent($pastEvent)->create();
+    EventMatch::factory()->forEvent($scheduledEvent)->create();
     MatchCompetitor::factory()->for($match, 'eventMatch')->for($wrestler, 'competitor')->create();
 
-    $history = EventMatch::query()->forHistory()->get();
+    // Act
+    $query = EventMatch::query();
+    $query->forHistory();
+    $history = $query->get();
 
-    expect($history)->toHaveCount(1)
-        ->and($history->firstOrFail()->is($match))->toBeTrue()
+    // Assert
+    expect($history->modelKeys())->toBe([$match->id, $olderMatch->id])
         ->and($history->firstOrFail()->relationLoaded('event'))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('referees'))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('titles'))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('competitors'))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('winningSide'))->toBeTrue();
+
+    $competitor = $history->firstOrFail()->competitors->firstOrFail();
+
+    expect($competitor->relationLoaded('competitor'))->toBeTrue()
+        ->and($competitor->relationLoaded('side'))->toBeTrue()
+        ->and($competitor->competitor->is($wrestler))->toBeTrue();
 });
 
 it('retrieves matches for a competitor and eager loads competitors', function () {
