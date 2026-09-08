@@ -8,6 +8,8 @@ use App\Models\Matches\MatchCompetitor;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
+use function Pest\Laravel\assertModelExists;
+
 it('filters competitor records by model type and identifiers', function () {
     // Arrange
     $wrestler = Wrestler::factory()->create();
@@ -48,6 +50,7 @@ it('filters competitor records by their events', function () {
     $selectedMatch = EventMatch::factory()->forEvent($selectedEvent)->create();
     $secondSelectedMatch = EventMatch::factory()->forEvent($selectedEvent)->create();
     $secondEventMatch = EventMatch::factory()->forEvent($secondSelectedEvent)->create();
+    $deletedMatch = EventMatch::factory()->forEvent($selectedEvent)->trashed()->create();
     $otherMatch = EventMatch::factory()->forEvent($otherEvent)->create();
     $selectedRecord = MatchCompetitor::factory()->for($selectedMatch, 'eventMatch')->create();
     $secondCompetitorRecord = MatchCompetitor::factory()->for($selectedMatch, 'eventMatch')->create([
@@ -55,6 +58,7 @@ it('filters competitor records by their events', function () {
     ]);
     $secondMatchRecord = MatchCompetitor::factory()->for($secondSelectedMatch, 'eventMatch')->create();
     $secondEventRecord = MatchCompetitor::factory()->for($secondEventMatch, 'eventMatch')->create();
+    $historicalRecord = MatchCompetitor::factory()->for($deletedMatch, 'eventMatch')->create();
     MatchCompetitor::factory()->for($otherMatch, 'eventMatch')->create();
 
     // Act
@@ -73,4 +77,6 @@ it('filters competitor records by their events', function () {
         $secondMatchRecord->id,
         $secondEventRecord->id,
     ])->and($emptyRecords)->toBeEmpty();
+
+    assertModelExists($historicalRecord);
 });
