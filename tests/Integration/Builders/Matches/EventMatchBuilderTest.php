@@ -300,19 +300,28 @@ it('retrieves matches assigned to any selected title', function () {
 });
 
 it('orders matches by event date, card, and match number', function () {
-    $oldestEvent = Event::factory()->past()->create(['date' => now()->subDays(3)]);
-    $latestEvent = Event::factory()->past()->create(['date' => now()->subDay()]);
+    // Arrange
+    $this->freezeSecond();
+    $oldestEvent = Event::factory()->create(['date' => Date::now()->subDays(3)]);
+    $laterEvent = Event::factory()->create(['date' => Date::yesterday()->setTime(20, 0)]);
+    $latestEvent = Event::factory()->create(['date' => Date::yesterday()->setTime(19, 0)]);
     $otherLatestEvent = Event::factory()->past()->create(['date' => $latestEvent->date]);
-    $middleEvent = Event::factory()->past()->create(['date' => now()->subDays(2)]);
+    $middleEvent = Event::factory()->create(['date' => Date::now()->subDays(2)]);
     $oldestMatch = EventMatch::factory()->forEvent($oldestEvent)->create();
+    $laterMatch = EventMatch::factory()->forEvent($laterEvent)->create();
     $latestSecondMatch = EventMatch::factory()->forEvent($latestEvent)->create(['match_number' => 2]);
     $latestFirstMatch = EventMatch::factory()->forEvent($latestEvent)->create(['match_number' => 1]);
     $otherLatestMatch = EventMatch::factory()->forEvent($otherLatestEvent)->create(['match_number' => 1]);
     $middleMatch = EventMatch::factory()->forEvent($middleEvent)->create();
 
-    $matches = EventMatch::query()->latestEventFirst()->get();
+    // Act
+    $query = EventMatch::query();
+    $query->latestEventFirst();
+    $matches = $query->get();
 
+    // Assert
     expect($matches->modelKeys())->toBe([
+        $laterMatch->id,
         $otherLatestMatch->id,
         $latestFirstMatch->id,
         $latestSecondMatch->id,
