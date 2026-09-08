@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Builders\Roster\IndividualBuilder;
 use App\Builders\Roster\WrestlerBuilder;
+use App\Enums\Shared\EmploymentStatus;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Integration tests for IndividualBuilder abstract base class.
@@ -109,16 +109,26 @@ describe('IndividualBuilder Integration Tests', function () {
     });
 
     test('projected employment status does not query per wrestler', function () {
-        $wrestlers = Wrestler::query()
-            ->withEmploymentStatusState()
-            ->get();
+        // Arrange
+        $this->expectsDatabaseQueryCount(1);
 
-        DB::enableQueryLog();
-        DB::flushQueryLog();
+        // Act
+        $query = Wrestler::query();
+        $query->withEmploymentStatusState();
+        $query->orderBy('id');
+        $wrestlers = $query->get();
+        $statuses = $wrestlers->mapWithKeys(fn (Wrestler $wrestler): array => [$wrestler->id => $wrestler->status]);
 
-        $wrestlers->each(fn (Wrestler $wrestler) => $wrestler->status);
-
-        expect(DB::getQueryLog())->toBeEmpty();
+        // Assert
+        expect($statuses->all())->toBe([
+            $this->futureEmployedWrestler->id => EmploymentStatus::FutureEmployment,
+            $this->suspendedWrestler->id => EmploymentStatus::Employed,
+            $this->retiredWrestler->id => EmploymentStatus::Retired,
+            $this->releasedWrestler->id => EmploymentStatus::Released,
+            $this->unemployedWrestler->id => EmploymentStatus::Unemployed,
+            $this->injuredWrestler->id => EmploymentStatus::Employed,
+            $this->availableWrestler->id => EmploymentStatus::Employed,
+        ]);
     });
 
     describe('query builder inheritance verification', function () {
