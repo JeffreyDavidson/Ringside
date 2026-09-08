@@ -6,56 +6,75 @@ use App\Enums\Titles\TitleStatus;
 use App\Models\Titles\Title;
 
 test('active titles can be retrieved', function () {
+    // Arrange
     $activeTitle = Title::factory()->active()->create();
-    $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
-    $inactiveTitle = Title::factory()->inactive()->create();
-    $retiredTitle = Title::factory()->retired()->create();
+    Title::factory()->active()->trashed()->create();
+    Title::factory()->withFutureActivation()->create();
+    Title::factory()->inactive()->create();
+    Title::factory()->retired()->create();
+    Title::factory()->undebuted()->create();
 
-    $activeTitles = Title::query()->active()->get();
+    // Act
+    $query = Title::query();
+    $query->active();
+    $activeTitles = $query->get();
 
-    expect($activeTitles)
-        ->toHaveCount(1)
-        ->and($activeTitles->contains($activeTitle))->toBeTrue();
+    // Assert
+    expect($activeTitles->modelKeys())->toBe([$activeTitle->id]);
 });
 
 test('future activated titles can be retrieved', function () {
-    $activeTitle = Title::factory()->active()->create();
+    // Arrange
+    Title::factory()->active()->create();
     $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
-    $inactiveTitle = Title::factory()->inactive()->create();
-    $retiredTitle = Title::factory()->retired()->create();
+    Title::factory()->withFutureActivation()->trashed()->create();
+    Title::factory()->inactive()->create();
+    Title::factory()->retired()->create();
+    Title::factory()->undebuted()->create();
 
-    $futureActivatedTitles = Title::query()->withPendingDebut()->get();
+    // Act
+    $query = Title::query();
+    $query->withPendingDebut();
+    $futureActivatedTitles = $query->get();
 
-    expect($futureActivatedTitles)
-        ->toHaveCount(1)
-        ->and($futureActivatedTitles->contains($futureActivatedTitle))->toBeTrue();
+    // Assert
+    expect($futureActivatedTitles->modelKeys())->toBe([$futureActivatedTitle->id]);
 });
 
 test('inactive titles can be retrieved', function () {
-    $activeTitle = Title::factory()->active()->create();
-    $futureActivatedTitle = Title::factory()->withFutureActivation()->create();
+    // Arrange
+    Title::factory()->active()->create();
+    Title::factory()->withFutureActivation()->create();
     $inactiveTitle = Title::factory()->inactive()->create();
-    $retiredTitle = Title::factory()->retired()->create();
+    Title::factory()->inactive()->trashed()->create();
+    Title::factory()->retired()->create();
+    Title::factory()->undebuted()->create();
 
-    $inactiveTitles = Title::query()->inactive()->get();
+    // Act
+    $query = Title::query();
+    $query->inactive();
+    $inactiveTitles = $query->get();
 
-    expect($inactiveTitles)
-        ->toHaveCount(1)
-        ->and($inactiveTitles->contains($inactiveTitle))->toBeTrue()
-        ->and($inactiveTitles->contains($retiredTitle))->toBeFalse()
-        ->and($inactiveTitles->contains($futureActivatedTitle))->toBeFalse();
+    // Assert
+    expect($inactiveTitles->modelKeys())->toBe([$inactiveTitle->id]);
 });
 
 test('retired titles can be retrieved separately', function () {
-    $activeTitle = Title::factory()->active()->create();
+    // Arrange
+    Title::factory()->active()->create();
     $retiredTitle = Title::factory()->retired()->create();
+    Title::factory()->retired()->trashed()->create();
+    Title::factory()->withFutureActivation()->create();
+    Title::factory()->inactive()->create();
+    Title::factory()->undebuted()->create();
 
-    $retiredTitles = Title::query()->retired()->get();
+    // Act
+    $query = Title::query();
+    $query->retired();
+    $retiredTitles = $query->get();
 
-    expect($retiredTitles)
-        ->toHaveCount(1)
-        ->and($retiredTitles->contains($retiredTitle))->toBeTrue()
-        ->and($retiredTitles->contains($activeTitle))->toBeFalse();
+    // Assert
+    expect($retiredTitles->modelKeys())->toBe([$retiredTitle->id]);
 });
 
 test('projected activity status does not query per title', function () {
