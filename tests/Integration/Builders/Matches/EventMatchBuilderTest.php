@@ -24,25 +24,51 @@ function attachBuilderTestCompetitor(EventMatch $match, Wrestler|TagTeam $compet
 }
 
 it('retrieves matches for selected events', function () {
+    // Arrange
     $selectedEvent = Event::factory()->create();
+    $secondSelectedEvent = Event::factory()->create();
     $otherEvent = Event::factory()->create();
     $selectedMatch = EventMatch::factory()->forEvent($selectedEvent)->create();
+    $secondMatch = EventMatch::factory()->forEvent($selectedEvent)->create();
+    $secondEventMatch = EventMatch::factory()->forEvent($secondSelectedEvent)->create();
+    EventMatch::factory()->forEvent($selectedEvent)->trashed()->create();
     EventMatch::factory()->forEvent($otherEvent)->create();
 
-    $matches = EventMatch::query()
-        ->forEventIds(collect([$selectedEvent->id]))
-        ->get();
+    // Act
+    $query = EventMatch::query();
+    $query->forEventIds(collect([$selectedEvent->id, $secondSelectedEvent->id]));
+    $query->orderBy('id');
+    $matches = $query->get();
+    $emptyQuery = EventMatch::query();
+    $emptyQuery->forEventIds(collect());
+    $emptyMatches = $emptyQuery->get();
 
-    expect($matches)->toHaveCount(1)
-        ->and($matches->firstOrFail()->is($selectedMatch))->toBeTrue();
+    // Assert
+    expect($matches->modelKeys())->toBe([$selectedMatch->id, $secondMatch->id, $secondEventMatch->id])
+        ->and($emptyMatches)->toBeEmpty();
 });
 
 it('retrieves matches for one event by id', function () {
+    // Arrange
     $event = Event::factory()->create();
+    $emptyEvent = Event::factory()->create();
     $match = EventMatch::factory()->forEvent($event)->create();
+    $secondMatch = EventMatch::factory()->forEvent($event)->create();
+    EventMatch::factory()->forEvent($event)->trashed()->create();
     EventMatch::factory()->create();
 
-    expect(EventMatch::query()->forEventId($event->id)->pluck('id')->all())->toBe([$match->id]);
+    // Act
+    $query = EventMatch::query();
+    $query->forEventId($event->id);
+    $query->orderBy('id');
+    $matches = $query->get();
+    $emptyQuery = EventMatch::query();
+    $emptyQuery->forEventId($emptyEvent->id);
+    $emptyMatches = $emptyQuery->get();
+
+    // Assert
+    expect($matches->modelKeys())->toBe([$match->id, $secondMatch->id])
+        ->and($emptyMatches)->toBeEmpty();
 });
 
 it('retrieves matches for past events and eager loads their events', function () {
