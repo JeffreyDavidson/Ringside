@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\Shared\EmploymentStatus;
+use App\Models\Lifecycle\Retirement;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Date;
 
 test('employment statuses map to their shared roster query constraints', function (): void {
     $employed = Wrestler::factory()->employed()->create();
@@ -71,29 +73,93 @@ test('tag teams may be filtered by employment status', function (): void {
 });
 
 test('wrestlers may be filtered by retirement status', function (): void {
+    // Arrange
     $retired = Wrestler::factory()->retired()->create();
     Wrestler::factory()->unemployed()->create();
+    Wrestler::factory()->retired()->trashed()->create();
+    Wrestler::factory()->employed()
+        ->has(
+            Retirement::factory()
+                ->started(Date::now()->subMonth())
+                ->ended(Date::now()->subDays(2)),
+            'retirements'
+        )
+        ->create();
 
-    expect(Wrestler::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
+    // Act
+    $query = Wrestler::query();
+    $query->retired();
+    $results = $query->get();
+
+    // Assert
+    expect($results->modelKeys())->toBe([$retired->id]);
 });
 
 test('managers may be filtered by retirement status', function (): void {
+    // Arrange
     $retired = Manager::factory()->retired()->create();
     Manager::factory()->unemployed()->create();
+    Manager::factory()->retired()->trashed()->create();
+    Manager::factory()->employed()
+        ->has(
+            Retirement::factory()
+                ->started(Date::now()->subMonth())
+                ->ended(Date::now()->subDays(2)),
+            'retirements'
+        )
+        ->create();
 
-    expect(Manager::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
+    // Act
+    $query = Manager::query();
+    $query->retired();
+    $results = $query->get();
+
+    // Assert
+    expect($results->modelKeys())->toBe([$retired->id]);
 });
 
 test('referees may be filtered by retirement status', function (): void {
+    // Arrange
     $retired = Referee::factory()->retired()->create();
     Referee::factory()->unemployed()->create();
+    Referee::factory()->retired()->trashed()->create();
+    Referee::factory()->employed()
+        ->has(
+            Retirement::factory()
+                ->started(Date::now()->subMonth())
+                ->ended(Date::now()->subDays(2)),
+            'retirements'
+        )
+        ->create();
 
-    expect(Referee::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
+    // Act
+    $query = Referee::query();
+    $query->retired();
+    $results = $query->get();
+
+    // Assert
+    expect($results->modelKeys())->toBe([$retired->id]);
 });
 
 test('tag teams may be filtered by retirement status', function (): void {
+    // Arrange
     $retired = TagTeam::factory()->retired()->create();
     TagTeam::factory()->unemployed()->create();
+    TagTeam::factory()->retired()->trashed()->create();
+    TagTeam::factory()->employed()
+        ->has(
+            Retirement::factory()
+                ->started(Date::now()->subMonth())
+                ->ended(Date::now()->subDays(2)),
+            'retirements'
+        )
+        ->create();
 
-    expect(TagTeam::query()->retired()->pluck('id')->all())->toBe([$retired->id]);
+    // Act
+    $query = TagTeam::query();
+    $query->retired();
+    $results = $query->get();
+
+    // Assert
+    expect($results->modelKeys())->toBe([$retired->id]);
 });
