@@ -41,18 +41,36 @@ it('filters competitor records by model type and identifiers', function () {
 });
 
 it('filters competitor records by their events', function () {
+    // Arrange
     $selectedEvent = Event::factory()->create();
+    $secondSelectedEvent = Event::factory()->create();
     $otherEvent = Event::factory()->create();
     $selectedMatch = EventMatch::factory()->forEvent($selectedEvent)->create();
+    $secondSelectedMatch = EventMatch::factory()->forEvent($selectedEvent)->create();
+    $secondEventMatch = EventMatch::factory()->forEvent($secondSelectedEvent)->create();
     $otherMatch = EventMatch::factory()->forEvent($otherEvent)->create();
     $selectedRecord = MatchCompetitor::factory()->for($selectedMatch, 'eventMatch')->create();
+    $secondCompetitorRecord = MatchCompetitor::factory()->for($selectedMatch, 'eventMatch')->create([
+        'match_side_id' => $selectedRecord->match_side_id,
+    ]);
+    $secondMatchRecord = MatchCompetitor::factory()->for($secondSelectedMatch, 'eventMatch')->create();
+    $secondEventRecord = MatchCompetitor::factory()->for($secondEventMatch, 'eventMatch')->create();
     MatchCompetitor::factory()->for($otherMatch, 'eventMatch')->create();
 
-    $records = MatchCompetitor::query()
-        ->forEventIds(collect([$selectedEvent->id]))
-        ->get();
+    // Act
+    $query = MatchCompetitor::query();
+    $query->forEventIds(collect([$selectedEvent->id, $secondSelectedEvent->id]));
+    $query->orderBy('id');
+    $records = $query->get();
+    $emptyQuery = MatchCompetitor::query();
+    $emptyQuery->forEventIds(collect());
+    $emptyRecords = $emptyQuery->get();
 
-    expect($records)->toHaveCount(1)
-        ->and($records->firstOrFail()->match_id)->toBe($selectedRecord->match_id)
-        ->and($records->firstOrFail()->competitor_id)->toBe($selectedRecord->competitor_id);
+    // Assert
+    expect($records->modelKeys())->toBe([
+        $selectedRecord->id,
+        $secondCompetitorRecord->id,
+        $secondMatchRecord->id,
+        $secondEventRecord->id,
+    ])->and($emptyRecords)->toBeEmpty();
 });
