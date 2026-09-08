@@ -2,62 +2,56 @@
 
 declare(strict_types=1);
 
-use App\Builders\Events\EventBuilder;
 use App\Models\Events\Event;
+use Illuminate\Support\Facades\Date;
 
-/**
- * Integration tests for EventQueryBuilder query scopes and methods.
- *
- * INTEGRATION TEST SCOPE:
- * - Builder class structure and scope functionality
- * - Event timing filtering scopes (scheduled, unscheduled, past)
- * - Query scope accuracy and entity isolation
- *
- * These tests verify that the EventQueryBuilder correctly implements
- * all query scopes for filtering events by their scheduling status.
- *
- * @see EventBuilder
- */
-describe('EventQueryBuilder Integration Tests', function () {
+describe('event timing queries', function () {
     beforeEach(function () {
-        // Create events in all possible states for comprehensive scope testing
-        $this->scheduledEvent = Event::factory()->scheduled()->create();
+        // Arrange
+        $this->freezeSecond();
+        $this->scheduledEvent = Event::factory()->create(['date' => Date::now()->addSecond()]);
+        $this->startingEvent = Event::factory()->create(['date' => Date::now()]);
         $this->unscheduledEvent = Event::factory()->unscheduled()->create();
-        $this->pastEvent = Event::factory()->past()->create();
+        $this->pastEvent = Event::factory()->create(['date' => Date::now()->subSecond()]);
+        Event::factory()->trashed()->create(['date' => Date::now()->addSecond()]);
+        Event::factory()->trashed()->create(['date' => Date::now()]);
+        Event::factory()->trashed()->create(['date' => Date::now()->subSecond()]);
+        Event::factory()->unscheduled()->trashed()->create();
     });
 
     describe('event timing scopes', function () {
-        test('scheduled events can be retrieved', function () {
+        test('scheduled events include the current second and future events only', function () {
             // Act
-            $scheduledEvents = Event::scheduled()->get();
+            $query = Event::query();
+            $query->scheduled();
+            $query->orderBy('id');
+            $scheduledEvents = $query->get();
 
             // Assert
-            expect($scheduledEvents->pluck('id'))
-                ->toContain($this->scheduledEvent->id)
-                ->not->toContain($this->unscheduledEvent->id)
-                ->not->toContain($this->pastEvent->id);
+            expect($scheduledEvents->modelKeys())->toBe([
+                $this->scheduledEvent->id,
+                $this->startingEvent->id,
+            ]);
         });
 
         test('unscheduled events can be retrieved', function () {
             // Act
-            $unscheduledEvents = Event::unscheduled()->get();
+            $query = Event::query();
+            $query->unscheduled();
+            $unscheduledEvents = $query->get();
 
             // Assert
-            expect($unscheduledEvents->pluck('id'))
-                ->toContain($this->unscheduledEvent->id)
-                ->not->toContain($this->scheduledEvent->id)
-                ->not->toContain($this->pastEvent->id);
+            expect($unscheduledEvents->modelKeys())->toBe([$this->unscheduledEvent->id]);
         });
 
-        test('past events can be retrieved', function () {
+        test('past events exclude the current second and future events', function () {
             // Act
-            $pastEvents = Event::past()->get();
+            $query = Event::query();
+            $query->past();
+            $pastEvents = $query->get();
 
             // Assert
-            expect($pastEvents->pluck('id'))
-                ->toContain($this->pastEvent->id)
-                ->not->toContain($this->scheduledEvent->id)
-                ->not->toContain($this->unscheduledEvent->id);
+            expect($pastEvents->modelKeys())->toBe([$this->pastEvent->id]);
         });
     });
 });
