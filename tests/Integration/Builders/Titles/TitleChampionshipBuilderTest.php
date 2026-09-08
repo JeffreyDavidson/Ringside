@@ -28,30 +28,51 @@ it('filters current and previous championships', function () {
 });
 
 it('filters championships by supported champion type', function () {
+    // Arrange
     $wrestler = Wrestler::factory()->create();
-    $tagTeam = TagTeam::factory()->create();
-    $wrestlerChampionship = TitleChampionship::factory()->forWrestler($wrestler)->create();
-    $tagTeamChampionship = TitleChampionship::factory()->forTagTeam($tagTeam)->create();
+    $tagTeam = TagTeam::factory()->create(['id' => $wrestler->id]);
+    $wrestlerChampionship = TitleChampionship::factory()->for(Title::factory()->singles())->forWrestler($wrestler)->create();
+    $tagTeamChampionship = TitleChampionship::factory()->for(Title::factory()->tagTeam())->forTagTeam($tagTeam)->create();
+    TitleChampionship::factory()->for(Title::factory()->singles())->forWrestler(Wrestler::factory()->create())->create();
+    TitleChampionship::factory()->for(Title::factory()->tagTeam())->forTagTeam(TagTeam::factory()->create())->create();
+    TitleChampionship::factory()->for(Title::factory()->singles())->forWrestler($wrestler)->trashed()->create();
+    TitleChampionship::factory()->for(Title::factory()->tagTeam())->forTagTeam($tagTeam)->trashed()->create();
 
-    $wrestlerChampionships = TitleChampionship::query()->forChampion($wrestler)->get();
-    $tagTeamChampionships = TitleChampionship::query()->forChampion($tagTeam)->get();
+    // Act
+    $wrestlerQuery = TitleChampionship::query();
+    $wrestlerQuery->forChampion($wrestler);
+    $wrestlerChampionships = $wrestlerQuery->get();
+    $tagTeamQuery = TitleChampionship::query();
+    $tagTeamQuery->forChampion($tagTeam);
+    $tagTeamChampionships = $tagTeamQuery->get();
 
-    expect($wrestlerChampionships)->toHaveCount(1)
-        ->and($wrestlerChampionships->firstOrFail()->is($wrestlerChampionship))->toBeTrue()
-        ->and($tagTeamChampionships)->toHaveCount(1)
-        ->and($tagTeamChampionships->firstOrFail()->is($tagTeamChampionship))->toBeTrue();
+    // Assert
+    expect($wrestlerChampionships->modelKeys())->toBe([$wrestlerChampionship->id])
+        ->and($tagTeamChampionships->modelKeys())->toBe([$tagTeamChampionship->id]);
 });
 
 it('filters championships by wrestler and tag team ids', function () {
+    // Arrange
     $wrestler = Wrestler::factory()->create();
-    $tagTeam = TagTeam::factory()->create();
-    $wrestlerChampionship = TitleChampionship::factory()->forWrestler($wrestler)->create();
-    $tagTeamChampionship = TitleChampionship::factory()->forTagTeam($tagTeam)->create();
+    $tagTeam = TagTeam::factory()->create(['id' => $wrestler->id]);
+    $wrestlerChampionship = TitleChampionship::factory()->for(Title::factory()->singles())->forWrestler($wrestler)->create();
+    $tagTeamChampionship = TitleChampionship::factory()->for(Title::factory()->tagTeam())->forTagTeam($tagTeam)->create();
+    TitleChampionship::factory()->for(Title::factory()->singles())->forWrestler(Wrestler::factory()->create())->create();
+    TitleChampionship::factory()->for(Title::factory()->tagTeam())->forTagTeam(TagTeam::factory()->create())->create();
+    TitleChampionship::factory()->for(Title::factory()->singles())->forWrestler($wrestler)->trashed()->create();
+    TitleChampionship::factory()->for(Title::factory()->tagTeam())->forTagTeam($tagTeam)->trashed()->create();
 
-    expect(TitleChampionship::query()->forWrestlerId($wrestler->id)->pluck('id')->all())
-        ->toBe([$wrestlerChampionship->id])
-        ->and(TitleChampionship::query()->forTagTeamId($tagTeam->id)->pluck('id')->all())
-        ->toBe([$tagTeamChampionship->id]);
+    // Act
+    $wrestlerQuery = TitleChampionship::query();
+    $wrestlerQuery->forWrestlerId($wrestler->id);
+    $wrestlerChampionships = $wrestlerQuery->get();
+    $tagTeamQuery = TitleChampionship::query();
+    $tagTeamQuery->forTagTeamId($tagTeam->id);
+    $tagTeamChampionships = $tagTeamQuery->get();
+
+    // Assert
+    expect($wrestlerChampionships->modelKeys())->toBe([$wrestlerChampionship->id])
+        ->and($tagTeamChampionships->modelKeys())->toBe([$tagTeamChampionship->id]);
 });
 
 it('filters and orders title championship history', function () {
