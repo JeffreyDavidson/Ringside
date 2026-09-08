@@ -76,34 +76,46 @@ it('filters championships by wrestler and tag team ids', function () {
 });
 
 it('filters and orders title championship history', function () {
-    $title = Title::factory()->create();
-    $otherTitle = Title::factory()->create();
-    $firstChampionship = TitleChampionship::factory()->for($title)->ended()->create([
+    // Arrange
+    $title = Title::factory()->singles()->create();
+    $otherTitle = Title::factory()->singles()->create();
+    $currentChampionship = TitleChampionship::factory()->for($title)->forWrestler()->current()->create([
+        'won_at' => now()->subWeek(),
+    ]);
+    $firstChampionship = TitleChampionship::factory()->for($title)->forWrestler()->ended()->create([
         'won_at' => now()->subYears(4),
         'lost_at' => now()->subYears(3),
     ]);
-    $latestChampionship = TitleChampionship::factory()->for($title)->ended()->create([
+    $latestChampionship = TitleChampionship::factory()->for($title)->forWrestler()->ended()->create([
         'won_at' => now()->subYears(2),
         'lost_at' => now()->subYear(),
     ]);
-    TitleChampionship::factory()->for($otherTitle)->ended()->create([
+    TitleChampionship::factory()->for($otherTitle)->forWrestler()->ended()->create([
         'won_at' => now()->subMonths(2),
         'lost_at' => now()->subMonth(),
     ]);
 
-    $championshipsByWinDate = TitleChampionship::query()
-        ->forTitleId($title->id)
-        ->earliestWonFirst()
-        ->get();
-    $championshipsByLossDate = TitleChampionship::query()
-        ->forTitleId($title->id)
-        ->previous()
-        ->mostRecentlyLostFirst()
-        ->get();
+    TitleChampionship::factory()->for($title)->forWrestler()->ended()->trashed()->create([
+        'won_at' => now()->subMonths(2),
+        'lost_at' => now()->subMonth(),
+    ]);
 
+    // Act
+    $winDateQuery = TitleChampionship::query();
+    $winDateQuery->forTitleId($title->id);
+    $winDateQuery->earliestWonFirst();
+    $championshipsByWinDate = $winDateQuery->get();
+    $lossDateQuery = TitleChampionship::query();
+    $lossDateQuery->forTitleId($title->id);
+    $lossDateQuery->previous();
+    $lossDateQuery->mostRecentlyLostFirst();
+    $championshipsByLossDate = $lossDateQuery->get();
+
+    // Assert
     expect($championshipsByWinDate->modelKeys())->toBe([
         $firstChampionship->id,
         $latestChampionship->id,
+        $currentChampionship->id,
     ])->and($championshipsByLossDate->modelKeys())->toBe([
         $latestChampionship->id,
         $firstChampionship->id,
