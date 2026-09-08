@@ -100,45 +100,81 @@ test('projected activity status does not query per stable', function () {
 });
 
 test('previous stables can be retrieved for a wrestler', function () {
+    // Arrange
     $wrestler = Wrestler::factory()->create();
+    $otherMember = Wrestler::factory()->create();
+    $olderStable = Stable::factory()->create();
     $previousStable = Stable::factory()->create();
     $currentStable = Stable::factory()->create();
+    $deletedStable = Stable::factory()->trashed()->create();
+    $unrelatedStable = Stable::factory()->create();
+    $olderStable->wrestlers()->attach($wrestler, [
+        'joined_at' => '2025-01-01 12:00:00',
+        'left_at' => '2025-02-01 12:00:00',
+    ]);
     $previousStable->wrestlers()->attach($wrestler, [
-        'joined_at' => now()->subMonths(2),
-        'left_at' => now()->subMonth(),
+        'joined_at' => '2025-03-01 12:00:00',
+        'left_at' => '2025-04-01 12:00:00',
+    ]);
+    $deletedStable->wrestlers()->attach($wrestler, [
+        'joined_at' => '2025-05-01 12:00:00',
+        'left_at' => '2025-06-01 12:00:00',
+    ]);
+    $unrelatedStable->wrestlers()->attach($otherMember, [
+        'joined_at' => '2025-07-01 12:00:00',
+        'left_at' => '2025-08-01 12:00:00',
     ]);
     $currentStable->wrestlers()->attach($wrestler, [
         'joined_at' => now(),
     ]);
 
-    $stables = Stable::query()
-        ->previousForWrestlerId($wrestler->id)
-        ->get();
+    // Act
+    $query = Stable::query();
+    $query->previousForWrestlerId($wrestler->id);
+    $stables = $query->get();
 
-    expect($stables)->toHaveCount(1)
-        ->and($stables->firstOrFail()->is($previousStable))->toBeTrue()
-        ->and($stables->firstOrFail()->getAttribute('joined_at'))->not->toBeNull()
-        ->and($stables->firstOrFail()->getAttribute('left_at'))->not->toBeNull();
+    // Assert
+    expect($stables->modelKeys())->toBe([$previousStable->id, $olderStable->id])
+        ->and($stables->pluck('joined_at')->all())->toBe(['2025-03-01 12:00:00', '2025-01-01 12:00:00'])
+        ->and($stables->pluck('left_at')->all())->toBe(['2025-04-01 12:00:00', '2025-02-01 12:00:00']);
 });
 
 test('previous stables can be retrieved for a tag team', function () {
+    // Arrange
     $tagTeam = TagTeam::factory()->create();
+    $otherMember = TagTeam::factory()->create();
+    $olderStable = Stable::factory()->create();
     $previousStable = Stable::factory()->create();
     $currentStable = Stable::factory()->create();
+    $deletedStable = Stable::factory()->trashed()->create();
+    $unrelatedStable = Stable::factory()->create();
+    $olderStable->tagTeams()->attach($tagTeam, [
+        'joined_at' => '2025-01-01 12:00:00',
+        'left_at' => '2025-02-01 12:00:00',
+    ]);
     $previousStable->tagTeams()->attach($tagTeam, [
-        'joined_at' => now()->subMonths(2),
-        'left_at' => now()->subMonth(),
+        'joined_at' => '2025-03-01 12:00:00',
+        'left_at' => '2025-04-01 12:00:00',
+    ]);
+    $deletedStable->tagTeams()->attach($tagTeam, [
+        'joined_at' => '2025-05-01 12:00:00',
+        'left_at' => '2025-06-01 12:00:00',
+    ]);
+    $unrelatedStable->tagTeams()->attach($otherMember, [
+        'joined_at' => '2025-07-01 12:00:00',
+        'left_at' => '2025-08-01 12:00:00',
     ]);
     $currentStable->tagTeams()->attach($tagTeam, [
         'joined_at' => now(),
     ]);
 
-    $stables = Stable::query()
-        ->previousForTagTeamId($tagTeam->id)
-        ->get();
+    // Act
+    $query = Stable::query();
+    $query->previousForTagTeamId($tagTeam->id);
+    $stables = $query->get();
 
-    expect($stables)->toHaveCount(1)
-        ->and($stables->firstOrFail()->is($previousStable))->toBeTrue()
-        ->and($stables->firstOrFail()->getAttribute('joined_at'))->not->toBeNull()
-        ->and($stables->firstOrFail()->getAttribute('left_at'))->not->toBeNull();
+    // Assert
+    expect($stables->modelKeys())->toBe([$previousStable->id, $olderStable->id])
+        ->and($stables->pluck('joined_at')->all())->toBe(['2025-03-01 12:00:00', '2025-01-01 12:00:00'])
+        ->and($stables->pluck('left_at')->all())->toBe(['2025-04-01 12:00:00', '2025-02-01 12:00:00']);
 });
