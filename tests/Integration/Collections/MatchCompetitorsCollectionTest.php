@@ -11,16 +11,20 @@ use App\Models\Roster\Wrestlers\Wrestler;
 it('groups competitor models by ordered side position', function () {
     // Arrange
     $match = EventMatch::factory()->create();
-    $firstSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
-    $secondSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
+    $sides = MatchSide::factory()->for($match, 'match')->count(2)
+        ->sequence(['position' => 1], ['position' => 2])
+        ->create();
+    $firstSide = $sides->firstOrFail();
+    $secondSide = $sides->sole('position', 2);
     $partners = Wrestler::factory()->count(2)->create();
     $opponent = Wrestler::factory()->create();
 
     MatchCompetitor::factory()->for($match, 'eventMatch')->for($secondSide, 'side')->for($opponent, 'competitor')->create();
 
-    foreach ($partners as $partner) {
-        MatchCompetitor::factory()->for($match, 'eventMatch')->for($firstSide, 'side')->for($partner, 'competitor')->create();
-    }
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($firstSide, 'side')
+        ->count($partners->count())
+        ->sequence(...$partners->map(fn (Wrestler $partner): array => ['competitor_id' => $partner->id])->all())
+        ->create();
 
     // Act
     $query = $match->competitors();
@@ -41,9 +45,8 @@ it('partitions competitor models by roster type', function () {
     $wrestler = Wrestler::factory()->create();
     $tagTeam = TagTeam::factory()->create(['id' => $wrestler->id]);
 
-    foreach ([$wrestler, $tagTeam] as $competitor) {
-        MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($competitor, 'competitor')->create();
-    }
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($wrestler, 'competitor')->create();
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($tagTeam, 'competitor')->create();
 
     // Act
     $query = $match->competitors();
