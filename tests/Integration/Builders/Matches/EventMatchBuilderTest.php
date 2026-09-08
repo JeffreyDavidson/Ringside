@@ -151,18 +151,38 @@ it('retrieves matches for a competitor and eager loads competitors', function ()
 });
 
 it('retrieves matches by wrestler and tag team ids', function () {
+    // Arrange
     $event = Event::factory()->past()->create();
     $wrestler = Wrestler::factory()->create();
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->create(['id' => $wrestler->id]);
+    $unassignedWrestler = Wrestler::factory()->create();
+    $unassignedTagTeam = TagTeam::factory()->create();
     $wrestlerMatch = EventMatch::factory()->forEvent($event)->create();
     MatchCompetitor::factory()->for($wrestlerMatch, 'eventMatch')->for($wrestler, 'competitor')->create();
     $tagTeamMatch = EventMatch::factory()->forEvent($event)->create();
     MatchCompetitor::factory()->for($tagTeamMatch, 'eventMatch')->for($tagTeam, 'competitor')->create();
 
-    expect(EventMatch::query()->forWrestlerId($wrestler->id)->pluck('id')->all())
-        ->toBe([$wrestlerMatch->id])
-        ->and(EventMatch::query()->forTagTeamId($tagTeam->id)->pluck('id')->all())
-        ->toBe([$tagTeamMatch->id]);
+    // Act
+    $wrestlerQuery = EventMatch::query();
+    $wrestlerQuery->forWrestlerId($wrestler->id);
+    $wrestlerMatches = $wrestlerQuery->get();
+    $tagTeamQuery = EventMatch::query();
+    $tagTeamQuery->forTagTeamId($tagTeam->id);
+    $tagTeamMatches = $tagTeamQuery->get();
+    $emptyWrestlerQuery = EventMatch::query();
+    $emptyWrestlerQuery->forWrestlerId($unassignedWrestler->id);
+    $emptyWrestlerMatches = $emptyWrestlerQuery->get();
+    $emptyTagTeamQuery = EventMatch::query();
+    $emptyTagTeamQuery->forTagTeamId($unassignedTagTeam->id);
+    $emptyTagTeamMatches = $emptyTagTeamQuery->get();
+
+    // Assert
+    expect($wrestlerMatches->modelKeys())->toBe([$wrestlerMatch->id])
+        ->and($wrestlerMatches->firstOrFail()->relationLoaded('competitors'))->toBeTrue()
+        ->and($tagTeamMatches->modelKeys())->toBe([$tagTeamMatch->id])
+        ->and($tagTeamMatches->firstOrFail()->relationLoaded('competitors'))->toBeTrue()
+        ->and($emptyWrestlerMatches)->toBeEmpty()
+        ->and($emptyTagTeamMatches)->toBeEmpty();
 });
 
 it('retrieves matches officiated by a referee and eager loads every assigned referee', function () {
