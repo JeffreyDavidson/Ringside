@@ -166,6 +166,7 @@ it('retrieves matches by wrestler and tag team ids', function () {
 });
 
 it('retrieves matches officiated by a referee and eager loads every assigned referee', function () {
+    // Arrange
     $referee = Referee::factory()->create();
     $otherReferee = Referee::factory()->create();
     $officiatedMatch = EventMatch::factory()->create();
@@ -173,21 +174,40 @@ it('retrieves matches officiated by a referee and eager loads every assigned ref
     $officiatedMatch->referees()->attach([$referee->id, $otherReferee->id]);
     $otherMatch->referees()->attach($otherReferee);
 
-    $matches = EventMatch::query()->forReferee($referee)->get();
+    // Act
+    $query = EventMatch::query();
+    $query->forReferee($referee);
+    $matches = $query->get();
 
-    expect($matches)->toHaveCount(1)
-        ->and($matches->firstOrFail()->is($officiatedMatch))->toBeTrue()
+    // Assert
+    expect($matches->modelKeys())->toBe([$officiatedMatch->id])
         ->and($matches->firstOrFail()->relationLoaded('referees'))->toBeTrue()
-        ->and($matches->firstOrFail()->referees)->toHaveCount(2);
+        ->and($matches->firstOrFail()->referees->modelKeys())->toEqualCanonicalizing([$referee->id, $otherReferee->id]);
 });
 
 it('retrieves matches officiated by a referee id', function () {
+    // Arrange
     $referee = Referee::factory()->create();
+    $otherReferee = Referee::factory()->create();
+    $unassignedReferee = Referee::factory()->create();
     $match = EventMatch::factory()->create();
-    $match->referees()->attach($referee);
+    $match->referees()->attach([$referee->id, $otherReferee->id]);
+    EventMatch::factory()->create()->referees()->attach($otherReferee);
     EventMatch::factory()->create();
 
-    expect(EventMatch::query()->forRefereeId($referee->id)->pluck('id')->all())->toBe([$match->id]);
+    // Act
+    $query = EventMatch::query();
+    $query->forRefereeId($referee->id);
+    $matches = $query->get();
+    $emptyQuery = EventMatch::query();
+    $emptyQuery->forRefereeId($unassignedReferee->id);
+    $emptyMatches = $emptyQuery->get();
+
+    // Assert
+    expect($matches->modelKeys())->toBe([$match->id])
+        ->and($matches->firstOrFail()->relationLoaded('referees'))->toBeTrue()
+        ->and($matches->firstOrFail()->referees->modelKeys())->toEqualCanonicalizing([$referee->id, $otherReferee->id])
+        ->and($emptyMatches)->toBeEmpty();
 });
 
 it('retrieves matches assigned to any selected referee', function () {
