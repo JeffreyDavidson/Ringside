@@ -15,12 +15,14 @@ test('stable membership models use the stable membership builder', function () {
 });
 
 test('stable memberships can be filtered and ordered by their stable history', function () {
+    // Arrange
     $stable = Stable::factory()->create();
     $otherStable = Stable::factory()->create();
     $recentWrestler = Wrestler::factory()->create();
     $olderWrestler = Wrestler::factory()->create();
     $currentTagTeam = TagTeam::factory()->create();
     $formerTagTeam = TagTeam::factory()->create();
+    $olderTagTeam = TagTeam::factory()->create();
 
     StableWrestler::query()->create([
         'stable_id' => $stable->id,
@@ -40,6 +42,17 @@ test('stable memberships can be filtered and ordered by their stable history', f
         'joined_at' => now()->subWeek(),
         'left_at' => now()->subDay(),
     ]);
+    StableWrestler::query()->create([
+        'stable_id' => $stable->id,
+        'wrestler_id' => Wrestler::factory()->create()->id,
+        'joined_at' => now()->subWeek(),
+    ]);
+    StableTagTeam::query()->create([
+        'stable_id' => $stable->id,
+        'tag_team_id' => $olderTagTeam->id,
+        'joined_at' => now()->subMonths(5),
+        'left_at' => now()->subMonths(4),
+    ]);
     StableTagTeam::query()->create([
         'stable_id' => $stable->id,
         'tag_team_id' => $currentTagTeam->id,
@@ -52,18 +65,24 @@ test('stable memberships can be filtered and ordered by their stable history', f
         'left_at' => now()->subMonths(2),
     ]);
 
-    $wrestlerIds = StableWrestler::query()
-        ->forStableId($stable->id)
-        ->ended()
-        ->mostRecentlyJoinedFirst()
-        ->pluck('wrestler_id')
-        ->all();
-    $formerTagTeamIds = StableTagTeam::query()
-        ->forStableId($stable->id)
-        ->ended()
-        ->pluck('tag_team_id')
-        ->all();
+    StableTagTeam::query()->create([
+        'stable_id' => $otherStable->id,
+        'tag_team_id' => TagTeam::factory()->create()->id,
+        'joined_at' => now()->subWeek(),
+        'left_at' => now()->subDay(),
+    ]);
 
-    expect($wrestlerIds)->toBe([$recentWrestler->id, $olderWrestler->id])
-        ->and($formerTagTeamIds)->toBe([$formerTagTeam->id]);
+    // Act
+    $wrestlerQuery = StableWrestler::query();
+    $wrestlerQuery->forStableId($stable->id);
+    $wrestlerQuery->forHistory();
+    $wrestlerIds = $wrestlerQuery->pluck('wrestler_id');
+    $tagTeamQuery = StableTagTeam::query();
+    $tagTeamQuery->forStableId($stable->id);
+    $tagTeamQuery->forHistory();
+    $formerTagTeamIds = $tagTeamQuery->pluck('tag_team_id');
+
+    // Assert
+    expect($wrestlerIds->all())->toBe([$recentWrestler->id, $olderWrestler->id])
+        ->and($formerTagTeamIds->all())->toBe([$formerTagTeam->id, $olderTagTeam->id]);
 });
