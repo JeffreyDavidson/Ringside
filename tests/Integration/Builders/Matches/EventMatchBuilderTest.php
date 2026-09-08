@@ -118,10 +118,12 @@ it('retrieves match history with its display relationships eager loaded and orde
 });
 
 it('retrieves matches for a competitor and eager loads competitors', function () {
+    // Arrange
     $event = Event::factory()->past()->create();
     $wrestler = Wrestler::factory()->create();
     $otherWrestler = Wrestler::factory()->create();
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->create(['id' => $wrestler->id]);
+    $otherTagTeam = TagTeam::factory()->create();
     $wrestlerMatch = EventMatch::factory()->forEvent($event)->create();
     MatchCompetitor::factory()->for($wrestlerMatch, 'eventMatch')->for($wrestler, 'competitor')->create();
 
@@ -130,19 +132,22 @@ it('retrieves matches for a competitor and eager loads competitors', function ()
 
     $otherMatch = EventMatch::factory()->forEvent($event)->create();
     MatchCompetitor::factory()->for($otherMatch, 'eventMatch')->for($otherWrestler, 'competitor')->create();
+    $otherTagTeamMatch = EventMatch::factory()->forEvent($event)->create();
+    MatchCompetitor::factory()->for($otherTagTeamMatch, 'eventMatch')->for($otherTagTeam, 'competitor')->create();
 
-    $wrestlerMatches = EventMatch::query()->forCompetitor($wrestler)->get();
-    $tagTeamMatches = EventMatch::query()->forCompetitor($tagTeam)->get();
+    // Act
+    $wrestlerQuery = EventMatch::query();
+    $wrestlerQuery->forCompetitor($wrestler);
+    $wrestlerMatches = $wrestlerQuery->get();
+    $tagTeamQuery = EventMatch::query();
+    $tagTeamQuery->forCompetitor($tagTeam);
+    $tagTeamMatches = $tagTeamQuery->get();
 
-    expect($wrestlerMatches)
-        ->toHaveCount(1)
-        ->and($wrestlerMatches->contains($wrestlerMatch))->toBeTrue()
-        ->and($wrestlerMatches->contains($tagTeamMatch))->toBeFalse()
-        ->and($wrestlerMatches->contains($otherMatch))->toBeFalse()
+    // Assert
+    expect($wrestlerMatches->modelKeys())->toBe([$wrestlerMatch->id])
         ->and($wrestlerMatches->firstOrFail()->relationLoaded('competitors'))->toBeTrue()
-        ->and($tagTeamMatches)
-        ->toHaveCount(1)
-        ->and($tagTeamMatches->contains($tagTeamMatch))->toBeTrue();
+        ->and($tagTeamMatches->modelKeys())->toBe([$tagTeamMatch->id])
+        ->and($tagTeamMatches->firstOrFail()->relationLoaded('competitors'))->toBeTrue();
 });
 
 it('retrieves matches by wrestler and tag team ids', function () {
