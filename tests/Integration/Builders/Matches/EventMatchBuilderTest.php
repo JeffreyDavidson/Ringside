@@ -191,33 +191,59 @@ it('retrieves matches officiated by a referee id', function () {
 });
 
 it('retrieves matches assigned to any selected referee', function () {
+    // Arrange
     $selectedReferee = Referee::factory()->create();
+    $secondReferee = Referee::factory()->create();
     $otherReferee = Referee::factory()->create();
     $selectedMatch = EventMatch::factory()->create();
     $selectedMatch->referees()->attach($selectedReferee);
+    $secondMatch = EventMatch::factory()->create();
+    $secondMatch->referees()->attach($secondReferee);
+    $sharedMatch = EventMatch::factory()->create();
+    $sharedMatch->referees()->attach([$selectedReferee->id, $secondReferee->id]);
     EventMatch::factory()->create()->referees()->attach($otherReferee);
+    EventMatch::factory()->create();
 
-    $matches = EventMatch::query()
-        ->withAnyRefereeIds(collect([$selectedReferee->id]))
-        ->get();
+    // Act
+    $query = EventMatch::query();
+    $query->withAnyRefereeIds(collect([$selectedReferee->id, $secondReferee->id]));
+    $query->orderBy('id');
+    $matches = $query->get();
+    $emptyQuery = EventMatch::query();
+    $emptyQuery->withAnyRefereeIds(collect());
+    $emptyMatches = $emptyQuery->get();
 
-    expect($matches)->toHaveCount(1)
-        ->and($matches->firstOrFail()->is($selectedMatch))->toBeTrue();
+    // Assert
+    expect($matches->modelKeys())->toBe([$selectedMatch->id, $secondMatch->id, $sharedMatch->id])
+        ->and($emptyMatches)->toBeEmpty();
 });
 
 it('retrieves matches assigned to any selected title', function () {
+    // Arrange
     $selectedTitle = Title::factory()->create();
+    $secondTitle = Title::factory()->create();
     $otherTitle = Title::factory()->create();
     $selectedMatch = EventMatch::factory()->create();
     $selectedMatch->titles()->attach($selectedTitle);
+    $secondMatch = EventMatch::factory()->create();
+    $secondMatch->titles()->attach($secondTitle);
+    $sharedMatch = EventMatch::factory()->create();
+    $sharedMatch->titles()->attach([$selectedTitle->id, $secondTitle->id]);
     EventMatch::factory()->create()->titles()->attach($otherTitle);
+    EventMatch::factory()->create();
 
-    $matches = EventMatch::query()
-        ->withAnyTitleIds(collect([$selectedTitle->id]))
-        ->get();
+    // Act
+    $query = EventMatch::query();
+    $query->withAnyTitleIds(collect([$selectedTitle->id, $secondTitle->id]));
+    $query->orderBy('id');
+    $matches = $query->get();
+    $emptyQuery = EventMatch::query();
+    $emptyQuery->withAnyTitleIds(collect());
+    $emptyMatches = $emptyQuery->get();
 
-    expect($matches)->toHaveCount(1)
-        ->and($matches->firstOrFail()->is($selectedMatch))->toBeTrue();
+    // Assert
+    expect($matches->modelKeys())->toBe([$selectedMatch->id, $secondMatch->id, $sharedMatch->id])
+        ->and($emptyMatches)->toBeEmpty();
 });
 
 it('orders matches by event date, card, and match number', function () {
