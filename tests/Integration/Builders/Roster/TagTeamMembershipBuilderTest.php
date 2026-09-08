@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Support\Facades\Date;
 
 test('tag team memberships can be filtered by tag team and wrestler', function () {
     $tagTeam = TagTeam::factory()->create();
@@ -56,37 +57,41 @@ test('tag team memberships can exclude a wrestler', function () {
         ->and($memberships->firstOrFail()->wrestler_id)->toBe($otherWrestler->id);
 });
 
-test('tag team memberships can be filtered by overlapping periods', function () {
+test('tag team memberships can be filtered by overlapping periods', function (string $joinedAt, ?string $leftAt, bool $overlaps) {
+    // Arrange
     $tagTeam = TagTeam::factory()->create();
-    $overlappingWrestler = Wrestler::factory()->create();
-    $earlierWrestler = Wrestler::factory()->create();
-    $laterWrestler = Wrestler::factory()->create();
+    $wrestler = Wrestler::factory()->create();
+    $periodStart = Date::parse('2026-03-01 12:00:00');
+    $periodEnd = Date::parse('2026-03-10 12:00:00');
     TagTeamWrestler::factory()->create([
         'tag_team_id' => $tagTeam->id,
-        'wrestler_id' => $overlappingWrestler->id,
-        'joined_at' => now()->subMonths(3),
-        'left_at' => now()->subMonth(),
+        'wrestler_id' => $wrestler->id,
+        'joined_at' => $joinedAt,
+        'left_at' => $leftAt,
     ]);
     TagTeamWrestler::factory()->create([
-        'tag_team_id' => $tagTeam->id,
-        'wrestler_id' => $earlierWrestler->id,
-        'joined_at' => now()->subMonths(6),
-        'left_at' => now()->subMonths(5),
-    ]);
-    TagTeamWrestler::factory()->create([
-        'tag_team_id' => $tagTeam->id,
-        'wrestler_id' => $laterWrestler->id,
-        'joined_at' => now(),
+        'joined_at' => $periodStart,
+        'left_at' => null,
     ]);
 
-    $memberships = TagTeamWrestler::query()
-        ->forTagTeamId($tagTeam->id)
-        ->overlappingPeriod(now()->subMonths(4), now()->subMonths(2))
-        ->get();
+    // Act
+    $query = TagTeamWrestler::query();
+    $query->forTagTeamId($tagTeam->id);
+    $query->overlappingPeriod($periodStart, $periodEnd);
+    $memberships = $query->pluck('wrestler_id');
 
-    expect($memberships)->toHaveCount(1)
-        ->and($memberships->firstOrFail()->wrestler_id)->toBe($overlappingWrestler->id);
-});
+    // Assert
+    expect($memberships->all())->toBe($overlaps ? [$wrestler->id] : []);
+})->with([
+    'ends at start' => ['2026-02-01 12:00:00', '2026-03-01 12:00:00', true],
+    'starts at end' => ['2026-03-10 12:00:00', '2026-03-20 12:00:00', true],
+    'inside period' => ['2026-03-02 12:00:00', '2026-03-09 12:00:00', true],
+    'spans period' => ['2026-02-01 12:00:00', '2026-04-01 12:00:00', true],
+    'open before period' => ['2026-02-01 12:00:00', null, true],
+    'ends one second before' => ['2026-02-01 12:00:00', '2026-03-01 11:59:59', false],
+    'starts one second after' => ['2026-03-10 12:00:01', '2026-03-20 12:00:00', false],
+    'open after period' => ['2026-03-10 12:00:01', null, false],
+]);
 
 test('tag team memberships can be ordered by most recent join', function () {
     $tagTeam = TagTeam::factory()->create();
