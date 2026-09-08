@@ -83,7 +83,8 @@ it('filters and orders title championship history', function () {
 });
 
 it('builds previous championship history with display relationships', function () {
-    $title = Title::factory()->create();
+    // Arrange
+    $title = Title::factory()->singles()->create();
     $champion = Wrestler::factory()->create();
     $firstChampionship = TitleChampionship::factory()
         ->for($title)
@@ -102,14 +103,33 @@ it('builds previous championship history with display relationships', function (
             'lost_at' => now()->subMonth(),
         ]);
 
-    $history = TitleChampionship::query()
-        ->forChampion($champion)
-        ->forPreviousHistory()
-        ->get();
+    TitleChampionship::factory()
+        ->for($title)
+        ->forWrestler($champion)
+        ->current()
+        ->create(['won_at' => now()->subWeek()]);
+    TitleChampionship::factory()
+        ->for(Title::factory()->singles())
+        ->forWrestler(Wrestler::factory()->create())
+        ->ended()
+        ->create([
+            'won_at' => now()->subMonth(),
+            'lost_at' => now()->subDay(),
+        ]);
 
+    // Act
+    $query = TitleChampionship::query();
+    $query->forChampion($champion);
+    $query->forPreviousHistory();
+    $history = $query->get();
+
+    // Assert
     expect($history->modelKeys())->toBe([$latestChampionship->id, $firstChampionship->id])
-        ->and($history->firstOrFail()->getAttribute('previous_championship_id'))->toBe($firstChampionship->id)
+        ->and($history->firstOrFail()->previous_championship_id)->toBe($firstChampionship->id)
+        ->and($history->last()?->previous_championship_id)->toBeNull()
         ->and($history->firstOrFail()->relationLoaded('title'))->toBeTrue()
+        ->and($history->firstOrFail()->title?->is($title))->toBeTrue()
         ->and($history->firstOrFail()->relationLoaded('previousChampionship'))->toBeTrue()
+        ->and($history->firstOrFail()->previousChampionship?->is($firstChampionship))->toBeTrue()
         ->and($history->firstOrFail()->previousChampionship?->champion?->is($champion))->toBeTrue();
 });
