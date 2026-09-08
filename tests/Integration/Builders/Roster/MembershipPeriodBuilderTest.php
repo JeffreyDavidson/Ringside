@@ -10,6 +10,7 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 test('membership periods can be queried by lifecycle state', function () {
+    // Arrange
     $stable = Stable::factory()->create();
     $tagTeam = TagTeam::factory()->create();
     $currentWrestler = Wrestler::factory()->create();
@@ -52,10 +53,33 @@ test('membership periods can be queried by lifecycle state', function () {
         'left_at' => now()->subMonths(2),
     ]);
 
-    expect(TagTeamWrestler::query()->current()->count())->toBe(1)
-        ->and(TagTeamWrestler::query()->ended()->count())->toBe(1)
-        ->and(StableWrestler::query()->current()->count())->toBe(1)
-        ->and(StableWrestler::query()->ended()->count())->toBe(1)
-        ->and(StableTagTeam::query()->current()->count())->toBe(1)
-        ->and(StableTagTeam::query()->ended()->count())->toBe(1);
+    // Act
+    $currentTagTeamQuery = TagTeamWrestler::query();
+    $currentTagTeamQuery->current();
+    $currentTagTeamMembers = $currentTagTeamQuery->pluck('wrestler_id');
+    $endedTagTeamQuery = TagTeamWrestler::query();
+    $endedTagTeamQuery->ended();
+    $formerTagTeamMembers = $endedTagTeamQuery->pluck('wrestler_id');
+
+    $currentStableWrestlerQuery = StableWrestler::query();
+    $currentStableWrestlerQuery->current();
+    $currentStableWrestlers = $currentStableWrestlerQuery->pluck('wrestler_id');
+    $endedStableWrestlerQuery = StableWrestler::query();
+    $endedStableWrestlerQuery->ended();
+    $formerStableWrestlers = $endedStableWrestlerQuery->pluck('wrestler_id');
+
+    $currentStableTagTeamQuery = StableTagTeam::query();
+    $currentStableTagTeamQuery->current();
+    $currentStableTagTeams = $currentStableTagTeamQuery->pluck('tag_team_id');
+    $endedStableTagTeamQuery = StableTagTeam::query();
+    $endedStableTagTeamQuery->ended();
+    $formerStableTagTeams = $endedStableTagTeamQuery->pluck('tag_team_id');
+
+    // Assert
+    expect($currentTagTeamMembers->all())->toBe([$currentWrestler->id])
+        ->and($formerTagTeamMembers->all())->toBe([$formerWrestler->id])
+        ->and($currentStableWrestlers->all())->toBe([$currentWrestler->id])
+        ->and($formerStableWrestlers->all())->toBe([$formerWrestler->id])
+        ->and($currentStableTagTeams->all())->toBe([$tagTeam->id])
+        ->and($formerStableTagTeams->all())->toBe([$formerTagTeam->id]);
 });
