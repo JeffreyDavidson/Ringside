@@ -9,30 +9,35 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 it('filters competitor records by model type and identifiers', function () {
+    // Arrange
     $wrestler = Wrestler::factory()->create();
     $otherWrestler = Wrestler::factory()->create();
-    $tagTeam = TagTeam::factory()->create();
-    $wrestlerRecord = MatchCompetitor::factory()->create([
-        'competitor_type' => (new Wrestler())->getMorphClass(),
-        'competitor_id' => $wrestler->id,
-    ]);
-    MatchCompetitor::factory()->create([
-        'competitor_type' => (new Wrestler())->getMorphClass(),
-        'competitor_id' => $otherWrestler->id,
-    ]);
-    MatchCompetitor::factory()->create([
-        'competitor_type' => (new TagTeam())->getMorphClass(),
-        'competitor_id' => $tagTeam->id,
-    ]);
+    $tagTeam = TagTeam::factory()->create(['id' => $wrestler->id]);
+    $otherTagTeam = TagTeam::factory()->create();
+    $wrestlerRecord = MatchCompetitor::factory()->for($wrestler, 'competitor')->create();
+    $tagTeamRecord = MatchCompetitor::factory()->for($tagTeam, 'competitor')->create();
+    MatchCompetitor::factory()->for($otherWrestler, 'competitor')->create();
+    MatchCompetitor::factory()->for($otherTagTeam, 'competitor')->create();
 
-    $records = MatchCompetitor::query()
-        ->forWrestlerIds(collect([$wrestler->id]))
-        ->get();
+    // Act
+    $wrestlerQuery = MatchCompetitor::query();
+    $wrestlerQuery->forWrestlerIds(collect([$wrestler->id]));
+    $wrestlerRecords = $wrestlerQuery->get();
+    $tagTeamQuery = MatchCompetitor::query();
+    $tagTeamQuery->forTagTeamIds(collect([$tagTeam->id]));
+    $tagTeamRecords = $tagTeamQuery->get();
+    $emptyWrestlerQuery = MatchCompetitor::query();
+    $emptyWrestlerQuery->forWrestlerIds(collect());
+    $emptyWrestlerRecords = $emptyWrestlerQuery->get();
+    $emptyTagTeamQuery = MatchCompetitor::query();
+    $emptyTagTeamQuery->forTagTeamIds(collect());
+    $emptyTagTeamRecords = $emptyTagTeamQuery->get();
 
-    expect($records)->toHaveCount(1)
-        ->and($records->firstOrFail()->match_id)->toBe($wrestlerRecord->match_id)
-        ->and($records->firstOrFail()->competitor_type)->toBe($wrestler->getMorphClass())
-        ->and($records->firstOrFail()->competitor_id)->toBe($wrestler->id);
+    // Assert
+    expect($wrestlerRecords->modelKeys())->toBe([$wrestlerRecord->id])
+        ->and($tagTeamRecords->modelKeys())->toBe([$tagTeamRecord->id])
+        ->and($emptyWrestlerRecords)->toBeEmpty()
+        ->and($emptyTagTeamRecords)->toBeEmpty();
 });
 
 it('filters competitor records by their events', function () {
