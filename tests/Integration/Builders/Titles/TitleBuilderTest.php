@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Enums\Titles\TitleStatus;
 use App\Models\Titles\Title;
-use Illuminate\Support\Facades\DB;
 
 test('active titles can be retrieved', function () {
     $activeTitle = Title::factory()->active()->create();
@@ -59,17 +59,27 @@ test('retired titles can be retrieved separately', function () {
 });
 
 test('projected activity status does not query per title', function () {
-    Title::factory()->active()->create();
-    Title::factory()->retired()->create();
+    // Arrange
+    $active = Title::factory()->active()->create();
+    $retired = Title::factory()->retired()->create();
+    $pending = Title::factory()->withFutureActivation()->create();
+    $inactive = Title::factory()->inactive()->create();
+    $initial = Title::factory()->unactivated()->create();
+    $this->expectsDatabaseQueryCount(1);
 
-    $titles = Title::query()
-        ->withActivityStatusState()
-        ->get();
+    // Act
+    $query = Title::query();
+    $query->withActivityStatusState();
+    $query->orderBy('id');
+    $titles = $query->get();
+    $statuses = $titles->mapWithKeys(fn (Title $title): array => [$title->id => $title->status]);
 
-    DB::enableQueryLog();
-    DB::flushQueryLog();
-
-    $titles->each(fn (Title $title) => $title->status);
-
-    expect(DB::getQueryLog())->toBeEmpty();
+    // Assert
+    expect($statuses->all())->toBe([
+        $active->id => TitleStatus::Active,
+        $retired->id => TitleStatus::Retired,
+        $pending->id => TitleStatus::PendingDebut,
+        $inactive->id => TitleStatus::Inactive,
+        $initial->id => TitleStatus::Undebuted,
+    ]);
 });
