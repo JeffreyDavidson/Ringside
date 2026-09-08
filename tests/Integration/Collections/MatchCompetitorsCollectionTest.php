@@ -9,55 +9,54 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
 it('groups competitor models by ordered side position', function () {
+    // Arrange
     $match = EventMatch::factory()->create();
     $firstSide = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
     $secondSide = MatchSide::factory()->for($match, 'match')->create(['position' => 2]);
     $partners = Wrestler::factory()->count(2)->create();
     $opponent = Wrestler::factory()->create();
 
-    MatchCompetitor::factory()->create([
-        'match_id' => $match->id,
-        'match_side_id' => $secondSide->id,
-        'competitor_type' => $opponent->getMorphClass(),
-        'competitor_id' => $opponent->id,
-    ]);
+    MatchCompetitor::factory()->for($match, 'eventMatch')->for($secondSide, 'side')->for($opponent, 'competitor')->create();
 
     foreach ($partners as $partner) {
-        MatchCompetitor::factory()->create([
-            'match_id' => $match->id,
-            'match_side_id' => $firstSide->id,
-            'competitor_type' => $partner->getMorphClass(),
-            'competitor_id' => $partner->id,
-        ]);
+        MatchCompetitor::factory()->for($match, 'eventMatch')->for($firstSide, 'side')->for($partner, 'competitor')->create();
     }
 
-    $competitorsBySide = $match->competitors()
-        ->with(['side', 'competitor'])
-        ->get()
-        ->competitorModelsBySidePosition();
+    // Act
+    $query = $match->competitors();
+    $query->with(['side', 'competitor']);
+    $competitors = $query->get();
+    $competitorsBySide = $competitors->competitorModelsBySidePosition();
 
+    // Assert
     expect($competitorsBySide->keys()->all())->toBe([1, 2])
         ->and($competitorsBySide->get(1)?->pluck('id')->all())->toBe($partners->pluck('id')->all())
         ->and($competitorsBySide->get(2)?->pluck('id')->all())->toBe([$opponent->id]);
 });
 
 it('partitions competitor models by roster type', function () {
+    // Arrange
     $match = EventMatch::factory()->create();
     $side = MatchSide::factory()->for($match, 'match')->create(['position' => 1]);
     $wrestler = Wrestler::factory()->create();
-    $tagTeam = TagTeam::factory()->create();
+    $tagTeam = TagTeam::factory()->create(['id' => $wrestler->id]);
 
     foreach ([$wrestler, $tagTeam] as $competitor) {
-        MatchCompetitor::factory()->create([
-            'match_id' => $match->id,
-            'match_side_id' => $side->id,
-            'competitor_type' => $competitor->getMorphClass(),
-            'competitor_id' => $competitor->id,
-        ]);
+        MatchCompetitor::factory()->for($match, 'eventMatch')->for($side, 'side')->for($competitor, 'competitor')->create();
     }
 
-    $competitors = $match->competitors()->with('competitor')->get();
+    // Act
+    $query = $match->competitors();
+    $query->with('competitor');
+    $competitors = $query->get();
+    $wrestlers = $competitors->wrestlers();
+    $tagTeams = $competitors->tagTeams();
 
-    expect($competitors->wrestlers()->pluck('id')->all())->toBe([$wrestler->id])
-        ->and($competitors->tagTeams()->pluck('id')->all())->toBe([$tagTeam->id]);
+    // Assert
+    expect($wrestlers->pluck('id')->all())->toBe([$wrestler->id])
+        ->and($wrestlers->first())->toBeInstanceOf(Wrestler::class)
+        ->and($wrestlers->keys()->all())->toBe([0])
+        ->and($tagTeams->pluck('id')->all())->toBe([$tagTeam->id])
+        ->and($tagTeams->first())->toBeInstanceOf(TagTeam::class)
+        ->and($tagTeams->keys()->all())->toBe([0]);
 });
