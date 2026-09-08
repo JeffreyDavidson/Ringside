@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\Stables\StableStatus;
 use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use Illuminate\Support\Facades\DB;
 
 test('established stables can be retrieved', function () {
     $activeStable = Stable::factory()->active()->create();
@@ -74,19 +74,29 @@ test('unestablished stables can be retrieved', function () {
 });
 
 test('projected activity status does not query per stable', function () {
-    Stable::factory()->active()->create();
-    Stable::factory()->retired()->create();
+    // Arrange
+    $active = Stable::factory()->active()->create();
+    $retired = Stable::factory()->retired()->create();
+    $pending = Stable::factory()->withFutureActivation()->create();
+    $inactive = Stable::factory()->inactive()->create();
+    $initial = Stable::factory()->unactivated()->create();
+    $this->expectsDatabaseQueryCount(1);
 
-    $stables = Stable::query()
-        ->withActivityStatusState()
-        ->get();
+    // Act
+    $query = Stable::query();
+    $query->withActivityStatusState();
+    $query->orderBy('id');
+    $stables = $query->get();
+    $statuses = $stables->mapWithKeys(fn (Stable $stable): array => [$stable->id => $stable->status]);
 
-    DB::enableQueryLog();
-    DB::flushQueryLog();
-
-    $stables->each(fn (Stable $stable) => $stable->status);
-
-    expect(DB::getQueryLog())->toBeEmpty();
+    // Assert
+    expect($statuses->all())->toBe([
+        $active->id => StableStatus::Active,
+        $retired->id => StableStatus::Retired,
+        $pending->id => StableStatus::PendingEstablishment,
+        $inactive->id => StableStatus::Inactive,
+        $initial->id => StableStatus::Unformed,
+    ]);
 });
 
 test('previous stables can be retrieved for a wrestler', function () {
