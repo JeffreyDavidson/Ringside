@@ -9,6 +9,7 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
+use Illuminate\Support\Facades\Date;
 
 it('retrieves matches for selected events', function () {
     // Arrange
@@ -59,18 +60,29 @@ it('retrieves matches for one event by id', function () {
 });
 
 it('retrieves matches for past events and eager loads their events', function () {
-    $pastEvent = Event::factory()->past()->create();
-    $scheduledEvent = Event::factory()->scheduled()->create();
+    // Arrange
+    $this->freezeSecond();
+    $pastEvent = Event::factory()->create(['date' => Date::now()->subSecond()]);
+    $currentEvent = Event::factory()->create(['date' => Date::now()]);
+    $scheduledEvent = Event::factory()->create(['date' => Date::now()->addSecond()]);
     $unscheduledEvent = Event::factory()->unscheduled()->create();
+    $deletedEvent = Event::factory()->past()->trashed()->create();
     $pastMatch = EventMatch::factory()->forEvent($pastEvent)->create();
+    EventMatch::factory()->forEvent($pastEvent)->trashed()->create();
+    EventMatch::factory()->forEvent($currentEvent)->create();
     EventMatch::factory()->forEvent($scheduledEvent)->create();
     EventMatch::factory()->forEvent($unscheduledEvent)->create();
+    EventMatch::factory()->forEvent($deletedEvent)->create();
 
-    $matches = EventMatch::query()->forPastEvents()->get();
+    // Act
+    $query = EventMatch::query();
+    $query->forPastEvents();
+    $matches = $query->get();
 
-    expect($matches)->toHaveCount(1)
-        ->and($matches->firstOrFail()->is($pastMatch))->toBeTrue()
-        ->and($matches->firstOrFail()->relationLoaded('event'))->toBeTrue();
+    // Assert
+    expect($matches->modelKeys())->toBe([$pastMatch->id])
+        ->and($matches->firstOrFail()->relationLoaded('event'))->toBeTrue()
+        ->and($matches->firstOrFail()->event->is($pastEvent))->toBeTrue();
 });
 
 it('retrieves match history with its display relationships eager loaded and ordered', function () {
