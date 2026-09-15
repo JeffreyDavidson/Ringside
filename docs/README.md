@@ -2,6 +2,14 @@
 
 This directory contains comprehensive project documentation and development tools.
 
+## Product Planning
+
+The [product roadmap](product-roadmap.md) preserves product positioning and
+future feature ideas, with focused plans for [promotion management](guides/promotion-management-plan.md)
+and the [admin interface](guides/admin-interface-direction.md). These are planning
+inputs; current behavior is documented in `/architecture/`, and executable work
+is tracked in the Ringside Hermes Kanban board.
+
 ## Directory Structure
 
 ### `/architecture/`
