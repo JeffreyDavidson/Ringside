@@ -33,15 +33,15 @@ gh pr create --base development
 ## Branch Naming Convention
 - `feat/feature-name` - New features
 - `fix/bug-description` - Bug fixes  
-- `tests/fix-description` - Test-related fixes
-- `tests/add-description` - Adding new tests
+- `test/fix-description` - Test-related fixes
+- `test/add-description` - Adding new tests
 - `refactor/code-improvement` - Code refactoring
 - `docs/documentation-update` - Documentation changes
 - `chore/task-description` - Maintenance tasks
 
 **Examples:**
-- `tests/fix-test-failures` - Fixing failing tests
-- `tests/add-policy-coverage` - Adding new test coverage
+- `test/fix-test-failures` - Fixing failing tests
+- `test/add-policy-coverage` - Adding new test coverage
 - `refactor/organize-model-tests` - Restructuring test organization
 
 ## Git Commit Message Format
@@ -127,19 +127,8 @@ git checkout -b refactor/stables-actions-phase3-standards
 
 ## Pull Request Creation Requirements
 
-**MANDATORY: Always ask for explicit approval before creating PRs**
-
-Before creating any pull request:
-1. **Ask the user**: "Is it okay for me to create a PR for these changes?"
-2. **Wait for explicit "Yes"** - Do not proceed without clear approval
-3. **Only create PR after receiving approval** - Never assume permission
-
-**Example:**
-```
-The work is complete. Is it okay for me to create a PR for these changes?
-```
-
-**Wait for user response before using `gh pr create` command.**
+Create a pull request after the change is complete, verified, and ready for
+review. Confirm the target branch and merge method before merging.
 
 **Example Decision Points:**
 - Just finished Rules organization → Next todo is Builders restructure = **COMMIT & PR**

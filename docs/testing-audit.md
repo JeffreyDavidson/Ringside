@@ -16,7 +16,7 @@ What changed after the original audit:
 - `composer.json` remains the source of truth: `laravel/framework ^13.7`, `livewire/livewire ^4.0`.
 - CI/PCOV now target Laravel 13 and use `composer install` against the committed dependency set instead of `composer require laravel/framework:12.*` during CI.
 - Local verification can boot far enough to run the Pest suite under Laravel 13.
-- The suite is **not green yet**: the Laravel 13 baseline exposes known failures that are tracked separately.
+- The current repository checks are green for the maintained Laravel 13 baseline; the failure buckets below describe historical audit findings and remain useful follow-up coverage targets.
 
 Follow-up tickets created from the exposed failure buckets:
 
@@ -41,13 +41,13 @@ Ringside has a large and valuable Pest test suite, but it is not yet aligned wit
 
 ### Configuration and gates
 
-- `composer.json` declares Pest, Pest Browser, Larastan, Pint, Rector, type coverage, PHP 8.4.
+- `composer.json` declares Pest, Pest Browser, Larastan, Pint, Rector, type coverage, PHP 8.5.
 - `phpunit.xml` defines suites: `Feature`, `Unit`, `Browser`, `Integration`.
 - Browser tests use Pest Browser through the `Browser` PHPUnit suite; Laravel Dusk is not installed.
 - `.github/workflows/ci.yml` runs Feature, Integration, Unit, and PHPStan against Laravel 13 after INF-62 / PR #633.
-- `.github/workflows/run-tests-pcov-pull.yml` runs Feature/Integration/Unit with coverage against Laravel 13 after INF-62 / PR #633.
+- `.github/workflows/coverage.yml` provides the manually dispatched PCOV coverage workflow for the Laravel 13 baseline.
 - `composer test` runs type coverage, Rector dry-run, Pint test, PHPStan, and Pest with coverage.
-- Local verification uses Herd PHP/Composer in this workspace; the suite currently boots but has known Laravel 13 failure buckets tracked in INF-103–106.
+- Local verification uses Herd PHP/Composer in this workspace; maintained checks run against the committed Laravel 13 dependency set. INF-103–106 remain historical follow-up coverage tickets.
 
 ### Suite inventory
 
@@ -287,12 +287,12 @@ High-value Ringside candidates:
 2. **Groups are documented as mandatory but rarely used.** Only 19 group calls across ~4,410 tests.
 3. **Some tests assert implementation structure more than behavior.** Trait/interface/fillable checks are useful as architecture/structural guards, but they should not crowd out behavior tests.
 4. **Generic exceptions appear in business-rule tests.** Many action tests assert `Exception::class` instead of domain-specific exceptions, reducing regression precision.
-5. **Browser tests must remain application-specific.** `tests/Browser/ExampleTest.php` is retained as a login smoke test rather than a framework scaffold.
+5. **Browser tests must remain application-specific.** The former framework scaffold was replaced by application-specific login smoke coverage.
 6. **Feature/Integration boundaries are fuzzy.** Livewire component interactions often live in Feature when they are closer to Integration.
 7. **Architecture tests are partially stale.** Some rules likely encode a previous architecture and may produce false confidence or false failures.
 8. **Naming drift hurts navigation.** Examples: `*UnitTest.php`, lowercase `tests/Unit/database`, lifecycle catch-all files, and tests that cover multiple production classes without clear per-class mirrors.
 9. **Coverage gates may be misleading.** Main source excludes Livewire/Console/providers, while Livewire is a major part of the app.
-10. **Laravel 13 baseline failures are now visible.** INF-62 aligned docs/CI with Laravel 13, and the remaining failures are tracked in INF-103–106 instead of being hidden by a framework downgrade.
+10. **Laravel 13 baseline findings are documented.** INF-62 aligned docs/CI with Laravel 13; the historical failure buckets in INF-103–106 remain follow-up coverage work rather than an active CI blocker.
 
 ## Recommended Test Improvement Tickets
 
