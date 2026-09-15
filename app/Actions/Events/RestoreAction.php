@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
-use App\Services\Events\EventDeletionService;
+use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
-    public function __construct(private readonly EventDeletionService $deletion) {}
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
 
     /**
      * Restore a soft-deleted event.
@@ -26,6 +28,14 @@ class RestoreAction
      */
     public function handle(Event $event): void
     {
-        $this->deletion->restore($event, now());
+        DB::transaction(function () use ($event): void {
+            $lockedEvent = $event->refreshForUpdate();
+            $venue = $lockedEvent->venue?->refreshForUpdate();
+
+            if ($venue !== null && $lockedEvent->date !== null) {
+                VenueSchedulingEligibility::ensureAvailable($venue, $lockedEvent->date, $lockedEvent);
+            }
+            $this->deletionState->restore($lockedEvent, now());
+        });
     }
 }

@@ -19,3 +19,6 @@ Keep membership Services focused on reading, establishing, and synchronizing rel
 
 ## Organize services by responsibility domain
 Keep Services organized by technical layer first and responsibility domain second. Place event, match, title, and venue services under their domains; place roster services under Roster with Individuals, TagTeams, Stables, and Relationships subdomains. Do not create a parallel Lifecycle service namespace; lifecycle persistence managers remain under app/Lifecycle.
+
+## Keep services read-only
+Services provide read-only retrieval, calculation, or validation. Actions own transactions, persistence, and other state-changing operations. Shared lifecycle mechanics belong in focused lifecycle components coordinated by Actions.
