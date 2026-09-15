@@ -5,16 +5,20 @@ This document provides a comprehensive reference for all development and testing
 ## Testing & Quality Assurance
 
 ### Primary Test Commands
-- `composer test` - Run all tests and quality checks
-- `composer test:unit` - Run PHPUnit/Pest tests with coverage
-- `composer test:types` - Run PHPStan for the application (level 6) and Pest tests (level 3)
-- `composer test:types:pest` - Run PHPStan against the Pest test suite (level 3)
+- `composer test` - Run quality checks and the default Pest suites with coverage
+- `composer test:unit` - Run the default Pest suites with PCOV coverage (minimum 44%); despite its name, this is not limited to Unit tests
+- `composer test:application` - Run Feature, Unit, and Integration tests in parallel
+- `composer test:browser` - Run Browser tests in parallel
+- `composer test:tia` - Run tests selected by Test Impact Analysis
+- `composer test:push` - Run quality checks, application tests, and browser tests before pushing
+- `composer test:types` - Run PHPStan for the application and Pest tests (both level 9)
+- `composer test:types:pest` - Run PHPStan against the Pest test suite (level 9)
 - `composer test:type-coverage` - Check type coverage (min 100%)
-- `composer test:lint` - Test code formatting (Laravel Pint)
+- `composer test:lint` - Check PHP and Blade formatting with Laravel Pint
 - `composer test:rector` - Test code modernization (dry-run)
 
 ### Code Quality Tools
-- `composer lint` - Fix code formatting with Laravel Pint
+- `composer lint` - Fix PHP and Blade formatting with Laravel Pint
 - `composer rector` - Apply code modernization with Rector
 
 ### Test Utilities
@@ -45,15 +49,23 @@ php artisan make:test --pest --unit Models/Roster/Wrestlers/WrestlerTest
 ## Quality Assurance Protocol
 
 ### Before Committing
-1. Run `composer test` to ensure all tests pass
-2. Run `composer lint` to fix formatting issues
-3. Run `composer rector` for code modernization
-4. Verify type coverage with `composer test:type-coverage`
+1. Run `composer lint` when formatting changes are needed.
+2. Run the affected tests and relevant quality checks.
+3. Review the diff and include only the intended changes.
+
+### Before Pushing
+
+Run `composer test:push`; the native `.githooks/pre-push` hook runs the same command.
+
+### Git Hooks
+
+Run `npm install` once after cloning to configure Git to use `.githooks`. The
+hooks run `npx lint-staged` before commits and `composer test:push` before pushes.
 
 ### Test Running Best Practices
-- **IMPORTANT**: Do not run tests automatically. The user will run tests manually when needed.
+- Run affected tests after changes.
 - Use specific test commands for targeted testing
-- Always verify application PHPStan level 6 and Pest PHPStan level 3 compliance
+- Always verify application and Pest PHPStan level 9 compliance
 - Maintain 100% type coverage requirement
 
 ## Git Integration
@@ -63,4 +75,4 @@ php artisan make:test --pest --unit Models/Roster/Wrestlers/WrestlerTest
 - Use `composer lint` and `composer rector` for automatic fixes
 - Only commit when code is properly formatted and tested
 
-For more development workflow information, see [Development Workflow](workflow.md).
+For more development workflow information, see [Git Workflow](../workflows/git-workflow.md).

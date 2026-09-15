@@ -10,15 +10,15 @@ Automated code quality tools ensure consistent formatting, type safety, and mode
 
 ### Configuration
 - **Configuration**: Custom rules defined in `pint.json`
-- **Usage**: `composer lint` to fix formatting
+- **Usage**: `composer lint` to fix PHP and Blade formatting
 - **CI Integration**: Automated formatting checks
 
 ## PHPStan
 
 ### Static Analysis
-- **Level**: Level 6 static analysis
+- **Level**: Level 9 for application and Pest tests
 - **Coverage**: 100% type coverage requirement
-- **Configuration**: Rules defined in `phpstan.neon`
+- **Configuration**: Rules defined in `phpstan.neon` and `phpstan-pest.neon`
 - **Usage**: `composer test:types` for analysis
 
 ## Rector
@@ -35,16 +35,16 @@ Automated code quality tools ensure consistent formatting, type safety, and mode
 # Code quality checks
 composer lint          # Format code
 composer test:types     # Static analysis
-composer test:coverage  # Test coverage
+composer test:unit      # Pest suites with PCOV coverage (minimum 44%)
 composer rector         # Code modernization
 ```
 
 ## Quality Metrics
 
 ### Coverage Requirements
-- **Code Coverage**: 100% test coverage required
+- **Code Coverage**: Current automated minimum is 44%
 - **Type Coverage**: 100% type coverage required
-- **Static Analysis**: PHPStan level 6 compliance
+- **Static Analysis**: PHPStan level 9 for application and Pest tests
 - **Code Style**: Laravel Pint compliance
 
 ## Automated Checks

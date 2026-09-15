@@ -47,20 +47,18 @@ Development process documentation:
 - CI/CD pipeline configuration
 - Branch protection enforcement
 
-### `/frontend/`
-Frontend development documentation and tools, including:
-- **Metronic Integration Documentation**: Component usage, maintenance checklists, and quality assurance tools
-- **Visual Comparison Tools**: HTML-based checklists for design accuracy validation  
-- **Color Validation Scripts**: JavaScript tools for ensuring Metronic color scheme compliance
+### `/examples/`
+Livewire component examples.
 
-These tools were created during the frontend modernization process to maintain design accuracy while converting from Metronic template code to custom Alpine.js + Tailwind CSS implementation.
+### `/releases/`
+Release notes and feature summaries.
 
 ## Codex Integration
 
 This Laravel project uses Laravel Boost's Codex integration:
 
 - `AGENTS.md` provides current, package-aware Laravel guidance.
-- `.agents/skills/` contains the installed Laravel, Livewire, Pest, Tailwind CSS, Laravel Actions, and Debugbar skills.
+- `.agents/skills/` contains the installed project development skills.
 - `.codex/config.toml` registers the project-scoped Laravel Boost MCP server.
 
 ### Environment
