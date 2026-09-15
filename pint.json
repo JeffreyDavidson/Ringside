@@ -1,6 +1,7 @@
 {
     "preset": "laravel",
     "rules": {
+        "Pint/laravel_blade": true,
         "array_push": true,
         "blank_line_after_namespace": true,
         "blank_line_after_opening_tag": true,
