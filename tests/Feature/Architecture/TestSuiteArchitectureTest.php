@@ -135,9 +135,7 @@ test('application actions have a matching test file', function (): void {
     ))
         ->map(fn (SplFileInfo $file): string => $file->getFilename())
         ->flip();
-    $knownGaps = [
-        'Actions/Stables/DisbandAction.php',
-    ];
+    $knownGaps = [];
 
     // Act
     $missingTests = collect(iterator_to_array(
