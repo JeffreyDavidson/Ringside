@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
-use App\Services\Titles\TitleLifecycleService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DebutAction
 {
     public function __construct(
-        private TitleLifecycleService $lifecycle,
+        private readonly TitleLifecycleEligibility $eligibility,
+        private readonly StartActivityPeriodAction $startActivityPeriod,
+        private readonly RecordLifecycleTransitionAction $recordLifecycleTransition,
     ) {}
 
     /**
@@ -30,6 +38,19 @@ class DebutAction
      */
     public function handle(Title $title, ?Carbon $debutDate = null, ?string $notes = null): void
     {
-        $this->lifecycle->debut($title, $debutDate ?? now(), $notes);
+        $date = $debutDate ?? now();
+
+        DB::transaction(function () use ($title, $date, $notes): void {
+            $lockedTitle = $title->refreshForUpdate();
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Debut);
+            $this->startActivityPeriod->handle($lockedTitle, $date);
+            $this->recordLifecycleTransition->handle(
+                $lockedTitle,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Debuted,
+                $date,
+                array_filter(['notes' => $notes]),
+            );
+        });
     }
 }

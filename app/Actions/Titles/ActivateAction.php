@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
-use App\Services\Titles\TitleActivationService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Activate action for titles.
@@ -17,7 +24,10 @@ use Illuminate\Support\Carbon;
 class ActivateAction
 {
     public function __construct(
-        private TitleActivationService $activation,
+        private readonly TitleLifecycleEligibility $eligibility,
+        private readonly StartActivityPeriodAction $startActivityPeriod,
+        private readonly RecordLifecycleTransitionAction $recordLifecycleTransition,
+        private readonly RetirementPeriodManager $retirementPeriods,
     ) {}
 
     /**
@@ -28,6 +38,35 @@ class ActivateAction
      */
     public function handle(Title $title, ?Carbon $activationDate = null): void
     {
-        $this->activation->activate($title, $activationDate ?? now());
+        $date = $activationDate ?? now();
+
+        DB::transaction(function () use ($title, $date): void {
+            $lockedTitle = $title->refreshForUpdate();
+
+            if ($lockedTitle->currentRetirement()->exists()) {
+                $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Unretire);
+                $this->retirementPeriods->end($lockedTitle, $date, LifecycleTransitionType::Unretired);
+            }
+
+            $transition = $lockedTitle->activityPeriods()->exists()
+                ? TitleLifecycleTransition::Reinstate
+                : TitleLifecycleTransition::Debut;
+            $lifecycleTransition = $transition === TitleLifecycleTransition::Reinstate
+                ? LifecycleTransitionType::Reinstated
+                : LifecycleTransitionType::Debuted;
+
+            $this->eligibility->ensureAllowed($lockedTitle, $transition);
+            $this->startActivityPeriod->handle(
+                $lockedTitle,
+                $date,
+                rescheduleFuturePeriod: $transition === TitleLifecycleTransition::Reinstate,
+            );
+            $this->recordLifecycleTransition->handle(
+                $lockedTitle,
+                LifecycleDimension::Activity,
+                $lifecycleTransition,
+                $date,
+            );
+        });
     }
 }
