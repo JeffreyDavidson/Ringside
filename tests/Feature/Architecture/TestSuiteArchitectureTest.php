@@ -137,8 +137,6 @@ test('application actions have a matching test file', function (): void {
         ->flip();
     $knownGaps = [
         'Actions/Stables/DisbandAction.php',
-        'Actions/Stables/EstablishAction.php',
-        'Actions/Stables/ReuniteAction.php',
     ];
 
     // Act
