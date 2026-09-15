@@ -139,8 +139,6 @@ test('application actions have a matching test file', function (): void {
         'Actions/Stables/DisbandAction.php',
         'Actions/Stables/EstablishAction.php',
         'Actions/Stables/ReuniteAction.php',
-        'Actions/Titles/DebutAction.php',
-        'Actions/Titles/PullAction.php',
     ];
 
     // Act
