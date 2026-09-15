@@ -12,7 +12,7 @@
         "lint:fix": "eslint resources/js/**/*.js --fix",
         "format": "prettier --write resources/js/**/*.js resources/views/**/*.blade.php",
         "format:check": "prettier --check resources/js/**/*.js resources/views/**/*.blade.php",
-        "prepare": "husky"
+        "prepare": "git config core.hooksPath .githooks"
     },
     "lint-staged": {
         "resources/js/**/*.js": [
@@ -33,7 +33,6 @@
         "eslint": "^9.32.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.3",
-        "husky": "^9.1.7",
         "laravel-vite-plugin": "^2.0.0",
         "lint-staged": "^16.1.2",
         "postcss": "^8.4.33",
