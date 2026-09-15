@@ -136,7 +136,6 @@ test('application actions have a matching test file', function (): void {
         ->map(fn (SplFileInfo $file): string => $file->getFilename())
         ->flip();
     $knownGaps = [
-        'Actions/Matches/ApplyMatchTitleOutcomesAction.php',
         'Actions/Stables/DisbandAction.php',
         'Actions/Stables/EstablishAction.php',
         'Actions/Stables/ReuniteAction.php',
