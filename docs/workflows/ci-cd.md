@@ -5,7 +5,7 @@
 The project uses four automated workflows:
 
 ### 1. **CI Pipeline** (`.github/workflows/ci.yml`)
-**Trigger**: Pushes and pull requests targeting `development` or `master`
+**Trigger**: Pushes and pull requests targeting `develop` or `main`
 **Purpose**: Comprehensive testing and static analysis
 
 **What it does:**
@@ -36,7 +36,7 @@ The project uses four automated workflows:
 ## Branch Protection Integration
 
 **GitHub Branch Protection Rules Applied:**
-- `development` and `master` branches require PRs
+- `develop` and `main` branches require PRs
 - CI workflow must pass before merge (`ci` status check)
 - Required CI checks must pass before merge
 - Direct pushes to protected branches are blocked
@@ -46,11 +46,11 @@ The project uses four automated workflows:
 # ✅ Conventional branch - CI runs on push
 git push origin chore/update-documentation
 
-# ✅ PR to development - required CI checks run
-gh pr create --base development
+# ✅ PR to develop - required CI checks run
+gh pr create --base develop
 
-# ❌ Direct push to development - blocked by GitHub
-git push origin development  # Will fail
+# ❌ Direct push to develop - blocked by GitHub
+git push origin develop  # Will fail
 ```
 
 ## Troubleshooting Common Issues
@@ -136,7 +136,7 @@ APP_KEY=base64:yBIJTxbDrdZCu2t7A7fAfdThy+LL6GEOArWwLJIfncQ=
 4. **Check CI status** - ensure all required checks pass before PR
 
 ### **For Protected Branch Merges:**
-1. **Create PR** - target `development` for normal work
+1. **Create PR** - target `develop` for normal work
 2. **Ensure required CI checks pass** - required for merge
 3. **Run coverage when needed** - dispatch `coverage.yml` for a PCOV report
 4. **Merge when green** - all status checks must pass

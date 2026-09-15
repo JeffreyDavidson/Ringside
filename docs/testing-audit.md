@@ -1,7 +1,7 @@
 # Ringside Testing Architecture & Quality Audit
 
 **Issue:** INF-56 — Ringside: testing architecture and quality audit  
-**Repo/branch audited:** `/Users/jeffreydavidson/.openclaw/workspace/ringside-app` on `development`  
+**Repo/branch audited:** `/Users/jeffreydavidson/.openclaw/workspace/ringside-app` on `develop`
 **Audit date:** 2026-05-13  
 **Updated:** 2026-05-15 after INF-62 Laravel 13 baseline alignment  
 **Standard:** `/Users/jeffreydavidson/.openclaw/workspace/docs/testing-quality-standard.md`

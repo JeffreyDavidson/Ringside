@@ -173,4 +173,21 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Use plain conventional branch names in the `<type>/<short-description>` format, such as `feat/`, `fix/`, `refactor/`, `docs/`, `test/`, or `chore/`; do not add a `codex/` prefix.
 - Use the Composer scripts defined by this repository for verification. Run `composer test:push` before pushing a completed change unless a narrower check is explicitly requested.
 - Laravel Pint must always run with Blade formatting enabled. Use `composer lint` to fix formatting or `composer test:lint` to check it; never invoke Pint without the `--blade` option.
-- Pull requests target `development` unless the work is an intentional release from `development` to `master`.
+
+## Git workflow and Conventional Commits
+
+- Use `develop` as the integration branch and `main` as the release branch. Reserve `development` for environment names, not new branch names.
+- Create focused working branches from an up-to-date `develop`; do not commit feature work directly to `develop` or `main`.
+- Squash merge feature, fix, refactor, chore, docs, and test branches into `develop` through pull requests.
+- Squash merge `hotfix/` branches into `main`; merge `release/` branches into `main` with regular merge commits. Do not rebase-merge pull requests.
+- Before merging, verify the pull request's head branch, base branch, and merge method.
+- Every new commit must follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/): `type: description`, with an optional scope (`type(scope): description`) and optional breaking-change marker (`type(scope)!: description`).
+- Use lowercase types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, or `revert`. Use `feat` for new features and `fix` for bug fixes; branch prefixes such as `feature/`, `hotfix/`, and `release/` are not commit types.
+- Write a concise, imperative description. Mark breaking changes with `!` before the colon or a `BREAKING CHANGE: description` footer.
+- Apply the same convention to pull request titles, squash commit subjects, and release or synchronization merge commit subjects; replace generated merge subjects when necessary (for example, `chore(release): release 2026.09.15`).
+- Check the message before every commit and verify the final commit subject before merging a pull request. Do not rely on squash merging to excuse nonconforming feature-branch commits.
+
+### Branch migration status
+
+- Ringside uses `develop` as the integration branch and `main` as the release/default branch.
+- Keep CI branch filters, pull request bases, branch protections, deployment references, and workflow documentation aligned with these names.
