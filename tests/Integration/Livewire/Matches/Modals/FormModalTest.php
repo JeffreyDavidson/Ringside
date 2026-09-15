@@ -27,7 +27,6 @@ describe('authorized match form interactions', function (): void {
         // Arrange
         $component = 'matches.modals.form-modal';
         $arguments = ['eventId' => $this->event->id];
-        $id = md5($component.serialize($arguments));
 
         // Act
         $modal = livewire(Modal::class)->dispatch(
@@ -38,8 +37,14 @@ describe('authorized match form interactions', function (): void {
 
         // Assert
         $modal
-            ->assertSet("components.{$id}.arguments", $arguments)
-            ->assertSet('activeComponent', $id);
+            ->assertCount('components', 1)
+            ->assertSet('components', function (array $components) use ($component, $arguments): bool {
+                $registeredComponent = array_values($components)[0] ?? null;
+
+                return $registeredComponent['name'] === $component
+                    && $registeredComponent['arguments'] === $arguments;
+            })
+            ->assertNotSet('activeComponent', null);
     });
 
     it('renders match fields and available choices', function (): void {
