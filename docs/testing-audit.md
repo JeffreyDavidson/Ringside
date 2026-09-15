@@ -201,7 +201,7 @@ Gaps / stale rules:
 - Rules reference `App\Repositories` and `App\Interfaces`, which appear absent.
 - `contracts directories only contain interfaces with Interface suffix` conflicts with actual contracts like `Bookable`, `Employable`, `Retirable`, etc.
 - `models are only used in repositories` conflicts with an Eloquent Laravel app where actions, policies, factories, Livewire, and tests naturally use models.
-- The action mirror guard documents five existing gaps and fails when additional application actions lack a matching test file.
+- The action mirror guard documents three existing gaps and fails when additional application actions lack a matching test file.
 - No Arch rule around Ringside domain boundaries: actions vs models vs Livewire vs controllers, computed status not stored, bookable competitor/official interfaces, or domain exception placement.
 
 ### 7. Contract tests
