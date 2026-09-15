@@ -34,7 +34,7 @@ Ringside has a large and valuable Pest test suite, but it is not yet aligned wit
 1. **The suite is broad but uneven:** 299 `*Test.php` files and ~4,410 `test()` / `it()` calls, but only a partial 1:1 mirror of production classes.
 2. **Type boundaries are blurred:** many `Unit` tests require Laravel/database behavior; several `Feature` workflow tests are effectively Livewire integration tests; Browser tests include a default Laravel example.
 3. **First-class categories are incomplete:** Architecture exists, Browser exists but is thin, Static Analysis exists in scripts/CI, but Contract, Snapshot/Approval, Performance, Accessibility, and Visual testing are not materially represented.
-4. **Architecture tests are currently too generic and partially stale:** several rules reference namespaces/patterns that do not match this app (`Repositories`, `Interfaces`, `Contracts` suffix, model usage only in repositories), and there is no rule enforcing required class/test pairing.
+4. **Architecture tests are currently too generic and partially stale:** several historical findings reference namespaces/patterns that do not match this app (`Repositories`, `Interfaces`, `Contracts` suffix, model usage only in repositories). A new action-to-test mirror guard documents the remaining known gaps and prevents new omissions.
 5. **Original local verification was blocked:** PHP was not available in the first audit environment and `vendor/` was missing. After INF-62, local verification can boot with Herd PHP/Composer, but the Laravel 13 suite still exposes known failures tracked in INF-103–106.
 
 ## Evidence Collected
@@ -201,7 +201,7 @@ Gaps / stale rules:
 - Rules reference `App\Repositories` and `App\Interfaces`, which appear absent.
 - `contracts directories only contain interfaces with Interface suffix` conflicts with actual contracts like `Bookable`, `Employable`, `Retirable`, etc.
 - `models are only used in repositories` conflicts with an Eloquent Laravel app where actions, policies, factories, Livewire, and tests naturally use models.
-- No Arch test enforces mirrored class-to-test expectations.
+- The action mirror guard documents six existing gaps and fails when additional application actions lack a matching test file.
 - No Arch rule around Ringside domain boundaries: actions vs models vs Livewire vs controllers, computed status not stored, bookable competitor/official interfaces, or domain exception placement.
 
 ### 7. Contract tests
@@ -306,7 +306,7 @@ High-value Ringside candidates:
 
 2. **INF-56-P0-B: Replace stale Architecture rules and add mirror enforcement**
    - Remove or update stale `Repositories`, `Interfaces`, `Contracts Interface suffix`, and `models only used in repositories` rules.
-   - Add an Arch/static test for required production class → test class pairing.
+   - The action-to-test mirror guard is now in place; extend it to additional production boundaries as coverage is completed.
    - Add allowlist with reasons for Arch tests, tiny glue, framework-only files, and intentional cross-cutting workflow tests.
 
 3. **INF-56-P0-C: Reclassify Unit vs Integration boundaries**
