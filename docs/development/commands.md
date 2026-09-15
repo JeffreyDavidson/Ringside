@@ -55,12 +55,15 @@ php artisan make:test --pest --unit Models/Roster/Wrestlers/WrestlerTest
 
 ### Before Pushing
 
-Run `composer test:push`; the native `.githooks/pre-push` hook runs the same command.
+Run `composer test:push` when you want the complete local verification suite.
+The pre-commit hook intentionally runs only fast staged-file checks; CI remains
+the required gate for pushed branches.
 
 ### Git Hooks
 
 Run `npm install` once after cloning to configure Git to use `.githooks`. The
-hooks run `npx lint-staged` before commits and `composer test:push` before pushes.
+pre-commit hook checks staged PHP syntax and formatting without running tests or
+static analysis.
 
 ### Test Running Best Practices
 - Run affected tests after changes.
