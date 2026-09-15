@@ -127,3 +127,38 @@ test('application tests use TestDouble instead of Mockery', function (): void {
     // Assert
     expect($mockeryUsages)->toBeEmpty();
 });
+
+test('application actions have a matching test file', function (): void {
+    // Arrange
+    $testNames = collect(iterator_to_array(
+        Finder::create()->files()->in(base_path('tests'))->name('*Test.php'),
+    ))
+        ->map(fn (SplFileInfo $file): string => $file->getFilename())
+        ->flip();
+    $knownGaps = [
+        'Actions/Matches/ApplyMatchTitleOutcomesAction.php',
+        'Actions/Stables/DisbandAction.php',
+        'Actions/Stables/EstablishAction.php',
+        'Actions/Stables/ReuniteAction.php',
+        'Actions/Titles/DebutAction.php',
+        'Actions/Titles/PullAction.php',
+    ];
+
+    // Act
+    $missingTests = collect(iterator_to_array(
+        Finder::create()->files()->in(app_path('Actions'))->name('*.php'),
+    ))
+        ->filter(fn (SplFileInfo $file): bool => ! $testNames->has(
+            pathinfo($file->getFilename(), PATHINFO_FILENAME).'Test.php',
+        ))
+        ->map(fn (SplFileInfo $file): string => str($file->getPathname())
+            ->after(app_path().DIRECTORY_SEPARATOR)
+            ->replace(DIRECTORY_SEPARATOR, '/')
+            ->toString())
+        ->sort()
+        ->values()
+        ->all();
+
+    // Assert
+    expect($missingTests)->toBe($knownGaps);
+});
