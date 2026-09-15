@@ -7,7 +7,7 @@
         <div class="mb-6 flex justify-end">
             <x-buttons.primary
                 data-test="add-event-match"
-                @click="$dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {{ $event->id }} } })"
+                onclick="Livewire.dispatch('openModal', { component: 'matches.modals.form-modal', arguments: { eventId: {{ $event->id }} } })"
             >
                 Add Event Match
             </x-buttons.primary>
