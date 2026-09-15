@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Events;
 
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Events\Event;
-use App\Services\Events\EventDeletionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly EventDeletionService $deletion) {}
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
 
     /**
      * Delete an event.
@@ -38,6 +39,10 @@ class DeleteAction
      */
     public function handle(Event $event, ?Carbon $deletionDate = null): void
     {
-        $this->deletion->delete($event, $deletionDate ?? now());
+        DB::transaction(function () use ($event, $deletionDate): void {
+            $lockedEvent = $event->refreshForUpdate();
+
+            $this->deletionState->delete($lockedEvent, $deletionDate ?? now());
+        });
     }
 }
