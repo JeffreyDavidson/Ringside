@@ -51,6 +51,15 @@ class FormModal extends BaseFormModal
 
     private UpdateMatchAction $updateMatchAction;
 
+    public function mount(int|string|null $modelId = null, ?int $eventId = null): void
+    {
+        if ($eventId !== null) {
+            $this->eventId = $eventId;
+        }
+
+        parent::mount($modelId);
+    }
+
     public function boot(
         MatchFormDummyData $dummyData,
         AddMatchForEventAction $addMatchForEventAction,
