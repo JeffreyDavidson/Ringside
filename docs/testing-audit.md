@@ -335,6 +335,7 @@ High-value Ringside candidates:
    - `ErrorMessageMappingService`
 
 2. **INF-56-P1-B: Add computed status and bookability matrices**
+   - Initial wrestler/referee bookability matrix coverage is now present; extend the matrix to remaining roster and status combinations as domain rules evolve.
    - Status priority: retired > employed > future employment > released > unemployed.
    - Injured/suspended interactions across wrestlers/managers/referees/tag teams.
    - Bookable competitors: wrestlers/tag teams.
@@ -342,6 +343,7 @@ High-value Ringside candidates:
    - Managers explicitly not bookable.
 
 3. **INF-56-P1-C: Add high-level feature workflows for core promoter jobs**
+   - Initial event → title match booking → result workflow coverage is now present; expand to non-title matches, tag teams, and additional promoter paths.
    - Create roster member → employ/suspend/retire/reinstate.
    - Create tag team from wrestlers → book into event match.
    - Create event at venue → add match → assign competitors/referees/title → record result.
