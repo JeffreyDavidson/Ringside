@@ -3,7 +3,7 @@
 **Issue:** INF-56 — Ringside: testing architecture and quality audit  
 **Repo/branch audited:** `/Users/jeffreydavidson/.openclaw/workspace/ringside-app` on `develop`
 **Audit date:** 2026-05-13  
-**Updated:** 2026-05-15 after INF-62 Laravel 13 baseline alignment  
+**Updated:** 2026-09-15 after browser workflow coverage and scaffold replacement
 **Standard:** `/Users/jeffreydavidson/.openclaw/workspace/docs/testing-quality-standard.md`
 
 
@@ -17,6 +17,7 @@ What changed after the original audit:
 - CI/PCOV now target Laravel 13 and use `composer install` against the committed dependency set instead of `composer require laravel/framework:12.*` during CI.
 - Local verification can boot far enough to run the Pest suite under Laravel 13.
 - The current repository checks are green for the maintained Laravel 13 baseline; the failure buckets below describe historical audit findings and remain useful follow-up coverage targets.
+- Browser coverage now includes login, dashboard, match results, event match booking, and an event-list smoke path.
 
 Follow-up tickets created from the exposed failure buckets:
 
@@ -58,7 +59,7 @@ Current `*Test.php` files by top-level suite/path:
 | `tests/Unit` | 130 |
 | `tests/Integration` | 121 |
 | `tests/Feature` | 44 |
-| `tests/Browser` | 3 |
+| `tests/Browser` | 5 |
 | Root Architecture test | 1 |
 | **Total** | **299** |
 
@@ -88,8 +89,6 @@ Notable missing 1:1 areas by production path:
 
 Representative missing/high-value paths:
 
-- `app/Actions/Matches/AddRefereesToMatchAction.php`
-- `app/Actions/Matches/AddTagTeamsToMatchAction.php`
 - Most `app/Actions/Stables/*` beyond lifecycle/retire/split coverage
 - Most `app/Actions/Titles/*` beyond activate/create/update coverage
 - All `app/Services/*`
@@ -270,12 +269,12 @@ High-value Ringside candidates:
 |---|---|---|
 | Wrestlers | Strong model/action/workflow/table coverage | Browser coverage; true unit tests for computed status edge cases; contracts/bookability across matches |
 | Managers | Strong action and table coverage | Manager assignment service coverage; workflow assertions should prove actual assignment behavior |
-| Referees | Good action/table coverage | Match officiating/bookable official rules and `AddRefereesToMatchAction` missing |
-| Tag teams | Good employment/action/model coverage | Add-to-match action missing; membership service/lifecycle service tests missing |
+| Referees | Good action/table coverage | Match officiating/bookable official rules and broader workflow assertions |
+| Tag teams | Good employment/action/model coverage | Membership service/lifecycle service tests missing |
 | Stables | Some lifecycle/retire/split coverage | Many actions missing 1:1 tests; membership/orchestrator/service coverage incomplete |
 | Titles | Some activate/create/update/model coverage | Debut/deactivate/pull/reinstate/retire/unretire/delete coverage incomplete; championship summaries/snapshots missing |
-| Events | Workflow + lifecycle coverage | Create/update/delete/restore action parity; event-match booking flow needs stronger feature/browser coverage |
-| Matches | Some action/rule/dynamic UI coverage | Full match booking flow, referees/tag teams/titles/result/decision contracts, performance/query guards |
+| Events | Workflow + lifecycle coverage | Create/restore action parity and broader event-card assertions |
+| Matches | Action/rule/dynamic UI coverage | Referees/tag teams/titles/result decision contracts and performance/query guards |
 | Venues | Controller/workflow/seeder coverage | Action parity and venue-event relationship behavior needs more explicit integration coverage |
 | Contracts | Mentioned as core feature but no obvious app surface/test coverage in audited tree | Define production surface and add contract/feature/integration tests when implemented |
 | Computed status | Well represented in factories/actions/models | Need Arch/static guard that status is not stored; focused unit matrix for priority order across domains |
@@ -323,8 +322,7 @@ High-value Ringside candidates:
      - missing `Actions\Events\*` and `Actions\Venues\*`
 
 5. **INF-56-P0-E: Replace scaffold Browser test**
-   - Delete/replace `tests/Browser/ExampleTest.php`.
-   - Add at least one real smoke E2E: login → dashboard → roster list or event list.
+   - **Completed:** `tests/Browser/ExampleTest.php` now covers an administrator loading the event list and seeing a scheduled event.
 
 ### P1 — High-value hardening
 
@@ -447,4 +445,4 @@ tests/
 
 ## Immediate Next Action
 
-First finish the Laravel 13 baseline follow-ups from INF-62: **INF-103**, **INF-104**, **INF-105**, and **INF-106**. Then start **P0-B** (Architecture cleanup + mirror enforcement) and **P0-D** (critical action parity). That sequence keeps the baseline truthful before adding stricter guardrails.
+The Laravel 13 baseline checks are green and the browser scaffold replacement is complete. Next reconcile the historical INF-103–106 findings, then continue **P0-B** (Architecture cleanup + mirror enforcement) and **P0-D** with the remaining event/venue action parity gaps. This keeps the audit aligned with the maintained code before adding stricter guardrails.
