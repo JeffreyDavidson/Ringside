@@ -45,6 +45,7 @@ class FormModal extends BaseFormModal
         $this->form->start_date = $this->generateOptionalStartDate('Y-m-d', 0.6, '-1 year', 'now');
     }
 
+    #[\Override]
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {

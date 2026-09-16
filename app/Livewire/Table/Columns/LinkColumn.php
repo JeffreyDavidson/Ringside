@@ -27,6 +27,7 @@ class LinkColumn extends Column
         return $this;
     }
 
+    #[\Override]
     public function resolveValue(mixed $row): string
     {
         $title = $this->titleCallback ? ($this->titleCallback)($row) : '';
@@ -39,6 +40,7 @@ class LinkColumn extends Column
         return static::linkHtml($title, $location);
     }
 
+    #[\Override]
     public function isHtml(): bool
     {
         return true;

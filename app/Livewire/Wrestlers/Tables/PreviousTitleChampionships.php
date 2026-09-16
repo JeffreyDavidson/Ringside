@@ -17,10 +17,12 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
      * Wrestler to use for component.
      */
     #[Locked]
-    public ?int $wrestlerId;
+    public ?int $wrestlerId = null;
 
+    #[\Override]
     public string $databaseTableName = 'titles_championships';
 
+    #[\Override]
     protected string $resourceName = 'title championships';
 
     /** @return TitleChampionshipBuilder<TitleChampionship> */
@@ -33,6 +35,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             ->forPreviousHistory();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();

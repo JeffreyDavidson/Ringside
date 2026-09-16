@@ -17,7 +17,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
      * Tag Team to use for component.
      */
     #[Locked]
-    public ?int $tagTeamId;
+    public ?int $tagTeamId = null;
 
     /** @return TitleChampionshipBuilder<TitleChampionship> */
     public function builder(): TitleChampionshipBuilder
@@ -29,6 +29,7 @@ class PreviousTitleChampionships extends BasePreviousTitleChampionshipsTable
             ->forPreviousHistory();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();

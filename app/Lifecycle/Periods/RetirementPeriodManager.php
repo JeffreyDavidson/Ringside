@@ -10,7 +10,7 @@ use App\Models\Contracts\Retirable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-final class RetirementPeriodManager
+final readonly class RetirementPeriodManager
 {
     public function __construct(private LifecyclePeriodWriter $periodWriter) {}
 

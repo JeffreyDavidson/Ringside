@@ -36,12 +36,16 @@ class Main extends BaseTable
     use ExecutesBusinessActions;
     use ExecutesRosterActions;
 
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'managers';
 
+    #[\Override]
     protected string $routeBasePath = 'managers';
 
+    #[\Override]
     protected string $resourceName = 'managers';
 
     /**
@@ -80,6 +84,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
         return [

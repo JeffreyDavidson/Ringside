@@ -27,7 +27,7 @@ class PreviousTagTeams extends DataTableComponent
     protected string $databaseTableName = 'stables_tag_teams';
 
     #[Locked]
-    public ?int $stableId;
+    public ?int $stableId = null;
 
     protected RosterResourceRouteResolver $routeResolver;
 

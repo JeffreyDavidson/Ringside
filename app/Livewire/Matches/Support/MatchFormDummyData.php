@@ -11,9 +11,9 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 
-final class MatchFormDummyData
+final readonly class MatchFormDummyData
 {
-    public function __construct(private readonly RosterBookingEligibility $bookingEligibility) {}
+    public function __construct(private RosterBookingEligibility $bookingEligibility) {}
 
     public function fill(CreateEditForm $form): void
     {

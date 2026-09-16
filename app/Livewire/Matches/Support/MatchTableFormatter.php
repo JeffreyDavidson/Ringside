@@ -10,7 +10,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Support\Collection;
 
-final class MatchTableFormatter
+final readonly class MatchTableFormatter
 {
     public function __construct(private MatchCompetitorRouteResolver $routeResolver) {}
 

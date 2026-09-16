@@ -16,12 +16,16 @@ use Illuminate\Support\Facades\Gate;
 /** @extends BaseTable<User> */
 class Main extends BaseTable
 {
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'users';
 
+    #[\Override]
     protected string $routeBasePath = 'users';
 
+    #[\Override]
     protected string $resourceName = 'users';
 
     /** @return UserBuilder<User> */
@@ -58,6 +62,7 @@ class Main extends BaseTable
     }
 
     /** @return array<int, Filter> */
+    #[\Override]
     public function filters(): array
     {
         return [

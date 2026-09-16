@@ -31,12 +31,16 @@ class Main extends BaseTable
     use ExecutesBusinessActions;
     use PresentsVenuesList;
 
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'events';
 
+    #[\Override]
     protected string $routeBasePath = 'events';
 
+    #[\Override]
     protected string $resourceName = 'events';
 
     /**
@@ -83,6 +87,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
         return [

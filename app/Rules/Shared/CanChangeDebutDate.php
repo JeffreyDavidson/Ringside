@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 
 class CanChangeDebutDate implements ValidationRule
 {
-    public function __construct(private Title|Stable|null $model) {}
+    public function __construct(private readonly Title|Stable|null $model) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

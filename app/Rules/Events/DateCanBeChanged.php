@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Date;
 
 class DateCanBeChanged implements ValidationRule
 {
-    public function __construct(private ?Event $event) {}
+    public function __construct(private readonly ?Event $event) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

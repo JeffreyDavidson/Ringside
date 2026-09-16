@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-final class LifecyclePeriodWriter
+final readonly class LifecyclePeriodWriter
 {
     public function __construct(private RecordLifecycleTransitionAction $recordLifecycleTransition) {}
 

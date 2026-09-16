@@ -34,10 +34,13 @@ class FormModal extends BaseFormModal
     use PresentsTitlesList;
     use PresentsWrestlersList;
 
+    #[\Override]
     protected ?string $createdEventName = 'matchCreated';
 
+    #[\Override]
     protected ?string $updatedEventName = 'matchUpdated';
 
+    #[\Override]
     protected bool $resetFormAfterSubmission = true;
 
     #[Locked]
@@ -51,6 +54,7 @@ class FormModal extends BaseFormModal
 
     private UpdateMatchAction $updateMatchAction;
 
+    #[\Override]
     public function mount(int|string|null $modelId = null, ?int $eventId = null): void
     {
         if ($eventId !== null) {
@@ -75,6 +79,7 @@ class FormModal extends BaseFormModal
         return EventMatch::class;
     }
 
+    #[\Override]
     protected function storeForm(): bool
     {
         $this->form->validate();
@@ -121,6 +126,7 @@ class FormModal extends BaseFormModal
         $this->dummyData->fill($this->form);
     }
 
+    #[\Override]
     public function getModalTitle(): string
     {
         return $this->form->isEditing() ? 'Edit Match' : 'Create Match';

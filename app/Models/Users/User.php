@@ -61,6 +61,7 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+    #[\Override]
     protected $attributes = [
         'status' => UserStatus::Unverified->value,
     ];
@@ -70,6 +71,7 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

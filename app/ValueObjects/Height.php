@@ -16,7 +16,7 @@ use InvalidArgumentException;
  * Height is stored as feet and inches since this is the standard format
  * used in professional wrestling.
  */
-readonly class Height implements Castable
+readonly class Height implements Castable, \Stringable
 {
     /**
      * Create a new Height instance.

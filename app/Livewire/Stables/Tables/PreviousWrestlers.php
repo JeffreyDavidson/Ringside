@@ -27,7 +27,7 @@ class PreviousWrestlers extends DataTableComponent
     protected string $databaseTableName = 'stables_wrestlers';
 
     #[Locked]
-    public ?int $stableId;
+    public ?int $stableId = null;
 
     protected RosterResourceRouteResolver $routeResolver;
 

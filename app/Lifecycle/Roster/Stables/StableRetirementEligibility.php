@@ -11,9 +11,9 @@ use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-final class StableRetirementEligibility
+final readonly class StableRetirementEligibility
 {
-    public function __construct(private readonly StableFormerMemberEligibility $formerMemberEligibility) {}
+    public function __construct(private StableFormerMemberEligibility $formerMemberEligibility) {}
 
     public function canRetire(Stable $stable): bool
     {

@@ -8,9 +8,9 @@ use App\Enums\Shared\EmploymentStatus;
 use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-final class IndividualRosterBookingStrategy implements RosterBookingStrategy
+final readonly class IndividualRosterBookingStrategy implements RosterBookingStrategy
 {
-    public function __construct(private readonly Wrestler|Referee $individual) {}
+    public function __construct(private Wrestler|Referee $individual) {}
 
     public function allows(): bool
     {

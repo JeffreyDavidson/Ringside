@@ -18,8 +18,9 @@ class PreviousStables extends BasePreviousStablesTable
      * Wrestler to use for component.
      */
     #[Locked]
-    public ?int $wrestlerId;
+    public ?int $wrestlerId = null;
 
+    #[\Override]
     protected string $databaseTableName = 'stables';
 
     /**

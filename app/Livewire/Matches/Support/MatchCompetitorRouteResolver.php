@@ -8,9 +8,9 @@ use App\Livewire\Support\RosterResourceRouteResolver;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-final class MatchCompetitorRouteResolver
+final readonly class MatchCompetitorRouteResolver
 {
-    public function __construct(private readonly RosterResourceRouteResolver $routeResolver) {}
+    public function __construct(private RosterResourceRouteResolver $routeResolver) {}
 
     public function link(Wrestler|TagTeam $competitor): string
     {

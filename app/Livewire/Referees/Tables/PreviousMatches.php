@@ -17,7 +17,7 @@ class PreviousMatches extends BasePreviousMatchesTable
      * Referee to use for component.
      */
     #[Locked]
-    public ?int $refereeId;
+    public ?int $refereeId = null;
 
     /** @return EventMatchBuilder<EventMatch> */
     public function builder(): EventMatchBuilder
@@ -29,6 +29,7 @@ class PreviousMatches extends BasePreviousMatchesTable
             ->forRefereeId($refereeId);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();

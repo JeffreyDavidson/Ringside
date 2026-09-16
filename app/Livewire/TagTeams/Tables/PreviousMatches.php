@@ -17,7 +17,7 @@ class PreviousMatches extends BasePreviousMatchesTable
      * Tag Team to use for component.
      */
     #[Locked]
-    public ?int $tagTeamId;
+    public ?int $tagTeamId = null;
 
     /** @return EventMatchBuilder<EventMatch> */
     public function builder(): EventMatchBuilder
@@ -29,6 +29,7 @@ class PreviousMatches extends BasePreviousMatchesTable
             ->forTagTeamId($tagTeamId);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();

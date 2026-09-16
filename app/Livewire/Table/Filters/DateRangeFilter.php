@@ -67,6 +67,7 @@ class DateRangeFilter extends Filter
      *
      * @param  Builder<*>  $builder
      */
+    #[\Override]
     public function apply(Builder $builder, mixed $value): void
     {
         if (! is_array($value)) {

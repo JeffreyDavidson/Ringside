@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-final class DeletionStateManager
+final readonly class DeletionStateManager
 {
     public function __construct(private RecordLifecycleTransitionAction $recordLifecycleTransition) {}
 

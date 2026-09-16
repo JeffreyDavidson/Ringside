@@ -12,9 +12,9 @@ use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 use App\Support\ConsecutiveIntegerSequence;
 
-final class MatchEliminationRequirement
+final readonly class MatchEliminationRequirement
 {
-    public function __construct(private readonly ConsecutiveIntegerSequence $sequence) {}
+    public function __construct(private ConsecutiveIntegerSequence $sequence) {}
 
     /**
      * @param  MatchCompetitorsCollection<int, MatchCompetitor>  $competitors

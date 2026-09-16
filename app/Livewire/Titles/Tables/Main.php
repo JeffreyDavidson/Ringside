@@ -30,12 +30,16 @@ class Main extends BaseTable
 {
     use ExecutesBusinessActions;
 
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'titles';
 
+    #[\Override]
     protected string $routeBasePath = 'titles';
 
+    #[\Override]
     protected string $resourceName = 'titles';
 
     /** @return TitleBuilder<Title> */
@@ -69,6 +73,7 @@ class Main extends BaseTable
     }
 
     /** @return array<int, Filter> */
+    #[\Override]
     public function filters(): array
     {
         return [

@@ -23,6 +23,6 @@ class WeightCast implements CastsAttributes
             return $value->toPounds();
         }
 
-        return (new Weight(Arr::integer(['value' => $value], 'value')))->toPounds();
+        return new Weight(Arr::integer(['value' => $value], 'value'))->toPounds();
     }
 }

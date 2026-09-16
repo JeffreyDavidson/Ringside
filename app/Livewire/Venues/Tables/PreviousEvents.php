@@ -21,7 +21,7 @@ class PreviousEvents extends DataTableComponent
     use ShowTableTrait;
 
     #[Locked]
-    public ?int $venueId;
+    public ?int $venueId = null;
 
     protected string $databaseTableName = 'events';
 

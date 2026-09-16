@@ -50,6 +50,7 @@ class FormModal extends BaseFormModal
         $this->form->preview = Str::of(fake()->text())->value();
     }
 
+    #[\Override]
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {

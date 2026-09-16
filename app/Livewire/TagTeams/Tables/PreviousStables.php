@@ -14,10 +14,11 @@ use Livewire\Attributes\Locked;
 /** @extends BasePreviousStablesTable<Stable> */
 class PreviousStables extends BasePreviousStablesTable
 {
+    #[\Override]
     protected string $databaseTableName = 'stables';
 
     #[Locked]
-    public ?int $tagTeamId;
+    public ?int $tagTeamId = null;
 
     /**
      * @return StableBuilder<Stable>

@@ -14,13 +14,14 @@ use Livewire\Attributes\Locked;
 /** @extends BasePreviousManagersTable<TagTeamManager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
+    #[\Override]
     protected string $databaseTableName = 'tag_teams_managers';
 
     /**
      * Tag Team to use for component.
      */
     #[Locked]
-    public ?int $tagTeamId;
+    public ?int $tagTeamId = null;
 
     /** @return ManagerAssignmentBuilder<TagTeamManager> */
     public function builder(): ManagerAssignmentBuilder

@@ -34,7 +34,7 @@ class PhoneNumberCast implements CastsAttributes, SerializesCastableAttributes
             return $value->toDigits();
         }
 
-        return (new PhoneNumber($value))->toDigits();
+        return new PhoneNumber($value)->toDigits();
     }
 
     public function serialize(Model $model, string $key, mixed $value, array $attributes): ?string

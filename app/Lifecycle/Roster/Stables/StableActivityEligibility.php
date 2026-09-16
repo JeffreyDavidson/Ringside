@@ -15,11 +15,11 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Roster\Stables\StableMembershipService;
 
-final class StableActivityEligibility
+final readonly class StableActivityEligibility
 {
     public function __construct(
-        private readonly StableFormerMemberEligibility $formerMemberEligibility,
-        private readonly StableMembershipService $membershipService,
+        private StableFormerMemberEligibility $formerMemberEligibility,
+        private StableMembershipService $membershipService,
     ) {}
 
     public function allows(Stable $stable, StableActivityTransition $transition): bool

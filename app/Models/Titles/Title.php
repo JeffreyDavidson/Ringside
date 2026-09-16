@@ -115,6 +115,7 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\DB;
 class UpdateMatchAction
 {
     public function __construct(
-        private AddRefereesToMatchAction $addRefereesToMatchAction,
-        private AddTitlesToMatchAction $addTitlesToMatchAction,
-        private AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
-        private MatchConfigurationRequirements $requirements,
+        private readonly AddRefereesToMatchAction $addRefereesToMatchAction,
+        private readonly AddTitlesToMatchAction $addTitlesToMatchAction,
+        private readonly AddCompetitorsToMatchAction $addCompetitorsToMatchAction,
+        private readonly MatchConfigurationRequirements $requirements,
     ) {}
 
     public function handle(EventMatch $match, EventMatchData $data): EventMatch

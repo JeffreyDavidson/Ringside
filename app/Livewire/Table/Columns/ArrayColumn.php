@@ -62,6 +62,7 @@ class ArrayColumn extends Column
         return $this;
     }
 
+    #[\Override]
     public function resolveValue(mixed $row): string
     {
         $items = $this->dataCallback
@@ -80,6 +81,7 @@ class ArrayColumn extends Column
         return $items->implode($this->separator);
     }
 
+    #[\Override]
     public function isHtml(): bool
     {
         return true;

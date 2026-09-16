@@ -12,9 +12,9 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Services\Roster\Stables\StableMembershipService;
 
-final class StableRestructuringEligibility
+final readonly class StableRestructuringEligibility
 {
-    public function __construct(private readonly StableMembershipService $membershipService) {}
+    public function __construct(private StableMembershipService $membershipService) {}
 
     public function canSplit(Stable $stable): bool
     {

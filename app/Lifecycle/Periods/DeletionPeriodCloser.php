@@ -11,13 +11,13 @@ use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-final class DeletionPeriodCloser
+final readonly class DeletionPeriodCloser
 {
     public function __construct(
-        private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly InjuryPeriodManager $injuryPeriods,
-        private readonly RetirementPeriodManager $retirementPeriods,
-        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private EmploymentPeriodManager $employmentPeriods,
+        private InjuryPeriodManager $injuryPeriods,
+        private RetirementPeriodManager $retirementPeriods,
+        private SuspensionPeriodManager $suspensionPeriods,
     ) {}
 
     /**
