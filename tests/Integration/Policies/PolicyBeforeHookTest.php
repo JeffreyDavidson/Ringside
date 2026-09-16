@@ -25,16 +25,16 @@ describe('Global Gate Hook Pattern', function () {
 
     beforeEach(function () {
         $this->policies = [
-            new MatchPolicy(),
-            new EventPolicy(),
-            new ManagerPolicy(),
-            new RefereePolicy(),
-            new StablePolicy(),
-            new TagTeamPolicy(),
-            new TitlePolicy(),
-            new UserPolicy(),
-            new VenuePolicy(),
-            new WrestlerPolicy(),
+            new MatchPolicy,
+            new EventPolicy,
+            new ManagerPolicy,
+            new RefereePolicy,
+            new StablePolicy,
+            new TagTeamPolicy,
+            new TitlePolicy,
+            new UserPolicy,
+            new VenuePolicy,
+            new WrestlerPolicy,
         ];
 
         $this->admin = administrator();

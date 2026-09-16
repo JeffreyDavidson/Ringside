@@ -31,6 +31,6 @@ test('it enforces stable aliases for every polymorphic model', function () {
 });
 
 test('it rejects models without an approved polymorphic alias', function () {
-    expect(fn () => (new User())->getMorphClass())
+    expect(fn () => (new User)->getMorphClass())
         ->toThrow(ClassMorphViolationException::class);
 });

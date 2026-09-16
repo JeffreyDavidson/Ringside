@@ -11,7 +11,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 describe('individual employment eligibility', function () {
     test('keeps the employment predicate aligned with its guard', function (string $factoryState, bool $canBeEmployed) {
-        $eligibility = new IndividualEmploymentEligibility();
+        $eligibility = new IndividualEmploymentEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canEmploy($wrestler))->toBe($canBeEmployed);
@@ -34,7 +34,7 @@ describe('individual employment eligibility', function () {
     ]);
 
     test('supports each individual roster model', function (string $modelClass) {
-        $eligibility = new IndividualEmploymentEligibility();
+        $eligibility = new IndividualEmploymentEligibility;
         $individual = $modelClass::factory()->unemployed()->create();
 
         expect($eligibility->canEmploy($individual))->toBeTrue()
@@ -47,7 +47,7 @@ describe('individual employment eligibility', function () {
     ]);
 
     test('keeps the release predicate aligned with its guard', function (string $factoryState, bool $canBeReleased) {
-        $eligibility = new IndividualEmploymentEligibility();
+        $eligibility = new IndividualEmploymentEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canRelease($wrestler))->toBe($canBeReleased);

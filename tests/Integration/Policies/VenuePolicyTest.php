@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Gate;
  */
 describe('VenuePolicy Integration Tests', function () {
     beforeEach(function () {
-        $this->policy = new VenuePolicy();
+        $this->policy = new VenuePolicy;
         $this->admin = User::factory()->administrator()->make(['id' => 1]);
         $this->basicUser = User::factory()->make(['id' => 2]);
         $this->venue = Venue::factory()->make(['id' => 1]);

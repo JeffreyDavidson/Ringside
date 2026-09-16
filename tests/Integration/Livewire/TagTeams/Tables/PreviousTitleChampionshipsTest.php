@@ -20,7 +20,7 @@ beforeEach(function (): void {
 describe('PreviousTitleChampionships configuration', function (): void {
     it('requires a tag team', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousTitleChampionships())->builder())
+        expect(fn () => (new PreviousTitleChampionships)->builder())
             ->toThrow(LogicException::class, 'A tag team was not provided.');
     });
 });
@@ -52,7 +52,7 @@ describe('PreviousTitleChampionships query', function (): void {
             ->forTagTeam($otherTagTeam)
             ->ended()
             ->create();
-        $table = new PreviousTitleChampionships();
+        $table = new PreviousTitleChampionships;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act

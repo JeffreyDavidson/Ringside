@@ -17,7 +17,7 @@ test('calculates the combined wrestler weight in pounds', function () {
 });
 
 test('returns zero without wrestlers', function () {
-    $members = new TagTeamMembershipData();
+    $members = new TagTeamMembershipData;
 
     expect($members->combinedWeightInPounds())->toBe(0);
 });

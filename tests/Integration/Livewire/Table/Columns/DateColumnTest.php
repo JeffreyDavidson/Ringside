@@ -60,6 +60,6 @@ describe('date column values', function (): void {
         'integer' => [42],
         'boolean' => [false],
         'array' => [[]],
-        'non-date object' => [new stdClass()],
+        'non-date object' => [new stdClass],
     ]);
 });

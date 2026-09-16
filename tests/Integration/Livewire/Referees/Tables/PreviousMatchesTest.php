@@ -20,7 +20,7 @@ beforeEach(function (): void {
 describe('PreviousMatches configuration', function (): void {
     it('requires a referee', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousMatches())->builder())
+        expect(fn () => (new PreviousMatches)->builder())
             ->toThrow(LogicException::class, 'A referee was not provided.');
     });
 });
@@ -45,7 +45,7 @@ describe('PreviousMatches query', function (): void {
             ->for(Event::factory()->past())
             ->create();
         $otherMatch->referees()->attach($otherReferee);
-        $table = new PreviousMatches();
+        $table = new PreviousMatches;
         $table->refereeId = $this->referee->id;
 
         // Act

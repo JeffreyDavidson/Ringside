@@ -5,5 +5,5 @@ return [
 
     'validation' => [
         'employment_released' => ':name was released and the start date cannot be changed.',
-    ]
+    ],
 ];

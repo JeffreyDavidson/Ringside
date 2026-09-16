@@ -102,32 +102,32 @@ describe('IsEmployable Trait Integration Tests', function () {
 
     describe('employment status checks', function () {
         test('can check if model is employed', function () {
-            $model = new EmploymentStateModel();
+            $model = new EmploymentStateModel;
             $model->currentEmploymentExists = true;
 
             expect($model->currentEmployment()->exists())->toBeTrue();
         });
 
         test('can check if model is not employed', function () {
-            $model = new EmploymentStateModel();
+            $model = new EmploymentStateModel;
 
             expect($model->currentEmployment()->exists())->toBeFalse();
         });
 
         test('can check if model has future employment through its relationship', function () {
-            $modelWith = new EmploymentStateModel();
+            $modelWith = new EmploymentStateModel;
             $modelWith->futureEmploymentExists = true;
-            $modelWithout = new EmploymentStateModel();
+            $modelWithout = new EmploymentStateModel;
 
             expect($modelWith->futureEmployment()->exists())->toBeTrue();
             expect($modelWithout->futureEmployment()->exists())->toBeFalse();
         });
 
         test('detects the absence of current and future employment through relationships', function () {
-            $withoutEmployment = new EmploymentStateModel();
-            $currentlyEmployed = new EmploymentStateModel();
+            $withoutEmployment = new EmploymentStateModel;
+            $currentlyEmployed = new EmploymentStateModel;
             $currentlyEmployed->currentEmploymentExists = true;
-            $futureEmployment = new EmploymentStateModel();
+            $futureEmployment = new EmploymentStateModel;
             $futureEmployment->futureEmploymentExists = true;
 
             expect($withoutEmployment->currentEmployment()->exists())->toBeFalse()
@@ -137,9 +137,9 @@ describe('IsEmployable Trait Integration Tests', function () {
         });
 
         test('can check if model has employment history through its relationship', function () {
-            $modelWith = new EmploymentStateModel();
+            $modelWith = new EmploymentStateModel;
             $modelWith->employmentExists = true;
-            $modelWithout = new EmploymentStateModel();
+            $modelWithout = new EmploymentStateModel;
 
             expect($modelWith->employments()->exists())->toBeTrue();
             expect($modelWithout->employments()->exists())->toBeFalse();

@@ -30,6 +30,7 @@ class ReinstateAction
      *
      * @param  Referee  $referee  The referee to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
+     *
      * @throws CannotBeReinstatedException When referee cannot be reinstated due to business rules
      */
     public function handle(Referee $referee, ?Carbon $reinstatementDate = null): void

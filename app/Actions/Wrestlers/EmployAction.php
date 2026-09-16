@@ -33,6 +33,7 @@ class EmployAction
      *
      * @param  Wrestler  $wrestler  The wrestler to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
+     *
      * @throws CannotBeEmployedException When the wrestler cannot be employed
      */
     public function handle(Wrestler $wrestler, ?Carbon $employmentDate = null): void

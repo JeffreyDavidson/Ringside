@@ -31,12 +31,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('Stable Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $stable = new Stable();
+            $stable = new Stable;
             expect($stable->getTable())->toBe('stables');
         });
 
         test('has correct fillable properties', function () {
-            $stable = new Stable();
+            $stable = new Stable;
 
             expect($stable->getFillable())->toEqual([
                 'name',
@@ -44,12 +44,12 @@ describe('Stable Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $stable = new Stable();
+            $stable = new Stable;
             expect($stable->query())->toBeInstanceOf(StableBuilder::class);
         });
 
         test('has correct default values', function () {
-            $stable = new Stable();
+            $stable = new Stable;
             expect($stable->status)->toBe(StableStatus::Unformed);
         });
     });
@@ -65,7 +65,7 @@ describe('Stable Model Integration Tests', function () {
     });
 
     test('defines its membership relationships directly', function () {
-        $stable = new Stable();
+        $stable = new Stable;
 
         expect($stable->wrestlers())->toBeInstanceOf(BelongsToMany::class)
             ->and($stable->wrestlers()->getRelated())->toBeInstanceOf(Wrestler::class)

@@ -29,6 +29,7 @@ class EmployAction
      *
      * @param  Referee  $referee  The referee to employ
      * @param  Carbon|null  $employmentDate  The employment start date (defaults to now)
+     *
      * @throws CannotBeEmployedException When the referee cannot be employed
      */
     public function handle(Referee $referee, ?Carbon $employmentDate = null): void

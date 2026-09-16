@@ -30,6 +30,7 @@ final class ReinstateAction
      *
      * @param  Manager  $manager  The manager to reinstate
      * @param  Carbon|null  $reinstatementDate  The reinstatement date (defaults to now)
+     *
      * @throws CannotBeReinstatedException When manager cannot be reinstated due to business rules
      */
     public function handle(Manager $manager, ?Carbon $reinstatementDate = null): void

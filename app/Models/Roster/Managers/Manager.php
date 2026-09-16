@@ -45,14 +45,11 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $first_name
  * @property string $last_name
- *
  * @property-read string $full_name
- *
  * @property EmploymentStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read Employment|null $currentEmployment
  * @property-read Employment|null $firstEmployment
  * @property-read Employment|null $futureEmployment
@@ -121,7 +118,7 @@ class Manager extends Model implements Employable, Injurable, Retirable, SoftDel
     /** @return BelongsToMany<Wrestler, $this, WrestlerManager> */
     public function wrestlers(): BelongsToMany
     {
-        return $this->belongsToMany(Wrestler::class, (new WrestlerManager())->getTable())
+        return $this->belongsToMany(Wrestler::class, (new WrestlerManager)->getTable())
             ->using(WrestlerManager::class)
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps();
@@ -142,7 +139,7 @@ class Manager extends Model implements Employable, Injurable, Retirable, SoftDel
     /** @return BelongsToMany<TagTeam, $this, TagTeamManager> */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class, (new TagTeamManager())->getTable())
+        return $this->belongsToMany(TagTeam::class, (new TagTeamManager)->getTable())
             ->using(TagTeamManager::class)
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps();

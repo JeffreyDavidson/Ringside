@@ -33,6 +33,7 @@ class UnretireAction
      * @param  Manager  $manager  The manager to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
      * @param  bool  $employImmediately  Whether to employ the manager immediately
+     *
      * @throws CannotBeUnretiredException When manager cannot be unretired due to business rules
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null, bool $employImmediately = true): void

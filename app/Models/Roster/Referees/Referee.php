@@ -43,14 +43,11 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $first_name
  * @property string $last_name
- *
  * @property-read string $full_name
- *
  * @property EmploymentStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read Employment|null $currentEmployment
  * @property-read Employment|null $firstEmployment
  * @property-read Employment|null $futureEmployment

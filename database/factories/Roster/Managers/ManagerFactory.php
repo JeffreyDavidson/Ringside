@@ -8,11 +8,12 @@ use App\Models\Lifecycle\Employment;
 use App\Models\Lifecycle\Injury;
 use App\Models\Lifecycle\Retirement;
 use App\Models\Lifecycle\Suspension;
+use App\Models\Roster\Managers\Manager;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Roster\Managers\Manager>
+ * @extends Factory<Manager>
  */
 class ManagerFactory extends Factory
 {

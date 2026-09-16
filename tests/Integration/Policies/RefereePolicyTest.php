@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Gate;
 describe('RefereePolicy Integration Tests', function () {
 
     beforeEach(function () {
-        $this->policy = new RefereePolicy();
+        $this->policy = new RefereePolicy;
         $this->admin = administrator();
         $this->basicUser = basicUser();
         $this->referee = Referee::factory()->create();
@@ -188,9 +188,9 @@ describe('RefereePolicy Integration Tests', function () {
             // Referee policy should have similar methods to wrestler and manager policies
             // since they're all individual roster members
             $refereeMethods = get_class_methods($this->policy);
-            $wrestlerPolicy = new WrestlerPolicy();
+            $wrestlerPolicy = new WrestlerPolicy;
             $wrestlerMethods = get_class_methods($wrestlerPolicy);
-            $managerPolicy = new ManagerPolicy();
+            $managerPolicy = new ManagerPolicy;
             $managerMethods = get_class_methods($managerPolicy);
 
             // Should have the same basic structure as other individual roster member policies
@@ -277,8 +277,8 @@ describe('RefereePolicy Integration Tests', function () {
 
     describe('edge cases and security', function () {
         test('policy is consistent across multiple instances', function () {
-            $policy1 = new RefereePolicy();
-            $policy2 = new RefereePolicy();
+            $policy1 = new RefereePolicy;
+            $policy2 = new RefereePolicy;
 
             expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });

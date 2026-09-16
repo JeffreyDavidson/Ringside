@@ -19,7 +19,7 @@ beforeEach(function (): void {
 describe('PreviousStablesTable Configuration', function () {
     it('requires wrestler id to be set', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousStables())->builder())
+        expect(fn () => (new PreviousStables)->builder())
             ->toThrow(LogicException::class, 'A wrestler was not provided.');
     });
 

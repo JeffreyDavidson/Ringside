@@ -17,7 +17,7 @@ test('it accepts a singles title contested only by wrestlers', function () {
         'competitors' => [['wrestlers' => [$wrestler->id], 'tag_teams' => []]],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new MatchesCompetitorType()],
+        'titles.*' => [new MatchesCompetitorType],
     ]);
 
     expect($validator->passes())->toBeTrue();
@@ -31,7 +31,7 @@ test('it accepts a tag team title contested only by tag teams', function () {
         'competitors' => [['wrestlers' => [], 'tag_teams' => [$tagTeam->id]]],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new MatchesCompetitorType()],
+        'titles.*' => [new MatchesCompetitorType],
     ]);
 
     expect($validator->passes())->toBeTrue();
@@ -45,7 +45,7 @@ test('it rejects a singles title contested by tag teams', function () {
         'competitors' => [['wrestlers' => [], 'tag_teams' => [$tagTeam->id]]],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new MatchesCompetitorType()],
+        'titles.*' => [new MatchesCompetitorType],
     ]);
 
     expect($validator->errors()->first('titles.0'))
@@ -60,7 +60,7 @@ test('it rejects a tag team title contested by wrestlers', function () {
         'competitors' => [['wrestlers' => [$wrestler->id], 'tag_teams' => []]],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new MatchesCompetitorType()],
+        'titles.*' => [new MatchesCompetitorType],
     ]);
 
     expect($validator->errors()->first('titles.0'))
@@ -79,7 +79,7 @@ test('it rejects mixed competitor types for one title', function () {
         ]],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new MatchesCompetitorType()],
+        'titles.*' => [new MatchesCompetitorType],
     ]);
 
     expect($validator->errors()->has('titles.0'))->toBeTrue();
@@ -90,7 +90,7 @@ test('it safely rejects a missing title', function () {
         'competitors' => [['wrestlers' => [1], 'tag_teams' => []]],
         'titles' => [PHP_INT_MAX],
     ], [
-        'titles.*' => [new MatchesCompetitorType()],
+        'titles.*' => [new MatchesCompetitorType],
     ]);
 
     expect($validator->errors()->first('titles.0'))->toBe('The selected title is invalid.');

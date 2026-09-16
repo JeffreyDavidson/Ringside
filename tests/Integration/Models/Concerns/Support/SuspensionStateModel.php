@@ -30,13 +30,13 @@ final class SuspensionStateModel extends Model implements Suspendable
     /** @return MorphMany<Suspension, self> */
     public function suspensions(): MorphMany
     {
-        return new MorphMany($this->suspensionBuilder(false), new self(), 'suspendable_type', 'suspendable_id', 'id');
+        return new MorphMany($this->suspensionBuilder(false), new self, 'suspendable_type', 'suspendable_id', 'id');
     }
 
     /** @return MorphOne<Suspension, self> */
     private function suspensionHasOne(bool $exists): MorphOne
     {
-        return new MorphOne($this->suspensionBuilder($exists), new self(), 'suspendable_type', 'suspendable_id', 'id');
+        return new MorphOne($this->suspensionBuilder($exists), new self, 'suspendable_type', 'suspendable_id', 'id');
     }
 
     /** @return LifecycleStateBuilder<Suspension> */
@@ -45,6 +45,6 @@ final class SuspensionStateModel extends Model implements Suspendable
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
 
-        return new LifecycleStateBuilder($query, new Suspension());
+        return new LifecycleStateBuilder($query, new Suspension);
     }
 }

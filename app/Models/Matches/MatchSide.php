@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
  * @property int $position
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
  * @property-read EventMatch $match
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  *

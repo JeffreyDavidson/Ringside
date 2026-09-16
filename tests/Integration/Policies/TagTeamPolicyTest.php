@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Gate;
  */
 describe('TagTeamPolicy Integration Tests', function () {
     beforeEach(function () {
-        $this->policy = new TagTeamPolicy();
+        $this->policy = new TagTeamPolicy;
         $this->admin = User::factory()->administrator()->make(['id' => 1]);
         $this->basicUser = User::factory()->make(['id' => 2]);
         $this->tagTeam = TagTeam::factory()->make(['id' => 1]);

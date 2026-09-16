@@ -11,7 +11,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 describe('individual retirement eligibility', function () {
     test('keeps the retirement predicate aligned with its guard', function (string $factoryState, bool $canBeRetired) {
-        $eligibility = new IndividualRetirementEligibility();
+        $eligibility = new IndividualRetirementEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canRetire($wrestler))->toBe($canBeRetired);
@@ -36,7 +36,7 @@ describe('individual retirement eligibility', function () {
     ]);
 
     test('supports each individual roster model', function (string $modelClass) {
-        $eligibility = new IndividualRetirementEligibility();
+        $eligibility = new IndividualRetirementEligibility;
         $individual = $modelClass::factory()->employed()->create();
 
         expect($eligibility->canRetire($individual))->toBeTrue()
@@ -49,7 +49,7 @@ describe('individual retirement eligibility', function () {
     ]);
 
     test('rejects unretiring a deleted retired individual consistently', function () {
-        $eligibility = new IndividualRetirementEligibility();
+        $eligibility = new IndividualRetirementEligibility;
         $wrestler = Wrestler::factory()->retired()->create();
         $wrestler->delete();
 
@@ -62,7 +62,7 @@ describe('individual retirement eligibility', function () {
     });
 
     test('keeps the unretirement predicate aligned with its guard', function (string $factoryState, bool $canBeUnretired) {
-        $eligibility = new IndividualRetirementEligibility();
+        $eligibility = new IndividualRetirementEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canUnretire($wrestler))->toBe($canBeUnretired);

@@ -41,12 +41,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('Wrestler Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $wrestler = new Wrestler();
+            $wrestler = new Wrestler;
             expect($wrestler->getTable())->toBe('wrestlers');
         });
 
         test('has correct fillable properties', function () {
-            $wrestler = new Wrestler();
+            $wrestler = new Wrestler;
 
             expect($wrestler->getFillable())->toEqual([
                 'name',
@@ -58,7 +58,7 @@ describe('Wrestler Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $wrestler = new Wrestler();
+            $wrestler = new Wrestler;
             $casts = $wrestler->getCasts();
 
             expect($casts['height'])->toBe(Height::class)
@@ -68,12 +68,12 @@ describe('Wrestler Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $wrestler = new Wrestler();
+            $wrestler = new Wrestler;
             expect($wrestler->query())->toBeInstanceOf(WrestlerBuilder::class);
         });
 
         test('has correct default values', function () {
-            $wrestler = new Wrestler();
+            $wrestler = new Wrestler;
             expect($wrestler->status)->toBe(EmploymentStatus::Unemployed);
         });
     });

@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 describe('ActivityPeriod Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('has correct fillable properties', function () {
-            $activityPeriod = new ActivityPeriod();
+            $activityPeriod = new ActivityPeriod;
 
             expect($activityPeriod->getFillable())->toEqual([
                 'started_at',
@@ -29,7 +29,7 @@ describe('ActivityPeriod Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $activityPeriod = new ActivityPeriod();
+            $activityPeriod = new ActivityPeriod;
             $casts = $activityPeriod->getCasts();
 
             expect($casts)->toBeArray();
@@ -39,20 +39,20 @@ describe('ActivityPeriod Model Integration Tests', function () {
         });
 
         test('uses correct table name', function () {
-            $activityPeriod = new ActivityPeriod();
+            $activityPeriod = new ActivityPeriod;
 
             expect($activityPeriod->getTable())->toBe('activity_periods');
         });
 
         test('has correct default values', function () {
-            $activityPeriod = new ActivityPeriod();
+            $activityPeriod = new ActivityPeriod;
 
             // Model has no custom default values
             expect($activityPeriod)->toBeInstanceOf(ActivityPeriod::class);
         });
 
         test('has custom eloquent builder', function () {
-            $activityPeriod = new ActivityPeriod();
+            $activityPeriod = new ActivityPeriod;
 
             // Model has no custom builder
             expect($activityPeriod->query())->toBeObject();

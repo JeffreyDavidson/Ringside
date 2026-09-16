@@ -8,7 +8,7 @@ use App\Models\Roster\Wrestlers\WrestlerManager;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 test('manager defines typed wrestler relationships', function () {
-    $manager = new Manager();
+    $manager = new Manager;
 
     expect($manager->wrestlers())->toBeInstanceOf(BelongsToMany::class)
         ->and($manager->wrestlers()->getPivotClass())->toBe(WrestlerManager::class)
@@ -17,7 +17,7 @@ test('manager defines typed wrestler relationships', function () {
 });
 
 test('manager defines typed tag team relationships', function () {
-    $manager = new Manager();
+    $manager = new Manager;
 
     expect($manager->tagTeams())->toBeInstanceOf(BelongsToMany::class)
         ->and($manager->tagTeams()->getPivotClass())->toBe(TagTeamManager::class)

@@ -24,7 +24,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $left_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
  * @property-read TagTeam|null $tagTeam
  * @property-read Wrestler|null $wrestler
  *

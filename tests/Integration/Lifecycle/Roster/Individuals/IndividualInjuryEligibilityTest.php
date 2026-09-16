@@ -11,7 +11,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 describe('individual injury eligibility', function () {
     test('keeps the injury predicate aligned with its guard', function (string $factoryState, bool $canBeInjured) {
-        $eligibility = new IndividualInjuryEligibility();
+        $eligibility = new IndividualInjuryEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canInjure($wrestler))->toBe($canBeInjured);
@@ -36,7 +36,7 @@ describe('individual injury eligibility', function () {
     ]);
 
     test('supports each individual roster model', function (string $modelClass) {
-        $eligibility = new IndividualInjuryEligibility();
+        $eligibility = new IndividualInjuryEligibility;
         $individual = $modelClass::factory()->employed()->create();
 
         expect($eligibility->canInjure($individual))->toBeTrue()
@@ -49,7 +49,7 @@ describe('individual injury eligibility', function () {
     ]);
 
     test('keeps the injury clearance predicate aligned with its guard', function (string $factoryState, bool $canBeClearedFromInjury) {
-        $eligibility = new IndividualInjuryEligibility();
+        $eligibility = new IndividualInjuryEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canBeClearedFromInjury($wrestler))->toBe($canBeClearedFromInjury);

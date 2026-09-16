@@ -28,7 +28,7 @@ describe('IsRetirable', function () {
     });
 
     test('checks current retirement state', function () {
-        $model = new RetirementStateModel();
+        $model = new RetirementStateModel;
 
         expect($model->currentRetirement()->exists())->toBeFalse();
 

@@ -19,7 +19,7 @@ use App\Models\Roster\TagTeams\TagTeamManager;
 describe('TagTeamManager Model Integration Tests', function () {
     describe('tagTeamManager attributes and configuration', function () {
         test('tagTeamManager has correct fillable properties', function () {
-            $tagTeamManager = new TagTeamManager();
+            $tagTeamManager = new TagTeamManager;
 
             expect($tagTeamManager->getFillable())->toEqual([
                 'tag_team_id',
@@ -30,7 +30,7 @@ describe('TagTeamManager Model Integration Tests', function () {
         });
 
         test('tagTeamManager has correct casts configuration', function () {
-            $tagTeamManager = new TagTeamManager();
+            $tagTeamManager = new TagTeamManager;
             $casts = $tagTeamManager->getCasts();
 
             expect($casts)->toBeArray();
@@ -39,19 +39,19 @@ describe('TagTeamManager Model Integration Tests', function () {
         });
 
         test('tagTeamManager has custom eloquent builder', function () {
-            $tagTeamManager = new TagTeamManager();
+            $tagTeamManager = new TagTeamManager;
             // Model has no custom builder
             expect($tagTeamManager->query())->toBeObject();
         });
 
         test('tagTeamManager has correct default values', function () {
-            $tagTeamManager = new TagTeamManager();
+            $tagTeamManager = new TagTeamManager;
             // Model has no custom default values
             expect($tagTeamManager)->toBeInstanceOf(TagTeamManager::class);
         });
 
         test('tagTeamManager uses correct table name', function () {
-            $tagTeamManager = new TagTeamManager();
+            $tagTeamManager = new TagTeamManager;
             expect($tagTeamManager->getTable())->toBe('tag_teams_managers');
         });
     });

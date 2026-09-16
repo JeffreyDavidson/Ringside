@@ -21,7 +21,7 @@ beforeEach(function (): void {
 describe('PreviousStables configuration', function (): void {
     it('requires a manager', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousStables())->builder())
+        expect(fn () => (new PreviousStables)->builder())
             ->toThrow(LogicException::class, 'A manager was not provided.');
     });
 });
@@ -63,7 +63,7 @@ describe('PreviousStables query', function (): void {
         $tagTeam->managers()->attach($this->manager, [
             'hired_at' => Date::now()->subMonths(5),
         ]);
-        $table = new PreviousStables();
+        $table = new PreviousStables;
         $table->managerId = $this->manager->id;
 
         // Act

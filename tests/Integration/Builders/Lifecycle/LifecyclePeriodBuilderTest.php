@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 
 test('lifecycle period models use the shared builder', function (string $modelClass) {
     /** @var Model $model */
-    $model = new $modelClass();
+    $model = new $modelClass;
 
     expect($model->newQuery())->toBeInstanceOf(LifecyclePeriodBuilder::class);
 })->with([

@@ -25,12 +25,12 @@ use Illuminate\Support\Facades\Hash;
 describe('User Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $user = new User();
+            $user = new User;
             expect($user->getTable())->toBe('users');
         });
 
         test('has correct fillable properties', function () {
-            $user = new User();
+            $user = new User;
 
             expect($user->getFillable())->toEqual([
                 'first_name',
@@ -46,7 +46,7 @@ describe('User Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $user = new User();
+            $user = new User;
             $casts = $user->getCasts();
 
             expect($casts['role'])->toBe(Role::class);
@@ -56,12 +56,12 @@ describe('User Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $user = new User();
+            $user = new User;
             expect($user->query())->toBeInstanceOf(UserBuilder::class);
         });
 
         test('has correct default values', function () {
-            $user = new User();
+            $user = new User;
             expect($user->status)->toBe(UserStatus::Unverified);
         });
     });

@@ -31,6 +31,7 @@ class ClearFromInjuryAction
      *
      * @param  Manager  $manager  The injured manager to clear
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
+     *
      * @throws CannotBeClearedFromInjuryException When manager cannot be cleared due to business rules
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void

@@ -27,7 +27,7 @@ test('adds the authenticated user full name to the request context', function ()
     try {
         $response = resolve(AddWrestlingContext::class)->handle(
             $request,
-            fn (): Response => new Response(),
+            fn (): Response => new Response,
         );
 
         expect($response->isSuccessful())->toBeTrue()
@@ -44,7 +44,7 @@ test('adds event details for a model-bound event route', function () {
         'date' => '2026-08-17',
     ]);
     $request = Request::create('/events/123');
-    $route = new Route(['GET'], '/events/{event}', fn (): Response => new Response());
+    $route = new Route(['GET'], '/events/{event}', fn (): Response => new Response);
     $route->bind($request);
     $route->setParameter('event', $event);
     $request->setRouteResolver(fn (): Route => $route);
@@ -54,7 +54,7 @@ test('adds event details for a model-bound event route', function () {
     try {
         $response = resolve(AddWrestlingContext::class)->handle(
             $request,
-            fn (): Response => new Response(),
+            fn (): Response => new Response,
         );
 
         expect($response->isSuccessful())->toBeTrue()

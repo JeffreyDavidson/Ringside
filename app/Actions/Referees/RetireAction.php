@@ -38,6 +38,7 @@ class RetireAction
      *
      * @param  Referee  $referee  The referee to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
+     *
      * @throws CannotBeRetiredException When referee cannot be retired due to business rules
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void

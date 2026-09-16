@@ -24,7 +24,7 @@ trait HasMatchParticipations
         return $this->morphToMany(
             EventMatch::class,
             'competitor',
-            (new MatchCompetitor())->getTable(),
+            (new MatchCompetitor)->getTable(),
             'competitor_id',
             'match_id',
         )

@@ -31,7 +31,6 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $context
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
  * @property-read Model $subject
  * @property-read User|null $user
  */

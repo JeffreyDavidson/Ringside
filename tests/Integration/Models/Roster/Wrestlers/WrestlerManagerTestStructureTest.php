@@ -19,7 +19,7 @@ use App\Models\Roster\Wrestlers\WrestlerManager;
 describe('WrestlerManager Model Integration Tests', function () {
     describe('wrestlerManager attributes and configuration', function () {
         test('wrestlerManager has correct fillable properties', function () {
-            $wrestlerManager = new WrestlerManager();
+            $wrestlerManager = new WrestlerManager;
 
             expect($wrestlerManager->getFillable())->toEqual([
                 'wrestler_id',
@@ -30,7 +30,7 @@ describe('WrestlerManager Model Integration Tests', function () {
         });
 
         test('wrestlerManager has correct casts configuration', function () {
-            $wrestlerManager = new WrestlerManager();
+            $wrestlerManager = new WrestlerManager;
             $casts = $wrestlerManager->getCasts();
 
             expect($casts)->toBeArray();
@@ -39,19 +39,19 @@ describe('WrestlerManager Model Integration Tests', function () {
         });
 
         test('wrestlerManager has custom eloquent builder', function () {
-            $wrestlerManager = new WrestlerManager();
+            $wrestlerManager = new WrestlerManager;
             // Model has no custom builder
             expect($wrestlerManager->query())->toBeObject();
         });
 
         test('wrestlerManager has correct default values', function () {
-            $wrestlerManager = new WrestlerManager();
+            $wrestlerManager = new WrestlerManager;
             // Model has no custom default values
             expect($wrestlerManager)->toBeInstanceOf(WrestlerManager::class);
         });
 
         test('wrestlerManager uses correct table name', function () {
-            $wrestlerManager = new WrestlerManager();
+            $wrestlerManager = new WrestlerManager;
             expect($wrestlerManager->getTable())->toBe('wrestlers_managers');
         });
     });

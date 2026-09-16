@@ -28,7 +28,7 @@ describe('IsInjurable', function () {
     });
 
     test('checks current injury state', function () {
-        $model = new InjuryStateModel();
+        $model = new InjuryStateModel;
 
         expect($model->currentInjury()->exists())->toBeFalse();
 

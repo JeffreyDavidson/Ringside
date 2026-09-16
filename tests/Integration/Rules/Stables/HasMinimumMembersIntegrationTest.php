@@ -27,8 +27,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
     describe('member calculation logic', function () {
         test('calculates correct total with wrestlers only', function () {
             // Arrange
-            $wrestlers = new Collection([new Wrestler(), new Wrestler(), new Wrestler()]);
-            $tagTeams = new Collection();
+            $wrestlers = new Collection([new Wrestler, new Wrestler, new Wrestler]);
+            $tagTeams = new Collection;
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -45,8 +45,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('calculates correct total with tag teams only', function () {
             // Arrange - 2 tag teams = 4 members (2 each)
-            $wrestlers = new Collection();
-            $tagTeams = new Collection([new TagTeam(), new TagTeam()]);
+            $wrestlers = new Collection;
+            $tagTeams = new Collection([new TagTeam, new TagTeam]);
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -63,8 +63,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('calculates correct total with mixed members', function () {
             // Arrange - 1 wrestler + 1 tag team = 3 members
-            $wrestlers = new Collection([new Wrestler()]);
-            $tagTeams = new Collection([new TagTeam()]);
+            $wrestlers = new Collection([new Wrestler]);
+            $tagTeams = new Collection([new TagTeam]);
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -81,8 +81,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('tag team multiplication logic is correct', function () {
             // Arrange - Test that each tag team counts as exactly 2 members
-            $wrestlers = new Collection();
-            $tagTeams = new Collection([new TagTeam(), new TagTeam(), new TagTeam()]); // 3 teams = 6 members
+            $wrestlers = new Collection;
+            $tagTeams = new Collection([new TagTeam, new TagTeam, new TagTeam]); // 3 teams = 6 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -101,8 +101,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
     describe('minimum threshold validation', function () {
         test('validation fails when total is below minimum', function () {
             // Arrange - Only 2 wrestlers, need minimum 3
-            $wrestlers = new Collection([new Wrestler(), new Wrestler()]);
-            $tagTeams = new Collection();
+            $wrestlers = new Collection([new Wrestler, new Wrestler]);
+            $tagTeams = new Collection;
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -123,8 +123,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('validation passes when total equals minimum', function () {
             // Arrange - Exactly 3 members
-            $wrestlers = new Collection([new Wrestler(), new Wrestler(), new Wrestler()]);
-            $tagTeams = new Collection();
+            $wrestlers = new Collection([new Wrestler, new Wrestler, new Wrestler]);
+            $tagTeams = new Collection;
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -141,8 +141,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('validation passes when total exceeds minimum', function () {
             // Arrange - 5 wrestlers > 3 minimum
-            $wrestlers = Collection::times(5, fn (): Wrestler => new Wrestler());
-            $tagTeams = new Collection();
+            $wrestlers = Collection::times(5, fn (): Wrestler => new Wrestler);
+            $tagTeams = new Collection;
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -161,8 +161,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
     describe('error message formatting', function () {
         test('error message includes correct minimum count', function () {
             // Arrange
-            $wrestlers = new Collection([new Wrestler()]); // Only 1 member
-            $tagTeams = new Collection();
+            $wrestlers = new Collection([new Wrestler]); // Only 1 member
+            $tagTeams = new Collection;
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failMessage = '';
@@ -179,8 +179,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('error message includes actual member count', function () {
             // Arrange - 1 wrestler + 1 tag team = 3 total, but let's make it 2
-            $wrestlers = new Collection([new Wrestler()]);
-            $tagTeams = new Collection(); // Only 1 member total
+            $wrestlers = new Collection([new Wrestler]);
+            $tagTeams = new Collection; // Only 1 member total
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failMessage = '';
@@ -197,8 +197,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('error message format is consistent', function () {
             // Arrange - Test with different counts to verify format consistency
-            $wrestlers = new Collection();
-            $tagTeams = new Collection(); // 0 members
+            $wrestlers = new Collection;
+            $tagTeams = new Collection; // 0 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failMessage = '';
@@ -218,8 +218,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
     describe('edge cases and collection handling', function () {
         test('handles empty collections', function () {
             // Arrange
-            $wrestlers = new Collection();
-            $tagTeams = new Collection();
+            $wrestlers = new Collection;
+            $tagTeams = new Collection;
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCalled = false;
@@ -236,8 +236,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('handles large collections efficiently', function () {
             // Arrange - Large collections to test performance
-            $wrestlers = Collection::times(50, fn (): Wrestler => new Wrestler());
-            $tagTeams = Collection::times(25, fn (): TagTeam => new TagTeam()); // 25 tag teams = 50 members
+            $wrestlers = Collection::times(50, fn (): Wrestler => new Wrestler);
+            $tagTeams = Collection::times(25, fn (): TagTeam => new TagTeam); // 25 tag teams = 50 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
             // Total: 50 + 50 = 100 members
 
@@ -255,8 +255,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('attribute and value parameters do not affect calculation', function () {
             // Arrange
-            $wrestlers = new Collection([new Wrestler(), new Wrestler()]);
-            $tagTeams = new Collection();
+            $wrestlers = new Collection([new Wrestler, new Wrestler]);
+            $tagTeams = new Collection;
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
 
             $failCallCount = 0;
@@ -282,8 +282,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
         test('calculation logic aligns with business rules', function () {
             // Arrange - Test edge case around the minimum
-            $wrestlers = new Collection([new Wrestler()]);
-            $tagTeams = new Collection([new TagTeam()]); // 1 tag team = 2 members
+            $wrestlers = new Collection([new Wrestler]);
+            $tagTeams = new Collection([new TagTeam]); // 1 tag team = 2 members
             $rule = new HasMinimumMembers($wrestlers, $tagTeams);
             // Total: 1 + 2 = 3 members (exactly minimum)
 

@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 it('defines manager assignment relationships', function () {
-    $tagTeam = new TagTeam();
+    $tagTeam = new TagTeam;
     $managers = $tagTeam->managers();
 
     expect($managers)->toBeInstanceOf(BelongsToMany::class)
-        ->and($managers->getTable())->toBe((new TagTeamManager())->getTable())
+        ->and($managers->getTable())->toBe((new TagTeamManager)->getTable())
         ->and($managers->getPivotClass())->toBe(TagTeamManager::class)
         ->and($managers->getPivotColumns())->toContain('hired_at', 'fired_at', 'created_at', 'updated_at')
         ->and($tagTeam->currentManagers()->toRawSql())->toContain('"fired_at" is null')
@@ -22,14 +22,14 @@ it('defines manager assignment relationships', function () {
 });
 
 it('defines stable membership relationships', function () {
-    $tagTeam = new TagTeam();
+    $tagTeam = new TagTeam;
     $stables = $tagTeam->stables();
     $currentStable = $tagTeam->currentStable();
 
     expect($stables)->toBeInstanceOf(BelongsToMany::class)
         ->and($currentStable)->toBeInstanceOf(HasOneThrough::class)
         ->and($stables->getRelated())->toBeInstanceOf(Stable::class)
-        ->and($stables->getTable())->toBe((new StableTagTeam())->getTable())
+        ->and($stables->getTable())->toBe((new StableTagTeam)->getTable())
         ->and($stables->getForeignPivotKeyName())->toBe('tag_team_id')
         ->and($stables->getPivotClass())->toBe(StableTagTeam::class)
         ->and($stables->getPivotColumns())->toContain('joined_at', 'left_at', 'created_at', 'updated_at')

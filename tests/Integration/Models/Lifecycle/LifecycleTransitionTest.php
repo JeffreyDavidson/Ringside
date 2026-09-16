@@ -8,7 +8,7 @@ use App\Models\Lifecycle\LifecycleTransition;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 test('it defines the lifecycle transition persistence boundary', function () {
-    $transition = new LifecycleTransition();
+    $transition = new LifecycleTransition;
 
     expect($transition->getTable())->toBe('lifecycle_transitions')
         ->and($transition->getFillable())->toBe([

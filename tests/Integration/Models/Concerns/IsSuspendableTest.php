@@ -28,7 +28,7 @@ describe('IsSuspendable', function () {
     });
 
     test('checks current suspension state', function () {
-        $model = new SuspensionStateModel();
+        $model = new SuspensionStateModel;
 
         expect($model->currentSuspension()->exists())->toBeFalse();
 

@@ -23,7 +23,7 @@ beforeEach(function (): void {
 describe('PreviousTitleChampionships configuration', function (): void {
     it('requires a title', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousTitleChampionships())->builder())
+        expect(fn () => (new PreviousTitleChampionships)->builder())
             ->toThrow(LogicException::class, 'A title was not provided.');
     });
 
@@ -33,7 +33,7 @@ describe('PreviousTitleChampionships configuration', function (): void {
             'won_at' => '2025-01-01',
             'lost_at' => '2025-01-11',
         ]);
-        $table = new PreviousTitleChampionships();
+        $table = new PreviousTitleChampionships;
         $table->boot(app(RosterResourceRouteResolver::class));
 
         // Act
@@ -57,7 +57,7 @@ describe('PreviousTitleChampionships query', function (): void {
         ]);
         TitleChampionship::factory()->for($this->title)->current()->create();
         TitleChampionship::factory()->ended()->create();
-        $table = new PreviousTitleChampionships();
+        $table = new PreviousTitleChampionships;
         $table->titleId = $this->title->id;
 
         // Act

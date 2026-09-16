@@ -20,7 +20,7 @@ beforeEach(function (): void {
 describe('PreviousTagTeams configuration', function (): void {
     it('requires a stable', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousTagTeams())->builder())
+        expect(fn () => (new PreviousTagTeams)->builder())
             ->toThrow(LogicException::class, 'A stable was not provided.');
     });
 });
@@ -59,7 +59,7 @@ describe('PreviousTagTeams query', function (): void {
             'left_at' => Date::now()->subDay(),
         ]);
 
-        $table = new PreviousTagTeams();
+        $table = new PreviousTagTeams;
         $table->stableId = $this->stable->id;
 
         // Act

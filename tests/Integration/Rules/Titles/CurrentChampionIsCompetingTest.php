@@ -21,7 +21,7 @@ test('it rejects a title when its current wrestler champion is not competing', f
         ],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new CurrentChampionIsCompeting()],
+        'titles.*' => [new CurrentChampionIsCompeting],
     ]);
 
     expect($validator->errors()->has('titles.0'))->toBeTrue();
@@ -38,7 +38,7 @@ test('it accepts a title when its current wrestler champion is competing', funct
         ],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new CurrentChampionIsCompeting()],
+        'titles.*' => [new CurrentChampionIsCompeting],
     ]);
 
     expect($validator->passes())->toBeTrue();
@@ -55,7 +55,7 @@ test('it accepts a title when its current tag team champion is competing', funct
         ],
         'titles' => [(string) $title->id],
     ], [
-        'titles.*' => [new CurrentChampionIsCompeting()],
+        'titles.*' => [new CurrentChampionIsCompeting],
     ]);
 
     expect($validator->passes())->toBeTrue();
@@ -68,7 +68,7 @@ test('it accepts a vacant title', function () {
         'competitors' => [],
         'titles' => [$title->id],
     ], [
-        'titles.*' => [new CurrentChampionIsCompeting()],
+        'titles.*' => [new CurrentChampionIsCompeting],
     ]);
 
     expect($validator->passes())->toBeTrue();

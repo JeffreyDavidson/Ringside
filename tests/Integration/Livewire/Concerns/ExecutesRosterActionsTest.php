@@ -85,7 +85,7 @@ describe('roster action execution', function (): void {
         $execute = fn () => $component->execute(
             RosterLifecycleAction::Injure,
             RosterEntityType::TagTeam,
-            new TagTeam(),
+            new TagTeam,
         );
 
         // Act / Assert

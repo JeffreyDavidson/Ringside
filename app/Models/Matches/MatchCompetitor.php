@@ -34,7 +34,6 @@ use Illuminate\Support\Carbon;
  * @property int|null $eliminated_by_match_competitor_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- *
  * @property-read Wrestler|TagTeam $competitor
  * @property-read MatchSide $side
  * @property-read MatchCompetitor|null $eliminatedBy

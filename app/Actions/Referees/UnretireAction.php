@@ -33,6 +33,7 @@ class UnretireAction
      *
      * @param  Referee  $referee  The referee to unretire
      * @param  Carbon|null  $unretiredDate  The unretirement date (defaults to now)
+     *
      * @throws CannotBeUnretiredException When referee cannot be unretired due to business rules
      */
     public function handle(Referee $referee, ?Carbon $unretiredDate = null): void

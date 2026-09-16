@@ -18,7 +18,7 @@ describe('match competitor form state', function (): void {
         $sides = $match->sides()
             ->with('competitors.competitor')
             ->get();
-        $mapper = new MatchCompetitorStateMapper();
+        $mapper = new MatchCompetitorStateMapper;
 
         // Act
         $competitors = $mapper->fromSides($sides, false);
@@ -39,7 +39,7 @@ describe('match competitor form state', function (): void {
         $sides = $match->sides()
             ->with('competitors.competitor')
             ->get();
-        $mapper = new MatchCompetitorStateMapper();
+        $mapper = new MatchCompetitorStateMapper;
 
         // Act
         $competitors = $mapper->fromSides($sides, true);

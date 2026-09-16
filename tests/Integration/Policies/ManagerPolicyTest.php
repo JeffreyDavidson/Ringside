@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Gate;
 describe('ManagerPolicy Integration Tests', function () {
 
     beforeEach(function () {
-        $this->policy = new ManagerPolicy();
+        $this->policy = new ManagerPolicy;
         $this->admin = administrator();
         $this->basicUser = basicUser();
         $this->manager = Manager::factory()->create();
@@ -184,7 +184,7 @@ describe('ManagerPolicy Integration Tests', function () {
             // Manager policy should have similar methods to wrestler policy
             // since they're both individual roster members
             $managerMethods = get_class_methods($this->policy);
-            $wrestlerPolicy = new WrestlerPolicy();
+            $wrestlerPolicy = new WrestlerPolicy;
             $wrestlerMethods = get_class_methods($wrestlerPolicy);
 
             // Should have the same basic structure
@@ -249,8 +249,8 @@ describe('ManagerPolicy Integration Tests', function () {
 
     describe('edge cases and security', function () {
         test('policy is consistent across multiple instances', function () {
-            $policy1 = new ManagerPolicy();
-            $policy2 = new ManagerPolicy();
+            $policy1 = new ManagerPolicy;
+            $policy2 = new ManagerPolicy;
 
             expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });

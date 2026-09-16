@@ -25,12 +25,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('Title Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $title = new Title();
+            $title = new Title;
             expect($title->getTable())->toBe('titles');
         });
 
         test('has correct fillable properties', function () {
-            $title = new Title();
+            $title = new Title;
 
             expect($title->getFillable())->toEqual([
                 'name',
@@ -39,7 +39,7 @@ describe('Title Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $title = new Title();
+            $title = new Title;
             $casts = $title->getCasts();
 
             expect($casts['type'])->toBe(TitleType::class);
@@ -47,12 +47,12 @@ describe('Title Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $title = new Title();
+            $title = new Title;
             expect($title->query())->toBeInstanceOf(TitleBuilder::class);
         });
 
         test('has correct default values', function () {
-            $title = new Title();
+            $title = new Title;
             expect($title->status)->toBe(TitleStatus::Undebuted);
         });
 
@@ -99,7 +99,7 @@ describe('Title Model Integration Tests', function () {
 
     describe('business logic methods', function () {
         test('has required relationship methods', function () {
-            $title = new Title();
+            $title = new Title;
 
             // Title model has standard Eloquent relationships but no custom business methods
             expect($title)->toBeInstanceOf(Title::class);

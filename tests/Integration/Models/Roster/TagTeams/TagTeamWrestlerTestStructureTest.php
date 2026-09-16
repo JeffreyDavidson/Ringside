@@ -6,7 +6,7 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 test('defines its pivot persistence metadata', function () {
-    $membership = new TagTeamWrestler();
+    $membership = new TagTeamWrestler;
 
     expect($membership)->toBeInstanceOf(Pivot::class)
         ->and($membership->getTable())->toBe('tag_teams_wrestlers')

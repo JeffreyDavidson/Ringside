@@ -27,7 +27,7 @@ describe('select filter application', function (): void {
     test('empty selections leave queries unchanged without invoking callbacks', function (?string $selection): void {
         // Arrange
         $user = User::factory()->create();
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $filter = SelectFilter::make('Role')->filter(
             fn (): never => throw new LogicException('Empty selections must not invoke the callback.'),
         );
@@ -49,7 +49,7 @@ describe('select filter application', function (): void {
         User::factory()->create([
             'role' => $role === Role::Administrator ? Role::Basic : Role::Administrator,
         ]);
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $filter = SelectFilter::make('Role')->filter(
             /** @param Builder<User> $query */
             function (Builder $query, string $value): void {
@@ -71,7 +71,7 @@ describe('select filter application', function (): void {
     test('selections leave queries unchanged without a callback', function (): void {
         // Arrange
         $user = User::factory()->basicUser()->create();
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $filter = SelectFilter::make('Role');
 
         // Act

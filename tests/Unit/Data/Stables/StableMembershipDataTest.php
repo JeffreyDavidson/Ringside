@@ -16,7 +16,7 @@ it('counts individual wrestlers as one and tag teams as two', function () {
 });
 
 it('reports whether the payload contains members', function () {
-    $emptyMembers = new StableMembershipData();
+    $emptyMembers = new StableMembershipData;
     $members = new StableMembershipData(wrestlers: Wrestler::factory()->count(1)->make());
 
     expect($emptyMembers->isEmpty())->toBeTrue()

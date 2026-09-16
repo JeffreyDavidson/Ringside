@@ -295,7 +295,7 @@ describe('stables table metadata', function (): void {
 
         Stable::factory()->active()->trashed()->create();
 
-        $table = new Main();
+        $table = new Main;
 
         // Act
         $metadata = $table->metadata();

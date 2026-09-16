@@ -68,7 +68,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read Employment|null $currentEmployment
  * @property-read Employment|null $firstEmployment
  * @property-read Employment|null $futureEmployment
@@ -134,7 +133,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     /** @return BelongsToMany<Manager, $this, WrestlerManager> */
     public function managers(): BelongsToMany
     {
-        return $this->belongsToMany(Manager::class, (new WrestlerManager())->getTable())
+        return $this->belongsToMany(Manager::class, (new WrestlerManager)->getTable())
             ->using(WrestlerManager::class)
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps();
@@ -157,7 +156,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     {
         return $this->belongsToMany(
             Stable::class,
-            (new StableWrestler())->getTable(),
+            (new StableWrestler)->getTable(),
             'wrestler_id',
             'stable_id',
         )
@@ -176,7 +175,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
             'id',
             'id',
             'stable_id',
-        )->whereNull((new StableWrestler())->qualifyColumn('left_at'));
+        )->whereNull((new StableWrestler)->qualifyColumn('left_at'));
     }
 
     /** @return BelongsToMany<Stable, $this, StableWrestler> */
@@ -190,7 +189,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
      */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class, (new TagTeamWrestler())->getTable(), 'wrestler_id', 'tag_team_id')
+        return $this->belongsToMany(TagTeam::class, (new TagTeamWrestler)->getTable(), 'wrestler_id', 'tag_team_id')
             ->withPivot(['joined_at', 'left_at'])
             ->using(TagTeamWrestler::class)
             ->withTimestamps();
@@ -216,7 +215,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
             'id',
             'id',
             'tag_team_id',
-        )->whereNull((new TagTeamWrestler())->qualifyColumn('left_at'));
+        )->whereNull((new TagTeamWrestler)->qualifyColumn('left_at'));
     }
 
     /**
@@ -232,8 +231,8 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
             'id',
             'tag_team_id',
         )
-            ->whereNotNull((new TagTeamWrestler())->qualifyColumn('left_at'))
-            ->latest((new TagTeamWrestler())->qualifyColumn('left_at'));
+            ->whereNotNull((new TagTeamWrestler)->qualifyColumn('left_at'))
+            ->latest((new TagTeamWrestler)->qualifyColumn('left_at'));
     }
 
     /**

@@ -41,7 +41,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read Collection<int, LifecycleTransition> $lifecycleTransitions
  * @property-read Retirement|null $currentRetirement
  * @property-read Retirement|null $previousRetirement
@@ -99,7 +98,7 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
     /** @return BelongsToMany<Wrestler, $this, StableWrestler, 'pivot'> */
     public function wrestlers(): BelongsToMany
     {
-        return $this->belongsToMany(Wrestler::class, (new StableWrestler())->getTable())
+        return $this->belongsToMany(Wrestler::class, (new StableWrestler)->getTable())
             ->using(StableWrestler::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
@@ -120,7 +119,7 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
     /** @return BelongsToMany<TagTeam, $this, StableTagTeam, 'pivot'> */
     public function tagTeams(): BelongsToMany
     {
-        return $this->belongsToMany(TagTeam::class, (new StableTagTeam())->getTable())
+        return $this->belongsToMany(TagTeam::class, (new StableTagTeam)->getTable())
             ->using(StableTagTeam::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();

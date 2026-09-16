@@ -75,7 +75,7 @@ describe('MatchFactory', function () {
 
             // All competitors should be wrestlers
             foreach ($eventMatch->competitors as $competitor) {
-                expect($competitor->competitor_type)->toBe((new Wrestler())->getMorphClass());
+                expect($competitor->competitor_type)->toBe((new Wrestler)->getMorphClass());
             }
         });
 
@@ -88,7 +88,7 @@ describe('MatchFactory', function () {
             expect($eventMatch->competitors)->toHaveCount(2);
 
             // All competitors should be wrestlers or tag teams
-            $allowedTypes = [(new Wrestler())->getMorphClass(), (new TagTeam())->getMorphClass()];
+            $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -102,7 +102,7 @@ describe('MatchFactory', function () {
             expect($eventMatch->competitors)->toHaveCount(3);
 
             // All competitors should be wrestlers or tag teams
-            $allowedTypes = [(new Wrestler())->getMorphClass(), (new TagTeam())->getMorphClass()];
+            $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -116,7 +116,7 @@ describe('MatchFactory', function () {
             expect($eventMatch->competitors)->toHaveCount(4);
 
             // All competitors should be wrestlers or tag teams
-            $allowedTypes = [(new Wrestler())->getMorphClass(), (new TagTeam())->getMorphClass()];
+            $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -130,7 +130,7 @@ describe('MatchFactory', function () {
             expect($eventMatch->competitors)->toHaveCount($competitorCount);
 
             // All competitors should be wrestlers or tag teams
-            $allowedTypes = [(new Wrestler())->getMorphClass(), (new TagTeam())->getMorphClass()];
+            $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
             foreach ($eventMatch->competitors as $competitor) {
                 expect($allowedTypes)->toContain($competitor->competitor_type);
             }
@@ -161,7 +161,7 @@ describe('MatchFactory', function () {
             expect($championship->champion_type)->toBe(Wrestler::class);
             // Champion should be one of the competitors
             $championCompetitor = $eventMatch->competitors->first(function ($competitor) use ($championship) {
-                return $competitor->competitor_type === (new Wrestler())->getMorphClass()
+                return $competitor->competitor_type === (new Wrestler)->getMorphClass()
                     && $competitor->competitor_id === $championship->champion_id;
             });
             expect($championCompetitor)->not->toBeNull();
@@ -180,7 +180,7 @@ describe('MatchFactory', function () {
             expect($championship->champion_type)->toBe(TagTeam::class);
             // Champion should be one of the competitors
             $championCompetitor = $eventMatch->competitors->first(function ($competitor) use ($championship) {
-                return $competitor->competitor_type === (new TagTeam())->getMorphClass()
+                return $competitor->competitor_type === (new TagTeam)->getMorphClass()
                     && $competitor->competitor_id === $championship->champion_id;
             });
             expect($championCompetitor)->not->toBeNull();

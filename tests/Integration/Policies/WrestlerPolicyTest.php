@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Gate;
 describe('WrestlerPolicy Integration Tests', function () {
 
     beforeEach(function () {
-        $this->policy = new WrestlerPolicy();
+        $this->policy = new WrestlerPolicy;
         $this->admin = administrator();
         $this->basicUser = basicUser();
         $this->wrestler = Wrestler::factory()->create();
@@ -200,8 +200,8 @@ describe('WrestlerPolicy Integration Tests', function () {
 
     describe('edge cases and security', function () {
         test('policy is consistent across multiple instances', function () {
-            $policy1 = new WrestlerPolicy();
-            $policy2 = new WrestlerPolicy();
+            $policy1 = new WrestlerPolicy;
+            $policy2 = new WrestlerPolicy;
 
             expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });
