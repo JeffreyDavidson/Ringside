@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeClearedFromInjuryException;
+use App\Lifecycle\Periods\InjuryPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualInjuryEligibility;
 use App\Models\Roster\Managers\Manager;
-use App\Services\Roster\Individuals\IndividualInjuryService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ClearFromInjuryAction
 {
     public function __construct(
-        private readonly IndividualInjuryService $injury,
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly IndividualInjuryEligibility $eligibility,
     ) {}
 
     /**
@@ -31,6 +35,13 @@ class ClearFromInjuryAction
      */
     public function handle(Manager $manager, ?Carbon $recoveryDate = null): void
     {
-        $this->injury->clear($manager, $recoveryDate ?? now());
+        $effectiveDate = $recoveryDate ?? now();
+
+        DB::transaction(function () use ($manager, $effectiveDate): void {
+            $lockedManager = $manager->refreshForUpdate();
+
+            $this->eligibility->ensureCanBeClearedFromInjury($lockedManager);
+            $this->injuryPeriods->end($lockedManager, $effectiveDate, LifecycleTransitionType::ClearedFromInjury);
+        });
     }
 }
