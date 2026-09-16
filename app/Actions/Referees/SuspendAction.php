@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeSuspendedException;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
 use App\Models\Roster\Referees\Referee;
-use App\Services\Roster\Individuals\IndividualSuspensionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
     public function __construct(
-        private readonly IndividualSuspensionService $suspension,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualSuspensionEligibility $eligibility,
     ) {}
 
     /**
@@ -30,6 +34,13 @@ class SuspendAction
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void
     {
-        $this->suspension->suspend($referee, $suspensionDate ?? now());
+        $effectiveDate = $suspensionDate ?? now();
+
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
+
+            $this->eligibility->ensureCanSuspend($lockedReferee);
+            $this->suspensionPeriods->start($lockedReferee, $effectiveDate, LifecycleTransitionType::Suspended);
+        });
     }
 }
