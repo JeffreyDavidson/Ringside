@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\InjuryPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
 use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Individuals\IndividualRetirementPeriodService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
     public function __construct(
-        private readonly IndividualRetirementPeriodService $retirementPeriods,
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
         private readonly IndividualRetirementEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
@@ -42,7 +49,18 @@ class RetireAction
             $lockedWrestler = $wrestler->refreshForUpdate();
 
             $this->eligibility->ensureCanRetire($lockedWrestler);
-            $this->retirementPeriods->start($lockedWrestler, $effectiveDate);
+
+            if ($lockedWrestler->currentEmployment()->exists()) {
+                $this->employmentPeriods->end($lockedWrestler, $effectiveDate);
+            }
+
+            if ($lockedWrestler->currentSuspension()->exists()) {
+                $this->suspensionPeriods->end($lockedWrestler, $effectiveDate);
+            } elseif ($lockedWrestler->currentInjury()->exists()) {
+                $this->injuryPeriods->end($lockedWrestler, $effectiveDate);
+            }
+
+            $this->retirementPeriods->start($lockedWrestler, $effectiveDate, LifecycleTransitionType::Retired);
             $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate);
         });
     }
