@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Actions\Lifecycle\RecordLifecycleTransitionAction;
+use App\Actions\Lifecycle\StartActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleDimension;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Stables\StableActivityTransition;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
 use App\Models\Roster\Stables\Stable;
-use App\Services\Roster\Stables\StableReuniteService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReuniteAction
 {
@@ -14,7 +20,9 @@ class ReuniteAction
      * Create a new reunite action instance.
      */
     public function __construct(
-        protected StableReuniteService $reunite,
+        protected StartActivityPeriodAction $startActivityPeriodAction,
+        protected RecordLifecycleTransitionAction $recordLifecycleTransitionAction,
+        protected StableActivityEligibility $eligibility,
     ) {}
 
     /**
@@ -22,6 +30,19 @@ class ReuniteAction
      */
     public function handle(Stable $stable, ?Carbon $reuniteDate = null): void
     {
-        $this->reunite->reunite($stable, $reuniteDate ?? now());
+        $effectiveDate = $reuniteDate ?? now();
+
+        DB::transaction(function () use ($stable, $effectiveDate): void {
+            $lockedStable = $stable->refreshForUpdate();
+
+            $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Reunite);
+            $this->startActivityPeriodAction->handle($lockedStable, $effectiveDate);
+            $this->recordLifecycleTransitionAction->handle(
+                $lockedStable,
+                LifecycleDimension::Activity,
+                LifecycleTransitionType::Reunited,
+                $effectiveDate,
+            );
+        });
     }
 }
