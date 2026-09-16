@@ -6,7 +6,6 @@ namespace App\Actions\TagTeams;
 
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Roster\TagTeams\TagTeamMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -14,7 +13,7 @@ class EndCurrentRelationshipsAction
 {
     public function __construct(
         private readonly ChampionshipReignManager $championshipReigns,
-        private readonly TagTeamMembershipService $memberships,
+        private readonly EndMembershipsAction $endMembershipsAction,
     ) {}
 
     public function handle(TagTeam $tagTeam, Carbon $effectiveDate): void
@@ -22,7 +21,7 @@ class EndCurrentRelationshipsAction
         DB::transaction(function () use ($tagTeam, $effectiveDate): void {
             $lockedTagTeam = $tagTeam->refreshForUpdate();
 
-            $this->memberships->endCurrentMemberships($lockedTagTeam, $effectiveDate);
+            $this->endMembershipsAction->handle($lockedTagTeam, $effectiveDate);
 
             $this->championshipReigns->endCurrentReignsForChampion($lockedTagTeam, $effectiveDate);
         });

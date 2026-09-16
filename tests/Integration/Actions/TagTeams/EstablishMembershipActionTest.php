@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Actions\TagTeams\EndMembershipsAction;
+use App\Actions\TagTeams\EstablishMembershipAction;
+use App\Actions\TagTeams\SynchronizeMembershipAction;
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\TagTeams\TagTeamMembershipService;
 use Illuminate\Database\Eloquent\Collection;
 
 beforeEach(function () {
-    $this->service = resolve(TagTeamMembershipService::class);
+    $this->establishMembership = resolve(EstablishMembershipAction::class);
+    $this->synchronizeMembership = resolve(SynchronizeMembershipAction::class);
+    $this->endMemberships = resolve(EndMembershipsAction::class);
     $this->tagTeam = TagTeam::factory()->create();
     $this->membershipDate = now()->subDay();
 });
@@ -20,7 +24,7 @@ it('establishes wrestler and manager memberships with the same date', function (
     $wrestlers = Wrestler::factory()->count(2)->create();
     $managers = Manager::factory()->count(2)->create();
 
-    $this->service->establishMembership(
+    $this->establishMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData($wrestlers, $managers),
         $this->membershipDate,
@@ -56,7 +60,7 @@ it('synchronizes memberships while preserving relationship history', function ()
     $addedWrestler = Wrestler::factory()->create();
     $removedManager = Manager::factory()->create();
     $addedManager = Manager::factory()->create();
-    $this->service->establishMembership(
+    $this->establishMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData(
             new Collection([$retainedWrestler, $removedWrestler]),
@@ -66,7 +70,7 @@ it('synchronizes memberships while preserving relationship history', function ()
     );
     $changeDate = now();
 
-    $this->service->updateMembership(
+    $this->synchronizeMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData(
             new Collection([$retainedWrestler, $addedWrestler]),
@@ -95,13 +99,13 @@ it('synchronizes memberships while preserving relationship history', function ()
 it('leaves an omitted membership group unchanged', function () {
     $wrestlers = Wrestler::factory()->count(2)->create();
     $manager = Manager::factory()->create();
-    $this->service->establishMembership(
+    $this->establishMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData($wrestlers, new Collection([$manager])),
         $this->membershipDate,
     );
 
-    $this->service->updateMembership(
+    $this->synchronizeMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData(wrestlers: $wrestlers),
         now(),
@@ -119,22 +123,22 @@ it('preserves each wrestler membership when a wrestler rejoins', function () {
     $secondJoinedAt = now()->subDays(2)->startOfSecond();
     $secondLeftAt = now()->subDay()->startOfSecond();
 
-    $this->service->establishMembership(
+    $this->establishMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData(wrestlers: $wrestlers),
         $firstJoinedAt,
     );
-    $this->service->updateMembership(
+    $this->synchronizeMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData(wrestlers: $noWrestlers),
         $firstLeftAt,
     );
-    $this->service->establishMembership(
+    $this->establishMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData(wrestlers: $wrestlers),
         $secondJoinedAt,
     );
-    $this->service->updateMembership(
+    $this->synchronizeMembership->handle(
         $this->tagTeam,
         new TagTeamMembershipData(wrestlers: $noWrestlers),
         $secondLeftAt,
