@@ -4,17 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
-use App\Models\Roster\Managers\Manager;
-use App\Models\Roster\Referees\Referee;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Individuals\IndividualUnretirementService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
     public function __construct(
-        private readonly IndividualUnretirementService $unretirement,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
         private readonly EmployAction $employ,
     ) {}
 
@@ -36,13 +38,16 @@ class UnretireAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void
     {
-        $unretirementDate = $unretirementDate ?? now();
+        $effectiveDate = $unretirementDate ?? now();
 
-        $this->unretirement->unretire($wrestler, $unretirementDate, function (Wrestler|Manager|Referee $lockedWrestler, Carbon $date) use ($employImmediately): void {
+        DB::transaction(function () use ($wrestler, $effectiveDate, $employImmediately): void {
+            $lockedWrestler = $wrestler->refreshForUpdate();
+
+            $this->eligibility->ensureCanUnretire($lockedWrestler);
+            $this->retirementPeriods->end($lockedWrestler, $effectiveDate, LifecycleTransitionType::Unretired);
+
             if ($employImmediately) {
-                if ($lockedWrestler instanceof Wrestler) {
-                    $this->employ->handle($lockedWrestler, $date);
-                }
+                $this->employ->handle($lockedWrestler, $effectiveDate);
             }
         });
     }

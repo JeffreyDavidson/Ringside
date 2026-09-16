@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
-use App\Services\Titles\TitleRetirementService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
     public function __construct(
-        private readonly TitleRetirementService $retirement,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly TitleLifecycleEligibility $eligibility,
     ) {}
 
     /**
@@ -30,6 +35,13 @@ class UnretireAction
      */
     public function handle(Title $title, ?Carbon $unretiredDate = null): void
     {
-        $this->retirement->unretire($title, $unretiredDate ?? now());
+        $date = $unretiredDate ?? now();
+
+        DB::transaction(function () use ($title, $date): void {
+            $lockedTitle = $title->refreshForUpdate();
+
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Unretire);
+            $this->retirementPeriods->end($lockedTitle, $date, LifecycleTransitionType::Unretired);
+        });
     }
 }

@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Stables\StableDeletionEligibility;
 use App\Models\Roster\Stables\Stable;
-use App\Services\Roster\Stables\StableDeletionService;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly StableDeletionService $deletion,
+        private readonly DeletionStateManager $deletionState,
+        private readonly StableDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -22,8 +26,15 @@ class RestoreAction
      * - Preserves all historical member relationships and match history
      * - Leaves reunion and activation as explicit subsequent operations
      */
-    public function handle(Stable $stable): void
+    public function handle(Stable $stable, ?Carbon $restoreDate = null): void
     {
-        $this->deletion->restore($stable, now());
+        $effectiveDate = $restoreDate ?? now();
+
+        DB::transaction(function () use ($stable, $effectiveDate): void {
+            $lockedStable = $stable->refreshForUpdate();
+
+            $this->eligibility->ensureCanRestore($lockedStable);
+            $this->deletionState->restore($lockedStable, $effectiveDate);
+        });
     }
 }

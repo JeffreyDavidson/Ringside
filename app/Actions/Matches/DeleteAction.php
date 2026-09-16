@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Matches;
 
+use App\Lifecycle\Periods\DeletionStateManager;
 use App\Models\Matches\EventMatch;
-use App\Services\Matches\EventMatchDeletionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
-    public function __construct(private readonly EventMatchDeletionService $deletion) {}
+    public function __construct(private readonly DeletionStateManager $deletionState) {}
 
     public function handle(EventMatch $eventMatch, ?Carbon $deletedAt = null): void
     {
-        $this->deletion->delete($eventMatch, $deletedAt ?? now());
+        DB::transaction(function () use ($eventMatch, $deletedAt): void {
+            $lockedMatch = $eventMatch->refreshForUpdate();
+
+            $this->deletionState->delete($lockedMatch, $deletedAt ?? now());
+        });
     }
 }

@@ -7,7 +7,6 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Roster\Stables\Stable;
-use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -17,7 +16,7 @@ class UpdateAction
      */
     public function __construct(
         protected EstablishAction $establishAction,
-        protected StableMembershipService $membershipService,
+        protected SynchronizeStableMembersAction $synchronizeStableMembersAction,
     ) {}
 
     /**
@@ -50,7 +49,7 @@ class UpdateAction
                 'name' => $stableData->getTrimmedName(),
             ]);
 
-            $this->membershipService->updateMembership($lockedStable, $stableData->members, now());
+            $this->synchronizeStableMembersAction->handle($lockedStable, $stableData->members, now());
 
             if ($stableData->hasStartDate()) {
                 $activityPeriod = $lockedStable->firstActivityPeriod()->lockForUpdate()->first();

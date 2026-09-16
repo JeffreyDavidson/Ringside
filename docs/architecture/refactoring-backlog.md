@@ -85,10 +85,11 @@ continue to authorize on the server immediately before protected operations.
 **Priority:** Medium  
 **Status:** Audit ongoing.
 
-Use an Action for a discrete application operation and a Service for a
-coordinating capability used by multiple operations. Lifecycle persistence and
-eligibility remain under `app/Lifecycle`; do not create generic services merely
-to wrap one Action call.
+Use an Action for every state-changing application operation. Services are
+read-only collaborators for retrieval, calculation, or validation. Lifecycle
+persistence and eligibility remain under `app/Lifecycle`; do not create a
+write-oriented service merely to wrap one Action call. Existing write-oriented
+services should be folded into their coordinating Actions when touched.
 
 ### Pipelines and composable workflows
 

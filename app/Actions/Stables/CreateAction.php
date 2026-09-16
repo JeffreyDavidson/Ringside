@@ -6,7 +6,6 @@ namespace App\Actions\Stables;
 
 use App\Data\Stables\StableData;
 use App\Models\Roster\Stables\Stable;
-use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -16,7 +15,7 @@ class CreateAction
      */
     public function __construct(
         protected EstablishAction $establishAction,
-        protected StableMembershipService $membershipService,
+        protected AddStableMembersAction $addStableMembersAction,
     ) {}
 
     /**
@@ -42,8 +41,7 @@ class CreateAction
             // Use enhanced DTO methods
             $joinDate = $stableData->getJoinDate();
 
-            // Add members using service
-            $this->membershipService->addMembers($stable, $stableData->members, $joinDate);
+            $this->addStableMembersAction->handle($stable, $stableData->members, $joinDate);
 
             // Use enhanced DTO method instead of isset check
             if ($stableData->shouldEstablish()) {

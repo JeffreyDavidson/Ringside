@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Roster\TagTeams\TagTeamDeletionService;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly TagTeamDeletionService $deletion,
+        private readonly DeletionStateManager $deletionState,
+        private readonly TagTeamDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -24,8 +28,17 @@ class RestoreAction
      * - Preserves ended wrestler memberships as partnership history
      * - Employment relationships are not automatically restored to avoid conflicts
      */
-    public function handle(TagTeam $tagTeam): void
+    public function handle(TagTeam $tagTeam, ?Carbon $restoreDate = null): void
     {
-        $this->deletion->restore($tagTeam, now());
+        $effectiveDate = $restoreDate ?? now();
+
+        DB::transaction(function () use ($tagTeam, $effectiveDate): void {
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
+
+            $this->eligibility->ensureCanRestore($lockedTagTeam);
+            $this->deletionState->restore($lockedTagTeam, $effectiveDate);
+        });
+
+        $tagTeam->setAttribute($tagTeam->getDeletedAtColumn(), null);
     }
 }

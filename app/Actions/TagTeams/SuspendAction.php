@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\TagTeams\TagTeamSuspensionEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Roster\TagTeams\TagTeamSuspensionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SuspendAction
 {
     public function __construct(
-        private readonly TagTeamSuspensionService $suspension,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly TagTeamSuspensionEligibility $eligibility,
         private readonly SuspendCurrentMembersAction $suspendCurrentMembers,
     ) {}
 
@@ -20,12 +24,14 @@ class SuspendAction
      */
     public function handle(TagTeam $tagTeam, ?Carbon $suspensionDate = null): void
     {
-        $this->suspension->suspend(
-            $tagTeam,
-            $suspensionDate ?? now(),
-            function (TagTeam $lockedTagTeam, Carbon $effectiveDate): void {
-                $this->suspendCurrentMembers->handle($lockedTagTeam, $effectiveDate);
-            },
-        );
+        $effectiveDate = $suspensionDate ?? now();
+
+        DB::transaction(function () use ($tagTeam, $effectiveDate): void {
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
+
+            $this->eligibility->ensureCanSuspend($lockedTagTeam);
+            $this->suspensionPeriods->start($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Suspended);
+            $this->suspendCurrentMembers->handle($lockedTagTeam, $effectiveDate);
+        });
     }
 }

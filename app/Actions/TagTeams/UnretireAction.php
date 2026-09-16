@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\TagTeams;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Roster\TagTeams\TagTeamUnretirementService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
     public function __construct(
-        private readonly TagTeamUnretirementService $unretirement,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly TagTeamRetirementEligibility $eligibility,
         private readonly UnretireCurrentMembersAction $unretireCurrentMembers,
         private readonly EmployAction $employ,
     ) {}
@@ -26,19 +30,27 @@ class UnretireAction
         bool $employImmediately = true,
         bool $requireAvailablePartners = true
     ): void {
-        $this->unretirement->unretire(
-            $tagTeam,
-            $unretiredDate ?? now(),
-            $requireAvailablePartners,
-            function (TagTeam $lockedTagTeam, Carbon $effectiveDate) use ($unretireMembers, $employImmediately): void {
-                if ($unretireMembers) {
-                    $this->unretireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
-                }
+        $effectiveDate = $unretiredDate ?? now();
 
-                if ($employImmediately && ! $lockedTagTeam->currentEmployment()->exists() && $lockedTagTeam->currentWrestlers()->exists()) {
-                    $this->employ->handle($lockedTagTeam, $effectiveDate);
-                }
-            },
-        );
+        DB::transaction(function () use (
+            $tagTeam,
+            $effectiveDate,
+            $unretireMembers,
+            $employImmediately,
+            $requireAvailablePartners,
+        ): void {
+            $lockedTagTeam = $tagTeam->refreshForUpdate();
+
+            $this->eligibility->ensureCanUnretire($lockedTagTeam, $requireAvailablePartners);
+            $this->retirementPeriods->end($lockedTagTeam, $effectiveDate, LifecycleTransitionType::Unretired);
+
+            if ($unretireMembers) {
+                $this->unretireCurrentMembers->handle($lockedTagTeam, $effectiveDate);
+            }
+
+            if ($employImmediately && ! $lockedTagTeam->currentEmployment()->exists() && $lockedTagTeam->currentWrestlers()->exists()) {
+                $this->employ->handle($lockedTagTeam, $effectiveDate);
+            }
+        });
     }
 }

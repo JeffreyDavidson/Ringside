@@ -6,8 +6,8 @@ namespace App\Actions\Events;
 
 use App\Data\Events\EventData;
 use App\Lifecycle\Events\EventSchedulingEligibility;
+use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
-use App\Services\Events\EventVenueSchedulingService;
 use App\Services\Matches\MatchAssignmentConflictService;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +15,6 @@ class UpdateAction
 {
     public function __construct(
         private readonly MatchAssignmentConflictService $assignmentConflicts,
-        private readonly EventVenueSchedulingService $venueScheduling,
     ) {}
 
     public function handle(Event $event, EventData $eventData): Event
@@ -24,7 +23,11 @@ class UpdateAction
             $lockedEvent = $event->refreshForUpdate();
 
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
-            $this->venueScheduling->schedule($eventData->date, $eventData->venue, $lockedEvent);
+            $venue = $eventData->venue?->refreshForUpdate();
+
+            if ($venue !== null && $eventData->date !== null) {
+                VenueSchedulingEligibility::ensureAvailable($venue, $eventData->date, $lockedEvent);
+            }
 
             if (EventSchedulingEligibility::isDateChanging($lockedEvent, $eventData->date)) {
                 $this->assignmentConflicts->ensureEventCanBeRescheduled($lockedEvent, $eventData->date);

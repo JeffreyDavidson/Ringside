@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
-use App\Models\Roster\Managers\Manager;
-use App\Models\Roster\Referees\Referee;
+use App\Lifecycle\Periods\DeletionPeriodCloser;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Individuals\IndividualDeletionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly IndividualDeletionService $deletion,
+        private readonly DeletionPeriodCloser $periods,
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
@@ -39,16 +42,15 @@ class DeleteAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $deletionDate = null): void
     {
-        $this->deletion->delete(
-            $wrestler,
-            $deletionDate ?? now(),
-            function (Wrestler|Manager|Referee $lockedIndividual, Carbon $date): void {
-                if (! $lockedIndividual instanceof Wrestler) {
-                    return;
-                }
+        $effectiveDate = $deletionDate ?? now();
 
-                $this->endCurrentRelationships->handle($lockedIndividual, $date);
-            },
-        );
+        DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $lockedWrestler = $wrestler->refreshForUpdate();
+
+            $this->eligibility->ensureCanDelete($lockedWrestler);
+            $this->periods->close($lockedWrestler, $effectiveDate);
+            $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate);
+            $this->deletionState->delete($lockedWrestler, $effectiveDate);
+        });
     }
 }

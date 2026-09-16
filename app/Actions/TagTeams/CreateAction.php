@@ -6,7 +6,6 @@ namespace App\Actions\TagTeams;
 
 use App\Data\TagTeams\TagTeamData;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Roster\TagTeams\TagTeamMembershipService;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -15,7 +14,7 @@ class CreateAction
      * Create a new create action instance.
      */
     public function __construct(
-        protected TagTeamMembershipService $membershipService,
+        protected EstablishMembershipAction $establishMembershipAction,
         protected EmployAction $employAction,
     ) {}
 
@@ -34,7 +33,7 @@ class CreateAction
             // Get membership data
             $membershipData = $tagTeamData->getMembershipData();
 
-            $this->membershipService->establishMembership(
+            $this->establishMembershipAction->handle(
                 $tagTeam,
                 $membershipData,
                 $tagTeamData->getJoinDate(),

@@ -12,6 +12,7 @@ use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use LivewireUI\Modal\Modal;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -20,6 +21,30 @@ describe('authorized match form interactions', function (): void {
     beforeEach(function (): void {
         actingAs(administrator());
         $this->event = Event::factory()->create();
+    });
+
+    it('passes event context through the modal dispatcher', function (): void {
+        // Arrange
+        $component = 'matches.modals.form-modal';
+        $arguments = ['eventId' => $this->event->id];
+
+        // Act
+        $modal = livewire(Modal::class)->dispatch(
+            'openModal',
+            component: $component,
+            arguments: $arguments,
+        );
+
+        // Assert
+        $modal
+            ->assertCount('components', 1)
+            ->assertSet('components', function (array $components) use ($component, $arguments): bool {
+                $registeredComponent = array_values($components)[0] ?? null;
+
+                return $registeredComponent['name'] === $component
+                    && $registeredComponent['arguments'] === $arguments;
+            })
+            ->assertNotSet('activeComponent', null);
     });
 
     it('renders match fields and available choices', function (): void {

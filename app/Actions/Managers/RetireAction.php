@@ -4,17 +4,25 @@ declare(strict_types=1);
 
 namespace App\Actions\Managers;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\InjuryPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Periods\SuspensionPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
-use App\Models\Roster\Referees\Referee;
-use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Individuals\IndividualRetirementService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
     public function __construct(
-        private readonly IndividualRetirementService $retirement,
+        private readonly EmploymentPeriodManager $employmentPeriods,
+        private readonly InjuryPeriodManager $injuryPeriods,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly SuspensionPeriodManager $suspensionPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
@@ -35,14 +43,25 @@ class RetireAction
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void
     {
-        $retirementDate = $retirementDate ?? now();
+        $effectiveDate = $retirementDate ?? now();
 
-        $this->retirement->retire($manager, $retirementDate, function (Wrestler|Manager|Referee $lockedManager, Carbon $date): void {
-            if (! $lockedManager instanceof Manager) {
-                return;
+        DB::transaction(function () use ($manager, $effectiveDate): void {
+            $lockedManager = $manager->refreshForUpdate();
+
+            $this->eligibility->ensureCanRetire($lockedManager);
+
+            if ($lockedManager->currentEmployment()->exists()) {
+                $this->employmentPeriods->end($lockedManager, $effectiveDate);
             }
 
-            $this->endCurrentRelationships->handle($lockedManager, $date);
+            if ($lockedManager->currentSuspension()->exists()) {
+                $this->suspensionPeriods->end($lockedManager, $effectiveDate);
+            } elseif ($lockedManager->currentInjury()->exists()) {
+                $this->injuryPeriods->end($lockedManager, $effectiveDate);
+            }
+
+            $this->retirementPeriods->start($lockedManager, $effectiveDate, LifecycleTransitionType::Retired);
+            $this->endCurrentRelationships->handle($lockedManager, $effectiveDate);
         });
     }
 }
