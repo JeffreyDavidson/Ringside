@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Referees\Referee;
-use App\Services\Roster\Individuals\IndividualReleaseService;
+use App\Services\Roster\Individuals\IndividualReleasePeriodService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReleaseAction
 {
     public function __construct(
-        private readonly IndividualReleaseService $release,
+        private readonly IndividualReleasePeriodService $releasePeriods,
+        private readonly IndividualEmploymentEligibility $eligibility,
     ) {}
 
     /**
@@ -19,6 +22,13 @@ class ReleaseAction
      */
     public function handle(Referee $referee, ?Carbon $releaseDate = null): void
     {
-        $this->release->release($referee, $releaseDate ?? now());
+        $effectiveDate = $releaseDate ?? now();
+
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
+
+            $this->eligibility->ensureCanRelease($lockedReferee);
+            $this->releasePeriods->end($lockedReferee, $effectiveDate);
+        });
     }
 }
