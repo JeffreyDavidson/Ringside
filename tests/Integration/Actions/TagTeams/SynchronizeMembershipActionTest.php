@@ -17,3 +17,11 @@ test('synchronizing membership dates ended wrestler pivots', function () {
     resolve(SynchronizeMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData(wrestlers: new Collection()), $date);
     expect($tagTeam->previousWrestlers()->whereKey($wrestler)->exists())->toBeTrue();
 });
+
+test('synchronizing omitted wrestler memberships leaves them unchanged', function () {
+    $tagTeam = TagTeam::factory()->create();
+
+    resolve(SynchronizeMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData(), now());
+
+    expect($tagTeam->currentWrestlers()->exists())->toBeFalse();
+});

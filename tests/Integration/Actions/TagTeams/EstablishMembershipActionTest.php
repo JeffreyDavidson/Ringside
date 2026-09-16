@@ -12,6 +12,14 @@ use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Collection;
 
+it('accepts omitted membership groups', function () {
+    $tagTeam = TagTeam::factory()->create();
+
+    resolve(EstablishMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData(), now());
+
+    expect($tagTeam->wrestlers()->exists())->toBeFalse();
+});
+
 beforeEach(function () {
     $this->establishMembership = resolve(EstablishMembershipAction::class);
     $this->synchronizeMembership = resolve(SynchronizeMembershipAction::class);
