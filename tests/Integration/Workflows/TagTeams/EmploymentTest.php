@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\TagTeams\EmployAction;
+use App\Actions\TagTeams\EstablishMembershipAction;
 use App\Actions\TagTeams\ReleaseAction;
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Enums\Shared\EmploymentStatus;
 use App\Exceptions\Roster\TagTeams\CannotBeEmployedException;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\TagTeams\TagTeamMembershipService;
 use Illuminate\Support\Facades\Date;
 
 test('released tag teams require a renewed membership before re-employment', function () {
@@ -36,7 +36,7 @@ test('released tag teams require a renewed membership before re-employment', fun
 test('renewed memberships support distinct tag team employment periods', function () {
     // Arrange
     $tagTeam = TagTeam::factory()->unemployed()->create();
-    $membershipService = resolve(TagTeamMembershipService::class);
+    $establishMembership = resolve(EstablishMembershipAction::class);
 
     // Act
     resolve(EmployAction::class)
@@ -44,7 +44,7 @@ test('renewed memberships support distinct tag team employment periods', functio
     resolve(ReleaseAction::class)
         ->handle(freshModel($tagTeam), Date::now()->subMonths(9));
 
-    $membershipService->establishMembership(
+    $establishMembership->handle(
         $tagTeam,
         new TagTeamMembershipData(Wrestler::factory()->count(2)->create()),
         Date::now()->subMonths(8),
@@ -54,7 +54,7 @@ test('renewed memberships support distinct tag team employment periods', functio
     resolve(ReleaseAction::class)
         ->handle(freshModel($tagTeam), Date::now()->subMonths(3));
 
-    $membershipService->establishMembership(
+    $establishMembership->handle(
         $tagTeam,
         new TagTeamMembershipData(Wrestler::factory()->count(2)->create()),
         Date::now()->subMonths(2),

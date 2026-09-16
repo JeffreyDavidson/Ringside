@@ -7,7 +7,6 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Models\Roster\TagTeams\TagTeam;
-use App\Services\Roster\TagTeams\TagTeamMembershipService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -16,7 +15,7 @@ class UpdateAction
      * Create a new update action instance.
      */
     public function __construct(
-        protected TagTeamMembershipService $membershipService,
+        protected SynchronizeMembershipAction $synchronizeMembershipAction,
         protected EmployAction $employAction,
         protected EmployCurrentWrestlersAction $employCurrentWrestlersAction,
         protected EmployCurrentManagersAction $employCurrentManagersAction,
@@ -40,7 +39,7 @@ class UpdateAction
             // Handle partnership changes through membership service using membership data
             $membershipData = $tagTeamData->getMembershipData();
 
-            $this->membershipService->updateMembership(
+            $this->synchronizeMembershipAction->handle(
                 $lockedTagTeam,
                 $membershipData,
                 $updateDate,
