@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\TagTeams\EndMembershipsAction;
+use App\Actions\TagTeams\EstablishMembershipAction;
+use App\Actions\TagTeams\SynchronizeMembershipAction;
+use App\Data\TagTeams\TagTeamMembershipData;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Relationships\HistoricalMembershipService;
 use Illuminate\Database\Eloquent\Collection;
 
 it('adds memberships with an open historical period', function () {
@@ -13,9 +16,9 @@ it('adds memberships with an open historical period', function () {
     $wrestlers = Wrestler::factory()->count(2)->create();
     $joinedAt = now()->subDay()->startOfSecond();
 
-    resolve(HistoricalMembershipService::class)->add(
-        $tagTeam->wrestlers(),
-        new Collection($wrestlers->all()),
+    resolve(EstablishMembershipAction::class)->handle(
+        $tagTeam,
+        new TagTeamMembershipData(new Collection($wrestlers->all())),
         $joinedAt,
     );
 
@@ -48,11 +51,7 @@ it('removes only current memberships while preserving history', function () {
         'left_at' => null,
     ]);
 
-    resolve(HistoricalMembershipService::class)->remove(
-        $tagTeam->wrestlers(),
-        new Collection([$currentWrestler]),
-        $leftAt,
-    );
+    resolve(EndMembershipsAction::class)->handle($tagTeam, $leftAt);
 
     $historicalMembership = TagTeamWrestler::query()
         ->whereBelongsTo($tagTeam)
@@ -85,10 +84,9 @@ it('synchronizes membership changes without rewriting retained history', functio
         'left_at' => null,
     ]);
 
-    resolve(HistoricalMembershipService::class)->synchronize(
-        $tagTeam->wrestlers(),
-        new Collection([$removedWrestler, $retainedWrestler]),
-        new Collection([$retainedWrestler, $addedWrestler]),
+    resolve(SynchronizeMembershipAction::class)->handle(
+        $tagTeam,
+        new TagTeamMembershipData(wrestlers: new Collection([$retainedWrestler, $addedWrestler])),
         $changedAt,
     );
 
