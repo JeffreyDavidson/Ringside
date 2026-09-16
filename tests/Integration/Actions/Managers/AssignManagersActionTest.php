@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Actions\Managers\AssignManagersAction;
+use App\Actions\Managers\EndManagerAssignmentsForManagerAction;
+use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\TagTeams\TagTeamManager;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Roster\Wrestlers\WrestlerManager;
-use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Database\Eloquent\Collection;
 
 it('assigns managers to a wrestler without employing them', function () {
@@ -15,7 +17,7 @@ it('assigns managers to a wrestler without employing them', function () {
     $managers = Manager::factory()->count(2)->create();
     $assignmentDate = now()->subDay();
 
-    resolve(ManagerAssignmentService::class)->assign($wrestler, $managers, $assignmentDate);
+    resolve(AssignManagersAction::class)->handle($wrestler, $managers, $assignmentDate);
 
     expect($wrestler->currentManagers()->pluck('managers.id')->all())
         ->toEqualCanonicalizing($managers->modelKeys())
@@ -37,7 +39,7 @@ it('assigns managers to a tag team through the same boundary', function () {
     $manager = Manager::factory()->create();
     $assignmentDate = now()->subDay();
 
-    resolve(ManagerAssignmentService::class)->assign(
+    resolve(AssignManagersAction::class)->handle(
         $tagTeam,
         new Collection([$manager]),
         $assignmentDate,
@@ -58,15 +60,16 @@ it('synchronizes current managers while preserving relationship history', functi
     $retainedManager = Manager::factory()->create();
     $removedManager = Manager::factory()->create();
     $addedManager = Manager::factory()->create();
-    $service = resolve(ManagerAssignmentService::class);
-    $service->assign(
+    $assignManagers = resolve(AssignManagersAction::class);
+    $synchronizeAssignments = resolve(SynchronizeManagerAssignmentsAction::class);
+    $assignManagers->handle(
         $wrestler,
         new Collection([$retainedManager, $removedManager]),
         now()->subDay(),
     );
     $changeDate = now();
 
-    $service->synchronize(
+    $synchronizeAssignments->handle(
         $wrestler,
         new Collection([$retainedManager, $addedManager]),
         $changeDate,
@@ -87,10 +90,11 @@ it('synchronizes current managers while preserving relationship history', functi
 it('leaves manager assignments unchanged when synchronization is omitted', function () {
     $tagTeam = TagTeam::factory()->create();
     $manager = Manager::factory()->create();
-    $service = resolve(ManagerAssignmentService::class);
-    $service->assign($tagTeam, new Collection([$manager]), now()->subDay());
+    $assignManagers = resolve(AssignManagersAction::class);
+    $synchronizeAssignments = resolve(SynchronizeManagerAssignmentsAction::class);
+    $assignManagers->handle($tagTeam, new Collection([$manager]), now()->subDay());
 
-    $service->synchronize($tagTeam, null, now());
+    $synchronizeAssignments->handle($tagTeam, null, now());
 
     expect($tagTeam->currentManagers()->whereKey($manager->id)->exists())->toBeTrue();
 });
@@ -98,7 +102,7 @@ it('leaves manager assignments unchanged when synchronization is omitted', funct
 it('accepts an empty manager collection', function () {
     $wrestler = Wrestler::factory()->create();
 
-    resolve(ManagerAssignmentService::class)->assign(
+    resolve(AssignManagersAction::class)->handle(
         $wrestler,
         new Collection(),
         now(),
@@ -116,12 +120,13 @@ it('preserves each manager assignment when a manager is reassigned', function ()
     $firstFiredAt = now()->subDays(3)->startOfSecond();
     $secondHiredAt = now()->subDays(2)->startOfSecond();
     $secondFiredAt = now()->subDay()->startOfSecond();
-    $service = resolve(ManagerAssignmentService::class);
+    $assignManagers = resolve(AssignManagersAction::class);
+    $synchronizeAssignments = resolve(SynchronizeManagerAssignmentsAction::class);
 
-    $service->assign($wrestler, $managers, $firstHiredAt);
-    $service->synchronize($wrestler, $noManagers, $firstFiredAt);
-    $service->assign($wrestler, $managers, $secondHiredAt);
-    $service->synchronize($wrestler, $noManagers, $secondFiredAt);
+    $assignManagers->handle($wrestler, $managers, $firstHiredAt);
+    $synchronizeAssignments->handle($wrestler, $noManagers, $firstFiredAt);
+    $assignManagers->handle($wrestler, $managers, $secondHiredAt);
+    $synchronizeAssignments->handle($wrestler, $noManagers, $secondFiredAt);
 
     $assignments = WrestlerManager::query()
         ->whereBelongsTo($wrestler)
@@ -163,7 +168,7 @@ it("ends only a manager's current wrestler and tag team assignments", function (
         'fired_at' => null,
     ]);
 
-    resolve(ManagerAssignmentService::class)->endCurrentAssignments($manager, $assignmentEnd);
+    resolve(EndManagerAssignmentsForManagerAction::class)->handle($manager, $assignmentEnd);
 
     $wrestlerAssignments = WrestlerManager::query()
         ->whereBelongsTo($manager)

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Actions\Managers\AssignManagersAction;
 use App\Data\Wrestlers\WrestlerData;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
 {
     public function __construct(
         protected EmployAction $employAction,
-        protected ManagerAssignmentService $managerAssignmentService
+        protected AssignManagersAction $assignManagersAction
     ) {}
 
     public function handle(WrestlerData $wrestlerData): Wrestler
@@ -28,7 +28,7 @@ class CreateAction
             ]);
 
             if ($wrestlerData->hasManagers()) {
-                $this->managerAssignmentService->assign(
+                $this->assignManagersAction->handle(
                     $wrestler,
                     $wrestlerData->managers,
                     $wrestlerData->employment_date ?? now(),
