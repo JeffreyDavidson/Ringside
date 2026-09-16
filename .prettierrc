@@ -9,14 +9,6 @@
   "endOfLine": "lf",
   "overrides": [
     {
-      "files": "*.blade.php",
-      "options": {
-        "parser": "html",
-        "tabWidth": 4,
-        "printWidth": 120
-      }
-    },
-    {
       "files": "*.js",
       "options": {
         "tabWidth": 4

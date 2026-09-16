@@ -17,6 +17,32 @@ This document provides a comprehensive reference for all development and testing
 - `composer test:lint` - Check PHP and Blade formatting with Laravel Pint
 - `composer test:rector` - Test code modernization (dry-run)
 
+### Shared Development Commands
+
+Ringside and KneadIt share explicit command names while retaining each application's
+Pint rules, Rector exclusions, PHPStan levels, and coverage requirements.
+
+- `composer check` - Run formatting, static analysis, Rector, type coverage, application tests, frontend lint, and the production asset build; browser tests remain a separate gate
+- `composer lint:dirty` - Fix formatting in changed PHP and Blade files
+- `composer lint:check` - Alias for `test:lint`
+- `composer rector:fix` - Apply application and Pest Rector transformations
+- `composer rector:pest:fix` - Apply only Pest Rector transformations
+- `composer test:coverage` - Alias for the existing `test:unit` coverage command, with its current suite scope and 44% minimum
+- `composer frontend:check` - Run frontend lint and the production asset build
+
+The shared test commands also include `test:application`, `test:browser`,
+`test:types`, `test:type-coverage`, `test:rector`, and `test:push`.
+Existing `test`, `test:push`, `lint`, and `rector` commands retain their behavior.
+In Ringside, `lint` formats all applicable files and `rector` applies fixes;
+use `lint:dirty`, `test:rector`, and `rector:fix` for explicit intent across apps.
+
+Pint owns PHP and Blade formatting, using the Laravel preset plus Ringside's
+existing additional rules. `npm run format` and `npm run format:check` cover
+JavaScript only, so Blade is not passed through a second formatter configuration.
+Playwright is a development dependency; browser testing requires a development
+dependency install. The ESLint configuration's `@eslint/js` import is declared
+directly in `package.json`.
+
 ### Code Quality Tools
 - `composer lint` - Fix PHP and Blade formatting with Laravel Pint
 - `composer rector` - Apply code modernization with Rector
