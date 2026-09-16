@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Lifecycle\Periods\DeletionPeriodCloser;
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Referees\Referee;
-use App\Services\Roster\Individuals\IndividualDeletionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly IndividualDeletionService $deletion,
+        private readonly DeletionPeriodCloser $periods,
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -38,6 +43,14 @@ class DeleteAction
      */
     public function handle(Referee $referee, ?Carbon $deletionDate = null): void
     {
-        $this->deletion->delete($referee, $deletionDate ?? now());
+        $effectiveDate = $deletionDate ?? now();
+
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
+
+            $this->eligibility->ensureCanDelete($lockedReferee);
+            $this->periods->close($lockedReferee, $effectiveDate);
+            $this->deletionState->delete($lockedReferee, $effectiveDate);
+        });
     }
 }
