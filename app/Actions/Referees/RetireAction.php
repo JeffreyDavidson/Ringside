@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Actions\Referees;
 
 use App\Exceptions\Roster\Individuals\CannotBeRetiredException;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Referees\Referee;
-use App\Services\Roster\Individuals\IndividualRetirementService;
+use App\Services\Roster\Individuals\IndividualRetirementPeriodService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
     public function __construct(
-        private readonly IndividualRetirementService $retirement,
+        private readonly IndividualRetirementPeriodService $retirementPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -32,8 +35,13 @@ class RetireAction
      */
     public function handle(Referee $referee, ?Carbon $retirementDate = null): void
     {
-        $retirementDate = $retirementDate ?? now();
+        $effectiveDate = $retirementDate ?? now();
 
-        $this->retirement->retire($referee, $retirementDate);
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
+
+            $this->eligibility->ensureCanRetire($lockedReferee);
+            $this->retirementPeriods->start($lockedReferee, $effectiveDate);
+        });
     }
 }

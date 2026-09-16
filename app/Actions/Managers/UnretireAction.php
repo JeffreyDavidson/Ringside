@@ -7,17 +7,18 @@ namespace App\Actions\Managers;
 use App\Enums\Lifecycle\LifecycleTransitionType;
 use App\Exceptions\Roster\Individuals\CannotBeUnretiredException;
 use App\Lifecycle\Periods\EmploymentPeriodManager;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
 use App\Models\Roster\Managers\Manager;
-use App\Models\Roster\Referees\Referee;
-use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Individuals\IndividualUnretirementService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UnretireAction
 {
     public function __construct(
         private readonly EmploymentPeriodManager $employmentPeriods,
-        private readonly IndividualUnretirementService $unretirement,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly IndividualRetirementEligibility $eligibility,
     ) {}
 
     /**
@@ -36,13 +37,16 @@ class UnretireAction
      */
     public function handle(Manager $manager, ?Carbon $unretiredDate = null, bool $employImmediately = true): void
     {
-        $unretiredDate = $unretiredDate ?? now();
+        $effectiveDate = $unretiredDate ?? now();
 
-        $this->unretirement->unretire($manager, $unretiredDate, function (Wrestler|Manager|Referee $lockedManager, Carbon $date) use ($employImmediately): void {
+        DB::transaction(function () use ($manager, $effectiveDate, $employImmediately): void {
+            $lockedManager = $manager->refreshForUpdate();
+
+            $this->eligibility->ensureCanUnretire($lockedManager);
+            $this->retirementPeriods->end($lockedManager, $effectiveDate, LifecycleTransitionType::Unretired);
+
             if ($employImmediately) {
-                if ($lockedManager instanceof Manager) {
-                    $this->employmentPeriods->start($lockedManager, $date, LifecycleTransitionType::Employed);
-                }
+                $this->employmentPeriods->start($lockedManager, $effectiveDate, LifecycleTransitionType::Employed);
             }
         });
     }
