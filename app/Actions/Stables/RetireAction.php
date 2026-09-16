@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Actions\TagTeams\RetireAction as TagTeamsRetireAction;
 use App\Actions\Wrestlers\RetireAction as WrestlersRetireAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Lifecycle\Periods\RetirementPeriodManager;
 use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
 use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
-use App\Services\Roster\Stables\StableRetirementService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
@@ -21,7 +25,9 @@ class RetireAction
     public function __construct(
         protected WrestlersRetireAction $wrestlersRetireAction,
         protected TagTeamsRetireAction $tagTeamsRetireAction,
-        protected StableRetirementService $retirement,
+        protected EndActivityPeriodAction $endActivityPeriodAction,
+        protected RetirementPeriodManager $retirementPeriods,
+        protected StableRetirementEligibility $stableRetirementEligibility,
         protected RemoveStableMembersAction $removeStableMembersAction,
         protected IndividualRetirementEligibility $individualRetirementEligibility,
         protected TagTeamRetirementEligibility $tagTeamRetirementEligibility,
@@ -36,14 +42,22 @@ class RetireAction
         $retirementDate ??= now();
         $operationalDate = $retirementDate->isFuture() ? now() : $retirementDate;
 
-        $this->retirement->retire($stable, $retirementDate, $operationalDate, function (Stable $lockedStable, Carbon $effectiveRetirementDate, Carbon $effectiveOperationalDate): void {
+        DB::transaction(function () use ($stable, $retirementDate, $operationalDate): void {
+            $lockedStable = $stable->refreshForUpdate();
+
+            $this->stableRetirementEligibility->ensureCanRetire($lockedStable);
+
+            if ($lockedStable->currentActivityPeriod()->exists()) {
+                $this->endActivityPeriodAction->handle($lockedStable, $operationalDate);
+            }
+
             $currentMembers = $this->membershipService->currentMembers($lockedStable);
-            $this->removeStableMembersAction->handle($lockedStable, $currentMembers, $effectiveOperationalDate);
+            $this->removeStableMembersAction->handle($lockedStable, $currentMembers, $operationalDate);
 
             if ($currentMembers->wrestlers) {
                 foreach ($currentMembers->wrestlers as $wrestler) {
                     if ($this->individualRetirementEligibility->canRetire($wrestler)) {
-                        $this->wrestlersRetireAction->handle($wrestler, $effectiveRetirementDate);
+                        $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
                     }
                 }
             }
@@ -51,11 +65,12 @@ class RetireAction
             if ($currentMembers->tagTeams) {
                 foreach ($currentMembers->tagTeams as $tagTeam) {
                     if ($this->tagTeamRetirementEligibility->canRetire($tagTeam)) {
-                        $this->tagTeamsRetireAction->handle($tagTeam, $effectiveRetirementDate);
+                        $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate);
                     }
                 }
             }
 
+            $this->retirementPeriods->start($lockedStable, $retirementDate, LifecycleTransitionType::Retired);
         });
     }
 }
