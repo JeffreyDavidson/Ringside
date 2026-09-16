@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\Stables;
 
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Stables\StableActivityTransition;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
 use App\Models\Roster\Stables\Stable;
-use App\Services\Roster\Stables\StableDisbandService;
+use App\Services\Roster\Stables\StableActivityPeriodService;
 use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DisbandAction
 {
@@ -16,7 +20,8 @@ class DisbandAction
      */
     public function __construct(
         protected RemoveStableMembersAction $removeStableMembersAction,
-        protected StableDisbandService $disbandment,
+        protected StableActivityEligibility $eligibility,
+        protected StableActivityPeriodService $activityPeriods,
         protected StableMembershipService $membershipService,
     ) {}
 
@@ -25,7 +30,14 @@ class DisbandAction
      */
     public function handle(Stable $stable, ?Carbon $disbandDate = null): void
     {
-        $this->disbandment->disband($stable, $disbandDate ?? now(), function (Stable $lockedStable, Carbon $effectiveDate): void {
+        $effectiveDate = $disbandDate ?? now();
+
+        DB::transaction(function () use ($stable, $effectiveDate): void {
+            $lockedStable = $stable->refreshForUpdate();
+
+            $this->eligibility->ensureAllowed($lockedStable, StableActivityTransition::Disband);
+            $this->activityPeriods->end($lockedStable, $effectiveDate, LifecycleTransitionType::Disbanded);
+
             $currentMembers = $this->membershipService->currentMembers($lockedStable);
 
             if ($currentMembers->isNotEmpty()) {
