@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Referees;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Referees\Referee;
-use App\Services\Roster\Individuals\IndividualRestoreService;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly IndividualRestoreService $restore,
+        private readonly DeletionStateManager $deletionState,
+        private readonly IndividualDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -25,8 +29,15 @@ class RestoreAction
      *
      * @param  Referee  $referee  The soft-deleted referee to restore
      */
-    public function handle(Referee $referee): void
+    public function handle(Referee $referee, ?Carbon $restoreDate = null): void
     {
-        $this->restore->restore($referee, now());
+        $effectiveDate = $restoreDate ?? now();
+
+        DB::transaction(function () use ($referee, $effectiveDate): void {
+            $lockedReferee = $referee->refreshForUpdate();
+
+            $this->eligibility->ensureCanRestore($lockedReferee);
+            $this->deletionState->restore($lockedReferee, $effectiveDate);
+        });
     }
 }
