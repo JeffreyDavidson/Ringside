@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Titles\Title;
-use App\Services\Titles\TitleDeletionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DeleteAction
 {
     public function __construct(
-        private readonly TitleDeletionService $deletion,
+        private readonly ChampionshipReignManager $championshipReigns,
+        private readonly DeletionStateManager $deletionState,
     ) {}
 
     /**
@@ -39,6 +42,19 @@ class DeleteAction
      */
     public function handle(Title $title, ?Carbon $deletionDate = null): void
     {
-        $this->deletion->delete($title, $deletionDate ?? now());
+        $date = $deletionDate ?? now();
+
+        DB::transaction(function () use ($title, $date): void {
+            $lockedTitle = $title->refreshForUpdate();
+
+            if ($lockedTitle->currentActivityPeriod()->exists()) {
+                $lockedTitle->activityPeriods()->whereNull('ended_at')->update(['ended_at' => $date]);
+            } elseif ($lockedTitle->currentRetirement()->exists()) {
+                $lockedTitle->retirements()->whereNull('ended_at')->update(['ended_at' => $date]);
+            }
+
+            $this->championshipReigns->endCurrentReign($lockedTitle, $date);
+            $this->deletionState->delete($lockedTitle, $date);
+        });
     }
 }
