@@ -46,7 +46,7 @@ test('a failed title activity transition does not write an audit record', functi
 });
 
 test('pull eligibility stays aligned with its guard', function (string $factoryState, bool $canPull) {
-    $eligibility = new TitleLifecycleEligibility();
+    $eligibility = new TitleLifecycleEligibility;
     $title = Title::factory()->{$factoryState}()->create();
 
     expect($eligibility->allows($title, TitleLifecycleTransition::Pull))->toBe($canPull);

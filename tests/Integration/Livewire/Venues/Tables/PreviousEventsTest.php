@@ -19,7 +19,7 @@ beforeEach(function (): void {
 describe('PreviousEvents configuration', function (): void {
     it('requires a venue', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousEvents())->builder())
+        expect(fn () => (new PreviousEvents)->builder())
             ->toThrow(LogicException::class, 'A venue was not provided.');
     });
 });
@@ -40,7 +40,7 @@ describe('PreviousEvents query', function (): void {
         Event::factory()->atVenue(Venue::factory()->create())->create([
             'date' => Date::parse('2026-08-01'),
         ]);
-        $table = new PreviousEvents();
+        $table = new PreviousEvents;
         $table->venueId = $this->venue->id;
 
         // Act

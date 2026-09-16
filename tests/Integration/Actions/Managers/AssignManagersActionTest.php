@@ -104,7 +104,7 @@ it('accepts an empty manager collection', function () {
 
     resolve(AssignManagersAction::class)->handle(
         $wrestler,
-        new Collection(),
+        new Collection,
         now(),
     );
 
@@ -115,7 +115,7 @@ it('preserves each manager assignment when a manager is reassigned', function ()
     $wrestler = Wrestler::factory()->create();
     $manager = Manager::factory()->create();
     $managers = new Collection([$manager]);
-    $noManagers = new Collection();
+    $noManagers = new Collection;
     $firstHiredAt = now()->subDays(4)->startOfSecond();
     $firstFiredAt = now()->subDays(3)->startOfSecond();
     $secondHiredAt = now()->subDays(2)->startOfSecond();

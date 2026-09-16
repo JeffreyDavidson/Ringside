@@ -19,7 +19,7 @@ use function Pest\Laravel\actingAs;
  */
 describe('UserPolicy global Gate hook', function () {
     beforeEach(function () {
-        $this->policy = new UserPolicy();
+        $this->policy = new UserPolicy;
         $this->administrator = administrator();
         $this->basicUser = basicUser();
     });
@@ -69,7 +69,7 @@ describe('UserPolicy global Gate hook', function () {
 
 describe('UserPolicy individual methods', function () {
     beforeEach(function () {
-        $this->policy = new UserPolicy();
+        $this->policy = new UserPolicy;
         $this->basicUser = basicUser();
     });
 
@@ -194,7 +194,7 @@ describe('UserPolicy method signatures', function () {
 
 describe('UserPolicy business context', function () {
     beforeEach(function () {
-        $this->policy = new UserPolicy();
+        $this->policy = new UserPolicy;
     });
 
     test('policy supports user management operations via the global Gate hook', function () {
@@ -256,12 +256,12 @@ describe('UserPolicy business context', function () {
 
 describe('UserPolicy edge cases and security', function () {
     beforeEach(function () {
-        $this->policy = new UserPolicy();
+        $this->policy = new UserPolicy;
     });
 
     test('policy is consistent across multiple instances', function () {
-        $policy1 = new UserPolicy();
-        $policy2 = new UserPolicy();
+        $policy1 = new UserPolicy;
+        $policy2 = new UserPolicy;
 
         expect($policy1->viewAny(basicUser()))->toBe($policy2->viewAny(basicUser()));
     });

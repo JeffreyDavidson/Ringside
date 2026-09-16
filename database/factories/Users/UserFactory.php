@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Database\Factories\Users;
 
 use App\Enums\Users\Role;
+use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Users\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {

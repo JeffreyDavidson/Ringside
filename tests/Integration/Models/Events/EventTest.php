@@ -23,12 +23,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('Event Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $event = new Event();
+            $event = new Event;
             expect($event->getTable())->toBe('events');
         });
 
         test('has correct fillable properties', function () {
-            $event = new Event();
+            $event = new Event;
 
             expect($event->getFillable())->toEqual([
                 'name',
@@ -39,19 +39,19 @@ describe('Event Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $event = new Event();
+            $event = new Event;
             $casts = $event->getCasts();
 
             expect($casts['date'])->toBe('datetime');
         });
 
         test('has custom eloquent builder', function () {
-            $event = new Event();
+            $event = new Event;
             expect($event->query())->toBeInstanceOf(EventBuilder::class);
         });
 
         test('has correct default values', function () {
-            $event = new Event();
+            $event = new Event;
 
             // Model has no custom default values
             expect($event)->toBeInstanceOf(Event::class);
@@ -66,7 +66,7 @@ describe('Event Model Integration Tests', function () {
     });
 
     test('defines its match relationship directly', function () {
-        $relation = (new Event())->matches();
+        $relation = (new Event)->matches();
 
         expect($relation)->toBeInstanceOf(HasMany::class)
             ->and($relation->getRelated())->toBeInstanceOf(EventMatch::class);

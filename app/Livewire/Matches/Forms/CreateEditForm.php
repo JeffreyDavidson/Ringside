@@ -126,15 +126,15 @@ class CreateEditForm extends BaseForm
             ],
             'preview' => ['sometimes', 'string'],
             'referees' => ['required', 'array', 'min:1'],
-            'referees.*' => ['bail', 'integer', 'exists:referees,id', new RefereeIsBookable()],
+            'referees.*' => ['bail', 'integer', 'exists:referees,id', new RefereeIsBookable],
             'titles' => ['sometimes', 'array'],
             'titles.*' => [
                 'bail',
                 'integer',
                 'exists:titles,id',
-                new IsActive(),
-                new MatchesCompetitorType(),
-                new CurrentChampionIsCompeting(),
+                new IsActive,
+                new MatchesCompetitorType,
+                new CurrentChampionIsCompeting,
             ],
         ];
 

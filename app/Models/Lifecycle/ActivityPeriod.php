@@ -20,7 +20,6 @@ use Illuminate\Support\Carbon;
  * @property string $activeable_type
  * @property Carbon $started_at
  * @property Carbon|null $ended_at
- *
  * @property-read Model $activeable
  */
 #[Fillable('started_at', 'ended_at')]

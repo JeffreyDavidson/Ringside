@@ -13,7 +13,7 @@ test('it creates an unformed stable without a start date', function (): void {
     $data = new StableData(
         name: '  The Alliance  ',
         start_date: null,
-        members: new StableMembershipData(),
+        members: new StableMembershipData,
     );
 
     $stable = resolve(CreateAction::class)->handle($data);

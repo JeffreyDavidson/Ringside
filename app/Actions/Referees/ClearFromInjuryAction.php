@@ -31,6 +31,7 @@ class ClearFromInjuryAction
      *
      * @param  Referee  $referee  The injured referee to clear
      * @param  Carbon|null  $recoveryDate  The recovery date (defaults to now)
+     *
      * @throws CannotBeClearedFromInjuryException When referee cannot be cleared due to business rules
      */
     public function handle(Referee $referee, ?Carbon $recoveryDate = null): void

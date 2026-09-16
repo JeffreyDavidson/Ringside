@@ -21,7 +21,7 @@ beforeEach(function (): void {
 describe('PreviousManagers configuration', function (): void {
     it('requires a tag team', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousManagers())->builder())
+        expect(fn () => (new PreviousManagers)->builder())
             ->toThrow(LogicException::class, 'A tag team was not provided.');
     });
 });
@@ -59,7 +59,7 @@ describe('PreviousManagers query', function (): void {
             'hired_at' => Date::now()->subDays(2),
             'fired_at' => Date::now()->subDay(),
         ]);
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act
@@ -87,7 +87,7 @@ describe('PreviousManagers query', function (): void {
             'hired_at' => Date::now()->subMonths(2),
             'fired_at' => Date::now()->subMonth(),
         ]);
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act
@@ -111,7 +111,7 @@ describe('PreviousManagers query', function (): void {
             'fired_at' => Date::now()->subWeek(),
         ]);
         $manager->delete();
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act
@@ -130,7 +130,7 @@ describe('PreviousManagers query', function (): void {
             'hired_at' => Date::now()->subYear(),
             'fired_at' => Date::now()->subMonth(),
         ]);
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->tagTeamId = $this->tagTeam->id;
         $assignment = $table->builder()->firstOrFail();
         DB::flushQueryLog();

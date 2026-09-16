@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 it('defines manager assignment relationships', function () {
-    $wrestler = new Wrestler();
+    $wrestler = new Wrestler;
     $managers = $wrestler->managers();
 
     expect($managers)->toBeInstanceOf(BelongsToMany::class)
-        ->and($managers->getTable())->toBe((new WrestlerManager())->getTable())
+        ->and($managers->getTable())->toBe((new WrestlerManager)->getTable())
         ->and($managers->getPivotClass())->toBe(WrestlerManager::class)
         ->and($managers->getPivotColumns())->toContain('hired_at', 'fired_at', 'created_at', 'updated_at')
         ->and($wrestler->currentManagers()->toRawSql())->toContain('"fired_at" is null')
@@ -22,14 +22,14 @@ it('defines manager assignment relationships', function () {
 });
 
 it('defines stable membership relationships', function () {
-    $wrestler = new Wrestler();
+    $wrestler = new Wrestler;
     $stables = $wrestler->stables();
     $currentStable = $wrestler->currentStable();
 
     expect($stables)->toBeInstanceOf(BelongsToMany::class)
         ->and($currentStable)->toBeInstanceOf(HasOneThrough::class)
         ->and($stables->getRelated())->toBeInstanceOf(Stable::class)
-        ->and($stables->getTable())->toBe((new StableWrestler())->getTable())
+        ->and($stables->getTable())->toBe((new StableWrestler)->getTable())
         ->and($stables->getForeignPivotKeyName())->toBe('wrestler_id')
         ->and($stables->getPivotClass())->toBe(StableWrestler::class)
         ->and($stables->getPivotColumns())->toContain('joined_at', 'left_at', 'created_at', 'updated_at')

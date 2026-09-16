@@ -20,7 +20,7 @@ beforeEach(function (): void {
 describe('PreviousMatches configuration', function (): void {
     it('requires a wrestler', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousMatches())->builder())
+        expect(fn () => (new PreviousMatches)->builder())
             ->toThrow(LogicException::class, 'A wrestler was not provided.');
     });
 });
@@ -44,7 +44,7 @@ describe('PreviousMatches query', function (): void {
             ->for(Event::factory()->past())
             ->withCompetitors(Wrestler::factory()->count(2)->create()->all())
             ->create();
-        $table = new PreviousMatches();
+        $table = new PreviousMatches;
         $table->wrestlerId = $this->wrestler->id;
 
         // Act

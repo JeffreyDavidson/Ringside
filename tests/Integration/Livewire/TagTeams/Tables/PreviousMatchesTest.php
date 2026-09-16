@@ -20,7 +20,7 @@ beforeEach(function (): void {
 describe('PreviousMatches configuration', function (): void {
     it('requires a tag team', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousMatches())->builder())
+        expect(fn () => (new PreviousMatches)->builder())
             ->toThrow(LogicException::class, 'A tag team was not provided.');
     });
 });
@@ -44,7 +44,7 @@ describe('PreviousMatches query', function (): void {
             ->for(Event::factory()->past())
             ->withCompetitors(TagTeam::factory()->count(2)->create()->all())
             ->create();
-        $table = new PreviousMatches();
+        $table = new PreviousMatches;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act

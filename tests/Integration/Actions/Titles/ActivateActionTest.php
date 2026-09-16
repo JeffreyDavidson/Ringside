@@ -190,7 +190,7 @@ test('it successfully activates a title with future activation', function () {
 });
 
 test('title can be debuted when in correct state', function () {
-    $eligibility = new TitleLifecycleEligibility();
+    $eligibility = new TitleLifecycleEligibility;
     $undebutedTitle = Title::factory()->unactivated()->create();
     $inactiveTitle = Title::factory()->inactive()->create();
     $activeTitle = Title::factory()->active()->create();
@@ -201,7 +201,7 @@ test('title can be debuted when in correct state', function () {
 });
 
 test('title can be reinstated when in correct state', function () {
-    $eligibility = new TitleLifecycleEligibility();
+    $eligibility = new TitleLifecycleEligibility;
     $inactiveTitle = Title::factory()->inactive()->create();
     $activeTitle = Title::factory()->active()->create();
 
@@ -210,7 +210,7 @@ test('title can be reinstated when in correct state', function () {
 });
 
 test('title debut validation throws correct exceptions', function () {
-    $eligibility = new TitleLifecycleEligibility();
+    $eligibility = new TitleLifecycleEligibility;
     $activeTitle = Title::factory()->active()->create();
     $undebutedTitle = Title::factory()->unactivated()->create();
 
@@ -221,7 +221,7 @@ test('title debut validation throws correct exceptions', function () {
 });
 
 test('title reinstatement validation throws correct exceptions', function () {
-    $eligibility = new TitleLifecycleEligibility();
+    $eligibility = new TitleLifecycleEligibility;
     $inactiveTitle = Title::factory()->inactive()->create();
     $activeTitle = Title::factory()->active()->create();
 

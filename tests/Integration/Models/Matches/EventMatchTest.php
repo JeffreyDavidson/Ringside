@@ -22,12 +22,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 describe('EventMatch Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $eventMatch = new EventMatch();
+            $eventMatch = new EventMatch;
             expect($eventMatch->getTable())->toBe('events_matches');
         });
 
         test('has correct fillable properties', function () {
-            $eventMatch = new EventMatch();
+            $eventMatch = new EventMatch;
 
             expect($eventMatch->getFillable())->toEqual([
                 'event_id',
@@ -41,7 +41,7 @@ describe('EventMatch Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $eventMatch = new EventMatch();
+            $eventMatch = new EventMatch;
             $casts = $eventMatch->getCasts();
 
             expect($casts)->toBeArray();
@@ -51,13 +51,13 @@ describe('EventMatch Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $eventMatch = new EventMatch();
+            $eventMatch = new EventMatch;
             // EventMatch model has no custom builder
             expect($eventMatch->query())->toBeObject();
         });
 
         test('has correct default values', function () {
-            $eventMatch = new EventMatch();
+            $eventMatch = new EventMatch;
             // EventMatch model has no custom default values
             expect($eventMatch)->toBeInstanceOf(EventMatch::class);
         });
@@ -96,7 +96,7 @@ describe('EventMatch Model Integration Tests', function () {
 
     describe('business logic methods', function () {
         test('has required relationship methods', function () {
-            $eventMatch = new EventMatch();
+            $eventMatch = new EventMatch;
 
             // EventMatch model has standard Eloquent relationships but no custom business methods
             expect($eventMatch)->toBeInstanceOf(EventMatch::class);

@@ -30,6 +30,7 @@ class InjureAction
      *
      * @param  Manager  $manager  The manager to mark as injured
      * @param  Carbon|null  $injureDate  The injury date (defaults to now)
+     *
      * @throws CannotBeInjuredException When manager cannot be injured due to business rules
      */
     public function handle(Manager $manager, ?Carbon $injureDate = null): void

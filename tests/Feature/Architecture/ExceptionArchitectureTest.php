@@ -105,10 +105,10 @@ test('application and test code construct business exceptions through factories'
                 continue;
             }
 
-            $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
-            $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
+            $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($contents);
+            $resolvedStatements = (new NodeTraverser(new NameResolver))->traverse($statements ?? []);
 
-            foreach ((new NodeFinder())->findInstanceOf($resolvedStatements, New_::class) as $construction) {
+            foreach ((new NodeFinder)->findInstanceOf($resolvedStatements, New_::class) as $construction) {
                 if (! $construction->class instanceof Name) {
                     continue;
                 }
@@ -130,9 +130,9 @@ test('application and test code construct business exceptions through factories'
 
 test('application and test code do not catch generic exception types', function () {
     $genericCatchTypes = function (string $contents): array {
-        $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
-        $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
-        $catchClauses = (new NodeFinder())->findInstanceOf($resolvedStatements, Catch_::class);
+        $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($contents);
+        $resolvedStatements = (new NodeTraverser(new NameResolver))->traverse($statements ?? []);
+        $catchClauses = (new NodeFinder)->findInstanceOf($resolvedStatements, Catch_::class);
 
         return collect($catchClauses)
             ->flatMap(fn (Catch_ $catchClause): array => $catchClause->types)
@@ -198,11 +198,11 @@ test('every concrete exception factory has an enforced caller', function () {
                 return [];
             }
 
-            $statements = (new ParserFactory())->createForNewestSupportedVersion()->parse($contents);
-            $resolvedStatements = (new NodeTraverser(new NameResolver()))->traverse($statements ?? []);
+            $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($contents);
+            $resolvedStatements = (new NodeTraverser(new NameResolver))->traverse($statements ?? []);
             $calledFactories = [];
 
-            foreach ((new NodeFinder())->findInstanceOf($resolvedStatements, StaticCall::class) as $call) {
+            foreach ((new NodeFinder)->findInstanceOf($resolvedStatements, StaticCall::class) as $call) {
                 if (! $call->class instanceof Name || ! $call->name instanceof Identifier) {
                     continue;
                 }

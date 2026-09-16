@@ -12,6 +12,6 @@ test('synchronization ends omitted current assignments', function () {
     $wrestler = Wrestler::factory()->create();
     $manager = Manager::factory()->create();
     resolve(AssignManagersAction::class)->handle($wrestler, new Collection([$manager]), now()->subDay());
-    resolve(SynchronizeManagerAssignmentsAction::class)->handle($wrestler, new Collection(), now());
+    resolve(SynchronizeManagerAssignmentsAction::class)->handle($wrestler, new Collection, now());
     expect($wrestler->currentManagers()->exists())->toBeFalse();
 });

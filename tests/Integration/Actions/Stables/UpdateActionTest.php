@@ -16,7 +16,7 @@ test('it rejects an activity end date before the start date', function () {
     $data = new StableData(
         name: 'Updated Name',
         start_date: $startedAt,
-        members: new StableMembershipData(),
+        members: new StableMembershipData,
         end_date: $startedAt->copy()->subSecond(),
     );
 

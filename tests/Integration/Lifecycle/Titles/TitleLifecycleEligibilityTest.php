@@ -10,7 +10,7 @@ use App\Models\Titles\Title;
 
 describe('title lifecycle eligibility', function () {
     test('keeps the retirement predicate aligned with its guard', function (string $factoryState, bool $canBeRetired) {
-        $eligibility = new TitleLifecycleEligibility();
+        $eligibility = new TitleLifecycleEligibility;
         $title = Title::factory()->{$factoryState}()->create();
 
         expect($eligibility->allows($title, TitleLifecycleTransition::Retire))->toBe($canBeRetired);
@@ -34,7 +34,7 @@ describe('title lifecycle eligibility', function () {
     ]);
 
     test('rejects unretiring a deleted retired title consistently', function () {
-        $eligibility = new TitleLifecycleEligibility();
+        $eligibility = new TitleLifecycleEligibility;
         $title = Title::factory()->retired()->create();
         $title->delete();
 
@@ -47,7 +47,7 @@ describe('title lifecycle eligibility', function () {
     });
 
     test('keeps the unretirement predicate aligned with its guard', function (string $factoryState, bool $canBeUnretired) {
-        $eligibility = new TitleLifecycleEligibility();
+        $eligibility = new TitleLifecycleEligibility;
         $title = Title::factory()->{$factoryState}()->create();
 
         expect($eligibility->allows($title, TitleLifecycleTransition::Unretire))->toBe($canBeUnretired);

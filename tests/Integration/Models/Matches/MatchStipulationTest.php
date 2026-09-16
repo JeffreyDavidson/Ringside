@@ -22,12 +22,12 @@ use Illuminate\Database\Eloquent\Model;
 describe('MatchStipulation Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $matchStipulation = new MatchStipulation();
+            $matchStipulation = new MatchStipulation;
             expect($matchStipulation->getTable())->toBe('matches_stipulations');
         });
 
         test('has correct fillable properties', function () {
-            $matchStipulation = new MatchStipulation();
+            $matchStipulation = new MatchStipulation;
             expect($matchStipulation->getFillable())->toEqual([
                 'name',
                 'slug',
@@ -37,19 +37,19 @@ describe('MatchStipulation Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $matchStipulation = new MatchStipulation();
+            $matchStipulation = new MatchStipulation;
             $casts = $matchStipulation->getCasts();
 
             expect($casts['is_active'])->toBe('boolean');
         });
 
         test('has custom eloquent builder', function () {
-            $matchStipulation = new MatchStipulation();
+            $matchStipulation = new MatchStipulation;
             expect($matchStipulation->query())->toBeObject();
         });
 
         test('has correct default values', function () {
-            $matchStipulation = new MatchStipulation();
+            $matchStipulation = new MatchStipulation;
             expect($matchStipulation->is_active)->toBe(true);
         });
     });
@@ -86,7 +86,7 @@ describe('MatchStipulation Model Integration Tests', function () {
 
     describe('model inheritance', function () {
         test('extends eloquent model', function () {
-            $matchStipulation = new MatchStipulation();
+            $matchStipulation = new MatchStipulation;
             expect($matchStipulation)->toBeInstanceOf(Model::class);
         });
     });

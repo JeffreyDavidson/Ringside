@@ -30,13 +30,13 @@ final class InjuryStateModel extends Model implements Injurable
     /** @return MorphMany<Injury, self> */
     public function injuries(): MorphMany
     {
-        return new MorphMany($this->injuryBuilder(false), new self(), 'injurable_type', 'injurable_id', 'id');
+        return new MorphMany($this->injuryBuilder(false), new self, 'injurable_type', 'injurable_id', 'id');
     }
 
     /** @return MorphOne<Injury, self> */
     private function injuryHasOne(bool $exists): MorphOne
     {
-        return new MorphOne($this->injuryBuilder($exists), new self(), 'injurable_type', 'injurable_id', 'id');
+        return new MorphOne($this->injuryBuilder($exists), new self, 'injurable_type', 'injurable_id', 'id');
     }
 
     /** @return LifecycleStateBuilder<Injury> */
@@ -45,6 +45,6 @@ final class InjuryStateModel extends Model implements Injurable
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
 
-        return new LifecycleStateBuilder($query, new Injury());
+        return new LifecycleStateBuilder($query, new Injury);
     }
 }

@@ -37,8 +37,9 @@ class SplitStableAction
      * @param  string  $newStableName  Name for the new stable
      * @param  StableMembershipData  $membersForNewStable  Members to move to new stable
      * @param  Carbon  $date  The date when the split operation occurs
-     * @throws CannotBeSplitException When the stable or selected members cannot be split
      * @return Stable The newly created stable
+     *
+     * @throws CannotBeSplitException When the stable or selected members cannot be split
      */
     public function handle(
         Stable $originalStable,
@@ -70,6 +71,7 @@ class SplitStableAction
      *
      * @param  Stable  $originalStable  The stable being split
      * @param  StableMembershipData  $membersForNewStable  The members being moved
+     *
      * @throws CannotBeSplitException When split is not feasible
      */
     private function validateSplitMembers(Stable $originalStable, StableMembershipData $membersForNewStable): void

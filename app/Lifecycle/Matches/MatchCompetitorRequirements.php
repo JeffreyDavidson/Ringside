@@ -74,7 +74,7 @@ final class MatchCompetitorRequirements
             throw InvalidMatchConfigurationException::individualCompetitorSidesRequired($match->match_type);
         }
 
-        (new TagTeam())->newCollection($tagTeams->all())->loadMissing('currentWrestlers');
+        (new TagTeam)->newCollection($tagTeams->all())->loadMissing('currentWrestlers');
         $representedWrestlerIds = $tagTeams
             ->flatMap(fn (TagTeam $tagTeam): array => $tagTeam->currentWrestlers->modelKeys());
 

@@ -29,6 +29,7 @@ class EmployAction
      *
      * @param  Manager  $manager  The manager to employ
      * @param  Carbon|null  $startDate  The employment start date (defaults to now)
+     *
      * @throws CannotBeEmployedException When the manager cannot be employed
      */
     public function handle(Manager $manager, ?Carbon $startDate = null): void

@@ -20,7 +20,7 @@ beforeEach(function (): void {
 describe('PreviousTitleChampionshipsTable Configuration', function () {
     it('requires wrestler id to be set', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousTitleChampionships())->builder())
+        expect(fn () => (new PreviousTitleChampionships)->builder())
             ->toThrow(LogicException::class, 'A wrestler was not provided.');
     });
 

@@ -57,7 +57,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read TagTeamWrestler|TagTeamManager|null $pivot
  * @property-read Employment|null $currentEmployment
  * @property-read Employment|null $firstEmployment
@@ -132,7 +131,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @return BelongsToMany<Manager, $this, TagTeamManager> */
     public function managers(): BelongsToMany
     {
-        return $this->belongsToMany(Manager::class, (new TagTeamManager())->getTable())
+        return $this->belongsToMany(Manager::class, (new TagTeamManager)->getTable())
             ->using(TagTeamManager::class)
             ->withPivot(['hired_at', 'fired_at'])
             ->withTimestamps();
@@ -153,7 +152,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     /** @return BelongsToMany<Wrestler, $this, TagTeamWrestler> */
     public function wrestlers(): BelongsToMany
     {
-        return $this->belongsToMany(Wrestler::class, (new TagTeamWrestler())->getTable(), 'tag_team_id', 'wrestler_id')
+        return $this->belongsToMany(Wrestler::class, (new TagTeamWrestler)->getTable(), 'tag_team_id', 'wrestler_id')
             ->using(TagTeamWrestler::class)
             ->withPivot(['joined_at', 'left_at'])
             ->withTimestamps();
@@ -182,7 +181,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     {
         return $this->belongsToMany(
             Stable::class,
-            (new StableTagTeam())->getTable(),
+            (new StableTagTeam)->getTable(),
             'tag_team_id',
             'stable_id',
         )
@@ -201,7 +200,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
             'id',
             'id',
             'stable_id',
-        )->whereNull((new StableTagTeam())->qualifyColumn('left_at'));
+        )->whereNull((new StableTagTeam)->qualifyColumn('left_at'));
     }
 
     /** @return BelongsToMany<Stable, $this, StableTagTeam> */

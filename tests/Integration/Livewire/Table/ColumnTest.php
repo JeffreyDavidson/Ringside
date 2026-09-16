@@ -12,7 +12,7 @@ describe('table column search', function (): void {
         // Arrange
         $matching = User::factory()->create(['first_name' => 'Clara', 'email' => 'match@example.com']);
         User::factory()->create(['first_name' => 'Other', 'email' => 'clara@example.com']);
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $column = Column::make('Name', 'first_name')->searchable();
 
         // Act
@@ -28,7 +28,7 @@ describe('table column search', function (): void {
         $matching = User::factory()->create(['first_name' => 'Chosen', 'email' => 'target@example.com']);
         User::factory()->create(['first_name' => 'Other', 'email' => 'prefix-target@example.com']);
         User::factory()->create(['first_name' => 'target@example.com', 'email' => 'other@example.com']);
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $column = Column::make('Name', 'first_name')->searchable(
             /** @param Builder<User> $query */
             function (Builder $query, string $term): void {
@@ -97,7 +97,7 @@ describe('table column values', function (): void {
             ->toThrow(LogicException::class, 'Table column values must be stringable.');
     })->with([
         'array' => [[]],
-        'non-stringable object' => [new stdClass()],
+        'non-stringable object' => [new stdClass],
     ]);
 
     test('label callbacks receive the row and configured column', function (): void {

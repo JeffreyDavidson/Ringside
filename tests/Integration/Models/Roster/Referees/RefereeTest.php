@@ -31,12 +31,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('Referee Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $referee = new Referee();
+            $referee = new Referee;
             expect($referee->getTable())->toBe('referees');
         });
 
         test('has correct fillable properties', function () {
-            $referee = new Referee();
+            $referee = new Referee;
 
             expect($referee->getFillable())->toEqual([
                 'first_name',
@@ -45,19 +45,19 @@ describe('Referee Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $referee = new Referee();
+            $referee = new Referee;
             $casts = $referee->getCasts();
 
             expect($casts)->not->toHaveKey('status');
         });
 
         test('has custom eloquent builder', function () {
-            $referee = new Referee();
+            $referee = new Referee;
             expect($referee->query())->toBeInstanceOf(RefereeBuilder::class);
         });
 
         test('has correct default values', function () {
-            $referee = new Referee();
+            $referee = new Referee;
             expect($referee->status)->toBe(EmploymentStatus::Unemployed);
         });
     });
@@ -100,7 +100,7 @@ describe('Referee Model Integration Tests', function () {
 
     describe('match relationships', function () {
         test('officiates matches through the referee pivot', function () {
-            $referee = new Referee();
+            $referee = new Referee;
 
             $matches = $referee->matches();
             $previousMatches = $referee->previousMatches();

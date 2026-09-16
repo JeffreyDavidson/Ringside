@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Database\Factories\Roster\TagTeams;
 
 use App\Models\Roster\TagTeams\TagTeam;
+use App\Models\Roster\TagTeams\TagTeamWrestler;
 use App\Models\Roster\Wrestlers\Wrestler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Roster\TagTeams\TagTeamWrestler>
+ * @extends Factory<TagTeamWrestler>
  */
 class TagTeamWrestlerFactory extends Factory
 {

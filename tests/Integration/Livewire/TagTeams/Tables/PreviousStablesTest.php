@@ -19,7 +19,7 @@ beforeEach(function (): void {
 describe('PreviousStables configuration', function (): void {
     it('requires a tag team', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousStables())->builder())
+        expect(fn () => (new PreviousStables)->builder())
             ->toThrow(LogicException::class, 'A tag team was not provided.');
     });
 });
@@ -47,7 +47,7 @@ describe('PreviousStables query', function (): void {
             'joined_at' => Date::now()->subDays(3),
             'left_at' => Date::now()->subDay(),
         ]);
-        $table = new PreviousStables();
+        $table = new PreviousStables;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act
@@ -68,7 +68,7 @@ describe('PreviousStables query', function (): void {
             'left_at' => Date::now()->subWeek(),
         ]);
         $stable->delete();
-        $table = new PreviousStables();
+        $table = new PreviousStables;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act

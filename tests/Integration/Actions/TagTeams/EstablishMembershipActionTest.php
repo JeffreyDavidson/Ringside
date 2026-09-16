@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 it('accepts omitted membership groups', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    resolve(EstablishMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData(), now());
+    resolve(EstablishMembershipAction::class)->handle($tagTeam, new TagTeamMembershipData, now());
 
     expect($tagTeam->wrestlers()->exists())->toBeFalse();
 });
@@ -125,7 +125,7 @@ it('leaves an omitted membership group unchanged', function () {
 it('preserves each wrestler membership when a wrestler rejoins', function () {
     $wrestler = Wrestler::factory()->create();
     $wrestlers = new Collection([$wrestler]);
-    $noWrestlers = new Collection();
+    $noWrestlers = new Collection;
     $firstJoinedAt = now()->subDays(4)->startOfSecond();
     $firstLeftAt = now()->subDays(3)->startOfSecond();
     $secondJoinedAt = now()->subDays(2)->startOfSecond();

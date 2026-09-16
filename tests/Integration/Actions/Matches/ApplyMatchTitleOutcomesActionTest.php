@@ -20,7 +20,7 @@ test('it leaves matches without titles unchanged', function (): void {
 
     resolve(ApplyMatchTitleOutcomesAction::class)->handle(
         $match,
-        new MatchResultData(MatchFinish::Pinfall, null, new Collection()),
+        new MatchResultData(MatchFinish::Pinfall, null, new Collection),
         $match->competitors,
     );
 
@@ -51,7 +51,7 @@ test('it rejects a title match with multiple eligible winners', function (): voi
 
     expect(fn () => resolve(ApplyMatchTitleOutcomesAction::class)->handle(
         $match,
-        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection()),
+        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection),
         $match->competitors()->with('competitor')->get(),
     ))->toThrow(InvalidMatchOutcomeException::class);
 });
@@ -83,7 +83,7 @@ test('it transfers the current singles championship to the winning wrestler', fu
 
     resolve(ApplyMatchTitleOutcomesAction::class)->handle(
         $match,
-        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection()),
+        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection),
         $match->competitors()->with('competitor')->get(),
     );
 

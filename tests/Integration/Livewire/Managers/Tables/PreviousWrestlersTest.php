@@ -21,7 +21,7 @@ beforeEach(function (): void {
 describe('PreviousWrestlers configuration', function (): void {
     it('requires a manager', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousWrestlers())->builder())
+        expect(fn () => (new PreviousWrestlers)->builder())
             ->toThrow(LogicException::class, 'A manager was not provided.');
     });
 });
@@ -58,7 +58,7 @@ describe('PreviousWrestlers query', function (): void {
             'hired_at' => Date::now()->subDays(2),
             'fired_at' => Date::now()->subDay(),
         ]);
-        $table = new PreviousWrestlers();
+        $table = new PreviousWrestlers;
         $table->managerId = $this->manager->id;
 
         // Act
@@ -81,7 +81,7 @@ describe('PreviousWrestlers query', function (): void {
             'fired_at' => Date::now()->subWeek(),
         ]);
         $wrestler->delete();
-        $table = new PreviousWrestlers();
+        $table = new PreviousWrestlers;
         $table->managerId = $this->manager->id;
 
         // Act
@@ -100,7 +100,7 @@ describe('PreviousWrestlers query', function (): void {
             'hired_at' => Date::now()->subYear(),
             'fired_at' => Date::now()->subMonth(),
         ]);
-        $table = new PreviousWrestlers();
+        $table = new PreviousWrestlers;
         $table->managerId = $this->manager->id;
         $assignment = $table->builder()->firstOrFail();
         DB::flushQueryLog();

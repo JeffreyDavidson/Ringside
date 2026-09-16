@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Gate;
 describe('TitlePolicy Integration Tests', function () {
 
     beforeEach(function () {
-        $this->policy = new TitlePolicy();
+        $this->policy = new TitlePolicy;
         $this->admin = administrator();
         $this->basicUser = basicUser();
         $this->title = Title::factory()->create();
@@ -168,7 +168,7 @@ describe('TitlePolicy Integration Tests', function () {
             // Title policy should have fewer methods than wrestler policy
             // since titles don't have employment, injury, or suspension management
             $titleMethods = get_class_methods($this->policy);
-            $wrestlerPolicy = new WrestlerPolicy();
+            $wrestlerPolicy = new WrestlerPolicy;
             $wrestlerMethods = get_class_methods($wrestlerPolicy);
 
             expect(count($titleMethods))->toBeLessThan(count($wrestlerMethods));
@@ -229,8 +229,8 @@ describe('TitlePolicy Integration Tests', function () {
 
     describe('edge cases and security', function () {
         test('policy is consistent across multiple instances', function () {
-            $policy1 = new TitlePolicy();
-            $policy2 = new TitlePolicy();
+            $policy1 = new TitlePolicy;
+            $policy2 = new TitlePolicy;
 
             expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });

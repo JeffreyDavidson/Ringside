@@ -21,7 +21,7 @@ beforeEach(function (): void {
 describe('PreviousManagers configuration', function (): void {
     it('requires a stable', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousManagers())->builder())
+        expect(fn () => (new PreviousManagers)->builder())
             ->toThrow(LogicException::class, 'A stable was not provided.');
     });
 });
@@ -71,7 +71,7 @@ describe('PreviousManagers query', function (): void {
         $currentWrestler->managers()->attach($currentManager, [
             'hired_at' => Date::now()->subMonths(2),
         ]);
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->stableId = $this->stable->id;
 
         // Act

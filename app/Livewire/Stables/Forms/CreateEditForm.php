@@ -201,7 +201,7 @@ class CreateEditForm extends BaseForm
                 'integer',
                 'exists:wrestlers,id',
                 new CanJoinStable(Wrestler::class, $this->stableId(), $stableStartDate),
-                new IsNotInjured(),
+                new IsNotInjured,
                 new NotRepresentedBySelectedTagTeam(collect($this->tag_teams)),
             ],
             'tag_teams' => ['nullable', 'array'],

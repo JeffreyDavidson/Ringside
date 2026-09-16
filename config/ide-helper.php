@@ -1,7 +1,6 @@
 <?php
 
 use Ankurk91\Eloquent\Relations\BelongsToOne;
-use Staudenmeir\EloquentHasManyDeep\HasOneDeep;
 
 return [
     /*

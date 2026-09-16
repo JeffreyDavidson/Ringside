@@ -34,6 +34,7 @@ class UnretireAction
      * @param  Wrestler  $wrestler  The wrestler to unretire
      * @param  Carbon|null  $unretirementDate  The unretirement date (defaults to now)
      * @param  bool  $employImmediately  Whether to employ the wrestler immediately (default: true)
+     *
      * @throws CannotBeUnretiredException When wrestler cannot be unretired due to business rules
      */
     public function handle(Wrestler $wrestler, ?Carbon $unretirementDate = null, bool $employImmediately = true): void

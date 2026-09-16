@@ -18,7 +18,7 @@ beforeEach(function (): void {
 
 describe('wrestler previous managers table', function (): void {
     it('requires a wrestler', function (): void {
-        expect(fn () => (new PreviousManagers())->builder())
+        expect(fn () => (new PreviousManagers)->builder())
             ->toThrow(LogicException::class, 'A wrestler was not provided.');
     });
 
@@ -56,7 +56,7 @@ describe('wrestler previous managers table', function (): void {
             'fired_at' => Date::now()->subDay(),
         ]);
 
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->wrestlerId = $wrestler->id;
 
         // Act
@@ -160,7 +160,7 @@ describe('wrestler previous managers table', function (): void {
             'fired_at' => Date::now()->subMonth(),
         ]);
 
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->wrestlerId = $wrestler->id;
 
         // Act
@@ -186,7 +186,7 @@ describe('wrestler previous managers table', function (): void {
         ]);
         $manager->delete();
 
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
         $table->wrestlerId = $wrestler->id;
 
         // Act
@@ -198,7 +198,7 @@ describe('wrestler previous managers table', function (): void {
 
     it('defines the manager history table configuration', function (): void {
         // Arrange
-        $table = new PreviousManagers();
+        $table = new PreviousManagers;
 
         // Act
         $fields = collect($table->columns())

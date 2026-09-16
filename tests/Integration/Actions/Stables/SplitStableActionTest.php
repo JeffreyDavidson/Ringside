@@ -268,7 +268,7 @@ describe('SplitStableAction Integration Tests', function () {
         test('split rejects empty transfer collections', function () {
             $splitDate = Carbon::now();
 
-            $membersForSplit = new StableMembershipData();
+            $membersForSplit = new StableMembershipData;
 
             expect(fn () => resolve(SplitStableAction::class)->handle(
                 $this->originalStable,

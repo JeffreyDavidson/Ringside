@@ -18,7 +18,7 @@ class TestDataTableComponent extends DataTableComponent
     /** @return Builder<User> */
     public function builder(): Builder
     {
-        return (new User())->newQuery();
+        return (new User)->newQuery();
     }
 
     /** @return array<int, Column> */

@@ -187,7 +187,7 @@ describe('wrestlers table metadata', function (): void {
 
         Wrestler::factory()->employed()->trashed()->create();
 
-        $table = new Main();
+        $table = new Main;
 
         // Act
         $metadata = $table->metadata();

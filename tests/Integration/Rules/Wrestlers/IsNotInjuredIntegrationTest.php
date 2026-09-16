@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 test('it reports an unknown wrestler as a validation error', function () {
     $validator = Validator::make(
         ['wrestler' => 999],
-        ['wrestler' => [new IsNotInjured()]],
+        ['wrestler' => [new IsNotInjured]],
     );
 
     expect($validator->errors()->has('wrestler'))->toBeTrue();

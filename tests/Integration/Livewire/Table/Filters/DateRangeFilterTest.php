@@ -10,7 +10,7 @@ describe('date range filter application', function (): void {
     test('incomplete ranges leave the query unchanged', function (mixed $range): void {
         // Arrange
         $user = User::factory()->create();
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $filter = DateRangeFilter::make('Created At')->filter(
             fn (): never => throw new LogicException('Incomplete ranges must not invoke the callback.'),
         );
@@ -39,7 +39,7 @@ describe('date range filter application', function (): void {
             ['created_at' => '2026-08-31 23:59:59'],
             ['created_at' => '2026-09-01 00:00:00'],
         )->create();
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $filter = DateRangeFilter::make('Created At')->filter(
             /**
              * @param  Builder<User>  $query
@@ -64,7 +64,7 @@ describe('date range filter application', function (): void {
     test('complete ranges leave queries unchanged without a callback', function (): void {
         // Arrange
         $user = User::factory()->create();
-        $query = (new User())->newQuery();
+        $query = (new User)->newQuery();
         $filter = DateRangeFilter::make('Created At');
 
         // Act

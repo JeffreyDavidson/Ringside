@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\QueryException;
 
 it('belongs to a match and owns its competitors', function () {
-    $side = new MatchSide();
+    $side = new MatchSide;
 
     expect($side->match())->toBeInstanceOf(BelongsTo::class)
         ->and($side->competitors())->toBeInstanceOf(HasMany::class)

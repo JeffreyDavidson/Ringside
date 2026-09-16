@@ -39,12 +39,12 @@ class StableBuilder extends Builder
 
     public function previousForTagTeamId(int $tagTeamId): static
     {
-        return $this->previousForMember(new StableTagTeam(), 'tag_team_id', $tagTeamId);
+        return $this->previousForMember(new StableTagTeam, 'tag_team_id', $tagTeamId);
     }
 
     public function previousForWrestlerId(int $wrestlerId): static
     {
-        return $this->previousForMember(new StableWrestler(), 'wrestler_id', $wrestlerId);
+        return $this->previousForMember(new StableWrestler, 'wrestler_id', $wrestlerId);
     }
 
     /**

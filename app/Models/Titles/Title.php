@@ -41,7 +41,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read Collection<int, LifecycleTransition> $lifecycleTransitions
  * @property-read Retirement|null $currentRetirement
  * @property-read Retirement|null $previousRetirement
@@ -49,9 +48,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Retirement> $previousRetirements
  * @property-read TitleChampionship|null $currentChampionship
  * @property-read Collection<int, TitleChampionship> $championships
- *
  * @property TitleType $type
- *
  * @property-read Collection<int, ActivityPeriod> $activityPeriods
  * @property-read ActivityPeriod|null $currentActivityPeriod
  * @property-read ActivityPeriod|null $firstActivityPeriod

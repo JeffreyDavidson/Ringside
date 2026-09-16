@@ -20,7 +20,7 @@ beforeEach(function (): void {
 describe('PreviousWrestlers configuration', function (): void {
     it('requires a tag team', function (): void {
         // Act & Assert
-        expect(fn () => (new PreviousWrestlers())->builder())
+        expect(fn () => (new PreviousWrestlers)->builder())
             ->toThrow(LogicException::class, 'A tag team was not provided.');
     });
 });
@@ -58,7 +58,7 @@ describe('PreviousWrestlers query', function (): void {
             'joined_at' => Date::now()->subDays(2),
             'left_at' => Date::now()->subDay(),
         ]);
-        $table = new PreviousWrestlers();
+        $table = new PreviousWrestlers;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act
@@ -86,7 +86,7 @@ describe('PreviousWrestlers query', function (): void {
             'joined_at' => Date::now()->subMonths(2),
             'left_at' => Date::now()->subMonth(),
         ]);
-        $table = new PreviousWrestlers();
+        $table = new PreviousWrestlers;
         $table->tagTeamId = $this->tagTeam->id;
 
         // Act

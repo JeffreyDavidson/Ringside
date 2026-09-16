@@ -30,6 +30,7 @@ class InjureAction
      *
      * @param  Referee  $referee  The referee to mark as injured
      * @param  Carbon|null  $injureDate  The injury date (defaults to now)
+     *
      * @throws CannotBeInjuredException When referee cannot be injured due to business rules
      */
     public function handle(Referee $referee, ?Carbon $injureDate = null): void

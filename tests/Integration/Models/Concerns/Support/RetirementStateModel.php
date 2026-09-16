@@ -30,13 +30,13 @@ final class RetirementStateModel extends Model implements Retirable
     /** @return MorphMany<Retirement, self> */
     public function retirements(): MorphMany
     {
-        return new MorphMany($this->retirementBuilder(false), new self(), 'retirable_type', 'retirable_id', 'id');
+        return new MorphMany($this->retirementBuilder(false), new self, 'retirable_type', 'retirable_id', 'id');
     }
 
     /** @return MorphOne<Retirement, self> */
     private function retirementHasOne(bool $exists): MorphOne
     {
-        return new MorphOne($this->retirementBuilder($exists), new self(), 'retirable_type', 'retirable_id', 'id');
+        return new MorphOne($this->retirementBuilder($exists), new self, 'retirable_type', 'retirable_id', 'id');
     }
 
     /** @return LifecycleStateBuilder<Retirement> */
@@ -45,6 +45,6 @@ final class RetirementStateModel extends Model implements Retirable
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
 
-        return new LifecycleStateBuilder($query, new Retirement());
+        return new LifecycleStateBuilder($query, new Retirement);
     }
 }

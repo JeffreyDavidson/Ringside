@@ -33,12 +33,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('TagTeam Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $tagTeam = new TagTeam();
+            $tagTeam = new TagTeam;
             expect($tagTeam->getTable())->toBe('tag_teams');
         });
 
         test('has correct fillable properties', function () {
-            $tagTeam = new TagTeam();
+            $tagTeam = new TagTeam;
 
             expect($tagTeam->getFillable())->toEqual([
                 'name',
@@ -47,7 +47,7 @@ describe('TagTeam Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $tagTeam = new TagTeam();
+            $tagTeam = new TagTeam;
             $casts = $tagTeam->getCasts();
 
             // Status is computed attribute, no cast needed
@@ -55,12 +55,12 @@ describe('TagTeam Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $tagTeam = new TagTeam();
+            $tagTeam = new TagTeam;
             expect($tagTeam->query())->toBeInstanceOf(TagTeamBuilder::class);
         });
 
         test('has correct default values', function () {
-            $tagTeam = new TagTeam();
+            $tagTeam = new TagTeam;
 
             // Test specific status default value
             expect($tagTeam->status)->toBe(EmploymentStatus::Unemployed);

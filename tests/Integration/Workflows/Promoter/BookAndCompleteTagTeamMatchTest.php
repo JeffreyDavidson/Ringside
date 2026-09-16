@@ -37,7 +37,7 @@ test('a promoter can book and complete a tag team match', function (): void {
     $winningSide = $match->sides()->where('position', 1)->firstOrFail();
     $completedMatch = resolve(RecordResultAction::class)->handle(
         $match,
-        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection()),
+        new MatchResultData(MatchFinish::Pinfall, $winningSide, new Collection),
     );
 
     // Assert

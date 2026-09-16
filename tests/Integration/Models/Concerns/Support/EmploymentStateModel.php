@@ -40,13 +40,13 @@ final class EmploymentStateModel extends Model implements Employable
     /** @return MorphMany<Employment, self> */
     public function employments(): MorphMany
     {
-        return new MorphMany($this->employmentBuilder($this->employmentExists), new self(), 'employable_type', 'employable_id', 'id');
+        return new MorphMany($this->employmentBuilder($this->employmentExists), new self, 'employable_type', 'employable_id', 'id');
     }
 
     /** @return MorphOne<Employment, self> */
     private function employmentHasOne(bool $exists): MorphOne
     {
-        return new MorphOne($this->employmentBuilder($exists), new self(), 'employable_type', 'employable_id', 'id');
+        return new MorphOne($this->employmentBuilder($exists), new self, 'employable_type', 'employable_id', 'id');
     }
 
     /** @return LifecycleStateBuilder<Employment> */
@@ -55,6 +55,6 @@ final class EmploymentStateModel extends Model implements Employable
         $query = Double::for(QueryBuilder::class);
         $query->expects('exists')->returns($exists);
 
-        return new LifecycleStateBuilder($query, new Employment());
+        return new LifecycleStateBuilder($query, new Employment);
     }
 }

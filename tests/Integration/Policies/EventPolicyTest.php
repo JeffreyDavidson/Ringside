@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Gate;
 describe('EventPolicy Integration Tests', function () {
 
     beforeEach(function () {
-        $this->policy = new EventPolicy();
+        $this->policy = new EventPolicy;
         $this->admin = administrator();
         $this->basicUser = basicUser();
         $this->event = Event::factory()->create();
@@ -132,8 +132,8 @@ describe('EventPolicy Integration Tests', function () {
 
     describe('edge cases and security', function () {
         test('policy is consistent across multiple instances', function () {
-            $policy1 = new EventPolicy();
-            $policy2 = new EventPolicy();
+            $policy1 = new EventPolicy;
+            $policy2 = new EventPolicy;
 
             expect($policy1->viewAny($this->basicUser))->toBe($policy2->viewAny($this->basicUser));
         });

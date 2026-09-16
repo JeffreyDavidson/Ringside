@@ -25,12 +25,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('Venue Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $venue = new Venue();
+            $venue = new Venue;
             expect($venue->getTable())->toBe('venues');
         });
 
         test('has correct fillable properties', function () {
-            $venue = new Venue();
+            $venue = new Venue;
 
             expect($venue->getFillable())->toEqual([
                 'name',
@@ -43,7 +43,7 @@ describe('Venue Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $venue = new Venue();
+            $venue = new Venue;
             $casts = $venue->getCasts();
 
             expect($casts)->toMatchArray([
@@ -52,12 +52,12 @@ describe('Venue Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $venue = new Venue();
+            $venue = new Venue;
             expect($venue->query())->toBeInstanceOf(VenueBuilder::class);
         });
 
         test('has correct default values', function () {
-            $venue = new Venue();
+            $venue = new Venue;
             // Venue model has no custom default values
             expect($venue)->toBeInstanceOf(Venue::class);
         });
@@ -71,7 +71,7 @@ describe('Venue Model Integration Tests', function () {
     });
 
     test('defines its event relationships directly', function () {
-        $venue = new Venue();
+        $venue = new Venue;
 
         expect($venue->events())->toBeInstanceOf(HasMany::class)
             ->and($venue->events()->getRelated())->toBeInstanceOf(Event::class);

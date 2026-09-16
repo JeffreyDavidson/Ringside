@@ -30,12 +30,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 describe('Manager Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('uses correct table name', function () {
-            $manager = new Manager();
+            $manager = new Manager;
             expect($manager->getTable())->toBe('managers');
         });
 
         test('has correct fillable properties', function () {
-            $manager = new Manager();
+            $manager = new Manager;
 
             expect($manager->getFillable())->toEqual([
                 'first_name',
@@ -44,12 +44,12 @@ describe('Manager Model Integration Tests', function () {
         });
 
         test('has custom eloquent builder', function () {
-            $manager = new Manager();
+            $manager = new Manager;
             expect($manager->query())->toBeInstanceOf(ManagerBuilder::class);
         });
 
         test('has correct default values', function () {
-            $manager = new Manager();
+            $manager = new Manager;
             expect($manager->status)->toBe(EmploymentStatus::Unemployed);
         });
     });

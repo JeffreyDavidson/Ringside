@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\MorphPivot;
 describe('MatchCompetitor Model Integration Tests', function () {
     describe('model attributes and configuration', function () {
         test('has correct fillable properties', function () {
-            $MatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor;
 
             expect($MatchCompetitor->getFillable())->toEqual([
                 'match_id',
@@ -32,7 +32,7 @@ describe('MatchCompetitor Model Integration Tests', function () {
         });
 
         test('has correct casts configuration', function () {
-            $MatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor;
             $casts = $MatchCompetitor->getCasts();
 
             expect($casts)->toBeArray();
@@ -40,39 +40,39 @@ describe('MatchCompetitor Model Integration Tests', function () {
         });
 
         test('uses correct table name', function () {
-            $MatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor;
 
             expect($MatchCompetitor->getTable())->toBe('events_matches_competitors');
         });
 
         test('has correct default values', function () {
-            $MatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor;
 
             // Model has no custom default values
             expect($MatchCompetitor)->toBeInstanceOf(MatchCompetitor::class);
         });
 
         test('has custom eloquent builder', function () {
-            $MatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor;
 
             // Model has no custom builder
             expect($MatchCompetitor->query())->toBeObject();
         });
 
         test('extends MorphPivot base class', function () {
-            $MatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor;
 
             expect($MatchCompetitor)->toBeInstanceOf(MorphPivot::class);
         });
 
         test('uses custom collection class', function () {
-            expect((new MatchCompetitor())->newCollection())->toBeInstanceOf(MatchCompetitorsCollection::class);
+            expect((new MatchCompetitor)->newCollection())->toBeInstanceOf(MatchCompetitorsCollection::class);
         });
     });
 
     describe('trait integration', function () {
         test('extends MorphPivot class', function () {
-            $MatchCompetitor = new MatchCompetitor();
+            $MatchCompetitor = new MatchCompetitor;
             expect($MatchCompetitor)->toBeInstanceOf(MorphPivot::class);
         });
     });

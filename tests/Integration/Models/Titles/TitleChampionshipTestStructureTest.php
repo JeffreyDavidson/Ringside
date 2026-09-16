@@ -19,12 +19,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 describe('TitleChampionship Model Integration Tests', function () {
     describe('title championship attributes and configuration', function () {
         test('title championship uses correct table name', function () {
-            $titleChampionship = new TitleChampionship();
+            $titleChampionship = new TitleChampionship;
             expect($titleChampionship->getTable())->toBe('titles_championships');
         });
 
         test('title championship has correct fillable properties', function () {
-            $titleChampionship = new TitleChampionship();
+            $titleChampionship = new TitleChampionship;
 
             expect($titleChampionship->getFillable())->toEqual([
                 'title_id',
@@ -38,7 +38,7 @@ describe('TitleChampionship Model Integration Tests', function () {
         });
 
         test('title championship has correct casts configuration', function () {
-            $titleChampionship = new TitleChampionship();
+            $titleChampionship = new TitleChampionship;
             $casts = $titleChampionship->getCasts();
 
             expect($casts['won_at'])->toBe('datetime');
@@ -47,7 +47,7 @@ describe('TitleChampionship Model Integration Tests', function () {
         });
 
         test('title championship has correct default values', function () {
-            $titleChampionship = new TitleChampionship();
+            $titleChampionship = new TitleChampionship;
             // TitleChampionship model has no custom default values
             expect($titleChampionship)->toBeInstanceOf(TitleChampionship::class);
         });

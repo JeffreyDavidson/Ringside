@@ -12,7 +12,7 @@ use App\Models\Roster\Wrestlers\Wrestler;
 
 describe('individual suspension eligibility', function () {
     test('keeps the suspension predicate aligned with its guard', function (string $factoryState, bool $canBeSuspended) {
-        $eligibility = new IndividualSuspensionEligibility();
+        $eligibility = new IndividualSuspensionEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canSuspend($wrestler))->toBe($canBeSuspended);
@@ -37,7 +37,7 @@ describe('individual suspension eligibility', function () {
     ]);
 
     test('supports each individual roster model', function (string $modelClass) {
-        $eligibility = new IndividualSuspensionEligibility();
+        $eligibility = new IndividualSuspensionEligibility;
         $individual = $modelClass::factory()->employed()->create();
 
         expect($eligibility->canSuspend($individual))->toBeTrue()
@@ -50,7 +50,7 @@ describe('individual suspension eligibility', function () {
     ]);
 
     test('treats future employment as distinct from released employment', function () {
-        $eligibility = new IndividualSuspensionEligibility();
+        $eligibility = new IndividualSuspensionEligibility;
         $wrestler = Wrestler::factory()->released()->withFutureEmployment()->create();
 
         expect($wrestler->status)->toBe(EmploymentStatus::FutureEmployment)
@@ -62,7 +62,7 @@ describe('individual suspension eligibility', function () {
     });
 
     test('keeps the reinstatement predicate aligned with its guard', function (string $factoryState, bool $canBeReinstated) {
-        $eligibility = new IndividualSuspensionEligibility();
+        $eligibility = new IndividualSuspensionEligibility;
         $wrestler = Wrestler::factory()->{$factoryState}()->create();
 
         expect($eligibility->canReinstate($wrestler))->toBe($canBeReinstated);

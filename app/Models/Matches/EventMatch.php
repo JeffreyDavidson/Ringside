@@ -42,7 +42,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read MatchCompetitor|null $pivot
  * @property-read MatchCompetitorsCollection<int, MatchCompetitor> $competitors
  * @property-read Event $event
@@ -158,7 +157,7 @@ class EventMatch extends Model implements SoftDeletable
      */
     public function wrestlers(): MorphToMany
     {
-        return $this->morphedByMany(Wrestler::class, 'competitor', (new MatchCompetitor())->getTable(), 'match_id')
+        return $this->morphedByMany(Wrestler::class, 'competitor', (new MatchCompetitor)->getTable(), 'match_id')
             ->using(MatchCompetitor::class)
             ->withPivot('match_side_id');
     }
@@ -170,7 +169,7 @@ class EventMatch extends Model implements SoftDeletable
      */
     public function tagTeams(): MorphToMany
     {
-        return $this->morphedByMany(TagTeam::class, 'competitor', (new MatchCompetitor())->getTable(), 'match_id')
+        return $this->morphedByMany(TagTeam::class, 'competitor', (new MatchCompetitor)->getTable(), 'match_id')
             ->using(MatchCompetitor::class)
             ->withPivot('match_side_id');
     }

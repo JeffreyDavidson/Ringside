@@ -39,6 +39,7 @@ class RetireAction
      *
      * @param  Manager  $manager  The manager to retire
      * @param  Carbon|null  $retirementDate  The retirement date (defaults to now)
+     *
      * @throws CannotBeRetiredException When manager cannot be retired due to business rules
      */
     public function handle(Manager $manager, ?Carbon $retirementDate = null): void

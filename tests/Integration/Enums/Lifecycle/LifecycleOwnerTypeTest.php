@@ -19,18 +19,18 @@ test('it resolves supported lifecycle owner models', function (LifecycleOwnerTyp
     expect(LifecycleOwnerType::fromModel($owner))->toBe($ownerType)
         ->and($ownerType->morphAlias())->toBe($owner->getMorphClass());
 })->with([
-    'event' => [LifecycleOwnerType::Event, new Event()],
-    'manager' => [LifecycleOwnerType::Manager, new Manager()],
-    'match' => [LifecycleOwnerType::Match, new EventMatch()],
-    'referee' => [LifecycleOwnerType::Referee, new Referee()],
-    'stable' => [LifecycleOwnerType::Stable, new Stable()],
-    'tag team' => [LifecycleOwnerType::TagTeam, new TagTeam()],
-    'title' => [LifecycleOwnerType::Title, new Title()],
-    'venue' => [LifecycleOwnerType::Venue, new Venue()],
-    'wrestler' => [LifecycleOwnerType::Wrestler, new Wrestler()],
+    'event' => [LifecycleOwnerType::Event, new Event],
+    'manager' => [LifecycleOwnerType::Manager, new Manager],
+    'match' => [LifecycleOwnerType::Match, new EventMatch],
+    'referee' => [LifecycleOwnerType::Referee, new Referee],
+    'stable' => [LifecycleOwnerType::Stable, new Stable],
+    'tag team' => [LifecycleOwnerType::TagTeam, new TagTeam],
+    'title' => [LifecycleOwnerType::Title, new Title],
+    'venue' => [LifecycleOwnerType::Venue, new Venue],
+    'wrestler' => [LifecycleOwnerType::Wrestler, new Wrestler],
 ]);
 
 test('it rejects models that cannot own lifecycle transitions', function () {
-    expect(fn () => LifecycleOwnerType::fromModel(new User()))
+    expect(fn () => LifecycleOwnerType::fromModel(new User))
         ->toThrow(InvalidArgumentException::class, 'Unsupported lifecycle owner');
 });

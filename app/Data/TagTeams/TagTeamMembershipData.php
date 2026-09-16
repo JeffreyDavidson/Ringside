@@ -47,7 +47,7 @@ readonly class TagTeamMembershipData
      */
     public function getWrestlers(): Collection
     {
-        return $this->wrestlers ?? new Collection();
+        return $this->wrestlers ?? new Collection;
     }
 
     /**
@@ -57,7 +57,7 @@ readonly class TagTeamMembershipData
      */
     public function getManagers(): Collection
     {
-        return $this->managers ?? new Collection();
+        return $this->managers ?? new Collection;
     }
 
     /**

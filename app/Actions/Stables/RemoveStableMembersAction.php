@@ -24,6 +24,7 @@ class RemoveStableMembersAction
      * @param  Stable  $stable  The stable to remove members from
      * @param  StableMembershipData  $members  The members to remove
      * @param  Carbon  $removalDate  The date they left
+     *
      * @throws InvalidDateRangeException When the removal date is in the future
      */
     public function handle(Stable $stable, StableMembershipData $members, Carbon $removalDate): void

@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Database\Factories\Events;
 
 use App\Enums\Shared\UnitedStatesState;
+use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Events\Venue>
+ * @extends Factory<Venue>
  */
 class VenueFactory extends Factory
 {

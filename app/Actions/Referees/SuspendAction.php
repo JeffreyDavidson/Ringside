@@ -30,6 +30,7 @@ class SuspendAction
      *
      * @param  Referee  $referee  The referee to suspend
      * @param  Carbon|null  $suspensionDate  The suspension start date (defaults to now)
+     *
      * @throws CannotBeSuspendedException When referee cannot be suspended due to business rules
      */
     public function handle(Referee $referee, ?Carbon $suspensionDate = null): void

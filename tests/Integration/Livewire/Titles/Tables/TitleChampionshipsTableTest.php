@@ -11,7 +11,7 @@ it('displays championship reign length from its dates', function (): void {
         'won_at' => '2025-01-01',
         'lost_at' => '2025-01-11',
     ]);
-    $table = new TitleChampionshipsTable();
+    $table = new TitleChampionshipsTable;
 
     // Act
     $columns = $table->columns();

@@ -268,7 +268,7 @@ describe('titles table metadata', function (): void {
 
         Title::factory()->active()->trashed()->create();
 
-        $table = new Main();
+        $table = new Main;
 
         // Act
         $metadata = $table->metadata();

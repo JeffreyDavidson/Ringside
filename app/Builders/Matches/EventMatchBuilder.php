@@ -145,7 +145,7 @@ class EventMatchBuilder extends Builder
 
     public function latestEventFirst(): static
     {
-        $event = new Event();
+        $event = new Event;
 
         $this->orderByDesc(
             $event->newQuery()

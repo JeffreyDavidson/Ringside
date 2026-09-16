@@ -32,7 +32,7 @@ test('it stores an address across the existing venue columns', function () {
 });
 
 test('it rejects values that are not addresses', function () {
-    $cast = new AddressCast();
+    $cast = new AddressCast;
     $venue = Venue::factory()->make();
 
     expect(fn () => $cast->set($venue, 'address', null, []))

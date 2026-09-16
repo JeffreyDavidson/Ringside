@@ -23,7 +23,7 @@ class ApplyMatchTitleOutcomesAction
     /** @param MatchCompetitorsCollection<int, MatchCompetitor> $competitors */
     public function handle(EventMatch $match, MatchResultData $result, MatchCompetitorsCollection $competitors): void
     {
-        $titleIds = $match->titles()->pluck((new Title())->qualifyColumn('id'));
+        $titleIds = $match->titles()->pluck((new Title)->qualifyColumn('id'));
 
         if ($titleIds->isEmpty()) {
             return;
@@ -70,7 +70,7 @@ class ApplyMatchTitleOutcomesAction
     private function winningCompetitors(MatchResultData $result, MatchCompetitorsCollection $competitors): MatchCompetitorsCollection
     {
         if (! $result->finish->allowsTitleChange() || $result->winningSide === null) {
-            return new MatchCompetitorsCollection();
+            return new MatchCompetitorsCollection;
         }
 
         return $competitors
