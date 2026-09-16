@@ -7,14 +7,13 @@ namespace App\Actions\Managers;
 use App\Lifecycle\Periods\DeletionStateManager;
 use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
 use App\Models\Roster\Managers\Manager;
-use App\Services\Roster\Relationships\ManagerAssignmentService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly ManagerAssignmentService $managerAssignments,
+        private readonly EndManagerAssignmentsForManagerAction $endManagerAssignmentsAction,
         private readonly DeletionStateManager $deletionState,
         private readonly IndividualDeletionEligibility $eligibility,
     ) {}
@@ -42,7 +41,7 @@ class RestoreAction
             $this->deletionState->restore($lockedManager, $effectiveDate);
 
             $lockedManager->employments()->whereNull('ended_at')->update(['ended_at' => $effectiveDate]);
-            $this->managerAssignments->endCurrentAssignments($lockedManager, $effectiveDate);
+            $this->endManagerAssignmentsAction->handle($lockedManager, $effectiveDate);
         });
     }
 }
