@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Stables\CreateAction;
+use App\Actions\Stables\RemoveStableMembersAction;
 use App\Actions\Stables\SplitStableAction;
 use App\Data\Stables\StableMembershipData;
 use App\Enums\Shared\EmploymentStatus;
@@ -462,6 +463,7 @@ describe('SplitStableAction Integration Tests', function () {
             $action = new SplitStableAction(
                 $createAction,
                 resolve(StableMembershipService::class),
+                resolve(RemoveStableMembersAction::class),
                 resolve(StableRestructuringEligibility::class),
             );
 

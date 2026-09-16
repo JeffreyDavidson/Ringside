@@ -40,6 +40,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | app/Policies/** | .ai/rules/policies.md |
 | app/{Livewire,Http/Requests,Actions,Services}/** | .ai/rules/requests-actions-services.md |
 | app/Http/Requests/** | .ai/rules/requests.md |
+| app/{Actions/Stables/**,Services/Roster/Stables/**} | .ai/rules/roster-stables.md |
 | routes/**, routes/web.php | .ai/rules/routes.md |
 | app/Rules/** | .ai/rules/rules.md |
 | app/Exceptions/Scheduling/** | .ai/rules/scheduling.md |

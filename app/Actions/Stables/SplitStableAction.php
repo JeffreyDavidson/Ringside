@@ -23,6 +23,7 @@ class SplitStableAction
     public function __construct(
         protected CreateAction $createAction,
         protected StableMembershipService $membershipService,
+        protected RemoveStableMembersAction $removeStableMembersAction,
         protected StableRestructuringEligibility $eligibility,
     ) {}
 
@@ -58,7 +59,7 @@ class SplitStableAction
                 members: $membersForNewStable
             );
 
-            $this->membershipService->removeMembers($lockedStable, $membersForNewStable, $date);
+            $this->removeStableMembersAction->handle($lockedStable, $membersForNewStable, $date);
 
             return $this->createAction->handle($stableData);
         });

@@ -2,17 +2,19 @@
 
 declare(strict_types=1);
 
+use App\Actions\Stables\AddStableMembersAction;
+use App\Actions\Stables\RemoveStableMembersAction;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\Stables\Stable;
 use App\Models\Roster\Stables\StableTagTeam;
 use App\Models\Roster\Stables\StableWrestler;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Database\Eloquent\Collection;
 
 beforeEach(function () {
-    $this->service = resolve(StableMembershipService::class);
+    $this->addMembers = resolve(AddStableMembersAction::class);
+    $this->removeMembers = resolve(RemoveStableMembersAction::class);
     $this->stable = Stable::factory()->create();
     $this->membershipDate = now()->subDay();
 });
@@ -21,7 +23,7 @@ it('adds wrestlers and tag teams with the same membership date', function () {
     $wrestlers = Wrestler::factory()->count(2)->create();
     $tagTeams = TagTeam::factory()->count(2)->create();
 
-    $this->service->addMembers(
+    $this->addMembers->handle(
         $this->stable,
         new StableMembershipData($wrestlers, $tagTeams),
         $this->membershipDate,
@@ -58,43 +60,15 @@ it('ends wrestler and tag team memberships without deleting their history', func
         new Collection([$wrestler]),
         new Collection([$tagTeam]),
     );
-    $this->service->addMembers($this->stable, $members, $this->membershipDate);
+    $this->addMembers->handle($this->stable, $members, $this->membershipDate);
     $departureDate = now();
 
-    $this->service->removeMembers($this->stable, $members, $departureDate);
+    $this->removeMembers->handle($this->stable, $members, $departureDate);
 
     expect($this->stable->currentWrestlers()->exists())->toBeFalse()
         ->and($this->stable->currentTagTeams()->exists())->toBeFalse()
         ->and($this->stable->previousWrestlers()->whereKey($wrestler->id)->exists())->toBeTrue()
         ->and($this->stable->previousTagTeams()->whereKey($tagTeam->id)->exists())->toBeTrue();
-});
-
-it('synchronizes changed groups while leaving omitted groups untouched', function () {
-    $retainedWrestler = Wrestler::factory()->create();
-    $removedWrestler = Wrestler::factory()->create();
-    $addedWrestler = Wrestler::factory()->create();
-    $tagTeam = TagTeam::factory()->create();
-    $this->service->addMembers(
-        $this->stable,
-        new StableMembershipData(
-            new Collection([$retainedWrestler, $removedWrestler]),
-            new Collection([$tagTeam]),
-        ),
-        $this->membershipDate,
-    );
-
-    $this->service->updateMembership(
-        $this->stable,
-        new StableMembershipData(
-            wrestlers: new Collection([$retainedWrestler, $addedWrestler]),
-        ),
-        now(),
-    );
-
-    expect($this->stable->currentWrestlers()->pluck('wrestlers.id')->all())
-        ->toEqualCanonicalizing([$retainedWrestler->id, $addedWrestler->id])
-        ->and($this->stable->previousWrestlers()->whereKey($removedWrestler->id)->exists())->toBeTrue()
-        ->and($this->stable->currentTagTeams()->whereKey($tagTeam->id)->exists())->toBeTrue();
 });
 
 it('preserves each membership period when members rejoin a stable', function () {
@@ -109,10 +83,10 @@ it('preserves each membership period when members rejoin a stable', function () 
     $secondJoinedAt = now()->subDays(2)->startOfSecond();
     $secondLeftAt = now()->subDay()->startOfSecond();
 
-    $this->service->addMembers($this->stable, $members, $firstJoinedAt);
-    $this->service->removeMembers($this->stable, $members, $firstLeftAt);
-    $this->service->addMembers($this->stable, $members, $secondJoinedAt);
-    $this->service->removeMembers($this->stable, $members, $secondLeftAt);
+    $this->addMembers->handle($this->stable, $members, $firstJoinedAt);
+    $this->removeMembers->handle($this->stable, $members, $firstLeftAt);
+    $this->addMembers->handle($this->stable, $members, $secondJoinedAt);
+    $this->removeMembers->handle($this->stable, $members, $secondLeftAt);
 
     $wrestlerMemberships = StableWrestler::query()
         ->whereBelongsTo($this->stable)

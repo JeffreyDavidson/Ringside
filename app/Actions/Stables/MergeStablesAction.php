@@ -8,7 +8,6 @@ use App\Actions\Lifecycle\EndActivityPeriodAction;
 use App\Data\Stables\StableMembershipData;
 use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
 use App\Models\Roster\Stables\Stable;
-use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +17,8 @@ class MergeStablesAction
      * Create a new merge stables action instance.
      */
     public function __construct(
-        protected StableMembershipService $membershipService,
+        protected RemoveStableMembersAction $removeStableMembersAction,
+        protected AddStableMembersAction $addStableMembersAction,
         protected EndActivityPeriodAction $endActivityPeriodAction,
         protected StableRestructuringEligibility $eligibility,
     ) {}
@@ -62,8 +62,8 @@ class MergeStablesAction
 
             $this->eligibility->ensureMergeMembersAvailable($members);
 
-            $this->membershipService->removeMembers($lockedSecondaryStable, $members, $date);
-            $this->membershipService->addMembers($lockedPrimaryStable, $members, $date);
+            $this->removeStableMembersAction->handle($lockedSecondaryStable, $members, $date);
+            $this->addStableMembersAction->handle($lockedPrimaryStable, $members, $date);
             $this->endActivityPeriodAction->handle($lockedSecondaryStable, $date);
             $lockedSecondaryStable->delete();
         });
