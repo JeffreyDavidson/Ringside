@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Venues;
 
+use App\Lifecycle\Periods\DeletionStateManager;
+use App\Lifecycle\Venues\VenueDeletionEligibility;
 use App\Models\Events\Venue;
-use App\Services\Venues\VenueDeletionService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RestoreAction
 {
     public function __construct(
-        private readonly VenueDeletionService $deletion,
+        private readonly DeletionStateManager $deletionState,
+        private readonly VenueDeletionEligibility $eligibility,
     ) {}
 
     /**
@@ -28,6 +31,11 @@ class RestoreAction
      */
     public function handle(Venue $venue, ?Carbon $restoreDate = null): void
     {
-        $this->deletion->restore($venue, $restoreDate ?? now());
+        DB::transaction(function () use ($venue, $restoreDate): void {
+            $lockedVenue = $venue->refreshForUpdate();
+
+            $this->eligibility->ensureCanRestore($lockedVenue);
+            $this->deletionState->restore($lockedVenue, $restoreDate ?? now());
+        });
     }
 }
