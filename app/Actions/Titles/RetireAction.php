@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Titles;
 
+use App\Actions\Lifecycle\EndActivityPeriodAction;
+use App\Enums\Lifecycle\LifecycleTransitionType;
+use App\Enums\Titles\TitleLifecycleTransition;
+use App\Lifecycle\Periods\RetirementPeriodManager;
+use App\Lifecycle\Titles\ChampionshipReignManager;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
 use App\Models\Titles\Title;
-use App\Services\Titles\TitleRetirementService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RetireAction
 {
     public function __construct(
-        private readonly TitleRetirementService $retirement,
+        private readonly EndActivityPeriodAction $endActivityPeriod,
+        private readonly ChampionshipReignManager $championshipReigns,
+        private readonly RetirementPeriodManager $retirementPeriods,
+        private readonly TitleLifecycleEligibility $eligibility,
     ) {}
 
     /**
@@ -30,6 +39,19 @@ class RetireAction
      */
     public function handle(Title $title, ?Carbon $retirementDate = null): void
     {
-        $this->retirement->retire($title, $retirementDate ?? now());
+        $date = $retirementDate ?? now();
+        $operationalDate = $date->isFuture() ? now() : $date;
+
+        DB::transaction(function () use ($title, $date, $operationalDate): void {
+            $lockedTitle = $title->refreshForUpdate();
+            $this->eligibility->ensureAllowed($lockedTitle, TitleLifecycleTransition::Retire);
+
+            if ($lockedTitle->activityPeriods()->exists() && $lockedTitle->currentActivityPeriod()->exists()) {
+                $this->endActivityPeriod->handle($lockedTitle, $operationalDate);
+            }
+
+            $this->championshipReigns->endCurrentReign($lockedTitle, $date);
+            $this->retirementPeriods->start($lockedTitle, $date, LifecycleTransitionType::Retired);
+        });
     }
 }
