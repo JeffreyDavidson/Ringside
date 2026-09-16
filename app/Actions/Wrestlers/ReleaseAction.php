@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions\Wrestlers;
 
+use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
 use App\Models\Roster\Wrestlers\Wrestler;
-use App\Services\Roster\Individuals\IndividualReleaseService;
+use App\Services\Roster\Individuals\IndividualReleasePeriodService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReleaseAction
 {
     public function __construct(
-        private readonly IndividualReleaseService $release,
+        private readonly IndividualReleasePeriodService $releasePeriods,
+        private readonly IndividualEmploymentEligibility $eligibility,
         private readonly EndCurrentRelationshipsAction $endCurrentRelationships,
     ) {}
 
@@ -20,12 +23,14 @@ class ReleaseAction
      */
     public function handle(Wrestler $wrestler, ?Carbon $releaseDate = null): void
     {
-        $this->release->release(
-            $wrestler,
-            $releaseDate ?? now(),
-            function (Wrestler $lockedWrestler, Carbon $effectiveDate): void {
-                $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate);
-            },
-        );
+        $effectiveDate = $releaseDate ?? now();
+
+        DB::transaction(function () use ($wrestler, $effectiveDate): void {
+            $lockedWrestler = $wrestler->refreshForUpdate();
+
+            $this->eligibility->ensureCanRelease($lockedWrestler);
+            $this->releasePeriods->end($lockedWrestler, $effectiveDate);
+            $this->endCurrentRelationships->handle($lockedWrestler, $effectiveDate);
+        });
     }
 }
