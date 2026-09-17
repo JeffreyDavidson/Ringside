@@ -6,6 +6,7 @@ namespace App\Actions\Referees;
 
 use App\Data\Referees\RefereeData;
 use App\Models\Roster\Referees\Referee;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -40,7 +41,7 @@ class UpdateAction
                 'last_name' => $refereeData->last_name,
             ]);
 
-            if ($refereeData->employment_date !== null && ! $lockedReferee->currentEmployment()->exists()) {
+            if ($refereeData->employment_date instanceof Carbon && ! $lockedReferee->currentEmployment()->exists()) {
                 $this->employAction->handle($lockedReferee, $refereeData->employment_date);
             }
 

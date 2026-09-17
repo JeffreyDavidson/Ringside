@@ -21,6 +21,6 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = self::formatModelContext($venue);
 
-        return new static("{$context} cannot be restored because the name conflicts with existing venue '{$conflictingName}'. Resolve the conflict before restoration.");
+        return new self("{$context} cannot be restored because the name conflicts with existing venue '{$conflictingName}'. Resolve the conflict before restoration.");
     }
 }

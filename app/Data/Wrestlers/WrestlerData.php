@@ -45,6 +45,6 @@ readonly class WrestlerData
      */
     public function hasManagers(): bool
     {
-        return $this->managers !== null && $this->managers->isNotEmpty();
+        return $this->managers instanceof Collection && $this->managers->isNotEmpty();
     }
 }

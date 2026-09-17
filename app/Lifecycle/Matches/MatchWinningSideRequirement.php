@@ -9,6 +9,7 @@ use App\Data\Matches\MatchResultData;
 use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 
 final class MatchWinningSideRequirement
 {
@@ -17,15 +18,15 @@ final class MatchWinningSideRequirement
      */
     public function ensureSatisfied(EventMatch $match, MatchResultData $result, MatchCompetitorsCollection $competitors): void
     {
-        if ($result->finish->requiresWinningSide() && $result->winningSide === null) {
+        if ($result->finish->requiresWinningSide() && ! $result->winningSide instanceof MatchSide) {
             throw InvalidMatchOutcomeException::missingWinningSide();
         }
 
-        if (! $result->finish->requiresWinningSide() && $result->winningSide !== null) {
+        if (! $result->finish->requiresWinningSide() && $result->winningSide instanceof MatchSide) {
             throw InvalidMatchOutcomeException::unexpectedWinningSide();
         }
 
-        if ($result->winningSide === null) {
+        if (! $result->winningSide instanceof MatchSide) {
             return;
         }
 

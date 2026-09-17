@@ -62,7 +62,7 @@ final readonly class LifecyclePeriodWriter
         ?LifecycleTransitionType $transition,
         Carbon $date,
     ): void {
-        if ($transition === null) {
+        if (! $transition instanceof LifecycleTransitionType) {
             return;
         }
 

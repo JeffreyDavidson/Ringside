@@ -28,7 +28,7 @@ abstract class BaseForm extends Form
 
         $this->modelId = $modelId;
 
-        if ($formModel !== null) {
+        if ($formModel instanceof Model) {
             $this->fill($formModel->getAttributes());
             $this->loadModelData($formModel);
         }

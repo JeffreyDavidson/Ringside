@@ -11,6 +11,7 @@ use App\Exceptions\Matches\InvalidMatchOutcomeException;
 use App\Lifecycle\Titles\ChampionshipReignManager;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
+use App\Models\Matches\MatchSide;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 use App\Models\Titles\Title;
@@ -69,7 +70,7 @@ class ApplyMatchTitleOutcomesAction
      */
     private function winningCompetitors(MatchResultData $result, MatchCompetitorsCollection $competitors): MatchCompetitorsCollection
     {
-        if (! $result->finish->allowsTitleChange() || $result->winningSide === null) {
+        if (! $result->finish->allowsTitleChange() || ! $result->winningSide instanceof MatchSide) {
             return new MatchCompetitorsCollection;
         }
 

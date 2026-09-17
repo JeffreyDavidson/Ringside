@@ -23,14 +23,14 @@ final class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} is retired and cannot be reinstated.");
+        return new self("{$context} is retired and cannot be reinstated.");
     }
 
     public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} has not been officially employed and cannot be reinstated.");
+        return new self("{$context} has not been officially employed and cannot be reinstated.");
     }
 
     public static function injured(Wrestler|Manager|Referee $entity, ?string $injuryDetails = null): static

@@ -21,6 +21,6 @@ final class CannotBeRestoredException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new static("{$context} cannot be restored because the name conflicts with existing active tag team '{$conflictingName}'. Resolve name conflicts before restoration.");
+        return new self("{$context} cannot be restored because the name conflicts with existing active tag team '{$conflictingName}'. Resolve name conflicts before restoration.");
     }
 }

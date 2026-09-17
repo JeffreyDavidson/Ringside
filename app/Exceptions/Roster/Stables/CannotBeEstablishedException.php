@@ -27,13 +27,13 @@ final class CannotBeEstablishedException extends BaseBusinessException
     {
         $context = self::formatModelContext($stable);
 
-        return new static("{$context} is retired and cannot be established.");
+        return new self("{$context} is retired and cannot be established.");
     }
 
     public static function insufficientMembers(Stable $stable, int $currentMembers, int $minimumMembers): static
     {
         $context = self::formatModelContext($stable);
 
-        return new static("{$context} has {$currentMembers} members but requires at least {$minimumMembers} members to be established.");
+        return new self("{$context} has {$currentMembers} members but requires at least {$minimumMembers} members to be established.");
     }
 }

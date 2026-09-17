@@ -65,7 +65,7 @@ readonly class TagTeamMembershipData
      */
     public function hasWrestlers(): bool
     {
-        return $this->wrestlers !== null && $this->wrestlers->isNotEmpty();
+        return $this->wrestlers instanceof Collection && $this->wrestlers->isNotEmpty();
     }
 
     /**
@@ -73,7 +73,7 @@ readonly class TagTeamMembershipData
      */
     public function hasManagers(): bool
     {
-        return $this->managers !== null && $this->managers->isNotEmpty();
+        return $this->managers instanceof Collection && $this->managers->isNotEmpty();
     }
 
     public function combinedWeightInPounds(): int

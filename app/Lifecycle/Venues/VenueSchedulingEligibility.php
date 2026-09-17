@@ -15,7 +15,7 @@ final class VenueSchedulingEligibility
     {
         $events = $venue->events()->where('date', $date);
 
-        if ($except !== null) {
+        if ($except instanceof Event) {
             $events->whereKeyNot($except->getKey());
         }
 

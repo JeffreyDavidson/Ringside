@@ -23,13 +23,13 @@ final class CannotBeReleasedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} is retired and cannot be released.");
+        return new self("{$context} is retired and cannot be released.");
     }
 
     public static function hasFutureEmployment(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} has not been officially employed and cannot be released.");
+        return new self("{$context} has not been officially employed and cannot be released.");
     }
 }

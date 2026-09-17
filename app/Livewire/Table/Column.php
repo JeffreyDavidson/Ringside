@@ -56,7 +56,7 @@ class Column
      */
     public function applySearch(Builder $query, string $searchTerm): void
     {
-        if ($this->searchCallback !== null) {
+        if ($this->searchCallback instanceof Closure) {
             ($this->searchCallback)($query, $searchTerm);
 
             return;

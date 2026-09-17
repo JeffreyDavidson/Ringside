@@ -14,7 +14,7 @@ enum EventStatus: string
 
     public static function fromDate(?CarbonInterface $date): self
     {
-        if ($date === null) {
+        if (! $date instanceof CarbonInterface) {
             return self::Unscheduled;
         }
 

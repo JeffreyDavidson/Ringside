@@ -23,21 +23,21 @@ final class CannotBeSuspendedException extends BaseBusinessException
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} has not been officially employed and cannot be suspended.");
+        return new self("{$context} has not been officially employed and cannot be suspended.");
     }
 
     public static function retired(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} is retired and cannot be suspended.");
+        return new self("{$context} is retired and cannot be suspended.");
     }
 
     public static function released(Wrestler|Manager|Referee $entity): static
     {
         $context = self::formatModelContext($entity);
 
-        return new static("{$context} is released and cannot be suspended.");
+        return new self("{$context} is released and cannot be suspended.");
     }
 
     public static function suspended(Wrestler|Manager|Referee $entity, ?string $currentSuspensionReason = null): static

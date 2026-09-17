@@ -8,6 +8,7 @@ use App\Actions\Managers\SynchronizeManagerAssignmentsAction;
 use App\Data\TagTeams\TagTeamMembershipData;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
@@ -19,7 +20,7 @@ class SynchronizeMembershipAction
 
     public function handle(TagTeam $tagTeam, TagTeamMembershipData $members, Carbon $date): void
     {
-        if ($members->wrestlers !== null) {
+        if ($members->wrestlers instanceof Collection) {
             $currentWrestlers = $tagTeam->currentWrestlers;
 
             foreach ($currentWrestlers->diff($members->wrestlers) as $wrestler) {

@@ -15,7 +15,7 @@ final readonly class MatchCompetitorRuleSet
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
-        if ($this->matchType === null) {
+        if (! $this->matchType instanceof MatchType) {
             return $this->unselectedMatchTypeRules();
         }
 

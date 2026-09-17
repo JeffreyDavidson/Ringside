@@ -34,8 +34,8 @@ readonly class StableMembershipData
      */
     public function isEmpty(): bool
     {
-        return ($this->wrestlers === null || $this->wrestlers->isEmpty()) &&
-               ($this->tagTeams === null || $this->tagTeams->isEmpty());
+        return (! $this->wrestlers instanceof Collection || $this->wrestlers->isEmpty()) &&
+               (! $this->tagTeams instanceof Collection || $this->tagTeams->isEmpty());
     }
 
     /**

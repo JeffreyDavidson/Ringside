@@ -19,7 +19,7 @@ class SynchronizeManagerAssignmentsAction
      */
     public function handle(Manageable $manageable, ?Collection $managers, Carbon $date): void
     {
-        if ($managers === null) {
+        if (! $managers instanceof Collection) {
             return;
         }
 
