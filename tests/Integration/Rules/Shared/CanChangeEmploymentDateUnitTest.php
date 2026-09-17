@@ -29,7 +29,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = managerWithEmploymentPeriod($startedAt);
         $message = null;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'employment_date',
             $startedAt->copy()->subDay(),
             validationFailureCallback(function (string $failure) use (&$message): void {
@@ -44,7 +44,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = Manager::factory()->create();
         $message = null;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             [],
             validationFailureCallback(function (string $failure) use (&$message): void {
@@ -59,7 +59,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = Manager::factory()->create();
         $failed = false;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             now()->addWeek(),
             validationFailureCallback(function () use (&$failed): void {
@@ -74,7 +74,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = managerWithEmploymentPeriod(now()->subMonth());
         $failed = false;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             now()->subMonths(2),
             validationFailureCallback(function () use (&$failed): void {
@@ -89,7 +89,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = managerWithEmploymentPeriod(now()->subMonth());
         $failed = false;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             now()->subWeek(),
             validationFailureCallback(function () use (&$failed): void {
@@ -104,7 +104,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $wrestler = Wrestler::factory()->employed()->create(['name' => 'Test Wrestler']);
         $message = null;
 
-        (new CanChangeEmploymentDate($wrestler))->validate(
+        new CanChangeEmploymentDate($wrestler)->validate(
             'started_at',
             now()->subMonths(2),
             validationFailureCallback(function (string $failure) use (&$message): void {
@@ -119,7 +119,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = managerWithEmploymentPeriod(now()->subMonth());
         $message = null;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             now()->subMonths(2),
             validationFailureCallback(function (string $failure) use (&$message): void {
@@ -134,7 +134,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = managerWithEmploymentPeriod(now()->subMonth());
         $failed = false;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             $value,
             validationFailureCallback(function () use (&$failed): void {
@@ -152,7 +152,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
         $manager = managerWithEmploymentPeriod(now()->subMonth());
         $failed = false;
 
-        (new CanChangeEmploymentDate($manager))->validate(
+        new CanChangeEmploymentDate($manager)->validate(
             'started_at',
             Carbon::parse('2026-06-30'),
             validationFailureCallback(function () use (&$failed): void {
@@ -166,7 +166,7 @@ describe('CanChangeEmploymentDate validation rule', function () {
     test('passes when no model is provided', function () {
         $failed = false;
 
-        (new CanChangeEmploymentDate(null))->validate(
+        new CanChangeEmploymentDate(null)->validate(
             'started_at',
             now()->addWeek(),
             validationFailureCallback(function () use (&$failed): void {

@@ -71,10 +71,8 @@ test('it persists the injury clearance lifecycle', function () {
 test('it prevents clearing non-injured manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->currentInjury()->exists())->toBeFalse();
-
-    expect(fn () => resolve(ClearFromInjuryAction::class)->handle($manager))
-        ->toThrow(Exception::class);
+    expect($manager->currentInjury()->exists())->toBeFalse()
+        ->and(fn() => resolve(ClearFromInjuryAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -103,8 +101,8 @@ test('it handles database transactions correctly', function () {
 test('it maintains employment status during injury clearance', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->currentInjury()->exists())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentInjury()->exists())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($manager);
 

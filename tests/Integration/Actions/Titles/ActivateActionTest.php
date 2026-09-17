@@ -29,13 +29,13 @@ test('it activates an unactivated title at the current datetime by default', fun
 
     // Verify the title is now active and has activity periods
     $refreshedTitle = freshModel($title);
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
+    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue()
+        ->and($refreshedTitle->activityPeriods()->exists())->toBeTrue();
 
     // Verify the debut was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod()->firstOrFail();
-    expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
-    expect($refreshedTitle->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Debuted);
+    expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'))
+        ->and($refreshedTitle->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Debuted);
 });
 
 test('it activates an inactive title at the current datetime by default', function () {
@@ -44,21 +44,21 @@ test('it activates an inactive title at the current datetime by default', functi
 
     // Verify title is initially inactive but has activity periods
     expect($title->currentActivityPeriod()->exists())->toBeFalse();
-    expect($title->activityPeriods()->exists())->toBeTrue();
-    expect($title->currentActivityPeriod()->exists())->toBeFalse();
+    expect($title->activityPeriods()->exists())->toBeTrue()
+        ->and($title->currentActivityPeriod()->exists())->toBeFalse();
 
     // Execute the activation
     resolve(ActivateAction::class)->handle($title);
 
     // Verify the title is now active
     $refreshedTitle = freshModel($title);
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
+    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue()
+        ->and($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
 
     // Verify the reinstatement was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod()->firstOrFail();
-    expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
-    expect($refreshedTitle->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Reinstated);
+    expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'))
+        ->and($refreshedTitle->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Reinstated);
 });
 
 test('it activates an unactivated title at a specific datetime', function () {
@@ -74,9 +74,9 @@ test('it activates an unactivated title at a specific datetime', function () {
 
     // Verify the title has activity periods but is not currently active (future activation)
     $refreshedTitle = freshModel($title);
-    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
-    expect($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so not currently active
+    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue()
+        ->and($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue()
+        ->and($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so not currently active
 
     // Verify the debut was created with the specific datetime
     $activityPeriod = $refreshedTitle->futureActivityPeriod()->firstOrFail();
@@ -89,17 +89,17 @@ test('it activates an inactive title at a specific datetime', function () {
 
     // Verify title is initially inactive but has activity periods
     expect($title->currentActivityPeriod()->exists())->toBeFalse();
-    expect($title->activityPeriods()->exists())->toBeTrue();
-    expect($title->currentActivityPeriod()->exists())->toBeFalse();
+    expect($title->activityPeriods()->exists())->toBeTrue()
+        ->and($title->currentActivityPeriod()->exists())->toBeFalse();
 
     // Execute the activation with specific datetime
     resolve(ActivateAction::class)->handle($title, $datetime);
 
     // Verify the title has future activity but is not currently active (future date)
     $refreshedTitle = freshModel($title);
-    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
-    expect($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so not currently active
+    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue()
+        ->and($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue()
+        ->and($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so not currently active
     expect($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so still inactive until the period begins.
 
     // Verify the reinstatement was created with the specific datetime
@@ -113,16 +113,16 @@ test('it activates a retired title at the current datetime by default', function
 
     // Verify title is initially retired
     expect($title->currentRetirement()->exists())->toBeTrue();
-    expect($title->currentActivityPeriod()->exists())->toBeFalse();
-    expect($title->activityPeriods()->exists())->toBeTrue();
+    expect($title->currentActivityPeriod()->exists())->toBeFalse()
+        ->and($title->activityPeriods()->exists())->toBeTrue();
 
     // Execute the activation (should unretire then reinstate)
     resolve(ActivateAction::class)->handle($title);
 
     // Verify the title is now active and no longer retired
     $refreshedTitle = freshModel($title);
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->currentRetirement()->exists())->toBeFalse();
+    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue()
+        ->and($refreshedTitle->currentRetirement()->exists())->toBeFalse();
 
     // Verify the reinstatement was created with correct datetime
     $activityPeriod = $refreshedTitle->currentActivityPeriod()->firstOrFail();
@@ -130,8 +130,8 @@ test('it activates a retired title at the current datetime by default', function
 
     // Verify retirement was ended
     $latestRetirement = $refreshedTitle->previousRetirement()->firstOrFail();
-    expect($latestRetirement->ended_at)->not()->toBeNull();
-    expect(requiredDate($latestRetirement->ended_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($latestRetirement->ended_at)->not()->toBeNull()
+        ->and(requiredDate($latestRetirement->ended_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
 test('it activates a retired title at a specific datetime', function () {
@@ -140,17 +140,17 @@ test('it activates a retired title at a specific datetime', function () {
 
     // Verify title is initially retired
     expect($title->currentRetirement()->exists())->toBeTrue();
-    expect($title->currentActivityPeriod()->exists())->toBeFalse();
-    expect($title->activityPeriods()->exists())->toBeTrue();
+    expect($title->currentActivityPeriod()->exists())->toBeFalse()
+        ->and($title->activityPeriods()->exists())->toBeTrue();
 
     // Execute the activation with specific datetime (should unretire then reinstate)
     resolve(ActivateAction::class)->handle($title, $datetime);
 
     // Verify the title has future activity but is not currently active (future date) and no longer retired
     $refreshedTitle = freshModel($title);
-    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
-    expect($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so not currently active
+    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue()
+        ->and($refreshedTitle->futureActivityPeriod()->exists())->toBeTrue()
+        ->and($refreshedTitle->currentActivityPeriod()->exists())->toBeFalse(); // Future date, so not currently active
     expect($refreshedTitle->currentRetirement()->exists())->toBeFalse();
 
     // Verify the reinstatement was created with the specific datetime
@@ -159,8 +159,8 @@ test('it activates a retired title at a specific datetime', function () {
 
     // Verify retirement was ended with the specific datetime
     $latestRetirement = $refreshedTitle->previousRetirement()->firstOrFail();
-    expect($latestRetirement->ended_at)->not()->toBeNull();
-    expect(requiredDate($latestRetirement->ended_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($latestRetirement->ended_at)->not()->toBeNull()
+        ->and(requiredDate($latestRetirement->ended_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
 test('it throws exception for activating a non activatable title', function ($factoryState) {
@@ -185,8 +185,8 @@ test('it successfully activates a title with future activation', function () {
 
     // Verify the title is now currently active
     $refreshedTitle = freshModel($title);
-    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue();
-    expect($refreshedTitle->activityPeriods()->exists())->toBeTrue();
+    expect($refreshedTitle->currentActivityPeriod()->exists())->toBeTrue()
+        ->and($refreshedTitle->activityPeriods()->exists())->toBeTrue();
 });
 
 test('title can be debuted when in correct state', function () {
@@ -195,9 +195,9 @@ test('title can be debuted when in correct state', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $activeTitle = Title::factory()->active()->create();
 
-    expect($eligibility->allows($undebutedTitle, TitleLifecycleTransition::Debut))->toBeTrue();
-    expect($eligibility->allows($inactiveTitle, TitleLifecycleTransition::Debut))->toBeFalse();
-    expect($eligibility->allows($activeTitle, TitleLifecycleTransition::Debut))->toBeFalse();
+    expect($eligibility->allows($undebutedTitle, TitleLifecycleTransition::Debut))->toBeTrue()
+        ->and($eligibility->allows($inactiveTitle, TitleLifecycleTransition::Debut))->toBeFalse()
+        ->and($eligibility->allows($activeTitle, TitleLifecycleTransition::Debut))->toBeFalse();
 });
 
 test('title can be reinstated when in correct state', function () {
@@ -205,8 +205,8 @@ test('title can be reinstated when in correct state', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $activeTitle = Title::factory()->active()->create();
 
-    expect($eligibility->allows($inactiveTitle, TitleLifecycleTransition::Reinstate))->toBeTrue();
-    expect($eligibility->allows($activeTitle, TitleLifecycleTransition::Reinstate))->toBeFalse();
+    expect($eligibility->allows($inactiveTitle, TitleLifecycleTransition::Reinstate))->toBeTrue()
+        ->and($eligibility->allows($activeTitle, TitleLifecycleTransition::Reinstate))->toBeFalse();
 });
 
 test('title debut validation throws correct exceptions', function () {
@@ -215,9 +215,9 @@ test('title debut validation throws correct exceptions', function () {
     $undebutedTitle = Title::factory()->unactivated()->create();
 
     expect(fn () => $eligibility->ensureAllowed($activeTitle, TitleLifecycleTransition::Debut))
-        ->toThrow(CannotBeDebutedException::class);
-    expect(fn () => $eligibility->ensureAllowed($undebutedTitle, TitleLifecycleTransition::Debut))
-        ->not()->toThrow(Exception::class);
+        ->toThrow(CannotBeDebutedException::class)
+        ->and(fn() => $eligibility->ensureAllowed($undebutedTitle, TitleLifecycleTransition::Debut))->not()
+        ->toThrow(Exception::class);
 });
 
 test('title reinstatement validation throws correct exceptions', function () {
@@ -225,7 +225,6 @@ test('title reinstatement validation throws correct exceptions', function () {
     $inactiveTitle = Title::factory()->inactive()->create();
     $activeTitle = Title::factory()->active()->create();
 
-    expect(fn () => $eligibility->ensureAllowed($inactiveTitle, TitleLifecycleTransition::Reinstate))->not()->toThrow(Exception::class);
-    expect(fn () => $eligibility->ensureAllowed($activeTitle, TitleLifecycleTransition::Reinstate))
-        ->toThrow(CannotBeReinstatedException::class);
+    expect(fn () => $eligibility->ensureAllowed($inactiveTitle, TitleLifecycleTransition::Reinstate))->not()->toThrow(Exception::class)
+        ->and(fn() => $eligibility->ensureAllowed($activeTitle, TitleLifecycleTransition::Reinstate))->toThrow(CannotBeReinstatedException::class);
 });

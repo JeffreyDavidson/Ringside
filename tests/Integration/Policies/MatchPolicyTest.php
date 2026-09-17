@@ -26,26 +26,26 @@ describe('MatchPolicy Integration Tests', function () {
 
     describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('basic users continue to individual method checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
         });
 
         test('global Gate hook works for arbitrary abilities', function () {
-            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
         });
     });
 
@@ -79,24 +79,23 @@ describe('MatchPolicy Integration Tests', function () {
         test('policy integrates correctly with Gate facade', function () {
             // Test administrator permissions through Gate
             expect(Gate::forUser($this->admin)->allows('viewAny', EventMatch::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('create', EventMatch::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $this->eventMatch))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('create', EventMatch::class))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('update', $this->eventMatch))->toBeTrue();
 
             // Test basic user permissions through Gate
             expect(Gate::forUser($this->basicUser)->denies('viewAny', EventMatch::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('create', EventMatch::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $this->eventMatch))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('create', EventMatch::class))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $this->eventMatch))->toBeTrue();
         });
 
         test('policy works with specific event match instances', function () {
             // Test with specific event match instance
             expect(Gate::forUser($this->admin)->allows('view', $this->eventMatch))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $this->eventMatch))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('delete', $this->eventMatch))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('view', $this->eventMatch))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $this->eventMatch))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('delete', $this->eventMatch))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $this->eventMatch))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('delete', $this->eventMatch))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $this->eventMatch))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $this->eventMatch))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('delete', $this->eventMatch))->toBeTrue();
         });
     });
 

@@ -85,7 +85,7 @@ describe('table column values', function (): void {
         $value = $column->resolveValue([]);
 
         // Assert
-        expect($value)->toBe('');
+        expect($value)->toBeEmpty();
     });
 
     test('unsupported field values fail explicitly', function (mixed $input): void {

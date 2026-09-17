@@ -80,8 +80,8 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify new stable was created
             expect($newStable)->toBeInstanceOf(Stable::class);
-            expect($newStable->name)->toBe($this->newStableName);
-            expect($newStable->currentActivityPeriod()->exists())->toBeTrue();
+            expect($newStable->name)->toBe($this->newStableName)
+                ->and($newStable->currentActivityPeriod()->exists())->toBeTrue();
 
             // Verify new stable has transferred members
             expect($newStable->currentWrestlers()->count())->toBe($this->transferWrestlers->count());
@@ -89,8 +89,8 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify original stable has remaining members
             $refreshedOriginal = freshModel($this->originalStable);
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($initialWrestlerCount - $this->transferWrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($initialTagTeamCount - $this->transferTagTeams->count());
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($initialWrestlerCount - $this->transferWrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($initialTagTeamCount - $this->transferTagTeams->count());
         });
 
         test('split transfers specified members correctly', function () {
@@ -112,8 +112,8 @@ describe('SplitStableAction Integration Tests', function () {
             $newStableWrestlerIds = $newStable->currentWrestlers()->pluck('wrestlers.id');
             $newStableTagTeamIds = $newStable->currentTagTeams()->pluck('tag_teams.id');
 
-            expect($newStableWrestlerIds->sort()->values())->toEqual($transferWrestlerIds->sort()->values());
-            expect($newStableTagTeamIds->sort()->values())->toEqual($transferTagTeamIds->sort()->values());
+            expect($newStableWrestlerIds->sort()->values())->toEqual($transferWrestlerIds->sort()->values())
+                ->and($newStableTagTeamIds->sort()->values())->toEqual($transferTagTeamIds->sort()->values());
 
             // Verify members are no longer in original stable
             $refreshedOriginal = freshModel($this->originalStable);
@@ -188,8 +188,8 @@ describe('SplitStableAction Integration Tests', function () {
             $totalWrestlers = $newStable->currentWrestlers()->count() + $refreshedOriginal->currentWrestlers()->count();
             $totalTagTeams = $newStable->currentTagTeams()->count() + $refreshedOriginal->currentTagTeams()->count();
 
-            expect($totalWrestlers)->toBe($initialWrestlerCount);
-            expect($totalTagTeams)->toBe($initialTagTeamCount);
+            expect($totalWrestlers)->toBe($initialWrestlerCount)
+                ->and($totalTagTeams)->toBe($initialTagTeamCount);
         });
     });
 
@@ -259,8 +259,8 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify original stable has remaining members
             $refreshedOriginal = freshModel($this->originalStable);
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count() - $this->transferWrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count() - $this->transferTagTeams->count());
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count() - $this->transferWrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count() - $this->transferTagTeams->count());
         });
     });
 
@@ -279,8 +279,8 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify original stable unchanged
             $refreshedOriginal = freshModel($this->originalStable);
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
         test('split rejects transferring all members', function () {
@@ -300,8 +300,8 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify original stable still has all members (transaction rolled back)
             $refreshedOriginal = freshModel($this->originalStable);
-            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count());
-            expect($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
+            expect($refreshedOriginal->currentWrestlers()->count())->toBe($this->wrestlers->count())
+                ->and($refreshedOriginal->currentTagTeams()->count())->toBe($this->tagTeams->count());
         });
 
         test('split rejects selected members outside the original stable', function () {
@@ -316,9 +316,8 @@ describe('SplitStableAction Integration Tests', function () {
                 $this->newStableName,
                 $membersForSplit,
                 now(),
-            ))->toThrow(CannotBeSplitException::class);
-
-            expect(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
+            ))->toThrow(CannotBeSplitException::class)
+                ->and(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
         });
 
         test('split rejects a new stable below the canonical minimum headcount', function () {
@@ -363,9 +362,8 @@ describe('SplitStableAction Integration Tests', function () {
                 $this->newStableName,
                 $membersForSplit,
                 $splitDate
-            ))->toThrow(CannotBeSplitException::class);
-
-            expect(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
+            ))->toThrow(CannotBeSplitException::class)
+                ->and(Stable::query()->where('name', $this->newStableName)->exists())->toBeFalse();
         });
 
         test('split validates stable status before execution', function () {
@@ -398,13 +396,13 @@ describe('SplitStableAction Integration Tests', function () {
 
             // Verify new stable has correct properties
             expect($newStable->name)->toBe($this->newStableName);
-            expect($newStable->currentActivityPeriod()->exists())->toBeTrue();
-            expect($newStable->activityPeriods()->count())->toBe(1);
+            expect($newStable->currentActivityPeriod()->exists())->toBeTrue()
+                ->and($newStable->activityPeriods()->count())->toBe(1);
 
             // Verify activity period has correct start date
             $activityPeriod = $newStable->currentActivityPeriod()->firstOrFail();
-            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($splitDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at)->toBeNull();
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($splitDate->format('Y-m-d H:i:s'))
+                ->and($activityPeriod->ended_at)->toBeNull();
         });
 
         test('split validates new stable name uniqueness', function () {
@@ -473,19 +471,14 @@ describe('SplitStableAction Integration Tests', function () {
                 $this->membersForNewStable,
                 $splitDate
             ))
-                ->toThrow(LogicException::class, 'Stable creation failed.');
-
-            expect(Stable::count())->toBe($initialStableCount)
+                ->toThrow(LogicException::class, 'Stable creation failed.')
+                ->and(Stable::count())->toBe($initialStableCount)
                 ->and(StableWrestler::query()
-                    ->whereKey($originalMembershipIds)
-                    ->whereNull('left_at')
-                    ->count())
-                ->toBe($originalMembershipIds->count())
+                ->whereKey($originalMembershipIds)
+                ->whereNull('left_at')->count())->toBe($originalMembershipIds->count())
                 ->and(StableTagTeam::query()
-                    ->whereKey($originalTagTeamMembershipIds)
-                    ->whereNull('left_at')
-                    ->count())
-                ->toBe($originalTagTeamMembershipIds->count());
+                ->whereKey($originalTagTeamMembershipIds)
+                ->whereNull('left_at')->count())->toBe($originalTagTeamMembershipIds->count());
 
             $createAction->verify();
         });
@@ -509,8 +502,8 @@ describe('SplitStableAction Integration Tests', function () {
             $refreshedOriginal = freshModel($this->originalStable);
             $originalMemberCount = resolve(StableMembershipService::class)->currentMembers($refreshedOriginal)->getTotalMemberCount();
 
-            expect($newStableMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT);
-            expect($originalMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT);
+            expect($newStableMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT)
+                ->and($originalMemberCount)->toBeGreaterThanOrEqual(StableMembershipData::MINIMUM_MEMBER_COUNT);
         });
 
         test('split validates member employment status', function () {

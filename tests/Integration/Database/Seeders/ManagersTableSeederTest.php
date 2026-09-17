@@ -49,11 +49,9 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect($manager->first_name)->toBeString();
-                expect($manager->first_name)->not->toBeEmpty();
-                expect($manager->last_name)->toBeString();
-                expect($manager->last_name)->not->toBeEmpty();
-                expect($manager->status)->toBeInstanceOf(EmploymentStatus::class);
+                expect($manager->first_name)->toBeString()->not->toBeEmpty()
+                    ->and($manager->last_name)->toBeString()->not->toBeEmpty()
+                    ->and($manager->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -63,8 +61,8 @@ describe('ManagersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect($manager->first_name)->not->toContain('Test');
-                expect($manager->last_name)->not->toContain('Test');
+                expect($manager->first_name)->not->toContain('Test')
+                    ->and($manager->last_name)->not->toContain('Test');
             }
         });
     });

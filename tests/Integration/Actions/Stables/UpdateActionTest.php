@@ -21,9 +21,7 @@ test('it rejects an activity end date before the start date', function () {
     );
 
     expect(fn () => resolve(UpdateAction::class)->handle($stable, $data))
-        ->toThrow(InvalidDateRangeException::class);
-
-    expect($stable->refresh()->name)->toBe('Original Name')
-        ->and($originalPeriod->refresh()->started_at->toDateTimeString())
-        ->toBe($originalPeriod->started_at->toDateTimeString());
+        ->toThrow(InvalidDateRangeException::class)
+        ->and($stable->refresh()->name)->toBe('Original Name')
+        ->and($originalPeriod->refresh()->started_at->toDateTimeString())->toBe($originalPeriod->started_at->toDateTimeString());
 });

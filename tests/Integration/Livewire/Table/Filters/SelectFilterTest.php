@@ -19,7 +19,7 @@ describe('select filter configuration', function (): void {
         // Assert
         expect($filter->getKey())->toBe('status')
             ->and($filter->getOptions())->toBe(['active' => 'Active'])
-            ->and($filter->getDefaultValue())->toBe('');
+            ->and($filter->getDefaultValue())->toBeEmpty();
     });
 });
 

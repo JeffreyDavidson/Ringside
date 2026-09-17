@@ -26,5 +26,5 @@ it('returns no wrestler options when only deleted wrestlers exist', function ():
     $wrestlers = $modal->getWrestlers();
 
     // Assert
-    expect($wrestlers)->toBe([]);
+    expect($wrestlers)->toBeEmpty();
 });

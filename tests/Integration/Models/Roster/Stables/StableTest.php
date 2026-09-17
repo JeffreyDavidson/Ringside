@@ -83,8 +83,8 @@ describe('Stable Model Integration Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Stable::class);
 
-            expect($interfaces)->toContain(App\Models\Contracts\HasActivityPeriods::class);
-            expect($interfaces)->toContain(Retirable::class);
+            expect($interfaces)->toContain(App\Models\Contracts\HasActivityPeriods::class)
+                ->toContain(Retirable::class);
         });
     });
 

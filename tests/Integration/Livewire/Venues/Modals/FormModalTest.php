@@ -165,7 +165,7 @@ describe('authorized venue form interactions', function () {
         'long name' => ['form.name', str_repeat('a', 256), 'max'],
         'long street address' => ['form.street_address', str_repeat('a', 256), 'max'],
         'long city' => ['form.city', str_repeat('a', 256), 'max'],
-        'unsupported state' => ['form.state', 'Invalid State', 'Illuminate\\Validation\\Rules\\Enum'],
+        'unsupported state' => ['form.state', 'Invalid State', \Illuminate\Validation\Rules\Enum::class],
         'short zipcode' => ['form.zipcode', '123', 'digits'],
         'non-numeric zipcode' => ['form.zipcode', 'abcde', 'digits'],
     ]);

@@ -32,14 +32,11 @@ describe('UserFactory Integration Tests', function () {
 
             // Assert
             expect($user)->toBeInstanceOf(User::class);
-            expect($user->first_name)->toBeString();
-            expect($user->first_name)->not->toBeEmpty();
-            expect($user->last_name)->toBeString();
-            expect($user->last_name)->not->toBeEmpty();
-            expect($user->email)->toBeString();
-            expect($user->email)->toContain('@');
-            expect($user->password)->toBeString();
-            expect($user->password)->not->toBeEmpty();
+            expect($user->first_name)->toBeString()->not->toBeEmpty()
+                ->and($user->last_name)->toBeString()->not->toBeEmpty()
+                ->and($user->email)->toBeString()
+                ->toContain('@')
+                ->and($user->password)->toBeString()->not->toBeEmpty();
         });
 
         test('generates realistic user names', function () {
@@ -48,9 +45,9 @@ describe('UserFactory Integration Tests', function () {
 
             // Assert
             expect($user->first_name)->toBeString();
-            expect(mb_strlen($user->first_name))->toBeGreaterThan(1);
-            expect($user->last_name)->toBeString();
-            expect(mb_strlen($user->last_name))->toBeGreaterThan(1);
+            expect(mb_strlen($user->first_name))->toBeGreaterThan(1)
+                ->and($user->last_name)->toBeString()
+                ->and(mb_strlen($user->last_name))->toBeGreaterThan(1);
         });
 
         test('generates valid email addresses', function () {
@@ -59,9 +56,9 @@ describe('UserFactory Integration Tests', function () {
 
             // Assert
             expect($user->email)->toBeString();
-            expect($user->email)->toContain('@');
-            expect($user->email)->toContain('.');
-            expect(filter_var($user->email, FILTER_VALIDATE_EMAIL))->toBeTruthy();
+            expect($user->email)->toContain('@')
+                ->toContain('.')
+                ->and(filter_var($user->email, FILTER_VALIDATE_EMAIL))->toBeTruthy();
         });
     });
 
@@ -104,8 +101,8 @@ describe('UserFactory Integration Tests', function () {
 
             // Assert
             expect($user->first_name)->toBe('John');
-            expect($user->last_name)->toBe('Doe');
-            expect($user->email)->toBe('john@example.com');
+            expect($user->last_name)->toBe('Doe')
+                ->and($user->email)->toBe('john@example.com');
         });
 
         test('maintains required attributes when overriding', function () {
@@ -116,9 +113,9 @@ describe('UserFactory Integration Tests', function () {
 
             // Assert
             expect($user->first_name)->toBe('Custom');
-            expect($user->last_name)->toBeString();
-            expect($user->email)->toBeString();
-            expect($user->password)->toBeString();
+            expect($user->last_name)->toBeString()
+                ->and($user->email)->toBeString()
+                ->and($user->password)->toBeString();
         });
     });
 
@@ -138,11 +135,11 @@ describe('UserFactory Integration Tests', function () {
 
             // Assert
             foreach ($users as $user) {
-                expect($user->first_name)->toBeString();
-                expect($user->last_name)->toBeString();
-                expect($user->email)->toBeString();
-                expect($user->email)->toContain('@');
-                expect($user->password)->toBeString();
+                expect($user->first_name)->toBeString()
+                    ->and($user->last_name)->toBeString()
+                    ->and($user->email)->toBeString()
+                    ->toContain('@')
+                    ->and($user->password)->toBeString();
             }
         });
 

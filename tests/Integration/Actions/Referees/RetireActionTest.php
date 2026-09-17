@@ -16,17 +16,17 @@ test('it retires an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentRetirement()->exists())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentRetirement()->exists())->toBeFalse();
 
     resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
-    expect($referee->currentRetirement()->exists())->toBeTrue();
-    expect($referee->currentEmployment()->exists())->toBeFalse();
-    expect($employment->ended_at)->not->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($employment->ended_at)->not->toBeNull();
 
     $this->assertDatabaseHas('retirements', [
         'retirable_id' => $referee->id,
@@ -116,34 +116,34 @@ test('it ends suspension before retiring', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->currentSuspension()->exists())->toBeTrue();
-    expect($suspension->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($suspension->ended_at)->toBeNull();
 
     resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->currentRetirement()->exists())->toBeTrue();
-    expect($referee->currentSuspension()->exists())->toBeFalse();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($referee->currentSuspension()->exists())->toBeFalse()
+        ->and($suspension->ended_at)->not->toBeNull();
 });
 
 test('it ends injury before retiring', function () {
     $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->currentInjury()->exists())->toBeTrue();
-    expect($injury->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($injury->ended_at)->toBeNull();
 
     resolve(RetireAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->currentRetirement()->exists())->toBeTrue();
-    expect($referee->currentInjury()->exists())->toBeFalse();
-    expect($injury->ended_at)->not->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($referee->currentInjury()->exists())->toBeFalse()
+        ->and($injury->ended_at)->not->toBeNull();
 });
 
 test('it creates retirement record with correct structure', function () {
@@ -154,8 +154,8 @@ test('it creates retirement record with correct structure', function () {
 
     $retirement = freshModel($referee)->currentRetirement()->firstOrFail();
 
-    expect($retirement)->not->toBeNull();
-    expect($retirement->retirable->is($referee))->toBeTrue();
-    expect(requiredDate($retirement->started_at)->toDateTimeString())->toBe($retirementDate->toDateTimeString());
-    expect($retirement->ended_at)->toBeNull();
+    expect($retirement)->not->toBeNull()
+        ->and($retirement->retirable->is($referee))->toBeTrue()
+        ->and(requiredDate($retirement->started_at)->toDateTimeString())->toBe($retirementDate->toDateTimeString())
+        ->and($retirement->ended_at)->toBeNull();
 });

@@ -22,10 +22,10 @@ test('it updates a manager with new information', function () {
 
     $result = resolve(UpdateAction::class)->handle($manager, $updateData);
 
-    expect($result)->toBeInstanceOf(Manager::class);
-    expect($result->id)->toBe($manager->id);
-    expect($result->first_name)->toBe('Updated');
-    expect($result->last_name)->toBe('Manager');
+    expect($result)->toBeInstanceOf(Manager::class)
+        ->and($result->id)->toBe($manager->id)
+        ->and($result->first_name)->toBe('Updated')
+        ->and($result->last_name)->toBe('Manager');
 
     $this->assertDatabaseHas('managers', [
         'id' => $manager->id,
@@ -63,8 +63,8 @@ test('it updates manager and creates employment when employment date is provided
 
     $result = resolve(UpdateAction::class)->handle($manager, $updateData);
 
-    expect($result->last_name)->toBe('Updated');
-    expect($result->currentEmployment()->exists())->toBeTrue();
+    expect($result->last_name)->toBe('Updated')
+        ->and($result->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('managers', [
         'id' => $manager->id,
@@ -91,9 +91,9 @@ test('it updates manager without affecting existing employment', function () {
 
     $result = resolve(UpdateAction::class)->handle($manager, $updateData);
 
-    expect($result->first_name)->toBe('Still');
-    expect($result->last_name)->toBe('Employed');
-    expect($result->currentEmployment()->exists())->toBeTrue(); // Should still be employed
+    expect($result->first_name)->toBe('Still')
+        ->and($result->last_name)->toBe('Employed')
+        ->and($result->currentEmployment()->exists())->toBeTrue(); // Should still be employed
 
     $this->assertDatabaseHas('managers', [
         'id' => $manager->id,

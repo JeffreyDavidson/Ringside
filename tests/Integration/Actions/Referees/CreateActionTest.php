@@ -21,9 +21,9 @@ test('it creates a referee with basic information', function () {
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Referee::class);
-    expect($result->first_name)->toBe('Earl');
-    expect($result->last_name)->toBe('Hebner');
+    expect($result)->toBeInstanceOf(Referee::class)
+        ->and($result->first_name)->toBe('Earl')
+        ->and($result->last_name)->toBe('Hebner');
 
     $this->assertDatabaseHas('referees', [
         'first_name' => 'Earl',
@@ -47,9 +47,9 @@ test('it creates a referee with employment when employment date is provided', fu
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result->first_name)->toBe('Mike');
-    expect($result->last_name)->toBe('Chioda');
-    expect($result->currentEmployment()->exists())->toBeTrue();
+    expect($result->first_name)->toBe('Mike')
+        ->and($result->last_name)->toBe('Chioda')
+        ->and($result->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('referees', [
         'first_name' => 'Mike',
@@ -75,9 +75,9 @@ test('it creates referee with proper database transactions', function () {
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Referee::class);
-    expect($result->first_name)->toBe('Charles');
-    expect($result->last_name)->toBe('Robinson');
+    expect($result)->toBeInstanceOf(Referee::class)
+        ->and($result->first_name)->toBe('Charles')
+        ->and($result->last_name)->toBe('Robinson');
 
     // Verify database state is consistent
     $this->assertDatabaseHas('referees', [
@@ -109,6 +109,6 @@ test('it handles employment creation through EmployAction dependency injection',
     expect($result->currentEmployment()->exists())->toBeTrue();
 
     $employment = $result->currentEmployment()->firstOrFail();
-    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe($employmentDate->toDateTimeString());
-    expect($employment->ended_at)->toBeNull();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe($employmentDate->toDateTimeString())
+        ->and($employment->ended_at)->toBeNull();
 });

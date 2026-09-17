@@ -49,9 +49,8 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect($stable->name)->toBeString();
-                expect($stable->name)->not->toBeEmpty();
-                expect($stable->status)->toBeInstanceOf(StableStatus::class);
+                expect($stable->name)->toBeString()->not->toBeEmpty()
+                    ->and($stable->status)->toBeInstanceOf(StableStatus::class);
             }
         });
 
@@ -61,8 +60,8 @@ describe('StablesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($stables as $stable) {
-                expect(mb_strlen($stable->name))->toBeGreaterThanOrEqual(5);
-                expect($stable->name)->not->toContain('Test');
+                expect(mb_strlen($stable->name))->toBeGreaterThanOrEqual(5)
+                    ->and($stable->name)->not->toContain('Test');
             }
         });
     });

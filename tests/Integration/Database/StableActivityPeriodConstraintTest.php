@@ -23,7 +23,6 @@ test('a stable cannot have multiple open activity periods', function () {
     $stable = Stable::factory()->active()->create();
 
     expect(fn () => ActivityPeriod::factory()->for($stable, 'activeable')->create())
-        ->toThrow(QueryException::class);
-
-    expect($stable->activityPeriods()->whereNull('ended_at')->count())->toBe(1);
+        ->toThrow(QueryException::class)
+        ->and($stable->activityPeriods()->whereNull('ended_at')->count())->toBe(1);
 });

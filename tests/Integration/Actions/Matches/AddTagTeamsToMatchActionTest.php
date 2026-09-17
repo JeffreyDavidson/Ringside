@@ -46,9 +46,8 @@ test('it rejects the entire assignment when any tag team is unavailable', functi
         $match,
         collect([$availableTagTeam, $unavailableTagTeam]),
         1,
-    ))->toThrow(EntityNotAvailableException::class);
-
-    expect($match->competitors()->count())->toBe(0)
+    ))->toThrow(EntityNotAvailableException::class)
+        ->and($match->competitors()->count())->toBe(0)
         ->and($match->sides()->count())->toBe(0);
 });
 
@@ -60,9 +59,8 @@ test('it reloads tag teams before checking assignment eligibility', function () 
     $tagTeam->delete();
 
     expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($match, collect([$staleTagTeam]), 1))
-        ->toThrow(EntityNotAvailableException::class);
-
-    expect($match->competitors()->exists())->toBeFalse();
+        ->toThrow(EntityNotAvailableException::class)
+        ->and($match->competitors()->exists())->toBeFalse();
 });
 
 test('it rejects a tag team already booked on the event card', function () {
@@ -79,9 +77,8 @@ test('it rejects a tag team already booked on the event card', function () {
     ]);
 
     expect(fn () => resolve(AddTagTeamsToMatchAction::class)->handle($targetMatch, collect([$tagTeam]), 1))
-        ->toThrow(SchedulingConflictException::class, "Tag team [{$tagTeam->name}] is already booked at this event time.");
-
-    expect($targetMatch->competitors()->count())->toBe(0);
+        ->toThrow(SchedulingConflictException::class, "Tag team [{$tagTeam->name}] is already booked at this event time.")
+        ->and($targetMatch->competitors()->count())->toBe(0);
 });
 
 test('it assigns a repeated tag team only once', function () {

@@ -30,34 +30,34 @@ describe('TitleBuilder Query Scopes', function () {
         test('undebuted scope returns titles without activity periods', function () {
             $undebutedTitles = Title::query()->undebuted()->get();
 
-            expect($undebutedTitles->pluck('id'))->toContain($this->undebutedTitle->id);
-            expect($undebutedTitles->pluck('id'))->not->toContain($this->activeTitle->id);
-            expect($undebutedTitles->pluck('id'))->not->toContain($this->inactiveTitle->id);
-            expect($undebutedTitles->pluck('id'))->not->toContain($this->futureDebutTitle->id);
+            expect($undebutedTitles->pluck('id'))->toContain($this->undebutedTitle->id)
+                ->and($undebutedTitles->pluck('id'))->not->toContain($this->activeTitle->id)
+                ->and($undebutedTitles->pluck('id'))->not->toContain($this->inactiveTitle->id)
+                ->and($undebutedTitles->pluck('id'))->not->toContain($this->futureDebutTitle->id);
         });
 
         test('active scope returns titles with current activity periods', function () {
             $activeTitles = Title::query()->active()->get();
 
-            expect($activeTitles->pluck('id'))->toContain($this->activeTitle->id);
-            expect($activeTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
-            expect($activeTitles->pluck('id'))->not->toContain($this->inactiveTitle->id);
+            expect($activeTitles->pluck('id'))->toContain($this->activeTitle->id)
+                ->and($activeTitles->pluck('id'))->not->toContain($this->undebutedTitle->id)
+                ->and($activeTitles->pluck('id'))->not->toContain($this->inactiveTitle->id);
         });
 
         test('inactive scope returns titles with past but no current activity', function () {
             $inactiveTitles = Title::query()->inactive()->get();
 
-            expect($inactiveTitles->pluck('id'))->toContain($this->inactiveTitle->id);
-            expect($inactiveTitles->pluck('id'))->not->toContain($this->activeTitle->id);
-            expect($inactiveTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
+            expect($inactiveTitles->pluck('id'))->toContain($this->inactiveTitle->id)
+                ->and($inactiveTitles->pluck('id'))->not->toContain($this->activeTitle->id)
+                ->and($inactiveTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
         });
 
         test('withPendingDebut scope returns titles with future activity', function () {
             $pendingTitles = Title::query()->withPendingDebut()->get();
 
-            expect($pendingTitles->pluck('id'))->toContain($this->futureDebutTitle->id);
-            expect($pendingTitles->pluck('id'))->not->toContain($this->activeTitle->id);
-            expect($pendingTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
+            expect($pendingTitles->pluck('id'))->toContain($this->futureDebutTitle->id)
+                ->and($pendingTitles->pluck('id'))->not->toContain($this->activeTitle->id)
+                ->and($pendingTitles->pluck('id'))->not->toContain($this->undebutedTitle->id);
         });
     });
 
@@ -120,8 +120,8 @@ describe('TitleBuilder Query Scopes', function () {
         test('scopes handle empty database gracefully', function () {
             Title::query()->delete();
 
-            expect(Title::query()->active()->count())->toBe(0);
-            expect(Title::query()->undebuted()->count())->toBe(0);
+            expect(Title::query()->active()->count())->toBe(0)
+                ->and(Title::query()->undebuted()->count())->toBe(0);
         });
     });
 
@@ -129,10 +129,10 @@ describe('TitleBuilder Query Scopes', function () {
         test('all scopes return static for proper chaining', function () {
             $builder = Title::query();
 
-            expect($builder->undebuted())->toBeInstanceOf(get_class($builder));
-            expect($builder->active())->toBeInstanceOf(get_class($builder));
-            expect($builder->inactive())->toBeInstanceOf(get_class($builder));
-            expect($builder->withPendingDebut())->toBeInstanceOf(get_class($builder));
+            expect($builder->undebuted())->toBeInstanceOf($builder::class)
+                ->and($builder->active())->toBeInstanceOf($builder::class)
+                ->and($builder->inactive())->toBeInstanceOf($builder::class)
+                ->and($builder->withPendingDebut())->toBeInstanceOf($builder::class);
         });
 
         test('scopes maintain query builder functionality', function () {

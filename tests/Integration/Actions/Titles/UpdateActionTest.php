@@ -20,8 +20,8 @@ test('it updates a title', function () {
     resolve(UpdateAction::class)->handle($title, $data);
 
     $title->refresh();
-    expect($title->name)->toBe('New Example Title');
-    expect($title->type)->toBe(TitleType::Singles);
+    expect($title->name)->toBe('New Example Title')
+        ->and($title->type)->toBe(TitleType::Singles);
 });
 
 test('it updates using the current persisted title state', function () {
@@ -50,10 +50,10 @@ test('it activates an unactivated title if activation date is filled in request'
     resolve(UpdateAction::class)->handle($title, $data);
 
     $title->refresh();
-    expect($title->name)->toBe('New Example Title');
-    expect($title->type)->toBe(TitleType::Singles);
-    expect($title->activityPeriods)->toHaveCount(1);
-    expect(requiredDate($title->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($title->name)->toBe('New Example Title')
+        ->and($title->type)->toBe(TitleType::Singles)
+        ->and($title->activityPeriods)->toHaveCount(1)
+        ->and(requiredDate($title->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });
 
 test('it updates a title with future activation but does not create new debut since it already has debuted', function () {
@@ -65,8 +65,8 @@ test('it updates a title with future activation but does not create new debut si
     resolve(UpdateAction::class)->handle($title, $data);
 
     $title->refresh();
-    expect($title->name)->toBe('New Example Title');
-    expect($title->type)->toBe(TitleType::Singles);
+    expect($title->name)->toBe('New Example Title')
+        ->and($title->type)->toBe(TitleType::Singles);
     // Should not create new activation since title already has debuted
     expect($title->activityPeriods)->toHaveCount($originalActivityPeriodCount);
 });

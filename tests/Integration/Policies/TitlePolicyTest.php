@@ -34,40 +34,39 @@ describe('TitlePolicy Integration Tests', function () {
 
     describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('basic users continue to individual method checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
         });
 
         test('global Gate hook works for arbitrary abilities', function () {
-            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
         });
 
         test('global Gate hook works for title-specific abilities', function () {
-            expect(Gate::forUser($this->admin)->raw('debut'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('pull'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->raw('debut'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('pull'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('debut'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('pull'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('retire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('debut'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('pull'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
         });
     });
 
@@ -101,39 +100,37 @@ describe('TitlePolicy Integration Tests', function () {
         test('policy integrates correctly with Gate facade', function () {
             // Test administrator permissions through Gate
             expect(Gate::forUser($this->admin)->allows('viewAny', Title::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('create', Title::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('view', $this->title))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('create', Title::class))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('view', $this->title))->toBeTrue();
 
             // Test basic user permissions through Gate
             expect(Gate::forUser($this->basicUser)->denies('viewAny', Title::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('create', Title::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('view', $this->title))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('create', Title::class))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $this->title))->toBeTrue();
         });
 
         test('policy works with specific title instances', function () {
             // Test with specific title instance
             expect(Gate::forUser($this->admin)->allows('view', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('delete', $this->title))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('view', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('delete', $this->title))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('delete', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('delete', $this->title))->toBeTrue();
         });
 
         test('policy supports title-specific operations through Gate', function () {
             // Test title activation operations (even though not explicitly defined in policy)
             expect(Gate::forUser($this->admin)->allows('debut', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('pull', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('reinstate', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('retire', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('unretire', $this->title))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('debut', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('pull', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('reinstate', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('retire', $this->title))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('unretire', $this->title))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('pull', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('reinstate', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('retire', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('unretire', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('debut', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('pull', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('reinstate', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('retire', $this->title))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('unretire', $this->title))->toBeTrue();
         });
     });
 
@@ -174,10 +171,10 @@ describe('TitlePolicy Integration Tests', function () {
             expect(count($titleMethods))->toBeLessThan(count($wrestlerMethods));
 
             // Title policy should not have employment-related methods
-            expect(in_array('employ', $titleMethods))->toBeFalse();
-            expect(in_array('release', $titleMethods))->toBeFalse();
-            expect(in_array('injure', $titleMethods))->toBeFalse();
-            expect(in_array('suspend', $titleMethods))->toBeFalse();
+            expect($titleMethods)->not->toContain('employ');
+            expect($titleMethods)->not->toContain('release')
+                ->and($titleMethods)->not->toContain('injure')
+                ->and($titleMethods)->not->toContain('suspend');
         });
     });
 
@@ -192,10 +189,8 @@ describe('TitlePolicy Integration Tests', function () {
 
             foreach ($titleOperations as $operation) {
                 expect(Gate::forUser($this->admin)->raw($operation))
-                    ->toBeTrue("Administrator should be able to {$operation} titles");
-
-                expect(Gate::forUser($this->basicUser)->raw($operation))
-                    ->toBeNull("Basic user should continue to individual checks for {$operation}");
+                    ->toBeTrue("Administrator should be able to {$operation} titles")
+                    ->and(Gate::forUser($this->basicUser)->raw($operation))->toBeNull("Basic user should continue to individual checks for {$operation}");
             }
         });
 
@@ -205,10 +200,9 @@ describe('TitlePolicy Integration Tests', function () {
 
             // Both title types should follow same authorization rules
             expect(Gate::forUser($this->admin)->allows('view', $singlesTitle))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('view', $tagTeamTitle))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('view', $singlesTitle))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('view', $tagTeamTitle))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('view', $tagTeamTitle))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $singlesTitle))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $tagTeamTitle))->toBeTrue();
         });
 
         test('policy works with different title statuses', function () {
@@ -218,12 +212,11 @@ describe('TitlePolicy Integration Tests', function () {
 
             // All title statuses should follow same authorization rules
             expect(Gate::forUser($this->admin)->allows('update', $activeTitle))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $retiredTitle))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $undebutedTitle))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('update', $activeTitle))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $retiredTitle))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $undebutedTitle))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $retiredTitle))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('update', $undebutedTitle))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $activeTitle))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $retiredTitle))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $undebutedTitle))->toBeTrue();
         });
     });
 
@@ -238,10 +231,9 @@ describe('TitlePolicy Integration Tests', function () {
         test('policy is stateless', function () {
             // Multiple calls should return same results
             expect($this->policy->viewAny($this->basicUser))->toBeFalse();
-            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
-
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
         });
     });
 });

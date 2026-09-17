@@ -59,7 +59,6 @@ test('it rejects restoring a title into an active name conflict', function () {
     Title::factory()->create(['name' => 'World Title']);
 
     expect(fn () => resolve(RestoreAction::class)->handle($title))
-        ->toThrow(CannotBeRestoredException::class);
-
-    expect(Title::onlyTrashed()->whereKey($title->getKey())->exists())->toBeTrue();
+        ->toThrow(CannotBeRestoredException::class)
+        ->and(Title::onlyTrashed()->whereKey($title->getKey())->exists())->toBeTrue();
 });

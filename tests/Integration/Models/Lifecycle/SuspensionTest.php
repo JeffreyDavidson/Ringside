@@ -23,8 +23,8 @@ test('it creates a suspension for an explicit suspendable owner', function (Clos
         ->for($suspendable, 'suspendable')
         ->create();
 
-    expect($suspension->suspendable)->toBeInstanceOf($suspendable::class);
-    expect($suspension->suspendable->getKey())->toBe($suspendable->getKey());
+    expect($suspension->suspendable)->toBeInstanceOf($suspendable::class)
+        ->and($suspension->suspendable->getKey())->toBe($suspendable->getKey());
 })->with([
     fn (): Wrestler => Wrestler::factory()->create(),
     fn (): Manager => Manager::factory()->create(),

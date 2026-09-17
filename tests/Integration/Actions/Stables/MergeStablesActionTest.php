@@ -54,9 +54,8 @@ it('rejects unavailable secondary members without changing either stable', funct
         $primaryStable,
         $secondaryStable,
         now(),
-    ))->toThrow(CannotBeMergedException::class);
-
-    expect(resolve(StableMembershipService::class)->currentMembers($primaryStable)->getTotalMemberCount())->toBe($primaryMemberCount)
+    ))->toThrow(CannotBeMergedException::class)
+        ->and(resolve(StableMembershipService::class)->currentMembers($primaryStable)->getTotalMemberCount())->toBe($primaryMemberCount)
         ->and(resolve(StableMembershipService::class)->currentMembers($secondaryStable)->getTotalMemberCount())->toBe($secondaryMemberCount)
         ->and($secondaryStable->currentActivityPeriod()->exists())->toBeTrue()
         ->and($secondaryStable->trashed())->toBeFalse();

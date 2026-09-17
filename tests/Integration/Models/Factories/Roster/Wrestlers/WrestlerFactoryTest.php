@@ -30,44 +30,44 @@ describe('wrestler factory states', function () {
     test('wrestler factory creates wrestler with realistic data', function () {
         $wrestler = Wrestler::factory()->make();
 
-        expect((string) $wrestler->name)->toBeString();
-        expect($wrestler->height)->toBeInstanceOf(Height::class);
-        expect($wrestler->weight->toPounds())->toBeGreaterThan(0);
-        expect($wrestler->hometown)->toBeString();
-        expect($wrestler->status)->toBeInstanceOf(EmploymentStatus::class);
+        expect((string) $wrestler->name)->toBeString()
+            ->and($wrestler->height)->toBeInstanceOf(Height::class)
+            ->and($wrestler->weight->toPounds())->toBeGreaterThan(0)
+            ->and($wrestler->hometown)->toBeString()
+            ->and($wrestler->status)->toBeInstanceOf(EmploymentStatus::class);
     });
 
     test('wrestler factory can create unemployed wrestlers', function () {
         $wrestler = Wrestler::factory()->unemployed()->create();
 
-        expect($wrestler->status)->toBe(EmploymentStatus::Unemployed);
-        expect($wrestler->employments)->toBeEmpty();
+        expect($wrestler->status)->toBe(EmploymentStatus::Unemployed)
+            ->and($wrestler->employments)->toBeEmpty();
     });
 
     test('wrestler factory can create employed wrestlers', function () {
         $wrestler = Wrestler::factory()->employed()->create();
 
         $wrestler->load('currentEmployment');
-        expect($wrestler->currentEmployment)->not->toBeNull();
-        expect($wrestler->currentEmployment()->firstOrFail()->ended_at)->toBeNull();
+        expect($wrestler->currentEmployment)->not->toBeNull()
+            ->and($wrestler->currentEmployment()->firstOrFail()->ended_at)->toBeNull();
     });
 
     test('wrestler factory can create suspended wrestlers', function () {
         $wrestler = Wrestler::factory()->suspended()->create();
 
         $wrestler->load('currentSuspension');
-        expect($wrestler->currentSuspension)->not->toBeNull();
-        expect($wrestler->currentSuspension()->firstOrFail()->ended_at)->toBeNull();
-        expect($wrestler->currentEmployment()->exists())->toBeTrue();
-        expect($wrestler->employments()->whereNull('ended_at')->count())->toBe(1);
+        expect($wrestler->currentSuspension)->not->toBeNull()
+            ->and($wrestler->currentSuspension()->firstOrFail()->ended_at)->toBeNull()
+            ->and($wrestler->currentEmployment()->exists())->toBeTrue()
+            ->and($wrestler->employments()->whereNull('ended_at')->count())->toBe(1);
     });
 
     test('wrestler factory can create injured wrestlers', function () {
         $wrestler = Wrestler::factory()->injured()->create();
 
-        expect($wrestler->currentInjury()->exists())->toBeTrue();
-        expect($wrestler->currentEmployment()->exists())->toBeTrue();
-        expect($wrestler->employments()->whereNull('ended_at')->count())->toBe(1);
+        expect($wrestler->currentInjury()->exists())->toBeTrue()
+            ->and($wrestler->currentEmployment()->exists())->toBeTrue()
+            ->and($wrestler->employments()->whereNull('ended_at')->count())->toBe(1);
     });
 
     test('wrestler factory can create retired wrestlers', function () {
@@ -80,22 +80,22 @@ describe('wrestler factory states', function () {
     test('wrestler factory can create released wrestlers', function () {
         $wrestler = Wrestler::factory()->released()->create();
 
-        expect($wrestler->status)->toBe(EmploymentStatus::Released);
-        expect($wrestler->previousEmployments)->not->toBeEmpty();
+        expect($wrestler->status)->toBe(EmploymentStatus::Released)
+            ->and($wrestler->previousEmployments)->not->toBeEmpty();
     });
 
     test('wrestler factory can create wrestlers with future employment', function () {
         $wrestler = Wrestler::factory()->withFutureEmployment()->create();
 
-        expect($wrestler->status)->toBe(EmploymentStatus::FutureEmployment);
-        expect($wrestler->futureEmployment)->not->toBeNull();
+        expect($wrestler->status)->toBe(EmploymentStatus::FutureEmployment)
+            ->and($wrestler->futureEmployment)->not->toBeNull();
     });
 
     test('wrestler factory can create bookable wrestlers', function () {
         $wrestler = Wrestler::factory()->bookable()->create();
 
-        expect($wrestler->status)->toBe(EmploymentStatus::Employed);
-        expect($wrestler->currentEmployment)->not->toBeNull();
+        expect($wrestler->status)->toBe(EmploymentStatus::Employed)
+            ->and($wrestler->currentEmployment)->not->toBeNull();
     });
 
     test('wrestler factory can create wrestlers on tag teams', function () {

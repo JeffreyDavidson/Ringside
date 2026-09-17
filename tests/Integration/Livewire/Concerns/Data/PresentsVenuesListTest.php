@@ -27,5 +27,5 @@ it('returns no venue options when only deleted venues exist', function (): void 
     $venues = $modal->getVenues();
 
     // Assert
-    expect($venues)->toBe([]);
+    expect($venues)->toBeEmpty();
 });

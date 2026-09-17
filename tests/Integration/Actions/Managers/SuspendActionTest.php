@@ -15,14 +15,14 @@ beforeEach(function () {
 test('it suspends an employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->currentSuspension()->exists())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->currentSuspension()->exists())->toBeTrue();
-    expect($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed while suspended
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed while suspended
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $manager->id,
@@ -74,19 +74,15 @@ test('it persists the suspension lifecycle', function () {
 test('it prevents suspending already suspended manager', function () {
     $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->currentSuspension()->exists())->toBeTrue();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($manager))
-        ->toThrow(Exception::class);
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and(fn() => resolve(SuspendAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it prevents suspending unemployed manager', function () {
     $manager = Manager::factory()->create();
 
-    expect($manager->currentEmployment()->exists())->toBeFalse();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($manager))
-        ->toThrow(Exception::class);
+    expect($manager->currentEmployment()->exists())->toBeFalse()
+        ->and(fn() => resolve(SuspendAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -101,16 +97,16 @@ test('it handles database transactions correctly', function () {
 
     // Verify suspension record integrity
     $suspension = $manager->currentSuspension()->firstOrFail();
-    expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
-    expect($suspension->ended_at)->toBeNull();
+    expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($suspension->ended_at)->toBeNull();
 });
 
 test('it maintains employment status during suspension', function () {
     $manager = Manager::factory()->employed()->create();
     $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
-    expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->currentSuspension()->exists())->toBeFalse();
+    expect($manager->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($manager);
 
@@ -122,24 +118,22 @@ test('it maintains employment status during suspension', function () {
 
     // Employment record should remain unchanged
     $employment = $manager->currentEmployment()->firstOrFail();
-    expect($employment->id)->toBe($employmentId);
-    expect($employment->ended_at)->toBeNull();
+    expect($employment->id)->toBe($employmentId)
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it prevents suspending an injured manager', function () {
     $manager = Manager::factory()->injured()->create();
 
-    expect($manager->currentInjury()->exists())->toBeTrue();
-    expect($manager->currentSuspension()->exists())->toBeFalse();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($manager))
-        ->toThrow(CannotBeSuspendedException::class);
+    expect($manager->currentInjury()->exists())->toBeTrue()
+        ->and($manager->currentSuspension()->exists())->toBeFalse()
+        ->and(fn() => resolve(SuspendAction::class)->handle($manager))->toThrow(CannotBeSuspendedException::class);
 
     $manager->refresh();
 
-    expect($manager->currentInjury()->exists())->toBeTrue();
-    expect($manager->currentSuspension()->exists())->toBeFalse();
-    expect($manager->currentEmployment()->exists())->toBeTrue();
+    expect($manager->currentInjury()->exists())->toBeTrue()
+        ->and($manager->currentSuspension()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it uses the provided date', function () {

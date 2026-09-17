@@ -27,7 +27,7 @@ test('modal form bindings reference public properties on their form objects', fu
     $invalidBindings = [];
 
     foreach (File::glob(resource_path('views/livewire/*/modals/*-modal.blade.php')) as $viewPath) {
-        $domain = basename(dirname(dirname($viewPath)));
+        $domain = basename(dirname($viewPath, 2));
         $modal = Str::of(basename($viewPath, '.blade.php'))->studly();
         $component = 'App\\Livewire\\'.Str::studly($domain).'\\Modals\\'.$modal;
 
@@ -35,7 +35,7 @@ test('modal form bindings reference public properties on their form objects', fu
             throw new LogicException("Livewire component {$component} does not exist.");
         }
 
-        $formType = (new ReflectionProperty($component, 'form'))->getType();
+        $formType = new ReflectionProperty($component, 'form')->getType();
 
         if (! $formType instanceof ReflectionNamedType || ! is_a($formType->getName(), Form::class, true)) {
             throw new LogicException("Livewire component {$component} must declare a typed form object.");
@@ -80,26 +80,26 @@ test('component context identifiers are locked', function (string $component, st
 
     expect($lockedAttributes)->toHaveCount(1);
 })->with([
-    ['App\\Livewire\\Managers\\Tables\\PreviousStables', 'managerId'],
-    ['App\\Livewire\\Managers\\Tables\\PreviousTagTeams', 'managerId'],
-    ['App\\Livewire\\Managers\\Tables\\PreviousWrestlers', 'managerId'],
-    ['App\\Livewire\\Matches\\Modals\\FormModal', 'eventId'],
-    ['App\\Livewire\\Matches\\Modals\\ResultModal', 'matchId'],
-    ['App\\Livewire\\Matches\\Tables\\MatchesTable', 'eventId'],
-    ['App\\Livewire\\Referees\\Tables\\PreviousMatches', 'refereeId'],
-    ['App\\Livewire\\Stables\\Tables\\PreviousManagers', 'stableId'],
-    ['App\\Livewire\\Stables\\Tables\\PreviousTagTeams', 'stableId'],
-    ['App\\Livewire\\Stables\\Tables\\PreviousWrestlers', 'stableId'],
-    ['App\\Livewire\\TagTeams\\Tables\\PreviousManagers', 'tagTeamId'],
-    ['App\\Livewire\\TagTeams\\Tables\\PreviousMatches', 'tagTeamId'],
-    ['App\\Livewire\\TagTeams\\Tables\\PreviousStables', 'tagTeamId'],
-    ['App\\Livewire\\TagTeams\\Tables\\PreviousTitleChampionships', 'tagTeamId'],
-    ['App\\Livewire\\TagTeams\\Tables\\PreviousWrestlers', 'tagTeamId'],
-    ['App\\Livewire\\Titles\\Tables\\PreviousTitleChampionships', 'titleId'],
-    ['App\\Livewire\\Venues\\Tables\\PreviousEvents', 'venueId'],
-    ['App\\Livewire\\Wrestlers\\Tables\\PreviousManagers', 'wrestlerId'],
-    ['App\\Livewire\\Wrestlers\\Tables\\PreviousMatches', 'wrestlerId'],
-    ['App\\Livewire\\Wrestlers\\Tables\\PreviousStables', 'wrestlerId'],
-    ['App\\Livewire\\Wrestlers\\Tables\\PreviousTagTeams', 'wrestlerId'],
-    ['App\\Livewire\\Wrestlers\\Tables\\PreviousTitleChampionships', 'wrestlerId'],
+    [\App\Livewire\Managers\Tables\PreviousStables::class, 'managerId'],
+    [\App\Livewire\Managers\Tables\PreviousTagTeams::class, 'managerId'],
+    [\App\Livewire\Managers\Tables\PreviousWrestlers::class, 'managerId'],
+    [\App\Livewire\Matches\Modals\FormModal::class, 'eventId'],
+    [\App\Livewire\Matches\Modals\ResultModal::class, 'matchId'],
+    [\App\Livewire\Matches\Tables\MatchesTable::class, 'eventId'],
+    [\App\Livewire\Referees\Tables\PreviousMatches::class, 'refereeId'],
+    [\App\Livewire\Stables\Tables\PreviousManagers::class, 'stableId'],
+    [\App\Livewire\Stables\Tables\PreviousTagTeams::class, 'stableId'],
+    [\App\Livewire\Stables\Tables\PreviousWrestlers::class, 'stableId'],
+    [\App\Livewire\TagTeams\Tables\PreviousManagers::class, 'tagTeamId'],
+    [\App\Livewire\TagTeams\Tables\PreviousMatches::class, 'tagTeamId'],
+    [\App\Livewire\TagTeams\Tables\PreviousStables::class, 'tagTeamId'],
+    [\App\Livewire\TagTeams\Tables\PreviousTitleChampionships::class, 'tagTeamId'],
+    [\App\Livewire\TagTeams\Tables\PreviousWrestlers::class, 'tagTeamId'],
+    [\App\Livewire\Titles\Tables\PreviousTitleChampionships::class, 'titleId'],
+    [\App\Livewire\Venues\Tables\PreviousEvents::class, 'venueId'],
+    [\App\Livewire\Wrestlers\Tables\PreviousManagers::class, 'wrestlerId'],
+    [\App\Livewire\Wrestlers\Tables\PreviousMatches::class, 'wrestlerId'],
+    [\App\Livewire\Wrestlers\Tables\PreviousStables::class, 'wrestlerId'],
+    [\App\Livewire\Wrestlers\Tables\PreviousTagTeams::class, 'wrestlerId'],
+    [\App\Livewire\Wrestlers\Tables\PreviousTitleChampionships::class, 'wrestlerId'],
 ]);

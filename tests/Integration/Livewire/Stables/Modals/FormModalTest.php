@@ -343,8 +343,8 @@ describe('authorized stable form interactions', function () {
         $modal->call('openModal');
         $modal->call('fillDummyFields');
 
-        expect($modal->get('form.name'))->not->toBeEmpty();
-        expect(Stable::query()->doesntExist())->toBeTrue();
+        expect($modal->get('form.name'))->not->toBeEmpty()
+            ->and(Stable::query()->doesntExist())->toBeTrue();
     });
 });
 

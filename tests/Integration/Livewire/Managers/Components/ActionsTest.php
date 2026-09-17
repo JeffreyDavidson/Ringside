@@ -104,8 +104,8 @@ describe('manager actions component', function (): void {
         $component
             ->assertNotDispatched('manager-updated')
             ->assertNotDispatched('flash-message');
-        expect(session()->has('status'))->toBeFalse();
-        expect($manager->currentEmployment()->exists())->toBeFalse();
+        expect(session()->has('status'))->toBeFalse()
+            ->and($manager->currentEmployment()->exists())->toBeFalse();
     })->with([
         'employ',
         'release',

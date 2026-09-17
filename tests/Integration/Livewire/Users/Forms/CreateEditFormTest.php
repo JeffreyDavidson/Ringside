@@ -68,8 +68,8 @@ describe('user create and edit form', function (): void {
             ->and($form->last_name)->toBe('Smith')
             ->and($form->email)->toBe('jane@example.com')
             ->and($form->role)->toBe(Role::Administrator->value)
-            ->and($form->password)->toBe('')
-            ->and($form->password_confirmation)->toBe('')
+            ->and($form->password)->toBeEmpty()
+            ->and($form->password_confirmation)->toBeEmpty()
             ->and($selectedUser->is($user))->toBeTrue();
     });
 });

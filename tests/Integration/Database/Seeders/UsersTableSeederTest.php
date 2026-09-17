@@ -82,12 +82,12 @@ describe('UsersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($administrators as $admin) {
-                expect($admin->first_name)->toBeString();
-                expect($admin->last_name)->toBe('User');
-                expect($admin->email)->toContain('@example.com');
-                expect($admin->avatar_path)->toBe('300-3.png');
-                expect($admin->phone_number)->toBeInstanceOf(PhoneNumber::class);
-                expect($admin->status)->toBe(UserStatus::Active);
+                expect($admin->first_name)->toBeString()
+                    ->and($admin->last_name)->toBe('User')
+                    ->and($admin->email)->toContain('@example.com')
+                    ->and($admin->avatar_path)->toBe('300-3.png')
+                    ->and($admin->phone_number)->toBeInstanceOf(PhoneNumber::class)
+                    ->and($admin->status)->toBe(UserStatus::Active);
             }
         });
     });
@@ -119,10 +119,10 @@ describe('UsersTableSeeder Integration Tests', function () {
 
             // Assert
             expect($basicUsers->slice(0)->firstOrFail()->first_name)->toBe('Basic');
-            expect($basicUsers->slice(1)->firstOrFail()->first_name)->toBe('Second Basic');
-            expect($basicUsers->slice(2)->firstOrFail()->first_name)->toBe('Third Basic');
-            expect($basicUsers->slice(3)->firstOrFail()->first_name)->toBe('Fourth Basic');
-            expect($basicUsers->slice(4)->firstOrFail()->first_name)->toBe('Fifth Basic');
+            expect($basicUsers->slice(1)->firstOrFail()->first_name)->toBe('Second Basic')
+                ->and($basicUsers->slice(2)->firstOrFail()->first_name)->toBe('Third Basic')
+                ->and($basicUsers->slice(3)->firstOrFail()->first_name)->toBe('Fourth Basic')
+                ->and($basicUsers->slice(4)->firstOrFail()->first_name)->toBe('Fifth Basic');
         });
 
         test('basic users have required attributes', function () {
@@ -131,12 +131,12 @@ describe('UsersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($basicUsers as $user) {
-                expect($user->first_name)->toBeString();
-                expect($user->last_name)->toBe('User');
-                expect($user->email)->toContain('@example.com');
-                expect($user->avatar_path)->toBe('300-3.png');
-                expect($user->phone_number)->toBeInstanceOf(PhoneNumber::class);
-                expect($user->status)->toBe(UserStatus::Active);
+                expect($user->first_name)->toBeString()
+                    ->and($user->last_name)->toBe('User')
+                    ->and($user->email)->toContain('@example.com')
+                    ->and($user->avatar_path)->toBe('300-3.png')
+                    ->and($user->phone_number)->toBeInstanceOf(PhoneNumber::class)
+                    ->and($user->status)->toBe(UserStatus::Active);
             }
         });
     });
@@ -168,8 +168,8 @@ describe('UsersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($users as $user) {
-                expect($user->role)->toBeInstanceOf(Role::class);
-                expect($user->role)->toBeIn([Role::Administrator, Role::Basic]);
+                expect($user->role)->toBeInstanceOf(Role::class)
+                    ->toBeIn([Role::Administrator, Role::Basic]);
             }
         });
     });

@@ -23,8 +23,8 @@ test('it creates a new tag team', function () {
 
     $tagTeam = resolve(CreateAction::class)->handle($data);
 
-    expect($tagTeam->name)->toBe('The Test Team');
-    expect($tagTeam->signature_move)->toBe('Double Suplex');
+    expect($tagTeam->name)->toBe('The Test Team')
+        ->and($tagTeam->signature_move)->toBe('Double Suplex');
 
     // Verify tag team was created in database
     $this->assertDatabaseHas('tag_teams', [
@@ -47,8 +47,8 @@ test('it creates tag team with minimal data', function () {
 
     $tagTeam = resolve(CreateAction::class)->handle($data);
 
-    expect($tagTeam->name)->toBe('Minimal Team');
-    expect($tagTeam->signature_move)->toBeNull();
+    expect($tagTeam->name)->toBe('Minimal Team')
+        ->and($tagTeam->signature_move)->toBeNull();
 
     $this->assertDatabaseHas('tag_teams', [
         'name' => 'Minimal Team',
@@ -100,13 +100,13 @@ test('it handles database transactions correctly', function () {
 
     $tagTeam = resolve(CreateAction::class)->handle($data);
 
-    expect($tagTeam->exists)->toBeTrue();
-    expect($tagTeam->wrestlers()->count())->toBe(2);
+    expect($tagTeam->exists)->toBeTrue()
+        ->and($tagTeam->wrestlers()->count())->toBe(2);
 
     // Verify all related records were created atomically
     $wrestlers = $tagTeam->wrestlers;
-    expect($wrestlers->contains($wrestlerA))->toBeTrue();
-    expect($wrestlers->contains($wrestlerB))->toBeTrue();
+    expect($wrestlers->contains($wrestlerA))->toBeTrue()
+        ->and($wrestlers->contains($wrestlerB))->toBeTrue();
 });
 
 test('it receives validated wrestlers in its data', function () {
@@ -139,9 +139,9 @@ test('it creates tag team with all optional fields', function () {
 
     $tagTeam = resolve(CreateAction::class)->handle($data);
 
-    expect($tagTeam->name)->toBe('Full Data Team');
-    expect($tagTeam->signature_move)->toBe('Ultimate Finisher');
-    expect($tagTeam->wrestlers()->count())->toBe(2);
+    expect($tagTeam->name)->toBe('Full Data Team')
+        ->and($tagTeam->signature_move)->toBe('Ultimate Finisher')
+        ->and($tagTeam->wrestlers()->count())->toBe(2);
 });
 
 test('it creates partnerships with correct timestamps', function () {
@@ -166,8 +166,8 @@ test('it creates partnerships with correct timestamps', function () {
             ->whereBelongsTo($wrestler)
             ->firstOrFail();
 
-        expect($membership->joined_at)->not->toBeNull();
-        expect($membership->left_at)->toBeNull();
+        expect($membership->joined_at)->not->toBeNull()
+            ->and($membership->left_at)->toBeNull();
     }
 });
 

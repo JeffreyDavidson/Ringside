@@ -44,10 +44,8 @@ describe('EventMatch Model Integration Tests', function () {
             $eventMatch = new EventMatch;
             $casts = $eventMatch->getCasts();
 
-            expect($casts)->toBeArray();
-            expect($casts['id'])->toBe('int');
-            expect($casts['match_type'])->toBe(MatchType::class);
-            expect($casts['match_finish'])->toBe(MatchFinish::class);
+            expect($casts)->toBeArray()
+                ->toMatchArray(['id' => 'int', 'match_type' => MatchType::class, 'match_finish' => MatchFinish::class]);
         });
 
         test('has custom eloquent builder', function () {

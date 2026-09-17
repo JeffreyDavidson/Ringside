@@ -49,11 +49,9 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($referees as $referee) {
-                expect($referee->first_name)->toBeString();
-                expect($referee->first_name)->not->toBeEmpty();
-                expect($referee->last_name)->toBeString();
-                expect($referee->last_name)->not->toBeEmpty();
-                expect($referee->status)->toBeInstanceOf(EmploymentStatus::class);
+                expect($referee->first_name)->toBeString()->not->toBeEmpty()
+                    ->and($referee->last_name)->toBeString()->not->toBeEmpty()
+                    ->and($referee->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -63,8 +61,8 @@ describe('RefereesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($referees as $referee) {
-                expect($referee->first_name)->not->toContain('Test');
-                expect($referee->last_name)->not->toContain('Test');
+                expect($referee->first_name)->not->toContain('Test')
+                    ->and($referee->last_name)->not->toContain('Test');
             }
         });
     });

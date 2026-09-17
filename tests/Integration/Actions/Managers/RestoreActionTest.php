@@ -87,9 +87,9 @@ test('it preserves all historical records during restoration', function () {
 
     // Verify all historical records are preserved
     $restoredManager = Manager::findOrFail($managerId);
-    expect($restoredManager->employments()->count())->toBe($originalEmploymentCount);
-    expect($restoredManager->suspensions()->count())->toBe($originalSuspensionCount);
-    expect($restoredManager->injuries()->count())->toBe($originalInjuryCount);
+    expect($restoredManager->employments()->count())->toBe($originalEmploymentCount)
+        ->and($restoredManager->suspensions()->count())->toBe($originalSuspensionCount)
+        ->and($restoredManager->injuries()->count())->toBe($originalInjuryCount);
 });
 
 test('it does not automatically restore employment relationships', function () {
@@ -140,7 +140,7 @@ test('it does not automatically restore management relationships', function () {
 
     // Management relationships should be preserved but not automatically reactivated
     expect($restoredManager->wrestlers()->count())->toBe(1); // Historical preserved
-    expect($restoredManager->currentWrestlers)->toHaveCount(0); // Not auto-reactivated
+    expect($restoredManager->currentWrestlers)->toBeEmpty(); // Not auto-reactivated
 
     // This ensures restoration doesn't create conflicts with current assignments
 });
@@ -169,8 +169,8 @@ test('it handles managers with complex deletion history', function () {
 
     // Verify all complex history is preserved
     $restoredManager = Manager::findOrFail($managerId);
-    expect($restoredManager->employments()->count())->toBe($originalRecordCounts['employments']);
-    expect($restoredManager->retirements()->count())->toBe($originalRecordCounts['retirements']);
+    expect($restoredManager->employments()->count())->toBe($originalRecordCounts['employments'])
+        ->and($restoredManager->retirements()->count())->toBe($originalRecordCounts['retirements']);
 });
 
 test('it prevents restoring non-deleted managers', function () {
@@ -214,15 +214,17 @@ test('it maintains referential integrity during restoration', function () {
         ->whereBelongsTo($restoredManager, 'manager')
         ->whereBelongsTo($wrestler)
         ->firstOrFail();
-    expect($wrestlerManagement->hired_at->toDateTimeString())->toBe(now()->subDays(5)->toDateTimeString());
-    expect($wrestlerManagement->fired_at)->not()->toBeNull();
+    expect($wrestlerManagement->hired_at->toDateTimeString())->toBe(now()->subDays(5)->toDateTimeString())
+        ->and($wrestlerManagement->fired_at)->not()
+        ->toBeNull();
 
     $tagTeamManagement = TagTeamManager::query()
         ->whereBelongsTo($restoredManager, 'manager')
         ->whereBelongsTo($tagTeam, 'tagTeam')
         ->firstOrFail();
-    expect($tagTeamManagement->hired_at->toDateTimeString())->toBe(now()->subDays(4)->toDateTimeString());
-    expect($tagTeamManagement->fired_at)->not()->toBeNull();
+    expect($tagTeamManagement->hired_at->toDateTimeString())->toBe(now()->subDays(4)->toDateTimeString())
+        ->and($tagTeamManagement->fired_at)->not()
+        ->toBeNull();
 });
 
 test('it allows separate employment after restoration', function () {

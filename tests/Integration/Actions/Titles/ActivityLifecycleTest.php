@@ -41,8 +41,8 @@ test('title activity actions preserve an attributed transition history', functio
 test('a failed title activity transition does not write an audit record', function () {
     $title = Title::factory()->unactivated()->create();
 
-    expect(fn () => resolve(PullAction::class)->handle($title))->toThrow(CannotBePulledException::class);
-    expect($title->lifecycleTransitions()->doesntExist())->toBeTrue();
+    expect(fn () => resolve(PullAction::class)->handle($title))->toThrow(CannotBePulledException::class)
+        ->and($title->lifecycleTransitions()->doesntExist())->toBeTrue();
 });
 
 test('pull eligibility stays aligned with its guard', function (string $factoryState, bool $canPull) {

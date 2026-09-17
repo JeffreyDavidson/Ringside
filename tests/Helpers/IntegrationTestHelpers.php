@@ -351,7 +351,7 @@ function createTagTeamMembership(Wrestler $wrestler, TagTeam $tagTeam, array $op
  */
 function endManagementRelationship(Wrestler $wrestler, Manager $manager, ?Carbon $endDate = null): void
 {
-    $endDate = $endDate ?? Carbon::now();
+    $endDate ??= Carbon::now();
     $wrestler->managers()->updateExistingPivot($manager->id, [
         'fired_at' => $endDate,
         'updated_at' => now(),
@@ -363,7 +363,7 @@ function endManagementRelationship(Wrestler $wrestler, Manager $manager, ?Carbon
  */
 function endTagTeamMembership(Wrestler $wrestler, TagTeam $tagTeam, ?Carbon $endDate = null): void
 {
-    $endDate = $endDate ?? Carbon::now();
+    $endDate ??= Carbon::now();
     $wrestler->tagTeams()->updateExistingPivot($tagTeam->id, [
         'left_at' => $endDate,
         'updated_at' => now(),

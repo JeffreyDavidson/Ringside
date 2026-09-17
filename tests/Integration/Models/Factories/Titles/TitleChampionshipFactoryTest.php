@@ -37,9 +37,9 @@ describe('TitleChampionshipFactory Integration Tests', function () {
 
             // Assert
             expect($championship->title_id)->toBeInt();
-            expect($championship->champion_type)->toBeIn(['wrestler', 'tag_team']);
-            expect($championship->champion_id)->toBeInt();
-            expect($championship->won_match_id)->toBeNull(); // Default has no match
+            expect($championship->champion_type)->toBeIn(['wrestler', 'tag_team'])
+                ->and($championship->champion_id)->toBeInt()
+                ->and($championship->won_match_id)->toBeNull(); // Default has no match
             expect($championship->lost_match_id)->toBeNull(); // Current championship
             expect($championship->won_at)->toBeInstanceOf(Carbon::class);
             expect($championship->lost_at)->toBeNull(); // Current championship
@@ -68,8 +68,8 @@ describe('TitleChampionshipFactory Integration Tests', function () {
 
             // Assert
             expect($championship->champion_type)->toBe('wrestler');
-            expect($championship->champion_id)->toBe($wrestler->id);
-            expect($championship->title_id)->toBe($title->id);
+            expect($championship->champion_id)->toBe($wrestler->id)
+                ->and($championship->title_id)->toBe($title->id);
         });
 
         test('tag team championship state works correctly', function () {
@@ -84,8 +84,8 @@ describe('TitleChampionshipFactory Integration Tests', function () {
 
             // Assert
             expect($championship->champion_type)->toBe('tag_team');
-            expect($championship->champion_id)->toBe($tagTeam->id);
-            expect($championship->title_id)->toBe($title->id);
+            expect($championship->champion_id)->toBe($tagTeam->id)
+                ->and($championship->title_id)->toBe($title->id);
         });
 
         test('configuring a champion relationship does not persist the champion', function (string $state, string $modelClass) {
@@ -112,9 +112,9 @@ describe('TitleChampionshipFactory Integration Tests', function () {
 
             // Assert
             expect(requiredDate($championship->won_at)->format('Y-m-d H:i:s'))->toBe($wonDate->format('Y-m-d H:i:s'));
-            expect(requiredDate($championship->lost_at)->format('Y-m-d H:i:s'))->toBe($lostDate->format('Y-m-d H:i:s'));
-            expect($championship->lost_match_id)->toBe($lostMatch->id);
-            expect(requiredDate($championship->lost_at)->isAfter($championship->won_at))->toBeTrue();
+            expect(requiredDate($championship->lost_at)->format('Y-m-d H:i:s'))->toBe($lostDate->format('Y-m-d H:i:s'))
+                ->and($championship->lost_match_id)->toBe($lostMatch->id)
+                ->and(requiredDate($championship->lost_at)->isAfter($championship->won_at))->toBeTrue();
         });
 
         test('won at event match creates a scheduled match when one is not supplied', function () {

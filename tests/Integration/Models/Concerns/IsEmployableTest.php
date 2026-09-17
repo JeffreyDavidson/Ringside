@@ -84,8 +84,8 @@ describe('IsEmployable Trait Integration Tests', function () {
                 use IsEmployable;
             };
             $relation = $model->employments();
-            expect($relation)->toBeInstanceOf(MorphMany::class);
-            expect($relation->getRelated())->toBeInstanceOf(Employment::class);
+            expect($relation)->toBeInstanceOf(MorphMany::class)
+                ->and($relation->getRelated())->toBeInstanceOf(Employment::class);
         });
 
         test('currentEmployment relationship uses the correct related model', function () {
@@ -95,8 +95,8 @@ describe('IsEmployable Trait Integration Tests', function () {
                 use IsEmployable;
             };
             $relation = $model->currentEmployment();
-            expect($relation)->toBeInstanceOf(MorphOne::class);
-            expect($relation->getRelated())->toBeInstanceOf(Employment::class);
+            expect($relation)->toBeInstanceOf(MorphOne::class)
+                ->and($relation->getRelated())->toBeInstanceOf(Employment::class);
         });
     });
 
@@ -119,8 +119,8 @@ describe('IsEmployable Trait Integration Tests', function () {
             $modelWith->futureEmploymentExists = true;
             $modelWithout = new EmploymentStateModel;
 
-            expect($modelWith->futureEmployment()->exists())->toBeTrue();
-            expect($modelWithout->futureEmployment()->exists())->toBeFalse();
+            expect($modelWith->futureEmployment()->exists())->toBeTrue()
+                ->and($modelWithout->futureEmployment()->exists())->toBeFalse();
         });
 
         test('detects the absence of current and future employment through relationships', function () {
@@ -141,8 +141,8 @@ describe('IsEmployable Trait Integration Tests', function () {
             $modelWith->employmentExists = true;
             $modelWithout = new EmploymentStateModel;
 
-            expect($modelWith->employments()->exists())->toBeTrue();
-            expect($modelWithout->employments()->exists())->toBeFalse();
+            expect($modelWith->employments()->exists())->toBeTrue()
+                ->and($modelWithout->employments()->exists())->toBeFalse();
         });
     });
 
@@ -155,9 +155,7 @@ describe('IsEmployable Trait Integration Tests', function () {
             };
             $relation = $model->currentEmployment();
             $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNull = collect($wheres)->contains(function ($where) {
-                return ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at';
-            });
+            $hasWhereNull = collect($wheres)->contains(fn($where) => ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at');
             expect($hasWhereNull)->toBeTrue();
         });
 
@@ -169,14 +167,10 @@ describe('IsEmployable Trait Integration Tests', function () {
             };
             $relation = $model->futureEmployment();
             $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNull = collect($wheres)->contains(function ($where) {
-                return ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at';
-            });
-            $hasStartedAtGreater = collect($wheres)->contains(function ($where) {
-                return ($where['column'] ?? null) === 'started_at' && ($where['operator'] ?? null) === '>';
-            });
-            expect($hasWhereNull)->toBeTrue();
-            expect($hasStartedAtGreater)->toBeTrue();
+            $hasWhereNull = collect($wheres)->contains(fn($where) => ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at');
+            $hasStartedAtGreater = collect($wheres)->contains(fn($where) => ($where['column'] ?? null) === 'started_at' && ($where['operator'] ?? null) === '>');
+            expect($hasWhereNull)->toBeTrue()
+                ->and($hasStartedAtGreater)->toBeTrue();
         });
 
         test('previous employments query includes whereNotNull ended_at', function () {
@@ -187,9 +181,7 @@ describe('IsEmployable Trait Integration Tests', function () {
             };
             $relation = $model->previousEmployments();
             $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNotNull = collect($wheres)->contains(function ($where) {
-                return ($where['type'] ?? null) === 'NotNull' && ($where['column'] ?? null) === 'ended_at';
-            });
+            $hasWhereNotNull = collect($wheres)->contains(fn($where) => ($where['type'] ?? null) === 'NotNull' && ($where['column'] ?? null) === 'ended_at');
             expect($hasWhereNotNull)->toBeTrue();
         });
 

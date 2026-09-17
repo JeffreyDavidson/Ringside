@@ -25,9 +25,8 @@ test('it rejects the entire assignment when any referee is unavailable', functio
     expect(fn () => resolve(AddRefereesToMatchAction::class)->handle(
         $match,
         collect([$availableReferee, $unavailableReferee]),
-    ))->toThrow(EntityNotAvailableException::class);
-
-    expect($match->referees()->count())->toBe(0);
+    ))->toThrow(EntityNotAvailableException::class)
+        ->and($match->referees()->count())->toBe(0);
 });
 
 test('it reloads referees before checking assignment eligibility', function () {
@@ -38,9 +37,8 @@ test('it reloads referees before checking assignment eligibility', function () {
     $referee->delete();
 
     expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($match, collect([$staleReferee])))
-        ->toThrow(EntityNotAvailableException::class);
-
-    expect($match->referees()->exists())->toBeFalse();
+        ->toThrow(EntityNotAvailableException::class)
+        ->and($match->referees()->exists())->toBeFalse();
 });
 
 test('it allows a referee to officiate multiple matches on one event card', function () {
@@ -68,9 +66,8 @@ test('it rejects a referee assigned to another event at the same time', function
     $referee->refresh();
 
     expect(fn () => resolve(AddRefereesToMatchAction::class)->handle($targetMatch, $referee->newCollection([$referee])))
-        ->toThrow(SchedulingConflictException::class, "Referee [{$referee->full_name}] is already assigned to another event at this time.");
-
-    expect($targetMatch->referees()->count())->toBe(0);
+        ->toThrow(SchedulingConflictException::class, "Referee [{$referee->full_name}] is already assigned to another event at this time.")
+        ->and($targetMatch->referees()->count())->toBe(0);
 });
 
 test('it assigns a repeated referee only once', function () {

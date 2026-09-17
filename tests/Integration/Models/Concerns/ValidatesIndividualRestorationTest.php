@@ -17,9 +17,8 @@ describe('individual restoration validation', function () {
             default => throw new InvalidArgumentException("Unsupported individual type [{$individualType}]."),
         };
 
-        expect(resolve(IndividualDeletionEligibility::class)->canRestore($individual))->toBeFalse();
-        expect(fn () => resolve(IndividualDeletionEligibility::class)->ensureCanRestore($individual))
-            ->toThrow(CannotBeRestoredException::class);
+        expect(resolve(IndividualDeletionEligibility::class)->canRestore($individual))->toBeFalse()
+            ->and(fn() => resolve(IndividualDeletionEligibility::class)->ensureCanRestore($individual))->toThrow(CannotBeRestoredException::class);
     })->with([
         Wrestler::class,
         Manager::class,

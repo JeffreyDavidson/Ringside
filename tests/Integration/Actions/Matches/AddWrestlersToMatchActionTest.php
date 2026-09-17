@@ -111,9 +111,8 @@ test('it rejects the entire assignment when any wrestler is ineligible', functio
     $sideNumber = 1;
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, $wrestlers, $sideNumber))
-        ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.');
-
-    expect($match->competitors()->count())->toBe(0)
+        ->toThrow(EntityNotAvailableException::class, 'Selected wrestlers must all be eligible for match assignment.')
+        ->and($match->competitors()->count())->toBe(0)
         ->and($match->sides()->count())->toBe(0);
 });
 
@@ -136,9 +135,8 @@ test('it reloads wrestlers before checking assignment eligibility', function () 
     $wrestler->delete();
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($match, collect([$staleWrestler]), 1))
-        ->toThrow(EntityNotAvailableException::class);
-
-    expect($match->competitors()->exists())->toBeFalse();
+        ->toThrow(EntityNotAvailableException::class)
+        ->and($match->competitors()->exists())->toBeFalse();
 });
 
 test('it throws exception when side number is invalid', function () {
@@ -183,9 +181,8 @@ test('it rejects a wrestler booked on another event at the same time', function 
     ]);
 
     expect(fn () => resolve(AddWrestlersToMatchAction::class)->handle($targetMatch, collect([$wrestler]), 1))
-        ->toThrow(SchedulingConflictException::class, "Wrestler [{$wrestler->name}] is already booked at this event time.");
-
-    expect($targetMatch->competitors()->count())->toBe(0);
+        ->toThrow(SchedulingConflictException::class, "Wrestler [{$wrestler->name}] is already booked at this event time.")
+        ->and($targetMatch->competitors()->count())->toBe(0);
 });
 
 test('it allows a wrestler booked at a different event time', function () {

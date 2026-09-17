@@ -21,9 +21,8 @@ test('it rejects creating events at the same venue and time', function () {
         ->toThrow(
             SchedulingConflictException::class,
             "Venue [{$venue->name}] is already booked at this event time.",
-        );
-
-    expect(Event::query()->where('name', 'Conflicting Event')->exists())->toBeFalse();
+        )
+        ->and(Event::query()->where('name', 'Conflicting Event')->exists())->toBeFalse();
 });
 
 test('it permits using the same venue at a different time', function () {
@@ -47,11 +46,7 @@ test('it rejects moving an event into a venue scheduling conflict', function () 
     $data = new EventData('Updated Event', $date, $conflictingVenue, null);
 
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(SchedulingConflictException::class);
-
-    expect($event->refresh())
-        ->name->not->toBe('Updated Event')
-        ->venue_id->toBe($originalVenue->id);
+        ->toThrow(SchedulingConflictException::class)->and($event->refresh())->name->not->toBe('Updated Event')->venue_id->toBe($originalVenue->id);
 });
 
 test('it rejects rescheduling an event into a conflict at its current venue', function () {
@@ -63,10 +58,7 @@ test('it rejects rescheduling an event into a conflict at its current venue', fu
     $data = new EventData('Rescheduled Event', $conflictingDate, $venue, null);
 
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(SchedulingConflictException::class);
-
-    expect($event->refresh())
-        ->name->not->toBe('Rescheduled Event')
+        ->toThrow(SchedulingConflictException::class)->and($event->refresh())->name->not->toBe('Rescheduled Event')
         ->and($event->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
 });
 
@@ -96,7 +88,6 @@ test('it rejects restoring an event into a venue scheduling conflict', function 
         ->toThrow(
             SchedulingConflictException::class,
             "Venue [{$venue->name}] is already booked at this event time.",
-        );
-
-    expect(Event::onlyTrashed()->whereKey($deletedEvent->getKey())->exists())->toBeTrue();
+        )
+        ->and(Event::onlyTrashed()->whereKey($deletedEvent->getKey())->exists())->toBeTrue();
 });

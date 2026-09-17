@@ -40,29 +40,23 @@ test('it deletes unemployed tag team', function () {
 test('it prevents deleting employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-
-    expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
-        ->toThrow(CannotBeDeletedException::class);
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and(fn() => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     expect($tagTeam->currentRetirement()->exists())->toBeTrue()
-        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse();
-
-    expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
-        ->toThrow(CannotBeDeletedException::class);
+        ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse()
+        ->and(fn() => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
-
-    expect(fn () => resolve(DeleteAction::class)->handle($tagTeam))
-        ->toThrow(CannotBeDeletedException::class);
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue()
+        ->and(fn() => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -118,8 +112,8 @@ test('it preserves historical data during deletion', function () {
     resolve(DeleteAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->trashed())->toBeTrue();
-    expect($tagTeam->name)->toBe($originalName);
+    expect($tagTeam->trashed())->toBeTrue()
+        ->and($tagTeam->name)->toBe($originalName);
 
     // Historical data should remain
     expect($tagTeam->employments()->count())->toBe(1);
@@ -142,8 +136,8 @@ test('it uses appropriate business rules for deletion', function () {
 
     // Tag team should be in a state that allows deletion
     expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($tagTeam);
 

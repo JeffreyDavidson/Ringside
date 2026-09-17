@@ -19,9 +19,8 @@ test('it rejects changing the date of an event that already occurred', function 
     $data = new EventData($event->name, now()->addWeek(), $event->venue, $event->preview);
 
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(CannotBeRescheduledException::class);
-
-    expect($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+        ->toThrow(CannotBeRescheduledException::class)
+        ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
 });
 
 test('it permits updating a past event when its date is unchanged', function () {
@@ -48,9 +47,8 @@ test('it rejects rescheduling when a wrestler is booked at the target time', fun
     $data = new EventData('Rescheduled Event', $targetDate, null, null);
 
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(SchedulingConflictException::class, "Wrestler [{$wrestler->name}] is already booked at this event time.");
-
-    expect($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+        ->toThrow(SchedulingConflictException::class, "Wrestler [{$wrestler->name}] is already booked at this event time.")
+        ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
 });
 
 test('it rejects rescheduling when a tag team is booked at the target time', function () {
@@ -64,9 +62,8 @@ test('it rejects rescheduling when a tag team is booked at the target time', fun
     $data = new EventData('Rescheduled Event', $targetDate, null, null);
 
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(SchedulingConflictException::class, "Tag team [{$tagTeam->name}] is already booked at this event time.");
-
-    expect($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+        ->toThrow(SchedulingConflictException::class, "Tag team [{$tagTeam->name}] is already booked at this event time.")
+        ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
 });
 
 test('it rejects rescheduling when a referee is assigned at the target time', function () {
@@ -83,9 +80,8 @@ test('it rejects rescheduling when a referee is assigned at the target time', fu
     $data = new EventData('Rescheduled Event', $targetDate, null, null);
 
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(SchedulingConflictException::class, "Referee [{$refereeName}] is already assigned to another event at this time.");
-
-    expect($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+        ->toThrow(SchedulingConflictException::class, "Referee [{$refereeName}] is already assigned to another event at this time.")
+        ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
 });
 
 test('it rejects rescheduling when a title is assigned at the target time', function () {
@@ -101,7 +97,6 @@ test('it rejects rescheduling when a title is assigned at the target time', func
     $data = new EventData('Rescheduled Event', $targetDate, null, null);
 
     expect(fn () => resolve(UpdateAction::class)->handle($event, $data))
-        ->toThrow(SchedulingConflictException::class, "Title [{$title->name}] is already assigned at this event time.");
-
-    expect($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
+        ->toThrow(SchedulingConflictException::class, "Title [{$title->name}] is already assigned at this event time.")
+        ->and($event->refresh()->date?->toDateTimeString())->toBe($originalDate->toDateTimeString());
 });

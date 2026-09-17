@@ -51,9 +51,8 @@ describe('EventsTableSeeder Integration Tests', function () {
             expect($events)->not->toBeEmpty();
 
             foreach ($events as $event) {
-                expect($event->name)->toBeString();
-                expect($event->name)->not->toBeEmpty();
-                expect($event->date)->toBeInstanceOf(Carbon::class);
+                expect($event->name)->toBeString()->not->toBeEmpty()
+                    ->and($event->date)->toBeInstanceOf(Carbon::class);
                 // venue_id can be null for future events without assigned venues
                 if ($event->venue_id !== null) {
                     expect($event->venue_id)->toBeInt();
@@ -69,8 +68,8 @@ describe('EventsTableSeeder Integration Tests', function () {
             expect($events)->not->toBeEmpty();
 
             foreach ($events as $event) {
-                expect(mb_strlen($event->name))->toBeGreaterThanOrEqual(3);
-                expect($event->name)->not->toContain('Test');
+                expect(mb_strlen($event->name))->toBeGreaterThanOrEqual(3)
+                    ->and($event->name)->not->toContain('Test');
             }
         });
 
@@ -112,8 +111,8 @@ describe('EventsTableSeeder Integration Tests', function () {
             foreach ($events as $event) {
                 // venue_id can be null for future events without assigned venues
                 if ($event->venue_id !== null) {
-                    expect($event->venue_id)->toBeInt();
-                    expect($event->venue_id)->toBeGreaterThan(0);
+                    expect($event->venue_id)->toBeInt()
+                        ->toBeGreaterThan(0);
                 }
             }
         });

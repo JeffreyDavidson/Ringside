@@ -119,9 +119,8 @@ test('it rolls back the match when a side contains no eligible competitors', fun
     );
 
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
-        ->toThrow(EntityNotAvailableException::class);
-
-    expect(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
+        ->toThrow(EntityNotAvailableException::class)
+        ->and(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
 });
 
 test('it creates a title match when the current champion is a competitor', function () {
@@ -167,7 +166,6 @@ test('it rolls back a title match when the current champion is absent', function
     );
 
     expect(fn () => resolve(AddMatchForEventAction::class)->handle($event, $matchData))
-        ->toThrow(InvalidMatchConfigurationException::class);
-
-    expect(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
+        ->toThrow(InvalidMatchConfigurationException::class)
+        ->and(EventMatch::query()->whereBelongsTo($event)->exists())->toBeFalse();
 });

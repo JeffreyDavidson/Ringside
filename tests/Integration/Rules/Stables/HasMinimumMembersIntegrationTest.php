@@ -117,8 +117,8 @@ describe('HasMinimumMembers Validation Rule Integration Tests', function () {
 
             // Assert
             expect($failCalled)->toBeTrue();
-            expect($failMessage)->toContain('A stable must have at least');
-            expect($failMessage)->toContain('members. Currently adding 2 members.');
+            expect($failMessage)->toContain('A stable must have at least')
+                ->toContain('members. Currently adding 2 members.');
         });
 
         test('validation passes when total equals minimum', function () {

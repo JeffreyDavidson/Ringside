@@ -33,9 +33,8 @@ describe('TagTeamManager Model Integration Tests', function () {
             $tagTeamManager = new TagTeamManager;
             $casts = $tagTeamManager->getCasts();
 
-            expect($casts)->toBeArray();
-            expect($casts['hired_at'])->toBe('datetime');
-            expect($casts['fired_at'])->toBe('datetime');
+            expect($casts)->toBeArray()
+                ->toMatchArray(['hired_at' => 'datetime', 'fired_at' => 'datetime']);
         });
 
         test('tagTeamManager has custom eloquent builder', function () {

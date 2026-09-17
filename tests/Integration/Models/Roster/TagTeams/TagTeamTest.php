@@ -69,24 +69,24 @@ describe('TagTeam Model Integration Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(TagTeam::class))->toContain(HasChampionshipReigns::class);
-            expect(class_uses(TagTeam::class))->toContain(HasFactory::class);
-            expect(class_uses(TagTeam::class))->toContain(HasMatchParticipations::class);
-            expect(class_uses(TagTeam::class))->toContain(IsEmployable::class);
-            expect(class_uses(TagTeam::class))->toContain(IsRetirable::class);
-            expect(class_uses(TagTeam::class))->toContain(IsSuspendable::class);
-            expect(class_uses(TagTeam::class))->toContain(SoftDeletes::class);
+            expect(class_uses(TagTeam::class))->toContain(HasChampionshipReigns::class)
+                ->and(class_uses(TagTeam::class))->toContain(HasFactory::class)
+                ->and(class_uses(TagTeam::class))->toContain(HasMatchParticipations::class)
+                ->and(class_uses(TagTeam::class))->toContain(IsEmployable::class)
+                ->and(class_uses(TagTeam::class))->toContain(IsRetirable::class)
+                ->and(class_uses(TagTeam::class))->toContain(IsSuspendable::class)
+                ->and(class_uses(TagTeam::class))->toContain(SoftDeletes::class);
         });
     });
 
     describe('interface implementation', function () {
         test('implements all required interfaces', function () {
-            expect(TagTeam::class)->toImplement(CanBeAStableMember::class);
-            expect(TagTeam::class)->toImplement(CanBeChampion::class);
-            expect(TagTeam::class)->toImplement(Employable::class);
-            expect(TagTeam::class)->toImplement(Manageable::class);
-            expect(TagTeam::class)->toImplement(Retirable::class);
-            expect(TagTeam::class)->toImplement(Suspendable::class);
+            expect(TagTeam::class)->toImplement(CanBeAStableMember::class)
+                ->toImplement(CanBeChampion::class)
+                ->toImplement(Employable::class)
+                ->toImplement(Manageable::class)
+                ->toImplement(Retirable::class)
+                ->toImplement(Suspendable::class);
         });
     });
 

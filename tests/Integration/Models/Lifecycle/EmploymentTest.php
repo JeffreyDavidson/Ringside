@@ -17,8 +17,8 @@ test('it creates employment for an explicit employable owner', function (Closure
         ->for($employable, 'employable')
         ->create();
 
-    expect($employment->employable)->toBeInstanceOf($employable::class);
-    expect($employment->employable->getKey())->toBe($employable->getKey());
+    expect($employment->employable)->toBeInstanceOf($employable::class)
+        ->and($employment->employable->getKey())->toBe($employable->getKey());
 })->with([
     fn (): Wrestler => Wrestler::factory()->create(),
     fn (): Manager => Manager::factory()->create(),

@@ -36,8 +36,8 @@ describe('TagTeamFactory Integration Tests', function () {
 
             // Assert
             expect($tagTeam->name)->toBeString();
-            expect($tagTeam->name)->not->toBeEmpty();
-            expect($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
+            expect($tagTeam->name)->not->toBeEmpty()
+                ->and($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
         });
 
         test('generates realistic tag team names', function () {

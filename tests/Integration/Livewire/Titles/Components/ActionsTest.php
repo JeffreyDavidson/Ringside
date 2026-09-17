@@ -82,8 +82,8 @@ describe('title actions component', function (): void {
         $component
             ->assertNotDispatched('title-updated')
             ->assertNotDispatched('flash-message');
-        expect(session()->has('status'))->toBeFalse();
-        expect($title->currentActivityPeriod()->exists())->toBeFalse();
+        expect(session()->has('status'))->toBeFalse()
+            ->and($title->currentActivityPeriod()->exists())->toBeFalse();
     })->with([
         'debut',
         'retire',

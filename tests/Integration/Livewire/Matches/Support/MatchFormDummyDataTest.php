@@ -37,7 +37,7 @@ describe('match form dummy data', function (): void {
             ->and($selectedWrestlerIds)->not->toContain($unavailableWrestler->id)
             ->and($form->referees)->toBe([$bookableReferee->id])
             ->and($form->referees)->not->toContain($unavailableReferee->id)
-            ->and($form->titles)->toBe([])
+            ->and($form->titles)->toBeEmpty()
             ->and($form->preview)->toBeString()->not->toBeEmpty();
     });
 });

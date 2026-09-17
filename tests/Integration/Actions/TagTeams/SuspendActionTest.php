@@ -14,14 +14,14 @@ beforeEach(function () {
 test('it suspends an employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     // Verify suspension record was created
     $this->assertDatabaseHas('suspensions', [
@@ -61,8 +61,8 @@ test('it persists the suspension lifecycle', function () {
 
     // Verify suspension period was created
     expect($tagTeam->currentSuspension)->not()->toBeNull();
-    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue()
+        ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify records show proper dates
     $this->assertDatabaseHas('suspensions', [
@@ -76,28 +76,22 @@ test('it persists the suspension lifecycle', function () {
 test('it prevents suspending unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and(fn() => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents suspending already suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentSuspension()->exists())->toBeTrue()
+        ->and(fn() => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents suspending retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
-    expect($tagTeam->currentRetirement()->exists())->toBeTrue();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
+        ->and(fn() => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -113,8 +107,8 @@ test('it handles database transactions correctly', function () {
 
     // Verify suspension record was created
     $suspension = $tagTeam->currentSuspension()->firstOrFail();
-    expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
-    expect($suspension->ended_at)->toBeNull();
+    expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($suspension->ended_at)->toBeNull();
 });
 
 test('it creates new suspension period', function () {
@@ -131,8 +125,8 @@ test('it creates new suspension period', function () {
 
     // New suspension should be current and active
     $currentSuspension = $tagTeam->currentSuspension()->firstOrFail();
-    expect(requiredDate($currentSuspension->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
-    expect($currentSuspension->ended_at)->toBeNull();
+    expect(requiredDate($currentSuspension->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($currentSuspension->ended_at)->toBeNull();
 });
 
 test('it uses the provided date', function () {
@@ -160,8 +154,8 @@ test('it handles multiple suspension history correctly', function () {
     $tagTeam->suspensions()->create(['started_at' => now()->subDays(20), 'ended_at' => now()->subDays(15)]);
 
     $tagTeam->refresh();
-    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
-    expect($tagTeam->suspensions()->count())->toBe(2);
+    expect($tagTeam->currentSuspension()->exists())->toBeFalse()
+        ->and($tagTeam->suspensions()->count())->toBe(2);
 
     resolve(SuspendAction::class)->handle($tagTeam);
 
@@ -225,8 +219,8 @@ test('it handles tag team with complex employment history', function () {
     $tagTeam->employments()->create(['started_at' => now()->subDays(20), 'ended_at' => null]); // Current
 
     $tagTeam->refresh();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($tagTeam);
 

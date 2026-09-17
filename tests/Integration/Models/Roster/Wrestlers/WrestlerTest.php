@@ -80,14 +80,14 @@ describe('Wrestler Model Integration Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Wrestler::class))->toContain(HasChampionshipReigns::class);
-            expect(class_uses(Wrestler::class))->toContain(HasFactory::class);
-            expect(class_uses(Wrestler::class))->toContain(HasMatchParticipations::class);
-            expect(class_uses(Wrestler::class))->toContain(IsEmployable::class);
-            expect(class_uses(Wrestler::class))->toContain(IsInjurable::class);
-            expect(class_uses(Wrestler::class))->toContain(IsRetirable::class);
-            expect(class_uses(Wrestler::class))->toContain(IsSuspendable::class);
-            expect(class_uses(Wrestler::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Wrestler::class))->toContain(HasChampionshipReigns::class)
+                ->and(class_uses(Wrestler::class))->toContain(HasFactory::class)
+                ->and(class_uses(Wrestler::class))->toContain(HasMatchParticipations::class)
+                ->and(class_uses(Wrestler::class))->toContain(IsEmployable::class)
+                ->and(class_uses(Wrestler::class))->toContain(IsInjurable::class)
+                ->and(class_uses(Wrestler::class))->toContain(IsRetirable::class)
+                ->and(class_uses(Wrestler::class))->toContain(IsSuspendable::class)
+                ->and(class_uses(Wrestler::class))->toContain(SoftDeletes::class);
         });
     });
 
@@ -95,13 +95,13 @@ describe('Wrestler Model Integration Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Wrestler::class);
 
-            expect($interfaces)->toContain(CanBeAStableMember::class);
-            expect($interfaces)->toContain(CanBeChampion::class);
-            expect($interfaces)->toContain(Employable::class);
-            expect($interfaces)->toContain(Injurable::class);
-            expect($interfaces)->toContain(Manageable::class);
-            expect($interfaces)->toContain(Retirable::class);
-            expect($interfaces)->toContain(Suspendable::class);
+            expect($interfaces)->toContain(CanBeAStableMember::class)
+                ->toContain(CanBeChampion::class)
+                ->toContain(Employable::class)
+                ->toContain(Injurable::class)
+                ->toContain(Manageable::class)
+                ->toContain(Retirable::class)
+                ->toContain(Suspendable::class);
         });
     });
 

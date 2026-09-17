@@ -50,7 +50,7 @@ describe('MatchStipulation Model Integration Tests', function () {
 
         test('has correct default values', function () {
             $matchStipulation = new MatchStipulation;
-            expect($matchStipulation->is_active)->toBe(true);
+            expect($matchStipulation->is_active)->toBeTrue();
         });
     });
 

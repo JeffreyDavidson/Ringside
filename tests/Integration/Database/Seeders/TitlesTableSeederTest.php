@@ -49,9 +49,8 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($titles as $title) {
-                expect($title->name)->toBeString();
-                expect($title->name)->not->toBeEmpty();
-                expect($title->status)->toBeInstanceOf(TitleStatus::class);
+                expect($title->name)->toBeString()->not->toBeEmpty()
+                    ->and($title->status)->toBeInstanceOf(TitleStatus::class);
             }
         });
 
@@ -61,8 +60,8 @@ describe('TitlesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($titles as $title) {
-                expect(mb_strlen($title->name))->toBeGreaterThan(5);
-                expect($title->name)->not->toContain('Test');
+                expect(mb_strlen($title->name))->toBeGreaterThan(5)
+                    ->and($title->name)->not->toContain('Test');
                 // Wrestling titles often contain words like "Championship", "Title", "Belt"
                 $hasWrestlingTerms = str_contains($title->name, 'Championship') ||
                                    str_contains($title->name, 'Title') ||

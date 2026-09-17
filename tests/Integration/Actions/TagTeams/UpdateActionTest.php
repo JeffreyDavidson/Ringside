@@ -32,8 +32,8 @@ test('it updates tag team basic information', function () {
     resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Updated Team');
-    expect($this->tagTeam->signature_move)->toBe('Updated Move');
+    expect($this->tagTeam->name)->toBe('Updated Team')
+        ->and($this->tagTeam->signature_move)->toBe('Updated Move');
 
     $this->assertDatabaseHas('tag_teams', [
         'id' => $this->tagTeam->id,
@@ -73,8 +73,8 @@ test('it updates only the name when signature move is repeated', function () {
     resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Updated Team Only');
-    expect($this->tagTeam->signature_move)->toBe('Original Move');
+    expect($this->tagTeam->name)->toBe('Updated Team Only')
+        ->and($this->tagTeam->signature_move)->toBe('Original Move');
 });
 
 test('it updates only the signature move when name is repeated', function () {
@@ -89,8 +89,8 @@ test('it updates only the signature move when name is repeated', function () {
     resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
-    expect($this->tagTeam->signature_move)->toBe('New Finisher');
+    expect($this->tagTeam->name)->toBe('Original Team')
+        ->and($this->tagTeam->signature_move)->toBe('New Finisher');
 });
 
 test('it handles clearing the signature move', function () {
@@ -105,8 +105,8 @@ test('it handles clearing the signature move', function () {
     resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
-    expect($this->tagTeam->signature_move)->toBeNull();
+    expect($this->tagTeam->name)->toBe('Original Team')
+        ->and($this->tagTeam->signature_move)->toBeNull();
 });
 
 test('it handles database transactions correctly', function () {
@@ -122,8 +122,8 @@ test('it handles database transactions correctly', function () {
 
     $this->tagTeam->refresh();
 
-    expect($this->tagTeam->name)->toBe('Updated Transaction Team');
-    expect($this->tagTeam->signature_move)->toBe('Transaction Slam');
+    expect($this->tagTeam->name)->toBe('Updated Transaction Team')
+        ->and($this->tagTeam->signature_move)->toBe('Transaction Slam');
 });
 
 test('it allows updating to the same name', function () {
@@ -138,8 +138,8 @@ test('it allows updating to the same name', function () {
     resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('Original Team');
-    expect($this->tagTeam->signature_move)->toBe('Updated Move');
+    expect($this->tagTeam->name)->toBe('Original Team')
+        ->and($this->tagTeam->signature_move)->toBe('Updated Move');
 });
 
 test('it updates timestamps correctly', function () {
@@ -177,10 +177,10 @@ test('it preserves unmodified attributes', function () {
 
     $this->tagTeam->refresh();
 
-    expect($this->tagTeam->name)->toBe('Updated Preservation Team');
-    expect($this->tagTeam->signature_move)->toBe('Original Move');
-    expect(requiredDate($this->tagTeam->created_at)->toDateTimeString())->toBe(requiredDate($originalCreatedAt)->toDateTimeString());
-    expect($this->tagTeam->id)->toBe($originalId);
+    expect($this->tagTeam->name)->toBe('Updated Preservation Team')
+        ->and($this->tagTeam->signature_move)->toBe('Original Move')
+        ->and(requiredDate($this->tagTeam->created_at)->toDateTimeString())->toBe(requiredDate($originalCreatedAt)->toDateTimeString())
+        ->and($this->tagTeam->id)->toBe($originalId);
 });
 
 test('it handles long signature move names', function () {
@@ -212,8 +212,8 @@ test('it handles special characters in updates', function () {
     resolve(UpdateAction::class)->handle($this->tagTeam, $updateData);
 
     $this->tagTeam->refresh();
-    expect($this->tagTeam->name)->toBe('The "Elite" & Dangerous Team');
-    expect($this->tagTeam->signature_move)->toBe('The \'Ultimate\' Slam (TM)');
+    expect($this->tagTeam->name)->toBe('The "Elite" & Dangerous Team')
+        ->and($this->tagTeam->signature_move)->toBe('The \'Ultimate\' Slam (TM)');
 });
 
 test('it employs newly assigned members when the tag team is employed', function () {

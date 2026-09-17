@@ -33,8 +33,8 @@ describe('ActivityPeriodFactory Integration Tests', function () {
 
             // Assert
             expect($activityPeriod->getAttributes())->not->toHaveKey('activeable_id');
-            expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class);
-            expect($activityPeriod->ended_at)->toBeNull(); // Default is current activity
+            expect($activityPeriod->started_at)->toBeInstanceOf(Carbon::class)
+                ->and($activityPeriod->ended_at)->toBeNull(); // Default is current activity
         });
 
         test('creates realistic activity dates', function () {
@@ -61,8 +61,8 @@ describe('ActivityPeriodFactory Integration Tests', function () {
 
             // Assert
             expect($activityPeriod->activeable_id)->toBe($title->id);
-            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at)->toBeNull();
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'))
+                ->and($activityPeriod->ended_at)->toBeNull();
         });
 
         test('ended activity state works correctly', function () {
@@ -80,9 +80,9 @@ describe('ActivityPeriodFactory Integration Tests', function () {
 
             // Assert
             expect($activityPeriod->activeable_id)->toBe($title->id);
-            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'));
-            expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'));
-            expect(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($startDate->format('Y-m-d H:i:s'))
+                ->and(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($endDate->format('Y-m-d H:i:s'))
+                ->and(requiredDate($activityPeriod->ended_at)->isAfter($activityPeriod->started_at))->toBeTrue();
         });
     });
 

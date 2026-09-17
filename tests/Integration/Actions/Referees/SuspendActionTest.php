@@ -15,8 +15,8 @@ beforeEach(function () {
 test('it suspends an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentSuspension()->exists())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($referee);
 
@@ -87,10 +87,8 @@ test('it throws exception when referee cannot be suspended', function () {
 test('it prevents suspending an injured referee', function () {
     $referee = Referee::factory()->injured()->create();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($referee))
-        ->toThrow(CannotBeSuspendedException::class);
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and(fn() => resolve(SuspendAction::class)->handle($referee))->toThrow(CannotBeSuspendedException::class);
 
     $referee->refresh();
 
@@ -112,8 +110,8 @@ test('it maintains referee employment after suspension', function () {
 
     // Should remain employed after suspension
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentSuspension()->exists())->toBeTrue();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it creates suspension record with correct structure', function () {
@@ -124,8 +122,8 @@ test('it creates suspension record with correct structure', function () {
 
     $suspension = freshModel($referee)->currentSuspension()->firstOrFail();
 
-    expect($suspension)->not->toBeNull();
-    expect($suspension->suspendable->is($referee))->toBeTrue();
-    expect(requiredDate($suspension->started_at)->toDateTimeString())->toBe($suspensionDate->toDateTimeString());
-    expect($suspension->ended_at)->toBeNull();
+    expect($suspension)->not->toBeNull()
+        ->and($suspension->suspendable->is($referee))->toBeTrue()
+        ->and(requiredDate($suspension->started_at)->toDateTimeString())->toBe($suspensionDate->toDateTimeString())
+        ->and($suspension->ended_at)->toBeNull();
 });
