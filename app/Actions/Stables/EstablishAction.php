@@ -45,7 +45,7 @@ class EstablishAction
 
             $activityPeriod = $this->startActivityPeriodAction->handle($lockedStable, $effectiveActivationDate);
 
-            if ($endDate !== null) {
+            if ($endDate instanceof Carbon) {
                 $activityPeriod->update(['ended_at' => $endDate]);
             }
 

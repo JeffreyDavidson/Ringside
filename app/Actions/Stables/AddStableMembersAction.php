@@ -35,7 +35,7 @@ class AddStableMembersAction
         ?Collection $members,
         Carbon $joinedAt,
     ): void {
-        if ($members === null || $members->isEmpty()) {
+        if (! $members instanceof Collection || $members->isEmpty()) {
             return;
         }
 

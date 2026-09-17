@@ -20,6 +20,6 @@ final class CannotBeDebutedException extends BaseBusinessException
     {
         $context = self::formatModelContext($title);
 
-        return new static("{$context} is retired and cannot be debuted.");
+        return new self("{$context} is retired and cannot be debuted.");
     }
 }

@@ -25,7 +25,7 @@ final readonly class MatchAssignmentConflictService
 
     public function ensureEventCanBeRescheduled(Event $event, ?Carbon $date): void
     {
-        if ($date === null) {
+        if (! $date instanceof Carbon) {
             return;
         }
 

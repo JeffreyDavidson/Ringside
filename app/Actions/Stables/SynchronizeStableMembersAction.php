@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableMembershipData;
 use App\Models\Roster\Stables\Stable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class SynchronizeStableMembersAction
 {
@@ -20,7 +21,7 @@ class SynchronizeStableMembersAction
         $currentMembers = $stable->currentWrestlers;
         $currentTagTeams = $stable->currentTagTeams;
 
-        if ($desiredMembers->wrestlers !== null) {
+        if ($desiredMembers->wrestlers instanceof Collection) {
             $this->removeStableMembersAction->handle(
                 $stable,
                 new StableMembershipData(wrestlers: $currentMembers->diff($desiredMembers->wrestlers)),
@@ -33,7 +34,7 @@ class SynchronizeStableMembersAction
             );
         }
 
-        if ($desiredMembers->tagTeams !== null) {
+        if ($desiredMembers->tagTeams instanceof Collection) {
             $this->removeStableMembersAction->handle(
                 $stable,
                 new StableMembershipData(tagTeams: $currentTagTeams->diff($desiredMembers->tagTeams)),

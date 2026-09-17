@@ -117,7 +117,7 @@ final class ChampionshipReignManager
         ?TitleChampionship $reign,
         Wrestler|TagTeam|null $champion,
     ): bool {
-        return $reign !== null
+        return $reign instanceof TitleChampionship
             && $champion !== null
             && $reign->champion_type === $champion->getMorphClass()
             && $reign->champion_id === $champion->id;

@@ -9,6 +9,7 @@ use App\Lifecycle\Events\EventSchedulingEligibility;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
 use App\Services\Matches\MatchAssignmentConflictService;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -25,7 +26,7 @@ class UpdateAction
             EventSchedulingEligibility::ensureDateCanChange($lockedEvent, $eventData->date);
             $venue = $eventData->venue?->refreshForUpdate();
 
-            if ($venue !== null && $eventData->date !== null) {
+            if ($venue !== null && $eventData->date instanceof Carbon) {
                 VenueSchedulingEligibility::ensureAvailable($venue, $eventData->date, $lockedEvent);
             }
 

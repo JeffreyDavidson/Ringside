@@ -25,9 +25,9 @@ final class EventSchedulingEligibility
     public static function isDateChanging(Event $event, ?Carbon $targetDate): bool
     {
         if ($event->date === null) {
-            return $targetDate !== null;
+            return $targetDate instanceof Carbon;
         }
 
-        return $targetDate === null || ! $event->date->isSameSecond($targetDate);
+        return ! $targetDate instanceof Carbon || ! $event->date->isSameSecond($targetDate);
     }
 }

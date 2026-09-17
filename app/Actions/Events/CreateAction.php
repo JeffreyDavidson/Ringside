@@ -7,6 +7,7 @@ namespace App\Actions\Events;
 use App\Data\Events\EventData;
 use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use App\Models\Events\Event;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -16,7 +17,7 @@ class CreateAction
         return DB::transaction(function () use ($eventData): Event {
             $venue = $eventData->venue?->refreshForUpdate();
 
-            if ($venue !== null && $eventData->date !== null) {
+            if ($venue !== null && $eventData->date instanceof Carbon) {
                 VenueSchedulingEligibility::ensureAvailable($venue, $eventData->date);
             }
 

@@ -17,7 +17,7 @@ class AssignManagersAction
      */
     public function handle(Manageable $manageable, ?Collection $managers, Carbon $date): void
     {
-        if ($managers === null || $managers->isEmpty()) {
+        if (! $managers instanceof Collection || $managers->isEmpty()) {
             return;
         }
 

@@ -87,7 +87,7 @@ final readonly class MatchEliminationRequirement
             throw InvalidMatchOutcomeException::competitorFromAnotherMatch();
         }
 
-        if ($elimination->eliminatedBy === null) {
+        if (! $elimination->eliminatedBy instanceof MatchCompetitor) {
             return;
         }
 

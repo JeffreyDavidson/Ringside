@@ -9,4 +9,9 @@ return RectorConfig::configure()
         __DIR__.'/app',
     ])
     ->withPhpSets()
+    ->withPreparedSets(
+        codeQuality: true,
+        typeDeclarations: true,
+        earlyReturn: true,
+    )
     ->withComposerBased(laravel: true);

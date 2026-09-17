@@ -21,6 +21,6 @@ final class CannotBeReinstatedException extends BaseBusinessException
     {
         $context = self::formatModelContext($tagTeam);
 
-        return new static("{$context} cannot be reinstated because it is no longer employed. Tag teams must maintain employment status during suspension periods.");
+        return new self("{$context} cannot be reinstated because it is no longer employed. Tag teams must maintain employment status during suspension periods.");
     }
 }

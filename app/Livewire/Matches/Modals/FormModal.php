@@ -153,9 +153,9 @@ class FormModal extends BaseFormModal
     #[Computed]
     public function competitorSelectionLayout(): ?CompetitorSelectionLayout
     {
-        return $this->form->matchType === null
-            ? null
-            : CompetitorSelectionLayout::forMatchType($this->form->matchType);
+        return $this->form->matchType instanceof MatchType
+            ? CompetitorSelectionLayout::forMatchType($this->form->matchType)
+            : null;
     }
 
     public function render(): View
