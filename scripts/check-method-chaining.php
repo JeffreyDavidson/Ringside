@@ -17,6 +17,7 @@ foreach ($paths as $path) {
 
     if (is_file($absolutePath)) {
         $files[] = $absolutePath;
+
         continue;
     }
 
