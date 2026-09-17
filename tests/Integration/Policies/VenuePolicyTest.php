@@ -33,21 +33,21 @@ describe('VenuePolicy Integration Tests', function () {
 
     describe('global Gate hook authorization', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('non-administrators do not bypass authorization checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
         });
     });
 
@@ -87,8 +87,8 @@ describe('VenuePolicy Integration Tests', function () {
 
             // All venue types should follow same authorization pattern
             expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse()
+                ->and($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('venue location management considers geographic factors', function () {
@@ -118,17 +118,17 @@ describe('VenuePolicy Integration Tests', function () {
 
             // Admin should be able to manage any venue regardless of characteristics
             expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('basic users cannot perform management actions', function () {
             // All management actions should be denied for basic users
             expect($this->policy->create($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->restore($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse()
+                ->and($this->policy->delete($this->basicUser, $this->venue))->toBeFalse()
+                ->and($this->policy->restore($this->basicUser, $this->venue))->toBeFalse();
         });
     });
 
@@ -136,13 +136,13 @@ describe('VenuePolicy Integration Tests', function () {
         test('role hierarchy is respected for venue operations', function () {
             // Administrator has full access
             expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
 
             // Basic user has no access
             expect($this->policy->create($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse()
+                ->and($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('view permissions are consistently restrictive', function () {
@@ -187,8 +187,8 @@ describe('VenuePolicy Integration Tests', function () {
 
             // Event history should not affect base authorization
             expect($this->policy->view($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse()
+                ->and($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('venue booking management requires proper authorization', function () {
@@ -205,8 +205,8 @@ describe('VenuePolicy Integration Tests', function () {
         test('restoration permissions are properly restricted', function () {
             $deletedVenue = Venue::factory()->make(['name' => 'Deleted Venue']);
 
-            expect($this->policy->restore($this->basicUser, $this->venue))->toBeFalse();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect($this->policy->restore($this->basicUser, $this->venue))->toBeFalse()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('deletion permissions consider venue status', function () {
@@ -223,11 +223,11 @@ describe('VenuePolicy Integration Tests', function () {
         test('policy methods return correct types', function () {
             // All policy methods should return boolean values
             expect($this->policy->viewAny($this->basicUser))->toBeBool();
-            expect($this->policy->view($this->basicUser, $this->venue))->toBeBool();
-            expect($this->policy->create($this->basicUser))->toBeBool();
-            expect($this->policy->update($this->basicUser, $this->venue))->toBeBool();
-            expect($this->policy->delete($this->basicUser, $this->venue))->toBeBool();
-            expect($this->policy->restore($this->basicUser, $this->venue))->toBeBool();
+            expect($this->policy->view($this->basicUser, $this->venue))->toBeBool()
+                ->and($this->policy->create($this->basicUser))->toBeBool()
+                ->and($this->policy->update($this->basicUser, $this->venue))->toBeBool()
+                ->and($this->policy->delete($this->basicUser, $this->venue))->toBeBool()
+                ->and($this->policy->restore($this->basicUser, $this->venue))->toBeBool();
         });
 
         test('global Gate hook returns correct types', function () {
@@ -245,8 +245,8 @@ describe('VenuePolicy Integration Tests', function () {
 
             // Facility type should not change authorization pattern
             expect($this->policy->create($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse();
-            expect($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->venue))->toBeFalse()
+                ->and($this->policy->delete($this->basicUser, $this->venue))->toBeFalse();
         });
 
         test('venue capacity planning requires admin access', function () {

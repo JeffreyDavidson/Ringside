@@ -78,7 +78,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     {
         $partner = $this->getPartner($row);
 
-        return $partner ? $partner->name : 'Unknown';
+        return $partner instanceof Wrestler ? $partner->name : 'Unknown';
     }
 
     /**
@@ -88,7 +88,7 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
     {
         $partner = $this->getPartner($row);
 
-        return $partner ? $this->routeResolver->urlFor($partner) : '#';
+        return $partner instanceof Wrestler ? $this->routeResolver->urlFor($partner) : '#';
     }
 
     /**

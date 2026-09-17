@@ -35,9 +35,9 @@ describe('MatchCompetitorFactory Integration Tests', function () {
 
             // Assert
             expect($competitor->match_id)->toBeInt();
-            expect($competitor->competitor_id)->toBeInt();
-            expect($competitor->competitor_type)->toBeString();
-            expect($competitor->competitor_type)->toBeIn(['wrestler', 'tag_team']);
+            expect($competitor->competitor_id)->toBeInt()
+                ->and($competitor->competitor_type)->toBeString()
+                ->toBeIn(['wrestler', 'tag_team']);
         });
 
         test('creates a match side assignment', function () {
@@ -64,8 +64,8 @@ describe('MatchCompetitorFactory Integration Tests', function () {
 
             // Assert
             expect($competitor->match_id)->toBe($match->id);
-            expect($competitor->competitor_id)->toBe($wrestler->id);
-            expect($competitor->competitor_type)->toBe('wrestler');
+            expect($competitor->competitor_id)->toBe($wrestler->id)
+                ->and($competitor->competitor_type)->toBe('wrestler');
         });
 
         test('tag team competitor state works correctly', function () {
@@ -82,8 +82,8 @@ describe('MatchCompetitorFactory Integration Tests', function () {
 
             // Assert
             expect($competitor->match_id)->toBe($match->id);
-            expect($competitor->competitor_id)->toBe($tagTeam->id);
-            expect($competitor->competitor_type)->toBe('tag_team');
+            expect($competitor->competitor_id)->toBe($tagTeam->id)
+                ->and($competitor->competitor_type)->toBe('tag_team');
         });
 
         test('side assignment state works correctly', function () {
@@ -100,8 +100,8 @@ describe('MatchCompetitorFactory Integration Tests', function () {
                 'match_side_id' => $side2->id,
             ]);
 
-            expect($competitor1->match_side_id)->toBe($side1->id);
-            expect($competitor2->match_side_id)->toBe($side2->id);
+            expect($competitor1->match_side_id)->toBe($side1->id)
+                ->and($competitor2->match_side_id)->toBe($side2->id);
         });
     });
 
@@ -133,8 +133,8 @@ describe('MatchCompetitorFactory Integration Tests', function () {
 
             // Assert
             expect($competitor->competitor_id)->toBe($wrestler->id);
-            expect($competitor->competitor_type)->toBe('wrestler');
-            expect($competitor->match_side_id)->toBe($side->id);
+            expect($competitor->competitor_type)->toBe('wrestler')
+                ->and($competitor->match_side_id)->toBe($side->id);
         });
     });
 
@@ -154,8 +154,8 @@ describe('MatchCompetitorFactory Integration Tests', function () {
 
             // Assert
             foreach ($competitors as $competitor) {
-                expect($competitor->competitor_type)->toBeIn(['wrestler', 'tag_team']);
-                expect($competitor->match_side_id)->toBeInt();
+                expect($competitor->competitor_type)->toBeIn(['wrestler', 'tag_team'])
+                    ->and($competitor->match_side_id)->toBeInt();
             }
         });
 
@@ -165,8 +165,8 @@ describe('MatchCompetitorFactory Integration Tests', function () {
 
             // Assert
             expect($competitor->match_id)->toBeInt();
-            expect($competitor->competitor_id)->toBeInt();
-            expect($competitor->competitor_type)->toBeString();
+            expect($competitor->competitor_id)->toBeInt()
+                ->and($competitor->competitor_type)->toBeString();
         });
     });
 });

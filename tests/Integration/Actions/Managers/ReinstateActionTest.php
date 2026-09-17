@@ -15,14 +15,14 @@ beforeEach(function () {
 test('it reinstates a suspended manager', function () {
     $manager = Manager::factory()->suspended()->create();
 
-    expect($manager->currentSuspension()->exists())->toBeTrue();
-    expect($manager->currentEmployment()->exists())->toBeTrue();
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and($manager->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($manager);
 
     $manager->refresh();
-    expect($manager->currentSuspension()->exists())->toBeFalse();
-    expect($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed after reinstatement
+    expect($manager->currentSuspension()->exists())->toBeFalse()
+        ->and($manager->currentEmployment()->exists())->toBeTrue(); // Should remain employed after reinstatement
 
     // Verify suspension record was ended
     $this->assertDatabaseHas('suspensions', [
@@ -89,10 +89,8 @@ test('it persists the reinstatement lifecycle', function () {
 test('it prevents reinstating non-suspended manager', function () {
     $manager = Manager::factory()->employed()->create();
 
-    expect($manager->currentSuspension()->exists())->toBeFalse();
-
-    expect(fn () => resolve(ReinstateAction::class)->handle($manager))
-        ->toThrow(Exception::class);
+    expect($manager->currentSuspension()->exists())->toBeFalse()
+        ->and(fn () => resolve(ReinstateAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -122,8 +120,8 @@ test('it maintains employment status during reinstatement', function () {
     $manager = Manager::factory()->suspended()->create();
     $employmentId = $manager->currentEmployment()->firstOrFail()->id;
 
-    expect($manager->currentEmployment()->exists())->toBeTrue();
-    expect($manager->currentSuspension()->exists())->toBeTrue();
+    expect($manager->currentEmployment()->exists())->toBeTrue()
+        ->and($manager->currentSuspension()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($manager);
 
@@ -135,8 +133,8 @@ test('it maintains employment status during reinstatement', function () {
 
     // Employment record should remain unchanged
     $employment = $manager->currentEmployment()->firstOrFail();
-    expect($employment->id)->toBe($employmentId);
-    expect($employment->ended_at)->toBeNull();
+    expect($employment->id)->toBe($employmentId)
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it uses the provided date', function () {
@@ -163,8 +161,8 @@ test('it handles multiple suspensions correctly', function () {
     $manager->suspensions()->create(['started_at' => now()->subDays(5), 'ended_at' => null]); // Current suspension
 
     $manager->refresh();
-    expect($manager->currentSuspension()->exists())->toBeTrue();
-    expect($manager->suspensions()->count())->toBe(2);
+    expect($manager->currentSuspension()->exists())->toBeTrue()
+        ->and($manager->suspensions()->count())->toBe(2);
 
     resolve(ReinstateAction::class)->handle($manager);
 
@@ -172,6 +170,6 @@ test('it handles multiple suspensions correctly', function () {
 
     // Should only end the current suspension, leaving historical ones intact
     expect($manager->currentSuspension()->exists())->toBeFalse();
-    expect($manager->suspensions()->count())->toBe(2);
-    expect($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
+    expect($manager->suspensions()->count())->toBe(2)
+        ->and($manager->suspensions()->whereNull('ended_at')->count())->toBe(0);
 });

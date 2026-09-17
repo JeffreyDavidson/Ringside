@@ -2,6 +2,25 @@
 
 declare(strict_types=1);
 
+use App\Lifecycle\Events\EventSchedulingEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualDeletionEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualEmploymentEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualInjuryEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualRetirementEligibility;
+use App\Lifecycle\Roster\Individuals\IndividualSuspensionEligibility;
+use App\Lifecycle\Roster\Stables\StableActivityEligibility;
+use App\Lifecycle\Roster\Stables\StableDeletionEligibility;
+use App\Lifecycle\Roster\Stables\StableFormerMemberEligibility;
+use App\Lifecycle\Roster\Stables\StableRestructuringEligibility;
+use App\Lifecycle\Roster\Stables\StableRetirementEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamDeletionEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamEmploymentEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
+use App\Lifecycle\Roster\TagTeams\TagTeamSuspensionEligibility;
+use App\Lifecycle\Titles\TitleDeletionEligibility;
+use App\Lifecycle\Titles\TitleLifecycleEligibility;
+use App\Lifecycle\Venues\VenueDeletionEligibility;
+use App\Lifecycle\Venues\VenueSchedulingEligibility;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 arch()->preset()->php();
@@ -45,24 +64,24 @@ arch('custom validation rules implement Laravel validation rules')
 
 arch('lifecycle eligibility policies are final')
     ->expect([
-        'App\\Lifecycle\\Events\\EventSchedulingEligibility',
-        'App\\Lifecycle\\Roster\\Individuals\\IndividualDeletionEligibility',
-        'App\\Lifecycle\\Roster\\Individuals\\IndividualEmploymentEligibility',
-        'App\\Lifecycle\\Roster\\Individuals\\IndividualInjuryEligibility',
-        'App\\Lifecycle\\Roster\\Individuals\\IndividualRetirementEligibility',
-        'App\\Lifecycle\\Roster\\Individuals\\IndividualSuspensionEligibility',
-        'App\\Lifecycle\\Roster\\Stables\\StableActivityEligibility',
-        'App\\Lifecycle\\Roster\\Stables\\StableDeletionEligibility',
-        'App\\Lifecycle\\Roster\\Stables\\StableFormerMemberEligibility',
-        'App\\Lifecycle\\Roster\\Stables\\StableRestructuringEligibility',
-        'App\\Lifecycle\\Roster\\Stables\\StableRetirementEligibility',
-        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamDeletionEligibility',
-        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamEmploymentEligibility',
-        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamRetirementEligibility',
-        'App\\Lifecycle\\Roster\\TagTeams\\TagTeamSuspensionEligibility',
-        'App\\Lifecycle\\Titles\\TitleDeletionEligibility',
-        'App\\Lifecycle\\Titles\\TitleLifecycleEligibility',
-        'App\\Lifecycle\\Venues\\VenueDeletionEligibility',
-        'App\\Lifecycle\\Venues\\VenueSchedulingEligibility',
+        EventSchedulingEligibility::class,
+        IndividualDeletionEligibility::class,
+        IndividualEmploymentEligibility::class,
+        IndividualInjuryEligibility::class,
+        IndividualRetirementEligibility::class,
+        IndividualSuspensionEligibility::class,
+        StableActivityEligibility::class,
+        StableDeletionEligibility::class,
+        StableFormerMemberEligibility::class,
+        StableRestructuringEligibility::class,
+        StableRetirementEligibility::class,
+        TagTeamDeletionEligibility::class,
+        TagTeamEmploymentEligibility::class,
+        TagTeamRetirementEligibility::class,
+        TagTeamSuspensionEligibility::class,
+        TitleDeletionEligibility::class,
+        TitleLifecycleEligibility::class,
+        VenueDeletionEligibility::class,
+        VenueSchedulingEligibility::class,
     ])
     ->toBeFinal();

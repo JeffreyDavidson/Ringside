@@ -20,13 +20,11 @@ test('it rejects a future membership removal date', function () {
         $stable,
         $members,
         now()->addDay(),
-    ))->toThrow(InvalidDateRangeException::class);
-
-    expect(StableWrestler::query()
-        ->whereBelongsTo($stable)
-        ->whereBelongsTo($wrestler)
-        ->whereNull('left_at')
-        ->exists())->toBeTrue();
+    ))->toThrow(InvalidDateRangeException::class)
+        ->and(StableWrestler::query()
+            ->whereBelongsTo($stable)
+            ->whereBelongsTo($wrestler)
+            ->whereNull('left_at')->exists())->toBeTrue();
 });
 
 test('it ends current stable memberships on the removal date', function () {

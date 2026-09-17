@@ -86,8 +86,8 @@ describe('wrestler actions component', function (): void {
         $component
             ->assertNotDispatched('wrestler-updated')
             ->assertNotDispatched('flash-message');
-        expect(session()->has('status'))->toBeFalse();
-        expect($wrestler->currentEmployment()->exists())->toBeFalse();
+        expect(session()->has('status'))->toBeFalse()
+            ->and($wrestler->currentEmployment()->exists())->toBeFalse();
     })->with([
         'employ',
         'release',

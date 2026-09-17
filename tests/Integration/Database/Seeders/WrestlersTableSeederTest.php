@@ -50,13 +50,11 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($wrestlers as $wrestler) {
-                expect($wrestler->name)->toBeString();
-                expect($wrestler->name)->not->toBeEmpty();
-                expect($wrestler->hometown)->toBeString();
-                expect($wrestler->hometown)->not->toBeEmpty();
-                expect($wrestler->height->feet)->toBeInt();
-                expect($wrestler->height->inches)->toBeInt();
-                expect($wrestler->weight)->toBeInstanceOf(Weight::class);
+                expect($wrestler->name)->toBeString()->not->toBeEmpty()
+                    ->and($wrestler->hometown)->toBeString()->not->toBeEmpty()
+                    ->and($wrestler->height->feet)->toBeInt()
+                    ->and($wrestler->height->inches)->toBeInt()
+                    ->and($wrestler->weight)->toBeInstanceOf(Weight::class);
             }
         });
 
@@ -66,9 +64,9 @@ describe('WrestlersTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($wrestlers as $wrestler) {
-                expect($wrestler->height->feet)->toBeBetween(4, 8);
-                expect($wrestler->height->inches)->toBeBetween(0, 11);
-                expect($wrestler->weight->toPounds())->toBeBetween(100, 500);
+                expect($wrestler->height->feet)->toBeBetween(4, 8)
+                    ->and($wrestler->height->inches)->toBeBetween(0, 11)
+                    ->and($wrestler->weight->toPounds())->toBeBetween(100, 500);
             }
         });
 

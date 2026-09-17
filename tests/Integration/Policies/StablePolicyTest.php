@@ -32,34 +32,34 @@ describe('StablePolicy Integration Tests', function () {
 
     describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('establish'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('disband'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('establish'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('disband'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('retire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
         });
 
         test('basic users do not bypass authorization checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('establish'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('disband'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('establish'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('disband'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
         });
 
         test('global Gate hook handles unknown abilities correctly', function () {
-            expect(Gate::forUser($this->admin)->raw('nonexistentAbility'))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->raw('nonexistentAbility'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('nonexistentAbility'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('nonexistentAbility'))->toBeNull();
         });
     });
 
@@ -132,10 +132,10 @@ describe('StablePolicy Integration Tests', function () {
             $stables = [$activeStable, $retiredStable, $disbandedStable, $inactiveStable];
 
             foreach ($stables as $stable) {
-                expect($this->policy->establish($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->disband($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->retire($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->unretire($this->basicUser, $stable))->toBeFalse();
+                expect($this->policy->establish($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->disband($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->retire($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->unretire($this->basicUser, $stable))->toBeFalse();
             }
         });
     });
@@ -182,9 +182,9 @@ describe('StablePolicy Integration Tests', function () {
         test('policy works with soft deleted stables', function () {
             $deletedStable = Stable::factory()->trashed()->create();
 
-            expect($this->policy->view($this->basicUser, $deletedStable))->toBeFalse();
-            expect($this->policy->update($this->basicUser, $deletedStable))->toBeFalse();
-            expect($this->policy->restore($this->basicUser, $deletedStable))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $deletedStable))->toBeFalse()
+                ->and($this->policy->update($this->basicUser, $deletedStable))->toBeFalse()
+                ->and($this->policy->restore($this->basicUser, $deletedStable))->toBeFalse();
         });
 
         test('policy consistency across all stable statuses', function () {
@@ -199,12 +199,12 @@ describe('StablePolicy Integration Tests', function () {
             foreach ($stableStatuses as $stable) {
                 // All basic user permissions should be consistently false
                 expect($this->policy->view($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->update($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->delete($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->establish($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->disband($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->retire($this->basicUser, $stable))->toBeFalse();
-                expect($this->policy->unretire($this->basicUser, $stable))->toBeFalse();
+                expect($this->policy->update($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->delete($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->establish($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->disband($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->retire($this->basicUser, $stable))->toBeFalse()
+                    ->and($this->policy->unretire($this->basicUser, $stable))->toBeFalse();
             }
         });
     });
@@ -271,8 +271,8 @@ describe('StablePolicy Integration Tests', function () {
             $abilities = ['viewAny', 'view', 'create', 'update', 'delete', 'restore', 'establish', 'disband', 'retire', 'unretire'];
 
             foreach ($abilities as $ability) {
-                expect(Gate::forUser($this->admin)->raw($ability))->toBeTrue();
-                expect(Gate::forUser($this->basicUser)->raw($ability))->toBeNull();
+                expect(Gate::forUser($this->admin)->raw($ability))->toBeTrue()
+                    ->and(Gate::forUser($this->basicUser)->raw($ability))->toBeNull();
             }
         });
     });

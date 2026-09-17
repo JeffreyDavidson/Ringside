@@ -15,8 +15,8 @@ beforeEach(function () {
 test('it soft deletes an unemployed referee', function () {
     $referee = Referee::factory()->create();
 
-    expect($referee->currentEmployment()->exists())->toBeFalse();
-    expect($referee->trashed())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeFalse()
+        ->and($referee->trashed())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($referee);
 
@@ -39,8 +39,8 @@ test('it deletes using the current persisted referee state', function () {
 
     resolve(DeleteAction::class)->handle($staleReferee);
 
-    expect(Referee::find($referee->id))->toBeNull();
-    expect(Referee::withTrashed()->findOrFail($referee->id)->trashed())->toBeTrue();
+    expect(Referee::find($referee->id))->toBeNull()
+        ->and(Referee::withTrashed()->findOrFail($referee->id)->trashed())->toBeTrue();
 });
 
 test('it rejects deleting an already deleted referee', function () {
@@ -71,16 +71,16 @@ test('it ends employment before deletion', function () {
     $referee = Referee::factory()->employed()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($employment->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $employment->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($employment->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($employment->ended_at)->not->toBeNull();
 
     // Verify employment was ended
     $this->assertDatabaseHas('employments', [
@@ -94,16 +94,16 @@ test('it ends suspension before deletion', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->currentSuspension()->exists())->toBeTrue();
-    expect($suspension->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($suspension->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($suspension->ended_at)->not->toBeNull();
 
     // Verify suspension was ended
     $this->assertDatabaseHas('suspensions', [
@@ -118,16 +118,16 @@ test('it ends injury before deletion', function () {
     $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->currentInjury()->exists())->toBeTrue();
-    expect($injury->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($injury->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($injury->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($injury->ended_at)->not->toBeNull();
 
     // Verify injury was ended
     $this->assertDatabaseHas('injuries', [
@@ -142,16 +142,16 @@ test('it ends retirement before deletion', function () {
     $referee = Referee::factory()->retired()->create();
     $retirement = $referee->currentRetirement()->firstOrFail();
 
-    expect($referee->currentRetirement()->exists())->toBeTrue();
-    expect($retirement->ended_at)->toBeNull();
+    expect($referee->currentRetirement()->exists())->toBeTrue()
+        ->and($retirement->ended_at)->toBeNull();
 
     resolve(DeleteAction::class)->handle($referee);
 
     $referee->refresh();
     $retirement->refresh();
 
-    expect($referee->trashed())->toBeTrue();
-    expect($retirement->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and($retirement->ended_at)->not->toBeNull();
 
     // Verify retirement was ended
     $this->assertDatabaseHas('retirements', [
@@ -191,8 +191,8 @@ test('it maintains transaction boundaries', function () {
 
     // All changes should be atomic - referee deleted and relationships ended
     expect($referee->trashed())->toBeTrue();
-    expect($employment->ended_at)->not->toBeNull();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($employment->ended_at)->not->toBeNull()
+        ->and($suspension->ended_at)->not->toBeNull();
 });
 
 test('it validates referee can be deleted', function () {

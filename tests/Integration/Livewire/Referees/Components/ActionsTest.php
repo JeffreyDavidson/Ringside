@@ -89,8 +89,8 @@ describe('referee actions component', function (): void {
         $component
             ->assertNotDispatched('referee-updated')
             ->assertNotDispatched('flash-message');
-        expect(session()->has('status'))->toBeFalse();
-        expect($referee->currentEmployment()->exists())->toBeFalse();
+        expect(session()->has('status'))->toBeFalse()
+            ->and($referee->currentEmployment()->exists())->toBeFalse();
     })->with([
         'employ',
         'release',

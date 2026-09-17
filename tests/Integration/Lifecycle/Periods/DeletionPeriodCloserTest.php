@@ -55,7 +55,6 @@ test('it participates in the coordinating transaction', function () {
             ->close($wrestler, now());
 
         throw new RuntimeException('Force rollback.');
-    }))->toThrow(RuntimeException::class);
-
-    expect($employment->refresh()->ended_at)->toBeNull();
+    }))->toThrow(RuntimeException::class)
+        ->and($employment->refresh()->ended_at)->toBeNull();
 });

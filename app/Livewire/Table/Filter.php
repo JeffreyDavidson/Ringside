@@ -56,7 +56,7 @@ abstract class Filter
      */
     public function apply(Builder $builder, mixed $value): void
     {
-        if ($this->filterCallback && $value !== '' && $value !== null) {
+        if ($this->filterCallback instanceof Closure && $value !== '' && $value !== null) {
             ($this->filterCallback)($builder, $value);
         }
     }

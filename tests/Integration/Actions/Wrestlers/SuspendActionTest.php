@@ -15,14 +15,14 @@ beforeEach(function () {
 test('it suspends an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->currentSuspension()->exists())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->currentSuspension()->exists())->toBeTrue();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue();
 
     $this->assertDatabaseHas('suspensions', [
         'suspendable_id' => $wrestler->id,
@@ -117,8 +117,8 @@ test('it handles multiple suspension scenarios', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->currentSuspension()->exists())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentSuspension()->exists())->toBeFalse();
 
     resolve(SuspendAction::class)->handle($wrestler);
 
@@ -145,19 +145,15 @@ test('it handles multiple suspension scenarios', function () {
 test('it prevents suspending already suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->currentSuspension()->exists())->toBeTrue();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and(fn () => resolve(SuspendAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents suspending retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->currentRetirement()->exists())->toBeTrue();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and(fn () => resolve(SuspendAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents suspending unemployed wrestler', function () {
@@ -177,15 +173,13 @@ test('it prevents suspending an injured wrestler', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->currentInjury()->exists())->toBeTrue();
-
-    expect(fn () => resolve(SuspendAction::class)->handle($wrestler))
-        ->toThrow(CannotBeSuspendedException::class);
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeTrue()
+        ->and(fn () => resolve(SuspendAction::class)->handle($wrestler))->toThrow(CannotBeSuspendedException::class);
 
     $wrestler->refresh();
 
-    expect($wrestler->currentInjury()->exists())->toBeTrue();
-    expect($wrestler->currentSuspension()->exists())->toBeFalse();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeTrue()
+        ->and($wrestler->currentSuspension()->exists())->toBeFalse()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue();
 });

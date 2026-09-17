@@ -15,14 +15,14 @@ beforeEach(function () {
 test('it injures an employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->currentInjury()->exists())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->currentInjury()->exists())->toBeTrue();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue(); // Should remain employed while injured
+    expect($wrestler->currentInjury()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue(); // Should remain employed while injured
 
     $this->assertDatabaseHas('injuries', [
         'injurable_id' => $wrestler->id,
@@ -95,8 +95,8 @@ test('it handles multiple injury scenarios', function () {
         'ended_at' => now()->subDays(30),
     ]);
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->currentInjury()->exists())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($wrestler);
 
@@ -123,19 +123,15 @@ test('it handles multiple injury scenarios', function () {
 test('it prevents injuring already injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
-    expect($wrestler->currentInjury()->exists())->toBeTrue();
-
-    expect(fn () => resolve(InjureAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentInjury()->exists())->toBeTrue()
+        ->and(fn () => resolve(InjureAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents injuring retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->currentRetirement()->exists())->toBeTrue();
-
-    expect(fn () => resolve(InjureAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and(fn () => resolve(InjureAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents injuring unemployed wrestler', function () {
@@ -150,17 +146,15 @@ test('it prevents injuring unemployed wrestler', function () {
 test('it prevents injuring a suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->currentSuspension()->exists())->toBeTrue();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-
-    expect(fn () => resolve(InjureAction::class)->handle($wrestler))
-        ->toThrow(CannotBeInjuredException::class);
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(InjureAction::class)->handle($wrestler))->toThrow(CannotBeInjuredException::class);
 
     $wrestler->refresh();
 
-    expect($wrestler->currentSuspension()->exists())->toBeTrue();
-    expect($wrestler->currentInjury()->exists())->toBeFalse();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeFalse()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it maintains injury history integrity', function () {
@@ -216,8 +210,8 @@ test('it allows re-injury after injury clearance', function () {
         'ended_at' => now()->subDays(10), // Cleared from injury 10 days ago
     ]);
 
-    expect($wrestler->currentInjury()->exists())->toBeFalse();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
+    expect($wrestler->currentInjury()->exists())->toBeFalse()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue();
 
     // Should be able to get injured again
     resolve(InjureAction::class)->handle($wrestler);

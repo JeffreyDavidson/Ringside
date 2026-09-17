@@ -31,10 +31,9 @@ describe('RefereeFactory Integration Tests', function () {
 
             // Assert
             expect($referee->first_name)->toBeString();
-            expect($referee->first_name)->not->toBeEmpty();
-            expect($referee->last_name)->toBeString();
-            expect($referee->last_name)->not->toBeEmpty();
-            expect($referee->status)->toBeInstanceOf(EmploymentStatus::class);
+            expect($referee->first_name)->not->toBeEmpty()
+                ->and($referee->last_name)->toBeString()->not->toBeEmpty()
+                ->and($referee->status)->toBeInstanceOf(EmploymentStatus::class);
         });
 
         test('generates realistic referee names', function () {
@@ -43,9 +42,9 @@ describe('RefereeFactory Integration Tests', function () {
 
             // Assert
             expect($referee->first_name)->toBeString();
-            expect(mb_strlen($referee->first_name))->toBeGreaterThan(1);
-            expect($referee->last_name)->toBeString();
-            expect(mb_strlen($referee->last_name))->toBeGreaterThan(1);
+            expect(mb_strlen($referee->first_name))->toBeGreaterThan(1)
+                ->and($referee->last_name)->toBeString()
+                ->and(mb_strlen($referee->last_name))->toBeGreaterThan(1);
         });
     });
 
@@ -70,17 +69,17 @@ describe('RefereeFactory Integration Tests', function () {
         test('suspended state creates exactly one active employment', function () {
             $referee = Referee::factory()->suspended()->create();
 
-            expect($referee->currentSuspension()->exists())->toBeTrue();
-            expect($referee->currentEmployment()->exists())->toBeTrue();
-            expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
+            expect($referee->currentSuspension()->exists())->toBeTrue()
+                ->and($referee->currentEmployment()->exists())->toBeTrue()
+                ->and($referee->employments()->whereNull('ended_at')->count())->toBe(1);
         });
 
         test('injured state creates exactly one active employment', function () {
             $referee = Referee::factory()->injured()->create();
 
-            expect($referee->currentInjury()->exists())->toBeTrue();
-            expect($referee->currentEmployment()->exists())->toBeTrue();
-            expect($referee->employments()->whereNull('ended_at')->count())->toBe(1);
+            expect($referee->currentInjury()->exists())->toBeTrue()
+                ->and($referee->currentEmployment()->exists())->toBeTrue()
+                ->and($referee->employments()->whereNull('ended_at')->count())->toBe(1);
         });
     });
 
@@ -95,8 +94,8 @@ describe('RefereeFactory Integration Tests', function () {
 
             // Assert
             expect($referee->first_name)->toBe('John');
-            expect($referee->last_name)->toBe('Doe');
-            expect($referee->status)->toBe(EmploymentStatus::Employed);
+            expect($referee->last_name)->toBe('Doe')
+                ->and($referee->status)->toBe(EmploymentStatus::Employed);
         });
     });
 

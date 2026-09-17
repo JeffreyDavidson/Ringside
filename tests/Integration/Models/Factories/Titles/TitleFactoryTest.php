@@ -32,9 +32,9 @@ describe('TitleFactory Integration Tests', function () {
 
             // Assert
             expect($title->name)->toBeString();
-            expect($title->name)->toEndWith($title->type === TitleType::Singles ? 'Title' : 'Titles');
-            expect($title->status)->toBeInstanceOf(TitleStatus::class);
-            expect($title->type)->toBeInstanceOf(TitleType::class);
+            expect($title->name)->toEndWith($title->type === TitleType::Singles ? 'Title' : 'Titles')
+                ->and($title->status)->toBeInstanceOf(TitleStatus::class)
+                ->and($title->type)->toBeInstanceOf(TitleType::class);
         });
 
         test('generates realistic singles title names', function () {
@@ -43,8 +43,8 @@ describe('TitleFactory Integration Tests', function () {
 
             // Assert
             expect($title->name)->toBeString();
-            expect(mb_strlen($title->name))->toBeGreaterThan(5);
-            expect($title->name)->toEndWith('Title');
+            expect(mb_strlen($title->name))->toBeGreaterThan(5)
+                ->and($title->name)->toEndWith('Title');
         });
 
         test('generates realistic tag team title names', function () {
@@ -53,8 +53,8 @@ describe('TitleFactory Integration Tests', function () {
 
             // Assert
             expect($title->name)->toBeString();
-            expect(mb_strlen($title->name))->toBeGreaterThan(6);
-            expect($title->name)->toEndWith('Titles');
+            expect(mb_strlen($title->name))->toBeGreaterThan(6)
+                ->and($title->name)->toEndWith('Titles');
         });
     });
 
@@ -74,8 +74,7 @@ describe('TitleFactory Integration Tests', function () {
 
             // Assert
             $title->load('currentActivityPeriod');
-            expect($title->currentActivityPeriod)->not->toBeNull();
-            expect($title->currentActivityPeriod)->not->toBeNull()->ended_at->toBeNull();
+            expect($title->currentActivityPeriod)->not->toBeNull()->not->toBeNull()->ended_at->toBeNull();
         });
 
         test('inactive state works correctly', function () {
@@ -84,8 +83,8 @@ describe('TitleFactory Integration Tests', function () {
 
             // Assert
             $title->load(['activityPeriods', 'currentActivityPeriod']);
-            expect($title->activityPeriods)->not->toBeEmpty();
-            expect($title->currentActivityPeriod)->toBeNull();
+            expect($title->activityPeriods)->not->toBeEmpty()
+                ->and($title->currentActivityPeriod)->toBeNull();
         });
 
         test('retired state works correctly', function () {
@@ -130,8 +129,8 @@ describe('TitleFactory Integration Tests', function () {
 
             // Assert
             expect($title->name)->toBe('Custom Championship');
-            expect($title->type)->toBe(TitleType::Singles);
-            expect($title->status)->toBe(TitleStatus::Undebuted);
+            expect($title->type)->toBe(TitleType::Singles)
+                ->and($title->status)->toBe(TitleStatus::Undebuted);
         });
     });
 

@@ -33,9 +33,8 @@ describe('WrestlerManager Model Integration Tests', function () {
             $wrestlerManager = new WrestlerManager;
             $casts = $wrestlerManager->getCasts();
 
-            expect($casts)->toBeArray();
-            expect($casts['hired_at'])->toBe('datetime');
-            expect($casts['fired_at'])->toBe('datetime');
+            expect($casts)->toBeArray()
+                ->toMatchArray(['hired_at' => 'datetime', 'fired_at' => 'datetime']);
         });
 
         test('wrestlerManager has custom eloquent builder', function () {

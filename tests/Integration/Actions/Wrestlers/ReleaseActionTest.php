@@ -131,24 +131,22 @@ test('it prevents releasing non-employed wrestler', function () {
 test('it prevents releasing retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
-    expect($wrestler->currentRetirement()->exists())->toBeTrue();
-    expect($wrestler->currentEmployment()->exists())->toBeFalse();
-
-    expect(fn () => resolve(ReleaseAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentRetirement()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and(fn () => resolve(ReleaseAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it can release suspended wrestler', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->currentSuspension()->exists())->toBeTrue();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($wrestler);
 
     $wrestler->refresh();
-    expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($wrestler->currentSuspension()->exists())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($wrestler->currentSuspension()->exists())->toBeFalse();
 
     $this->assertDatabaseHas('employments', [
         'employable_id' => $wrestler->id,
@@ -164,8 +162,8 @@ test('it can release injured wrestler', function () {
         'ended_at' => null,
     ]);
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->currentInjury()->exists())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentInjury()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($wrestler);
 

@@ -27,8 +27,8 @@ test('it retires an active stable at the current datetime by default', function 
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->currentRetirement()->exists())->toBeTrue();
-    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires an active stable at a specific datetime', function () {
@@ -44,8 +44,8 @@ test('it retires an active stable at a specific datetime', function () {
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->currentRetirement()->exists())->toBeTrue();
-    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it records a future retirement date while ending current operations now', function () {
@@ -56,9 +56,9 @@ test('it records a future retirement date while ending current operations now', 
 
     $stable->refresh();
 
-    expect($stable->currentRetirement()->exists())->toBeTrue();
-    expect(requiredDate($stable->currentRetirement()->firstOrFail()->started_at)->toDateTimeString())->toBe($datetime->toDateTimeString());
-    expect(requiredDate($stable->activityPeriods()->latest('id')->firstOrFail()->ended_at)->toDateTimeString())->toBe(now()->toDateTimeString());
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and(requiredDate($stable->currentRetirement()->firstOrFail()->started_at)->toDateTimeString())->toBe($datetime->toDateTimeString())
+        ->and(requiredDate($stable->activityPeriods()->latest('id')->firstOrFail()->ended_at)->toDateTimeString())->toBe(now()->toDateTimeString());
 
     foreach ($stable->previousWrestlers as $wrestler) {
         $membership = StableWrestler::query()
@@ -95,8 +95,8 @@ test('it retires an inactive stable at the current datetime by default', functio
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->currentRetirement()->exists())->toBeTrue();
-    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires an inactive stable at a specific datetime', function () {
@@ -112,8 +112,8 @@ test('it retires an inactive stable at a specific datetime', function () {
 
     // Verify stable is retired after action
     $stable->refresh();
-    expect($stable->currentRetirement()->exists())->toBeTrue();
-    expect($stable->currentActivityPeriod()->exists())->toBeFalse();
+    expect($stable->currentRetirement()->exists())->toBeTrue()
+        ->and($stable->currentActivityPeriod()->exists())->toBeFalse();
 });
 
 test('it retires the current tag teams and current wrestlers of a stable', function () {

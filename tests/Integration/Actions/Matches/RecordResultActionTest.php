@@ -202,9 +202,8 @@ it('rolls back an invalid correction without changing the recorded outcome', fun
         matchResult(MatchFinish::NoDecision, null, [
             new MatchEliminationData($competitors[0], 2),
         ]),
-    ))->toThrow(InvalidMatchOutcomeException::class);
-
-    expect($match->refresh()->match_finish)->toBe(MatchFinish::Stipulation)
+    ))->toThrow(InvalidMatchOutcomeException::class)
+        ->and($match->refresh()->match_finish)->toBe(MatchFinish::Stipulation)
         ->and($match->winning_side_id)->toBe($winner->match_side_id)
         ->and($competitors[0]->refresh()->elimination_order)->toBe(1)
         ->and($competitors[1]->refresh()->elimination_order)->toBe(2);
@@ -489,9 +488,8 @@ it('rejects a winner incompatible with the title type', function () {
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
         matchResult(MatchFinish::Pinfall, $winningSide),
-    ))->toThrow(InvalidMatchOutcomeException::class);
-
-    expect($match->refresh()->match_finish)->toBeNull()
+    ))->toThrow(InvalidMatchOutcomeException::class)
+        ->and($match->refresh()->match_finish)->toBeNull()
         ->and($title->championships()->count())->toBe(0);
 });
 
@@ -505,9 +503,8 @@ it('rejects a title change at an undated event', function () {
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
         matchResult(MatchFinish::Pinfall, $winningSide),
-    ))->toThrow(InvalidMatchOutcomeException::class);
-
-    expect($match->refresh()->match_finish)->toBeNull()
+    ))->toThrow(InvalidMatchOutcomeException::class)
+        ->and($match->refresh()->match_finish)->toBeNull()
         ->and($title->championships()->count())->toBe(0);
 });
 
@@ -569,8 +566,7 @@ it('rejects correcting a title result after later lineage exists', function () {
     expect(fn () => resolve(RecordResultAction::class)->handle(
         $match,
         matchResult(MatchFinish::TimeLimitDraw, null),
-    ))->toThrow(InvalidMatchOutcomeException::class);
-
-    expect($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
+    ))->toThrow(InvalidMatchOutcomeException::class)
+        ->and($match->refresh()->match_finish)->toBe(MatchFinish::Pinfall)
         ->and($title->championships()->current()->sole()->champion->is($laterChampion))->toBeTrue();
 });

@@ -10,7 +10,7 @@ use App\Rules\Shared\CanChangeDebutDate;
 test('allows a debut date when no model is being edited', function () {
     $failed = false;
 
-    (new CanChangeDebutDate(null))->validate(
+    new CanChangeDebutDate(null)->validate(
         'debut_date',
         now(),
         validationFailureCallback(function () use (&$failed): void {
@@ -25,7 +25,7 @@ test('allows changing the date of an inactive model', function (string $modelCla
     $model = $modelClass::factory()->create();
     $failed = false;
 
-    (new CanChangeDebutDate($model))->validate(
+    new CanChangeDebutDate($model)->validate(
         'debut_date',
         now(),
         validationFailureCallback(function () use (&$failed): void {
@@ -46,7 +46,7 @@ test('allows retaining the current activity start date', function (string $model
         ->create();
     $failed = false;
 
-    (new CanChangeDebutDate($model))->validate(
+    new CanChangeDebutDate($model)->validate(
         'debut_date',
         $startedAt->toDateString(),
         validationFailureCallback(function () use (&$failed): void {
@@ -66,7 +66,7 @@ test('rejects changing the start date of an active model', function (string $mod
         ->create();
     $message = null;
 
-    (new CanChangeDebutDate($model))->validate(
+    new CanChangeDebutDate($model)->validate(
         'debut_date',
         now(),
         validationFailureCallback(function (string $failure) use (&$message): void {
@@ -86,7 +86,7 @@ test('rejects an invalid debut date value for an active model', function () {
         ->create();
     $message = null;
 
-    (new CanChangeDebutDate($stable))->validate(
+    new CanChangeDebutDate($stable)->validate(
         'debut_date',
         [],
         validationFailureCallback(function (string $failure) use (&$message): void {

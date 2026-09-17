@@ -6,6 +6,7 @@ namespace App\Actions\TagTeams;
 
 use App\Data\TagTeams\TagTeamData;
 use App\Models\Roster\TagTeams\TagTeam;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CreateAction
@@ -39,7 +40,7 @@ class CreateAction
                 $tagTeamData->getJoinDate(),
             );
 
-            if ($tagTeamData->employment_date) {
+            if ($tagTeamData->employment_date instanceof Carbon) {
                 $this->employAction->handle($tagTeam, $tagTeamData->employment_date);
             }
 

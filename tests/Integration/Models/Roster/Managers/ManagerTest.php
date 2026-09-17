@@ -56,12 +56,12 @@ describe('Manager Model Integration Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Manager::class))->toContain(HasFactory::class);
-            expect(class_uses(Manager::class))->toContain(IsEmployable::class);
-            expect(class_uses(Manager::class))->toContain(IsInjurable::class);
-            expect(class_uses(Manager::class))->toContain(IsRetirable::class);
-            expect(class_uses(Manager::class))->toContain(IsSuspendable::class);
-            expect(class_uses(Manager::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Manager::class))->toContain(HasFactory::class)
+                ->and(class_uses(Manager::class))->toContain(IsEmployable::class)
+                ->and(class_uses(Manager::class))->toContain(IsInjurable::class)
+                ->and(class_uses(Manager::class))->toContain(IsRetirable::class)
+                ->and(class_uses(Manager::class))->toContain(IsSuspendable::class)
+                ->and(class_uses(Manager::class))->toContain(SoftDeletes::class);
         });
     });
 
@@ -69,10 +69,10 @@ describe('Manager Model Integration Tests', function () {
         test('implements all required interfaces', function () {
             $interfaces = class_implements(Manager::class);
 
-            expect($interfaces)->toContain(Employable::class);
-            expect($interfaces)->toContain(Injurable::class);
-            expect($interfaces)->toContain(Retirable::class);
-            expect($interfaces)->toContain(Suspendable::class);
+            expect($interfaces)->toContain(Employable::class)
+                ->toContain(Injurable::class)
+                ->toContain(Retirable::class)
+                ->toContain(Suspendable::class);
         });
     });
 

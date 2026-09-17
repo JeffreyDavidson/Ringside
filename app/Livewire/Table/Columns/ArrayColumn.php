@@ -65,7 +65,7 @@ class ArrayColumn extends Column
     #[\Override]
     public function resolveValue(mixed $row): string
     {
-        $items = $this->dataCallback
+        $items = $this->dataCallback instanceof Closure
             ? ($this->dataCallback)($row)
             : collect();
 
@@ -73,7 +73,7 @@ class ArrayColumn extends Column
             return $this->emptyValue;
         }
 
-        if ($this->outputFormatCallback) {
+        if ($this->outputFormatCallback instanceof Closure) {
             return $items->map(fn (mixed $item) => ($this->outputFormatCallback)($item))
                 ->implode($this->separator);
         }

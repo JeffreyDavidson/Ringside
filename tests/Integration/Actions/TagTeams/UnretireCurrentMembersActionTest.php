@@ -62,7 +62,7 @@ test('it skips current members rejected by unretirement rules', function () {
     $unretireWrestler->expects('handle')
         ->throws(CannotBeUnretiredException::notRetired($wrestler));
 
-    (new UnretireCurrentMembersAction($unretireWrestler, $unretireManager))
+    new UnretireCurrentMembersAction($unretireWrestler, $unretireManager)
         ->handle($tagTeam, now());
 
     $unretireWrestler->verify();

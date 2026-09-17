@@ -276,14 +276,11 @@ describe('titles table metadata', function (): void {
         // Assert
         $statuses = collect($metadata['statuses'])->keyBy('value');
 
-        expect($metadata['total'])->toBe(3);
-
-        expect($statuses->keys()->all())->toBe(
-            array_map(
+        expect($metadata['total'])->toBe(3)
+            ->and($statuses->keys()->all())->toBe(array_map(
                 static fn (TitleStatus $status): string => $status->value,
                 TitleStatus::cases(),
-            ),
-        )
+            ))
             ->and($statuses->get(TitleStatus::Active->value))->toBe([
                 'value' => TitleStatus::Active->value,
                 'label' => TitleStatus::Active->label(),

@@ -26,5 +26,5 @@ it('returns no tag team options when only deleted tag teams exist', function ():
     $tagTeams = $modal->getTagTeams();
 
     // Assert
-    expect($tagTeams)->toBe([]);
+    expect($tagTeams)->toBeEmpty();
 });

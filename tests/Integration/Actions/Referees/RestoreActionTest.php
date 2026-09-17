@@ -95,10 +95,10 @@ test('it preserves referee data after restoration', function () {
 
     // All original data should be preserved
     expect($referee->id)->toBe($originalId);
-    expect($referee->first_name)->toBe('Earl');
-    expect($referee->last_name)->toBe('Hebner');
-    expect(requiredDate($referee->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp);
-    expect($referee->deleted_at)->toBeNull();
+    expect($referee->first_name)->toBe('Earl')
+        ->and($referee->last_name)->toBe('Hebner')
+        ->and(requiredDate($referee->created_at)->timestamp)->toBe(requiredDate($originalCreatedAt)->timestamp)
+        ->and($referee->deleted_at)->toBeNull();
 });
 
 test('it does not automatically restore employment relationships', function () {
@@ -109,8 +109,8 @@ test('it does not automatically restore employment relationships', function () {
     $employment->update(['ended_at' => now()]);
     $referee->delete();
 
-    expect($referee->trashed())->toBeTrue();
-    expect(freshModel($employment)->ended_at)->not->toBeNull();
+    expect($referee->trashed())->toBeTrue()
+        ->and(freshModel($employment)->ended_at)->not->toBeNull();
 
     resolve(RestoreAction::class)->handle($referee);
 
@@ -119,8 +119,8 @@ test('it does not automatically restore employment relationships', function () {
 
     // Referee should be restored but employment should remain ended
     expect($referee->trashed())->toBeFalse();
-    expect($employment->ended_at)->not->toBeNull();
-    expect($referee->currentEmployment()->exists())->toBeFalse();
+    expect($employment->ended_at)->not->toBeNull()
+        ->and($referee->currentEmployment()->exists())->toBeFalse();
 });
 
 test('it preserves historical relationships', function () {
@@ -168,8 +168,8 @@ test('it allows referee to be re-employed after restoration', function () {
     resolve(RestoreAction::class)->handle($referee);
 
     $referee->refresh();
-    expect($referee->trashed())->toBeFalse();
-    expect($referee->currentEmployment()->exists())->toBeFalse();
+    expect($referee->trashed())->toBeFalse()
+        ->and($referee->currentEmployment()->exists())->toBeFalse();
 
     // Should be able to employ the restored referee
     $referee->employments()->create([

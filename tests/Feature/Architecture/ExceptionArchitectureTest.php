@@ -106,7 +106,7 @@ test('application and test code construct business exceptions through factories'
             }
 
             $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($contents);
-            $resolvedStatements = (new NodeTraverser(new NameResolver))->traverse($statements ?? []);
+            $resolvedStatements = new NodeTraverser(new NameResolver)->traverse($statements ?? []);
 
             foreach ((new NodeFinder)->findInstanceOf($resolvedStatements, New_::class) as $construction) {
                 if (! $construction->class instanceof Name) {
@@ -131,7 +131,7 @@ test('application and test code construct business exceptions through factories'
 test('application and test code do not catch generic exception types', function () {
     $genericCatchTypes = function (string $contents): array {
         $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($contents);
-        $resolvedStatements = (new NodeTraverser(new NameResolver))->traverse($statements ?? []);
+        $resolvedStatements = new NodeTraverser(new NameResolver)->traverse($statements ?? []);
         $catchClauses = (new NodeFinder)->findInstanceOf($resolvedStatements, Catch_::class);
 
         return collect($catchClauses)
@@ -199,7 +199,7 @@ test('every concrete exception factory has an enforced caller', function () {
             }
 
             $statements = (new ParserFactory)->createForNewestSupportedVersion()->parse($contents);
-            $resolvedStatements = (new NodeTraverser(new NameResolver))->traverse($statements ?? []);
+            $resolvedStatements = new NodeTraverser(new NameResolver)->traverse($statements ?? []);
             $calledFactories = [];
 
             foreach ((new NodeFinder)->findInstanceOf($resolvedStatements, StaticCall::class) as $call) {
@@ -232,12 +232,10 @@ test('every concrete exception factory has an enforced caller', function () {
 
     $orphanedFactories = collect($exceptionClasses)
         ->filter(fn (string $class): bool => class_exists($class) && $class !== BaseBusinessException::class)
-        ->flatMap(function (string $class): array {
-            return collect((new ReflectionClass($class))->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_STATIC))
-                ->filter(fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $class)
-                ->map(fn (ReflectionMethod $method): string => $class.'::'.$method->getName())
-                ->all();
-        })
+        ->flatMap(fn (string $class): array => collect(new ReflectionClass($class)->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_STATIC))
+            ->filter(fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $class)
+            ->map(fn (ReflectionMethod $method): string => $class.'::'.$method->getName())
+            ->all())
         ->reject(fn (string $factory): bool => $calledFactories->contains($factory))
         ->values();
 

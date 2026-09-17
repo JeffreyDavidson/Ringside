@@ -29,8 +29,8 @@ test('it soft deletes an unemployed manager', function () {
 
     // Can still find with trashed
     $trashedManager = Manager::withTrashed()->findOrFail($manager->id);
-    expect($trashedManager)->not->toBeNull();
-    expect($trashedManager->deleted_at)->not->toBeNull();
+    expect($trashedManager)->not->toBeNull()
+        ->and($trashedManager->deleted_at)->not->toBeNull();
 });
 
 test('it deletes using the current persisted manager state', function () {
@@ -41,8 +41,8 @@ test('it deletes using the current persisted manager state', function () {
 
     resolve(DeleteAction::class)->handle($staleManager);
 
-    expect(Manager::find($manager->id))->toBeNull();
-    expect(Manager::withTrashed()->findOrFail($manager->id)->trashed())->toBeTrue();
+    expect(Manager::find($manager->id))->toBeNull()
+        ->and(Manager::withTrashed()->findOrFail($manager->id)->trashed())->toBeTrue();
 });
 
 test('it rejects deleting an already deleted manager', function () {

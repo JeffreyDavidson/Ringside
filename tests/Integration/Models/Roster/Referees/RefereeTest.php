@@ -64,21 +64,21 @@ describe('Referee Model Integration Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Referee::class))->toContain(HasFactory::class);
-            expect(class_uses(Referee::class))->toContain(IsEmployable::class);
-            expect(class_uses(Referee::class))->toContain(IsInjurable::class);
-            expect(class_uses(Referee::class))->toContain(IsRetirable::class);
-            expect(class_uses(Referee::class))->toContain(IsSuspendable::class);
-            expect(class_uses(Referee::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Referee::class))->toContain(HasFactory::class)
+                ->and(class_uses(Referee::class))->toContain(IsEmployable::class)
+                ->and(class_uses(Referee::class))->toContain(IsInjurable::class)
+                ->and(class_uses(Referee::class))->toContain(IsRetirable::class)
+                ->and(class_uses(Referee::class))->toContain(IsSuspendable::class)
+                ->and(class_uses(Referee::class))->toContain(SoftDeletes::class);
         });
     });
 
     describe('interface implementation', function () {
         test('implements all required interfaces', function () {
-            expect(Referee::class)->toImplement(Employable::class);
-            expect(Referee::class)->toImplement(Injurable::class);
-            expect(Referee::class)->toImplement(Retirable::class);
-            expect(Referee::class)->toImplement(Suspendable::class);
+            expect(Referee::class)->toImplement(Employable::class)
+                ->toImplement(Injurable::class)
+                ->toImplement(Retirable::class)
+                ->toImplement(Suspendable::class);
         });
     });
 

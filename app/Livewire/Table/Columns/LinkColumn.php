@@ -30,8 +30,8 @@ class LinkColumn extends Column
     #[\Override]
     public function resolveValue(mixed $row): string
     {
-        $title = $this->titleCallback ? ($this->titleCallback)($row) : '';
-        $location = $this->locationCallback ? ($this->locationCallback)($row) : '';
+        $title = $this->titleCallback instanceof Closure ? ($this->titleCallback)($row) : '';
+        $location = $this->locationCallback instanceof Closure ? ($this->locationCallback)($row) : '';
 
         if ($location === '' || $location === null) {
             return e((string) $title);

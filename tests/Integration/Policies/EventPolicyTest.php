@@ -26,26 +26,26 @@ describe('EventPolicy Integration Tests', function () {
 
     describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('basic users continue to individual method checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
         });
 
         test('global Gate hook works for arbitrary abilities', function () {
-            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
         });
     });
 
@@ -79,24 +79,23 @@ describe('EventPolicy Integration Tests', function () {
         test('policy integrates correctly with Gate facade', function () {
             // Test administrator permissions through Gate
             expect(Gate::forUser($this->admin)->allows('viewAny', Event::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('create', Event::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $this->event))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('create', Event::class))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('update', $this->event))->toBeTrue();
 
             // Test basic user permissions through Gate
             expect(Gate::forUser($this->basicUser)->denies('viewAny', Event::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('create', Event::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $this->event))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('create', Event::class))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $this->event))->toBeTrue();
         });
 
         test('policy works with specific event instances', function () {
             // Test with specific event instance
             expect(Gate::forUser($this->admin)->allows('view', $this->event))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $this->event))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('delete', $this->event))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('view', $this->event))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $this->event))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('delete', $this->event))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $this->event))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('delete', $this->event))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $this->event))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $this->event))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('delete', $this->event))->toBeTrue();
         });
     });
 

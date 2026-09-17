@@ -40,10 +40,7 @@ describe('TitleChampionship Model Integration Tests', function () {
         test('title championship has correct casts configuration', function () {
             $titleChampionship = new TitleChampionship;
             $casts = $titleChampionship->getCasts();
-
-            expect($casts['won_at'])->toBe('datetime');
-            expect($casts['lost_at'])->toBe('datetime');
-            expect($casts)->not->toHaveKey('last_held_reign');
+            expect($casts)->toMatchArray(['won_at' => 'datetime', 'lost_at' => 'datetime'])->not->toHaveKey('last_held_reign');
         });
 
         test('title championship has correct default values', function () {

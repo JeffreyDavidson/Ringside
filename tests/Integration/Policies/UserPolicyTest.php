@@ -55,15 +55,14 @@ describe('UserPolicy global Gate hook', function () {
     });
 
     test('global Gate hook works for user-specific abilities', function () {
-        expect(Gate::forUser($this->administrator)->raw('viewProfile'))->toBeTrue();
-        expect(Gate::forUser($this->administrator)->raw('changePassword'))->toBeTrue();
-        expect(Gate::forUser($this->administrator)->raw('manageRoles'))->toBeTrue();
-        expect(Gate::forUser($this->administrator)->raw('deactivate'))->toBeTrue();
-
-        expect(Gate::forUser($this->basicUser)->raw('viewProfile'))->toBeNull();
-        expect(Gate::forUser($this->basicUser)->raw('changePassword'))->toBeNull();
-        expect(Gate::forUser($this->basicUser)->raw('manageRoles'))->toBeNull();
-        expect(Gate::forUser($this->basicUser)->raw('deactivate'))->toBeNull();
+        expect(Gate::forUser($this->administrator)->raw('viewProfile'))->toBeTrue()
+            ->and(Gate::forUser($this->administrator)->raw('changePassword'))->toBeTrue()
+            ->and(Gate::forUser($this->administrator)->raw('manageRoles'))->toBeTrue()
+            ->and(Gate::forUser($this->administrator)->raw('deactivate'))->toBeTrue()
+            ->and(Gate::forUser($this->basicUser)->raw('viewProfile'))->toBeNull()
+            ->and(Gate::forUser($this->basicUser)->raw('changePassword'))->toBeNull()
+            ->and(Gate::forUser($this->basicUser)->raw('manageRoles'))->toBeNull()
+            ->and(Gate::forUser($this->basicUser)->raw('deactivate'))->toBeNull();
     });
 });
 
@@ -115,38 +114,38 @@ describe('UserPolicy integration with Gate facade', function () {
         actingAs(administrator());
         $targetUser = basicUser();
 
-        expect(Gate::allows('viewAny', User::class))->toBeTrue();
-        expect(Gate::allows('view', $targetUser))->toBeTrue();
-        expect(Gate::allows('create', User::class))->toBeTrue();
-        expect(Gate::allows('update', $targetUser))->toBeTrue();
-        expect(Gate::allows('delete', $targetUser))->toBeTrue();
-        expect(Gate::allows('restore', $targetUser))->toBeTrue();
+        expect(Gate::allows('viewAny', User::class))->toBeTrue()
+            ->and(Gate::allows('view', $targetUser))->toBeTrue()
+            ->and(Gate::allows('create', User::class))->toBeTrue()
+            ->and(Gate::allows('update', $targetUser))->toBeTrue()
+            ->and(Gate::allows('delete', $targetUser))->toBeTrue()
+            ->and(Gate::allows('restore', $targetUser))->toBeTrue();
     });
 
     test('Gate denies basic users after global Gate hook returns null', function () {
         actingAs(basicUser());
         $targetUser = administrator();
 
-        expect(Gate::denies('viewAny', User::class))->toBeTrue();
-        expect(Gate::denies('view', $targetUser))->toBeTrue();
-        expect(Gate::denies('create', User::class))->toBeTrue();
-        expect(Gate::denies('update', $targetUser))->toBeTrue();
-        expect(Gate::denies('delete', $targetUser))->toBeTrue();
-        expect(Gate::denies('restore', $targetUser))->toBeTrue();
+        expect(Gate::denies('viewAny', User::class))->toBeTrue()
+            ->and(Gate::denies('view', $targetUser))->toBeTrue()
+            ->and(Gate::denies('create', User::class))->toBeTrue()
+            ->and(Gate::denies('update', $targetUser))->toBeTrue()
+            ->and(Gate::denies('delete', $targetUser))->toBeTrue()
+            ->and(Gate::denies('restore', $targetUser))->toBeTrue();
     });
 
     test('Gate works with specific user instances', function () {
         $user = User::factory()->create();
 
         actingAs(administrator());
-        expect(Gate::allows('view', $user))->toBeTrue();
-        expect(Gate::allows('update', $user))->toBeTrue();
-        expect(Gate::allows('delete', $user))->toBeTrue();
+        expect(Gate::allows('view', $user))->toBeTrue()
+            ->and(Gate::allows('update', $user))->toBeTrue()
+            ->and(Gate::allows('delete', $user))->toBeTrue();
 
         actingAs(basicUser());
-        expect(Gate::denies('view', $user))->toBeTrue();
-        expect(Gate::denies('update', $user))->toBeTrue();
-        expect(Gate::denies('delete', $user))->toBeTrue();
+        expect(Gate::denies('view', $user))->toBeTrue()
+            ->and(Gate::denies('update', $user))->toBeTrue()
+            ->and(Gate::denies('delete', $user))->toBeTrue();
     });
 
     // NOTE: Gate integration testing moved to Feature tests for proper application context
@@ -182,8 +181,8 @@ describe('UserPolicy method signatures', function () {
 
             $expectedParameterCount = in_array($method, ['viewAny', 'create'], true) ? 1 : 2;
 
-            expect($reflection->getParameters())->toHaveCount($expectedParameterCount);
-            expect(reflectionTypeName($reflection->getParameters()[0]))->toBe(User::class);
+            expect($reflection->getParameters())->toHaveCount($expectedParameterCount)
+                ->and(reflectionTypeName($reflection->getParameters()[0]))->toBe(User::class);
             if ($expectedParameterCount === 2) {
                 expect(reflectionTypeName($reflection->getParameters()[1]))->toBe(User::class);
             }
@@ -207,10 +206,8 @@ describe('UserPolicy business context', function () {
 
         foreach ($userOperations as $operation) {
             expect(Gate::forUser(administrator())->raw($operation))
-                ->toBeTrue("Administrator should be able to {$operation} users");
-
-            expect(Gate::forUser(basicUser())->raw($operation))
-                ->toBeNull("Basic user should continue to individual checks for {$operation}");
+                ->toBeTrue("Administrator should be able to {$operation} users")
+                ->and(Gate::forUser(basicUser())->raw($operation))->toBeNull("Basic user should continue to individual checks for {$operation}");
         }
     });
 
@@ -220,10 +217,9 @@ describe('UserPolicy business context', function () {
 
         // Both user types should follow same authorization rules
         expect(Gate::forUser(administrator())->allows('view', $adminUser))->toBeTrue();
-        expect(Gate::forUser(administrator())->allows('view', $basicUser))->toBeTrue();
-
-        expect(Gate::forUser(basicUser())->denies('view', $adminUser))->toBeTrue();
-        expect(Gate::forUser(basicUser())->denies('view', $basicUser))->toBeTrue();
+        expect(Gate::forUser(administrator())->allows('view', $basicUser))->toBeTrue()
+            ->and(Gate::forUser(basicUser())->denies('view', $adminUser))->toBeTrue()
+            ->and(Gate::forUser(basicUser())->denies('view', $basicUser))->toBeTrue();
     });
 
     test('policy works with different user statuses', function () {
@@ -233,12 +229,11 @@ describe('UserPolicy business context', function () {
 
         // All user statuses should follow same authorization rules
         expect(Gate::forUser(administrator())->allows('update', $activeUser))->toBeTrue();
-        expect(Gate::forUser(administrator())->allows('update', $inactiveUser))->toBeTrue();
-        expect(Gate::forUser(administrator())->allows('update', $unverifiedUser))->toBeTrue();
-
-        expect(Gate::forUser(basicUser())->denies('update', $activeUser))->toBeTrue();
-        expect(Gate::forUser(basicUser())->denies('update', $inactiveUser))->toBeTrue();
-        expect(Gate::forUser(basicUser())->denies('update', $unverifiedUser))->toBeTrue();
+        expect(Gate::forUser(administrator())->allows('update', $inactiveUser))->toBeTrue()
+            ->and(Gate::forUser(administrator())->allows('update', $unverifiedUser))->toBeTrue()
+            ->and(Gate::forUser(basicUser())->denies('update', $activeUser))->toBeTrue()
+            ->and(Gate::forUser(basicUser())->denies('update', $inactiveUser))->toBeTrue()
+            ->and(Gate::forUser(basicUser())->denies('update', $unverifiedUser))->toBeTrue();
     });
 
     test('policy maintains consistency with authentication system', function () {
@@ -247,10 +242,9 @@ describe('UserPolicy business context', function () {
 
         // Verify the policy respects the user's isAdministrator method
         expect($admin->role->isAdministrator())->toBeTrue();
-        expect($basic->role->isAdministrator())->toBeFalse();
-
-        expect(Gate::forUser($admin)->raw('any-operation'))->toBeTrue();
-        expect(Gate::forUser($basic)->raw('any-operation'))->toBeNull();
+        expect($basic->role->isAdministrator())->toBeFalse()
+            ->and(Gate::forUser($admin)->raw('any-operation'))->toBeTrue()
+            ->and(Gate::forUser($basic)->raw('any-operation'))->toBeNull();
     });
 });
 
@@ -269,10 +263,9 @@ describe('UserPolicy edge cases and security', function () {
     test('policy is stateless', function () {
         // Multiple calls should return same results
         expect($this->policy->viewAny(basicUser()))->toBeFalse();
-        expect($this->policy->viewAny(basicUser()))->toBeFalse();
-
-        expect(Gate::forUser(administrator())->raw('create'))->toBeTrue();
-        expect(Gate::forUser(administrator())->raw('create'))->toBeTrue();
+        expect($this->policy->viewAny(basicUser()))->toBeFalse()
+            ->and(Gate::forUser(administrator())->raw('create'))->toBeTrue()
+            ->and(Gate::forUser(administrator())->raw('create'))->toBeTrue();
     });
 
     test('policy correctly identifies administrator privileges', function () {
@@ -283,8 +276,8 @@ describe('UserPolicy edge cases and security', function () {
         $abilities = ['create', 'read', 'update', 'delete', 'custom', 'manage', 'any'];
 
         foreach ($abilities as $ability) {
-            expect(Gate::forUser($admin)->raw($ability))->toBeTrue();
-            expect(Gate::forUser($basic)->raw($ability))->toBeNull();
+            expect(Gate::forUser($admin)->raw($ability))->toBeTrue()
+                ->and(Gate::forUser($basic)->raw($ability))->toBeNull();
         }
     });
 });

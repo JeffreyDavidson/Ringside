@@ -34,42 +34,42 @@ describe('WrestlerPolicy Integration Tests', function () {
 
     describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('employ'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('release'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('injure'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('clearFromInjury'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('employ'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('release'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('retire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('injure'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('clearFromInjury'))->toBeTrue();
         });
 
         test('basic users continue to individual method checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('employ'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('release'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('suspend'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('injure'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('clearFromInjury'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('employ'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('release'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('suspend'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('injure'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('clearFromInjury'))->toBeNull();
         });
 
         test('global Gate hook works for arbitrary abilities', function () {
-            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
         });
     });
 
@@ -143,24 +143,23 @@ describe('WrestlerPolicy Integration Tests', function () {
         test('policy integrates correctly with Gate facade', function () {
             // Test administrator permissions through Gate
             expect(Gate::forUser($this->admin)->allows('viewAny', Wrestler::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('create', Wrestler::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('employ', $this->wrestler))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('create', Wrestler::class))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('employ', $this->wrestler))->toBeTrue();
 
             // Test basic user permissions through Gate
             expect(Gate::forUser($this->basicUser)->denies('viewAny', Wrestler::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('create', Wrestler::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('employ', $this->wrestler))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('create', Wrestler::class))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('employ', $this->wrestler))->toBeTrue();
         });
 
         test('policy works with specific wrestler instances', function () {
             // Test with specific wrestler instance
             expect(Gate::forUser($this->admin)->allows('view', $this->wrestler))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $this->wrestler))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('delete', $this->wrestler))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('view', $this->wrestler))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $this->wrestler))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('delete', $this->wrestler))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $this->wrestler))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('delete', $this->wrestler))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $this->wrestler))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $this->wrestler))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('delete', $this->wrestler))->toBeTrue();
         });
     });
 

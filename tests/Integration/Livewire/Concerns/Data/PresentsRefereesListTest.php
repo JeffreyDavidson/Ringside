@@ -33,5 +33,5 @@ it('returns no referee options when only deleted referees exist', function (): v
     $referees = $modal->getReferees();
 
     // Assert
-    expect($referees)->toBe([]);
+    expect($referees)->toBeEmpty();
 });

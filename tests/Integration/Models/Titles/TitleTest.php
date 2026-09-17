@@ -42,8 +42,8 @@ describe('Title Model Integration Tests', function () {
             $title = new Title;
             $casts = $title->getCasts();
 
-            expect($casts['type'])->toBe(TitleType::class);
-            expect($casts)->not->toHaveKey('status');
+            expect($casts['type'])->toBe(TitleType::class)
+                ->and($casts)->not->toHaveKey('status');
         });
 
         test('has custom eloquent builder', function () {
@@ -65,10 +65,10 @@ describe('Title Model Integration Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(Title::class))->toContain(HasFactory::class);
-            expect(class_uses(Title::class))->toContain(HasLifecycleTransitions::class);
-            expect(class_uses(Title::class))->toContain(IsRetirable::class);
-            expect(class_uses(Title::class))->toContain(SoftDeletes::class);
+            expect(class_uses(Title::class))->toContain(HasFactory::class)
+                ->and(class_uses(Title::class))->toContain(HasLifecycleTransitions::class)
+                ->and(class_uses(Title::class))->toContain(IsRetirable::class)
+                ->and(class_uses(Title::class))->toContain(SoftDeletes::class);
         });
     });
 

@@ -31,12 +31,12 @@ describe('VenueFactory Integration Tests', function () {
 
             // Assert
             expect($venue->name)->toBeString();
-            expect($venue->name)->toContain('Arena');
-            expect($venue->street_address)->toBeString();
-            expect($venue->city)->toBeString();
-            expect($venue->state)->toBeString();
-            expect($venue->zipcode)->toBeString();
-            expect(mb_strlen($venue->zipcode))->toBe(5);
+            expect($venue->name)->toContain('Arena')
+                ->and($venue->street_address)->toBeString()
+                ->and($venue->city)->toBeString()
+                ->and($venue->state)->toBeString()
+                ->and($venue->zipcode)->toBeString()
+                ->and($venue->zipcode)->toHaveLength(5);
         });
 
         test('generates realistic venue names', function () {
@@ -45,8 +45,8 @@ describe('VenueFactory Integration Tests', function () {
 
             // Assert
             expect($venue->name)->toBeString();
-            expect(mb_strlen($venue->name))->toBeGreaterThan(3);
-            expect($venue->name)->toContain('Arena');
+            expect(mb_strlen($venue->name))->toBeGreaterThan(3)
+                ->and($venue->name)->toContain('Arena');
         });
 
         test('generates valid address components', function () {
@@ -55,13 +55,13 @@ describe('VenueFactory Integration Tests', function () {
 
             // Assert
             expect($venue->street_address)->toBeString();
-            expect(mb_strlen($venue->street_address))->toBeGreaterThan(5);
-            expect($venue->city)->toBeString();
-            expect(mb_strlen($venue->city))->toBeGreaterThan(2);
-            expect($venue->state)->toBeString();
-            expect(UnitedStatesState::tryFrom($venue->state))->not->toBeNull();
-            expect($venue->zipcode)->toBeString();
-            expect(mb_strlen($venue->zipcode))->toBe(5);
+            expect(mb_strlen($venue->street_address))->toBeGreaterThan(5)
+                ->and($venue->city)->toBeString()
+                ->and(mb_strlen($venue->city))->toBeGreaterThan(2)
+                ->and($venue->state)->toBeString()
+                ->and(UnitedStatesState::tryFrom($venue->state))->not->toBeNull()
+                ->and($venue->zipcode)->toBeString()
+                ->and($venue->zipcode)->toHaveLength(5);
         });
     });
 
@@ -76,8 +76,8 @@ describe('VenueFactory Integration Tests', function () {
 
             // Assert
             expect($venue->name)->toBe('Custom Arena');
-            expect($venue->city)->toBe('Custom City');
-            expect($venue->state)->toBe(UnitedStatesState::Colorado->value);
+            expect($venue->city)->toBe('Custom City')
+                ->and($venue->state)->toBe(UnitedStatesState::Colorado->value);
         });
 
         test('maintains required attributes when overriding', function () {
@@ -88,10 +88,10 @@ describe('VenueFactory Integration Tests', function () {
 
             // Assert
             expect($venue->name)->toBe('Override Arena');
-            expect($venue->street_address)->toBeString();
-            expect($venue->city)->toBeString();
-            expect($venue->state)->toBeString();
-            expect($venue->zipcode)->toBeString();
+            expect($venue->street_address)->toBeString()
+                ->and($venue->city)->toBeString()
+                ->and($venue->state)->toBeString()
+                ->and($venue->zipcode)->toBeString();
         });
     });
 
@@ -111,9 +111,9 @@ describe('VenueFactory Integration Tests', function () {
 
             // Assert
             foreach ($venues as $venue) {
-                expect($venue->name)->toBeString();
-                expect($venue->zipcode)->toMatch('/^\d{5}$/');
-                expect(UnitedStatesState::tryFrom($venue->state))->not->toBeNull();
+                expect($venue->name)->toBeString()
+                    ->and($venue->zipcode)->toMatch('/^\d{5}$/')
+                    ->and(UnitedStatesState::tryFrom($venue->state))->not->toBeNull();
             }
         });
     });

@@ -18,10 +18,10 @@ test('it creates a title', function () {
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Title::class);
-    expect($result->name)->toBe('Example Title');
-    expect($result->type)->toBe(TitleType::Singles);
-    expect($result->activityPeriods)->toHaveCount(0);
+    expect($result)->toBeInstanceOf(Title::class)
+        ->and($result->name)->toBe('Example Title')
+        ->and($result->type)->toBe(TitleType::Singles)
+        ->and($result->activityPeriods)->toBeEmpty();
 });
 
 test('it activates a title if activation date is filled in request', function () {
@@ -30,9 +30,9 @@ test('it activates a title if activation date is filled in request', function ()
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Title::class);
-    expect($result->name)->toBe('Example Title');
-    expect($result->type)->toBe(TitleType::Singles);
-    expect($result->activityPeriods)->toHaveCount(1);
-    expect(requiredDate($result->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
+    expect($result)->toBeInstanceOf(Title::class)
+        ->and($result->name)->toBe('Example Title')
+        ->and($result->type)->toBe(TitleType::Singles)
+        ->and($result->activityPeriods)->toHaveCount(1)
+        ->and(requiredDate($result->activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($datetime->format('Y-m-d H:i:s'));
 });

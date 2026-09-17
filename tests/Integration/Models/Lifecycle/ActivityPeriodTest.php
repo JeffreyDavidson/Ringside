@@ -32,10 +32,8 @@ describe('ActivityPeriod Model Integration Tests', function () {
             $activityPeriod = new ActivityPeriod;
             $casts = $activityPeriod->getCasts();
 
-            expect($casts)->toBeArray();
-            expect($casts['id'])->toBe('int');
-            expect($casts['started_at'])->toBe('datetime');
-            expect($casts['ended_at'])->toBe('datetime');
+            expect($casts)->toBeArray()
+                ->toMatchArray(['id' => 'int', 'started_at' => 'datetime', 'ended_at' => 'datetime']);
         });
 
         test('uses correct table name', function () {

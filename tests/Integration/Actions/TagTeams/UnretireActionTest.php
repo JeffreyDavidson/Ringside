@@ -18,14 +18,14 @@ beforeEach(function () {
 test('it unretires a retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
-    expect($tagTeam->currentRetirement()->exists())->toBeTrue();
-    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
+        ->and($tagTeam->currentEmployment()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement record was ended
     $this->assertDatabaseHas('retirements', [
@@ -56,10 +56,8 @@ test('it prevents unretiring a tag team with an injured current wrestler', funct
         ['joined_at' => now()->subDays(2), 'left_at' => null],
     );
 
-    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse();
-
-    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
-        ->toThrow(CannotBeUnretiredException::class);
+    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(CannotBeUnretiredException::class);
 });
 
 test('it prevents unretiring a tag team without enough current wrestlers', function () {
@@ -75,10 +73,8 @@ test('it prevents unretiring a tag team without enough current wrestlers', funct
         'left_at' => null,
     ]);
 
-    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse();
-
-    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
-        ->toThrow(CannotBeUnretiredException::class);
+    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(CannotBeUnretiredException::class);
 });
 
 test('it unretires and employs current members by default', function () {
@@ -131,8 +127,8 @@ test('it unretires tag team with specific unretirement date', function () {
     resolve(UnretireAction::class)->handle($tagTeam, $unretirementDate);
 
     $tagTeam->refresh();
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 
     // Verify retirement ended with specific date
     $this->assertDatabaseHas('retirements', [
@@ -162,9 +158,9 @@ test('it persists the unretirement lifecycle', function () {
 
     // Verify retirement ended and employment was created
     expect($tagTeam->currentRetirement)->toBeNull();
-    expect($tagTeam->currentEmployment)->not()->toBeNull();
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
+    expect($tagTeam->currentEmployment)->not()->toBeNull()
+        ->and($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentEmployment()->exists())->toBeTrue();
 });
 
 test('it unretires without auto-employing when no current wrestlers are available', function () {
@@ -175,39 +171,35 @@ test('it unretires without auto-employing when no current wrestlers are availabl
     ]);
 
     $tagTeam->refresh();
-    expect($tagTeam->currentRetirement()->exists())->toBeTrue();
-    expect($tagTeam->currentWrestlers)->toBeEmpty();
-    expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
+        ->and($tagTeam->currentWrestlers)->toBeEmpty()
+        ->and(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
         ->and(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam, requireAvailablePartners: false))->toBeTrue();
 
     resolve(UnretireAction::class)->handle($tagTeam, requireAvailablePartners: false);
 
     $tagTeam->refresh();
 
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->currentRetirement)->toBeNull();
-    expect($tagTeam->currentEmployment)->toBeNull();
-    expect($tagTeam->employments()->count())->toBe(0);
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and($tagTeam->currentRetirement)->toBeNull()
+        ->and($tagTeam->currentEmployment)->toBeNull()
+        ->and($tagTeam->employments()->count())->toBe(0);
 });
 
 test('it prevents unretiring non-retired tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-
-    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents unretiring unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->unemployed()->create();
 
-    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-
-    expect(fn () => resolve(UnretireAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and($tagTeam->currentRetirement()->exists())->toBeFalse()
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -232,8 +224,8 @@ test('it handles database transactions correctly', function () {
 
     // Verify new employment record was created
     $employment = $tagTeam->currentEmployment()->firstOrFail();
-    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
-    expect($employment->ended_at)->toBeNull();
+    expect(requiredDate($employment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it ends current retirement period', function () {
@@ -266,8 +258,8 @@ test('it creates new employment period', function () {
 
     // New employment should be current and active
     $currentEmployment = $tagTeam->currentEmployment()->firstOrFail();
-    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString());
-    expect($currentEmployment->ended_at)->toBeNull();
+    expect(requiredDate($currentEmployment->started_at)->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($currentEmployment->ended_at)->toBeNull();
 });
 
 test('it uses the provided date', function () {
@@ -301,8 +293,8 @@ test('it handles multiple retirement history correctly', function () {
     $tagTeam->retirements()->create(['started_at' => now()->subDays(20), 'ended_at' => null]); // Current
 
     $tagTeam->refresh();
-    expect($tagTeam->currentRetirement()->exists())->toBeTrue();
-    expect($tagTeam->retirements()->count())->toBe(3);
+    expect($tagTeam->currentRetirement()->exists())->toBeTrue()
+        ->and($tagTeam->retirements()->count())->toBe(3);
 
     resolve(UnretireAction::class)->handle($tagTeam);
 
@@ -379,8 +371,8 @@ test('it transitions from retired to employed seamlessly', function () {
 
     // Verify starting state
     expect($tagTeam->currentRetirement()->exists())->toBeTrue();
-    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     resolve(UnretireAction::class)->handle($tagTeam);
 
@@ -388,8 +380,8 @@ test('it transitions from retired to employed seamlessly', function () {
 
     // Should transition to employed state
     expect($tagTeam->currentRetirement()->exists())->toBeFalse();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Should have active employment and no active retirement
     expect($tagTeam->currentEmployment)->not()->toBeNull();

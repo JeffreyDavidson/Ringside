@@ -34,9 +34,9 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
 
             // Assert
             expect($tagTeamWrestler->tag_team_id)->toBeInt();
-            expect($tagTeamWrestler->wrestler_id)->toBeInt();
-            expect($tagTeamWrestler->joined_at)->toBeInstanceOf(Carbon::class);
-            expect($tagTeamWrestler->left_at)->toBeNull(); // Default is current partnership
+            expect($tagTeamWrestler->wrestler_id)->toBeInt()
+                ->and($tagTeamWrestler->joined_at)->toBeInstanceOf(Carbon::class)
+                ->and($tagTeamWrestler->left_at)->toBeNull(); // Default is current partnership
         });
 
         test('creates realistic partnership dates', function () {
@@ -45,8 +45,8 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
 
             // Assert - Factory creates dates between 2 years ago and now
             expect($tagTeamWrestler->joined_at)->toBeInstanceOf(Carbon::class);
-            expect($tagTeamWrestler->joined_at->isPast() || $tagTeamWrestler->joined_at->isToday())->toBeTrue();
-            expect($tagTeamWrestler->joined_at->greaterThan(now()->subYears(2)->subDay()))->toBeTrue();
+            expect($tagTeamWrestler->joined_at->isPast() || $tagTeamWrestler->joined_at->isToday())->toBeTrue()
+                ->and($tagTeamWrestler->joined_at->greaterThan(now()->subYears(2)->subDay()))->toBeTrue();
         });
     });
 
@@ -67,9 +67,9 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
 
             // Assert
             expect($tagTeamWrestler->tag_team_id)->toBe($tagTeam->id);
-            expect($tagTeamWrestler->wrestler_id)->toBe($wrestler->id);
-            expect($tagTeamWrestler->joined_at->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
-            expect($tagTeamWrestler->left_at)->toBeNull();
+            expect($tagTeamWrestler->wrestler_id)->toBe($wrestler->id)
+                ->and($tagTeamWrestler->joined_at->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'))
+                ->and($tagTeamWrestler->left_at)->toBeNull();
         });
 
         test('past partnership state works correctly', function () {
@@ -89,10 +89,10 @@ describe('TagTeamWrestlerFactory Integration Tests', function () {
 
             // Assert
             expect($tagTeamWrestler->tag_team_id)->toBe($tagTeam->id);
-            expect($tagTeamWrestler->wrestler_id)->toBe($wrestler->id);
-            expect(requiredDate($tagTeamWrestler->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'));
-            expect(requiredDate($tagTeamWrestler->left_at)->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'));
-            expect(requiredDate($tagTeamWrestler->left_at)->isAfter(requiredDate($tagTeamWrestler->joined_at)))->toBeTrue();
+            expect($tagTeamWrestler->wrestler_id)->toBe($wrestler->id)
+                ->and(requiredDate($tagTeamWrestler->joined_at)->format('Y-m-d H:i:s'))->toBe($joinedDate->format('Y-m-d H:i:s'))
+                ->and(requiredDate($tagTeamWrestler->left_at)->format('Y-m-d H:i:s'))->toBe($leftDate->format('Y-m-d H:i:s'))
+                ->and(requiredDate($tagTeamWrestler->left_at)->isAfter(requiredDate($tagTeamWrestler->joined_at)))->toBeTrue();
         });
     });
 

@@ -16,16 +16,16 @@ test('it clears an injured referee', function () {
     $referee = Referee::factory()->injured()->create();
     $injury = $referee->currentInjury()->firstOrFail();
 
-    expect($referee->currentInjury()->exists())->toBeTrue();
-    expect($injury->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($injury->ended_at)->toBeNull();
 
     resolve(ClearFromInjuryAction::class)->handle($referee);
 
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->currentInjury()->exists())->toBeFalse();
-    expect($injury->ended_at)->not->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeFalse()
+        ->and($injury->ended_at)->not->toBeNull();
 
     $this->assertDatabaseHas('injuries', [
         'id' => $injury->id,
@@ -43,8 +43,8 @@ test('it clears referee from injury with specific recovery date', function () {
     $referee->refresh();
     $injury->refresh();
 
-    expect($referee->currentInjury()->exists())->toBeFalse();
-    expect(requiredDate($injury->ended_at)->toDateTimeString())->toBe($recoveryDate->toDateTimeString());
+    expect($referee->currentInjury()->exists())->toBeFalse()
+        ->and(requiredDate($injury->ended_at)->toDateTimeString())->toBe($recoveryDate->toDateTimeString());
 
     $this->assertDatabaseHas('injuries', [
         'id' => $injury->id,
@@ -105,8 +105,8 @@ test('it maintains referee employment status after injury clearance', function (
     $referee = Referee::factory()->injured()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentInjury()->exists())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentInjury()->exists())->toBeTrue();
 
     resolve(ClearFromInjuryAction::class)->handle($referee);
 
@@ -115,8 +115,8 @@ test('it maintains referee employment status after injury clearance', function (
 
     // Should remain employed after injury clearance
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentInjury()->exists())->toBeFalse();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeFalse()
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it preserves injury history', function () {

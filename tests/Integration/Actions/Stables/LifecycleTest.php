@@ -42,15 +42,14 @@ describe('Stable Activation Action Integration', function () {
             resolve(EstablishAction::class)->handle($this->stable, $debutDate);
 
             $refreshedStable = freshModel($this->stable);
-            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue();
-            expect($refreshedStable->status)->toBe(StableStatus::Active);
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue()
+                ->and($refreshedStable->status)->toBe(StableStatus::Active);
 
             // Verify activity period is created
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->firstOrFail();
-            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($debutDate->format('Y-m-d H:i:s'));
-            expect($activityPeriod->ended_at)->toBeNull();
-            expect($refreshedStable->lifecycleTransitions()->sole()->transition)
-                ->toBe(LifecycleTransitionType::Established);
+            expect(requiredDate($activityPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($debutDate->format('Y-m-d H:i:s'))
+                ->and($activityPeriod->ended_at)->toBeNull()
+                ->and($refreshedStable->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Established);
         });
 
         test('debut action handles date parameter correctly', function () {
@@ -68,9 +67,8 @@ describe('Stable Activation Action Integration', function () {
             $endDate = $activationDate->copy()->subDay();
 
             expect(fn () => resolve(EstablishAction::class)->handle($this->stable, $activationDate, $endDate))
-                ->toThrow(InvalidDateRangeException::class);
-
-            expect($this->stable->activityPeriods()->doesntExist())->toBeTrue();
+                ->toThrow(InvalidDateRangeException::class)
+                ->and($this->stable->activityPeriods()->doesntExist())->toBeTrue();
         });
 
         test('debut action requires the minimum member headcount', function () {
@@ -80,9 +78,8 @@ describe('Stable Activation Action Integration', function () {
                 ->toThrow(
                     CannotBeEstablishedException::class,
                     CannotBeEstablishedException::insufficientMembers($stable, 0, 3)->getMessage(),
-                );
-
-            expect($stable->activityPeriods()->doesntExist())->toBeTrue();
+                )
+                ->and($stable->activityPeriods()->doesntExist())->toBeTrue();
         });
 
         test('establishment records its lifecycle transition', function () {
@@ -115,10 +112,9 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify activity period is ended
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->firstOrFail();
-            expect($activityPeriod->ended_at)->not()->toBeNull();
-            expect(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($disbandDate->format('Y-m-d H:i:s'));
-            expect($refreshedStable->lifecycleTransitions()->sole()->transition)
-                ->toBe(LifecycleTransitionType::Disbanded);
+            expect($activityPeriod->ended_at)->not()->toBeNull()
+                ->and(requiredDate($activityPeriod->ended_at)->format('Y-m-d H:i:s'))->toBe($disbandDate->format('Y-m-d H:i:s'))
+                ->and($refreshedStable->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Disbanded);
         });
 
         test('disbandment records its lifecycle transition', function () {
@@ -161,18 +157,17 @@ describe('Stable Activation Action Integration', function () {
             resolve(ReuniteAction::class)->handle($this->disbandedStable, $reuniteDate);
 
             $refreshedStable = freshModel($this->disbandedStable);
-            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue();
-            expect($refreshedStable->status)->toBe(StableStatus::Active);
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue()
+                ->and($refreshedStable->status)->toBe(StableStatus::Active);
 
             // Verify new activity period is created
             $activityPeriods = $refreshedStable->activityPeriods()->orderBy('started_at')->get();
             expect($activityPeriods)->toHaveCount(2); // Original + reunite
 
             $latestPeriod = $activityPeriods->reverse()->firstOrFail();
-            expect(requiredDate($latestPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($reuniteDate->format('Y-m-d H:i:s'));
-            expect($latestPeriod->ended_at)->toBeNull();
-            expect($refreshedStable->lifecycleTransitions()->sole()->transition)
-                ->toBe(LifecycleTransitionType::Reunited);
+            expect(requiredDate($latestPeriod->started_at)->format('Y-m-d H:i:s'))->toBe($reuniteDate->format('Y-m-d H:i:s'))
+                ->and($latestPeriod->ended_at)->toBeNull()
+                ->and($refreshedStable->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Reunited);
         });
 
         test('reunite action maintains historical activity periods', function () {
@@ -201,13 +196,13 @@ describe('Stable Activation Action Integration', function () {
             resolve(RetireAction::class)->handle($this->activeStable, $retireDate);
 
             $refreshedStable = freshModel($this->activeStable);
-            expect($refreshedStable->currentRetirement()->exists())->toBeTrue();
-            expect($refreshedStable->status)->toBe(StableStatus::Retired);
+            expect($refreshedStable->currentRetirement()->exists())->toBeTrue()
+                ->and($refreshedStable->status)->toBe(StableStatus::Retired);
 
             // Verify retirement record
             $retirement = $refreshedStable->retirements()->latest()->firstOrFail();
-            expect(requiredDate($retirement->started_at)->format('Y-m-d H:i:s'))->toBe($retireDate->format('Y-m-d H:i:s'));
-            expect($retirement->ended_at)->toBeNull();
+            expect(requiredDate($retirement->started_at)->format('Y-m-d H:i:s'))->toBe($retireDate->format('Y-m-d H:i:s'))
+                ->and($retirement->ended_at)->toBeNull();
 
             // Verify activity period is ended
             $activityPeriod = $refreshedStable->activityPeriods()->latest()->firstOrFail();
@@ -220,8 +215,8 @@ describe('Stable Activation Action Integration', function () {
             resolve(RetireAction::class)->handle($disbandedStable, Carbon::now());
 
             $refreshedStable = freshModel($disbandedStable);
-            expect($refreshedStable->currentRetirement()->exists())->toBeTrue();
-            expect($refreshedStable->status)->toBe(StableStatus::Retired);
+            expect($refreshedStable->currentRetirement()->exists())->toBeTrue()
+                ->and($refreshedStable->status)->toBe(StableStatus::Retired);
         });
     });
 
@@ -236,8 +231,8 @@ describe('Stable Activation Action Integration', function () {
             resolve(UnretireAction::class)->handle($this->retiredStable, $unretireDate);
 
             $refreshedStable = freshModel($this->retiredStable);
-            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue();
-            expect($refreshedStable->status)->toBe(StableStatus::Active);
+            expect($refreshedStable->currentActivityPeriod()->exists())->toBeTrue()
+                ->and($refreshedStable->status)->toBe(StableStatus::Active);
 
             // Verify retirement is ended
             $retirement = $refreshedStable->retirements()->latest()->firstOrFail();
@@ -250,8 +245,8 @@ describe('Stable Activation Action Integration', function () {
             resolve(UnretireAction::class)->handle($this->retiredStable, Carbon::now(), establishImmediately: false);
 
             $refreshedStable = freshModel($this->retiredStable);
-            expect($refreshedStable->activityPeriods()->count())->toBe($originalPeriodCount);
-            expect($refreshedStable->currentActivityPeriod()->exists())->toBeFalse();
+            expect($refreshedStable->activityPeriods()->count())->toBe($originalPeriodCount)
+                ->and($refreshedStable->currentActivityPeriod()->exists())->toBeFalse();
         });
 
         test('unretire action preserves former members retirement state', function () {
@@ -347,8 +342,8 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify retirement record
             $retirement = $finalStable->retirements()->firstOrFail();
-            expect($retirement->started_at)->toBeInstanceOf(Carbon::class);
-            expect($retirement->ended_at)->toBeInstanceOf(Carbon::class);
+            expect($retirement->started_at)->toBeInstanceOf(Carbon::class)
+                ->and($retirement->ended_at)->toBeInstanceOf(Carbon::class);
         });
 
         test('action date validation maintains data integrity', function () {
@@ -368,9 +363,9 @@ describe('Stable Activation Action Integration', function () {
 
             // Verify chronological order is maintained
             expect(requiredDate($activityPeriods->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($debutDate->format('Y-m-d H:i:s'));
-            expect(requiredDate($activityPeriods->firstOrFail()->ended_at)->format('Y-m-d H:i:s'))->toBe($disbandDate->format('Y-m-d H:i:s'));
-            expect(requiredDate($activityPeriods->reverse()->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($reuniteDate->format('Y-m-d H:i:s'));
-            expect($activityPeriods->reverse()->firstOrFail()->ended_at)->toBeNull();
+            expect(requiredDate($activityPeriods->firstOrFail()->ended_at)->format('Y-m-d H:i:s'))->toBe($disbandDate->format('Y-m-d H:i:s'))
+                ->and(requiredDate($activityPeriods->reverse()->firstOrFail()->started_at)->format('Y-m-d H:i:s'))->toBe($reuniteDate->format('Y-m-d H:i:s'))
+                ->and($activityPeriods->reverse()->firstOrFail()->ended_at)->toBeNull();
         });
     });
 

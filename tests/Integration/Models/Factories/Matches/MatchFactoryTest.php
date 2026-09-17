@@ -26,11 +26,11 @@ describe('MatchFactory', function () {
         test('creates basic event match with default values', function () {
             $eventMatch = EventMatch::factory()->create();
 
-            expect($eventMatch)->toBeInstanceOf(EventMatch::class);
-            expect($eventMatch->event_id)->toBeInt();
-            expect($eventMatch->match_number)->toBeInt();
-            expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
-            expect($eventMatch->preview)->toBeNull();
+            expect($eventMatch)->toBeInstanceOf(EventMatch::class)
+                ->and($eventMatch->event_id)->toBeInt()
+                ->and($eventMatch->match_number)->toBeInt()
+                ->and($eventMatch->match_type)->toBeInstanceOf(MatchType::class)
+                ->and($eventMatch->preview)->toBeNull();
         });
 
         test('generates realistic match number within bounds', function () {
@@ -48,9 +48,9 @@ describe('MatchFactory', function () {
 
             // Assert
             foreach ($matches as $match) {
-                expect($match->match_number)->toBeInt();
-                expect($match->match_number)->toBeGreaterThan(0);
-                expect($match->match_number)->toBeBetween(1, 10);
+                expect($match->match_number)->toBeInt()
+                    ->toBeGreaterThan(0)
+                    ->toBeBetween(1, 10);
             }
         });
 
@@ -59,8 +59,8 @@ describe('MatchFactory', function () {
 
             // Factory complete() method returns empty state - verify it can be created
             expect($eventMatch->exists)->toBeTrue();
-            expect($eventMatch->event_id)->toBeInt();
-            expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
+            expect($eventMatch->event_id)->toBeInt()
+                ->and($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
         });
     });
 
@@ -68,10 +68,10 @@ describe('MatchFactory', function () {
         test('creates singles match with wrestler competitors', function () {
             $eventMatch = EventMatch::factory()->singles()->create();
 
-            expect($eventMatch->match_type->value)->toBe('singles');
-            expect($eventMatch->match_type->allowsWrestlers())->toBeTrue();
-            expect($eventMatch->match_type->allowsTagTeams())->toBeFalse();
-            expect($eventMatch->competitors)->toHaveCount(2);
+            expect($eventMatch->match_type->value)->toBe('singles')
+                ->and($eventMatch->match_type->allowsWrestlers())->toBeTrue()
+                ->and($eventMatch->match_type->allowsTagTeams())->toBeFalse()
+                ->and($eventMatch->competitors)->toHaveCount(2);
 
             // All competitors should be wrestlers
             foreach ($eventMatch->competitors as $competitor) {
@@ -82,10 +82,10 @@ describe('MatchFactory', function () {
         test('creates tag team match with mixed competitors', function () {
             $eventMatch = EventMatch::factory()->tagTeam()->create();
 
-            expect($eventMatch->match_type->value)->toBe('tag-team');
-            expect($eventMatch->match_type->allowsWrestlers())->toBeTrue();
-            expect($eventMatch->match_type->allowsTagTeams())->toBeTrue();
-            expect($eventMatch->competitors)->toHaveCount(2);
+            expect($eventMatch->match_type->value)->toBe('tag-team')
+                ->and($eventMatch->match_type->allowsWrestlers())->toBeTrue()
+                ->and($eventMatch->match_type->allowsTagTeams())->toBeTrue()
+                ->and($eventMatch->competitors)->toHaveCount(2);
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
@@ -97,9 +97,9 @@ describe('MatchFactory', function () {
         test('creates triple threat match with 3 mixed competitors', function () {
             $eventMatch = EventMatch::factory()->tripleThreat()->create();
 
-            expect($eventMatch->match_type->value)->toBe('triple-threat');
-            expect($eventMatch->match_type->getMinimumCompetitors())->toBe(3);
-            expect($eventMatch->competitors)->toHaveCount(3);
+            expect($eventMatch->match_type->value)->toBe('triple-threat')
+                ->and($eventMatch->match_type->getMinimumCompetitors())->toBe(3)
+                ->and($eventMatch->competitors)->toHaveCount(3);
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
@@ -111,9 +111,9 @@ describe('MatchFactory', function () {
         test('creates fatal four way match with 4 mixed competitors', function () {
             $eventMatch = EventMatch::factory()->fatalFourWay()->create();
 
-            expect($eventMatch->match_type->value)->toBe('fatal-4-way');
-            expect($eventMatch->match_type->getMinimumCompetitors())->toBe(4);
-            expect($eventMatch->competitors)->toHaveCount(4);
+            expect($eventMatch->match_type->value)->toBe('fatal-4-way')
+                ->and($eventMatch->match_type->getMinimumCompetitors())->toBe(4)
+                ->and($eventMatch->competitors)->toHaveCount(4);
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
@@ -126,8 +126,8 @@ describe('MatchFactory', function () {
             $competitorCount = 15;
             $eventMatch = EventMatch::factory()->battleRoyal($competitorCount)->create();
 
-            expect($eventMatch->match_type->value)->toBe('battle-royal');
-            expect($eventMatch->competitors)->toHaveCount($competitorCount);
+            expect($eventMatch->match_type->value)->toBe('battle-royal')
+                ->and($eventMatch->competitors)->toHaveCount($competitorCount);
 
             // All competitors should be wrestlers or tag teams
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
@@ -142,28 +142,26 @@ describe('MatchFactory', function () {
             $title = Title::factory()->create();
             $eventMatch = EventMatch::factory()->titleMatch($title)->create();
 
-            expect($eventMatch->titles)->toHaveCount(1);
-            expect($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
-            expect($eventMatch->competitors)->not->toBeEmpty();
-            expect($eventMatch->match_finish)->toBeInstanceOf(MatchFinish::class);
+            expect($eventMatch->titles)->toHaveCount(1)
+                ->and($eventMatch->titles->firstOrFail()->id)->toBe($title->id)
+                ->and($eventMatch->competitors)->not->toBeEmpty()
+                ->and($eventMatch->match_finish)->toBeInstanceOf(MatchFinish::class);
         });
 
         test('creates title defense with existing champion', function () {
             $title = Title::factory()->create(['type' => 'singles']);
             $eventMatch = EventMatch::factory()->titleDefense($title)->create();
 
-            expect($eventMatch->titles)->toHaveCount(1);
-            expect($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
+            expect($eventMatch->titles)->toHaveCount(1)
+                ->and($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
 
             // Should have a championship record
             $championship = TitleChampionship::where('title_id', $title->id)->firstOrFail();
-            expect($championship)->not->toBeNull();
-            expect($championship->champion_type)->toBe(Wrestler::class);
+            expect($championship)->not->toBeNull()
+                ->and($championship->champion_type)->toBe(Wrestler::class);
             // Champion should be one of the competitors
-            $championCompetitor = $eventMatch->competitors->first(function ($competitor) use ($championship) {
-                return $competitor->competitor_type === (new Wrestler)->getMorphClass()
-                    && $competitor->competitor_id === $championship->champion_id;
-            });
+            $championCompetitor = $eventMatch->competitors->first(fn ($competitor) => $competitor->competitor_type === (new Wrestler)->getMorphClass()
+                && $competitor->competitor_id === $championship->champion_id);
             expect($championCompetitor)->not->toBeNull();
         });
 
@@ -171,18 +169,16 @@ describe('MatchFactory', function () {
             $title = Title::factory()->create(['type' => 'tag-team']);
             $eventMatch = EventMatch::factory()->titleDefense($title)->create();
 
-            expect($eventMatch->titles)->toHaveCount(1);
-            expect($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
+            expect($eventMatch->titles)->toHaveCount(1)
+                ->and($eventMatch->titles->firstOrFail()->id)->toBe($title->id);
 
             // Should have a championship record
             $championship = TitleChampionship::where('title_id', $title->id)->firstOrFail();
-            expect($championship)->not->toBeNull();
-            expect($championship->champion_type)->toBe(TagTeam::class);
+            expect($championship)->not->toBeNull()
+                ->and($championship->champion_type)->toBe(TagTeam::class);
             // Champion should be one of the competitors
-            $championCompetitor = $eventMatch->competitors->first(function ($competitor) use ($championship) {
-                return $competitor->competitor_type === (new TagTeam)->getMorphClass()
-                    && $competitor->competitor_id === $championship->champion_id;
-            });
+            $championCompetitor = $eventMatch->competitors->first(fn ($competitor) => $competitor->competitor_type === (new TagTeam)->getMorphClass()
+                && $competitor->competitor_id === $championship->champion_id);
             expect($championCompetitor)->not->toBeNull();
         });
 
@@ -203,10 +199,8 @@ describe('MatchFactory', function () {
             expect($eventMatch->titles)->toHaveCount(1);
 
             // Champion should be one of the competitors
-            $championCompetitor = $eventMatch->competitors->first(function ($competitor) use ($champion) {
-                return $competitor->competitor_type === $champion->getMorphClass()
-                    && $competitor->competitor_id === $champion->id;
-            });
+            $championCompetitor = $eventMatch->competitors->first(fn ($competitor) => $competitor->competitor_type === $champion->getMorphClass()
+                && $competitor->competitor_id === $champion->id);
             expect($championCompetitor)->not->toBeNull();
         });
     });
@@ -306,34 +300,32 @@ describe('MatchFactory', function () {
             $competitor1 = $eventMatch->competitors->where('competitor_id', $wrestler1->id)->firstOrFail();
             $competitor2 = $eventMatch->competitors->where('competitor_id', $wrestler2->id)->firstOrFail();
 
-            expect($competitor1)->not->toBeNull();
-            expect($competitor2)->not->toBeNull();
-            expect($competitor1->side->position)->toBe(1);
-            expect($competitor2->side->position)->toBe(2);
+            expect($competitor1)->not->toBeNull()
+                ->and($competitor2)->not->toBeNull()
+                ->and($competitor1->side->position)->toBe(1)
+                ->and($competitor2->side->position)->toBe(2);
         });
     });
 
     describe('match type validation', function () {
         test('match type allows correct competitor types', function () {
-            expect(MatchType::Singles->allowsWrestlers())->toBeTrue();
-            expect(MatchType::Singles->allowsTagTeams())->toBeFalse();
-
-            expect(MatchType::TagTeam->allowsWrestlers())->toBeTrue();
-            expect(MatchType::TagTeam->allowsTagTeams())->toBeTrue();
-
-            expect(MatchType::TripleThreat->allowsWrestlers())->toBeTrue();
-            expect(MatchType::TripleThreat->allowsTagTeams())->toBeTrue();
+            expect(MatchType::Singles->allowsWrestlers())->toBeTrue()
+                ->and(MatchType::Singles->allowsTagTeams())->toBeFalse()
+                ->and(MatchType::TagTeam->allowsWrestlers())->toBeTrue()
+                ->and(MatchType::TagTeam->allowsTagTeams())->toBeTrue()
+                ->and(MatchType::TripleThreat->allowsWrestlers())->toBeTrue()
+                ->and(MatchType::TripleThreat->allowsTagTeams())->toBeTrue();
         });
 
         test('match type has correct competitor limits', function () {
-            expect(MatchType::Singles->getMinimumCompetitors())->toBe(2);
-            expect(MatchType::TripleThreat->getMinimumCompetitors())->toBe(3);
-            expect(MatchType::BattleRoyal->getMinimumCompetitors())->toBe(3);
-            expect(MatchType::BattleRoyal->getMaximumCompetitors())->toBeNull();
-            expect(MatchType::RoyalRumble->getMinimumCompetitors())->toBe(10);
-            expect(MatchType::RoyalRumble->getMaximumCompetitors())->toBe(30);
-            expect(MatchType::BattleRoyal->allowsTagTeams())->toBeFalse();
-            expect(MatchType::RoyalRumble->allowsTagTeams())->toBeFalse();
+            expect(MatchType::Singles->getMinimumCompetitors())->toBe(2)
+                ->and(MatchType::TripleThreat->getMinimumCompetitors())->toBe(3)
+                ->and(MatchType::BattleRoyal->getMinimumCompetitors())->toBe(3)
+                ->and(MatchType::BattleRoyal->getMaximumCompetitors())->toBeNull()
+                ->and(MatchType::RoyalRumble->getMinimumCompetitors())->toBe(10)
+                ->and(MatchType::RoyalRumble->getMaximumCompetitors())->toBe(30)
+                ->and(MatchType::BattleRoyal->allowsTagTeams())->toBeFalse()
+                ->and(MatchType::RoyalRumble->allowsTagTeams())->toBeFalse();
         });
     });
 });

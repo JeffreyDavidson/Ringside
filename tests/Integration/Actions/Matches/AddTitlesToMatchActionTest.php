@@ -87,9 +87,8 @@ test('it rejects the entire assignment when any title is inactive', function () 
     $titles = collect([$activeTitle, $inactiveTitle]);
 
     expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, $titles))
-        ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.');
-
-    expect($match->titles()->count())->toBe(0);
+        ->toThrow(EntityNotAvailableException::class, 'Selected titles must all be eligible for match assignment.')
+        ->and($match->titles()->count())->toBe(0);
 });
 
 test('it throws exception when no eligible titles provided', function () {
@@ -110,9 +109,8 @@ test('it reloads titles before checking assignment eligibility', function () {
     $title->delete();
 
     expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($match, collect([$staleTitle])))
-        ->toThrow(EntityNotAvailableException::class);
-
-    expect($match->titles()->exists())->toBeFalse();
+        ->toThrow(EntityNotAvailableException::class)
+        ->and($match->titles()->exists())->toBeFalse();
 });
 
 test('it handles empty collection', function () {
@@ -143,8 +141,8 @@ test('it creates championship match correctly', function () {
     expect($matchTitles)->toHaveCount(2);
 
     $titleNames = $matchTitles->pluck('name')->toArray();
-    expect($titleNames)->toContain('WWE Championship');
-    expect($titleNames)->toContain('Intercontinental Championship');
+    expect($titleNames)->toContain('WWE Championship')
+        ->toContain('Intercontinental Championship');
 });
 
 test('it handles transaction consistency', function () {
@@ -172,9 +170,8 @@ test('it rejects a title already assigned on the event card', function () {
     $existingMatch->titles()->attach($title);
 
     expect(fn () => resolve(AddTitlesToMatchAction::class)->handle($targetMatch, collect([$title])))
-        ->toThrow(SchedulingConflictException::class, "Title [{$title->name}] is already assigned at this event time.");
-
-    expect($targetMatch->titles()->count())->toBe(0);
+        ->toThrow(SchedulingConflictException::class, "Title [{$title->name}] is already assigned at this event time.")
+        ->and($targetMatch->titles()->count())->toBe(0);
 });
 
 test('it assigns a repeated title only once', function () {
@@ -202,9 +199,8 @@ test('it requires the current wrestler champion to compete in the title match', 
         ->toThrow(
             InvalidMatchConfigurationException::class,
             "The current champion of [{$title->name}] must compete in the title match.",
-        );
-
-    expect($match->titles()->exists())->toBeFalse();
+        )
+        ->and($match->titles()->exists())->toBeFalse();
 });
 
 test('it accepts a title match containing the current wrestler champion', function () {
@@ -253,9 +249,8 @@ test('it rejects a singles title assigned to tag team competitors', function () 
         ->toThrow(
             InvalidMatchConfigurationException::class,
             "The [{$title->name}] cannot be contested by this match's competitor type.",
-        );
-
-    expect($match->titles()->exists())->toBeFalse();
+        )
+        ->and($match->titles()->exists())->toBeFalse();
 });
 
 test('it rejects a tag team title assigned to wrestler competitors', function () {
@@ -272,7 +267,6 @@ test('it rejects a tag team title assigned to wrestler competitors', function ()
         ->toThrow(
             InvalidMatchConfigurationException::class,
             "The [{$title->name}] cannot be contested by this match's competitor type.",
-        );
-
-    expect($match->titles()->exists())->toBeFalse();
+        )
+        ->and($match->titles()->exists())->toBeFalse();
 });

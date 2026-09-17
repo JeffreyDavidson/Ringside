@@ -42,8 +42,8 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->match_type->value)->toBe('singles');
-            expect($match->competitors)->toHaveCount(2);
-            expect($match->match_finish)->toBeInstanceOf(MatchFinish::class);
+            expect($match->competitors)->toHaveCount(2)
+                ->and($match->match_finish)->toBeInstanceOf(MatchFinish::class);
 
             $competitors = $match->competitors;
             foreach ($competitors as $competitor) {
@@ -60,8 +60,8 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->match_type->value)->toBe('tag-team');
-            expect($match->competitors)->toHaveCount(4);
-            expect($match->match_finish)->toBeInstanceOf(MatchFinish::class);
+            expect($match->competitors)->toHaveCount(4)
+                ->and($match->match_finish)->toBeInstanceOf(MatchFinish::class);
 
             $allowedTypes = [(new Wrestler)->getMorphClass(), (new TagTeam)->getMorphClass()];
             foreach ($match->competitors as $competitor) {
@@ -78,8 +78,8 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->match_type->value)->toBe('battle-royal');
-            expect($match->competitors)->toHaveCount(15);
-            expect($match->match_finish)->toBeInstanceOf(MatchFinish::class);
+            expect($match->competitors)->toHaveCount(15)
+                ->and($match->match_finish)->toBeInstanceOf(MatchFinish::class);
         });
     });
 
@@ -170,9 +170,9 @@ describe('Match Comprehensive Generation Integration Tests', function () {
             expect($match->competitors)->toHaveCount(3);
 
             $competitorIds = $match->competitors->pluck('competitor_id');
-            expect($competitorIds)->toContain($wrestler1->id);
-            expect($competitorIds)->toContain($wrestler2->id);
-            expect($competitorIds)->toContain($tagTeam->id);
+            expect($competitorIds)->toContain($wrestler1->id)
+                ->toContain($wrestler2->id)
+                ->toContain($tagTeam->id);
         });
 
         test('generates match with competitor type hints', function () {
@@ -192,8 +192,8 @@ describe('Match Comprehensive Generation Integration Tests', function () {
                 ->where('competitor_type', (new TagTeam)->getMorphClass())
                 ->count();
 
-            expect($wrestlerCount)->toBe(2);
-            expect($tagTeamCount)->toBe(2);
+            expect($wrestlerCount)->toBe(2)
+                ->and($tagTeamCount)->toBe(2);
         });
 
         test('generates match with competitor names', function () {
@@ -209,8 +209,8 @@ describe('Match Comprehensive Generation Integration Tests', function () {
             // Should create wrestlers with specified names
             $wrestlerNames = Wrestler::whereIn('id', $match->competitors->pluck('competitor_id'))
                 ->pluck('name');
-            expect($wrestlerNames)->toContain('John Cena');
-            expect($wrestlerNames)->toContain('The Rock');
+            expect($wrestlerNames)->toContain('John Cena')
+                ->toContain('The Rock');
         });
     });
 
@@ -303,8 +303,8 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->referees)->toHaveCount(2);
-            expect($match->referees->pluck('id'))->toContain($referee1->id);
-            expect($match->referees->pluck('id'))->toContain($referee2->id);
+            expect($match->referees->pluck('id'))->toContain($referee1->id)
+                ->and($match->referees->pluck('id'))->toContain($referee2->id);
         });
     });
 
@@ -342,13 +342,13 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->event_id)->toBe($event->id);
-            expect($match->match_number)->toBe(1);
-            expect($match->preview)->toBe('Championship Main Event');
-            expect($match->match_type->value)->toBe('singles');
-            expect($match->titles->pluck('id'))->toContain($title->id);
-            expect($match->competitors)->toHaveCount(2);
-            expect($match->referees->pluck('id'))->toContain($referee->id);
-            expect($match->winningSide)->not->toBeNull()
+            expect($match->match_number)->toBe(1)
+                ->and($match->preview)->toBe('Championship Main Event')
+                ->and($match->match_type->value)->toBe('singles')
+                ->and($match->titles->pluck('id'))->toContain($title->id)
+                ->and($match->competitors)->toHaveCount(2)
+                ->and($match->referees->pluck('id'))->toContain($referee->id)
+                ->and($match->winningSide)->not->toBeNull()
                 ->and($match->winningSide?->competitors->sole()->competitor_id)->toBe($challenger->id);
         });
 
@@ -385,14 +385,14 @@ describe('Match Comprehensive Generation Integration Tests', function () {
 
             // Assert
             expect($match->titles)->toHaveCount(2);
-            expect($match->titles->pluck('id'))->toContain($title1->id);
-            expect($match->titles->pluck('id'))->toContain($title2->id);
-            expect($match->competitors)->toHaveCount(2);
+            expect($match->titles->pluck('id'))->toContain($title1->id)
+                ->and($match->titles->pluck('id'))->toContain($title2->id)
+                ->and($match->competitors)->toHaveCount(2);
 
             // Both champions should be included
             $competitorIds = $match->competitors->pluck('competitor_id');
-            expect($competitorIds)->toContain($champion1->id);
-            expect($competitorIds)->toContain($champion2->id);
+            expect($competitorIds)->toContain($champion1->id)
+                ->toContain($champion2->id);
         });
     });
 

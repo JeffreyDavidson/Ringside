@@ -49,9 +49,8 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect($tagTeam->name)->toBeString();
-                expect($tagTeam->name)->not->toBeEmpty();
-                expect($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
+                expect($tagTeam->name)->toBeString()->not->toBeEmpty()
+                    ->and($tagTeam->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 
@@ -61,8 +60,8 @@ describe('TagTeamsTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($tagTeams as $tagTeam) {
-                expect(str_word_count($tagTeam->name))->toBeGreaterThanOrEqual(2);
-                expect($tagTeam->name)->not->toContain('Test');
+                expect(str_word_count($tagTeam->name))->toBeGreaterThanOrEqual(2)
+                    ->and($tagTeam->name)->not->toContain('Test');
             }
         });
     });

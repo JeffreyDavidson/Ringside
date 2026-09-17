@@ -50,7 +50,7 @@ describe('Global Gate Hook Pattern', function () {
             $methods = getPublicPolicyMethods($policy);
             foreach ($methods as $methodName) {
                 expect(Gate::forUser($this->admin)->raw($methodName))
-                    ->toBeTrue("Admin should bypass {$methodName} in ".get_class($policy));
+                    ->toBeTrue("Admin should bypass {$methodName} in ".$policy::class);
             }
         }
     });
@@ -64,7 +64,7 @@ describe('Global Gate Hook Pattern', function () {
             $methods = getPublicPolicyMethods($policy);
             foreach ($methods as $methodName) {
                 expect(Gate::forUser($this->basicUser)->raw($methodName))
-                    ->toBeNull("Basic user should continue to {$methodName} check in ".get_class($policy));
+                    ->toBeNull("Basic user should continue to {$methodName} check in ".$policy::class);
             }
         }
     });

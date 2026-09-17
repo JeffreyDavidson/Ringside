@@ -51,10 +51,10 @@ describe('MatchesTableSeeder Integration Tests', function () {
             expect($eventMatches)->not->toBeEmpty();
 
             foreach ($eventMatches as $eventMatch) {
-                expect($eventMatch->event_id)->toBeInt();
-                expect($eventMatch->match_type)->toBeInstanceOf(MatchType::class);
-                expect($eventMatch->match_number)->toBeInt();
-                expect($eventMatch->match_number)->toBeGreaterThan(0);
+                expect($eventMatch->event_id)->toBeInt()
+                    ->and($eventMatch->match_type)->toBeInstanceOf(MatchType::class)
+                    ->and($eventMatch->match_number)->toBeInt()
+                    ->toBeGreaterThan(0);
             }
         });
 
@@ -102,8 +102,8 @@ describe('MatchesTableSeeder Integration Tests', function () {
             expect($eventMatches)->not->toBeEmpty();
 
             foreach ($eventMatches as $eventMatch) {
-                expect($eventMatch->event_id)->toBeInt();
-                expect($eventMatch->event_id)->toBeGreaterThan(0);
+                expect($eventMatch->event_id)->toBeInt()
+                    ->toBeGreaterThan(0);
             }
         });
 

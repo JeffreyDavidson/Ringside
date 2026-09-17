@@ -61,12 +61,12 @@ describe('VenuesTableSeeder Integration Tests', function () {
 
             // Assert
             foreach ($venues as $venue) {
-                expect($venue->name)->toBeString();
-                expect($venue->name)->toContain('Venue ');
-                expect($venue->street_address)->toBeString();
-                expect($venue->city)->toBeString();
-                expect($venue->state)->toBeString();
-                expect($venue->zipcode)->toBeString();
+                expect($venue->name)->toBeString()
+                    ->toContain('Venue ')
+                    ->and($venue->street_address)->toBeString()
+                    ->and($venue->city)->toBeString()
+                    ->and($venue->state)->toBeString()
+                    ->and($venue->zipcode)->toBeString();
             }
         });
 
@@ -76,9 +76,9 @@ describe('VenuesTableSeeder Integration Tests', function () {
 
             // Assert
             expect($venue->street_address)->not->toBeEmpty();
-            expect($venue->city)->not->toBeEmpty();
-            expect($venue->state)->not->toBeEmpty();
-            expect($venue->zipcode)->toMatch('/^\d{5}$/'); // 5-digit zipcode
+            expect($venue->city)->not->toBeEmpty()
+                ->and($venue->state)->not->toBeEmpty()
+                ->and($venue->zipcode)->toMatch('/^\d{5}$/'); // 5-digit zipcode
         });
     });
 

@@ -33,33 +33,33 @@ describe('TagTeamPolicy Integration Tests', function () {
 
     describe('global Gate hook authorization', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('employ'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('release'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('employ'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('release'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('retire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
         });
 
         test('non-administrators do not bypass authorization checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('employ'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('release'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('suspend'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('employ'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('release'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('suspend'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
         });
     });
 
@@ -127,9 +127,9 @@ describe('TagTeamPolicy Integration Tests', function () {
             // Booking-related permissions would be implemented here
             // These would check if tag team is in appropriate status for booking
             expect($this->policy->view($this->basicUser, $employedTagTeam))->toBeFalse();
-            expect($this->policy->view($this->basicUser, $unemployedTagTeam))->toBeFalse();
-            expect($this->policy->view($this->basicUser, $suspendedTagTeam))->toBeFalse();
-            expect($this->policy->view($this->basicUser, $retiredTagTeam))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $unemployedTagTeam))->toBeFalse()
+                ->and($this->policy->view($this->basicUser, $suspendedTagTeam))->toBeFalse()
+                ->and($this->policy->view($this->basicUser, $retiredTagTeam))->toBeFalse();
         });
 
         test('partnership management considers tag team status', function () {
@@ -149,8 +149,8 @@ describe('TagTeamPolicy Integration Tests', function () {
 
             // Different permission levels based on employment status
             expect($this->policy->view($this->basicUser, $currentTagTeam))->toBeFalse();
-            expect($this->policy->view($this->basicUser, $formerTagTeam))->toBeFalse();
-            expect($this->policy->view($this->basicUser, $futureTagTeam))->toBeFalse();
+            expect($this->policy->view($this->basicUser, $formerTagTeam))->toBeFalse()
+                ->and($this->policy->view($this->basicUser, $futureTagTeam))->toBeFalse();
         });
     });
 
@@ -162,21 +162,21 @@ describe('TagTeamPolicy Integration Tests', function () {
 
             // Admin should be able to manage any tag team regardless of status
             expect(Gate::forUser($this->admin)->raw('employ'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('release'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('release'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('retire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
         });
 
         test('basic users cannot perform management actions', function () {
             // All management actions should be denied for basic users
             expect($this->policy->employ($this->basicUser, $this->tagTeam))->toBeFalse();
-            expect($this->policy->release($this->basicUser, $this->tagTeam))->toBeFalse();
-            expect($this->policy->suspend($this->basicUser, $this->tagTeam))->toBeFalse();
-            expect($this->policy->reinstate($this->basicUser, $this->tagTeam))->toBeFalse();
-            expect($this->policy->retire($this->basicUser, $this->tagTeam))->toBeFalse();
-            expect($this->policy->unretire($this->basicUser, $this->tagTeam))->toBeFalse();
+            expect($this->policy->release($this->basicUser, $this->tagTeam))->toBeFalse()
+                ->and($this->policy->suspend($this->basicUser, $this->tagTeam))->toBeFalse()
+                ->and($this->policy->reinstate($this->basicUser, $this->tagTeam))->toBeFalse()
+                ->and($this->policy->retire($this->basicUser, $this->tagTeam))->toBeFalse()
+                ->and($this->policy->unretire($this->basicUser, $this->tagTeam))->toBeFalse();
         });
     });
 
@@ -184,13 +184,13 @@ describe('TagTeamPolicy Integration Tests', function () {
         test('role hierarchy is respected for tag team operations', function () {
             // Administrator has full access
             expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
 
             // Basic user has restricted access
             expect($this->policy->create($this->basicUser))->toBeFalse();
-            expect($this->policy->update($this->basicUser, $this->tagTeam))->toBeFalse();
-            expect($this->policy->delete($this->basicUser, $this->tagTeam))->toBeFalse();
+            expect($this->policy->update($this->basicUser, $this->tagTeam))->toBeFalse()
+                ->and($this->policy->delete($this->basicUser, $this->tagTeam))->toBeFalse();
         });
 
         test('view permissions follow same restrictive pattern as management permissions', function () {
@@ -213,11 +213,11 @@ describe('TagTeamPolicy Integration Tests', function () {
 
             // Basic users cannot perform any employment actions
             expect($this->policy->employ($this->basicUser, $unemployedTagTeam))->toBeFalse();
-            expect($this->policy->release($this->basicUser, $employedTagTeam))->toBeFalse();
-            expect($this->policy->suspend($this->basicUser, $employedTagTeam))->toBeFalse();
-            expect($this->policy->reinstate($this->basicUser, $suspendedTagTeam))->toBeFalse();
-            expect($this->policy->retire($this->basicUser, $employedTagTeam))->toBeFalse();
-            expect($this->policy->unretire($this->basicUser, $retiredTagTeam))->toBeFalse();
+            expect($this->policy->release($this->basicUser, $employedTagTeam))->toBeFalse()
+                ->and($this->policy->suspend($this->basicUser, $employedTagTeam))->toBeFalse()
+                ->and($this->policy->reinstate($this->basicUser, $suspendedTagTeam))->toBeFalse()
+                ->and($this->policy->retire($this->basicUser, $employedTagTeam))->toBeFalse()
+                ->and($this->policy->unretire($this->basicUser, $retiredTagTeam))->toBeFalse();
         });
 
         test('suspension management follows employment rules', function () {
@@ -228,8 +228,8 @@ describe('TagTeamPolicy Integration Tests', function () {
             // Suspension-related actions should consider employment status
             // but policy just checks user permissions, not business logic
             expect($this->policy->suspend($this->basicUser, $employedTagTeam))->toBeFalse();
-            expect($this->policy->reinstate($this->basicUser, $suspendedTagTeam))->toBeFalse();
-            expect($this->policy->suspend($this->basicUser, $unemployedTagTeam))->toBeFalse();
+            expect($this->policy->reinstate($this->basicUser, $suspendedTagTeam))->toBeFalse()
+                ->and($this->policy->suspend($this->basicUser, $unemployedTagTeam))->toBeFalse();
         });
 
         test('retirement management considers tag team status', function () {
@@ -240,8 +240,8 @@ describe('TagTeamPolicy Integration Tests', function () {
             // Retirement actions should be possible from various statuses
             // but policy just checks user permissions
             expect($this->policy->retire($this->basicUser, $activeTagTeam))->toBeFalse();
-            expect($this->policy->retire($this->basicUser, $suspendedTagTeam))->toBeFalse();
-            expect($this->policy->unretire($this->basicUser, $retiredTagTeam))->toBeFalse();
+            expect($this->policy->retire($this->basicUser, $suspendedTagTeam))->toBeFalse()
+                ->and($this->policy->unretire($this->basicUser, $retiredTagTeam))->toBeFalse();
         });
     });
 
@@ -270,8 +270,8 @@ describe('TagTeamPolicy Integration Tests', function () {
         test('restoration permissions are properly restricted', function () {
             $deletedTagTeam = TagTeam::factory()->trashed()->make();
 
-            expect($this->policy->restore($this->basicUser, $deletedTagTeam))->toBeFalse();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect($this->policy->restore($this->basicUser, $deletedTagTeam))->toBeFalse()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('deletion permissions consider tag team status', function () {
@@ -288,16 +288,16 @@ describe('TagTeamPolicy Integration Tests', function () {
         test('policy methods return correct types', function () {
             // All policy methods should return boolean values
             expect($this->policy->viewAny($this->basicUser))->toBeBool();
-            expect($this->policy->view($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->create($this->basicUser))->toBeBool();
-            expect($this->policy->update($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->delete($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->employ($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->release($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->suspend($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->reinstate($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->retire($this->basicUser, $this->tagTeam))->toBeBool();
-            expect($this->policy->unretire($this->basicUser, $this->tagTeam))->toBeBool();
+            expect($this->policy->view($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->create($this->basicUser))->toBeBool()
+                ->and($this->policy->update($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->delete($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->employ($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->release($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->suspend($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->reinstate($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->retire($this->basicUser, $this->tagTeam))->toBeBool()
+                ->and($this->policy->unretire($this->basicUser, $this->tagTeam))->toBeBool();
         });
 
         test('global Gate hook returns correct types', function () {

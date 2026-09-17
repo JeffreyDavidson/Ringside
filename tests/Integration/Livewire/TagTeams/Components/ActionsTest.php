@@ -84,8 +84,8 @@ describe('tag team actions component', function (): void {
         $component
             ->assertNotDispatched('tag-team-updated')
             ->assertNotDispatched('flash-message');
-        expect(session()->has('status'))->toBeFalse();
-        expect($tagTeam->currentEmployment()->exists())->toBeFalse();
+        expect(session()->has('status'))->toBeFalse()
+            ->and($tagTeam->currentEmployment()->exists())->toBeFalse();
     })->with([
         'employ',
         'release',

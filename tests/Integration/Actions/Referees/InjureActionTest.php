@@ -15,8 +15,8 @@ beforeEach(function () {
 test('it injures an employed referee', function () {
     $referee = Referee::factory()->employed()->create();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentInjury()->exists())->toBeFalse();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentInjury()->exists())->toBeFalse();
 
     resolve(InjureAction::class)->handle($referee);
 
@@ -87,10 +87,8 @@ test('it throws exception when referee cannot be injured', function () {
 test('it prevents injuring a suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-
-    expect(fn () => resolve(InjureAction::class)->handle($referee))
-        ->toThrow(CannotBeInjuredException::class);
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(InjureAction::class)->handle($referee))->toThrow(CannotBeInjuredException::class);
 
     $referee->refresh();
 
@@ -130,8 +128,8 @@ test('it maintains referee employment after injury', function () {
 
     // Should remain employed after injury
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentInjury()->exists())->toBeTrue();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentInjury()->exists())->toBeTrue()
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it creates injury record with correct structure', function () {
@@ -142,9 +140,9 @@ test('it creates injury record with correct structure', function () {
 
     $injury = freshModel($referee)->currentInjury()->firstOrFail();
 
-    expect($injury)->not->toBeNull();
-    expect($injury->injurable_id)->toBe($referee->id)
-        ->and($injury->injurable_type)->toBe($referee->getMorphClass());
-    expect(requiredDate($injury->started_at)->toDateTimeString())->toBe($injuryDate->toDateTimeString());
-    expect($injury->ended_at)->toBeNull();
+    expect($injury)->not->toBeNull()
+        ->and($injury->injurable_id)->toBe($referee->id)
+        ->and($injury->injurable_type)->toBe($referee->getMorphClass())
+        ->and(requiredDate($injury->started_at)->toDateTimeString())->toBe($injuryDate->toDateTimeString())
+        ->and($injury->ended_at)->toBeNull();
 });

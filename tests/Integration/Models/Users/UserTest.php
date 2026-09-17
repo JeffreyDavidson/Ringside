@@ -48,11 +48,7 @@ describe('User Model Integration Tests', function () {
         test('has correct casts configuration', function () {
             $user = new User;
             $casts = $user->getCasts();
-
-            expect($casts['role'])->toBe(Role::class);
-            expect($casts['status'])->toBe(UserStatus::class);
-            expect($casts['email_verified_at'])->toBe('datetime');
-            expect($casts['password'])->toBe('hashed');
+            expect($casts)->toMatchArray(['role' => Role::class, 'status' => UserStatus::class, 'email_verified_at' => 'datetime', 'password' => 'hashed']);
         });
 
         test('has custom eloquent builder', function () {
@@ -68,8 +64,8 @@ describe('User Model Integration Tests', function () {
 
     describe('trait integration', function () {
         test('uses all required traits', function () {
-            expect(class_uses(User::class))->toContain(HasFactory::class);
-            expect(class_uses(User::class))->toContain(Notifiable::class);
+            expect(class_uses(User::class))->toContain(HasFactory::class)
+                ->and(class_uses(User::class))->toContain(Notifiable::class);
         });
     });
 

@@ -28,50 +28,49 @@ describe('RefereePolicy Integration Tests', function () {
 
     describe('global Gate hook behavior', function () {
         test('administrators bypass all authorization checks', function () {
-            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('view'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('update'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('delete'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
+            expect(Gate::forUser($this->admin)->raw('viewAny'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('view'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('update'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('delete'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('restore'))->toBeTrue();
         });
 
         test('basic users continue to individual method checks', function () {
-            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('view'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('create'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('update'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
+            expect(Gate::forUser($this->basicUser)->raw('viewAny'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('view'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('create'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('update'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('delete'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('restore'))->toBeNull();
         });
 
         test('global Gate hook works for arbitrary abilities', function () {
-            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('custom-ability'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('custom-ability'))->toBeNull();
         });
 
         test('global Gate hook works for referee-specific abilities', function () {
-            expect(Gate::forUser($this->admin)->raw('employ'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('release'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('retire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('injure'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('clearFromInjury'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('assignToMatch'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('removeFromMatch'))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->raw('employ'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('release'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('injure'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('clearFromInjury'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('suspend'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('assignToMatch'))->toBeNull();
-            expect(Gate::forUser($this->basicUser)->raw('removeFromMatch'))->toBeNull();
+            expect(Gate::forUser($this->admin)->raw('employ'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('release'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('retire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('unretire'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('injure'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('clearFromInjury'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('suspend'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('reinstate'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('assignToMatch'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('removeFromMatch'))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->raw('employ'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('release'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('retire'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('unretire'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('injure'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('clearFromInjury'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('suspend'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('reinstate'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('assignToMatch'))->toBeNull()
+                ->and(Gate::forUser($this->basicUser)->raw('removeFromMatch'))->toBeNull();
         });
     });
 
@@ -105,48 +104,45 @@ describe('RefereePolicy Integration Tests', function () {
         test('policy integrates correctly with Gate facade', function () {
             // Test administrator permissions through Gate
             expect(Gate::forUser($this->admin)->allows('viewAny', Referee::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('create', Referee::class))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('view', $this->referee))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('create', Referee::class))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('view', $this->referee))->toBeTrue();
 
             // Test basic user permissions through Gate
             expect(Gate::forUser($this->basicUser)->denies('viewAny', Referee::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('create', Referee::class))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('view', $this->referee))->toBeTrue();
+            expect(Gate::forUser($this->basicUser)->denies('create', Referee::class))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $this->referee))->toBeTrue();
         });
 
         test('policy works with specific referee instances', function () {
             // Test with specific referee instance
             expect(Gate::forUser($this->admin)->allows('view', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('delete', $this->referee))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('view', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('delete', $this->referee))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('delete', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('delete', $this->referee))->toBeTrue();
         });
 
         test('policy supports referee-specific operations through Gate', function () {
             // Test referee employment operations
             expect(Gate::forUser($this->admin)->allows('employ', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('release', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('retire', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('unretire', $this->referee))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('employ', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('release', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('retire', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('unretire', $this->referee))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('release', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('retire', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('unretire', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('employ', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('release', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('retire', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('unretire', $this->referee))->toBeTrue();
 
             // Test referee injury operations
             expect(Gate::forUser($this->admin)->allows('injure', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('clearFromInjury', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('suspend', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('reinstate', $this->referee))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('injure', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('clearFromInjury', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('suspend', $this->referee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('reinstate', $this->referee))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('clearFromInjury', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('suspend', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->allows('reinstate', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('injure', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('clearFromInjury', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('suspend', $this->referee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('reinstate', $this->referee))->toBeTrue();
 
             // TODO: Add match assignment policy methods when business requirements are clarified
             // expect(Gate::forUser($this->admin)->allows('assignToMatch', $this->referee))->toBeTrue();
@@ -195,11 +191,11 @@ describe('RefereePolicy Integration Tests', function () {
 
             // Should have the same basic structure as other individual roster member policies
             expect($refereeMethods)->not->toContain('before');
-            expect(in_array('viewAny', $refereeMethods))->toBeTrue();
-            expect(in_array('create', $refereeMethods))->toBeTrue();
-            expect(in_array('update', $refereeMethods))->toBeTrue();
-            expect(in_array('delete', $refereeMethods))->toBeTrue();
-            expect(in_array('restore', $refereeMethods))->toBeTrue();
+            expect($refereeMethods)->toContain('viewAny')
+                ->and($refereeMethods)->toContain('create')
+                ->and($refereeMethods)->toContain('update')
+                ->and($refereeMethods)->toContain('delete')
+                ->and($refereeMethods)->toContain('restore');
         });
     });
 
@@ -215,10 +211,8 @@ describe('RefereePolicy Integration Tests', function () {
 
             foreach ($refereeOperations as $operation) {
                 expect(Gate::forUser($this->admin)->raw($operation))
-                    ->toBeTrue("Administrator should be able to {$operation} referees");
-
-                expect(Gate::forUser($this->basicUser)->raw($operation))
-                    ->toBeNull("Basic user should continue to individual checks for {$operation}");
+                    ->toBeTrue("Administrator should be able to {$operation} referees")
+                    ->and(Gate::forUser($this->basicUser)->raw($operation))->toBeNull("Basic user should continue to individual checks for {$operation}");
             }
         });
 
@@ -230,8 +224,8 @@ describe('RefereePolicy Integration Tests', function () {
 
             // All referee statuses should follow same authorization rules
             foreach ([$employedReferee, $injuredReferee, $retiredReferee, $suspendedReferee] as $referee) {
-                expect(Gate::forUser($this->admin)->allows('view', $referee))->toBeTrue();
-                expect(Gate::forUser($this->basicUser)->denies('view', $referee))->toBeTrue();
+                expect(Gate::forUser($this->admin)->allows('view', $referee))->toBeTrue()
+                    ->and(Gate::forUser($this->basicUser)->denies('view', $referee))->toBeTrue();
             }
         });
 
@@ -286,10 +280,9 @@ describe('RefereePolicy Integration Tests', function () {
         test('policy is stateless', function () {
             // Multiple calls should return same results
             expect($this->policy->viewAny($this->basicUser))->toBeFalse();
-            expect($this->policy->viewAny($this->basicUser))->toBeFalse();
-
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
-            expect(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
+            expect($this->policy->viewAny($this->basicUser))->toBeFalse()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue()
+                ->and(Gate::forUser($this->admin)->raw('create'))->toBeTrue();
         });
 
         test('policy handles complex referee states consistently', function () {
@@ -303,10 +296,9 @@ describe('RefereePolicy Integration Tests', function () {
 
             // Authorization should remain consistent regardless of complex state
             expect(Gate::forUser($this->admin)->allows('view', $complexReferee))->toBeTrue();
-            expect(Gate::forUser($this->admin)->allows('update', $complexReferee))->toBeTrue();
-
-            expect(Gate::forUser($this->basicUser)->denies('view', $complexReferee))->toBeTrue();
-            expect(Gate::forUser($this->basicUser)->denies('update', $complexReferee))->toBeTrue();
+            expect(Gate::forUser($this->admin)->allows('update', $complexReferee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('view', $complexReferee))->toBeTrue()
+                ->and(Gate::forUser($this->basicUser)->denies('update', $complexReferee))->toBeTrue();
         });
     });
 

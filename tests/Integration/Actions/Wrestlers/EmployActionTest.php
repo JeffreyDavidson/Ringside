@@ -49,21 +49,17 @@ test('it employs wrestler with specific employment date', function () {
 test('it employs suspended wrestler and ends suspension', function () {
     $wrestler = Wrestler::factory()->suspended()->create();
 
-    expect($wrestler->currentSuspension()->exists())->toBeTrue();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-
-    expect(fn () => resolve(EmployAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentSuspension()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(EmployAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it employs injured wrestler and ends injury', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
-    expect($wrestler->currentInjury()->exists())->toBeTrue();
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-
-    expect(fn () => resolve(EmployAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentInjury()->exists())->toBeTrue()
+        ->and($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(EmployAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it employs wrestler and also employs unemployed managers', function () {
@@ -75,9 +71,9 @@ test('it employs wrestler and also employs unemployed managers', function () {
     $wrestler->managers()->attach($manager1->id, ['hired_at' => now()->subDays(10)]);
     $wrestler->managers()->attach($manager2->id, ['hired_at' => now()->subDays(5)]);
 
-    expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($manager1->currentEmployment()->exists())->toBeFalse();
-    expect($manager2->currentEmployment()->exists())->toBeTrue();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($manager1->currentEmployment()->exists())->toBeFalse()
+        ->and($manager2->currentEmployment()->exists())->toBeTrue();
 
     resolve(EmployAction::class)->handle($wrestler);
 
@@ -85,8 +81,8 @@ test('it employs wrestler and also employs unemployed managers', function () {
     $manager1->refresh();
     $manager2->refresh();
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($manager1->currentEmployment()->exists())->toBeTrue(); // Should now be employed
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($manager1->currentEmployment()->exists())->toBeTrue(); // Should now be employed
     expect($manager2->currentEmployment()->exists())->toBeTrue(); // Should remain employed
 
     // Both wrestler and manager1 should have new employment records
@@ -104,10 +100,8 @@ test('it employs wrestler and also employs unemployed managers', function () {
 test('it prevents employing already employed wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-
-    expect(fn () => resolve(EmployAction::class)->handle($wrestler))
-        ->toThrow(Exception::class);
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and(fn () => resolve(EmployAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it rejects employing a retired wrestler without changing retirement', function () {

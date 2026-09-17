@@ -133,8 +133,8 @@ describe('FormModal Form Integration', function () {
             ->call('submitForm');
 
         $wrestler->refresh();
-        expect($wrestler->name)->toBe('Updated Name');
-        expect($wrestler->hometown)->toBe('Updated City');
+        expect($wrestler->name)->toBe('Updated Name')
+            ->and($wrestler->hometown)->toBe('Updated City');
         $component->assertSuccessful();
     });
 
@@ -156,11 +156,11 @@ describe('FormModal Dummy Data', function () {
         $component = livewire(FormModal::class);
         $component->call('fillDummyFields');
 
-        expect($component->get('form.name'))->not->toBeEmpty();
-        expect($component->get('form.hometown'))->not->toBeEmpty();
-        expect($component->get('form.height_feet'))->toBeGreaterThan(0);
-        expect($component->get('form.height_inches'))->toBeGreaterThanOrEqual(0);
-        expect($component->get('form.weight'))->toBeGreaterThan(0);
+        expect($component->get('form.name'))->not->toBeEmpty()
+            ->and($component->get('form.hometown'))->not->toBeEmpty()
+            ->and($component->get('form.height_feet'))->toBeGreaterThan(0)
+            ->and($component->get('form.height_inches'))->toBeGreaterThanOrEqual(0)
+            ->and($component->get('form.weight'))->toBeGreaterThan(0);
     });
 
     it('generates realistic dummy data', function () {

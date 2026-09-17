@@ -25,8 +25,8 @@ test('it creates a retirement for an explicit retirable owner', function (Closur
         ->for($retirable, 'retirable')
         ->create();
 
-    expect($retirement->retirable)->toBeInstanceOf($retirable::class);
-    expect($retirement->retirable->getKey())->toBe($retirable->getKey());
+    expect($retirement->retirable)->toBeInstanceOf($retirable::class)
+        ->and($retirement->retirable->getKey())->toBe($retirable->getKey());
 })->with([
     fn (): Wrestler => Wrestler::factory()->create(),
     fn (): Manager => Manager::factory()->create(),

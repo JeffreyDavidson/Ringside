@@ -303,14 +303,11 @@ describe('stables table metadata', function (): void {
         // Assert
         $statuses = collect($metadata['statuses'])->keyBy('value');
 
-        expect($metadata['total'])->toBe(3);
-
-        expect($statuses->keys()->all())->toBe(
-            array_map(
+        expect($metadata['total'])->toBe(3)
+            ->and($statuses->keys()->all())->toBe(array_map(
                 static fn (StableStatus $status): string => $status->value,
                 StableStatus::cases(),
-            ),
-        )
+            ))
             ->and($statuses->get(StableStatus::Active->value))->toBe([
                 'value' => StableStatus::Active->value,
                 'label' => StableStatus::Active->label(),

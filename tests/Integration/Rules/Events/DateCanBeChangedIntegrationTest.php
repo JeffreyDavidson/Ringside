@@ -130,9 +130,9 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
             // Assert
             expect($reflection->getParameters())->toHaveCount(3);
-            expect($reflection->getParameters()[0]->getName())->toBe('attribute');
-            expect($reflection->getParameters()[1]->getName())->toBe('value');
-            expect($reflection->getParameters()[2]->getName())->toBe('fail');
+            expect($reflection->getParameters()[0]->getName())->toBe('attribute')
+                ->and($reflection->getParameters()[1]->getName())->toBe('value')
+                ->and($reflection->getParameters()[2]->getName())->toBe('fail');
         });
     });
 
@@ -153,8 +153,7 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
             // Assert
             expect($messages)->toHaveCount(2);
-            expect($messages[0])->toBe($messages[1]);
-            expect($messages[0])->toBe("Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred.");
+            expect($messages)->toMatchArray([0 => $messages[1], 1 => "Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred."]);
         });
 
         test('attribute name does not affect validation logic', function () {

@@ -50,14 +50,14 @@ test('it releases tag team with specific release date', function () {
 test('it releases suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->currentSuspension()->exists())->toBeTrue();
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->currentSuspension()->exists())->toBeTrue();
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 
     $tagTeam->refresh();
-    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-    expect($tagTeam->currentSuspension()->exists())->toBeFalse();
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and($tagTeam->currentSuspension()->exists())->toBeFalse();
 
     // Verify employment ended
     $this->assertDatabaseHas('employments', [
@@ -97,10 +97,8 @@ test('it persists the release lifecycle', function () {
 test('it prevents releasing unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
-    expect($tagTeam->currentEmployment()->exists())->toBeFalse();
-
-    expect(fn () => resolve(ReleaseAction::class)->handle($tagTeam))
-        ->toThrow(Exception::class);
+    expect($tagTeam->currentEmployment()->exists())->toBeFalse()
+        ->and(fn () => resolve(ReleaseAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -180,8 +178,8 @@ test('it handles tag team with complex employment history', function () {
     $tagTeam->employments()->create(['started_at' => now()->subDays(10), 'ended_at' => null]); // Current
 
     $tagTeam->refresh();
-    expect($tagTeam->currentEmployment()->exists())->toBeTrue();
-    expect($tagTeam->employments()->count())->toBe(3);
+    expect($tagTeam->currentEmployment()->exists())->toBeTrue()
+        ->and($tagTeam->employments()->count())->toBe(3);
 
     resolve(ReleaseAction::class)->handle($tagTeam);
 

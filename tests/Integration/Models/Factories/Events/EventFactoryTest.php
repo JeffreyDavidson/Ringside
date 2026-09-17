@@ -32,8 +32,8 @@ describe('EventFactory Integration Tests', function () {
 
             // Assert
             expect($event->name)->toBeString();
-            expect($event->name)->not->toBeEmpty();
-            expect($event->date)->toBeNull(); // Default state has no date
+            expect($event->name)->not->toBeEmpty()
+                ->and($event->date)->toBeNull(); // Default state has no date
             expect($event->venue_id)->toBeNull(); // Default state has no venue
             expect($event->preview)->toBeNull(); // Default state has no preview
         });
@@ -44,8 +44,8 @@ describe('EventFactory Integration Tests', function () {
 
             // Assert
             expect($event->name)->toBeString();
-            expect(mb_strlen($event->name))->toBeGreaterThan(3);
-            expect($event->name)->toBe(ucwords($event->name));
+            expect(mb_strlen($event->name))->toBeGreaterThan(3)
+                ->and($event->name)->toBe(ucwords($event->name));
         });
 
         test('sets default nullable fields correctly', function () {
@@ -54,8 +54,8 @@ describe('EventFactory Integration Tests', function () {
 
             // Assert
             expect($event->date)->toBeNull();
-            expect($event->venue_id)->toBeNull();
-            expect($event->preview)->toBeNull();
+            expect($event->venue_id)->toBeNull()
+                ->and($event->preview)->toBeNull();
         });
     });
 
@@ -143,9 +143,9 @@ describe('EventFactory Integration Tests', function () {
 
             // Assert
             expect($event->name)->toBe('Override Event');
-            expect($event->date)->toBeNull();
-            expect($event->venue_id)->toBeNull();
-            expect($event->preview)->toBeNull();
+            expect($event->date)->toBeNull()
+                ->and($event->venue_id)->toBeNull()
+                ->and($event->preview)->toBeNull();
         });
     });
 
@@ -171,9 +171,8 @@ describe('EventFactory Integration Tests', function () {
 
             // Assert
             foreach ($events as $event) {
-                expect($event->name)->toBeString();
-                expect($event->name)->not->toBeEmpty();
-                expect($event->name)->toBe(ucwords($event->name));
+                expect($event->name)->toBeString()->not->toBeEmpty()
+                    ->toBe(ucwords($event->name));
             }
         });
 

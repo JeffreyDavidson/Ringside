@@ -16,16 +16,16 @@ test('it reinstates a suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
     $suspension = $referee->currentSuspension()->firstOrFail();
 
-    expect($referee->currentSuspension()->exists())->toBeTrue();
-    expect($suspension->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeTrue()
+        ->and($suspension->ended_at)->toBeNull();
 
     resolve(ReinstateAction::class)->handle($referee);
 
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->currentSuspension()->exists())->toBeFalse();
-    expect($suspension->ended_at)->not->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeFalse()
+        ->and($suspension->ended_at)->not->toBeNull();
 
     $this->assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
@@ -58,8 +58,8 @@ test('it reinstates referee with specific reinstatement date', function () {
     $referee->refresh();
     $suspension->refresh();
 
-    expect($referee->currentSuspension()->exists())->toBeFalse();
-    expect(requiredDate($suspension->ended_at)->toDateTimeString())->toBe($reinstatementDate->toDateTimeString());
+    expect($referee->currentSuspension()->exists())->toBeFalse()
+        ->and(requiredDate($suspension->ended_at)->toDateTimeString())->toBe($reinstatementDate->toDateTimeString());
 
     $this->assertDatabaseHas('suspensions', [
         'id' => $suspension->id,
@@ -106,8 +106,8 @@ test('it maintains referee employment after reinstatement', function () {
     $referee = Referee::factory()->suspended()->create();
     $employment = $referee->currentEmployment()->firstOrFail();
 
-    expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentSuspension()->exists())->toBeTrue();
+    expect($referee->currentEmployment()->exists())->toBeTrue()
+        ->and($referee->currentSuspension()->exists())->toBeTrue();
 
     resolve(ReinstateAction::class)->handle($referee);
 
@@ -116,8 +116,8 @@ test('it maintains referee employment after reinstatement', function () {
 
     // Should remain employed after reinstatement
     expect($referee->currentEmployment()->exists())->toBeTrue();
-    expect($referee->currentSuspension()->exists())->toBeFalse();
-    expect($employment->ended_at)->toBeNull();
+    expect($referee->currentSuspension()->exists())->toBeFalse()
+        ->and($employment->ended_at)->toBeNull();
 });
 
 test('it preserves suspension history', function () {

@@ -16,8 +16,8 @@ beforeEach(function () {
 test('it soft deletes an unemployed wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
-    expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($wrestler->trashed())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($wrestler->trashed())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($wrestler);
 
@@ -39,8 +39,8 @@ test('it deletes using the current persisted wrestler state', function () {
 
     resolve(DeleteAction::class)->handle($staleWrestler);
 
-    expect(Wrestler::find($wrestler->id))->toBeNull();
-    expect(Wrestler::withTrashed()->findOrFail($wrestler->id)->trashed())->toBeTrue();
+    expect(Wrestler::find($wrestler->id))->toBeNull()
+        ->and(Wrestler::withTrashed()->findOrFail($wrestler->id)->trashed())->toBeTrue();
 });
 
 test('it soft deletes wrestler with specific deletion date', function () {
@@ -153,8 +153,8 @@ test('it closes lifecycle periods and applies relationship cascades', function (
         'fired_at' => null,
     ]);
 
-    expect($wrestler->currentEmployment()->exists())->toBeTrue();
-    expect($wrestler->currentManagers)->toHaveCount(1);
+    expect($wrestler->currentEmployment()->exists())->toBeTrue()
+        ->and($wrestler->currentManagers)->toHaveCount(1);
 
     resolve(DeleteAction::class)->handle($wrestler);
 
@@ -252,8 +252,8 @@ test('it handles wrestler with no active relationships', function () {
         'ended_at' => now()->subDays(80),
     ]);
 
-    expect($wrestler->currentEmployment()->exists())->toBeFalse();
-    expect($wrestler->currentRetirement()->exists())->toBeFalse();
+    expect($wrestler->currentEmployment()->exists())->toBeFalse()
+        ->and($wrestler->currentRetirement()->exists())->toBeFalse();
 
     resolve(DeleteAction::class)->handle($wrestler);
 

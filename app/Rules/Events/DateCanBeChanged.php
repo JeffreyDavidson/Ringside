@@ -17,7 +17,7 @@ class DateCanBeChanged implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (! $this->event) {
+        if (! $this->event instanceof Event) {
             return;
         }
 

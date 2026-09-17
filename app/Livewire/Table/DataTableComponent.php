@@ -264,9 +264,7 @@ abstract class DataTableComponent extends Component
     protected function initializeFilterValues(): void
     {
         foreach ($this->filters() as $filter) {
-            if (! isset($this->filterValues[$filter->getKey()])) {
-                $this->filterValues[$filter->getKey()] = $filter->getDefaultValue();
-            }
+            $this->filterValues[$filter->getKey()] ??= $filter->getDefaultValue();
         }
     }
 

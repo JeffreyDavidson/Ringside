@@ -39,7 +39,7 @@ describe('authorized match form interactions', function (): void {
         $modal
             ->assertCount('components', 1)
             ->assertSet('components', function (array $components) use ($component, $arguments): bool {
-                $registeredComponent = array_values($components)[0] ?? null;
+                $registeredComponent = array_first($components) ?? null;
 
                 return $registeredComponent['name'] === $component
                     && $registeredComponent['arguments'] === $arguments;

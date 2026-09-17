@@ -32,10 +32,9 @@ describe('ManagerFactory Integration Tests', function () {
 
             // Assert
             expect($manager->first_name)->toBeString();
-            expect($manager->first_name)->not->toBeEmpty();
-            expect($manager->last_name)->toBeString();
-            expect($manager->last_name)->not->toBeEmpty();
-            expect($manager->status)->toBeInstanceOf(EmploymentStatus::class);
+            expect($manager->first_name)->not->toBeEmpty()
+                ->and($manager->last_name)->toBeString()->not->toBeEmpty()
+                ->and($manager->status)->toBeInstanceOf(EmploymentStatus::class);
         });
 
         test('generates realistic manager names', function () {
@@ -44,9 +43,9 @@ describe('ManagerFactory Integration Tests', function () {
 
             // Assert
             expect($manager->first_name)->toBeString();
-            expect(mb_strlen($manager->first_name))->toBeGreaterThan(1);
-            expect($manager->last_name)->toBeString();
-            expect(mb_strlen($manager->last_name))->toBeGreaterThan(1);
+            expect(mb_strlen($manager->first_name))->toBeGreaterThan(1)
+                ->and($manager->last_name)->toBeString()
+                ->and(mb_strlen($manager->last_name))->toBeGreaterThan(1);
         });
 
         test('sets default employment status', function () {
@@ -98,17 +97,17 @@ describe('ManagerFactory Integration Tests', function () {
         test('suspended state creates exactly one active employment', function () {
             $manager = Manager::factory()->suspended()->create();
 
-            expect($manager->currentSuspension()->exists())->toBeTrue();
-            expect($manager->currentEmployment()->exists())->toBeTrue();
-            expect($manager->employments()->whereNull('ended_at')->count())->toBe(1);
+            expect($manager->currentSuspension()->exists())->toBeTrue()
+                ->and($manager->currentEmployment()->exists())->toBeTrue()
+                ->and($manager->employments()->whereNull('ended_at')->count())->toBe(1);
         });
 
         test('injured state creates exactly one active employment', function () {
             $manager = Manager::factory()->injured()->create();
 
-            expect($manager->currentInjury()->exists())->toBeTrue();
-            expect($manager->currentEmployment()->exists())->toBeTrue();
-            expect($manager->employments()->whereNull('ended_at')->count())->toBe(1);
+            expect($manager->currentInjury()->exists())->toBeTrue()
+                ->and($manager->currentEmployment()->exists())->toBeTrue()
+                ->and($manager->employments()->whereNull('ended_at')->count())->toBe(1);
         });
     });
 
@@ -122,8 +121,8 @@ describe('ManagerFactory Integration Tests', function () {
 
             // Assert
             expect($manager->first_name)->toBe('John');
-            expect($manager->last_name)->toBe('Doe');
-            expect($manager->status)->toBe(EmploymentStatus::Employed);
+            expect($manager->last_name)->toBe('Doe')
+                ->and($manager->status)->toBe(EmploymentStatus::Employed);
         });
 
         test('maintains required attributes when overriding', function () {
@@ -134,8 +133,8 @@ describe('ManagerFactory Integration Tests', function () {
 
             // Assert
             expect($manager->first_name)->toBe('Custom');
-            expect($manager->last_name)->toBeString();
-            expect($manager->status)->toBeInstanceOf(EmploymentStatus::class);
+            expect($manager->last_name)->toBeString()
+                ->and($manager->status)->toBeInstanceOf(EmploymentStatus::class);
         });
     });
 
@@ -163,9 +162,9 @@ describe('ManagerFactory Integration Tests', function () {
 
             // Assert
             foreach ($managers as $manager) {
-                expect($manager->first_name)->toBeString();
-                expect($manager->last_name)->toBeString();
-                expect($manager->status)->toBeInstanceOf(EmploymentStatus::class);
+                expect($manager->first_name)->toBeString()
+                    ->and($manager->last_name)->toBeString()
+                    ->and($manager->status)->toBeInstanceOf(EmploymentStatus::class);
             }
         });
 

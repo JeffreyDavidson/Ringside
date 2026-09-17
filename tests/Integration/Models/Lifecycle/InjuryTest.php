@@ -22,8 +22,8 @@ test('it creates an injury for an explicit injurable owner', function (Closure $
         ->for($injurable, 'injurable')
         ->create();
 
-    expect($injury->injurable)->toBeInstanceOf($injurable::class);
-    expect($injury->injurable->getKey())->toBe($injurable->getKey());
+    expect($injury->injurable)->toBeInstanceOf($injurable::class)
+        ->and($injury->injurable->getKey())->toBe($injurable->getKey());
 })->with([
     fn (): Wrestler => Wrestler::factory()->create(),
     fn (): Manager => Manager::factory()->create(),

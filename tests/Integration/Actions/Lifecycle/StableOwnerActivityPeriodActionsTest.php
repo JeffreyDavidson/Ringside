@@ -25,11 +25,9 @@ test('it rejects starting a second open activity period', function () {
     $originalPeriod = $stable->currentActivityPeriod()->firstOrFail();
 
     expect(fn () => resolve(StartActivityPeriodAction::class)->handle($stable, now()))
-        ->toThrow(LogicException::class, 'already has an open activity period');
-
-    expect($stable->activityPeriods()->whereNull('ended_at')->count())->toBe(1)
-        ->and($originalPeriod->refresh()->started_at->toDateTimeString())
-        ->toBe($originalPeriod->started_at->toDateTimeString());
+        ->toThrow(LogicException::class, 'already has an open activity period')
+        ->and($stable->activityPeriods()->whereNull('ended_at')->count())->toBe(1)
+        ->and($originalPeriod->refresh()->started_at->toDateTimeString())->toBe($originalPeriod->started_at->toDateTimeString());
 });
 
 test('it ends the open activity period', function () {
@@ -59,16 +57,14 @@ test('it rejects an end date before the activity period starts', function () {
         ->create();
 
     expect(fn () => resolve(EndActivityPeriodAction::class)->handle($stable, $startedAt->copy()->subSecond()))
-        ->toThrow(InvalidDateRangeException::class);
-
-    expect($stable->currentActivityPeriod()->exists())->toBeTrue();
+        ->toThrow(InvalidDateRangeException::class)
+        ->and($stable->currentActivityPeriod()->exists())->toBeTrue();
 });
 
 test('it rejects ending activity in the future', function () {
     $stable = Stable::factory()->active()->create();
 
     expect(fn () => resolve(EndActivityPeriodAction::class)->handle($stable, now()->addDay()))
-        ->toThrow(InvalidDateRangeException::class);
-
-    expect($stable->currentActivityPeriod()->exists())->toBeTrue();
+        ->toThrow(InvalidDateRangeException::class)
+        ->and($stable->currentActivityPeriod()->exists())->toBeTrue();
 });

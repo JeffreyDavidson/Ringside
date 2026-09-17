@@ -26,7 +26,6 @@ test('it soft deletes a match while preserving its historical records', function
         ->and($eventMatch->referees()->pluck('referees.id'))->toEqual($refereeIds)
         ->and($eventMatch->refresh()->match_finish)->toBe($matchFinish)
         ->and($eventMatch->winning_side_id)->toBe($winningSideId)
-        ->and($eventMatch->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Deleted);
-
-    expect(Referee::query()->whereKey($refereeIds)->count())->toBe($refereeIds->count());
+        ->and($eventMatch->lifecycleTransitions()->sole()->transition)->toBe(LifecycleTransitionType::Deleted)
+        ->and(Referee::query()->whereKey($refereeIds)->count())->toBe($refereeIds->count());
 });

@@ -17,9 +17,9 @@ test('it creates a manager with basic information', function () {
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Manager::class);
-    expect($result->first_name)->toBe('Taylor');
-    expect($result->last_name)->toBe('Otwell');
+    expect($result)->toBeInstanceOf(Manager::class)
+        ->and($result->first_name)->toBe('Taylor')
+        ->and($result->last_name)->toBe('Otwell');
 
     $this->assertDatabaseHas('managers', [
         'first_name' => 'Taylor',
@@ -38,9 +38,9 @@ test('it creates a manager with employment when employment date is provided', fu
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Manager::class);
-    expect($result->first_name)->toBe('Jeffrey');
-    expect($result->last_name)->toBe('Davidson');
+    expect($result)->toBeInstanceOf(Manager::class)
+        ->and($result->first_name)->toBe('Jeffrey')
+        ->and($result->last_name)->toBe('Davidson');
 
     $this->assertDatabaseHas('managers', [
         'first_name' => 'Jeffrey',
@@ -68,9 +68,9 @@ test('it creates manager with all optional fields', function () {
 
     $result = resolve(CreateAction::class)->handle($data);
 
-    expect($result)->toBeInstanceOf(Manager::class);
-    expect($result->first_name)->toBe('John');
-    expect($result->last_name)->toBe('Doe');
+    expect($result)->toBeInstanceOf(Manager::class)
+        ->and($result->first_name)->toBe('John')
+        ->and($result->last_name)->toBe('Doe');
 
     // Verify database state
     $this->assertDatabaseHas('managers', [
