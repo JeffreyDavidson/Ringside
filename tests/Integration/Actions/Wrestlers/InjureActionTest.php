@@ -124,14 +124,14 @@ test('it prevents injuring already injured wrestler', function () {
     $wrestler = Wrestler::factory()->injured()->create();
 
     expect($wrestler->currentInjury()->exists())->toBeTrue()
-        ->and(fn() => resolve(InjureAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(InjureAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents injuring retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     expect($wrestler->currentRetirement()->exists())->toBeTrue()
-        ->and(fn() => resolve(InjureAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(InjureAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents injuring unemployed wrestler', function () {
@@ -148,7 +148,7 @@ test('it prevents injuring a suspended wrestler', function () {
 
     expect($wrestler->currentSuspension()->exists())->toBeTrue()
         ->and($wrestler->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(InjureAction::class)->handle($wrestler))->toThrow(CannotBeInjuredException::class);
+        ->and(fn () => resolve(InjureAction::class)->handle($wrestler))->toThrow(CannotBeInjuredException::class);
 
     $wrestler->refresh();
 

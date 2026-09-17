@@ -236,7 +236,7 @@ test('it prevents unretiring non-retired wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentRetirement()->exists())->toBeFalse()
-        ->and(fn() => resolve(UnretireAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(UnretireAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents unretiring deleted wrestler', function () {

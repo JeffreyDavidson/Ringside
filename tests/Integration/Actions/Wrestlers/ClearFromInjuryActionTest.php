@@ -127,7 +127,7 @@ test('it prevents clearing non-injured wrestler', function () {
     $wrestler = Wrestler::factory()->employed()->create();
 
     expect($wrestler->currentInjury()->exists())->toBeFalse()
-        ->and(fn() => resolve(ClearFromInjuryAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents clearing retired wrestler', function () {
@@ -135,7 +135,7 @@ test('it prevents clearing retired wrestler', function () {
 
     expect($wrestler->currentRetirement()->exists())->toBeTrue()
         ->and($wrestler->currentInjury()->exists())->toBeFalse()
-        ->and(fn() => resolve(ClearFromInjuryAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(ClearFromInjuryAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it works with employed injured wrestler', function () {

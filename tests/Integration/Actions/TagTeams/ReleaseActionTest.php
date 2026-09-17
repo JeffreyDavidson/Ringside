@@ -98,7 +98,7 @@ test('it prevents releasing unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(ReleaseAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReleaseAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

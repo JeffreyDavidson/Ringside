@@ -97,7 +97,7 @@ test('it prevents unretiring non-retired manager', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentRetirement()->exists())->toBeFalse()
-        ->and(fn() => resolve(UnretireAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(UnretireAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

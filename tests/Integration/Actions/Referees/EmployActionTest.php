@@ -51,7 +51,7 @@ test('it prevents re-employing suspended referee', function () {
 
     expect($referee->currentSuspension()->exists())->toBeTrue()
         ->and($referee->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 });
 
 test('it prevents re-employing injured referee', function () {
@@ -59,7 +59,7 @@ test('it prevents re-employing injured referee', function () {
 
     expect($referee->currentInjury()->exists())->toBeTrue()
         ->and($referee->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 });
 
 test('it rejects employing a retired referee without changing retirement', function () {
@@ -68,7 +68,7 @@ test('it rejects employing a retired referee without changing retirement', funct
 
     expect($referee->currentRetirement()->exists())->toBeTrue()
         ->and($referee->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
     $retirement->refresh();
@@ -130,7 +130,7 @@ test('it prevents double employment', function () {
     $originalEmployment = $referee->currentEmployment()->firstOrFail();
 
     expect($referee->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($referee))->toThrow(CannotBeEmployedException::class);
 
     $referee->refresh();
     expect($referee->currentEmployment()->exists())->toBeTrue()

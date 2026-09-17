@@ -57,7 +57,7 @@ test('it prevents unretiring a tag team with an injured current wrestler', funct
     );
 
     expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
-        ->and(fn() => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(CannotBeUnretiredException::class);
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(CannotBeUnretiredException::class);
 });
 
 test('it prevents unretiring a tag team without enough current wrestlers', function () {
@@ -74,7 +74,7 @@ test('it prevents unretiring a tag team without enough current wrestlers', funct
     ]);
 
     expect(resolve(TagTeamRetirementEligibility::class)->canUnretire($tagTeam))->toBeFalse()
-        ->and(fn() => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(CannotBeUnretiredException::class);
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(CannotBeUnretiredException::class);
 });
 
 test('it unretires and employs current members by default', function () {
@@ -191,7 +191,7 @@ test('it prevents unretiring non-retired tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     expect($tagTeam->currentRetirement()->exists())->toBeFalse()
-        ->and(fn() => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents unretiring unemployed tag team', function () {
@@ -199,7 +199,7 @@ test('it prevents unretiring unemployed tag team', function () {
 
     expect($tagTeam->currentEmployment()->exists())->toBeFalse()
         ->and($tagTeam->currentRetirement()->exists())->toBeFalse()
-        ->and(fn() => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(UnretireAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

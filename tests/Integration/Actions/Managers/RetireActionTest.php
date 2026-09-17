@@ -179,14 +179,14 @@ test('it prevents retiring already retired manager', function () {
     $manager = Manager::factory()->retired()->create();
 
     expect($manager->currentRetirement()->exists())->toBeTrue()
-        ->and(fn() => resolve(RetireAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(RetireAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it prevents retiring unemployed manager', function () {
     $manager = Manager::factory()->create();
 
     expect($manager->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(RetireAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(RetireAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

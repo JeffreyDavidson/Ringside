@@ -41,7 +41,7 @@ test('it prevents deleting employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
+        ->and(fn () => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting retired tag team', function () {
@@ -49,14 +49,14 @@ test('it prevents deleting retired tag team', function () {
 
     expect($tagTeam->currentRetirement()->exists())->toBeTrue()
         ->and(resolve(TagTeamDeletionEligibility::class)->canDelete($tagTeam))->toBeFalse()
-        ->and(fn() => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
+        ->and(fn () => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it prevents deleting suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
     expect($tagTeam->currentSuspension()->exists())->toBeTrue()
-        ->and(fn() => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
+        ->and(fn () => resolve(DeleteAction::class)->handle($tagTeam))->toThrow(CannotBeDeletedException::class);
 });
 
 test('it handles database transactions correctly', function () {

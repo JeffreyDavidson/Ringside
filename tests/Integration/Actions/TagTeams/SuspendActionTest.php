@@ -77,21 +77,21 @@ test('it prevents suspending unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents suspending already suspended tag team', function () {
     $tagTeam = TagTeam::factory()->suspended()->create();
 
     expect($tagTeam->currentSuspension()->exists())->toBeTrue()
-        ->and(fn() => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents suspending retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     expect($tagTeam->currentRetirement()->exists())->toBeTrue()
-        ->and(fn() => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(SuspendAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

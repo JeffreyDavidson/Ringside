@@ -18,7 +18,7 @@ describe('individual restoration validation', function () {
         };
 
         expect(resolve(IndividualDeletionEligibility::class)->canRestore($individual))->toBeFalse()
-            ->and(fn() => resolve(IndividualDeletionEligibility::class)->ensureCanRestore($individual))->toThrow(CannotBeRestoredException::class);
+            ->and(fn () => resolve(IndividualDeletionEligibility::class)->ensureCanRestore($individual))->toThrow(CannotBeRestoredException::class);
     })->with([
         Wrestler::class,
         Manager::class,

@@ -75,14 +75,14 @@ test('it prevents suspending already suspended manager', function () {
     $manager = Manager::factory()->suspended()->create();
 
     expect($manager->currentSuspension()->exists())->toBeTrue()
-        ->and(fn() => resolve(SuspendAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(SuspendAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it prevents suspending unemployed manager', function () {
     $manager = Manager::factory()->create();
 
     expect($manager->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(SuspendAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(SuspendAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -127,7 +127,7 @@ test('it prevents suspending an injured manager', function () {
 
     expect($manager->currentInjury()->exists())->toBeTrue()
         ->and($manager->currentSuspension()->exists())->toBeFalse()
-        ->and(fn() => resolve(SuspendAction::class)->handle($manager))->toThrow(CannotBeSuspendedException::class);
+        ->and(fn () => resolve(SuspendAction::class)->handle($manager))->toThrow(CannotBeSuspendedException::class);
 
     $manager->refresh();
 

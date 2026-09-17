@@ -72,7 +72,7 @@ test('it prevents clearing non-injured manager', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentInjury()->exists())->toBeFalse()
-        ->and(fn() => resolve(ClearFromInjuryAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(ClearFromInjuryAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

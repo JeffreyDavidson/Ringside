@@ -155,7 +155,7 @@ test('it prevents restoring non-deleted wrestler', function () {
     $wrestler = Wrestler::factory()->create();
 
     expect($wrestler->trashed())->toBeFalse()
-        ->and(fn() => resolve(RestoreAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(RestoreAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it restores wrestler with complex status history', function () {

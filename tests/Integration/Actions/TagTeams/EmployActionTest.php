@@ -63,7 +63,7 @@ test('it prevents employing retired tag team directly', function () {
 
     expect($tagTeam->currentRetirement()->exists())->toBeTrue()
         ->and($tagTeam->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(EmployAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it persists the employment lifecycle', function () {
@@ -91,7 +91,7 @@ test('it prevents employing already employed tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(EmployAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

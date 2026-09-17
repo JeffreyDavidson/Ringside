@@ -160,7 +160,7 @@ describe('MatchFactory', function () {
             expect($championship)->not->toBeNull()
                 ->and($championship->champion_type)->toBe(Wrestler::class);
             // Champion should be one of the competitors
-            $championCompetitor = $eventMatch->competitors->first(fn($competitor) => $competitor->competitor_type === (new Wrestler)->getMorphClass()
+            $championCompetitor = $eventMatch->competitors->first(fn ($competitor) => $competitor->competitor_type === (new Wrestler)->getMorphClass()
                 && $competitor->competitor_id === $championship->champion_id);
             expect($championCompetitor)->not->toBeNull();
         });
@@ -177,7 +177,7 @@ describe('MatchFactory', function () {
             expect($championship)->not->toBeNull()
                 ->and($championship->champion_type)->toBe(TagTeam::class);
             // Champion should be one of the competitors
-            $championCompetitor = $eventMatch->competitors->first(fn($competitor) => $competitor->competitor_type === (new TagTeam)->getMorphClass()
+            $championCompetitor = $eventMatch->competitors->first(fn ($competitor) => $competitor->competitor_type === (new TagTeam)->getMorphClass()
                 && $competitor->competitor_id === $championship->champion_id);
             expect($championCompetitor)->not->toBeNull();
         });
@@ -199,7 +199,7 @@ describe('MatchFactory', function () {
             expect($eventMatch->titles)->toHaveCount(1);
 
             // Champion should be one of the competitors
-            $championCompetitor = $eventMatch->competitors->first(fn($competitor) => $competitor->competitor_type === $champion->getMorphClass()
+            $championCompetitor = $eventMatch->competitors->first(fn ($competitor) => $competitor->competitor_type === $champion->getMorphClass()
                 && $competitor->competitor_id === $champion->id);
             expect($championCompetitor)->not->toBeNull();
         });

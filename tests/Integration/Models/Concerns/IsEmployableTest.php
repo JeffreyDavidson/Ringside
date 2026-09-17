@@ -155,7 +155,7 @@ describe('IsEmployable Trait Integration Tests', function () {
             };
             $relation = $model->currentEmployment();
             $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNull = collect($wheres)->contains(fn($where) => ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at');
+            $hasWhereNull = collect($wheres)->contains(fn ($where) => ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at');
             expect($hasWhereNull)->toBeTrue();
         });
 
@@ -167,8 +167,8 @@ describe('IsEmployable Trait Integration Tests', function () {
             };
             $relation = $model->futureEmployment();
             $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNull = collect($wheres)->contains(fn($where) => ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at');
-            $hasStartedAtGreater = collect($wheres)->contains(fn($where) => ($where['column'] ?? null) === 'started_at' && ($where['operator'] ?? null) === '>');
+            $hasWhereNull = collect($wheres)->contains(fn ($where) => ($where['type'] ?? null) === 'Null' && ($where['column'] ?? null) === 'ended_at');
+            $hasStartedAtGreater = collect($wheres)->contains(fn ($where) => ($where['column'] ?? null) === 'started_at' && ($where['operator'] ?? null) === '>');
             expect($hasWhereNull)->toBeTrue()
                 ->and($hasStartedAtGreater)->toBeTrue();
         });
@@ -181,7 +181,7 @@ describe('IsEmployable Trait Integration Tests', function () {
             };
             $relation = $model->previousEmployments();
             $wheres = $relation->getQuery()->getQuery()->wheres;
-            $hasWhereNotNull = collect($wheres)->contains(fn($where) => ($where['type'] ?? null) === 'NotNull' && ($where['column'] ?? null) === 'ended_at');
+            $hasWhereNotNull = collect($wheres)->contains(fn ($where) => ($where['type'] ?? null) === 'NotNull' && ($where['column'] ?? null) === 'ended_at');
             expect($hasWhereNotNull)->toBeTrue();
         });
 

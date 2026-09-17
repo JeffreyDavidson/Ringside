@@ -38,7 +38,7 @@ test('it prevents reinstating an injured wrestler', function () {
 
     expect($wrestler->currentInjury()->exists())->toBeTrue()
         ->and($wrestler->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(ReinstateAction::class)->handle($wrestler))->toThrow(CannotBeReinstatedException::class);
+        ->and(fn () => resolve(ReinstateAction::class)->handle($wrestler))->toThrow(CannotBeReinstatedException::class);
 
     $wrestler->refresh();
 
@@ -152,14 +152,14 @@ test('it prevents reinstating an available wrestler', function () {
 
     expect($wrestler->currentSuspension()->exists())->toBeFalse()
         ->and($wrestler->currentInjury()->exists())->toBeFalse()
-        ->and(fn() => resolve(ReinstateAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReinstateAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents reinstating retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     expect($wrestler->currentRetirement()->exists())->toBeTrue()
-        ->and(fn() => resolve(ReinstateAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReinstateAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it can reinstate suspended wrestler who is also employed', function () {

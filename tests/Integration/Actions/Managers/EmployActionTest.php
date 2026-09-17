@@ -51,7 +51,7 @@ test('it rejects employing a retired manager without changing retirement', funct
 
     expect($manager->currentRetirement()->exists())->toBeTrue()
         ->and($manager->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(EmployAction::class)->handle($manager))->toThrow(CannotBeEmployedException::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($manager))->toThrow(CannotBeEmployedException::class);
 
     $manager->refresh();
     $retirement->refresh();
@@ -71,7 +71,7 @@ test('it employs suspended manager and ends suspension', function () {
 
     expect($manager->currentSuspension()->exists())->toBeTrue()
         ->and($manager->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(EmployAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it employs injured manager and ends injury', function () {
@@ -79,14 +79,14 @@ test('it employs injured manager and ends injury', function () {
 
     expect($manager->currentInjury()->exists())->toBeTrue()
         ->and($manager->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(EmployAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it prevents employing already employed manager', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(EmployAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(EmployAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

@@ -75,14 +75,14 @@ test('it prevents injuring already injured manager', function () {
     $manager = Manager::factory()->injured()->create();
 
     expect($manager->currentInjury()->exists())->toBeTrue()
-        ->and(fn() => resolve(InjureAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(InjureAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it prevents injuring unemployed manager', function () {
     $manager = Manager::factory()->create();
 
     expect($manager->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(InjureAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(InjureAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {
@@ -127,7 +127,7 @@ test('it prevents injuring a suspended manager', function () {
 
     expect($manager->currentSuspension()->exists())->toBeTrue()
         ->and($manager->currentInjury()->exists())->toBeFalse()
-        ->and(fn() => resolve(InjureAction::class)->handle($manager))->toThrow(CannotBeInjuredException::class);
+        ->and(fn () => resolve(InjureAction::class)->handle($manager))->toThrow(CannotBeInjuredException::class);
 
     $manager->refresh();
 

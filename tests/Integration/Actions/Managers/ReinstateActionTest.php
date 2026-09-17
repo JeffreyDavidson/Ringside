@@ -90,7 +90,7 @@ test('it prevents reinstating non-suspended manager', function () {
     $manager = Manager::factory()->employed()->create();
 
     expect($manager->currentSuspension()->exists())->toBeFalse()
-        ->and(fn() => resolve(ReinstateAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReinstateAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

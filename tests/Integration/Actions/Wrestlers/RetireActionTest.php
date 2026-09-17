@@ -151,7 +151,7 @@ test('it prevents retiring already retired wrestler', function () {
     $wrestler = Wrestler::factory()->retired()->create();
 
     expect($wrestler->currentRetirement()->exists())->toBeTrue()
-        ->and(fn() => resolve(RetireAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(RetireAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it prevents retiring unemployed wrestler', function () {
@@ -159,7 +159,7 @@ test('it prevents retiring unemployed wrestler', function () {
 
     expect($wrestler->currentEmployment()->exists())->toBeFalse();
     expect($wrestler->currentRetirement()->exists())->toBeFalse()
-        ->and(fn() => resolve(RetireAction::class)->handle($wrestler))->toThrow(Exception::class);
+        ->and(fn () => resolve(RetireAction::class)->handle($wrestler))->toThrow(Exception::class);
 });
 
 test('it can retire suspended wrestler', function () {

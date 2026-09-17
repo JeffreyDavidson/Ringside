@@ -474,11 +474,11 @@ describe('SplitStableAction Integration Tests', function () {
                 ->toThrow(LogicException::class, 'Stable creation failed.')
                 ->and(Stable::count())->toBe($initialStableCount)
                 ->and(StableWrestler::query()
-                ->whereKey($originalMembershipIds)
-                ->whereNull('left_at')->count())->toBe($originalMembershipIds->count())
+                    ->whereKey($originalMembershipIds)
+                    ->whereNull('left_at')->count())->toBe($originalMembershipIds->count())
                 ->and(StableTagTeam::query()
-                ->whereKey($originalTagTeamMembershipIds)
-                ->whereNull('left_at')->count())->toBe($originalTagTeamMembershipIds->count());
+                    ->whereKey($originalTagTeamMembershipIds)
+                    ->whereNull('left_at')->count())->toBe($originalTagTeamMembershipIds->count());
 
             $createAction->verify();
         });

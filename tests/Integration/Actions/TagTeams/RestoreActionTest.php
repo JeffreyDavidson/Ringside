@@ -55,7 +55,7 @@ test('it prevents restoring non-deleted tag team', function () {
 
     expect($tagTeam->trashed())->toBeFalse()
         ->and(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeFalse()
-        ->and(fn() => resolve(RestoreAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(RestoreAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents restoring a tag team whose name belongs to an employed team', function () {
@@ -65,7 +65,7 @@ test('it prevents restoring a tag team whose name belongs to an employed team', 
     TagTeam::factory()->employed()->create(['name' => $tagTeam->name]);
 
     expect(resolve(TagTeamDeletionEligibility::class)->canRestore($tagTeam))->toBeFalse()
-        ->and(fn() => resolve(RestoreAction::class)->handle($tagTeam))->toThrow(CannotBeRestoredException::class);
+        ->and(fn () => resolve(RestoreAction::class)->handle($tagTeam))->toThrow(CannotBeRestoredException::class);
 });
 
 test('it restores tag team with historical data intact', function () {

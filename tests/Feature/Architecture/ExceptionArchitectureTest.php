@@ -232,7 +232,7 @@ test('every concrete exception factory has an enforced caller', function () {
 
     $orphanedFactories = collect($exceptionClasses)
         ->filter(fn (string $class): bool => class_exists($class) && $class !== BaseBusinessException::class)
-        ->flatMap(fn(string $class): array => collect(new ReflectionClass($class)->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_STATIC))
+        ->flatMap(fn (string $class): array => collect(new ReflectionClass($class)->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_STATIC))
             ->filter(fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $class)
             ->map(fn (ReflectionMethod $method): string => $class.'::'.$method->getName())
             ->all())

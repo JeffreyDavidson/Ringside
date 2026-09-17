@@ -88,7 +88,7 @@ test('it prevents injuring a suspended referee', function () {
     $referee = Referee::factory()->suspended()->create();
 
     expect($referee->currentEmployment()->exists())->toBeTrue()
-        ->and(fn() => resolve(InjureAction::class)->handle($referee))->toThrow(CannotBeInjuredException::class);
+        ->and(fn () => resolve(InjureAction::class)->handle($referee))->toThrow(CannotBeInjuredException::class);
 
     $referee->refresh();
 

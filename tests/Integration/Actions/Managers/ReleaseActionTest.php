@@ -161,14 +161,14 @@ test('it prevents releasing already released manager', function () {
     $manager = Manager::factory()->released()->create();
 
     expect($manager->status)->toBe(EmploymentStatus::Released)
-        ->and(fn() => resolve(ReleaseAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReleaseAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it prevents releasing unemployed manager', function () {
     $manager = Manager::factory()->create();
 
     expect($manager->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(ReleaseAction::class)->handle($manager))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReleaseAction::class)->handle($manager))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

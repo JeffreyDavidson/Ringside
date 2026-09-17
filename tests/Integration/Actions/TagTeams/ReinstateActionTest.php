@@ -68,7 +68,7 @@ test('it prevents reinstating non-suspended tag team', function () {
     $tagTeam = TagTeam::factory()->employed()->create();
 
     expect($tagTeam->currentSuspension()->exists())->toBeFalse()
-        ->and(fn() => resolve(ReinstateAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReinstateAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents reinstating unemployed tag team', function () {
@@ -76,7 +76,7 @@ test('it prevents reinstating unemployed tag team', function () {
 
     expect($tagTeam->currentEmployment()->exists())->toBeFalse()
         ->and($tagTeam->currentSuspension()->exists())->toBeFalse()
-        ->and(fn() => resolve(ReinstateAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(ReinstateAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

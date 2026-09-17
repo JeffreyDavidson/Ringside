@@ -154,14 +154,14 @@ test('it prevents retiring unemployed tag team', function () {
     $tagTeam = TagTeam::factory()->create();
 
     expect($tagTeam->currentEmployment()->exists())->toBeFalse()
-        ->and(fn() => resolve(RetireAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(RetireAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it prevents retiring already retired tag team', function () {
     $tagTeam = TagTeam::factory()->retired()->create();
 
     expect($tagTeam->currentRetirement()->exists())->toBeTrue()
-        ->and(fn() => resolve(RetireAction::class)->handle($tagTeam))->toThrow(Exception::class);
+        ->and(fn () => resolve(RetireAction::class)->handle($tagTeam))->toThrow(Exception::class);
 });
 
 test('it handles database transactions correctly', function () {

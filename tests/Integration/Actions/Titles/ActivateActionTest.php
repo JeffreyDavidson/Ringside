@@ -216,7 +216,7 @@ test('title debut validation throws correct exceptions', function () {
 
     expect(fn () => $eligibility->ensureAllowed($activeTitle, TitleLifecycleTransition::Debut))
         ->toThrow(CannotBeDebutedException::class)
-        ->and(fn() => $eligibility->ensureAllowed($undebutedTitle, TitleLifecycleTransition::Debut))->not()
+        ->and(fn () => $eligibility->ensureAllowed($undebutedTitle, TitleLifecycleTransition::Debut))->not()
         ->toThrow(Exception::class);
 });
 
@@ -226,5 +226,5 @@ test('title reinstatement validation throws correct exceptions', function () {
     $activeTitle = Title::factory()->active()->create();
 
     expect(fn () => $eligibility->ensureAllowed($inactiveTitle, TitleLifecycleTransition::Reinstate))->not()->toThrow(Exception::class)
-        ->and(fn() => $eligibility->ensureAllowed($activeTitle, TitleLifecycleTransition::Reinstate))->toThrow(CannotBeReinstatedException::class);
+        ->and(fn () => $eligibility->ensureAllowed($activeTitle, TitleLifecycleTransition::Reinstate))->toThrow(CannotBeReinstatedException::class);
 });

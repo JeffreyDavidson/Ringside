@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\Venues\Modals\FormModal;
 use App\Models\Events\Venue;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -165,7 +166,7 @@ describe('authorized venue form interactions', function () {
         'long name' => ['form.name', str_repeat('a', 256), 'max'],
         'long street address' => ['form.street_address', str_repeat('a', 256), 'max'],
         'long city' => ['form.city', str_repeat('a', 256), 'max'],
-        'unsupported state' => ['form.state', 'Invalid State', \Illuminate\Validation\Rules\Enum::class],
+        'unsupported state' => ['form.state', 'Invalid State', Enum::class],
         'short zipcode' => ['form.zipcode', '123', 'digits'],
         'non-numeric zipcode' => ['form.zipcode', 'abcde', 'digits'],
     ]);
