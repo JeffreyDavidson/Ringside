@@ -11,8 +11,10 @@
         "php": "^8.5",
         "blade-ui-kit/blade-heroicons": "^2.7",
         "laravel/framework": "^13.7",
+        "laravel/pennant": "^1.22",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.0",
+        "stancl/tenancy": "^3.10",
         "wire-elements/modal": "^3.0"
     },
     "require-dev": {
