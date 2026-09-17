@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${SKIP_PRE_PUSH_CHECKS:-0}" == "1" ]]; then
+    echo "Skipping pre-push checks (SKIP_PRE_PUSH_CHECKS=1)."
+    exit 0
+fi
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [[ "$local_sha" == 0000000000000000000000000000000000000000 ]] && continue
+    files=$(git diff-tree --no-commit-id --name-only -r "$remote_sha..$local_sha" -- '*.php' || true)
+    if [[ -n "$files" ]]; then
+        mapfile -t changed_files <<< "$files"
+        php scripts/check-method-chaining.php "${changed_files[@]}"
+    fi
+done
+
+echo "Running project pre-push checks..."
+composer test:push
