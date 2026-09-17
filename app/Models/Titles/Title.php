@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Titles;
 
+use App\Models\Concerns\TracksActivity;
+
 use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
@@ -77,6 +79,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TitleBuilder::class)]
 class Title extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
+    use TracksActivity;
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\Managers;
 
+use App\Models\Concerns\TracksActivity;
+
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasComputedEmploymentStatus;
@@ -96,6 +98,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(ManagerBuilder::class)]
 class Manager extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
+    use TracksActivity;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<ManagerFactory> */

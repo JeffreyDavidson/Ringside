@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
+use App\Models\Concerns\TracksActivity;
+
 use App\Builders\Events\EventBuilder;
 use App\Enums\EventStatus;
 use App\Models\Concerns\HasLifecycleTransitions;
@@ -56,6 +58,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(EventBuilder::class)]
 class Event extends Model implements SoftDeletable
 {
+    use TracksActivity;
     /** @use HasFactory<EventFactory> */
     use HasFactory;
 

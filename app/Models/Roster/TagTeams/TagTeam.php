@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\TagTeams;
 
+use App\Models\Concerns\TracksActivity;
+
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
@@ -109,6 +111,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TagTeamBuilder::class)]
 class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, SoftDeletable, Suspendable
 {
+    use TracksActivity;
     use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
+use App\Models\Concerns\TracksActivity;
+
 use App\Builders\Matches\EventMatchBuilder;
 use App\Collections\MatchCompetitorsCollection;
 use App\Enums\MatchFinish;
@@ -81,6 +83,7 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchFactory::class)]
 class EventMatch extends Model implements SoftDeletable
 {
+    use TracksActivity;
     /** @use HasFactory<MatchFactory> */
     use HasFactory;
 

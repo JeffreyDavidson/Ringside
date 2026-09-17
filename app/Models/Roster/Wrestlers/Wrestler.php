@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\Wrestlers;
 
+use App\Models\Concerns\TracksActivity;
+
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
@@ -108,6 +110,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
+    use TracksActivity;
     use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 

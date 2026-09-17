@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\Referees;
 
+use App\Models\Concerns\TracksActivity;
+
 use App\Builders\Matches\EventMatchBuilder;
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;
@@ -90,6 +92,7 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(RefereeBuilder::class)]
 class Referee extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
+    use TracksActivity;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<RefereeFactory> */
