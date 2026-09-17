@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${SKIP_PRE_PUSH_CHECKS:-0}" == "1" ]]; then
+    echo "Skipping pre-push checks (SKIP_PRE_PUSH_CHECKS=1)."
+    exit 0
+fi
+
+echo "Running Ringside pre-push checks..."
+composer test:push
