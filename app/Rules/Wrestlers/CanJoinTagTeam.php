@@ -10,7 +10,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class CanJoinTagTeam implements ValidationRule
 {
-    public function __construct(private int|string|null $tagTeamId = null) {}
+    public function __construct(private readonly int|string|null $tagTeamId = null) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

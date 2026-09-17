@@ -240,6 +240,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

@@ -15,12 +15,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
-final class MatchAssignmentConflictService
+final readonly class MatchAssignmentConflictService
 {
     public function __construct(
-        private readonly MatchCompetitorConflictService $competitorConflicts,
-        private readonly MatchRefereeConflictService $refereeConflicts,
-        private readonly MatchTitleConflictService $titleConflicts,
+        private MatchCompetitorConflictService $competitorConflicts,
+        private MatchRefereeConflictService $refereeConflicts,
+        private MatchTitleConflictService $titleConflicts,
     ) {}
 
     public function ensureEventCanBeRescheduled(Event $event, ?Carbon $date): void

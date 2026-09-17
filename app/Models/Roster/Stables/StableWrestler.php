@@ -41,6 +41,7 @@ use Illuminate\Support\Carbon;
 class StableWrestler extends Pivot
 {
     /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
         return [

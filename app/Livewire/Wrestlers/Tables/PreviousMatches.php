@@ -17,7 +17,7 @@ class PreviousMatches extends BasePreviousMatchesTable
      * Wrestler to use for component.
      */
     #[Locked]
-    public ?int $wrestlerId;
+    public ?int $wrestlerId = null;
 
     /** @return EventMatchBuilder<EventMatch> */
     public function builder(): EventMatchBuilder
@@ -29,6 +29,7 @@ class PreviousMatches extends BasePreviousMatchesTable
             ->forWrestlerId($wrestlerId);
     }
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();

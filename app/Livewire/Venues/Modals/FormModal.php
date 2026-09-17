@@ -19,10 +19,13 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    #[\Override]
     protected ?string $createdEventName = 'venueCreated';
 
+    #[\Override]
     protected ?string $updatedEventName = 'venueUpdated';
 
+    #[\Override]
     protected bool $resetFormAfterSubmission = true;
 
     public CreateEditForm $form;
@@ -51,6 +54,7 @@ class FormModal extends BaseFormModal
         $this->form->zipcode = fake('en_US')->numerify('#####');
     }
 
+    #[\Override]
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {
@@ -75,6 +79,7 @@ class FormModal extends BaseFormModal
         $this->createAction->handle($this->form->toData());
     }
 
+    #[\Override]
     public function closeModal(): void
     {
         parent::closeModal();

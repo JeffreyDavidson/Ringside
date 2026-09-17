@@ -38,6 +38,7 @@ class DateColumn extends Column
         return $this;
     }
 
+    #[\Override]
     public function resolveValue(mixed $row): string
     {
         $value = data_get($row, $this->getField());

@@ -21,7 +21,7 @@ class PreviousWrestlers extends DataTableComponent
     use ShowTableTrait;
 
     #[Locked]
-    public ?int $managerId;
+    public ?int $managerId = null;
 
     protected string $databaseTableName = 'wrestlers_managers';
 

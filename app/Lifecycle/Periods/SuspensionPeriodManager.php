@@ -10,7 +10,7 @@ use App\Models\Contracts\Suspendable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-final class SuspensionPeriodManager
+final readonly class SuspensionPeriodManager
 {
     public function __construct(private LifecyclePeriodWriter $periodWriter) {}
 

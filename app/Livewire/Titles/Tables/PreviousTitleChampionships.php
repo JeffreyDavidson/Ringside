@@ -32,7 +32,7 @@ class PreviousTitleChampionships extends DataTableComponent
      * Undocumented variable.
      */
     #[Locked]
-    public ?int $titleId;
+    public ?int $titleId = null;
 
     protected RosterResourceRouteResolver $routeResolver;
 

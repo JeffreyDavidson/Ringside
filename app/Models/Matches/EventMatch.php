@@ -92,6 +92,7 @@ class EventMatch extends Model implements SoftDeletable
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

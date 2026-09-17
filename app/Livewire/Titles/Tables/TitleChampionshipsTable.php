@@ -20,6 +20,7 @@ class TitleChampionshipsTable extends DataTableComponent
      */
     public ?Title $title = null;
 
+    #[\Override]
     public function mount(?Title $title = null): void
     {
         $this->title = $title;

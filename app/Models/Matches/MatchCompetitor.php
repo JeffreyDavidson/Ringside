@@ -61,6 +61,7 @@ class MatchCompetitor extends MorphPivot
     /** @use HasFactory<MatchCompetitorFactory> */
     use HasFactory;
 
+    #[\Override]
     public $incrementing = true;
 
     /**
@@ -92,6 +93,7 @@ class MatchCompetitor extends MorphPivot
     /**
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

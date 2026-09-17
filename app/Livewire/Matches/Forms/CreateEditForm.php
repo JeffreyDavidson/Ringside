@@ -138,7 +138,7 @@ class CreateEditForm extends BaseForm
             ],
         ];
 
-        return array_merge($baseRules, (new MatchCompetitorRuleSet($this->matchType))->rules());
+        return array_merge($baseRules, new MatchCompetitorRuleSet($this->matchType)->rules());
     }
 
     private function requiredMatchType(): MatchType

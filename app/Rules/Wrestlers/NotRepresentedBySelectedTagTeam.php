@@ -14,7 +14,7 @@ class NotRepresentedBySelectedTagTeam implements ValidationRule
     /**
      * @param  Collection<int, int>  $tagTeamIds
      */
-    public function __construct(private Collection $tagTeamIds) {}
+    public function __construct(private readonly Collection $tagTeamIds) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

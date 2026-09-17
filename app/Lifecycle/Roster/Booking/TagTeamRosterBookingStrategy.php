@@ -9,11 +9,11 @@ use App\Lifecycle\Roster\TagTeams\TagTeamMembershipRequirements;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-final class TagTeamRosterBookingStrategy implements RosterBookingStrategy
+final readonly class TagTeamRosterBookingStrategy implements RosterBookingStrategy
 {
     public function __construct(
-        private readonly TagTeam $tagTeam,
-        private readonly RosterBookingStrategyResolver $strategyResolver,
+        private TagTeam $tagTeam,
+        private RosterBookingStrategyResolver $strategyResolver,
     ) {}
 
     public function allows(): bool

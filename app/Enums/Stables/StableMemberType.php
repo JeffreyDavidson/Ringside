@@ -36,12 +36,12 @@ enum StableMemberType: string
      */
     public static function fromModel(Model $model): self
     {
-        return match (get_class($model)) {
+        return match ($model::class) {
             Wrestler::class => self::WRESTLER,
             TagTeam::class => self::TAG_TEAM,
             Manager::class => self::MANAGER,
             default => throw new InvalidArgumentException(
-                'Unsupported member type: '.get_class($model)
+                'Unsupported member type: '.$model::class
             )
         };
     }

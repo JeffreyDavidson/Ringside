@@ -10,7 +10,7 @@ use App\Models\Contracts\Injurable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
-final class InjuryPeriodManager
+final readonly class InjuryPeriodManager
 {
     public function __construct(private LifecyclePeriodWriter $periodWriter) {}
 

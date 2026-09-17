@@ -28,12 +28,16 @@ class Main extends BaseTable
 {
     use ExecutesBusinessActions;
 
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'stables';
 
+    #[\Override]
     protected string $routeBasePath = 'stables';
 
+    #[\Override]
     protected string $resourceName = 'stables';
 
     /** @return StableBuilder<Stable> */
@@ -68,6 +72,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
         return [

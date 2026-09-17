@@ -153,6 +153,7 @@ class CreateEditForm extends BaseForm
      *
      * @return array<string, string> Custom validation attributes for this form
      */
+    #[\Override]
     protected function validationAttributes(): array
     {
         return [

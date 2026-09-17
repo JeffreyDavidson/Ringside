@@ -9,9 +9,9 @@ use App\Exceptions\Roster\Stables\CannotBeRestoredException;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
 
-final class StableDeletionEligibility
+final readonly class StableDeletionEligibility
 {
-    public function __construct(private readonly StableMembershipService $membershipService) {}
+    public function __construct(private StableMembershipService $membershipService) {}
 
     public function canDelete(Stable $stable): bool
     {

@@ -41,6 +41,7 @@ use Illuminate\Support\Carbon;
 class StableTagTeam extends Pivot
 {
     /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
         return [

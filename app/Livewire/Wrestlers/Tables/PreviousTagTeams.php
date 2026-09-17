@@ -32,13 +32,14 @@ class PreviousTagTeams extends BasePreviousTagTeamsTable
      * @var int|null The wrestler's ID, or null if not set
      */
     #[Locked]
-    public ?int $wrestlerId;
+    public ?int $wrestlerId = null;
 
     /**
      * The database table name for the main query.
      *
      * @var string The name of the tag_teams_wrestlers pivot table
      */
+    #[\Override]
     public string $databaseTableName = 'tag_teams_wrestlers';
 
     /** @return TagTeamMembershipBuilder<TagTeamWrestler> */

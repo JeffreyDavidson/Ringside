@@ -16,6 +16,7 @@ use Illuminate\View\View;
  */
 class FormModal extends BaseFormModal
 {
+    #[\Override]
     protected string $modelTitleField = 'full_name';
 
     public CreateEditForm $form;

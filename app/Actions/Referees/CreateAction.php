@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class CreateAction
 {
     public function __construct(
-        private EmployAction $employAction
+        private readonly EmployAction $employAction
     ) {}
 
     /**

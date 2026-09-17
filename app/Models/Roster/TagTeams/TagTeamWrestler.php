@@ -51,6 +51,7 @@ class TagTeamWrestler extends Pivot
     use HasFactory;
 
     /** @return array<string, string> */
+    #[\Override]
     protected function casts(): array
     {
         return [

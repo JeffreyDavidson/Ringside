@@ -9,12 +9,12 @@ use App\Data\Matches\MatchResultData;
 use App\Models\Matches\EventMatch;
 use App\Models\Matches\MatchCompetitor;
 
-final class MatchOutcomeRequirements
+final readonly class MatchOutcomeRequirements
 {
     public function __construct(
-        private readonly MatchWinningSideRequirement $winningSide,
-        private readonly MatchEntryOrderRequirement $entryOrder,
-        private readonly MatchEliminationRequirement $eliminations,
+        private MatchWinningSideRequirement $winningSide,
+        private MatchEntryOrderRequirement $entryOrder,
+        private MatchEliminationRequirement $eliminations,
     ) {}
 
     /**

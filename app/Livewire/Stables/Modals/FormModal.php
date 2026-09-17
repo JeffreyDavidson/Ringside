@@ -45,6 +45,7 @@ class FormModal extends BaseFormModal
         $this->form->started_at = $this->generateOptionalStartDate();
     }
 
+    #[\Override]
     public function getModalTitle(): string
     {
         if ($this->form->isEditing()) {

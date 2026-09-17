@@ -9,9 +9,9 @@ use App\Models\Roster\Referees\Referee;
 use App\Models\Roster\TagTeams\TagTeam;
 use App\Models\Roster\Wrestlers\Wrestler;
 
-final class RosterBookingEligibility
+final readonly class RosterBookingEligibility
 {
-    public function __construct(private readonly RosterBookingStrategyResolver $strategyResolver) {}
+    public function __construct(private RosterBookingStrategyResolver $strategyResolver) {}
 
     public function allows(Wrestler|Referee|TagTeam $rosterMember): bool
     {

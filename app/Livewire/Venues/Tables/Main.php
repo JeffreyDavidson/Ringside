@@ -18,12 +18,16 @@ class Main extends BaseTable
 {
     use ExecutesBusinessActions;
 
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'venues';
 
+    #[\Override]
     protected string $routeBasePath = 'venues';
 
+    #[\Override]
     protected string $resourceName = 'venues';
 
     /**

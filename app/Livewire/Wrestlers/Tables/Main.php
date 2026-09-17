@@ -36,12 +36,16 @@ class Main extends BaseTable
     use ExecutesBusinessActions;
     use ExecutesRosterActions;
 
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'wrestlers';
 
+    #[\Override]
     protected string $routeBasePath = 'wrestlers';
 
+    #[\Override]
     protected string $resourceName = 'wrestlers';
 
     /** @return WrestlerBuilder<Wrestler> */
@@ -78,6 +82,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      **/
+    #[\Override]
     public function filters(): array
     {
         return [
@@ -119,6 +124,7 @@ class Main extends BaseTable
      *
      * @var array<string, string>
      */
+    #[\Override]
     protected $listeners = ['wrestler-action' => 'handleWrestlerAction'];
 
     protected function getDefaultActionColumn(): Column

@@ -14,7 +14,7 @@ use Illuminate\Support\Carbon;
 
 class RecordLifecycleTransitionAction
 {
-    public function __construct(private Guard $auth) {}
+    public function __construct(private readonly Guard $auth) {}
 
     /** @param array<string, mixed> $context */
     public function handle(

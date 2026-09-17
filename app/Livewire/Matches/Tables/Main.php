@@ -22,12 +22,16 @@ class Main extends BaseTable
 {
     use ExecutesBusinessActions;
 
+    #[\Override]
     protected bool $showActionColumn = false;
 
+    #[\Override]
     protected string $databaseTableName = 'events_matches';
 
+    #[\Override]
     protected string $routeBasePath = 'matches';
 
+    #[\Override]
     protected string $resourceName = 'matches';
 
     /**

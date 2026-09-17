@@ -44,6 +44,7 @@ class MatchStipulation extends Model
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -56,6 +57,7 @@ class MatchStipulation extends Model
      *
      * @var array<string, mixed>
      */
+    #[\Override]
     protected $attributes = [
         'is_active' => true,
     ];

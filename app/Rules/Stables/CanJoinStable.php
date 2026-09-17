@@ -22,9 +22,9 @@ class CanJoinStable implements ValidationRule
      * @param  class-string<TMember>  $memberClass
      */
     public function __construct(
-        private string $memberClass,
-        private ?int $stableId = null,
-        private ?Carbon $stableStartDate = null,
+        private readonly string $memberClass,
+        private readonly ?int $stableId = null,
+        private readonly ?Carbon $stableStartDate = null,
     ) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void

@@ -59,6 +59,7 @@ class CreateEditForm extends BaseForm
     }
 
     /** @return array<string, string> */
+    #[\Override]
     public function validationAttributes(): array
     {
         return [

@@ -16,10 +16,11 @@ use Livewire\Attributes\Locked;
 /** @extends BasePreviousManagersTable<Manager> */
 class PreviousManagers extends BasePreviousManagersTable
 {
+    #[\Override]
     public string $databaseTableName = 'managers';
 
     #[Locked]
-    public ?int $stableId;
+    public ?int $stableId = null;
 
     /**
      * @return ManagerBuilder<Manager>
@@ -34,6 +35,7 @@ class PreviousManagers extends BasePreviousManagersTable
     /**
      * @return array<int, Column>
      */
+    #[\Override]
     public function columns(): array
     {
         return [

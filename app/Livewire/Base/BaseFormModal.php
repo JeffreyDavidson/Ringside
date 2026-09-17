@@ -36,6 +36,7 @@ abstract class BaseFormModal extends BaseModal
         $this->isModalOpen = true;
     }
 
+    #[\Override]
     public function closeModal(): void
     {
         $this->isModalOpen = false;

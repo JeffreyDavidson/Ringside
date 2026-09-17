@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateAction
 {
-    public function __construct(private StartActivityPeriodAction $startActivityPeriod) {}
+    public function __construct(private readonly StartActivityPeriodAction $startActivityPeriod) {}
 
     /**
      * Update a title.

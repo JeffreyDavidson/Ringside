@@ -24,7 +24,7 @@ class PreviousTagTeams extends DataTableComponent
      * ManagerId to use for component.
      */
     #[Locked]
-    public ?int $managerId;
+    public ?int $managerId = null;
 
     protected string $databaseTableName = 'tag_teams_managers';
 

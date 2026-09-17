@@ -18,8 +18,9 @@ class PreviousManagers extends BasePreviousManagersTable
      * Wrestler to use for component.
      */
     #[Locked]
-    public ?int $wrestlerId;
+    public ?int $wrestlerId = null;
 
+    #[\Override]
     public string $databaseTableName = 'wrestlers_managers';
 
     /** @return ManagerAssignmentBuilder<WrestlerManager> */

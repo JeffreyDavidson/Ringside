@@ -12,11 +12,11 @@ use App\Models\Roster\Managers\Manager;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-final class ReinstateAction
+final readonly class ReinstateAction
 {
     public function __construct(
-        private readonly SuspensionPeriodManager $suspensionPeriods,
-        private readonly IndividualSuspensionEligibility $eligibility,
+        private SuspensionPeriodManager $suspensionPeriods,
+        private IndividualSuspensionEligibility $eligibility,
     ) {}
 
     /**

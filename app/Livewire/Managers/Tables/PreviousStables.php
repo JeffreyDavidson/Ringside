@@ -20,10 +20,12 @@ class PreviousStables extends BasePreviousStablesTable
      * ManagerId to use for component.
      */
     #[Locked]
-    public ?int $managerId;
+    public ?int $managerId = null;
 
+    #[\Override]
     protected string $databaseTableName = 'stables';
 
+    #[\Override]
     protected string $resourceName = 'stables';
 
     /**
@@ -38,6 +40,7 @@ class PreviousStables extends BasePreviousStablesTable
         return StableManagerHistoryQuery::previousStablesForManagerId($managerId);
     }
 
+    #[\Override]
     public function columns(): array
     {
         return [

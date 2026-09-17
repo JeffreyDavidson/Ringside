@@ -35,12 +35,16 @@ class Main extends BaseTable
     use ExecutesBusinessActions;
     use ExecutesRosterActions;
 
+    #[\Override]
     protected bool $showActionColumn = true;
 
+    #[\Override]
     protected string $databaseTableName = 'tag_teams';
 
+    #[\Override]
     protected string $routeBasePath = 'tag-teams';
 
+    #[\Override]
     protected string $resourceName = 'tag teams';
 
     /** @return TagTeamBuilder<TagTeam> */
@@ -75,6 +79,7 @@ class Main extends BaseTable
     /**
      * @return array<int, Filter>
      */
+    #[\Override]
     public function filters(): array
     {
         return [
