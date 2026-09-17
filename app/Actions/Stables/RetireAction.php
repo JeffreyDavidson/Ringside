@@ -15,6 +15,7 @@ use App\Lifecycle\Roster\TagTeams\TagTeamRetirementEligibility;
 use App\Models\Roster\Stables\Stable;
 use App\Services\Roster\Stables\StableMembershipService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class RetireAction
@@ -54,7 +55,7 @@ class RetireAction
             $currentMembers = $this->membershipService->currentMembers($lockedStable);
             $this->removeStableMembersAction->handle($lockedStable, $currentMembers, $operationalDate);
 
-            if ($currentMembers->wrestlers) {
+            if ($currentMembers->wrestlers instanceof Collection) {
                 foreach ($currentMembers->wrestlers as $wrestler) {
                     if ($this->individualRetirementEligibility->canRetire($wrestler)) {
                         $this->wrestlersRetireAction->handle($wrestler, $retirementDate);
@@ -62,7 +63,7 @@ class RetireAction
                 }
             }
 
-            if ($currentMembers->tagTeams) {
+            if ($currentMembers->tagTeams instanceof Collection) {
                 foreach ($currentMembers->tagTeams as $tagTeam) {
                     if ($this->tagTeamRetirementEligibility->canRetire($tagTeam)) {
                         $this->tagTeamsRetireAction->handle($tagTeam, $retirementDate);

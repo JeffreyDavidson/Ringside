@@ -76,7 +76,7 @@ class CanJoinStable implements ValidationRule
             return;
         }
 
-        if ($this->stableStartDate && ! $member->currentEmployment()
+        if ($this->stableStartDate instanceof Carbon && ! $member->currentEmployment()
             ->where('started_at', '<=', $this->stableStartDate)
             ->exists()) {
             $fail("This member's employment must begin on or before the stable's start date.");

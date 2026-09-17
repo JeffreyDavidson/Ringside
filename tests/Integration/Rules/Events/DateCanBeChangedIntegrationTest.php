@@ -153,7 +153,7 @@ describe('DateCanBeChanged Validation Rule Integration Tests', function () {
 
             // Assert
             expect($messages)->toHaveCount(2);
-            expect($messages)->toMatchArray([0 => $messages[1], 0 => "Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred."]);
+            expect($messages)->toMatchArray([0 => $messages[1], 1 => "Event [{$pastEvent->name}] cannot be rescheduled because it has already occurred."]);
         });
 
         test('attribute name does not affect validation logic', function () {

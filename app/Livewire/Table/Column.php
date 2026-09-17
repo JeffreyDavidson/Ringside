@@ -140,7 +140,7 @@ class Column
             return view($this->viewPath, ['row' => $row])->render();
         }
 
-        if ($this->labelCallback) {
+        if ($this->labelCallback instanceof Closure) {
             $result = ($this->labelCallback)($row, $this);
 
             return $result instanceof View ? $result->render() : $this->resolveStringValue($result);

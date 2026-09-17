@@ -7,6 +7,7 @@ namespace App\Actions\TagTeams;
 use App\Actions\Managers\EmployCurrentManagersAction;
 use App\Data\TagTeams\TagTeamData;
 use App\Models\Roster\TagTeams\TagTeam;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -45,7 +46,7 @@ class UpdateAction
                 $updateDate,
             );
 
-            if ($tagTeamData->employment_date) {
+            if ($tagTeamData->employment_date instanceof Carbon) {
                 if (! $lockedTagTeam->currentEmployment()->exists()) {
                     $this->employAction->handle($lockedTagTeam, $tagTeamData->employment_date);
                 } else {

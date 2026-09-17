@@ -57,6 +57,6 @@ class DateColumn extends Column
 
         $date = Carbon::createFromFormat($this->inputFormat, $value);
 
-        return $date ? $date->format($this->outputFormat) : $this->emptyValue;
+        return $date instanceof Carbon ? $date->format($this->outputFormat) : $this->emptyValue;
     }
 }

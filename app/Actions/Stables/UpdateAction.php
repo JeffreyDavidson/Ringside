@@ -7,6 +7,7 @@ namespace App\Actions\Stables;
 use App\Data\Stables\StableData;
 use App\Exceptions\Lifecycle\InvalidDateRangeException;
 use App\Models\Roster\Stables\Stable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class UpdateAction
@@ -34,7 +35,7 @@ class UpdateAction
      */
     public function handle(Stable $stable, StableData $stableData): Stable
     {
-        if ($stableData->start_date && $stableData->end_date && $stableData->end_date->lt($stableData->start_date)) {
+        if ($stableData->start_date instanceof Carbon && $stableData->end_date instanceof Carbon && $stableData->end_date->lt($stableData->start_date)) {
             throw InvalidDateRangeException::endBeforeStart(
                 $stableData->start_date,
                 $stableData->end_date,

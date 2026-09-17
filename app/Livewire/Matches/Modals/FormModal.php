@@ -145,7 +145,8 @@ class FormModal extends BaseFormModal
         }
     }
 
-    public function getMatchTypeAllowsTagTeamsProperty(): bool
+    #[Computed]
+    public function matchTypeAllowsTagTeams(): bool
     {
         return $this->form->matchType?->allowsTagTeams() ?? false;
     }
