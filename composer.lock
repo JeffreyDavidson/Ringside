@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "78689d7a5421b2838d6a33f7281ed51c",
+    "content-hash": "bf06de036c24c0883451db12052b76f5",
     "packages": [
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -9620,6 +9620,96 @@
                 "source": "https://github.com/mockery/mockery"
             },
             "time": "2024-05-16T03:13:13+00:00"
+        },
+        {
+            "name": "mrpunyapal/laravel-auditor",
+            "version": "v0.1.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MrPunyapal/laravel-auditor.git",
+                "reference": "84a25dea782f08bcfa134e3d3d942c10646770c2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MrPunyapal/laravel-auditor/zipball/84a25dea782f08bcfa134e3d3d942c10646770c2",
+                "reference": "84a25dea782f08bcfa134e3d3d942c10646770c2",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^12.0||^13.0",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.9",
+                "laravel/agent-detector": "^2.0",
+                "laravel/chisel": "^0.1",
+                "laravel/mcp": "^0.7.1|^0.8.0|^0.9.0",
+                "laravel/pao": "^1.0",
+                "laravel/pint": "^1.29",
+                "laravel/prompts": "^0.3",
+                "mrpunyapal/docsmith": "^0.5.1",
+                "orchestra/testbench": "^10.0||^11.0",
+                "pestphp/pest": "^4.6||^5.0",
+                "pestphp/pest-plugin-laravel": "^4.1||^5.0",
+                "pestphp/pest-plugin-type-coverage": "^4.0||^5.0",
+                "phpstan/extension-installer": "^1.4"
+            },
+            "suggest": {
+                "laravel/boost": "Expose Auditor guidelines, skills, and context tools through Laravel Boost.",
+                "laravel/mcp": "Required by Laravel Boost to load Auditor's Boost MCP tool adapters."
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "LaravelAuditor": "LaravelAuditor\\Facades\\LaravelAuditor"
+                    },
+                    "providers": [
+                        "LaravelAuditor\\LaravelAuditorServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "LaravelAuditor\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Punyapal Shah",
+                    "email": "mrpunyapal@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Evidence-based audit methodology and read-only Laravel context tools for existing AI coding agents.",
+            "homepage": "https://mrpunyapal.github.io/laravel-auditor",
+            "keywords": [
+                "Audit",
+                "Context",
+                "ai-agents",
+                "auditing",
+                "code-quality",
+                "dev",
+                "dev-tool",
+                "laravel",
+                "laravel-auditor",
+                "mcp"
+            ],
+            "support": {
+                "issues": "https://github.com/MrPunyapal/laravel-auditor/issues",
+                "source": "https://github.com/MrPunyapal/laravel-auditor/tree/v0.1.6"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/mrpunyapal",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-09-06T04:10:38+00:00"
         },
         {
             "name": "myclabs/deep-copy",
