@@ -3,10 +3,7 @@
 declare(strict_types=1);
 
 use Pest\Rector\Set\PestSetList;
-use Rector\CodeQuality\Rector\If_\ObjectExplicitBoolCompareRector;
 use Rector\Config\RectorConfig;
-use Rector\TypeDeclaration\Rector\BooleanAnd\BinaryOpNullableToInstanceofRector;
-use RectorLaravel\Rector\Class_\LivewireComponentComputedMethodToComputedAttributeRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -16,9 +13,4 @@ return RectorConfig::configure()
     ->withSets([
         PestSetList::CODING_STYLE,
     ])
-    ->withComposerBased(laravel: true)
-    ->withSkip([
-        BinaryOpNullableToInstanceofRector::class,
-        LivewireComponentComputedMethodToComputedAttributeRector::class,
-        ObjectExplicitBoolCompareRector::class,
-    ]);
+    ->withComposerBased(laravel: true);
