@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Roster\Stables;
 
 use App\Models\Concerns\TracksActivity;
-
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Lifecycle\Roster\Stables\StableStatusResolver;
@@ -85,6 +84,7 @@ use Illuminate\Support\Carbon;
 class Stable extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
     use TracksActivity;
+
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 

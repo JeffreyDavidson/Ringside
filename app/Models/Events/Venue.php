@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Events;
 
 use App\Models\Concerns\TracksActivity;
-
 use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Contracts\SoftDeletable;
@@ -51,6 +50,7 @@ use Illuminate\Support\Carbon;
 class Venue extends Model implements SoftDeletable
 {
     use TracksActivity;
+
     /** @use HasFactory<VenueFactory> */
     use HasFactory;
 

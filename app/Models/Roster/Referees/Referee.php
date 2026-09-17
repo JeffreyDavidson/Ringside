@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Roster\Referees;
 
 use App\Models\Concerns\TracksActivity;
-
 use App\Builders\Matches\EventMatchBuilder;
 use App\Builders\Roster\RefereeBuilder;
 use App\Enums\Shared\EmploymentStatus;

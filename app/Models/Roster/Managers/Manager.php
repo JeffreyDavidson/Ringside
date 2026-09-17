@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models\Roster\Managers;
 
 use App\Models\Concerns\TracksActivity;
-
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasComputedEmploymentStatus;
