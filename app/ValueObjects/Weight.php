@@ -8,7 +8,7 @@ use App\Casts\WeightCast;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use InvalidArgumentException;
 
-readonly class Weight implements Castable, \Stringable
+readonly class Weight implements \Stringable, Castable
 {
     public function __construct(public int $pounds)
     {
