@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models\Events;
 
-use App\Models\Concerns\TracksActivity;
 use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HasLifecycleTransitions;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;
 use App\ValueObjects\Address;
 use Database\Factories\Events\VenueFactory;
@@ -49,13 +49,12 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(VenueBuilder::class)]
 class Venue extends Model implements SoftDeletable
 {
-    use TracksActivity;
-
     /** @use HasFactory<VenueFactory> */
     use HasFactory;
 
     use HasLifecycleTransitions;
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return HasMany<Event, $this> */
     public function events(): HasMany

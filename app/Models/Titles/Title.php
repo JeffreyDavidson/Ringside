@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Titles;
 
-use App\Models\Concerns\TracksActivity;
 use App\Builders\Titles\TitleBuilder;
 use App\Enums\Titles\TitleStatus;
 use App\Enums\Titles\TitleType;
@@ -12,6 +11,7 @@ use App\Lifecycle\Titles\TitleStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\SoftDeletable;
@@ -78,8 +78,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TitleBuilder::class)]
 class Title extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
-    use TracksActivity;
-
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 
@@ -92,6 +90,7 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
     use IsRetirable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return HasMany<TitleChampionship, $this> */
     public function championships(): HasMany

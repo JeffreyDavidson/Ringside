@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\Stables;
 
-use App\Models\Concerns\TracksActivity;
 use App\Builders\Roster\StableBuilder;
 use App\Enums\Stables\StableStatus;
 use App\Lifecycle\Roster\Stables\StableStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\SoftDeletable;
@@ -83,8 +83,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(StableBuilder::class)]
 class Stable extends Model implements HasActivityPeriodsContract, Retirable, SoftDeletable
 {
-    use TracksActivity;
-
     /** @use HasActivityPeriods<static> */
     use HasActivityPeriods;
 
@@ -97,6 +95,7 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
     use IsRetirable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return BelongsToMany<Wrestler, $this, StableWrestler, 'pivot'> */
     public function wrestlers(): BelongsToMany

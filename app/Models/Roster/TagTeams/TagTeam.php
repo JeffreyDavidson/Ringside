@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\TagTeams;
 
-use App\Models\Concerns\TracksActivity;
 use App\Builders\Roster\TagTeamBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
@@ -13,6 +12,7 @@ use App\Models\Concerns\HasMatchParticipations;
 use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
@@ -110,7 +110,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(TagTeamBuilder::class)]
 class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employable, Manageable, Retirable, SoftDeletable, Suspendable
 {
-    use TracksActivity;
     use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 
@@ -129,6 +128,7 @@ class TagTeam extends Model implements CanBeAStableMember, CanBeChampion, Employ
     use IsSuspendable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return BelongsToMany<Manager, $this, TagTeamManager> */
     public function managers(): BelongsToMany

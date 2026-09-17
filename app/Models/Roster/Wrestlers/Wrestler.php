@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\Wrestlers;
 
-use App\Models\Concerns\TracksActivity;
 use App\Builders\Roster\WrestlerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasChampionshipReigns;
@@ -14,6 +13,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
@@ -109,7 +109,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(WrestlerBuilder::class)]
 class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Employable, Injurable, Manageable, Retirable, SoftDeletable, Suspendable
 {
-    use TracksActivity;
     use HasChampionshipReigns;
     use HasComputedEmploymentStatus;
 
@@ -131,6 +130,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     use IsSuspendable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return BelongsToMany<Manager, $this, WrestlerManager> */
     public function managers(): BelongsToMany

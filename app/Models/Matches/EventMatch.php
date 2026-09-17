@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models\Matches;
 
-use App\Models\Concerns\TracksActivity;
 use App\Builders\Matches\EventMatchBuilder;
 use App\Collections\MatchCompetitorsCollection;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Models\Concerns\HasLifecycleTransitions;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
@@ -82,13 +82,12 @@ use Illuminate\Support\Carbon;
 #[UseFactory(MatchFactory::class)]
 class EventMatch extends Model implements SoftDeletable
 {
-    use TracksActivity;
-
     /** @use HasFactory<MatchFactory> */
     use HasFactory;
 
     use HasLifecycleTransitions;
     use SoftDeletes;
+    use TracksActivity;
 
     /**
      * Get the attributes that should be cast.

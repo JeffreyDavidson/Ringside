@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models\Roster\Managers;
 
-use App\Models\Concerns\TracksActivity;
 use App\Builders\Roster\ManagerBuilder;
 use App\Enums\Shared\EmploymentStatus;
 use App\Models\Concerns\HasComputedEmploymentStatus;
@@ -12,6 +11,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
@@ -97,7 +97,6 @@ use Illuminate\Support\Carbon;
 #[UseEloquentBuilder(ManagerBuilder::class)]
 class Manager extends Model implements Employable, Injurable, Retirable, SoftDeletable, Suspendable
 {
-    use TracksActivity;
     use HasComputedEmploymentStatus;
 
     /** @use HasFactory<ManagerFactory> */
@@ -116,6 +115,7 @@ class Manager extends Model implements Employable, Injurable, Retirable, SoftDel
     use IsSuspendable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return BelongsToMany<Wrestler, $this, WrestlerManager> */
     public function wrestlers(): BelongsToMany
