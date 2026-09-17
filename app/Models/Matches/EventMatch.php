@@ -9,6 +9,7 @@ use App\Collections\MatchCompetitorsCollection;
 use App\Enums\MatchFinish;
 use App\Enums\MatchType;
 use App\Models\Concerns\HasLifecycleTransitions;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;
 use App\Models\Events\Event;
 use App\Models\Roster\Referees\Referee;
@@ -86,6 +87,7 @@ class EventMatch extends Model implements SoftDeletable
 
     use HasLifecycleTransitions;
     use SoftDeletes;
+    use TracksActivity;
 
     /**
      * Get the attributes that should be cast.

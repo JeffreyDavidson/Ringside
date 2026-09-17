@@ -11,6 +11,7 @@ use App\Lifecycle\Titles\TitleStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\SoftDeletable;
@@ -89,6 +90,7 @@ class Title extends Model implements HasActivityPeriodsContract, Retirable, Soft
     use IsRetirable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return HasMany<TitleChampionship, $this> */
     public function championships(): HasMany

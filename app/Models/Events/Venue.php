@@ -6,6 +6,7 @@ namespace App\Models\Events;
 
 use App\Builders\Events\VenueBuilder;
 use App\Models\Concerns\HasLifecycleTransitions;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\SoftDeletable;
 use App\ValueObjects\Address;
 use Database\Factories\Events\VenueFactory;
@@ -53,6 +54,7 @@ class Venue extends Model implements SoftDeletable
 
     use HasLifecycleTransitions;
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return HasMany<Event, $this> */
     public function events(): HasMany

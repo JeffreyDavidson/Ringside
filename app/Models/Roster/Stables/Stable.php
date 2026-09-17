@@ -10,6 +10,7 @@ use App\Lifecycle\Roster\Stables\StableStatusResolver;
 use App\Models\Concerns\HasActivityPeriods;
 use App\Models\Concerns\HasLifecycleTransitions;
 use App\Models\Concerns\IsRetirable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\HasActivityPeriods as HasActivityPeriodsContract;
 use App\Models\Contracts\Retirable;
 use App\Models\Contracts\SoftDeletable;
@@ -94,6 +95,7 @@ class Stable extends Model implements HasActivityPeriodsContract, Retirable, Sof
     use IsRetirable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return BelongsToMany<Wrestler, $this, StableWrestler, 'pivot'> */
     public function wrestlers(): BelongsToMany

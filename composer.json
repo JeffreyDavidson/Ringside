@@ -15,7 +15,8 @@
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.0",
         "stancl/tenancy": "^3.10",
-        "wire-elements/modal": "^3.0"
+        "wire-elements/modal": "^3.0",
+        "spatie/laravel-activitylog": "^5.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",
@@ -98,7 +99,10 @@
         "lint:dirty": "pint --dirty --blade --format agent",
         "lint:check": "@test:lint",
         "test:coverage": "@test:unit",
-        "frontend:check": ["npm run lint", "npm run build"],
+        "frontend:check": [
+            "npm run lint",
+            "npm run build"
+        ],
         "check": [
             "Composer\\Config::disableProcessTimeout",
             "@test:lint",

@@ -76,6 +76,7 @@ class AppServiceProvider extends ServiceProvider
             'stable' => Stable::class,
             'event' => Event::class,
             'venue' => Venue::class,
+            'user' => User::class,
         ]);
 
         Vite::macro('image', fn (string $asset) => Vite::asset("resources/media/{$asset}"));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Events\Event;
 use App\Models\Events\Venue;
+use App\Models\Lifecycle\ActivityPeriod;
 use App\Models\Matches\EventMatch;
 use App\Models\Roster\Managers\Manager;
 use App\Models\Roster\Referees\Referee;
@@ -27,10 +28,11 @@ test('it enforces stable aliases for every polymorphic model', function () {
             'stable' => Stable::class,
             'event' => Event::class,
             'venue' => Venue::class,
+            'user' => User::class,
         ]);
 });
 
 test('it rejects models without an approved polymorphic alias', function () {
-    expect(fn () => (new User)->getMorphClass())
+    expect(fn () => (new ActivityPeriod)->getMorphClass())
         ->toThrow(ClassMorphViolationException::class);
 });

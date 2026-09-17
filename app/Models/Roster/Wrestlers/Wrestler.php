@@ -13,6 +13,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\CanBeAStableMember;
 use App\Models\Contracts\CanBeChampion;
 use App\Models\Contracts\Employable;
@@ -129,6 +130,7 @@ class Wrestler extends Model implements CanBeAStableMember, CanBeChampion, Emplo
     use IsSuspendable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return BelongsToMany<Manager, $this, WrestlerManager> */
     public function managers(): BelongsToMany

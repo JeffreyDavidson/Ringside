@@ -12,6 +12,7 @@ use App\Models\Concerns\IsEmployable;
 use App\Models\Concerns\IsInjurable;
 use App\Models\Concerns\IsRetirable;
 use App\Models\Concerns\IsSuspendable;
+use App\Models\Concerns\TracksActivity;
 use App\Models\Contracts\Employable;
 use App\Models\Contracts\Injurable;
 use App\Models\Contracts\Retirable;
@@ -108,6 +109,7 @@ class Referee extends Model implements Employable, Injurable, Retirable, SoftDel
     use IsSuspendable;
 
     use SoftDeletes;
+    use TracksActivity;
 
     /** @return BelongsToMany<EventMatch, $this> */
     public function matches(): BelongsToMany
