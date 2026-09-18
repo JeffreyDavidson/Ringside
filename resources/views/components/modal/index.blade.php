@@ -1,6 +1,5 @@
 @props([
     'size' => null,
-    'footer' => null,
 ])
 
 <div
