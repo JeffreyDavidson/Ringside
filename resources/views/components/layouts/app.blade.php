@@ -50,7 +50,7 @@
     </div>
     <!-- End of Main -->
     <!-- End of Page -->
-    @livewire('wire-elements-modal')
+    @livewire('wire-elements-modal', [])
     @livewireScriptConfig
 </body>
 </html>

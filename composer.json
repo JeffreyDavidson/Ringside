@@ -122,7 +122,7 @@
         "test:rector:pest": "rector --config=rector-pest.php --dry-run",
         "test:lint": "pint --blade --test",
         "test:types": [
-            "phpstan analyze --memory-limit=4G --ansi",
+            "phpstan analyze --autoload-file=phpstan-bootstrap.php --memory-limit=4G --ansi",
             "@test:types:pest"
         ],
         "test:types:pest": "phpstan analyze --configuration=phpstan-pest.neon --memory-limit=4G --ansi",
