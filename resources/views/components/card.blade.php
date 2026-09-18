@@ -1,9 +1,12 @@
 @props([
-    'variant' => 'default',
-    'class' => '',
+    'variant' => null,
+    'class' => null,
 ])
 
 @php
+    $variant ??= 'default';
+    $class ??= '';
+
     $classes = collect([
         // Base card classes using Metronic design tokens
         'bg-card text-card-foreground border border-border overflow-hidden flex flex-col',
