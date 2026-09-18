@@ -247,7 +247,7 @@ jobs:
                   GH_TOKEN: ${{ github.token }}
               run: |
                   set +e
-                  php -d memory_limit=4G ./vendor/bin/pest --ci --configuration phpunit.application.xml --tia --baselined --filtered --no-coverage --parallel
+                  php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --tia --baselined --filtered --no-coverage --parallel
                   tia_status=$?
                   set -e
 
@@ -256,7 +256,7 @@ jobs:
                   fi
 
                   echo "::warning::Pest TIA was unavailable or failed validation; running the full application test suite."
-                  php -d memory_limit=4G ./vendor/bin/pest --ci --configuration phpunit.application.xml --no-coverage --parallel
+                  php -d memory_limit=4G ./vendor/bin/pest --ci --exclude-testsuite Browser --no-coverage --parallel
 
     browser-tests:
         name: Browser Tests
