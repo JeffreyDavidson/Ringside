@@ -1,6 +1,9 @@
 @props([
     'variant' => 'default',
     'class' => '',
+    'header' => null,
+    'body' => null,
+    'footer' => null,
 ])
 
 @php
