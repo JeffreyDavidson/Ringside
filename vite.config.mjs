@@ -1,10 +1,12 @@
 import {defineConfig} from "vite";
 import laravel from "laravel-vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
     base: './',
     plugins: [
+        tailwindcss(),
         laravel({
             input: [
                 'resources/js/app.js',
