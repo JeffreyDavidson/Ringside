@@ -1,16 +1,10 @@
 import js from '@eslint/js';
-import prettier from 'eslint-plugin-prettier';
-import prettierConfig from 'eslint-config-prettier';
 
 export default [
     js.configs.recommended,
-    prettierConfig,
     {
-        plugins: {
-            prettier,
-        },
         languageOptions: {
-            ecmaVersion: 2022,
+            ecmaVersion: 'latest',
             sourceType: 'module',
             globals: {
                 Alpine: 'readonly',
@@ -25,25 +19,25 @@ export default [
                 $el: 'readonly',
                 $refs: 'readonly',
                 $data: 'readonly',
+                process: 'readonly',
             },
         },
         rules: {
-            'prettier/prettier': 'error',
             'no-unused-vars': 'warn',
             'no-console': 'off', // Allow console for debugging
             'no-undef': 'error',
-            
+
             // Alpine.js specific rules
             'no-implicit-globals': 'error',
             'prefer-const': 'error',
             'no-var': 'error',
-            
+
             // Code quality
-            'eqeqeq': 'error',
-            'curly': 'error',
+            eqeqeq: 'error',
+            curly: 'error',
             'no-eval': 'error',
             'no-implied-eval': 'error',
-            
+
             // Style preferences
             'prefer-arrow-callback': 'error',
             'prefer-template': 'error',
@@ -58,13 +52,5 @@ export default [
             'storage/**',
             '*.min.js',
         ],
-    },
-    {
-        // Blade template-specific rules for Alpine.js
-        files: ['resources/views/**/*.blade.php'],
-        rules: {
-            // These would need a custom parser for PHP/Blade
-            // For now, we'll focus on JS files
-        },
     },
 ];
