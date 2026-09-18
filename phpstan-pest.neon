@@ -4,9 +4,6 @@ parameters:
   paths:
     - tests
 
-  bootstrapFiles:
-    - bootstrap/app.php
-
   stubFiles:
     - stubs/Illuminate/Http/Response.stub
     - stubs/Illuminate/Testing/TestResponse.stub

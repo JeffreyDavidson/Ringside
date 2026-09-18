@@ -49,8 +49,7 @@
         "phpstan/extension-installer": "^1.4",
         "rector/rector": "^2.3",
         "spatie/pest-plugin-snapshots": "^2.2",
-        "spatie/pest-plugin-test-time": "^2.3",
-        "tomasvotruba/bladestan": "^0.11.7"
+        "spatie/pest-plugin-test-time": "^2.3"
     },
     "config": {
         "optimize-autoloader": true,
@@ -122,10 +121,10 @@
         "test:rector:pest": "rector --config=rector-pest.php --dry-run",
         "test:lint": "pint --blade --test",
         "test:types": [
-            "phpstan analyze --autoload-file=phpstan-bootstrap.php --memory-limit=4G --ansi",
+            "phpstan analyze --memory-limit=4G --ansi",
             "@test:types:pest"
         ],
-        "test:types:pest": "phpstan analyze --autoload-file=phpstan-bootstrap.php --configuration=phpstan-pest.neon --memory-limit=4G --ansi",
+        "test:types:pest": "phpstan analyze --configuration=phpstan-pest.neon --memory-limit=4G --ansi",
         "test:application": "php -d memory_limit=4G ./vendor/bin/pest --ci --configuration phpunit.application.xml --parallel",
         "test:tia": "php -d memory_limit=4G ./vendor/bin/pest --ci --configuration phpunit.application.xml --tia --filtered",
         "test:browser": "php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser --parallel",

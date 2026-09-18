@@ -4,9 +4,6 @@ parameters:
   paths:
     - app  # ✅ Standard — analyzes all app code
 
-  bootstrapFiles:
-    - bootstrap/app.php  # ✅ Correct — loads Laravel's autoloader and service container
-
   excludePaths:
     - tests  # ✅ Tests are analyzed separately with the Pest PHPStan plugin
     - bootstrap/cache  # ✅ Should always be excluded
