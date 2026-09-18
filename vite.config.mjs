@@ -15,7 +15,7 @@ export default defineConfig({
         process.env.ANALYZE &&
             visualizer({
                 filename: 'public/build/bundle-analysis.html',
-                open: true,
+                open: false,
                 gzipSize: true,
                 brotliSize: true,
             }),
