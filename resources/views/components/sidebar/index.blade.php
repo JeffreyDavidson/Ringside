@@ -25,13 +25,13 @@
                 class="default-logo min-h-[22px] max-w-none transition-opacity duration-200"
                 :class="expanded ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
                 src="{{ Vite::image('app/default-logo.svg') }}"
-                alt="{{ config('app.name') }}"
+                alt="{{ \Illuminate\Support\Facades\Config::string('app.name') }}"
             />
             <img
                 class="small-logo absolute top-1/2 left-6 min-h-[22px] max-w-none -translate-y-1/2 transition-opacity duration-200"
                 :class="expanded ? 'opacity-0' : 'opacity-100 group-hover:opacity-0'"
                 src="{{ Vite::image('app/mini-logo.svg') }}"
-                alt="{{ config('app.name') }}"
+                alt="{{ \Illuminate\Support\Facades\Config::string('app.name') }}"
             />
         </a>
 
@@ -91,7 +91,7 @@
                 <img
                     class="min-h-[22px] max-w-none"
                     src="{{ Vite::image('app/default-logo.svg') }}"
-                    alt="{{ config('app.name') }}"
+                    alt="{{ \Illuminate\Support\Facades\Config::string('app.name') }}"
                 />
             </a>
 

@@ -16,6 +16,8 @@ use Livewire\Attributes\Computed;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Title>
+ *
+ * @property-read array<string, string> $getTitleTypes
  */
 class FormModal extends BaseFormModal
 {

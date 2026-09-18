@@ -10,6 +10,9 @@
 @php
     // Extract name from wire:model if not provided (Flux pattern)
     $fieldName = $name ?? $attributes->whereStartsWith('wire:model')->first();
+    if ($fieldName !== null && ! is_string($fieldName)) {
+        throw new \InvalidArgumentException('Form field names must be strings.');
+    }
     if ($fieldName && str_contains($fieldName, '=')) {
         $fieldName = str($fieldName)->after('=')->trim('"\'')->toString();
     }

@@ -1,3 +1,9 @@
+@php
+    $oldFirstName = old('first_name');
+    $oldLastName = old('last_name');
+    $oldEmail = old('email');
+@endphp
+
 <x-layouts.auth>
     <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('register') }}">
         @csrf
@@ -28,7 +34,7 @@
                 class="text-2sm focus:border-primary focus:ring-primary block h-10 w-full appearance-none rounded-md border border-solid border-gray-300 bg-gray-50 px-3 leading-4 font-medium text-gray-700 shadow-none transition-colors outline-none focus:bg-white focus:ring-1"
                 placeholder="Enter your first name"
                 type="text"
-                value="{{ old('first_name') }}"
+                value="{{ is_string($oldFirstName) ? $oldFirstName : '' }}"
                 name="first_name"
                 id="first_name"
                 required
@@ -44,7 +50,7 @@
                 class="text-2sm focus:border-primary focus:ring-primary block h-10 w-full appearance-none rounded-md border border-solid border-gray-300 bg-gray-50 px-3 leading-4 font-medium text-gray-700 shadow-none transition-colors outline-none focus:bg-white focus:ring-1"
                 placeholder="Enter your last name"
                 type="text"
-                value="{{ old('last_name') }}"
+                value="{{ is_string($oldLastName) ? $oldLastName : '' }}"
                 name="last_name"
                 id="last_name"
                 required
@@ -61,7 +67,7 @@
                 class="text-2sm focus:border-primary focus:ring-primary block h-10 w-full appearance-none rounded-md border border-solid border-gray-300 bg-gray-50 px-3 leading-4 font-medium text-gray-700 shadow-none transition-colors outline-none focus:bg-white focus:ring-1"
                 placeholder="email@email.com"
                 type="email"
-                value="{{ old('email') }}"
+                value="{{ is_string($oldEmail) ? $oldEmail : '' }}"
                 name="email"
                 id="email"
                 required

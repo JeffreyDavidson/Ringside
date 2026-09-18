@@ -1,16 +1,11 @@
 @props([
-    'variant' => null,
-    'size' => null,
-    'iconOnly' => null,
-    'tag' => null,
+    'variant' => 'primary',
+    'size' => 'md',
+    'iconOnly' => false,
+    'tag' => 'button',
 ])
 
 @php
-    $variant ??= 'primary';
-    $size ??= 'md';
-    $iconOnly ??= false;
-    $tag ??= 'button';
-
     $sizes = [
         'xs' => 'h-7 px-2 text-2xs gap-1',
         'sm' => 'h-8 px-3 text-xs gap-1.5',

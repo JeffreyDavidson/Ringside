@@ -1,3 +1,8 @@
+@php
+    $oldEmail = old('email');
+    $status = session('status');
+@endphp
+
 <x-layouts.auth>
     <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('password.email') }}">
         @csrf
@@ -9,8 +14,8 @@
         </div>
 
         <!-- Session Status -->
-        @if (session('status'))
-            <div class="text-sm font-medium text-green-600">{{ session('status') }}</div>
+        @if (is_string($status) && $status !== '')
+            <div class="text-sm font-medium text-green-600">{{ $status }}</div>
         @endif
 
         <!-- Email Field -->
@@ -20,7 +25,7 @@
                 class="text-2sm focus:border-primary focus:ring-primary block h-10 w-full appearance-none rounded-md border border-solid border-gray-300 bg-gray-50 px-3 leading-4 font-medium text-gray-700 shadow-none transition-colors outline-none focus:bg-white focus:ring-1"
                 placeholder="email@email.com"
                 type="email"
-                value="{{ old('email') }}"
+                value="{{ is_string($oldEmail) ? $oldEmail : '' }}"
                 name="email"
                 id="email"
                 required

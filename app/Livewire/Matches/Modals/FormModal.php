@@ -25,7 +25,18 @@ use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
-/** @extends BaseFormModal<CreateEditForm, EventMatch> */
+/**
+ * @extends BaseFormModal<CreateEditForm, EventMatch>
+ *
+ * @property-read array<string,string> $getMatchTypes
+ * @property-read array<int|string,string|null> $getTitles
+ * @property-read array<int|string,string|null> $getWrestlers
+ * @property-read array<int|string,string|null> $getReferees
+ * @property-read array<int|string,string|null> $getTagTeams
+ * @property-read array<int, string> $getMatchStipulations
+ * @property-read bool $matchTypeAllowsTagTeams
+ * @property-read CompetitorSelectionLayout|null $competitorSelectionLayout
+ */
 class FormModal extends BaseFormModal
 {
     use PresentsMatchTypesList;

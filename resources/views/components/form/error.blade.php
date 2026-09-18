@@ -3,7 +3,7 @@
     'showIcon' => false,
 ])
 
-@if ($errors->has($name))
+@if (is_string($name) && $errors->has($name))
     <div
         {{
             $attributes->merge([

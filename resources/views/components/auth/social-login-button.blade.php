@@ -1,12 +1,9 @@
 @props([
-    'provider' => null,
-    'href' => null,
+    'provider' => 'google',
+    'href' => '#',
 ])
 
 @php
-    $provider ??= 'google';
-    $href ??= '#';
-
     $configs = [
         'google' => [
             'text' => 'Use Google',

@@ -16,6 +16,9 @@ use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Stable>
+ *
+ * @property-read array<int|string,string|null> $getWrestlers
+ * @property-read array<int|string,string|null> $getTagTeams
  */
 class FormModal extends BaseFormModal
 {

@@ -125,7 +125,7 @@
             "phpstan analyze --autoload-file=phpstan-bootstrap.php --memory-limit=4G --ansi",
             "@test:types:pest"
         ],
-        "test:types:pest": "phpstan analyze --configuration=phpstan-pest.neon --memory-limit=4G --ansi",
+        "test:types:pest": "phpstan analyze --autoload-file=phpstan-bootstrap.php --configuration=phpstan-pest.neon --memory-limit=4G --ansi",
         "test:application": "php -d memory_limit=4G ./vendor/bin/pest --ci --configuration phpunit.application.xml --parallel",
         "test:tia": "php -d memory_limit=4G ./vendor/bin/pest --ci --configuration phpunit.application.xml --tia --filtered",
         "test:browser": "php -d memory_limit=4G ./vendor/bin/pest --ci --testsuite Browser --parallel",

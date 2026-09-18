@@ -6,6 +6,9 @@ namespace App\Livewire\Concerns\Columns;
 
 use App\Livewire\Table\Column;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
+use LogicException;
 
 /**
  * Provides action column functionality for Livewire table components.
@@ -21,10 +24,19 @@ trait HasActionColumn
     protected function getDefaultActionColumn(): Column
     {
         return Column::make(__('core.actions'))
-            ->label(fn ($row, Column $column): Factory|\Illuminate\Contracts\View\View => view('components.tables.columns.action-column', [
-                'path' => $this->routeBasePath,
-                'rowId' => $row->id,
-            ]))
+            ->label(function (Model $row, Column $column): Factory|View {
+                $rowId = $row->getKey();
+
+                if (! is_int($rowId) && ! is_string($rowId)) {
+                    throw new LogicException('Table actions require a persisted model identifier.');
+                }
+
+                return view('components.tables.columns.action-column', [
+                    'path' => $this->routeBasePath,
+                    'rowId' => $rowId,
+                    'resourceName' => $this->resourceName,
+                ]);
+            })
             ->html()
             ->excludeFromColumnSelect();
     }
