@@ -35,10 +35,10 @@
 
     {{-- Error Section --}}
     @if ($name)
-        @error($name)
+        @if ($errors->has($name))
             <div data-form-error>
                 <x-form.error :name="$name" />
             </div>
-        @enderror
+        @endif
     @endif
 </div>
