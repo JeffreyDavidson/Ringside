@@ -16,6 +16,8 @@ use Illuminate\View\View;
 
 /**
  * @extends BaseFormModal<CreateEditForm, Event>
+ *
+ * @property-read array<int|string,string|null> $getVenues
  */
 class FormModal extends BaseFormModal
 {

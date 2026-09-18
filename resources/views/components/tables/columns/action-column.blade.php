@@ -31,7 +31,7 @@
                     <button
                         class="group m-0 ms-2.5 me-2.5 flex grow cursor-pointer items-center rounded-md p-2.5 hover:bg-gray-100"
                         x-on:click="open = false"
-                        wire:click="$dispatch('openModal', { component: '{{ $this->resourceName }}.modals.form-modal', arguments: { 'modelId': '{{ $rowId }}' }})"
+                        wire:click="$dispatch('openModal', { component: '{{ $resourceName }}.modals.form-modal', arguments: { 'modelId': '{{ $rowId }}' }})"
                     >
                         <span class="me-2.5 flex shrink-0 items-center">
                             <x-heroicon-m-pencil-square class="group-hover:text-primary size-5 text-gray-500" />

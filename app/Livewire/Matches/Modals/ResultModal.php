@@ -17,7 +17,12 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use LivewireUI\Modal\ModalComponent;
 
-/** @property-read EventMatch $match */
+/**
+ * @property-read EventMatch $match
+ * @property-read array<string, string> $finishOptions
+ * @property-read array<int, string> $sideOptions
+ * @property-read array<int, string> $competitorOptions
+ */
 class ResultModal extends ModalComponent
 {
     #[Locked]

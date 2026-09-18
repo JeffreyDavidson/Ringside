@@ -34,11 +34,11 @@
     @endif
 
     {{-- Error Section --}}
-    @if ($name)
-        @error($name)
+    @if (is_string($name) && $name !== '')
+        @if ($errors->has($name))
             <div data-form-error>
                 <x-form.error :name="$name" />
             </div>
-        @enderror
+        @endif
     @endif
 </div>

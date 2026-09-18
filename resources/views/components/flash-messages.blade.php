@@ -1,7 +1,14 @@
+@php
+    $notificationMessage = session('error') ?? session('status');
+    if ($notificationMessage !== null && ! is_string($notificationMessage)) {
+        throw new \UnexpectedValueException('Flash notifications must contain a string message.');
+    }
+@endphp
+
 <div
     class="pt-5"
     data-notification-type="{{ session()->has('error') ? 'error' : 'status' }}"
-    data-notification-message="{{ session('error') ?? session('status') }}"
+    data-notification-message="{{ $notificationMessage }}"
     x-data="{
         notification: $el.dataset.notificationMessage
             ? {
@@ -27,7 +34,7 @@
             aria-live="{{ session()->has('error') ? 'assertive' : 'polite' }}"
             x-bind:aria-live="notification?.type === 'error' ? 'assertive' : 'polite'"
         >
-            <span x-text="notification?.message">{{ session('error') ?? session('status') }}</span>
+            <span x-text="notification?.message">{{ $notificationMessage }}</span>
 
             <button
                 type="button"

@@ -63,7 +63,7 @@
                                     <td class="px-4 py-3">
                                         <x-form.inputs.select
                                             wire:model="form.eliminations.{{ $competitor->id }}.eliminatedById"
-                                            :options="collect($this->competitorOptions)->except($competitor->id)->all()"
+                                            :options="collect($this->competitorOptions)->except([$competitor->id])->all()"
                                             placeholder="Not recorded"
                                             size="sm"
                                             aria-label="Eliminator for {{ $competitor->competitor->name }}"

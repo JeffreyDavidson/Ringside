@@ -1,3 +1,7 @@
+@php
+    $oldEmail = old('email');
+@endphp
+
 <x-layouts.auth>
     <form class="flex flex-col gap-5 p-10" method="post" action="{{ route('login') }}">
         @csrf
@@ -30,7 +34,7 @@
                 id="email"
                 data-test="email"
                 placeholder="email@email.com"
-                value="{{ old('email') }}"
+                value="{{ is_string($oldEmail) ? $oldEmail : '' }}"
             />
 
             <x-form.error name="email" />

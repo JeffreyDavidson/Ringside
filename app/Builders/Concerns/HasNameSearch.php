@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Builders\Concerns;
 
+use Illuminate\Database\Eloquent\Builder;
+
 /**
  * Provides name search for models with first_name, last_name, and full_name columns.
  */
@@ -22,7 +24,7 @@ trait HasNameSearch
     {
         $trimmedTerm = mb_trim($searchTerm);
 
-        return $this->where(function ($query) use ($trimmedTerm): void {
+        return $this->where(function (Builder $query) use ($trimmedTerm): void {
             $query->whereLike('first_name', $trimmedTerm)
                 ->orWhereLike('last_name', $trimmedTerm)
                 ->orWhereLike('full_name', $trimmedTerm)
